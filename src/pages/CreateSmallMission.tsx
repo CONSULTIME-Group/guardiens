@@ -26,6 +26,21 @@ import { useAccessLevel, MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel"
 import { canPublishSmallMission, shouldNudgeProfileCompletion } from "@/lib/missionPublishAccess";
 import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 import { geocodeCity } from "@/lib/geocode";
+import { CHILD_CARE_EXCLUDED_MESSAGE, CHILD_CARE_EXCLUDED_TITLE, isChildCareRequest } from "@/lib/missionChildCare";
+import { isHomeworkHelpRequest } from "@/lib/missionHomework";
+import HomeworkConditionsNote from "@/components/missions/HomeworkConditionsNote";
+import { automatedRetentionNotice } from "@/lib/moderation";
+
+// Lot J2c : un besoin retenu par un filtre automatique dit la vérification
+// automatique, la règle en cause et l'examen humain sur demande (CGU 14.5).
+const MONEY_RETENTION = automatedRetentionNotice("mission", {
+  rule: "payment",
+  facts: "votre texte mentionne de l'argent, alors que l'entraide s'échange service contre service",
+});
+const CHILD_CARE_RETENTION = `${CHILD_CARE_EXCLUDED_MESSAGE} ${automatedRetentionNotice("mission", {
+  rule: "child_care",
+  facts: "votre texte décrit une garde d'enfants",
+})}`;
 import { MISSION_PLACE_NOT_FOUND, officialPostalCentre, resolveMissionCoords, type Coords } from "@/lib/missionPlace";
 import { trackFirstAction, trackEvent } from "@/lib/analytics";
 import { recordMissionCreatedAttribution } from "@/lib/campaignAttribution";
@@ -366,6 +381,11 @@ const CreateSmallMission = () => {
     () => moneyWordingSignals(title, description),
     [title, description],
   );
+  // Lot J2d : conditions de l'aide aux devoirs (CGU 7.4), encadré non bloquant.
+  const homeworkHelp = useMemo(
+    () => isHomeworkHelpRequest(title, description),
+    [title, description],
+  );
 
   /**
    * Cohérence période / durée déclarée. Explicite, jamais bloquant : on
@@ -442,10 +462,17 @@ const CreateSmallMission = () => {
     if (hasMoneyMention(title, description)) {
       toast({
         title: "Ici, on s'échange des services",
-        description:
-          "Votre texte mentionne de l'argent. Sur l'entraide, on s'échange des services : reformulez en proposant un coup de main en retour.",
+        description: MONEY_RETENTION,
         variant: "destructive",
       });
+      setStep(2);
+      setDescTouched(true);
+      return;
+    }
+
+    // Lot E12 : la garde d'enfants est exclue de l'Entraide (CGU 7).
+    if (isChildCareRequest(title, description)) {
+      toast({ title: CHILD_CARE_EXCLUDED_TITLE, description: CHILD_CARE_RETENTION, variant: "destructive" });
       setStep(2);
       setDescTouched(true);
       return;
@@ -457,7 +484,10 @@ const CreateSmallMission = () => {
     if (contactKinds.length > 0) {
       toast({
         title: "Coordonnées détectées",
-        description: contactDetailsMessage(contactKinds),
+        description: automatedRetentionNotice("mission", {
+          rule: "contact_details",
+          facts: contactDetailsMessage(contactKinds),
+        }),
         variant: "destructive",
       });
       try {
@@ -523,7 +553,7 @@ const CreateSmallMission = () => {
       if (hint === "money_in_mutual_aid" || msg.includes("money_in_mutual_aid")) {
         toast({
           title: "Ici, on s'échange des services",
-          description: error.message,
+          description: MONEY_RETENTION,
           variant: "destructive",
         });
         setStep(2);
@@ -531,6 +561,12 @@ const CreateSmallMission = () => {
       }
       if (hint === "account_not_active" || msg.includes("account_not_active")) {
         toast({ title: "Compte non actif", description: "Contactez le support pour rétablir l'accès à l'entraide.", variant: "destructive" });
+        return;
+      }
+      // Lot E12 : la base refuse aussi un besoin de garde d'enfants.
+      if (hint === "child_care_in_mutual_aid" || msg.includes("child_care_in_mutual_aid")) {
+        toast({ title: CHILD_CARE_EXCLUDED_TITLE, description: CHILD_CARE_RETENTION, variant: "destructive" });
+        setStep(2);
         return;
       }
       // Lot X3b (C-09) : la base refuse aussi un besoin sans lieu situé.
@@ -703,6 +739,7 @@ const CreateSmallMission = () => {
                     </p>
                   </div>
                 )}
+                {homeworkHelp && <HomeworkConditionsNote />}
                 {rehoming && (
                   <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 space-y-1" role="note">
                     <p className="text-sm font-semibold text-foreground">

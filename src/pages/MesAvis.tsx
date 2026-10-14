@@ -5,12 +5,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StarRating from "@/components/reviews/StarRating";
 import Head from "@/components/seo/Head";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { ThumbsUp, Star, Inbox, Send, AlertTriangle, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { hydrateReviewers } from "@/lib/hydrateReviewers";
 import DisputeReviewDialog from "@/components/reviews/DisputeReviewDialog";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { attachSitPeriods, sortReviewsNewestFirst, type ReviewSitPeriodRow } from "@/lib/reviewDates";
+import ReviewDatesText from "@/components/reviews/ReviewDatesText";
 
 type DisputeStatus = "pending" | "accepted" | "rejected";
 interface DisputeInfo { status: DisputeStatus; }
@@ -44,8 +44,24 @@ const MesAvis = () => {
         .eq("disputer_id", user.id),
     ]);
 
-    const enrichedReceived = await hydrateReviewers(recRes.data || [], { includeReviewee: true });
-    const enrichedGiven = await hydrateReviewers(givRes.data || [], { includeReviewee: true });
+    // Lot J2d (CGU 9.7) : période de la garde de chaque avis, une seule
+    // lecture groupée pour les deux listes (review_sit_periods, droits Y2).
+    const recRows = sortReviewsNewestFirst((recRes.data || []) as any[]);
+    const givRows = sortReviewsNewestFirst((givRes.data || []) as any[]);
+    const sitReviewIds = Array.from(
+      new Set([...recRows, ...givRows].filter((r) => r.sit_id).map((r) => r.id as string)),
+    ).slice(0, 200);
+    let periodRows: ReviewSitPeriodRow[] = [];
+    if (sitReviewIds.length > 0) {
+      const { data: periods, error: periodsError } = await (supabase as any).rpc("review_sit_periods", {
+        p_review_ids: sitReviewIds,
+      });
+      // Fonction pas encore appliquée : les avis restent affichés avec leur date.
+      if (!periodsError) periodRows = (periods ?? []) as ReviewSitPeriodRow[];
+    }
+
+    const enrichedReceived = await hydrateReviewers(attachSitPeriods(recRows, periodRows), { includeReviewee: true });
+    const enrichedGiven = await hydrateReviewers(attachSitPeriods(givRows, periodRows), { includeReviewee: true });
 
     const dispMap: Record<string, DisputeInfo> = {};
     (dispRes.data || []).forEach((d: any) => {
@@ -182,7 +198,7 @@ const ReviewsList = ({
                   {otherName}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {format(new Date(r.created_at), "d MMMM yyyy", { locale: fr })}
+                  <ReviewDatesText review={r} />
                   {r.review_type === "annulation" && (
                     <span className="ml-2 inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px]">
                       Annulation

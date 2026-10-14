@@ -4,8 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import StarRating from "./StarRating";
 import { Star, ThumbsUp } from "lucide-react";
 import ReportButton from "@/components/reports/ReportButton";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { sortReviewsNewestFirst } from "@/lib/reviewDates";
+import ReviewDatesText from "./ReviewDatesText";
 import { hydrateReviewers } from "@/lib/hydrateReviewers";
 import { avatarImageUrl } from "@/lib/storageImage";
 
@@ -20,14 +20,12 @@ const ReviewsDisplay = ({ userId, showAnimalCare = false }: ReviewsDisplayProps)
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase
-        .from("reviews")
-        .select("*")
-        .eq("reviewee_id", userId)
-        .eq("published", true)
-        .order("created_at", { ascending: false });
+      // Lot J2d (CGU 9.7) : fonction publique public_profile_reviews, une
+      // seule lecture qui porte déjà les dates de la garde (sit_start_date,
+      // sit_end_date) et écarte les avis d'annulation et non validés (lot Z).
+      const { data } = await supabase.rpc("public_profile_reviews", { p_user_id: userId });
 
-      const enriched = await hydrateReviewers(data || []);
+      const enriched = await hydrateReviewers(sortReviewsNewestFirst((data || []) as any[]));
       setReviews(enriched);
       setLoading(false);
     };
@@ -81,10 +79,9 @@ const ReviewsDisplay = ({ userId, showAnimalCare = false }: ReviewsDisplayProps)
                     {getMemberInitial(r.reviewer)}
                   </div>
                 )}
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <span className="text-sm font-medium">{getMemberDisplayName(r.reviewer, 'Utilisateur')}</span>
-
-                  <span className="text-xs text-muted-foreground ml-2">{format(new Date(r.created_at), "d MMM yyyy", { locale: fr })}</span>
+                  <ReviewDatesText review={r} className="block text-xs text-muted-foreground" />
                 </div>
                 <StarRating value={r.overall_rating} readonly size="sm" />
               </div>

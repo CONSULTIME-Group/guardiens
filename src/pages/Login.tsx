@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { rememberLegalAcceptance } from "@/lib/legalAcceptance";
 import Head from "@/components/seo/Head";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -45,6 +46,9 @@ const Login = () => {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     startOAuthFlow("/login");
+    // Lot J1 : la mention sous le bouton vaut acceptation pour un nouveau
+    // compte ; le serveur l'ignore pour un compte existant.
+    rememberLegalAcceptance("login_google");
     try {
       trackEvent("login_completed", { source: "/login", metadata: { method: "google", stage: "started" } });
     } catch {}
@@ -190,6 +194,9 @@ const Login = () => {
             {t("login_page.gdpr_prefix")}{" "}
             <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
               {t("login_page.gdpr_terms")}
+            </Link>,{" "}
+            <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
+              {t("login_page.gdpr_cgs")}
             </Link>{" "}
             {t("login_page.gdpr_and")}{" "}
             <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">

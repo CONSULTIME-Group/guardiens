@@ -41,7 +41,8 @@ describe("À la maison et Atouts", () => {
 
 describe("date d'avis et bandeau entraide", () => {
   it("garde connue", () => {
-    expect(reviewDateLabel("2026-08-20", "2026-08-31", "2026-09-01T10:00:00Z")).toBe("Garde du 20 au 31 août 2026");
-    expect(reviewDateLabel(null, null, "2026-09-01T10:00:00Z")).toBe("septembre 2026");
+    // Lot J2d (CGU v9 9.7) : période de la garde puis date de dépôt.
+    expect(reviewDateLabel("2026-08-20", "2026-08-31", "2026-09-01T10:00:00Z")).toBe("Garde du 20 au 31 août 2026 · Avis du 1er septembre 2026");
+    expect(reviewDateLabel(null, null, "2026-09-01T10:00:00Z")).toBe("Avis du 1er septembre 2026");
   });
 });

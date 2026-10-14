@@ -6,8 +6,9 @@
  * Règle de tri : on trie, on n'élimine jamais. Les personnes qui disent pour
  * quoi elles peuvent aider (savoir-faire ou phrase) passent d'abord, les
  * autres restent visibles en fin de liste.
- * Décision du 11/10 : aide aux devoirs et garde d'enfants acceptées tant que
- * l'échange reste gratuit (le contrôle d'argent des besoins s'applique).
+ * Aide aux devoirs acceptée tant que l'échange reste gratuit (le contrôle
+ * d'argent des besoins s'applique) ; garde d'enfants exclue (lot E12,
+ * décision du 14/10/2026, src/lib/missionChildCare.ts).
  */
 
 export const HELPER_SKILLS_SHOWN = 4;

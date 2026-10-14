@@ -293,7 +293,7 @@ export const BADGE_DEFINITIONS: Record<string, BadgeDefinition> = {
     label: "Gardien d'urgence",
     labelArc: "GARDIEN D'URGENCE",
     category: 'special', expirable: false, fixedTier: 'gold',
-    tooltip: "Gardien certifié disponible pour des interventions sous 24h/48h.",
+    tooltip: "Gardien expérimenté, prêt à être alerté en priorité quand une garde se libère.",
     bg: '#B22222', iconColor: '#FFE27A',
     svgIcon: `<path d="M22.5 10l-5.5 11h5.5L18 30l11-14h-7z" fill="#FFE27A"/>`,
   },

@@ -180,7 +180,46 @@ interface CampaignPreset {
   utmContent: string;
 }
 
+// Lot J2b : préavis légal de 30 jours (CGU v8, article 15). Envoi manuel par
+// Jérémie le jour de la publication de la version 9 (16/10/2026), tous les
+// comptes actifs ; un membre désinscrit des emails reçoit l'information à
+// la connexion (fenêtre de réacceptation) et par l'encadré des pages /cgu et /cgs.
+const CGU_V9_SUBJECT = "Nos conditions évoluent le 16 novembre";
+const CGU_V9_BODY = `Bonjour,
+
+Guardiens grandit, et nos conditions d'utilisation grandissent avec lui. Nous avons réécrit nos Conditions Générales d'Utilisation (version 9) et nos Conditions Générales de Services (version 3) pour qu'elles décrivent exactement ce que fait Guardiens aujourd'hui. Elles entrent en vigueur le <strong>16 novembre 2026</strong>.
+
+Ce qui change, en bref :
+<ul>
+<li><strong>Le rôle de chacun est écrit clairement.</strong> Guardiens met à votre disposition des outils (annonces, messagerie, avis, vérification d'identité facultative) ; les gardes et les coups de main sont des accords entre membres, qui les organisent librement.</li>
+<li><strong>Les règles pratiques d'une garde sont précisées</strong> : ce qu'on se dit avant de partir, les animaux, les urgences vétérinaires, l'assurance de chacun, le remboursement de frais avancés sur justificatif.</li>
+<li><strong>L'entraide a ses repères</strong> : jeux, jardin, courses, trajets, aide aux devoirs en présence d'un parent ; la garde d'enfants reste en dehors de l'entraide.</li>
+<li><strong>Toute évolution importante du service vous est annoncée 30 jours à l'avance.</strong></li>
+</ul>
+
+Vous pouvez lire les deux textes dès maintenant : <a href="https://guardiens.fr/cgu?version=9" style="color:#2C6E49;font-weight:600;text-decoration:underline">les CGU, version 9</a> et <a href="https://guardiens.fr/cgs?version=3" style="color:#2C6E49;font-weight:600;text-decoration:underline">les CGS, version 3</a>. Lors de votre première connexion à partir du 16 novembre, une case à cocher vous permettra de les accepter.
+
+Guardiens est gratuit. Si ces nouvelles conditions vous conviennent moins, vous pouvez fermer votre compte à tout moment depuis vos paramètres, gratuitement. Une question ? Répondez simplement à cet email, ou écrivez à contact@guardiens.fr.
+
+Merci de faire vivre Guardiens avec nous,
+
+Elisa et Jérémie`;
+
 const CAMPAIGN_PRESETS: CampaignPreset[] = [
+  {
+    key: "cgu_v9_preavis",
+    label: "Préavis CGU v9 (16/10/2026)",
+    segment: "tous",
+    filters: { comptes_actifs: true },
+    subject: CGU_V9_SUBJECT,
+    body: CGU_V9_BODY,
+    ctaEnabled: true,
+    ctaLabel: "Lire les nouvelles conditions",
+    ctaUrl: "https://guardiens.fr/cgu?version=9",
+    utmEnabled: false,
+    utmCampaign: "cgu-v9-preavis",
+    utmContent: "cta",
+  },
   {
     key: "oser",
     label: "Oser demander",

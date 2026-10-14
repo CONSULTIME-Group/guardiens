@@ -353,7 +353,7 @@ export const staticRoutes: SiteRoute[] = [
  {
  path: "/contact",
  title: "Contact, nous écrire ou poser une question | Guardiens",
- metaDescription: "Contactez l'équipe Guardiens. Une question, une suggestion, un problème technique ou un partenariat ? Nous vous répondons sous 48 heures ouvrées.",
+ metaDescription: "Contactez l'équipe Guardiens. Une question, une suggestion, un problème technique ou un partenariat ? Écrivez-nous, nous vous répondons par email.",
  h1: "Contactez-nous",
  sitemapPriority: "0.8",
  changeFreq: "weekly",

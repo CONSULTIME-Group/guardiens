@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SignalPriorityBadge } from "./PriorityBadge";
 import { supabase } from "@/integrations/supabase/client";
+import { AccountMeasureDialog, type AccountMeasureTarget } from "@/components/admin/moderation/AccountMeasureDialog";
 
 export interface SuspiciousAccountSignal {
   id: string;
@@ -43,14 +44,13 @@ export const SuspiciousAccountCard = ({ signal }: Props) => {
   };
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin_dashboard_snapshot"] });
 
-  const handleSuspend = async () => {
-    setBusy("suspend");
-    const until = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-    const { error } = await supabase.from("profiles").update({ suspended_until: until }).eq("id", signal.entity_id);
-    if (error) { toast.error(`Suspension impossible : ${error.message}`); setBusy(null); return; }
-    await resolve("suspended_7d");
-    toast.success("Compte suspendu 7 jours.");
-    setBusy(null); invalidate();
+  // Lot J2c : la suspension passe par le dialogue motivé (règle, faits,
+  // durée, mode) qui envoie l'email au membre et journalise la mesure. Le
+  // signal vient d'un outil de détection : l'email le dit (automated
+  // « detection »), la décision reste humaine.
+  const [measureTarget, setMeasureTarget] = useState<AccountMeasureTarget | null>(null);
+  const handleSuspend = () => {
+    setMeasureTarget({ userId: signal.entity_id, userName: `${first} (${email})`, firstName: m.first_name ?? null });
   };
 
   const handleVerify = async () => {
@@ -94,7 +94,7 @@ export const SuspiciousAccountCard = ({ signal }: Props) => {
                 </a>
               </Button>
               <Button size="sm" variant="destructive" onClick={handleSuspend} disabled={busy !== null}>
-                {busy === "suspend" ? "Suspension..." : "Suspendre 7 jours"}
+                Suspendre le compte
               </Button>
               <Button size="sm" variant="ghost" onClick={handleVerify} disabled={busy !== null}>
                 Marquer vérifié
@@ -106,6 +106,25 @@ export const SuspiciousAccountCard = ({ signal }: Props) => {
           </div>
         </div>
       </CardContent>
+      <AccountMeasureDialog
+        target={measureTarget}
+        measure="suspend"
+        origin="initiative"
+        automated="detection"
+        defaultDurationDays={7}
+        factsHint={detail || undefined}
+        onClose={() => setMeasureTarget(null)}
+        onDone={async (result, input) => {
+          setBusy("suspend");
+          const action = input.mode === "notice"
+            ? "notice_sent"
+            : `suspended_${input.durationDays ? `${input.durationDays}d` : "review"}`;
+          const { error } = await resolve(action);
+          setBusy(null);
+          if (error) toast.error("Mesure appliquée, signal encore ouvert.");
+          if (result.ok) invalidate();
+        }}
+      />
     </Card>
   );
 };

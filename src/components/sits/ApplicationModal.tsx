@@ -268,12 +268,13 @@ const ApplicationModal = ({
     // Modération pré-envoi (content_type "message" : les coordonnées sont autorisées,
     // seule une proposition de paiement direct est interceptée).
     {
-      const { moderateContent } = await import("@/lib/moderation");
+      const { moderateContent, describeRetainedText, RETENTION_TITLE } = await import("@/lib/moderation");
       const verdict = await moderateContent("message", message.trim());
       if (verdict.status === "block") {
+        // Lot J2c : décision automatique, règle en cause, examen humain sur demande.
         toast({
-          title: "Message bloqué",
-          description: verdict.reasons.join(" · ") || "Ce message n'a pas pu être envoyé. Reformulez-le, ou écrivez-nous si le problème persiste.",
+          title: RETENTION_TITLE.application,
+          description: describeRetainedText("application", verdict),
           variant: "destructive",
         });
         return;

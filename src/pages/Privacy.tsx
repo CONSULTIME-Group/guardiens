@@ -14,7 +14,7 @@ const Privacy = () => {
 
       <main id="main-content" className="px-6 md:px-12 py-16 max-w-3xl mx-auto">
         <h1 className="font-heading text-3xl md:text-4xl font-bold mb-2">Politique de confidentialité</h1>
-        <p className="text-sm text-muted-foreground mb-8">Version 4, dernière mise à jour : 5 août 2026</p>
+        <p className="text-sm text-muted-foreground mb-8">Version 6, dernière mise à jour : 16 octobre 2026</p>
 
         <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
           <p>
@@ -31,10 +31,10 @@ const Privacy = () => {
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">2. Point de contact protection des données</h2>
           <ul className="list-disc pl-6 space-y-1">
-            <li><strong className="text-foreground">Email</strong> : <a href="mailto:dpo@guardiens.fr" className="text-primary hover:underline">dpo@guardiens.fr</a></li>
+            <li><strong className="text-foreground">Email</strong> : <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>, objet « Données personnelles »</li>
           </ul>
           <p>
-            Conformément à l'article 37 du RGPD, la désignation d'un Délégué à la Protection des Données au sens formel du Règlement n'est pas obligatoire compte tenu de la taille de la structure. Les missions équivalentes sont assurées par le responsable du traitement.
+            Le responsable du traitement traite lui-même les questions relatives aux données personnelles. Compte tenu de la taille de la structure, la désignation d'un délégué à la protection des données relève du choix de l'éditeur (article 37 du RGPD).
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">3. Données collectées</h2>
@@ -46,11 +46,12 @@ const Privacy = () => {
             <li><strong className="text-foreground">3.5 Géolocalisation</strong> : coordonnées approximatives via code postal, adresse précise uniquement après confirmation d'une garde.</li>
             <li><strong className="text-foreground">3.6 Paiement</strong> : aucune donnée bancaire complète conservée, traitement délégué à Stripe Payments Europe Limited (Dublin).</li>
             <li><strong className="text-foreground">3.7 Technique</strong> : IP, navigateur, système d'exploitation, logs, pages visitées (sous consentement).</li>
-            <li><strong className="text-foreground">3.8 Vérification d'identité (optionnelle)</strong> : pièce d'identité officielle (carte nationale d'identité, passeport, permis de conduire ou titre de séjour) et photographie de la personne prise depuis l'application, déposées volontairement par l'utilisateur qui souhaite obtenir le badge Identité vérifiée. Finalité : confiance entre membres et prévention des usurpations. Base légale : consentement, retirable à tout moment. Ces documents font l'objet d'une analyse automatisée destinée à contrôler la cohérence entre la pièce et la photographie. Cette analyse ne produit aucune décision ayant un effet juridique : un refus n'empêche ni l'inscription, ni l'usage de la plateforme, il prive seulement du badge. Le résultat automatique est contrôlé a posteriori par l'équipe, qui dispose d'une interface d'administration dédiée lui permettant de consulter les dossiers, la pièce et la photographie ainsi que l'historique des décisions, et d'infirmer à tout moment une décision automatique, de demander un nouveau document ou de révoquer un badge déjà attribué. Toute personne peut demander un réexamen humain en écrivant à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>.</li>
+            <li><strong className="text-foreground">3.8 Vérification d'identité (facultative)</strong> : photo d'une pièce d'identité officielle (carte nationale d'identité, passeport, permis de conduire ou titre de séjour) et, à titre facultatif, selfie pris depuis l'application, déposés volontairement par le membre qui souhaite obtenir le badge Identité vérifiée. Finalité : confiance entre membres et prévention des usurpations. Base légale : consentement, retirable à tout moment. Une analyse automatisée, fondée sur l'intelligence artificielle, examine la pièce seule : nature du document, lisibilité, signes apparents d'authenticité ; les dates d'émission et d'expiration lues sur la pièce sont contrôlées par le code de la Plateforme. Le selfie sert à la relecture par l'équipe. Un refus automatique vise uniquement un document illisible ou étranger à une pièce d'identité ; tout autre cas de doute est relu par une personne de l'équipe, qui décide. Le seul effet de la décision porte sur le badge : l'inscription et l'usage de la Plateforme restent ouverts à tout membre, avec ou sans badge, y compris après un refus. L'équipe consulte les dossiers et l'historique des décisions dans une interface d'administration dédiée ; elle peut à tout moment revenir sur une décision, demander un nouveau document ou retirer un badge. Toute personne peut demander un réexamen humain en écrivant à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>. La pièce et le selfie sont effacés automatiquement 30 jours après la décision.</li>
             <li><strong className="text-foreground">3.9 Données professionnelles (optionnelles)</strong> : numéro SIRET, raison sociale, spécialité, tarif indicatif, et pièces justificatives (Kbis, diplômes, certificat ACACED, attestation de responsabilité civile professionnelle) déposées par les membres exerçant à titre professionnel. Finalité : affichage du statut professionnel et vérification de son authenticité. Base légale : consentement. Ces pièces font également l'objet d'une analyse automatisée, suivie le cas échéant d'un examen humain.</li>
+            <li><strong className="text-foreground">3.10 Échanges avec Alma et aides à la rédaction</strong> : messages écrits ou dictés à Alma, l'assistante de la Plateforme (la voix est transcrite en texte, l'enregistrement est utilisé pour la seule transcription), textes soumis aux aides à la rédaction (annonce, profil) et photos analysées pour en vérifier la qualité. Finalité : répondre au membre et l'aider à utiliser la Plateforme. Base légale : exécution du contrat. Ces contenus sont traités par des modèles d'intelligence artificielle fournis par les sous-traitants décrits à l'article 6.</li>
           </ul>
           <p>
-            Les annonces, les messages et les biographies font l'objet d'un contrôle automatisé destiné à détecter les contenus contraires aux conditions d'utilisation. Base légale : intérêt légitime.
+            Les annonces, les candidatures, les propositions d'aide, les messages et les biographies font l'objet d'un contrôle automatisé, dont certains outils fondés sur l'intelligence artificielle, destiné à repérer les contenus contraires aux conditions d'utilisation. Une personne de l'équipe peut revoir toute décision issue de ces outils, d'office ou à la demande de la personne concernée. Base légale : intérêt légitime.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">4. Finalités et bases légales (art. 6 RGPD)</h2>
@@ -62,6 +63,7 @@ const Privacy = () => {
             <li>Notifications marketing : consentement (art. 6.1.a)</li>
             <li>Mesure d'audience : consentement</li>
             <li>Modération et lutte contre la fraude : intérêt légitime (art. 6.1.f)</li>
+            <li>Assistance par Alma, aides à la rédaction, analyse de la qualité des photos : exécution du contrat</li>
             <li>Amélioration du service, statistiques anonymisées : intérêt légitime</li>
             <li>Obligations comptables et fiscales : obligation légale (art. 6.1.c)</li>
           </ul>
@@ -70,7 +72,7 @@ const Privacy = () => {
           <ul className="list-disc pl-6 space-y-1">
             <li>Données de compte actif : durée de l'inscription</li>
             <li>Données après suppression : anonymisation immédiate du compte et effacement des documents et fichiers. Les avis et les messages sont conservés sous forme anonymisée, sans lien avec une personne identifiable, pour préserver l'intégrité des échanges entre membres et du système d'évaluation. La purge des sauvegardes techniques intervient dans un délai maximal de 30 jours.</li>
-            <li>Pièce d'identité et photographie : effacement automatique 30 jours après la décision de vérification</li>
+            <li>Pièce d'identité et selfie facultatif : effacement automatique 30 jours après la décision de vérification</li>
             <li>Documents professionnels : effacement 30 jours après la décision, ou sur demande du membre</li>
             <li>Journal des vérifications : conservation du résultat sans le document, 12 mois</li>
             <li>Messages : durée du compte, anonymisés à la suppression</li>
@@ -89,17 +91,19 @@ const Privacy = () => {
             <li><strong className="text-foreground">Resend Inc.</strong> : envoi d'emails transactionnels. États-Unis. SCC UE + EU-US Data Privacy Framework.</li>
             <li><strong className="text-foreground">Prerender LLC</strong> : pré-rendu SEO. États-Unis. SCC UE + EU-US Data Privacy Framework.</li>
             <li><strong className="text-foreground">Google LLC</strong> (via Google Ireland Ltd.) : mesure d'audience Google Analytics 4, uniquement sous consentement. Union européenne (Dublin), transferts US encadrés SCC UE + EU-US Data Privacy Framework.</li>
+            <li><strong className="text-foreground">Lovable Labs (passerelle d'intelligence artificielle)</strong> : acheminement des requêtes d'intelligence artificielle (vérification d'identité, analyse de photos, aides à la rédaction, Alma, transcription de la voix) vers les fournisseurs de modèles ci-dessous. Clauses contractuelles types (SCC) Module 2.</li>
+            <li><strong className="text-foreground">Google LLC (modèles Gemini)</strong> : analyse automatisée des pièces d'identité et des photos, réponses d'Alma, aides à la rédaction. États-Unis, transferts encadrés par l'EU-US Data Privacy Framework ou les SCC.</li>
+            <li><strong className="text-foreground">OpenAI (modèles de transcription)</strong> : transcription en texte des messages vocaux adressés à Alma. États-Unis, transferts encadrés par l'EU-US Data Privacy Framework ou les SCC.</li>
+            <li><strong className="text-foreground">Services de notification des navigateurs</strong> (Google, Apple, Mozilla) : acheminement des notifications push, à partir de l'adresse technique de l'appareil, pour les membres qui les activent.</li>
           </ul>
           <p>
             <strong className="text-foreground">Aucune donnée n'est vendue à des tiers.</strong> Les données ne sont communiquées à des autorités publiques qu'en cas de réquisition légale.
           </p>
-          <p>
-            <strong className="text-foreground">Opt-out spécifique Lovable</strong> : Guardiens a notifié par écrit à Lovable Labs Incorporated son opposition à l'utilisation des données de ses utilisateurs pour l'entraînement de modèles d'intelligence artificielle.
-          </p>
+          
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">7. Transferts hors Union européenne</h2>
           <p>
-            La majorité des données sont hébergées au sein de l'Union européenne. Certains sous-traitants secondaires (Resend, Prerender, Google Analytics) sont susceptibles de traiter les données depuis les États-Unis. Ces transferts sont encadrés par le EU-US Data Privacy Framework (décision UE 2023/1795) ou par les clauses contractuelles types Module 2 (décision UE 2021/914). Ces mécanismes garantissent un niveau de protection équivalent au RGPD.
+            La majorité des données sont hébergées au sein de l'Union européenne. Certains sous-traitants secondaires (Resend, Prerender, Google Analytics, fournisseurs de modèles d'intelligence artificielle, services de notification des navigateurs) sont susceptibles de traiter les données depuis les États-Unis. Ces transferts sont encadrés par le EU-US Data Privacy Framework (décision UE 2023/1795) ou par les clauses contractuelles types Module 2 (décision UE 2021/914). Ces mécanismes garantissent un niveau de protection équivalent au RGPD.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">8. Vos droits (art. 15 à 22 RGPD)</h2>
@@ -107,7 +111,7 @@ const Privacy = () => {
             Droit d'accès, de rectification, à l'effacement, à la limitation, à la portabilité, d'opposition, retrait du consentement à tout moment, directives post-mortem (art. 85 LIL).
           </p>
           <p>
-            <strong className="text-foreground">Exercice</strong> : <a href="mailto:dpo@guardiens.fr" className="text-primary hover:underline">dpo@guardiens.fr</a>. Délai de réponse : 30 jours, prolongeable à 60 jours pour les demandes complexes.
+            <strong className="text-foreground">Exercice</strong> : <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>. Délai de réponse : 30 jours, prolongeable à 60 jours pour les demandes complexes.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">9. Cookies et traceurs</h2>
@@ -123,7 +127,7 @@ const Privacy = () => {
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">10. Sécurité</h2>
           <p>
-            Chiffrement HTTPS/TLS 1.3, mots de passe bcrypt, Row Level Security Supabase, authentification à deux facteurs admin, accès restreint prod, journalisation, sauvegardes chiffrées quotidiennes, audits réguliers.
+            Échanges chiffrés (HTTPS), mots de passe conservés sous forme hachée, règles d'accès appliquées par la base de données à chaque lecture et écriture (Row Level Security), accès d'administration réservé à l'équipe de l'éditeur.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">11. Violation de données</h2>
@@ -131,22 +135,17 @@ const Privacy = () => {
             Conformément aux articles 33 et 34 du RGPD : notification CNIL sous 72 heures, information directe des utilisateurs concernés en cas de risque élevé, registre interne des violations.
           </p>
 
-          <h2 className="font-heading text-xl font-bold text-foreground pt-4">12. AIPD</h2>
+          <h2 className="font-heading text-xl font-bold text-foreground pt-4">12. Mineurs</h2>
           <p>
-            Une analyse d'impact relative à la protection des données a été réalisée compte tenu de la nature de certains traitements (géolocalisation, communications entre membres). Elle est mise à jour à chaque évolution majeure du service, notamment avant l'activation d'un modèle payant.
+            La Plateforme est réservée aux personnes majeures (18 ans révolus), qui déclarent leur majorité à l'inscription. Guardiens supprime tout compte dont il apprend qu'il a été créé par un mineur, avec les données associées. Les contenus publiés (profils, annonces, photos, besoins, avis) montrent des adultes, des animaux et des lieux ; un mineur y apparaît seulement de façon anonyme, et tout élément permettant de l'identifier ou de le localiser (prénom, école, emploi du temps) en est exclu. Guardiens masque ou retire un contenu contraire à cette règle dès qu'il en a connaissance.
           </p>
 
-          <h2 className="font-heading text-xl font-bold text-foreground pt-4">13. Mineurs</h2>
-          <p>
-            Plateforme strictement réservée aux personnes majeures (18 ans révolus). La création de compte par un mineur entraîne suppression immédiate. Interdiction de publier des photographies de mineurs identifiables sans consentement écrit des représentants légaux.
-          </p>
-
-          <h2 className="font-heading text-xl font-bold text-foreground pt-4">14. Modification</h2>
+          <h2 className="font-heading text-xl font-bold text-foreground pt-4">13. Modification</h2>
           <p>
             Toute modification substantielle est notifiée par email et sur la Plateforme 30 jours avant entrée en vigueur.
           </p>
 
-          <h2 className="font-heading text-xl font-bold text-foreground pt-4">15. Réclamation CNIL</h2>
+          <h2 className="font-heading text-xl font-bold text-foreground pt-4">14. Réclamation CNIL</h2>
           <p>
             CNIL : <a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">www.cnil.fr/fr/plaintes</a>, 3 Place de Fontenoy, TSA 80715, 75334 Paris Cedex 07, tél. 01 53 73 22 22.
           </p>

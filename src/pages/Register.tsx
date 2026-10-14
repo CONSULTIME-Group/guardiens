@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { resolvePostAuthTarget } from "@/lib/postAuthTarget";
 import { rememberSignupRole, withSignupRoleParam } from "@/lib/signupRole";
+import { rememberLegalAcceptance } from "@/lib/legalAcceptance";
 import { sanitizeRedirect, buildRedirectQuery } from "@/lib/safeRedirect";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent, trackEventWithUserId, mapSignupError } from "@/lib/analytics";
@@ -434,6 +435,8 @@ const Register = () => {
  } catch {}
   // Lot 0 : Google ne transmet pas le rôle, il est gardé localement et dans l'URL de retour.
   if (selectedRole) rememberSignupRole(selectedRole);
+  // Lot J1 : la case cochée vaut acceptation, transmise au retour de Google.
+  rememberLegalAcceptance("signup_google");
   const googleRedirectUrl = `${window.location.origin}${selectedRole ? withSignupRoleParam(postAuthTarget, selectedRole) : postAuthTarget}`;
 
   logOAuthStage("sdk_called", "/inscription", {

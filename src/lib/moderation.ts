@@ -1,13 +1,26 @@
 // Hook utilitaire : appelle moderate-content et renvoie le verdict.
 // Tolérant aux erreurs : si l'IA est indisponible, renvoie status 'ok' (fail-open
 // modéré, car bloquer un utilisateur sur indisponibilité IA = pire UX).
+//
+// Lot J2c : un texte retenu affiche un message conforme à CGU 14.5 : la
+// vérification est automatique, le constat, la règle en cause en une phrase,
+// et la façon de demander un examen par une personne de l'équipe.
 
 import { supabase } from "@/integrations/supabase/client";
+import {
+  HUMAN_REVIEW_SENTENCE,
+  automatedRuleStatement,
+  type AutomatedRuleId,
+} from "../../supabase/functions/_shared/moderation-rules.ts";
+
+export { HUMAN_REVIEW_SENTENCE };
 
 export type ModerationVerdict = {
   status: "ok" | "warning" | "block";
   reasons: string[];
   suggestion?: string;
+  /** Règle en cause d'un texte retenu (moderate-content, lot J2c). */
+  rule?: AutomatedRuleId | string;
 };
 
 export async function moderateContent(
@@ -25,9 +38,64 @@ export async function moderateContent(
       status: d.status ?? "ok",
       reasons: Array.isArray(d.reasons) ? d.reasons : [],
       suggestion: d.suggestion,
+      rule: typeof d.rule === "string" ? d.rule : undefined,
     };
   } catch (e) {
     console.warn("moderation unavailable", e);
     return { status: "ok", reasons: [] };
   }
+}
+
+/** Texte retenu : annonce, message, candidature, proposition d'aide, besoin, présentation. */
+export type RetainedTextKind = "sit" | "message" | "application" | "mission_response" | "mission" | "bio";
+
+const RETENTION_LEAD: Record<RetainedTextKind, string> = {
+  sit: "Ce passage de l'annonce est retenu par une vérification automatique, avant publication.",
+  message: "Ce message est retenu par une vérification automatique, avant envoi.",
+  application: "Cette candidature est retenue par une vérification automatique, avant envoi.",
+  mission_response: "Cette proposition d'aide est retenue par une vérification automatique, avant envoi.",
+  mission: "Ce besoin est retenu par une vérification automatique, avant publication.",
+  bio: "Cette présentation est retenue par une vérification automatique, avant publication.",
+};
+
+export const RETENTION_TITLE: Record<RetainedTextKind, string> = {
+  sit: "Passage retenu",
+  message: "Message retenu",
+  application: "Candidature retenue",
+  mission_response: "Proposition retenue",
+  mission: "Besoin retenu",
+  bio: "Présentation retenue",
+};
+
+// Tirets demi-cadratin et cadratin (U+2013, U+2014), écrits par leur code.
+const LONG_DASHES = new RegExp(`[${String.fromCharCode(0x2013, 0x2014)}]`, "g");
+
+function cleanReason(r: string): string {
+  return r.replace(LONG_DASHES, ",").replace(/\s+/g, " ").trim().replace(/[.\s]+$/, "");
+}
+
+/**
+ * Message à l'écran d'un texte retenu (CGU 14.4 et 14.5) : décision
+ * automatique, constat, règle en cause, modification possible et examen
+ * humain sur demande.
+ */
+export function automatedRetentionNotice(
+  kind: RetainedTextKind,
+  opts: { rule?: string | null; reasons?: string[]; facts?: string | null },
+): string {
+  const facts = opts.facts?.trim()
+    || (opts.reasons ?? []).map(cleanReason).filter(Boolean).join(" · ");
+  const parts = [
+    RETENTION_LEAD[kind],
+    facts ? `Constat : ${facts.replace(/[.\s]+$/, "")}.` : null,
+    `Règle en cause : ${automatedRuleStatement(opts.rule)}`,
+    "Vous pouvez reformuler puis renvoyer votre texte.",
+    HUMAN_REVIEW_SENTENCE,
+  ];
+  return parts.filter(Boolean).join(" ");
+}
+
+/** Raccourci pour un verdict de moderate-content. */
+export function describeRetainedText(kind: RetainedTextKind, verdict: ModerationVerdict | undefined): string {
+  return automatedRetentionNotice(kind, { rule: verdict?.rule, reasons: verdict?.reasons });
 }

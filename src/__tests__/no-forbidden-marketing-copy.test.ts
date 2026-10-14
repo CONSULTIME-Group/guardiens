@@ -33,6 +33,9 @@ const EXCLUDE = [
   "--glob=!src/pages/Terms.tsx",
   "--glob=!src/pages/Cgs.tsx",
   "--glob=!src/pages/MentionsLegales.tsx",
+  // Lot J2b : texte des CGU v8 déplacé tel quel de Terms.tsx (même motif).
+  // Les versions suivantes (TermsV9, CgsV3) restent scannées.
+  "--glob=!src/components/legal/TermsV8.tsx",
   // Validateur éditorial : il CONTIENT les motifs proscrits comme données.
   "--glob=!src/lib/refreshArticleValidator.ts",
   // Ce fichier de garde lui-même.
