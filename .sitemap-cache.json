@@ -2,239 +2,239 @@
   "version": 4,
   "sources": {
     "city_guides": {
-      "head": "2026-10-12T20:16:22.640719+00:00|101",
-      "fetchedAt": "2026-10-12T22:18:48.605Z"
+      "head": "2026-10-14T07:10:19.031457+00:00|102",
+      "fetchedAt": "2026-10-14T07:11:12.270Z"
     },
     "seo_city_pages": {
-      "head": "2026-10-12T16:50:06.022817+00:00|165",
-      "fetchedAt": "2026-10-12T22:18:48.634Z"
-    },
-    "articles": {
-      "head": "2026-10-12T16:10:12.763441+00:00|133",
-      "fetchedAt": "2026-10-12T22:18:48.632Z"
-    },
-    "seo_department_pages": {
-      "head": "2026-10-12T04:07:00.25173+00:00|102",
-      "fetchedAt": "2026-10-12T22:18:48.631Z"
+      "head": "2026-10-14T07:00:05.301092+00:00|165",
+      "fetchedAt": "2026-10-14T07:11:12.303Z"
     },
     "breed_profiles": {
       "head": "2026-08-19T19:06:57.126227+00:00|81",
-      "fetchedAt": "2026-10-03T12:57:20.091Z"
+      "fetchedAt": "2026-10-14T07:11:12.416Z"
     },
     "public_animal_associations_v2": {
       "head": "2026-09-13T10:14:03.912888+00:00|11",
-      "fetchedAt": "2026-10-03T12:57:20.114Z"
+      "fetchedAt": "2026-10-14T07:11:12.468Z"
+    },
+    "articles": {
+      "head": "2026-10-13T18:14:50.446745+00:00|133",
+      "fetchedAt": "2026-10-14T07:11:12.497Z"
+    },
+    "seo_department_pages": {
+      "head": "2026-10-14T04:07:00.228068+00:00|102",
+      "fetchedAt": "2026-10-14T07:11:12.618Z"
     }
   },
   "entries": {
     "city_guides": [
       {
         "loc": "/guides/tassin-la-demi-lune",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/chambery",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/oyonnax",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/caluire-et-cuire",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/vialas",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/meyzieu",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/saint-marcel-les-valence",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/saint-denis-reunion",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/montlucon",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/aubenas",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/conquereuil-44290",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/carhaix-plouguer",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/sonchamp",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/cezy",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/thonon-les-bains",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/gourdon",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/tence",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/paris",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/moulins",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/cogny",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/upaix",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/plumelec",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/gex",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/voiron",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/montelimar",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/saint-martin-d-heres",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/villeurbanne",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/aix-les-bains",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/monteleger",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/colmar",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/quetteville",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/saint-chamond",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/rillieux-la-pape",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/villefranche-sur-saone",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/bron",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
@@ -246,7 +246,7 @@
       },
       {
         "loc": "/guides/vaulx-en-velin",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
@@ -258,223 +258,229 @@
       },
       {
         "loc": "/guides/saint-vulbas",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/vienne",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/st-die-des-vosges",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/roanne",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/ecully",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/pau",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/belley",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/rennes",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/lyon",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/montaigu-de-quercy",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/mouvaux",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/longvic",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/romans-sur-isere",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/st-etienne",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/saint-didier-au-mont-d-or",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/bourgoin-jallieu",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/plouescat",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/marrakech",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/marseille",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/saint-etienne",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/megeve",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/vanves",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/annonay",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/montreuil",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/decines-charpieu",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/valence",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/chassenard",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/grenoble",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/licq-atherey",
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/reims",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/annemasse",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/sonnaz",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/echirolles",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/speracedes",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/sarry",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/saint-chef",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/champlemy",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/collonges-sous-saleve",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
@@ -486,43 +492,43 @@
       },
       {
         "loc": "/guides/clermont-ferrand",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/le-puy-en-velay",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/saint-pierre",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/troyes",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/st-caprais-de-bordeaux",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/noyal-pontivy",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/pusignan",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
@@ -534,73 +540,73 @@
       },
       {
         "loc": "/guides/bourg-en-bresse",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/quimper",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/saint-priest",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/schweighouse-sur-moder",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/vichy",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/nantes",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/annecy",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/venissieux",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/aurillac",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/taravao",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/st-cyr-sur-mer",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/saint-ludger",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
@@ -612,13 +618,13 @@
       },
       {
         "loc": "/guides/rouans",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/blauzac",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       },
@@ -630,7 +636,7 @@
       },
       {
         "loc": "/guides/isturits",
-        "lastmod": null,
+        "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
       }
@@ -1609,6 +1615,582 @@
         "priority": "0.8"
       }
     ],
+    "breed_profiles": [
+      {
+        "loc": "/races/cat-burmese",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/horse-ane-du-cotentin",
+        "lastmod": "2026-04-26",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-british-shorthair",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-berger-australien",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-siamois",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-sacre-de-birmanie",
+        "lastmod": "2026-04-29",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-golden-retriever",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-bouledogue-francais",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-akita-inu",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-bichon-frise",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-teckel",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-epagneul-breton",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-cane-corso",
+        "lastmod": "2026-08-19",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-teckel-nain",
+        "lastmod": "2026-08-19",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-bombay",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-springer-anglais",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-carlin",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-ecaille-de-tortue",
+        "lastmod": "2026-07-23",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-norvegien",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-cocker-anglais",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-border-collie",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-oriental",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-rottweiler",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-jack-russell",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-berger-de-l-atlas",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-berger-allemand",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-beauceron",
+        "lastmod": "2026-05-05",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-staffordshire-bull-terrier",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-bleu-de-russe",
+        "lastmod": "2026-04-22",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/horse-appaloosa",
+        "lastmod": "2026-08-19",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-scottish-fold",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-persan",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-beldi",
+        "lastmod": "2026-06-09",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-europeen",
+        "lastmod": "2026-05-05",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/rodent-rat",
+        "lastmod": "2026-05-01",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-turc-de-van",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-dalmatien",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-devon-rex",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-berger-hollandais",
+        "lastmod": "2026-08-19",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-terre-neuve",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-cocker-americain",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-whippet",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-labrador-retriever",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-ragdoll",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-bengal",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-setter-anglais",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/horse-merens",
+        "lastmod": "2026-04-26",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-yorkshire-terrier",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-husky-siberien",
+        "lastmod": "2026-04-29",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-bouvier-bernois",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-caniche",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-bichon-maltais",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-boxer",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-bouledogue-anglais",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/farm_animal-poules-marans",
+        "lastmod": "2026-04-26",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-saint-bernard",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-berger-roumain",
+        "lastmod": "2026-08-19",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-beagle",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-malamute-d-alaska",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-setter-irlandais",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-basset-hound",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/farm_animal-poule-pondeuse",
+        "lastmod": "2026-08-19",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-american-staffordshire-terrier",
+        "lastmod": "2026-08-19",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-berger-belge-tervueren",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-sphynx",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-shiba-inu",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-cornish-rex",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-dogue-allemand",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-maine-coon",
+        "lastmod": "2026-04-22",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-savannah",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-chihuahua",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-shih-tzu",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-cavalier-king-charles",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-chartreux",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-berger-belge-malinois",
+        "lastmod": "2026-06-08",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/cat-abyssin",
+        "lastmod": "2026-06-12",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/races/dog-berger-creole",
+        "lastmod": "2026-07-23",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      }
+    ],
+    "public_animal_associations_v2": [
+      {
+        "loc": "/associations/1000-moustaches",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "1000 Moustaches",
+        "_summary": "Plus de 200 bénévoles et un réseau de familles d'accueil pour chats, chiens et NAC en Loire-Atlantique.",
+        "_city": "La Chevrolière",
+        "_dept": "Loire-Atlantique"
+      },
+      {
+        "loc": "/associations/arche-du-val-de-sambre",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "L'Arche du Val de Sambre",
+        "_summary": "Plus de 20 ans d'engagement bénévole dans le Val de Sambre pour les chats, les chiens et les petits animaux.",
+        "_city": "Ferrière-la-Grande",
+        "_dept": "Nord"
+      },
+      {
+        "loc": "/associations/animaux-en-peril-jouques",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Animaux en Péril",
+        "_summary": "Depuis 1999, une dizaine de bénévoles veillent sur les chats libres et les animaux en danger autour de Jouques.",
+        "_city": "Jouques",
+        "_dept": "Bouches-du-Rhône"
+      },
+      {
+        "loc": "/associations/chats-d-oc-du-castera",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Chats d'Òc du Castéra",
+        "_summary": "Au Castéra, des bénévoles transforment les chats errants en chats libres : 200 stérilisations en 2025.",
+        "_city": "Le Castéra",
+        "_dept": "Haute-Garonne"
+      },
+      {
+        "loc": "/associations/kitties-in-paris",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Kitties in Paris",
+        "_summary": "À Paris, près de 800 chats pris en charge et plus d'une centaine de chatons nourris au biberon par des bénévoles.",
+        "_city": "Paris",
+        "_dept": "Paris"
+      },
+      {
+        "loc": "/associations/canistory",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Canistory",
+        "_summary": "Des chiens et des chats de France et de Roumanie, accompagnés jusqu'à l'adoption par des bénévoles alsaciens.",
+        "_city": "Lampertheim",
+        "_dept": "Bas-Rhin"
+      },
+      {
+        "loc": "/associations/le-repere-champeon",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Le Repère",
+        "_summary": "Un sanctuaire en Mayenne où des animaux de ferme et des animaux sauvages rescapés vivent leur seconde vie.",
+        "_city": "Champéon",
+        "_dept": "Mayenne"
+      },
+      {
+        "loc": "/associations/des-coeurs-a-sauver",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Des Cœurs à Sauver",
+        "_summary": "Une équipe entièrement bénévole qui secourt plus de 300 animaux par an autour d'Annecy.",
+        "_city": "Sevrier",
+        "_dept": "Haute-Savoie"
+      },
+      {
+        "loc": "/associations/la-chat-hyeres",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "La Chat'Hyères",
+        "_summary": "À Hyères, un refuge pour chats spécialisé dans l'accueil des chattes gestantes et des nouveau-nés.",
+        "_city": "Hyères",
+        "_dept": "Var"
+      },
+      {
+        "loc": "/associations/l-hirondelle-saint-forgeux",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "L'Hirondelle",
+        "_summary": "Près de 7 000 oiseaux et mammifères sauvages recueillis chaque année, soignés puis relâchés dans la nature.",
+        "_city": "Saint-Forgeux",
+        "_dept": "Rhône"
+      },
+      {
+        "loc": "/associations/cosa-animalia-grenoble",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Cosa Animalia",
+        "_summary": "À Grenoble depuis 2003, des bénévoles veillent sur 1 500 chats libres et trouvent une famille aux chats recueillis.",
+        "_city": "Grenoble",
+        "_dept": "Isère"
+      }
+    ],
     "articles": [
       {
         "loc": "/actualites/bengal-guide-race",
@@ -1729,12 +2311,6 @@
         "lastmod": null,
         "changefreq": "monthly",
         "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/reseau-entraide-quartier-lyon-aura",
-        "lastmod": null,
-        "changefreq": "monthly",
-        "priority": "0.7"
       },
       {
         "loc": "/actualites/premiers-pas-sur-guardiens",
@@ -1899,12 +2475,6 @@
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/demenagement-entraide-locale-france",
-        "lastmod": null,
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
         "loc": "/actualites/cavalier-king-charles-guide-race",
         "lastmod": null,
         "changefreq": "monthly",
@@ -1951,12 +2521,6 @@
         "lastmod": null,
         "changefreq": "monthly",
         "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/bricolage-montage-meubles-entraide-grenoble-lyon",
-        "lastmod": null,
-        "changefreq": "monthly",
-        "priority": "0.7"
       },
       {
         "loc": "/actualites/house-sitting-haute-savoie-annecy-megeve",
@@ -2203,12 +2767,6 @@
         "lastmod": null,
         "changefreq": "monthly",
         "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/courses-aide-domicile-entraide-senior-lyon",
-        "lastmod": null,
-        "changefreq": "monthly",
-        "priority": "0.7"
       },
       {
         "loc": "/actualites/preparer-maison-avant-garde",
@@ -2823,582 +3381,6 @@
         "lastmod": null,
         "changefreq": "weekly",
         "priority": "0.8"
-      }
-    ],
-    "breed_profiles": [
-      {
-        "loc": "/races/cat-burmese",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/horse-ane-du-cotentin",
-        "lastmod": "2026-04-26",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-british-shorthair",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-berger-australien",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-siamois",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-sacre-de-birmanie",
-        "lastmod": "2026-04-29",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-golden-retriever",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-bouledogue-francais",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-akita-inu",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-bichon-frise",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-teckel",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-epagneul-breton",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-cane-corso",
-        "lastmod": "2026-08-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-teckel-nain",
-        "lastmod": "2026-08-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-bombay",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-springer-anglais",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-carlin",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-ecaille-de-tortue",
-        "lastmod": "2026-07-23",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-norvegien",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-cocker-anglais",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-border-collie",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-oriental",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-rottweiler",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-jack-russell",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-berger-de-l-atlas",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-berger-allemand",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-beauceron",
-        "lastmod": "2026-05-05",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-staffordshire-bull-terrier",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-bleu-de-russe",
-        "lastmod": "2026-04-22",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/horse-appaloosa",
-        "lastmod": "2026-08-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-scottish-fold",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-persan",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-beldi",
-        "lastmod": "2026-06-09",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-europeen",
-        "lastmod": "2026-05-05",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/rodent-rat",
-        "lastmod": "2026-05-01",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-turc-de-van",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-dalmatien",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-devon-rex",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-berger-hollandais",
-        "lastmod": "2026-08-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-terre-neuve",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-cocker-americain",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-whippet",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-labrador-retriever",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-ragdoll",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-bengal",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-setter-anglais",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/horse-merens",
-        "lastmod": "2026-04-26",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-yorkshire-terrier",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-husky-siberien",
-        "lastmod": "2026-04-29",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-bouvier-bernois",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-caniche",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-bichon-maltais",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-boxer",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-bouledogue-anglais",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/farm_animal-poules-marans",
-        "lastmod": "2026-04-26",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-saint-bernard",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-berger-roumain",
-        "lastmod": "2026-08-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-beagle",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-malamute-d-alaska",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-setter-irlandais",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-basset-hound",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/farm_animal-poule-pondeuse",
-        "lastmod": "2026-08-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-american-staffordshire-terrier",
-        "lastmod": "2026-08-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-berger-belge-tervueren",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-sphynx",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-shiba-inu",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-cornish-rex",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-dogue-allemand",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-maine-coon",
-        "lastmod": "2026-04-22",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-savannah",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-chihuahua",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-shih-tzu",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-cavalier-king-charles",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-chartreux",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-berger-belge-malinois",
-        "lastmod": "2026-06-08",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/cat-abyssin",
-        "lastmod": "2026-06-12",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/races/dog-berger-creole",
-        "lastmod": "2026-07-23",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      }
-    ],
-    "public_animal_associations_v2": [
-      {
-        "loc": "/associations/1000-moustaches",
-        "lastmod": null,
-        "changefreq": "monthly",
-        "priority": "0.7",
-        "_name": "1000 Moustaches",
-        "_summary": "Plus de 200 bénévoles et un réseau de familles d'accueil pour chats, chiens et NAC en Loire-Atlantique.",
-        "_city": "La Chevrolière",
-        "_dept": "Loire-Atlantique"
-      },
-      {
-        "loc": "/associations/arche-du-val-de-sambre",
-        "lastmod": null,
-        "changefreq": "monthly",
-        "priority": "0.7",
-        "_name": "L'Arche du Val de Sambre",
-        "_summary": "Plus de 20 ans d'engagement bénévole dans le Val de Sambre pour les chats, les chiens et les petits animaux.",
-        "_city": "Ferrière-la-Grande",
-        "_dept": "Nord"
-      },
-      {
-        "loc": "/associations/animaux-en-peril-jouques",
-        "lastmod": null,
-        "changefreq": "monthly",
-        "priority": "0.7",
-        "_name": "Animaux en Péril",
-        "_summary": "Depuis 1999, une dizaine de bénévoles veillent sur les chats libres et les animaux en danger autour de Jouques.",
-        "_city": "Jouques",
-        "_dept": "Bouches-du-Rhône"
-      },
-      {
-        "loc": "/associations/chats-d-oc-du-castera",
-        "lastmod": null,
-        "changefreq": "monthly",
-        "priority": "0.7",
-        "_name": "Chats d'Òc du Castéra",
-        "_summary": "Au Castéra, des bénévoles transforment les chats errants en chats libres : 200 stérilisations en 2025.",
-        "_city": "Le Castéra",
-        "_dept": "Haute-Garonne"
-      },
-      {
-        "loc": "/associations/kitties-in-paris",
-        "lastmod": null,
-        "changefreq": "monthly",
-        "priority": "0.7",
-        "_name": "Kitties in Paris",
-        "_summary": "À Paris, près de 800 chats pris en charge et plus d'une centaine de chatons nourris au biberon par des bénévoles.",
-        "_city": "Paris",
-        "_dept": "Paris"
-      },
-      {
-        "loc": "/associations/canistory",
-        "lastmod": null,
-        "changefreq": "monthly",
-        "priority": "0.7",
-        "_name": "Canistory",
-        "_summary": "Des chiens et des chats de France et de Roumanie, accompagnés jusqu'à l'adoption par des bénévoles alsaciens.",
-        "_city": "Lampertheim",
-        "_dept": "Bas-Rhin"
-      },
-      {
-        "loc": "/associations/le-repere-champeon",
-        "lastmod": null,
-        "changefreq": "monthly",
-        "priority": "0.7",
-        "_name": "Le Repère",
-        "_summary": "Un sanctuaire en Mayenne où des animaux de ferme et des animaux sauvages rescapés vivent leur seconde vie.",
-        "_city": "Champéon",
-        "_dept": "Mayenne"
-      },
-      {
-        "loc": "/associations/des-coeurs-a-sauver",
-        "lastmod": null,
-        "changefreq": "monthly",
-        "priority": "0.7",
-        "_name": "Des Cœurs à Sauver",
-        "_summary": "Une équipe entièrement bénévole qui secourt plus de 300 animaux par an autour d'Annecy.",
-        "_city": "Sevrier",
-        "_dept": "Haute-Savoie"
-      },
-      {
-        "loc": "/associations/la-chat-hyeres",
-        "lastmod": null,
-        "changefreq": "monthly",
-        "priority": "0.7",
-        "_name": "La Chat'Hyères",
-        "_summary": "À Hyères, un refuge pour chats spécialisé dans l'accueil des chattes gestantes et des nouveau-nés.",
-        "_city": "Hyères",
-        "_dept": "Var"
-      },
-      {
-        "loc": "/associations/l-hirondelle-saint-forgeux",
-        "lastmod": null,
-        "changefreq": "monthly",
-        "priority": "0.7",
-        "_name": "L'Hirondelle",
-        "_summary": "Près de 7 000 oiseaux et mammifères sauvages recueillis chaque année, soignés puis relâchés dans la nature.",
-        "_city": "Saint-Forgeux",
-        "_dept": "Rhône"
-      },
-      {
-        "loc": "/associations/cosa-animalia-grenoble",
-        "lastmod": null,
-        "changefreq": "monthly",
-        "priority": "0.7",
-        "_name": "Cosa Animalia",
-        "_summary": "À Grenoble depuis 2003, des bénévoles veillent sur 1 500 chats libres et trouvent une famille aux chats recueillis.",
-        "_city": "Grenoble",
-        "_dept": "Isère"
       }
     ]
   }

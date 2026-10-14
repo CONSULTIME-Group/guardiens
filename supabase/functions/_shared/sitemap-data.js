@@ -25,6 +25,17 @@ const PRIORITY_MAP = {
 
 const NO_RELIABLE_LASTMOD = null;
 
+/**
+ * Lot P5 (14/10/2026) : un article n'entre au sitemap que s'il est sa propre
+ * canonique (canonical_url vide ou égale à son adresse). Sinon le sitemap
+ * déclare une URL que la page désigne elle-même comme doublon.
+ */
+export function isSelfCanonicalArticle(article) {
+  const canonical = (article?.canonical_url || "").trim().replace(/\/+$/, "");
+  if (!canonical) return true;
+  return canonical === `https://guardiens.fr/actualites/${article.slug}`;
+}
+
 export async function collectSitemapData({ readAll, fetchOrCache, maxUpdatedAtWithCount, cache = {}, today = new Date() }) {
   // Slugs volontairement exclus du sitemap (doublons/anciennes URLs).
   // NE PAS confondre avec `noindex` en base : cette liste ne concerne que des
@@ -52,8 +63,10 @@ export async function collectSitemapData({ readAll, fetchOrCache, maxUpdatedAtWi
       // max des lignes restantes. Sans le compteur, le cache resservait des
       // URL dépubliées (mesuré le 24/08/2026 sur les pages villes).
       () => maxUpdatedAtWithCount("articles", "updated_at", q => q.eq("published", true)),
-      () => readAll("articles", "articles", "id, slug, category, updated_at, published_at", "id", q => q.eq("published", true).or("noindex.is.null,noindex.eq.false")),
-      rows => rows.filter(a => !excludedSlugs.has(a.slug)).map(a => ({
+      () => readAll("articles", "articles", "id, slug, category, canonical_url, updated_at, published_at", "id", q => q.eq("published", true).or("noindex.is.null,noindex.eq.false")),
+      // Lot P5 (14/10/2026) : une URL dont la canonique pointe ailleurs
+      // n'entre pas au sitemap (4 articles d'entraide consolidés).
+      rows => rows.filter(a => !excludedSlugs.has(a.slug) && isSelfCanonicalArticle(a)).map(a => ({
         loc: `/actualites/${a.slug}`,
         lastmod: NO_RELIABLE_LASTMOD,
         changefreq: "monthly",
