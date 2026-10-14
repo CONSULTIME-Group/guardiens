@@ -23,6 +23,9 @@ import {
 } from "@/lib/alma/conversation-store";
 import { normalizeContactMessage } from "@/lib/normalizeContactMessage";
 
+// Lot A3 : sendAlmaMessage appelle trackEvent ; jamais d'écriture réelle en test.
+vi.mock("@/lib/analytics", () => ({ trackEvent: vi.fn(async () => undefined) }));
+
 const read = (p: string) => readFileSync(p, "utf8");
 
 describe("J2-B, faux positifs de J1 corrigés", () => {
@@ -156,7 +159,8 @@ describe("J2-B, synthèse du lundi", () => {
 
 describe("J2-B, rejeu", () => {
   it("jeu figé : 40 cas (38 du lot J2-B, 2 du lot L1), prénoms remplacés", () => {
-    expect(ALMA_REPLAY_CASES).toHaveLength(50);
+    // Lot A4 : 50 cas, plus 12 cas de sûreté (surete-01 à surete-12).
+    expect(ALMA_REPLAY_CASES).toHaveLength(62);
     const text = JSON.stringify(ALMA_REPLAY_CASES);
     for (const name of ["Jacqueline", "Véronica", "Julia", "Guilhem", "jean pierre", "Laëtitia", "Pascal", "Françoise", "Rita", "Alain"]) {
       expect(text).not.toContain(name);

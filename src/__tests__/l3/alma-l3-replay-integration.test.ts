@@ -1,8 +1,8 @@
 /**
  * Lot L3 : les 5 phrases réelles rejouées sur le code source d'alma-chat tel
- * que déployé, avec le contexte réel simulé (Martine : both, espace
- * propriétaire, brouillon du 03/09 périmé ; 16 annonces publiées, toutes en
- * France dont 2 en Polynésie française). Aucun appel au modèle n'est attendu.
+ * que déployé, avec le contexte réel simulé (Odile : both, espace
+ * propriétaire, brouillon du 03/09 périmé ; 16 annonces publiées, 14 en France
+ * et 2 en Polynésie française, hors de France depuis le lot A5). Aucun appel au modèle n'est attendu.
  */
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
@@ -23,6 +23,14 @@ import * as homePhoto from "../../../supabase/functions/_shared/alma-home-photo"
 import * as truth from "../../../supabase/functions/_shared/alma-truth";
 import * as companion from "../../../supabase/functions/_shared/alma-companion";
 import * as places from "../../../supabase/functions/_shared/alma-places";
+import * as childCare from "../../../supabase/functions/_shared/mission-child-care";
+import * as almaVersion from "../../../supabase/functions/_shared/alma-version";
+import * as almaUsage from "../../../supabase/functions/_shared/alma-usage";
+import * as almaBond from "../../../supabase/functions/_shared/alma-bond";
+// Lot A4 : sûreté, plafond réservé, intégrité des entrées.
+import * as almaSafety from "../../../supabase/functions/_shared/alma-safety";
+import * as turnCap from "../../../supabase/functions/_shared/alma-turn-cap";
+import * as almaIntegrity from "../../../supabase/functions/_shared/alma-integrity";
 import { ALMA_REPLAY_CASES } from "@/data/almaReplayCases";
 import { checkReplayAnswer } from "@/lib/alma/replayChecks";
 
@@ -32,7 +40,7 @@ const PUBLISHED = [
   { country: "PF", city: "Papeete", departement_code: "987" },
   { country: "PF", city: "Moorea", departement_code: "987" },
 ];
-const OWN_SITS = [{ id: "68f35bdd-554d-47c5-b401-197b2b63ce91", title: "Suite à plusieurs annulations je cherche un gardien pour Angus du 3/9 au 20/9", status: "draft", city: "Damgan", start_date: "2026-09-03", end_date: "2026-09-20" }];
+const OWN_SITS = [{ id: "00000000-0000-4000-8000-0000000000a1", title: "Suite à plusieurs annulations je cherche un gardien pour Filou du 3/9 au 20/9", status: "draft", city: "Vannes", start_date: "2026-09-03", end_date: "2026-09-20" }];
 const DEPS = [{ code: "56", nom: "Morbihan", nom_region: "Bretagne" }, { code: "987", nom: "Polynésie française", nom_region: "Outre-mer" }];
 
 function harness(profile: Record<string, unknown>, modelAnswers: string[] = ["Réponse du modèle."]) {
@@ -46,6 +54,8 @@ function harness(profile: Record<string, unknown>, modelAnswers: string[] = ["R�
     chain.eq = (c: string, v: unknown) => { filters[c] = v; return chain; };
     chain.gte = chain.lte = chain.order = chain.in = chain.or = chain.like = chain.neq = chain.ilike = chain.not = chain.is = chain.limit = chain.contains = chain.overlaps = chain.filter = chain.range = () => chain;
     chain.maybeSingle = chain.single = () => { single = true; return chain; };
+    // Lot A4 : la ligne réservée est complétée par update.
+    chain.update = (row: any) => { writes.push({ table, row }); return { eq: () => Promise.resolve({ error: null }) }; };
     chain.insert = (row: any) => { writes.push({ table, row }); const p: any = Promise.resolve({ error: null }); p.select = () => ({ single: () => Promise.resolve({ data: { id: "conv-1" }, error: null }) }); return p; };
     chain.then = (resolve: (v: unknown) => unknown, reject: (r: unknown) => unknown) => {
       let rows: any[] = [];
@@ -58,14 +68,15 @@ function harness(profile: Record<string, unknown>, modelAnswers: string[] = ["R�
   });
   let call = 0;
   const callLovableAI = vi.fn(async () => ({ ok: true, data: { choices: [{ message: { content: modelAnswers[Math.min(call++, modelAnswers.length - 1)] } }] } }));
-  const client = { from, rpc: vi.fn(async () => ({ data: [], error: null })), auth: { getUser: vi.fn(async () => ({ data: { user: { id: MARTINE } }, error: null })) } };
+  const client = { from, rpc: vi.fn(async (name: string) => name === "alma_reserve_turn" ? { data: { ok: true, id: "conv-1", used: 1 }, error: null } : { data: [], error: null }), auth: { getUser: vi.fn(async () => ({ data: { user: { id: MARTINE } }, error: null })) } };
   const source = readFileSync("supabase/functions/alma-chat/index.ts", "utf8");
   const { outputText } = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } });
   const mods: Record<string, unknown> = {
     "alma-system-prompt.ts": prompt, "alma-intent.ts": almaIntent, "alma-site-knowledge.ts": siteKnowledge,
     "alma-facts.ts": almaFacts, "alma-inventory.ts": almaInventory, "alma-next-action.ts": nextAction,
     "alma-classify.ts": almaClassify, "alma-output.ts": almaOutput, "normalize-contact-message.ts": normalizeContact,
-    "alma-owner-question.ts": ownerQuestion, "sit-location.ts": sitLocation, "alma-home-photo.ts": homePhoto, "alma-truth.ts": truth, "alma-companion.ts": companion, "alma-places.ts": places,
+    "alma-owner-question.ts": ownerQuestion, "sit-location.ts": sitLocation, "alma-home-photo.ts": homePhoto, "alma-truth.ts": truth, "alma-companion.ts": companion, "alma-places.ts": places, "mission-child-care.ts": childCare, "alma-version.ts": almaVersion, "alma-usage.ts": almaUsage, "alma-bond.ts": almaBond,
+    "alma-safety.ts": almaSafety, "alma-turn-cap.ts": turnCap, "alma-integrity.ts": almaIntegrity,
   };
   runInNewContext(outputText, {
     exports: {}, Request, Response, Date, console: { error: vi.fn(), log: vi.fn() },
@@ -74,7 +85,7 @@ function harness(profile: Record<string, unknown>, modelAnswers: string[] = ["R�
       if (name.includes("supabase-js")) return { createClient: () => client };
       if (name.endsWith("ai-gateway.ts")) return { callLovableAI, CORS_HEADERS: {} };
       if (name.endsWith("alma-frustration-signal.ts")) return { recordAlmaFrustration: async () => {} };
-      if (name.endsWith("alma-signals.ts")) return { recordAlmaSignal: async () => {} };
+      if (name.endsWith("alma-signals.ts")) return { recordAlmaSignal: async () => ({ created: false }), raiseImmediateAlmaSignal: async () => ({ created: false, emailed: false }) };
       const key = Object.keys(mods).find((k) => name.endsWith(k));
       if (key) return mods[key];
       throw new Error(`Unexpected import ${name}`);
@@ -96,10 +107,10 @@ export const REPLAY_OUTPUT: Record<string, { answer: string; action: string; pat
 
 // Lot L4 : le modèle rédige dans la voix d'Alma, sur faits verrouillés.
 const VOICE: Record<string, string> = {
-  "cas-43": "Vous êtes dans votre espace propriétaire, Martine : la page Annonces y montre vos propres annonces. Les gardes proposées par les propriétaires vous attendent dans votre espace gardien. Guardiens propose des gardes en France, Polynésie française comprise, et il n'y a aucune garde en Italie aujourd'hui.",
-  "cas-44": "Garder un chien en Italie, je comprends l'envie, mais il n'y a aucune garde en Italie aujourd'hui : Guardiens propose des gardes en France, Polynésie française comprise. Depuis votre espace propriétaire, vous voyez vos annonces ; les gardes à garder sont dans votre espace gardien.",
-  "cas-45": "Guardiens propose des gardes en France, Polynésie française comprise, et il n'y a aucune garde en Italie aujourd'hui. C'est normal : vous êtes dans votre espace propriétaire, et la page Annonces y montre vos propres annonces. Les gardes proposées par les autres propriétaires se trouvent dans votre espace gardien, je vous y emmène.",
-  "cas-46": "Guardiens propose des gardes en France, Polynésie française comprise ; il n'y a aucune garde en Italie aujourd'hui. Elle se trouve dans votre espace gardien. Ici, dans votre espace propriétaire, la page Annonces ne montre que les vôtres ; un clic suffit pour changer d'espace.",
+  "cas-43": "Vous êtes dans votre espace propriétaire, Odile : la page Annonces y montre vos propres annonces. Les gardes proposées par les propriétaires vous attendent dans votre espace gardien. Guardiens propose des gardes en France, et aujourd'hui aussi en Polynésie française, et il n'y a aucune garde en Italie aujourd'hui.",
+  "cas-44": "Garder un chien en Italie, je comprends l'envie, mais il n'y a aucune garde en Italie aujourd'hui : Guardiens propose des gardes en France, et aujourd'hui aussi en Polynésie française. Depuis votre espace propriétaire, vous voyez vos annonces ; les gardes à garder sont dans votre espace gardien.",
+  "cas-45": "Guardiens propose des gardes en France, et aujourd'hui aussi en Polynésie française, et il n'y a aucune garde en Italie aujourd'hui. C'est normal : vous êtes dans votre espace propriétaire, et la page Annonces y montre vos propres annonces. Les gardes proposées par les autres propriétaires se trouvent dans votre espace gardien, je vous y emmène.",
+  "cas-46": "Guardiens propose des gardes en France, et aujourd'hui aussi en Polynésie française ; il n'y a aucune garde en Italie aujourd'hui. Elle se trouve dans votre espace gardien. Ici, dans votre espace propriétaire, la page Annonces ne montre que les vôtres ; un clic suffit pour changer d'espace.",
   "cas-47": "Pour la photo de votre maison, tout se passe dans Mon profil propriétaire, rubrique Galerie : chaque photo s'y supprime ou s'y remplace. Si c'était la couverture de votre annonce, la suivante prend sa place.",
 };
 const BAD: Record<string, string> = {
@@ -114,7 +125,7 @@ describe("L3 et L4, rejeu des 5 phrases réelles sur alma-chat", () => {
   for (const id of ["cas-43", "cas-44", "cas-45", "cas-46", "cas-47"]) {
     it(`${id} : voix libre conforme aux faits verrouillés`, async () => {
       const c = ALMA_REPLAY_CASES.find((x) => x.id === id)!;
-      const h = harness({ role: c.accountRole, first_name: "Martine", city: "Damgan", departement_code: "56", country: "FR" }, [VOICE[id]]);
+      const h = harness({ role: c.accountRole, first_name: "Odile", city: "Vannes", departement_code: "56", country: "FR" }, [VOICE[id]]);
       const out = await h.invoke(c);
       REPLAY_OUTPUT[id] = { answer: out.answer, action: out.action?.label, path: out.action?.path };
       expect(h.callLovableAI).toHaveBeenCalledTimes(1);
@@ -124,10 +135,12 @@ describe("L3 et L4, rejeu des 5 phrases réelles sur alma-chat", () => {
       const log = h.writes.find((w) => w.table === "alma_conversations")?.row;
       expect(log?.classification?.fallback_template).toBe(false);
       expect(log?.proposed_action?.label ?? "").not.toMatch(/^Publier le brouillon/);
+      // Lot A3 : un appel au modèle, jetons absents de la réponse simulée.
+      expect(log?.classification?.usage).toEqual({ model_calls: 1, input_tokens: null, output_tokens: null });
     });
     it(`${id} : interdit ou fait manquant, repli sur le gabarit journalisé`, async () => {
       const c = ALMA_REPLAY_CASES.find((x) => x.id === id)!;
-      const h = harness({ role: c.accountRole, first_name: "Martine", city: "Damgan", departement_code: "56", country: "FR" }, [BAD[id]]);
+      const h = harness({ role: c.accountRole, first_name: "Odile", city: "Vannes", departement_code: "56", country: "FR" }, [BAD[id]]);
       const out = await h.invoke(c);
       expect(out.answer).not.toBe(BAD[id]);
       const v = checkReplayAnswer({ question: c.question, answer: out.answer, action: out.action, expect: c.expect });
@@ -136,6 +149,8 @@ describe("L3 et L4, rejeu des 5 phrases réelles sur alma-chat", () => {
       const log = h.writes.find((w) => w.table === "alma_conversations")?.row;
       expect(log?.classification?.fallback_template).toBe(true);
       expect(log?.classification?.fallback_issues?.length).toBeGreaterThan(0);
+      // Lot A3 : la relance de relecture compte comme un appel.
+      expect(log?.classification?.usage?.model_calls).toBe(h.callLovableAI.mock.calls.length);
     });
   }
 });

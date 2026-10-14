@@ -21,6 +21,8 @@
 
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+// Lot A4 : refus hors annonce publiée et ouverte, repli sans affirmation de disponibilité.
+import { buildFallbackDraft, letterSitRefusal } from "../_shared/application-letter.ts";
 
 const RATE_LIMIT_PER_HOUR = 3;
 const PROSCRIBED = /(voisin(e|s|age)?|gratuit à vie|pour toujours|période d'essai|programme fondateur|auvergne-rhône-alpes|\bAURA\b)/i;
@@ -44,45 +46,6 @@ function isRefusal(text: string): boolean {
   const t = (text || "").trim();
   if (t.length < 60) return true;
   return REFUSAL_PATTERNS.some((re) => re.test(t));
-}
-
-function fmtDate(d?: string | null): string | null {
-  if (!d) return null;
-  try {
-    return new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
-  } catch { return null; }
-}
-
-function buildFallbackDraft(ctx: {
-  ownerFirstName?: string | null;
-  city?: string | null;
-  petsLabel?: string | null;
-  startDate?: string | null;
-  endDate?: string | null;
-  sitterFirstName?: string | null;
-  sitterExperienceYears?: number | null;
-}): string {
-  const salut = `Bonjour${ctx.ownerFirstName ? ` ${ctx.ownerFirstName}` : ""},`;
-  const l1Parts: string[] = ["Votre annonce"];
-  if (ctx.petsLabel) l1Parts.push(`pour ${ctx.petsLabel}`);
-  if (ctx.city) l1Parts.push(`à ${ctx.city}`);
-  l1Parts.push("a retenu mon attention.");
-  const l1 = l1Parts.join(" ");
-
-  const l2 = ctx.sitterExperienceYears && ctx.sitterExperienceYears > 0
-    ? `Je pratique le house-sitting depuis ${ctx.sitterExperienceYears} an${ctx.sitterExperienceYears > 1 ? "s" : ""} et prends soin des animaux comme des miens, en respectant leurs habitudes.`
-    : `Je prends soin des animaux comme des miens, en respectant leurs habitudes et le rythme du foyer.`;
-
-  const start = fmtDate(ctx.startDate);
-  const end = fmtDate(ctx.endDate);
-  const l3 = start && end
-    ? `Je serais disponible du ${start} au ${end}.`
-    : `Je suis disponible sur les dates de votre annonce.`;
-
-  const l4 = `Je serais ravi${ctx.sitterFirstName ? "" : "(e)"} d'échanger avec vous, par message ou en visio, pour vous rassurer et vérifier que nos attentes se rejoignent.`;
-  const l5 = `Belle journée,`;
-
-  return [salut, "", l1, "", l2, l3, "", l4, "", l5].join("\n");
 }
 
 function json(body: unknown, status = 200) {
@@ -136,13 +99,15 @@ Deno.serve(async (req) => {
     // Contexte annonce (service_role, colonnes réelles)
     const { data: sit, error: sitErr } = await adminClient
       .from("sits")
-      .select("id, user_id, property_id, title, city, start_date, end_date, specific_expectations, owner_message")
+      .select("id, user_id, property_id, title, city, start_date, end_date, specific_expectations, owner_message, status, accepting_applications")
       .eq("id", sit_id)
       .maybeSingle();
 
-    if (sitErr || !sit) {
-      console.error("draft-application-letter: sit not found", { sit_id, sitErr });
-      return json({ error: "Annonce introuvable" }, 404);
+    // Lot A4 : une lettre ne se rédige que pour une annonce publiée, ouverte, d'un autre membre.
+    const refusal = sitErr ? "not_found" : letterSitRefusal(sit, userId);
+    if (refusal || !sit) {
+      console.error("draft-application-letter: sit refused", { sit_id, refusal, sitErr });
+      return json({ error: "Annonce introuvable", code: refusal ?? "not_found" }, 404);
     }
 
     // Propriétaire + animaux + profils gardien (service_role, en parallèle)
@@ -197,8 +162,8 @@ RÈGLE ABSOLUE : tu produis TOUJOURS une lettre exploitable, même si certaines 
 Structure attendue :
 1. Salutation ("Bonjour {prénom du propriétaire}," si connu, sinon "Bonjour,").
 2. Accroche factuelle reprenant UN élément concret disponible (animaux, ville OU dates).
-3. 2-3 phrases sur l'expérience concrète du gardien, à partir des données fournies. Aucune invention.
-4. Une phrase sur la disponibilité si les dates sont connues.
+3. 2-3 phrases sur l'expérience concrète du gardien, à partir des données fournies. Aucune invention, aucune qualité que les données ne disent pas.
+4. Si les dates sont connues, une phrase qui les cite, sans affirmer que le gardien est disponible : il le confirme lui-même.
 5. Une phrase de clôture ouvrant l'échange (proposition d'appel, question).
 6. Pas de signature, pas de coordonnées, pas d'emoji.`;
 

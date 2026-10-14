@@ -52,22 +52,28 @@ describe("règle 1 : espace actif", () => {
 });
 
 describe("règle 2 : périmètre réel", () => {
-  const sits = [{ country: "FR", city: "Damgan", departement_code: "56" }, { country: "PF", city: "Papeete", departement_code: "987" }];
+  const sits = [{ country: "FR", city: "Vannes", departement_code: "56" }, { country: "PF", city: "Papeete", departement_code: "987" }];
   const deps = [{ code: "56", nom: "Morbihan", nom_region: "Bretagne" }, { code: "29", nom: "Finistère", nom_region: "Bretagne" }, { code: "74", nom: "Haute-Savoie", nom_region: "Savoies" }, { code: "987", nom: "Polynésie française" }];
-  it("Toscane et Italie : Italie, phrase exacte", () => {
+  // Lot A5 (décision de Jérémie du 14/10/2026) : l'outre-mer suit la règle du
+  // site, la Polynésie française est hors de France (page internationale).
+  it("Toscane et Italie : Italie, phrase exacte, périmètre tiré des annonces", () => {
     expect(foreignPlaceIn("une garde en toscane")?.iso).toBe("IT");
-    expect(foreignNoneSentence("en Italie")).toBe("Guardiens propose des gardes en France, Polynésie française comprise. Il n'y a aucune garde en Italie aujourd'hui.");
+    expect(foreignNoneSentence("en Italie")).toBe("Guardiens propose des gardes en France. Il n'y a aucune garde en Italie aujourd'hui.");
+    expect(foreignNoneSentence("en Italie", sits)).toBe("Guardiens propose des gardes en France, et aujourd'hui aussi en Polynésie française. Il n'y a aucune garde en Italie aujourd'hui.");
   });
-  it.each(["une garde à Papeete", "garde en Polynésie", "garde à Lyon", "Comment allez-vous ?"])("pas de pays étranger : « %s »", (q) =>
+  it.each(["une garde à Papeete", "garde en Polynésie"])("Polynésie hors de France : « %s »", (q) =>
+    expect(foreignPlaceIn(q)?.iso).toBe("PF"));
+  it.each(["garde à Lyon", "Comment allez-vous ?"])("pas de pays étranger : « %s »", (q) =>
     expect(foreignPlaceIn(q)).toBeNull());
-  it("toutes les annonces en France ou en Polynésie : aucune hors de France", () => {
-    expect(hasForeignSits(sits)).toBe(false);
-    expect(hasForeignSits([...sits, { country: "IT" }])).toBe(true);
+  it("France seule : aucune hors de France ; une annonce en Polynésie est hors de France", () => {
+    expect(hasForeignSits([sits[0]])).toBe(false);
+    expect(hasForeignSits(sits)).toBe(true);
+    expect(hasForeignSits([sits[0], { country: "IT" }])).toBe(true);
   });
   it("lieu en France vérifié : Haute-Savoie sans annonce, Bretagne avec une annonce", () => {
     expect(frenchPlaceIn("je cherche une garde en haute-savoie", deps, sits)).toEqual({ label: "Haute-Savoie", count: 0 });
     expect(frenchPlaceIn("une garde en Bretagne", deps, sits)?.count).toBe(1);
-    expect(frenchPlaceIn("une garde à Damgan", deps, sits)?.count).toBe(1);
+    expect(frenchPlaceIn("une garde à Vannes", deps, sits)?.count).toBe(1);
   });
   it.each(["je cherche à garder un chien", "comment postuler ?"])("aucun lieu reconnu : « %s »", (q) =>
     expect(frenchPlaceIn(q, deps, sits)).toBeNull());
@@ -88,7 +94,7 @@ describe("règle 2 : périmètre réel", () => {
 
 function base(): any {
   return {
-    facts: { brouillons: [{ sit_id: "d1", titre: "Angus", debut: "2026-09-03" }], candidatures_envoyees: {}, candidatures_recues_non_ouvertes: 0, annonces_publiees: [], candidature_sans_reponse_jours: null },
+    facts: { brouillons: [{ sit_id: "d1", titre: "Filou", debut: "2026-09-03" }], candidatures_envoyees: {}, candidatures_recues_non_ouvertes: 0, annonces_publiees: [], candidature_sans_reponse_jours: null },
     inventory: { departement: "56", hors_france: false, pays: "FR", gardes: [], demandes_entraide: [], offres_entraide: [], projets: [], associations: [], questions_sans_reponse: [] },
     accountRole: "both", activeRole: "owner", question: "Bonjour", register: "dossier", completion: 80, today: "2026-10-07",
   };

@@ -9,6 +9,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
+import { applySafetyQuietFromResponse } from "@/lib/alma/safety-quiet";
 
 
 export type AlmaChatRole = "alma" | "user";
@@ -17,6 +18,8 @@ export type AlmaChatRole = "alma" | "user";
 export interface AlmaChatAction {
   label: string;
   path: string;
+  /** Lot A3 : motif calculé par le moteur, repris dans alma_action_clicked. */
+  reason?: string;
 }
 
 export interface AlmaChatChip {
@@ -53,7 +56,8 @@ function isInternalPath(v: unknown): v is string {
 export function readAlmaAction(raw: unknown): AlmaChatAction | undefined {
   const a = raw as any;
   if (!a || typeof a.label !== "string" || !a.label.trim() || !isInternalPath(a.path)) return undefined;
-  return { label: a.label.slice(0, 80), path: a.path };
+  const reason = typeof a.reason === "string" && /^[a-z0-9_]{1,64}$/.test(a.reason) ? a.reason : undefined;
+  return { label: a.label.slice(0, 80), path: a.path, ...(reason ? { reason } : {}) };
 }
 
 export function readAlmaChips(raw: unknown): AlmaChatChip[] | undefined {
@@ -228,6 +232,8 @@ export async function sendAlmaMessage({
       return;
     }
     const answer = typeof (data as any)?.answer === "string" ? (data as any).answer.trim() : "";
+    // Lot A4 : un gabarit de sûreté fait taire les chuchotements 2 heures.
+    applySafetyQuietFromResponse(data);
     if (!answer) {
       setState({ sending: false, error: "Alma reste joignable dans un instant, réessayez." });
       return;
@@ -287,7 +293,8 @@ export async function sendAlmaFeedback(
 
 export interface HumanContactInput {
   name: string;
-  email: string;
+  /** Lot A4 : ignoré, alma-chat prend l'email du compte connecté. */
+  email?: string;
   text: string;
   surface: string;
   invoke?: typeof supabase.functions.invoke;
@@ -300,7 +307,6 @@ export async function sendAlmaHumanContact(input: HumanContactInput): Promise<bo
     body: {
       kind: "contact_humans",
       name: input.name,
-      email: input.email,
       text: input.text,
       surface: input.surface,
       page_path: typeof window !== "undefined" ? window.location.pathname : undefined,

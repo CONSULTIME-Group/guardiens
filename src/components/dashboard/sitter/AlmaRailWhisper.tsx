@@ -29,6 +29,8 @@ interface AlmaRailWhisperProps {
     ongoingSitterFirstName?: string | null;
     pendingApps: boolean;
     noActiveSit: boolean;
+    /** Lot A2 : annonce de la plus ancienne candidature en attente. */
+    oldestAwaitingSitId?: string | null;
   };
 }
 

@@ -11,6 +11,7 @@ import { Key, Home, AlertTriangle, ClipboardList, Heart, Check, Circle, CheckCir
 import { AlmaHouseGuideAssist, type HouseGuideDrafts } from "@/components/ai/alma/AlmaHouseGuideAssist";
 import { trackEvent } from "@/lib/analytics";
 import { isPlausiblePhone, PHONE_MAX_LENGTH, PHONE_ERROR_MESSAGE } from "@/lib/phone";
+import { UNFILLED_PLACEHOLDER } from "@/lib/accordDeGarde";
 
 interface GuideData {
   exact_address: string;
@@ -122,7 +123,11 @@ const OwnerHouseGuideForm = () => {
 
   const emergencyPhone = guide.emergency_contact_phone?.trim() ?? "";
   const emergencyPhoneInvalid = !!emergencyPhone && !isPlausiblePhone(emergencyPhone);
-  const isPublishable = !!(
+  // Lot A1 : une trame d'Alma encore entre accolades bloque l'enregistrement.
+  const unfilledFields = (Object.values(guide) as unknown[]).some(
+    (v) => typeof v === "string" && UNFILLED_PLACEHOLDER.test(v),
+  );
+  const isPublishable = !unfilledFields && !!(
     guide.exact_address?.trim() &&
     guide.access_codes?.trim() &&
     emergencyPhone &&
@@ -476,6 +481,9 @@ const OwnerHouseGuideForm = () => {
                 )}
                 {emergencyPhoneInvalid && (
                   <p className="text-xs text-destructive">· {PHONE_ERROR_MESSAGE}</p>
+                )}
+                {unfilledFields && (
+                  <p className="text-xs text-destructive">· Remplacez les passages entre accolades proposés par Alma par vos informations</p>
                 )}
               </div>
             )}

@@ -16,6 +16,8 @@ export interface AlmaOwnerState {
   ongoingSitterFirstName?: string | null;
   pendingApps: boolean;
   noActiveSit: boolean;
+  /** Lot A2 : annonce de la plus ancienne candidature en attente (règle X3a). */
+  oldestAwaitingSitId?: string | null;
 }
 
 export interface AlmaPhraseInput {
@@ -51,6 +53,22 @@ export const ALMA_SKILLS_ACTION_ID = "savoir_faire";
 const skillsAction = { id: ALMA_SKILLS_ACTION_ID, label: ALMA_SKILLS_ACTION_LABEL, href: SAVOIR_FAIRE_PATH };
 
 /**
+ * Lot A2 (audit Alma du 14/10/2026) : la carte du propriétaire mène à la
+ * publication quand aucune annonce n'est en ligne, et aux candidatures de la
+ * plus ancienne en attente quand il y en a. Avant, elle ouvrait la
+ * conversation (0 annonce de garde proposée aux propriétaires par Alma).
+ */
+export const ALMA_PUBLISH_ACTION_ID = "publier_annonce";
+export const ALMA_PUBLISH_ACTION_LABEL = "Publier mon annonce de garde";
+export const ALMA_PUBLISH_PATH = "/sits/create";
+export const ALMA_APPLICATIONS_ACTION_ID = "lire_candidatures";
+export const ALMA_APPLICATIONS_ACTION_LABEL = "Lire les candidatures";
+
+export function ownerApplicationsHref(oldestAwaitingSitId?: string | null): string {
+  return oldestAwaitingSitId ? `/sits/${oldestAwaitingSitId}#candidatures` : "/sits";
+}
+
+/**
  * Lot E5 : phrase et lien éventuel. Les gardes passent d'abord (garde en
  * cours, candidatures, annonce à raconter, profil, disponibilité) ; l'invitation
  * aux savoir-faire vient ensuite, à la place de la phrase d'ambiance.
@@ -58,7 +76,16 @@ const skillsAction = { id: ALMA_SKILLS_ACTION_ID, label: ALMA_SKILLS_ACTION_LABE
 export function pickAlmaRail(input: AlmaPhraseInput): AlmaRailChoice {
   const phrase = pickAlmaRailPhraseBase(input);
   const { hidden, variant, skillsMissing, ownerState, checklistVisible = false, profileCompletion = 100, isAvailable = true, openingCardVisible = false } = input;
-  if (hidden || !skillsMissing) return { phrase, action: null };
+  if (hidden) return { phrase, action: null };
+  if (variant === "owner" && ownerState && !ownerState.ongoingSit) {
+    if (ownerState.pendingApps) {
+      return { phrase, action: { id: ALMA_APPLICATIONS_ACTION_ID, label: ALMA_APPLICATIONS_ACTION_LABEL, href: ownerApplicationsHref(ownerState.oldestAwaitingSitId) } };
+    }
+    if (ownerState.noActiveSit) {
+      return { phrase, action: { id: ALMA_PUBLISH_ACTION_ID, label: ALMA_PUBLISH_ACTION_LABEL, href: ALMA_PUBLISH_PATH } };
+    }
+  }
+  if (!skillsMissing) return { phrase, action: null };
   if (variant === "owner") {
     if (ownerState && !ownerState.ongoingSit && !ownerState.pendingApps && !ownerState.noActiveSit) {
       return { phrase: ALMA_SKILLS_OWNER_PHRASE, action: skillsAction };

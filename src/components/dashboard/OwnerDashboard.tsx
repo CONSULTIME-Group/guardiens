@@ -386,6 +386,8 @@ const OwnerDashboard = () => {
             : null,
           pendingApps: pendingAppCount > 0,
           noActiveSit,
+          // Lot A2 : la carte d'Alma mène à la plus ancienne candidature en attente.
+          oldestAwaitingSitId: awaiting.oldest?.sitId ?? null,
         }}
       />
       {ownerReadings.length > 0 && <RailReadingsCard items={ownerReadings} />}

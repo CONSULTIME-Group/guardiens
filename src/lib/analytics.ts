@@ -305,10 +305,14 @@ export type EventType =
   | "sit_proposal_question"                     // Lot I2 : question posée au propriétaire
   // Alma Pass 2 Tour 3 : empty search + notif summary ---------------------
   | "alma_empty_search_bubble_seen"             // Bulle empty search affichée (restrictive_filter, radius, zone_mode)
-  | "alma_empty_search_action_clicked"          // Action empty search cliquée (action_id, restrictive_filter?)
+  | "alma_empty_search_action_clicked"          // Action empty search cliquée (action_id, restrictive_filter?, zone_mode, is_visitor)
+  | "alma_whisper_card_clicked"                 // Lot A6 : carte Alma d'un profil public cliquée (is_visitor, surface, action)
+  | "owner_publish_cta_clicked"                 // Lot A6 : bouton « Publier mon annonce de garde » (source)
   | "alma_notif_summary_seen"                   // Résumé notifs affiché (unread, applications, messages, social)
   | "alma_notif_urgent_filter_clicked"          // Filtre "3 urgentes" cliqué (audience)
   // Alma Pass 4 : narratrice cross-page ------------------------------------
+  | "alma_moment_shown"                         // Lot A7 : bulle d'un moment ou d'un passage de stade (rule_key, kind, stage)
+  | "alma_moment_clicked"                       // Lot A7 : bouton de la bulle de moment (rule_key, kind, href)
   | "alma_whisper_emitted"                      // Whisper narratif affiché (whisper_type, surface, priority)
   | "alma_whisper_dismissed"                    // Whisper fermé (whisper_type, reason)
   | "alma_whisper_action_clicked"               // Action d'un whisper cliquée (whisper_type, action_id)
@@ -353,6 +357,7 @@ export type EventType =
   | "alma_usage_nudge_seen"                     // Usage nudge affiché (fact_id, surface, cta_action)
   | "alma_topbar_button_clicked"                // Bouton persistant Alma cliqué en topbar (surface)
   | "alma_first_meeting_cta_clicked"            // CTA principal du premier contact Alma cliqué (role, cta_action)
+  | "alma_action_clicked"                       // Lot A3 : lien suivi depuis la conversation d'Alma (reason, kind, path sans paramètres, surface)
   // Funnel création d'annonce ---------------------------------------------------
   | "sits_create_step_started"                  // Étape du wizard CreateSit entamée (step)
   | "sits_create_step_completed"                // Étape terminée (step, duration_ms)

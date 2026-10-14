@@ -8,6 +8,7 @@
 // Journalisation dans public.alma_conversations (lecture admin uniquement).
 
 import { callLovableAI, CORS_HEADERS } from "../_shared/ai-gateway.ts";
+import { emptyAlmaUsage, recordModelCall } from "../_shared/alma-usage.ts";
 import {
   ALMA_CHAT_DAILY_LIMIT,
   ALMA_CHAT_LIMIT_MESSAGE,
@@ -19,7 +20,10 @@ import {
 } from "../_shared/alma-system-prompt.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { almaDirectAnswer, almaHelpDirective, detectAlmaIntent, shouldAnswerDirectly } from "../_shared/alma-intent.ts";
-import { recordAlmaSignal } from "../_shared/alma-signals.ts";
+import { raiseImmediateAlmaSignal, recordAlmaSignal, type ImmediateSignalEmail } from "../_shared/alma-signals.ts";
+import { SAFETY_QUIET_MINUTES, safetyReply } from "../_shared/alma-safety.ts";
+import { reserveAlmaTurn } from "../_shared/alma-turn-cap.ts";
+import { almaModelOptions, contactIdentity, modelFailureReply, serverTranscript, trustedHistory } from "../_shared/alma-integrity.ts";
 import {
   CLASSIFICATION_DIRECTIVE,
   classificationFromPatterns,
@@ -32,8 +36,10 @@ import {
 import { normalizeContactMessage } from "../_shared/normalize-contact-message.ts";
 import { formatKnowledge, selectKnowledge } from "../_shared/alma-site-knowledge.ts";
 import { isMoodLineTruthful, loadVerifiedFacts, moodTruthFromFacts } from "../_shared/alma-facts.ts";
-import { formatInventory, loadAlmaInventory } from "../_shared/alma-inventory.ts";
-import { applyDraftToAction, computeNextAction, formatActionDirective } from "../_shared/alma-next-action.ts";
+import { formatInventory, inventoryItemOfSit, loadAlmaInventory } from "../_shared/alma-inventory.ts";
+import { almaResponseAction, almaResponseChips, applyDraftToAction, computeNextAction, formatActionDirective, isAnimalEmergency } from "../_shared/alma-next-action.ts";
+import { isChildCareRequest } from "../_shared/mission-child-care.ts";
+import { ALMA_VERSION } from "../_shared/alma-version.ts";
 import { almaProfileVisibleToModel, polishAlmaAnswer } from "../_shared/alma-output.ts";
 import { sitIdFromPath } from "../_shared/alma-next-action.ts";
 import {
@@ -47,6 +53,8 @@ import {
 import { deptCodeFromPostal, sitCommune, sitLocationLabel } from "../_shared/sit-location.ts";
 import {
   ALERT_ACTION,
+  askedPlaceSits,
+  doctrineSources,
   asksAboutListings,
   expressedIntent,
   foreignNoneSentence,
@@ -54,11 +62,12 @@ import {
   foreignPlaceInConversation,
   foreignWordsWithoutListings,
   frenchNoneSentence,
-  frenchPlaceIn,
+  frenchPlaceSitsIn,
   hasForeignSits,
   isMessagingQuestion,
   MESSAGING_DIRECTIVE,
-  SCOPE_DIRECTIVE,
+  scopeDirective,
+  scopeSentence,
   scrubTruth,
   spaceGuidance,
   type FrenchPlaceMatch,
@@ -89,7 +98,8 @@ import {
   type OutputGuardInput,
 } from "../_shared/alma-companion.ts";
 import { FRENCH_CITIES } from "../_shared/alma-places.ts";
-import type { VerifiedFacts } from "../_shared/alma-facts.ts";
+import { NO_AWAITING, summarizeAwaiting, type VerifiedFacts, type VerifiedFactsRaw } from "../_shared/alma-facts.ts";
+import { allowedBondClaims, computeAlmaBond, formatBondBlock, type AlmaBond, type BondServerSignals } from "../_shared/alma-bond.ts";
 
 /** Lot L4b : rejeu, faits vides puis complétés par le contexte simulé seul. */
 function simulatedFacts(role: string | null, extra: any): VerifiedFacts {
@@ -100,6 +110,7 @@ function simulatedFacts(role: string | null, extra: any): VerifiedFacts {
     candidatures_envoyees_detail: [],
     candidatures_recues: {},
     candidatures_recues_non_ouvertes: 0,
+    candidatures_en_attente: { ...NO_AWAITING },
     annonces_publiees: [],
     brouillons: [],
     missions_publiees: [],
@@ -138,6 +149,9 @@ async function loadViewedSit(admin: any, ref: string, userId: string, activeRole
   const q = admin.from("sits").select(cols);
   const { data: sit } = await (UUID_RE.test(ref) ? q.eq("id", ref) : q.eq("slug", ref)).maybeSingle();
   if (!sit || sit.user_id === userId) return null;
+  // Lot A1 (audit du 14/10/2026) : une annonce non publiée d'un autre membre
+  // reste hors du contexte, sauf candidature ou conversation de la personne.
+  const linkedOnly = sit.status !== "published";
   const [ownerRes, petsRes, appRes, convRes] = await Promise.all([
     admin.from("profiles").select("city, postal_code").eq("id", sit.user_id).maybeSingle(),
     sit.property_id
@@ -163,6 +177,7 @@ async function loadViewedSit(admin: any, ref: string, userId: string, activeRole
   }
   const app = ((appRes?.data ?? []) as any[]).find((a) => a.status !== "cancelled") ?? null;
   const conversationId = ((convRes?.data ?? []) as any[])[0]?.id ?? null;
+  if (linkedOnly && ((appRes?.data ?? []) as any[]).length === 0 && !conversationId) return null;
   const viewer: ViewerState = app ? "applied" : activeRole === "owner" ? "owner_space" : "can_apply";
   const petsList = ((petsRes?.data ?? []) as any[]).map((p) => ({ name: p.name ?? null, species: p.species ?? null, breed: p.breed ?? null, age: typeof p.age === "number" ? p.age : null }));
   const description = [sit.owner_message, sit.specific_expectations].filter((x: unknown) => typeof x === "string" && x).join(" ").slice(0, 800) || null;
@@ -195,11 +210,15 @@ function json(body: unknown, status = 200) {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: CORS_HEADERS });
+  // Lot A1 : la version servie se lit sans compte, par une requête OPTIONS.
+  if (req.method === "OPTIONS") return new Response(null, { headers: { ...CORS_HEADERS, "X-Alma-Version": ALMA_VERSION } });
 
   const startedAt = Date.now();
+  let releaseReservation: (() => Promise<void>) | null = null;
   try {
     const body = await req.json().catch(() => ({}));
+    // Lot A4 : version servie, lue par l'onglet Pilotage (« Rejeu à refaire »).
+    if (body?.kind === "version") return json({ version: ALMA_VERSION });
     const message = typeof body?.message === "string" ? body.message.trim() : "";
     const isContact = body?.kind === "contact_humans";
     if (!isContact && (!message || message.length > 2000)) {
@@ -247,16 +266,20 @@ Deno.serve(async (req) => {
 
     // Lot J2-B : « Écrire à Jérémie et Elisa » depuis Alma.
     if (isContact) {
-      const name = normalizeContactMessage(String(body?.name ?? "")).slice(0, 120);
-      const email = String(body?.email ?? u.user.email ?? "").trim().slice(0, 200);
+      // Lot A4 : email du compte (auth), jamais celui saisi ; transcription
+      // relue en base, jamais celle du navigateur.
+      const [{ data: cp }, { data: lastRows }] = await Promise.all([
+        adminClient.from("profiles").select("first_name").eq("id", userId).maybeSingle(),
+        adminClient.from("alma_conversations").select("question, answer, created_at").eq("user_id", userId)
+          .not("answer", "is", null).gte("created_at", new Date(Date.now() - 24 * 3_600_000).toISOString())
+          .order("created_at", { ascending: false }).limit(3),
+      ]);
+      const identity = contactIdentity(u.user.email, (cp as any)?.first_name ?? null, normalizeContactMessage(String(body?.name ?? "")));
+      const name = identity?.name ?? "Membre";
+      const email = identity?.email ?? "";
       const text = normalizeContactMessage(String(body?.text ?? ""));
-      const transcript = Array.isArray(body?.transcript)
-        ? body.transcript
-            .filter((m: any) => m && (m.role === "user" || m.role === "alma") && typeof m.content === "string")
-            .slice(-6)
-            .map((m: any) => `${m.role === "alma" ? "Alma" : "Membre"} : ${normalizeContactMessage(String(m.content)).slice(0, 600)}`)
-        : [];
-      if (!text || text.length > 3000 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      const transcript = serverTranscript((lastRows ?? []) as any[], normalizeContactMessage);
+      if (!text || text.length > 3000 || !identity) {
         return json({ error: "Message ou email invalide." }, 400);
       }
       const full = [
@@ -291,14 +314,43 @@ Deno.serve(async (req) => {
     }
     // Lot L4 : contexte simulé du membre, rejeu admin uniquement.
     const rc = isReplay && body?.replay_context && typeof body.replay_context === "object" ? body.replay_context as Record<string, any> : null;
+    // Lot A4 : la ligne réservée avant l'appel au modèle est complétée, jamais doublée.
+    let reservedId: string | null = null;
     const logConversation = async (row: Record<string, unknown>): Promise<string | null> => {
       if (isReplay) return null;
+      const full: Record<string, unknown> = {
+        ...row,
+        page_path: pagePath,
+        classification: { ...((row.classification as Record<string, unknown> | null) ?? {}), version: ALMA_VERSION },
+      };
+      if (reservedId) {
+        const id = reservedId;
+        const { error } = await adminClient.from("alma_conversations").update(full).eq("id", id);
+        if (error) console.error("alma-chat log update failed", error);
+        return id;
+      }
       const { data } = await adminClient
         .from("alma_conversations")
-        .insert({ ...row, page_path: pagePath })
+        .insert(full)
         .select("id")
         .single();
       return (data as any)?.id ?? null;
+    };
+    releaseReservation = async () => {
+      if (!reservedId) return;
+      await adminClient.from("alma_conversations").update({ refusal_reason: "error", latency_ms: Date.now() - startedAt }).eq("id", reservedId);
+    };
+    // Lot A4 : email immédiat à l'équipe (signal alma_safety), par send-transactional-email.
+    const sendTeamEmail = async (email: ImmediateSignalEmail): Promise<boolean> => {
+      const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const res = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-transactional-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}`, apikey: key },
+        body: JSON.stringify(email),
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) console.error("alma_safety email failed", res.status, await res.text().catch(() => ""));
+      return res.ok;
     };
     const raiseSignals = async (c: AlmaClassification, conversationId: string | null) => {
       if (isReplay) return;
@@ -319,30 +371,82 @@ Deno.serve(async (req) => {
       }
     };
 
-    // Plafond anti-boucle : ALMA_CHAT_DAILY_LIMIT échanges par personne et par jour.
-    const dayStart = new Date();
-    dayStart.setUTCHours(0, 0, 0, 0);
-    const { count } = await adminClient
-      .from("alma_conversations")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", userId)
-      .gte("created_at", dayStart.toISOString());
-
-    if (!isReplay && (count ?? 0) >= ALMA_CHAT_DAILY_LIMIT) {
-      await adminClient.from("alma_conversations").insert({
+    // Lot A4 : sûreté avant toute détection d'intention et avant le plafond.
+    // Gabarit verrouillé, sans appel au modèle, sans action, sans réécriture
+    // de mots ; signal alma_safety par email immédiat (un par membre et par heure).
+    const safety = safetyReply(message);
+    if (safety) {
+      const classification = { safety: safety.kind, intent: "sensible", version: ALMA_VERSION };
+      const conversationId = await logConversation({
         user_id: userId,
         surface,
         active_role: activeRole,
         input_mode: inputMode,
         question: message,
-        answer: ALMA_CHAT_LIMIT_MESSAGE,
-        register,
-        refusal_reason: "daily_limit",
+        answer: safety.answer,
+        register: "sensible",
+        refusal_reason: "safety_template",
         latency_ms: Date.now() - startedAt,
-
+        sources_count: 0,
+        classification,
       });
-      return json({ limited: true, message: ALMA_CHAT_LIMIT_MESSAGE });
+      // Contrairement aux autres signaux d'Alma (lot J3), un compte de
+      // l'équipe lève aussi alma_safety : la recette du lot se fait ainsi.
+      if (!isReplay) {
+        try {
+          await raiseImmediateAlmaSignal(adminClient, "alma_safety", userId, message, { pagePath, conversationId, safetyKind: safety.kind }, sendTeamEmail);
+        } catch (e) {
+          console.error("alma_safety signal failed", e);
+        }
+      }
+      return json({
+        answer: safety.answer,
+        safety: safety.kind,
+        quiet_minutes: SAFETY_QUIET_MINUTES,
+        ...(safety.humanContact ? { human_contact: true } : {}),
+        ...(conversationId ? { conversation_id: conversationId } : {}),
+        ...(isReplay ? { replay_meta: { register: "sensible", classification, confirmed_sit: false, version: ALMA_VERSION } } : {}),
+      });
     }
+
+    // Plafond anti-boucle : ALMA_CHAT_DAILY_LIMIT échanges par personne et par
+    // jour de Paris. Lot A4 : le tour est réservé AVANT l'appel au modèle
+    // (alma_reserve_turn), et une lecture du compteur en échec vaut refus.
+    let used = 0;
+    if (!isReplay) {
+      const reservation = await reserveAlmaTurn(adminClient, {
+        userId,
+        kind: "chat",
+        limit: ALMA_CHAT_DAILY_LIMIT,
+        row: { surface, active_role: activeRole, input_mode: inputMode, question: message, page_path: pagePath },
+        version: ALMA_VERSION,
+      });
+      if (!reservation.ok) {
+        const refusal = {
+          user_id: userId,
+          surface,
+          active_role: activeRole,
+          input_mode: inputMode,
+          question: message,
+          answer: ALMA_CHAT_LIMIT_MESSAGE,
+          register,
+          refusal_reason: reservation.reason,
+          latency_ms: Date.now() - startedAt,
+          page_path: pagePath,
+          classification: { version: ALMA_VERSION },
+        };
+        try {
+          if (reservation.id) await adminClient.from("alma_conversations").update(refusal).eq("id", reservation.id);
+          else await adminClient.from("alma_conversations").insert(refusal);
+        } catch (e) {
+          console.error("alma-chat refusal log failed", e);
+        }
+        return json({ limited: true, message: ALMA_CHAT_LIMIT_MESSAGE });
+      }
+      reservedId = reservation.id;
+      used = reservation.used;
+    }
+    const remaining = Math.max(0, ALMA_CHAT_DAILY_LIMIT - used);
 
     // Lot J1 : intention d'aide, frustration, départ.
     const intent = detectAlmaIntent(
@@ -353,7 +457,8 @@ Deno.serve(async (req) => {
     // frustration maximale sans question). Sinon le modèle répond d'abord.
     if (shouldAnswerDirectly(intent)) {
       const direct = almaDirectAnswer(intent)!;
-      const classification = classificationFromPatterns(intent);
+      // Lot A3 : réponse fixe, aucun appel au modèle.
+      const classification = { ...classificationFromPatterns(intent), usage: emptyAlmaUsage() };
       const conversationId = await logConversation({
         user_id: userId,
         surface,
@@ -371,10 +476,10 @@ Deno.serve(async (req) => {
       const human = needsHumanContact(classification);
       return json({
         answer: direct,
-        remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
+        remaining,
         ...(human ? { human_contact: true } : {}),
         ...(conversationId ? { conversation_id: conversationId } : {}),
-        ...(isReplay ? { replay_meta: { register, classification, confirmed_sit: false } } : {}),
+        ...(isReplay ? { replay_meta: { register, classification, confirmed_sit: false, version: ALMA_VERSION } } : {}),
       });
     }
     // Lots L2 et L4 : photo du logement, faits verrouillés, voix libre.
@@ -386,7 +491,8 @@ Deno.serve(async (req) => {
       // Lot L4, transparence : Alma dit qu'elle est une IA, jamais de déni.
       locked = aiIdentityBrief();
     }
-    const helpDirective = almaHelpDirective(intent);
+    // Lot A1 : ni urgence animale ni garde d'enfants ne s'orientent vers une publication.
+    const helpDirective = isAnimalEmergency(message) || isChildCareRequest(message) ? null : almaHelpDirective(intent);
 
     // Lot L1 : fiche d'annonce consultée.
     const viewedRef = sitIdFromPath(pagePath);
@@ -425,7 +531,7 @@ Deno.serve(async (req) => {
     const [profileRes, sitterRes, ownerRes] = await Promise.all([
       adminClient
         .from("profiles")
-        .select("first_name, city, profile_completion, identity_verified, role, postal_code, departement_code, country, latitude, longitude")
+        .select("first_name, city, profile_completion, identity_verified, role, postal_code, departement_code, country, latitude, longitude, created_at")
         .eq("id", userId)
         .maybeSingle(),
       adminClient
@@ -460,25 +566,72 @@ Deno.serve(async (req) => {
       prof.profile_completion = null;
       prof.identity_verified = null;
     }
+    // Lot A7 : les lignes lues par les faits nourrissent aussi le lien, sans lecture de plus.
+    const factsRaw: VerifiedFactsRaw = { ownSits: [], sent: [], missions: [] };
     const [facts, inventory] = await Promise.all([
-      rc ? Promise.resolve(simulatedFacts(accountRole, rc.facts)) : loadVerifiedFacts(adminClient, userId, accountRole, todayIso).catch(() => null),
+      rc ? Promise.resolve(simulatedFacts(accountRole, rc.facts)) : loadVerifiedFacts(adminClient, userId, accountRole, todayIso, factsRaw).catch(() => null),
       loadAlmaInventory(adminClient, prof, todayIso).catch(() => null),
     ]);
 
     // Lot L4 : compagnon. Ses animaux (tous rôles) et ses 20 dernières réponses
     // d'Alma (continuité de moins de 7 jours, amorces à ne pas répéter).
     const safeRead = async (f: () => any) => { try { return await f(); } catch { return { data: [] }; } };
-    const [myPetsRes, recentRes] = await Promise.all([
+    // Lot A7 : le lien avec Alma. Une lecture (my_alma_bond_signals, jeton du
+    // membre) ; si la fonction manque, une seule lecture de secours : premier
+    // échange et nombre d'échanges. En rejeu, seul replay_context.bond compte.
+    const readBondSignals = async (): Promise<BondServerSignals | null> => {
+      if (rc) return rc.bond && typeof rc.bond === "object" ? rc.bond as BondServerSignals : null;
+      try {
+        const { data: sig, error: sigErr } = await userClient.rpc("my_alma_bond_signals");
+        if (!sigErr && sig && typeof sig === "object" && !Array.isArray(sig)) return sig as BondServerSignals;
+        const { data: first, count: exchanges } = await adminClient
+          .from("alma_conversations")
+          .select("created_at", { count: "exact" })
+          .eq("user_id", userId)
+          .not("answer", "is", null)
+          .order("created_at", { ascending: true })
+          .limit(1);
+        return { member_since: prof.created_at ?? null, alma_exchanges: exchanges ?? 0, alma_first_at: (first as any[] | null)?.[0]?.created_at ?? null };
+      } catch (e) {
+        console.error("alma-chat bond signals failed", e);
+        return null;
+      }
+    };
+    const [myPetsRes, recentRes, bondSignals] = await Promise.all([
       rc
         ? Promise.resolve({ data: Array.isArray(rc.pets) ? rc.pets : [] })
         : safeRead(() => adminClient.from("pets").select("name, species, breed, age, properties!inner(user_id)").eq("properties.user_id", userId).limit(10)),
       rc
         ? Promise.resolve({ data: (Array.isArray(rc.recent_answers) ? rc.recent_answers : []).map((a: string) => ({ answer: a, question: "", created_at: new Date().toISOString() })) })
         : safeRead(() => adminClient.from("alma_conversations").select("question, answer, created_at").eq("user_id", userId).not("answer", "is", null).order("created_at", { ascending: false }).limit(20)),
+      readBondSignals(),
     ]);
+    let bond: AlmaBond | null = null;
+    try {
+      const server = bondSignals;
+      if (server) {
+        bond = computeAlmaBond({
+          today: todayIso,
+          activeRole,
+          profileCompletion: typeof prof.profile_completion === "number" ? prof.profile_completion : null,
+          ownSits: factsRaw.ownSits.map((x) => ({ id: x.id, status: x.status, published_at: x.published_at ?? null, created_at: x.created_at ?? null, start_date: x.start_date, end_date: x.end_date })),
+          sentApplications: factsRaw.sent.map((a) => ({ sit_id: a.sit_id, status: a.status, created_at: a.created_at, sit: a.sit ? { id: a.sit.id, status: a.sit.status, start_date: a.sit.start_date, end_date: a.sit.end_date } : null })),
+          missions: factsRaw.missions.map((m) => ({ id: m.id, status: m.status, created_at: m.created_at ?? null })),
+          server,
+        });
+      }
+    } catch (e) {
+      console.error("alma-chat bond failed", e);
+      bond = null;
+    }
     const myPets: ListingPet[] = ((myPetsRes?.data ?? []) as any[]).map((p) => ({ name: p.name ?? null, species: p.species ?? null, breed: p.breed ?? null, age: typeof p.age === "number" ? p.age : null }));
     const recentRows = ((recentRes?.data ?? []) as any[]).filter((r) => typeof r?.answer === "string" && r.answer);
     const recentAnswers: string[] = recentRows.map((r) => r.answer);
+    // Lot A4 : un tour « assistant » du navigateur ne fait foi que s'il est
+    // une réponse d'Alma relue en base ; sinon il ne nourrit ni le modèle ni
+    // le filet de sortie. En rejeu admin, l'historique simulé reste tel quel.
+    const trusted = rc ? { history, dropped: 0 } : trustedHistory(history, recentAnswers);
+    const trustedTurns = trusted.history;
     // Lot L4b : le gabarit de repli varie aussi son ouverture.
     if (locked?.kind === "ai_identity") locked = aiIdentityBrief(pickAiIdentityTemplate(recentAnswers));
     const lastRow = rc?.last_exchange
@@ -497,9 +650,11 @@ Deno.serve(async (req) => {
     try {
       const { data } = await adminClient
         .from("sits")
-        .select("country, city, departement_code")
+        .select("id, slug, title, country, city, departement_code, start_date, end_date")
         .eq("status", "published")
         .eq("accepting_applications", true)
+        // Lot A5 : annonces ouvertes seulement (règle isOpenSit du site, fin incluse).
+        .or(`end_date.is.null,end_date.gte.${todayIso}`)
         .limit(1000);
       publishedRows = Array.isArray(data) ? (data as PublishedSitRow[]) : [];
     } catch (e) {
@@ -521,12 +676,21 @@ Deno.serve(async (req) => {
       console.error("alma-chat departements failed", e);
     }
     let frenchNone: FrenchPlaceMatch | null = null;
-    if (!foreign && placeAsked) {
-      const match = frenchPlaceIn(message, departements, publishedRows);
-      if (match && match.count === 0) frenchNone = match;
+    const frenchMatch = !foreign && placeAsked ? frenchPlaceSitsIn(message, departements, publishedRows) : null;
+    if (frenchMatch && frenchMatch.count === 0) frenchNone = { label: frenchMatch.label, count: 0 };
+    // Lot A5 : le lieu demandé hors du département de la personne (Québec,
+    // Papeete, une autre région) fait entrer ses annonces dans l'inventaire.
+    if (inventory && placeAsked) {
+      const asked = askedPlaceSits({ foreign, french: frenchMatch, rows: publishedRows, personDept: inventory.departement });
+      if (asked.length) {
+        inventory.hors_departement = asked.map(inventoryItemOfSit);
+        inventory.lieu_demande_hors_france = Boolean(foreign);
+      }
     }
+    // Lot A5 : périmètre dit depuis les pays des annonces publiées et ouvertes.
+    const scope = scopeSentence(publishedRows);
     if (!locked && !viewed && (guidance || foreignNone || frenchNone)) {
-      const placeSentence = foreignNone ? foreignNoneSentence(foreignNone.inCountry) : frenchNone ? frenchNoneSentence(frenchNone.label) : null;
+      const placeSentence = foreignNone ? foreignNoneSentence(foreignNone.inCountry, publishedRows) : frenchNone ? frenchNoneSentence(frenchNone.label) : null;
       const truthAnswer = [placeSentence, guidance?.sentence ?? null].filter(Boolean).join(" ");
       const truthAction = guidance
         ? (foreignNone && guidance.switchable ? { ...guidance.action, label: "Passer en espace gardien et voir les gardes en France" } : guidance.action)
@@ -546,6 +710,7 @@ Deno.serve(async (req) => {
         foreignInCountry: foreignNone ? foreignNone.inCountry : null,
         frenchNoneLabel: frenchNone ? frenchNone.label : null,
         askedPlaceWords: placeWords.map((w) => w.charAt(0).toUpperCase() + w.slice(1)),
+        scopeSentence: scope,
         action: truthAction,
         template: truthAnswer,
       });
@@ -672,7 +837,11 @@ Deno.serve(async (req) => {
           ),
           candidatures_recues: mine.length,
           candidatures_non_lues: mine.filter((a) => a.viewed_at === null).length,
-          candidatures_en_attente: mine.filter((a) => a.status === "pending").length,
+          // Lot A2 : règle X3a, pending, viewed et discussing sur annonce ouverte.
+          candidatures_en_attente: summarizeAwaiting(
+            mine.map((a, i) => ({ id: `${s.id}:${i}`, sit_id: s.id, status: a.status, created_at: a.created_at })),
+            { [s.id]: s.status },
+          ).count,
         };
       });
     } else {
@@ -710,7 +879,7 @@ Deno.serve(async (req) => {
           helpIntent: Boolean(helpDirective),
           largeAnimals: Boolean((intent as any).largeAnimals),
           completion,
-          profileAlreadySuggested: history.some((m: any) => m.role === "assistant" && /\/(owner-)?profile\b/.test(m.content)),
+          profileAlreadySuggested: trustedTurns.some((m: any) => m.role === "assistant" && /\/(owner-)?profile\b/.test(m.content)),
           pagePath,
           sitterIntent: expressed === "sitter",
           foreignOpen,
@@ -750,7 +919,8 @@ Deno.serve(async (req) => {
           p_query: message,
           p_limit: 3,
         });
-        sources = Array.isArray(data) ? data : [];
+        // Lot A5 : aucune source qui compare avec la pension.
+        sources = Array.isArray(data) ? doctrineSources(data) : [];
       } catch (_e) {
         sources = [];
       }
@@ -793,7 +963,7 @@ Deno.serve(async (req) => {
         { role: "system", content: formatKnowledge(knowledge) },
         ...(facts ? [{ role: "system" as const, content: `FAITS VÉRIFIÉS, seule base de toute phrase qui affirme un fait sur la personne :\n${JSON.stringify(facts, null, 2)}` }] : []),
         ...(inventory ? [{ role: "system" as const, content: formatInventory(inventory, { foreignOpen }) }] : []),
-        ...history,
+        ...trustedTurns,
         { role: "system", content: almaRegisterReminder(register) },
         ...(viewed
           ? [{
@@ -803,31 +973,42 @@ Deno.serve(async (req) => {
           : []),
         ...(next ? [{ role: "system" as const, content: formatActionDirective(next) }] : []),
         ...(helpDirective ? [{ role: "system" as const, content: helpDirective }] : []),
-        { role: "system" as const, content: SCOPE_DIRECTIVE },
+        { role: "system" as const, content: scopeDirective(publishedRows) },
         ...(messagingAsked ? [{ role: "system" as const, content: MESSAGING_DIRECTIVE }] : []),
+        ...(bond ? [{ role: "system" as const, content: formatBondBlock(bond, todayIso) }] : []),
         { role: "system" as const, content: companion },
         ...(locked ? [{ role: "system" as const, content: lockedDirective(locked) }] : []),
         { role: "system", content: CLASSIFICATION_DIRECTIVE },
         { role: "user", content: message },
     ];
-    const askModel = (extra?: string) => callLovableAI({
-      model: "google/gemini-3.8-flash",
-      reasoning_effort: "low",
-      // 0.85 : à 0.6 le modèle retombe sur les mêmes ouvertures.
-      temperature: 0.85,
-      messages: extra
-        ? [...baseMessages.slice(0, -1), { role: "system" as const, content: extra }, baseMessages[baseMessages.length - 1]]
-        : baseMessages,
-    });
+    // Lot A3 : appels au modèle et jetons du tour, dans classification.usage.
+    const usage = emptyAlmaUsage();
+    const askModel = async (extra?: string) => {
+      // Lot A4 : appel borné pour Alma seule (15 s, max_tokens).
+      const res = await callLovableAI(almaModelOptions({
+        model: "google/gemini-3.8-flash",
+        reasoning_effort: "low",
+        // 0.85 : à 0.6 le modèle retombe sur les mêmes ouvertures.
+        temperature: 0.85,
+        messages: (extra
+          ? [...baseMessages.slice(0, -1), { role: "system" as const, content: extra }, baseMessages[baseMessages.length - 1]]
+          : baseMessages) as any,
+      }));
+      recordModelCall(usage, res);
+      return res;
+    };
     const r = await askModel();
 
     if (!r.ok) {
       // Secours : frustration ou départ, la réponse fixe prend le relais.
       // Lot L1 : une question au propriétaire reçoit la réponse factuelle.
-      const fallback = locked
-        ? locked.template
-        : intent.frustration || intent.leaving ? almaDirectAnswer(intent) : null;
-      const classification: AlmaClassification = { ...classificationFromPatterns(intent), ...(locked ? { fallback_template: true, unanswered: false } : {}) } as AlmaClassification;
+      // Lot A4 : un délai dépassé (15 s) rend une réponse de repli journalisée.
+      const reply = modelFailureReply(r, {
+        lockedTemplate: locked ? locked.template : null,
+        directAnswer: intent.frustration || intent.leaving ? almaDirectAnswer(intent) : null,
+      });
+      const fallback = reply?.answer ?? null;
+      const classification: AlmaClassification = { ...classificationFromPatterns(intent), ...(locked ? { fallback_template: true, unanswered: false } : {}), usage } as AlmaClassification;
       const conversationId = await logConversation({
         user_id: userId,
         surface,
@@ -836,7 +1017,7 @@ Deno.serve(async (req) => {
         question: message,
         answer: fallback,
         register,
-        refusal_reason: fallback ? "model_fallback" : r.code ?? `gateway_${r.status}`,
+        refusal_reason: reply?.refusalReason ?? r.code ?? `gateway_${r.status}`,
         latency_ms: Date.now() - startedAt,
         sources_count: sources.length,
         classification,
@@ -845,9 +1026,9 @@ Deno.serve(async (req) => {
       if (fallback) {
         return json({
           answer: fallback,
-          remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
-          ...(locked?.action ? { action: { label: locked.action.label, path: locked.action.path } } : {}),
-          ...(lockedChips.length ? { chips: lockedChips } : {}),
+          remaining,
+          ...(locked?.action ? { action: almaResponseAction(locked.action) } : {}),
+          ...(lockedChips.length ? { chips: almaResponseChips(lockedChips) } : {}),
           human_contact: true,
           ...(conversationId ? { conversation_id: conversationId } : {}),
         });
@@ -906,7 +1087,7 @@ Deno.serve(async (req) => {
     ];
     const memberText = foldC([
       message,
-      ...history.map((m: any) => String(m?.content ?? "")),
+      ...trustedTurns.map((m: any) => String(m?.content ?? "")),
       JSON.stringify(facts ?? {}),
       JSON.stringify(dossier),
       prof.city ?? "",
@@ -926,8 +1107,10 @@ Deno.serve(async (req) => {
       gazetteer: placeNames,
       noListingPlaces: foreignWordsWithoutListings(publishedRows),
       actionLabels,
-      hasPriorExchange: history.length > 0 || Boolean(lastExchange),
+      hasPriorExchange: trustedTurns.length > 0 || Boolean(lastExchange),
       allowAlmaBio: register === "perso" || aboutAlma,
+      // Lot A7 : un moment évoqué doit figurer dans le lien ou dans les faits.
+      ...(bond ? { allowedClaims: allowedBondClaims(bond, facts) } : {}),
     };
     const hardIssues = (text: string) => [...(locked ? checkLocked(text, locked) : []), ...checkOutput(text, guard)];
     let issues = [...hardIssues(answer), ...softIssues(answer)];
@@ -942,6 +1125,7 @@ Deno.serve(async (req) => {
           : x.startsWith("lieu_sans_annonce:") ? `- Lieu sans aucune annonce (${x.split(":")[1]}) : ne le cite que pour dire qu'il n'y a aucune garde dans ce pays aujourd'hui, jamais comme destination.`
           : x.startsWith("lieu_hors_faits:") ? `- Lieu absent des faits (${x.split(":")[1]}) : retire-le, ne cite que des lieux présents dans ses faits ou sa question.`
           : x === "echange_fantome" ? "- Tu évoques un échange passé qui n'existe pas : retire cette référence."
+          : x.startsWith("moment_fantome:") ? `- Tu évoques un moment (${x.split(":")[1].replace(/_/g, " ")}) absent de votre lien et de ses faits : retire cette phrase.`
           : x === "libelle_recopie" ? "- Tu recopies le libellé d'un bouton avec sa majuscule : décris l'action avec tes mots."
           : `- Contenu interdit : ${x.replace("interdit:", "")}.`),
         `Ta réponse précédente : « ${answer.slice(0, 600)} »`,
@@ -949,7 +1133,8 @@ Deno.serve(async (req) => {
       const r2 = await askModel(feedback);
       if (r2.ok) {
         const raw2: string = r2.data?.choices?.[0]?.message?.content ?? "";
-        const second = finish(normalizeAlmaOutput(extractClassification(raw2).answer));
+        // Lot A1 : la ligne BROUILLON de la relance est retirée comme la première.
+        const second = finish(applyDraftToAction(normalizeAlmaOutput(extractClassification(raw2).answer), null).answer);
         const issues2 = [...hardIssues(second), ...softIssues(second)];
         if (second && issues2.length < issues.length) { answer = second; issues = issues2; }
       }
@@ -992,6 +1177,8 @@ Deno.serve(async (req) => {
     }
     if (guardIssuesBefore.length) (classification as any).output_guard = guardIssuesBefore;
     if (retried) (classification as any).retried = true;
+    (classification as any).usage = usage;
+    if (trusted.dropped) (classification as any).history_dropped = trusted.dropped;
     if (issues.some((x) => !x.startsWith("manque:") && !x.startsWith("interdit:")) && !(classification as any).fallback_template) {
       (classification as any).soft_issues = issues;
     }
@@ -1037,17 +1224,22 @@ Deno.serve(async (req) => {
 
     return json({
       answer,
-      remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
-      ...(action ? { action: { label: action.label, path: action.path } } : {}),
-      ...(chips.length ? { chips } : {}),
+      remaining,
+      ...(action ? { action: almaResponseAction(action) } : {}),
+      ...(chips.length ? { chips: almaResponseChips(chips) } : {}),
       ...(human ? { human_contact: true } : {}),
       ...(conversationId ? { conversation_id: conversationId } : {}),
       ...(isReplay
-        ? { replay_meta: { register, classification, confirmed_sit: Boolean(facts && facts.gardes_confirmees.length > 0) } }
+        ? { replay_meta: { register, classification, confirmed_sit: Boolean(facts && facts.gardes_confirmees.length > 0), version: ALMA_VERSION } }
         : {}),
     });
   } catch (e) {
     console.error("alma-chat error", e);
+    try {
+      await releaseReservation?.();
+    } catch {
+      // La réservation reste comptée : mieux vaut un tour perdu qu'un plafond ouvert.
+    }
     return json({ error: "Erreur inattendue." }, 500);
   }
 });

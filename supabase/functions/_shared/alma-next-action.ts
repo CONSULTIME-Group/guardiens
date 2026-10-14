@@ -10,6 +10,7 @@ import type { VerifiedFacts } from "./alma-facts.ts";
 import type { AlmaInventory } from "./alma-inventory.ts";
 import { foldText } from "./alma-site-knowledge.ts";
 import { isStaleDraft, STALE_DRAFT_LABEL, staleDraftPath } from "./alma-truth.ts";
+import { isChildCareRequest } from "./mission-child-care.ts";
 
 export interface AlmaAction {
   label: string;
@@ -55,6 +56,18 @@ export interface NextActionInput {
   today?: string;
 }
 
+/**
+ * Lot A1 (audit Alma du 14/10/2026) : urgence pour un animal. Aucun bouton de
+ * publication ni d'entraide sous un empoisonnement ou une blessure : la
+ * réponse renvoie vers le vétérinaire, sans action calculée. Texte replié.
+ */
+export const ANIMAL_EMERGENCY =
+  /\b(avale|a mange du chocolat|chocolat|xylitol|raisins? secs?|empoisonn\w*|intoxi\w*|poison|saigne\w*|saignement|convuls\w*|crise d.epilepsie|ne respire plus|respire mal|etouffe\w*|vomi\w*|diarrhee de sang|renverse par|percute|accident|morsure|mordu|fugue\w*|s.est echappe\w*|perdu mon (chien|chat)|a disparu|coup de chaleur|ne bouge plus|inconscient)\b/;
+
+export function isAnimalEmergency(question: string): boolean {
+  return ANIMAL_EMERGENCY.test(foldText(question));
+}
+
 export interface NextActionResult {
   action: AlmaAction | null;
   chips: AlmaChip[];
@@ -77,6 +90,14 @@ const PROFILE_ASKED = /(mon profil|ma completion|mon score|completer mon profil|
 const SIT_INTENT = /(je pars|partir|depart|vacances|faire garder|garder (mes|ma|mon|nos)|garde de (mes|ma|maison)|absence|trouver un gardien|chevaux|poneys|troupeau|chevres|moutons|poules)/;
 const HOWTO_SIT = /comment se passe une garde/;
 
+/**
+ * Lot A2 (audit Alma du 14/10/2026) : mots d'entraide dans la question. Le
+ * repli « Demander un coup de main » (entraide_premiere) ne part que sur une
+ * intention d'aide ou sur ces mots. Texte replié, mots entiers.
+ */
+export const ENTRAIDE_WORDS =
+  /\b(entraide|coups? de main|petites? missions?|potager|jardin|jardinage|tondre|haie|courses|trajets?|covoiturage|jeux? de societe|scrabble|belote|echecs|partie de cartes|bricolage|legumes)\b/;
+
 /** Titre prêt pour une demande d'entraide, déduit des mots de la question. */
 export function suggestMissionTitle(question: string): string {
   const q = foldText(question);
@@ -87,7 +108,7 @@ export function suggestMissionTitle(question: string): string {
   if (/jardin|tondre|haie|tailler/.test(q)) return "Un coup de main au jardin";
   if (/course|marche\b|marché/.test(q)) return "Courses au marché ensemble";
   if (/trajet|voiture|covoitur|conduire/.test(q)) return "Un trajet en voiture";
-  if (/cheva|poney|equid/.test(q)) return "Un coup de main pour mes chevaux et poneys";
+  if (/cheva|poney|equid/.test(q)) return "Un coup de main ponctuel pour mes chevaux et poneys";
   if (/chat|chien|animal|animaux/.test(q)) return "Passer nourrir mes animaux";
   return "Une partie de Scrabble entre gens du coin";
 }
@@ -128,7 +149,21 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
       : input.register === "sensible" ? "after"
       : "end";
 
+  // Lot A1 : urgence animale, aucune action ni pastille.
+  if (ANIMAL_EMERGENCY.test(q)) return { action: null, chips: [], placement: "none" };
+
+  // Lot A1 : garde d'enfants (lot E12, CGU 7), jamais de formulaire de
+  // publication, ni annonce de garde ni demande d'entraide.
+  if (isChildCareRequest(input.question)) {
+    return {
+      action: { label: "Voir l'entraide près de chez moi", path: "/petites-missions", reason: "garde_enfants_hors_entraide" },
+      chips: [],
+      placement,
+    };
+  }
+
   const sitIntent = SIT_INTENT.test(q) || Boolean(input.largeAnimals);
+  const entraideAsked = Boolean(input.helpIntent) || ENTRAIDE_WORDS.test(q);
 
   // Demande d'inverser ou de changer d'espace sur un compte aux deux facettes :
   // on oriente vers le changement d'espace réel, jamais vers l'entraide.
@@ -170,8 +205,22 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
     if (draft && isStaleDraft(draft, today)) {
       candidates.push({ label: STALE_DRAFT_LABEL, path: staleDraftPath(draft.sit_id), reason: "brouillon_perime" });
     } else if (draft) candidates.push({ label: `Publier le brouillon${draft.titre ? ` « ${draft.titre} »` : ""}`, path: `/sits/create?draftId=${draft.sit_id}`, reason: "brouillon" });
-    if (facts.candidatures_recues_non_ouvertes > 0) candidates.push({ label: "Lire les candidatures reçues", path: "/sits", reason: "candidatures_non_ouvertes" });
-    if (!facts.annonces_publiees.length && sitIntent && !input.helpIntent) {
+    // Lot A2 : candidatures en attente au sens X3a (pending, viewed,
+    // discussing sur annonce ouverte), lien vers l'annonce de la plus ancienne.
+    const awaiting = facts.candidatures_en_attente;
+    if (awaiting && awaiting.nombre > 0) {
+      const path = awaiting.plus_ancienne_annonce ? `/sits/${awaiting.plus_ancienne_annonce}#candidatures` : "/sits";
+      candidates.push({ label: "Lire les candidatures reçues", path, reason: "candidatures_en_attente" });
+    }
+    // Lot A2 : le propriétaire sans annonce publiée ni brouillon reçoit la
+    // publication en tête, sans attendre qu'il parle de départ (priorité :
+    // plus d'annonces publiées). Un double rôle en espace gardien la reçoit
+    // seulement s'il parle d'un départ. Qui cherche de l'aide passe par le
+    // bloc helpIntent ci-dessus, qui propose déjà l'annonce de garde.
+    // Une garde déjà confirmée côté propriétaire n'appelle pas de nouvelle annonce d'office.
+    const ownerFirst = (role === "owner" || input.activeRole === "owner")
+      && !(facts.gardes_confirmees ?? []).some((g) => g.side === "proprietaire");
+    if (!facts.annonces_publiees.length && !input.helpIntent && ((ownerFirst && !draft) || sitIntent)) {
       candidates.push({ label: "Publier mon annonce de garde", path: withTitle("/sits/create", suggestSitTitle(input.question)), reason: "intention_garde" });
     }
   }
@@ -179,9 +228,13 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
   // 2. Gardien.
   if (sitterSide) {
     const nearby = inventory.gardes[0];
+    // Lot A5 : la garde du lieu demandé (Québec, Papeete) passe devant la garde proche.
+    const askedPlace = (inventory.hors_departement ?? [])[0];
     const waiting = (facts.candidature_sans_reponse_jours ?? 0) > 7;
     if (input.viewedSit) {
       // Lot L1 : jamais une autre annonce tant que celle-ci est ouverte.
+    } else if (askedPlace?.id) {
+      candidates.push({ label: `Postuler : ${askedPlace.titre}`, path: `/sits/${askedPlace.id}?postuler=1`, reason: "annonce_lieu_demande" });
     } else if (nearby) {
       candidates.push({ label: `Postuler : ${nearby.titre}`, path: `/sits/${nearby.id}?postuler=1`, reason: waiting ? "candidature_sans_reponse" : "annonce_proche" });
     } else if (!input.helpIntent) {
@@ -192,13 +245,17 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
   // 3. Tous : l'entraide.
   const besoin = inventory.demandes_entraide[0];
   if (besoin) candidates.push({ label: `Répondre à « ${besoin.titre} »`, path: besoin.lien, reason: "entraide_proche" });
-  else candidates.push({ label: "Demander un coup de main", path: withTitle("/petites-missions/creer", suggestMissionTitle(input.question)), reason: "entraide_premiere" });
+  // Lot A2 : le repli « Demander un coup de main » suit une intention d'aide
+  // ou des mots d'entraide ; avant, il partait pour tous (6 propositions à
+  // des propriétaires contre 0 annonce de garde, base du 14/10/2026).
+  else if (entraideAsked) candidates.push({ label: "Demander un coup de main", path: withTitle("/petites-missions/creer", suggestMissionTitle(input.question)), reason: "entraide_premiere" });
   if (!inventory.projets.length) candidates.push({ label: "Lancer un projet à plusieurs", path: withTitle("/projets/publier", "Planter une haie à plusieurs"), reason: "projet_premier" });
   else candidates.push({ label: `Voir « ${inventory.projets[0].titre} »`, path: inventory.projets[0].lien, reason: "projet_proche" });
   const question = inventory.questions_sans_reponse[0];
   if (question) candidates.push({ label: `Répondre à la question « ${question.titre} »`, path: question.lien, reason: "question_sans_reponse" });
   // Lot L3 : la page internationale n'est proposée que si une annonce hors de France existe.
-  if (input.foreignOpen !== false && (inventory.hors_france || /etranger|international|hors de france/.test(q))) {
+  // Lot A2 : réservée au côté gardien, un propriétaire cherche un gardien.
+  if (sitterSide && input.foreignOpen !== false && (inventory.hors_france || /etranger|international|hors de france/.test(q))) {
     candidates.unshift({ label: "Voir les gardes à l'international", path: "/annonces/international", reason: "international" });
   }
 
@@ -215,6 +272,8 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
   }
   const otherSit = (path: string): boolean => {
     if (!input.viewedSit) return false;
+    // Lot A2 : les candidatures reçues sur une annonce du membre restent.
+    if (path.endsWith("#candidatures")) return false;
     const m = path.match(/^\/(?:sits|annonces)\/([^/?#]+)/);
     return !!m && m[1] !== input.viewedSit.id && m[1] !== "create" && m[1] !== "international";
   };
@@ -253,7 +312,7 @@ export function formatActionDirective(r: NextActionResult): string {
     ? "Réponds d'abord pleinement ; l'action vient ensuite, en une phrase, ou pas du tout si elle détonne."
     : "Termine ta réponse par cette action, en une phrase qui la nomme par le nom de sa page, sans écrire le chemin.";
   return [
-    `PROCHAINE ACTION CALCULÉE : « ${r.action.label} », chemin ${r.action.path.split("?")[0]} (motif : ${r.action.reason}).`,
+    `PROCHAINE ACTION CALCULÉE : « ${r.action.label} », chemin ${r.action.path.split(/[?#]/)[0]} (motif : ${r.action.reason}).`,
     when,
     "Un bouton cliquable portant cette action s'affiche sous ta réponse : tu n'as pas à recopier les paramètres du lien.",
     "Tu ne proposes aucune autre action que celle ci.",
@@ -283,16 +342,59 @@ function stripPrefillTitle(path: string): string {
  * inventé par le moteur. Sans titre d'Alma, le formulaire s'ouvre vide.
  * La ligne BROUILLON est lue où qu'elle soit (avant ou après CLASSEMENT).
  */
+/**
+ * Lot A5 (décision de Jérémie du 14/10/2026, CGU 6.3 : coups de main
+ * ponctuels) : en entraide, un besoin pour des chevaux ou des poneys se dit
+ * ponctuel. « quotidien » et « régulier » deviennent « ponctuel » dans le
+ * titre ; une phrase de description qui les porte est retirée.
+ */
+const HORSE_WORDS = /\b(chevaux|cheval|poneys?|equides?|juments?|anes?)\b/;
+const RECURRING_WORDS = /\b(quotidien(ne)?s?|r[ée]guli[èe]re?s?|r[ée]guli[èe]rement|tous les jours|chaque jour|chaque matin|chaque soir)\b/i;
+
+export function isHorseHelpText(text: string): boolean {
+  return HORSE_WORDS.test(foldText(text));
+}
+
+export function punctualHorseTitle(title: string): string {
+  return title
+    .replace(/\bquotidien(ne)?(s)?\b/gi, (_m, f, s) => `ponctuel${f ? "le" : ""}${s ?? ""}`)
+    .replace(/\br[ée]guli[èe]rement\b/gi, "ponctuellement")
+    .replace(/\br[ée]guli(?:er|[èe]re)(s)?\b/gi, (m, s) => `ponctuel${/[èe]re/i.test(m) ? "le" : ""}${s ?? ""}`)
+    .replace(/\s*\b(tous les jours|chaque jour|chaque matin|chaque soir)\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+export function punctualHorseDescription(desc: string): string {
+  return desc
+    .split(/(?<=[.!?])\s+/)
+    .filter((s) => !RECURRING_WORDS.test(s))
+    .join(" ")
+    .trim();
+}
+
 export function applyDraftToAction(
   answer: string,
   action: AlmaAction | null,
   chips: AlmaChip[] = [],
 ): { answer: string; action: AlmaAction | null; chips: AlmaChip[]; title: string | null } {
   const m = answer.match(DRAFT_LINE_RE);
-  const cleaned = m ? answer.replace(DRAFT_LINE_RE, "").replace(/\n{3,}/g, "\n\n").trim() : answer;
+  let cleaned = m ? answer.replace(DRAFT_LINE_RE, "").replace(/\n{3,}/g, "\n\n").trim() : answer;
   const quoted = cleaned.match(QUOTED_TITLE_RE);
-  const title = (m ? m[1] : quoted ? quoted[1] : "").trim().replace(/^["«“]\s*|\s*["»”]$/g, "").slice(0, 100) || null;
-  const desc = m ? (m[2] || "").trim().slice(0, 1000) : "";
+  let title = (m ? m[1] : quoted ? quoted[1] : "").trim().replace(/^["«“]\s*|\s*["»”]$/g, "").slice(0, 100) || null;
+  let desc = m ? (m[2] || "").trim().slice(0, 1000) : "";
+  // Lot A5 : chevaux et poneys en entraide, coup de main ponctuel.
+  const missionForm = action?.path.split("?")[0] === "/petites-missions/creer";
+  if (missionForm && isHorseHelpText(`${title ?? ""} ${desc}`)) {
+    if (title) {
+      const punctual = punctualHorseTitle(title);
+      if (punctual && punctual !== title) {
+        cleaned = cleaned.split(title).join(punctual);
+        title = punctual;
+      }
+    }
+    desc = punctualHorseDescription(desc);
+  }
   const outChips = chips.map((c) => (c.path ? { ...c, path: stripPrefillTitle(c.path) } : c));
   if (!action) return { answer: cleaned, action, chips: outChips, title };
   const base = action.path.split("?")[0];
@@ -302,4 +404,34 @@ export function applyDraftToAction(
   if (desc) params.set("description", desc);
   const q = params.toString();
   return { answer: cleaned, action: { ...action, path: q ? `${base}?${q}` : base }, chips: outChips, title };
+}
+
+/**
+ * Lot A3 : formulaires de publication dont l'ouverture depuis Alma est
+ * mesurée. Le paramètre via=alma est ajouté au moment de répondre au site,
+ * jamais dans le moteur : titre, description et brouillon restent intacts.
+ */
+export const ALMA_VIA_FORMS = ["/sits/create", "/petites-missions/creer"] as const;
+
+export function withAlmaVia(path: string): string {
+  const hashAt = path.indexOf("#");
+  const beforeHash = hashAt >= 0 ? path.slice(0, hashAt) : path;
+  const hash = hashAt >= 0 ? path.slice(hashAt) : "";
+  const [base, query = ""] = beforeHash.split("?");
+  if (!(ALMA_VIA_FORMS as readonly string[]).includes(base)) return path;
+  if (new URLSearchParams(query).get("via") === "alma") return path;
+  const kept = query.split("&").filter((p) => p && !/^via=/.test(p));
+  kept.push("via=alma");
+  return `${base}?${kept.join("&")}${hash}`;
+}
+
+/** Action transmise au site : chemin marqué, motif du moteur conservé. */
+export function almaResponseAction(action: AlmaAction | null | undefined): AlmaAction | null {
+  if (!action) return null;
+  return { label: action.label, path: withAlmaVia(action.path), reason: action.reason };
+}
+
+/** Pastilles transmises au site, chemins marqués. */
+export function almaResponseChips<T extends { path?: string }>(chips: T[]): T[] {
+  return chips.map((c) => (c.path ? { ...c, path: withAlmaVia(c.path) } : c));
 }

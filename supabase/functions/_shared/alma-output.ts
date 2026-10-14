@@ -4,7 +4,9 @@
  *
  * 1. Le score du profil n'est transmis au modèle que sous 40 % ou sur une
  *    question explicite sur le profil.
- * 2. « gratuit » sous toutes ses formes est reformulé.
+ * 2. « gratuit » sous ses autres formes est reformulé ; « Guardiens est
+ *    gratuit » (doctrine Y3, décision de Jérémie du 14/10/2026), les chemins,
+ *    les adresses web et les titres cités entre guillemets restent intacts.
  * 3. Une anecdote (sieste, nuit, chats, forêt) en ouverture passe en fin de
  *    réponse, en une phrase, et disparaît en cas d'aide, de frustration ou de
  *    problème.
@@ -16,14 +18,38 @@ export function almaProfileVisibleToModel(completion: number | null, question: s
   return completion !== null && completion < PROFILE_SEARCH_THRESHOLD;
 }
 
-/** Reformule les mots proscrits dans la voix d'Alma. */
+/**
+ * Segments jamais réécrits : la phrase de doctrine, les adresses web, les
+ * chemins du site et les titres cités entre guillemets. Un lien d'article qui
+ * contient « gratuitement » restait sinon cassé (audit Alma du 14/10/2026).
+ */
+const PROTECTED_SEGMENT =
+  /Guardiens est gratuit|https?:\/\/[^\s)»"]+|(?<![\w])\/[a-z0-9][a-z0-9\-_/?=&#.%]*|«[^»]{0,200}»|"[^"\n]{0,200}"|“[^”]{0,200}”/gi;
+
+function rewriteOutsideProtected(text: string, rewrite: (chunk: string) => string): string {
+  let out = "";
+  let last = 0;
+  for (const m of text.matchAll(PROTECTED_SEGMENT)) {
+    const at = m.index ?? 0;
+    out += rewrite(text.slice(last, at)) + m[0];
+    last = at + m[0].length;
+  }
+  return out + rewrite(text.slice(last));
+}
+
+/** Reformule les mots proscrits dans la voix d'Alma, hors segments protégés. */
 export function rewriteForbiddenWords(text: string): string {
+  return rewriteOutsideProtected(text || "", rewriteChunk);
+}
+
+function rewriteChunk(text: string): string {
   const end = "(?![a-zà-ÿ])";
   const keepCase = (match: string, repl: string) =>
     /^[A-ZÀ-Ý]/.test(match) ? repl.charAt(0).toUpperCase() + repl.slice(1) : repl;
-  return (text || "")
+  return text
     .replace(new RegExp(`\\b(du|le|au|un|son|votre) logement gratuitement${end}`, "gi"), (_m, det: string) => `${det} logement sans rien payer`)
-    .replace(new RegExp(`\\bgratuitement${end}`, "gi"), "sans rien payer pour le logement")
+    .replace(new RegExp(`\\blog[ée]s? gratuitement${end}`, "gi"), (m) => m.replace(/gratuitement/i, "sans rien payer"))
+    .replace(new RegExp(`\\bgratuitement${end}`, "gi"), "sans frais")
     .replace(new RegExp(`\\bla gratuités?${end}`, "gi"), (m) => keepCase(m, "l'absence de frais"))
     .replace(new RegExp(`\\bgratuités?${end}`, "gi"), "absence de frais")
     .replace(new RegExp(`\\bgratuit(?:e|es|s)?${end}`, "gi"), "sans frais")

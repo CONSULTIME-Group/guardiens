@@ -18,7 +18,8 @@ import {
   subscribeAlmaConversation,
 } from "@/lib/alma/conversation-store";
 import { ALMA_HUMAN_CONTACT_LABEL, AlmaHumanContactForm } from "./AlmaHumanContact";
-import { ALMA_PAGE_LABELS } from "../../../../supabase/functions/_shared/alma-page-labels";
+import { trackEvent } from "@/lib/analytics";
+import { ALMA_PAGE_LABELS, almaPageKindLabel, almaPageLabel } from "../../../../supabase/functions/_shared/alma-page-labels";
 
 export const ALMA_THINKING_LINES = [
   "Je regarde.",
@@ -48,6 +49,33 @@ interface ExtractedLink {
   label?: string;
 }
 
+/** Lot A3 : nature du lien suivi depuis la conversation. */
+export interface AlmaLinkClick {
+  kind: "action" | "chip" | "inline_link" | "source" | "journal" | "carnet";
+  /** Motif calculé par le moteur (action principale) ou règle du journal. */
+  reason?: string;
+}
+
+/** Chemin mesuré : adresse interne sans paramètres ni ancre. */
+export function almaClickPath(path: string): string {
+  return path.split(/[?#]/)[0] || "/";
+}
+
+/**
+ * Lot A3 : événement alma_action_clicked. Le motif vaut celui du moteur pour
+ * le bouton principal, sinon la nature du lien.
+ */
+export function trackAlmaActionClick(path: string, click: AlmaLinkClick, surface: string) {
+  void trackEvent("alma_action_clicked", {
+    metadata: {
+      reason: click.reason || click.kind,
+      kind: click.kind,
+      path: almaClickPath(path),
+      surface,
+    },
+  });
+}
+
 export type AlmaMessageSegment =
   | { type: "text"; value: string }
   | { type: "link"; href: string; title: string };
@@ -71,10 +99,18 @@ function normalizeInternalPath(href: string): string | null {
   }
 }
 
+/**
+ * Lot A5 : pages de contenu public (article, ville, race, guide) citées comme
+ * sources ; elles gardent leur titre propre et une étiquette de nature.
+ */
+const CONTENT_SOURCE_PATH = /^\/(actualites|guides|races|house-sitting|departement|associations|auteurs)\/[^/]+/;
+
 function sourceLabel(path: string): string {
   if (path.includes("faq")) return "Dans la FAQ";
   if (path.includes("conseil")) return "Conseil";
-  return "Le journal";
+  // Lot A5 : la nature de la page vient de la carte (« Fiche d'une annonce »),
+  // plus de « Le journal » pour une annonce ou une page de ville.
+  return almaPageKindLabel(path) ?? "Le journal";
 }
 
 function readableSourceTitle(path: string): string {
@@ -94,7 +130,10 @@ function readableSourceTitle(path: string): string {
 
 function extractedLink(path: string): ExtractedLink {
   const basePath = path.split(/[?#]/)[0];
-  const menuLabel = SECTION_LABELS[basePath];
+  // Lot A5 : une source publique (FAQ, conseils, article, ville) reste une source.
+  const publicSource = basePath in PUBLIC_SOURCE_TITLES || CONTENT_SOURCE_PATH.test(basePath);
+  // Lot A2 : la rubrique exacte (/settings?section=spaces) d'abord.
+  const menuLabel = publicSource ? null : almaPageLabel(path) ?? SECTION_LABELS[basePath];
   return menuLabel
     ? { href: path, title: menuLabel, kind: "action" }
     : {
@@ -224,6 +263,8 @@ interface AlmaConversationProps {
   moodLine?: string | null;
   stageLabel?: string;
   stage?: "nouvelle" | "eveillee" | "complice" | "fidele";
+  /** Lot A7 : « Avec vous depuis le 3 septembre · Proche », lien vers le carnet. */
+  bondLine?: string | null;
   subject?: string;
   focusSignal?: number;
   starters?: string[];
@@ -256,6 +297,7 @@ export function AlmaConversation({
   moodLine,
   stageLabel,
   stage,
+  bondLine,
   subject,
   focusSignal,
   starters,
@@ -345,9 +387,12 @@ export function AlmaConversation({
   const submit = () => send(draft);
 
   // Suivre un lien ferme le panneau : la page d'arrivée reste utilisable.
-  const followLink = (href: string) => {
+  // Lot A3 : chaque lien suivi depuis la conversation est mesuré
+  // (alma_action_clicked), chemin sans paramètres.
+  const followLink = (href: string, click: AlmaLinkClick) => {
     const path = normalizeInternalPath(href);
     if (!path) return;
+    trackAlmaActionClick(path, click, surface);
     onOpenChange(false);
     navigate(path);
   };
@@ -383,9 +428,22 @@ export function AlmaConversation({
               <p className="font-heading text-[19px] leading-tight text-foreground">Alma</p>
               {/* Lot L4, transparence (règlement européen sur l'IA, article 50). */}
               <p className="text-[11px] text-muted-foreground">Compagne IA de Guardiens</p>
-              <p className="mt-1 text-[10.5px] font-bold uppercase text-terra [letter-spacing:.16em]">
-                {stageLabel ?? "Votre assistante"}
-              </p>
+              {bondLine ? (
+                // Lot A7 : le lien, calculé par le module partagé ; mène au carnet.
+                <button
+                  type="button"
+                  data-testid="alma-bond-line"
+                  onClick={() => followLink("/alma#carnet", { kind: "carnet" })}
+                  aria-label={`${bondLine}. Ouvrir notre carnet`}
+                  className="mt-1 text-left text-[11.5px] font-semibold text-terra underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {bondLine}
+                </button>
+              ) : (
+                <p className="mt-1 text-[10.5px] font-bold uppercase text-terra [letter-spacing:.16em]">
+                  {stageLabel ?? "Votre assistante"}
+                </p>
+              )}
               {moodLine && (
                 <p className="alma-header-mood mt-1 font-heading text-[13px] italic text-muted-foreground">
                   {moodLine}
@@ -425,7 +483,7 @@ export function AlmaConversation({
                   data-testid="alma-journal-action"
                   onClick={() => {
                     onJournalAction?.(entry);
-                    followLink(entry.action!.href);
+                    followLink(entry.action!.href, { kind: "journal", reason: entry.ruleKey });
                   }}
                   className="alma-action-link mt-3 inline-flex min-h-11 items-center gap-2 text-left text-[13px] font-bold text-pine focus-visible:ring-2 focus-visible:ring-ring"
                 >
@@ -466,7 +524,7 @@ export function AlmaConversation({
                             key={segIndex}
                             type="button"
                             data-testid="alma-inline-link"
-                            onClick={() => followLink(segment.href)}
+                            onClick={() => followLink(segment.href, { kind: "inline_link" })}
                             className="inline font-semibold text-pine underline underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           >
                             {segment.title}
@@ -478,7 +536,7 @@ export function AlmaConversation({
                       <button
                         key={`${message.id}-${link.href}`}
                         type="button"
-                        onClick={() => followLink(link.href)}
+                        onClick={() => followLink(link.href, { kind: "source" })}
                         className="alma-source-card notebook-card mt-3 block w-full bg-card p-4 text-left focus-visible:ring-2 focus-visible:ring-ring"
                       >
                         <span className="block text-[10.5px] font-bold uppercase text-terra [letter-spacing:.16em]">{link.label}</span>
@@ -492,7 +550,15 @@ export function AlmaConversation({
                       <Button
                         type="button"
                         data-testid="alma-message-action"
-                        onClick={() => (message.action!.path === "/contact" ? openAlmaHumanContact() : followLink(message.action!.path))}
+                        onClick={() => {
+                          const click: AlmaLinkClick = { kind: "action", reason: message.action!.reason };
+                          if (message.action!.path === "/contact") {
+                            trackAlmaActionClick("/contact", click, surface);
+                            openAlmaHumanContact();
+                          } else {
+                            followLink(message.action!.path, click);
+                          }
+                        }}
                         className="mt-3 h-11 max-w-full justify-start gap-2 whitespace-normal text-left text-[13px] font-bold"
                       >
                         <span>{message.action.label}</span><ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
@@ -516,7 +582,7 @@ export function AlmaConversation({
                             key={`${message.id}-${chip.label}`}
                             type="button"
                             variant="outline"
-                            onClick={() => (chip.path ? followLink(chip.path) : chip.prompt ? send(chip.prompt) : undefined)}
+                            onClick={() => (chip.path ? followLink(chip.path, { kind: "chip" }) : chip.prompt ? send(chip.prompt) : undefined)}
                             className="h-11 shrink-0 px-3 text-xs font-normal text-muted-foreground"
                           >
                             {chip.label}

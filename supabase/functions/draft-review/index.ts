@@ -22,19 +22,13 @@ function json(body: unknown, status = 200) {
   });
 }
 
-function buildFallback(params: {
-  audience: "owner" | "sitter";
-  otherFirstName?: string | null;
-  sitTitle?: string | null;
-  sitCity?: string | null;
-}): string {
-  const who = params.otherFirstName ? params.otherFirstName : (params.audience === "owner" ? "notre gardien" : "les propriétaires");
-  const ctxBit = params.sitCity ? ` à ${params.sitCity}` : "";
-  if (params.audience === "owner") {
-    return `Nous avons été très rassurés de confier notre foyer${ctxBit} à ${who}. La communication a été fluide, les consignes bien respectées, et nos animaux ont manifestement été bien accompagnés. Nous recommandons ce gardien à d'autres membres de la communauté.`;
-  }
-  return `L'échange avec ${who} s'est déroulé dans la confiance du début à la fin. Les consignes étaient claires, l'accueil chaleureux, et j'ai pu prendre soin de leur foyer${ctxBit} en toute sérénité. Une belle expérience à recommander.`;
-}
+/**
+ * Lot A1 (audit Alma du 14/10/2026) : aucun avis tout fait. Un avis est la
+ * parole du membre (CGU 9) : sans brouillon du modèle, la personne écrit avec
+ * ses mots, Alma ne recommande personne à sa place.
+ */
+const NO_DRAFT_MESSAGE =
+  "Alma n'a pas pu préparer de trame cette fois. Écrivez votre avis avec vos mots, vos notes restent enregistrées.";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS_HEADERS });
@@ -109,12 +103,6 @@ Deno.serve(async (req) => {
 
 
     const audience: "owner" | "sitter" = isOwner ? "owner" : "sitter";
-    const fallbackCtx = {
-      audience,
-      otherFirstName: (otherProfile as any)?.first_name ?? null,
-      sitTitle: (sit as any).title ?? null,
-      sitCity: (sit as any).city ?? null,
-    };
 
     const system = `Vous êtes Alma, narratrice IA de Guardiens.fr. Vous préparez un BROUILLON D'AVIS post-garde (100 à 180 mots) que la personne relira et ajustera. L'avis est TOUJOURS rédigé au vouvoiement (texte public de la communauté).
 
@@ -124,7 +112,7 @@ RÈGLE ABSOLUE : vous produisez TOUJOURS un avis exploitable. Vous ne refusez ja
 
 Contraintes :
 - Si des messages sont fournis : reprendre 1 anecdote factuelle vérifiable (photo envoyée, mot précis, moment de la garde).
-- Refléter les sous-notes (>=4 = point fort à citer, <=3 = ne pas mentionner, jamais négatif inventé).
+- Refléter fidèlement les sous-notes : >=4 = point fort à citer ; <=3 = point à mentionner sobrement, sans l'exagérer ni l'adoucir ; jamais un reproche inventé.
 - Aucune information personnelle sensible (adresse, code, tel).
 - Pas de signature.`;
 
@@ -169,8 +157,7 @@ Contraintes :
 
     if (!r.ok) {
       if (r.status === 402 || r.status === 429) return json({ error: r.error, code: r.code }, r.status);
-      const draft = buildFallback(fallbackCtx);
-      return json({ draft, warnings: ["Assistant IA momentanément indisponible, brouillon générique proposé."], fallback: true });
+      return json({ draft: null, error: NO_DRAFT_MESSAGE, fallback: true });
     }
 
     const parsed = extractToolArgs(r.data);
@@ -190,8 +177,7 @@ Contraintes :
         reason: "llm_refusal",
         extra: { sit_id, audience, raw_preview: draft.slice(0, 200) },
       });
-      const fb = buildFallback(fallbackCtx);
-      return json({ draft: fb, warnings: ["Brouillon générique proposé, personnalisez-le avant publication."], fallback: true });
+      return json({ draft: null, error: NO_DRAFT_MESSAGE, fallback: true });
     }
 
     return json({ draft, warnings });

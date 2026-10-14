@@ -74,6 +74,7 @@ import TrustStory from "@/components/profile/TrustStory";
 import ProfileRail from "@/components/profile/ProfileRail";
 import AffinityTeaserCard from "@/components/profile/AffinityTeaserCard";
 import AlmaWhisperCard from "@/components/profile/AlmaWhisperCard";
+import { profileSignupHref } from "@/lib/almaVisitorSearch";
 import CommunityPulseCard from "@/components/profile/CommunityPulseCard";
 import type { FooterLocalContext } from "@/components/layout/PublicFooter";
 import { useCommunityPulse } from "@/hooks/useCommunityPulse";
@@ -1714,7 +1715,17 @@ export default function PublicSitterProfile() {
         } else if (profile?.identity_verified) {
           almaPhrase = `L'identité de ${firstName} a été vérifiée à partir d'une pièce officielle.`;
         }
-        const almaNode = !isOwn ? <AlmaWhisperCard phrase={almaPhrase} /> : null;
+        // Lot A6 : le dock d'Alma n'est pas monté sur cette page. Visiteur :
+        // la carte mène à l'inscription propriétaire, retour sur ce profil.
+        // Membre : carte de lecture, sans bouton.
+        const almaNode = !isOwn ? (
+          <AlmaWhisperCard
+            phrase={almaPhrase}
+            surface="gardien"
+            signupHref={!isAuthenticated && !hasSession ? profileSignupHref("owner", redirectTo) : null}
+            actionLabel={`Créer mon compte pour écrire à ${firstName}`}
+          />
+        ) : null;
 
         // Savoir-faire
         const { groups: skillGroups, totalCount: skillsTotal } = groupSitterSkills({
@@ -2078,7 +2089,14 @@ export default function PublicSitterProfile() {
         } else if (profile?.identity_verified) {
           proprioAlmaPhrase = `L'identité de ${firstName} a été vérifiée à partir d'une pièce officielle.`;
         }
-        const proprioAlmaNode = !isOwn ? <AlmaWhisperCard phrase={proprioAlmaPhrase} /> : null;
+        const proprioAlmaNode = !isOwn ? (
+          <AlmaWhisperCard
+            phrase={proprioAlmaPhrase}
+            surface="proprio"
+            signupHref={!isAuthenticated && !hasSession ? profileSignupHref("sitter", redirectTo) : null}
+            actionLabel={`Créer mon compte pour écrire à ${firstName}`}
+          />
+        ) : null;
         // Pouls local : à partir de LOCAL_PULSE_MIN_SITTERS gardiens actifs
         // dans le département, le chiffre réel remplace le chiffre national.
         const pulseLocal =

@@ -14,6 +14,9 @@ import {
 import { shouldScheduleAutoDismiss } from "@/lib/alma/auto-dismiss";
 import { buildHistoryInsert, buildHistoryPatch } from "@/lib/alma/whisper-history";
 
+// Lot A3 : sendAlmaMessage appelle trackEvent ; jamais d'écriture réelle en test.
+vi.mock("@/lib/analytics", () => ({ trackEvent: vi.fn(async () => undefined) }));
+
 const promptSource = readFileSync(
   resolve(process.cwd(), "supabase/functions/_shared/alma-system-prompt.ts"),
   "utf8",

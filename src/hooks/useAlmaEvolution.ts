@@ -2,34 +2,39 @@
  * useAlmaEvolution, calcule le stade d'évolution de l'utilisateur courant
  * à partir de signaux RÉELS uniquement (jamais monétaire, jamais inventé).
  *
- * Les seuils sont centralisés dans ALMA_THRESHOLDS pour être ajustés facilement.
- * La vérification d'identité est un signal valorisé mais N'EST PLUS un plafond dur.
+ * Lot A7 (14/10/2026) : le calcul vit dans le module partagé
+ * supabase/functions/_shared/alma-bond.ts (même règle pour le site et pour
+ * alma-chat) ; ce hook ne lit que les lectures partagées du tableau de bord
+ * (aucune lecture de plus) et garde ses exports. Le lien complet, avec les
+ * moments datés, se lit par useAlmaBond.
  *
  * Stades :
- *  - "nouvelle" : par défaut, juste inscrit (profil sous le seuil).
- *  - "eveillee" : profil complété au-dessus du seuil (par défaut 40 %).
- *  - "complice" : profil complété ET au moins une action réelle
- *                 (annonce publiée, candidature, mission d'entraide).
- *  - "fidele"   : historique tangible, garde réalisée OU >= 3 missions d'entraide
- *                 OU >= 1 écusson OU statut gardien d'urgence.
+ *  - "nouvelle" : profil sous le seuil (40 %, doctrine Y3).
+ *  - "eveillee" : profil au-dessus du seuil, aucun geste encore.
+ *  - "complice" : profil prêt ET au moins un geste réel (annonce publiée,
+ *                 candidature, coup de main, garde confirmée).
+ *  - "fidele"   : garde réalisée OU 3 coups de main OU 1 écusson OU gardien d'urgence.
  */
 import { useQuery } from "@tanstack/react-query";
-import {
-  fetchMySitsIndex, fetchMyApplicationsIndex, fetchMySmallMissionsIndex,
-  fetchMyBadges, fetchMyEmergencyProfileId,
-} from "@/lib/dashboardShared";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  BOND_STAGE_LABEL,
+  BOND_STAGES,
+  BOND_THRESHOLDS,
+  computeAlmaBond,
+  loadCachedBondSignals,
+  type BondStage,
+} from "@/lib/alma/bond";
 
-
-export type AlmaStage = "nouvelle" | "eveillee" | "complice" | "fidele";
+export type AlmaStage = BondStage;
 
 /** Seuils centralisés, ajustables par produit sans toucher la logique. */
 export const ALMA_THRESHOLDS = {
-  // Seuil produit du stade Alma, sans rapport avec le seuil de candidature des gardiens.
-  profileCompletionMin: 60,
-  missionsForFidele: 3,
-  badgesForFidele: 1,
-  completedSitsForFidele: 1,
+  // Lot A7 : aligné sur la doctrine Y3 (MIN_COMPLETION_TO_APPLY, 40 %).
+  profileCompletionMin: BOND_THRESHOLDS.profileCompletionMin,
+  missionsForFidele: BOND_THRESHOLDS.helpForFidele,
+  badgesForFidele: BOND_THRESHOLDS.badgesForFidele,
+  completedSitsForFidele: BOND_THRESHOLDS.completedSitsForFidele,
 } as const;
 
 export interface AlmaEvolution {
@@ -53,12 +58,7 @@ export interface AlmaEvolution {
   };
 }
 
-const STAGE_LABEL: Record<AlmaStage, string> = {
-  nouvelle: "Nouvelle rencontre",
-  eveillee: "Éveillée",
-  complice: "Proche",
-  fidele: "Fidèle",
-};
+const STAGE_LABEL: Record<AlmaStage, string> = BOND_STAGE_LABEL;
 
 const STAGE_DESCRIPTION: Record<AlmaStage, string> = {
   nouvelle:
@@ -81,124 +81,38 @@ export function useAlmaEvolution() {
     staleTime: 5 * 60 * 1000,
     queryFn: async (): Promise<AlmaEvolution> => {
       const uid = user!.id;
-
-      // Lot P1b : lectures partagées avec les autres blocs du tableau de bord.
-      const [sitsIdx, appsIdx, missionsIdx, badgesIdx, emergencyId] = await Promise.all([
-        fetchMySitsIndex(uid).catch(() => []),
-        fetchMyApplicationsIndex(uid).catch(() => []),
-        fetchMySmallMissionsIndex(uid).catch(() => []),
-        fetchMyBadges(uid).catch(() => []),
-        fetchMyEmergencyProfileId(uid).catch(() => null),
-      ]);
-      const sitsRes = { data: sitsIdx };
-      const appsRes = { data: appsIdx.slice(0, 1) };
-      const missionsRes = {
-        data: missionsIdx.filter((m) => ["open", "in_progress", "completed"].includes(m.status)).slice(0, 1),
-      };
-      const badgesRes = { count: badgesIdx.length };
-      const emergencyRes = { data: emergencyId };
-      const draftRes = { data: sitsIdx.filter((x) => x.status === "draft").slice(0, 1) };
-
-      const sits = sitsRes.data || [];
-      const publishedSitsCount = sits.filter((s) =>
-        ["published", "confirmed", "completed"].includes(s.status),
-      ).length;
-      const completedSitsCount = sits.filter((s) => s.status === "completed").length;
-      const applicationsCount = appsRes.data?.length || 0;
-      const missionsCount = missionsRes.data?.length || 0;
-      const badgesCount = badgesRes.count || 0;
-      const isEmergencySitter = !!emergencyRes.data;
-      const hasDraftSit = (draftRes.data?.length || 0) > 0;
-
+      const role = activeRole === "owner" ? "owner" : "sitter";
       const profileCompletion = user!.profileCompletion || 0;
       const identityVerified = user!.identityVerified;
 
-      const T = ALMA_THRESHOLDS;
-      const profileOk = profileCompletion >= T.profileCompletionMin;
-
-      const hasEngagement =
-        publishedSitsCount > 0 ||
-        applicationsCount > 0 ||
-        missionsCount > 0 ||
-        completedSitsCount > 0 ||
-        badgesCount > 0;
-
-      const isFidele =
-        completedSitsCount >= T.completedSitsForFidele ||
-        missionsCount >= T.missionsForFidele ||
-        badgesCount >= T.badgesForFidele ||
-        isEmergencySitter;
-
-      // Identité valorisée mais NON bloquante : elle ne plafonne plus la progression.
-      let stage: AlmaStage;
-      if (!profileOk) stage = "nouvelle";
-      else if (isFidele) stage = "fidele";
-      else if (hasEngagement) stage = "complice";
-      else stage = "eveillee";
-
-      let nextMilestone: string | null = null;
-      let nextActionHref: string | null = null;
-      let nextActionLabel: string | null = null;
-
-      if (stage === "nouvelle") {
-        nextMilestone = `Compléter votre profil à ${T.profileCompletionMin} % pour ouvrir l'étape suivante.`;
-        nextActionHref = activeRole === "owner" ? "/owner-profile" : "/profile";
-        nextActionLabel = "Compléter mon profil";
-      } else if (stage === "eveillee") {
-        if (activeRole === "owner") {
-          nextMilestone = "Publier votre première annonce ou une petite mission pour devenir Proche.";
-          nextActionHref = "/sits/create";
-          nextActionLabel = "Publier une annonce";
-        } else {
-          nextMilestone = "Postuler à votre première garde pour devenir Proche.";
-
-          nextActionHref = "/annonces";
-          nextActionLabel = "Trouver une garde";
-        }
-      } else if (stage === "complice") {
-        if (activeRole === "sitter") {
-          nextMilestone =
-            "Réaliser une garde, cumuler 3 missions d'entraide ou recevoir un écusson pour devenir Fidèle.";
-          nextActionHref = "/annonces";
-          nextActionLabel = "Trouver une garde";
-        } else {
-          nextMilestone =
-            "Réaliser une garde avec un gardien ou publier une nouvelle annonce pour devenir Fidèle.";
-          nextActionHref = "/sits/create";
-          nextActionLabel = "Publier une annonce";
-        }
-      } else {
-        nextMilestone =
-          "Vous incarnez l'esprit Guardiens. Continuez à faire vivre le coin.";
-        nextActionHref = "/conseils";
-        nextActionLabel = "Explorer les conseils";
-      }
-
+      // Lot P1b : lectures partagées avec les autres blocs du tableau de bord.
+      const signals = await loadCachedBondSignals(uid, role, profileCompletion);
+      const bond = computeAlmaBond(signals);
 
       return {
-        stage,
-        stageLabel: STAGE_LABEL[stage],
-        stageDescription: STAGE_DESCRIPTION[stage],
-        nextMilestone,
-        nextActionHref,
-        nextActionLabel,
+        stage: bond.stage,
+        stageLabel: STAGE_LABEL[bond.stage],
+        stageDescription: STAGE_DESCRIPTION[bond.stage],
+        nextMilestone: bond.next?.milestone ?? null,
+        nextActionHref: bond.next?.href ?? null,
+        nextActionLabel: bond.next?.label ?? null,
         signals: {
           profileCompletion,
           identityVerified,
-          publishedSitsCount,
-          allSitsCount: sits.length,
-          applicationsCount,
-          missionsCount,
-          completedSitsCount,
-          badgesCount,
-          isEmergencySitter,
-          hasDraftSit,
+          publishedSitsCount: bond.counts.publishedSits,
+          allSitsCount: signals.ownSits.length,
+          applicationsCount: bond.counts.applications,
+          missionsCount: bond.counts.missionsPublished + bond.counts.helpGiven,
+          completedSitsCount: bond.counts.completedSits,
+          badgesCount: bond.counts.badges,
+          isEmergencySitter: Boolean(signals.isEmergencySitter),
+          hasDraftSit: signals.ownSits.some((s) => s.status === "draft"),
         },
       };
     },
   });
 }
 
-export const ALMA_STAGES: AlmaStage[] = ["nouvelle", "eveillee", "complice", "fidele"];
+export const ALMA_STAGES: AlmaStage[] = BOND_STAGES;
 export const ALMA_STAGE_LABEL = STAGE_LABEL;
 export const ALMA_STAGE_DESCRIPTION = STAGE_DESCRIPTION;

@@ -48,6 +48,10 @@ import { useAlmaFrequency, type AlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { useAlmaHidden } from "@/hooks/useAlmaHidden";
 import { useAlmaInstallSuggestion } from "@/hooks/usePwaInstall";
 import { useAlmaEvolution, type AlmaStage } from "@/hooks/useAlmaEvolution";
+import { useAlmaBond } from "@/hooks/useAlmaBond";
+import { useAlmaMoment } from "@/hooks/useAlmaMoment";
+import { bondHeaderLine, todayParis } from "@/lib/alma/bond";
+import { AlmaMomentBubble } from "./AlmaMomentBubble";
 import { profileNudgeAllowed } from "@/lib/alma/profileNudge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -247,6 +251,21 @@ function AlmaDockInner() {
   const { toast } = useToast();
 
   const [expanded, setExpanded] = useState(false);
+  // Lot A7 : le lien avec Alma (en-tête et bulle de moment). Lu hors du
+  // tableau de bord ou panneau ouvert, pour garder le budget de /dashboard.
+  const pillHiddenHere = location.pathname === "/dashboard"
+    || (location.pathname === "/sits/create" && new URLSearchParams(location.search).get("express") === "1");
+  const compactHere = /^\/(recherche-gardiens|search|annonces(\/international)?)\/?$/.test(location.pathname);
+  const { bond } = useAlmaBond(expanded || !pillHiddenHere);
+  const bondLine = bondHeaderLine(bond, todayParis());
+  const moment = useAlmaMoment({
+    userId,
+    bond,
+    frequency,
+    frequencyLoading,
+    role: activeRole === "owner" ? "owner" : "sitter",
+    enabled: !expanded && !pillHiddenHere && !compactHere && !hidden && !hiddenLoading,
+  });
   // Vrai quand Alma s'ouvre d'elle-même : le panneau reste alors non bloquant
   // et ne prend pas le curseur de saisie.
   const [spontaneous, setSpontaneous] = useState(false);
@@ -322,6 +341,8 @@ function AlmaDockInner() {
         pathname: location.pathname,
         spontaneousAlreadyUsed: spontaneousUsedThisSession(),
         formFieldFocused: isFormFieldFocused(),
+        // Lot A2 : une relance d'usage s'annonce en aperçu, sans déplier le panneau.
+        whisperType: currentWhisper.type,
       });
       if (arrival === "open_spontaneous") {
         markSpontaneousUsed();
@@ -461,7 +482,8 @@ function AlmaDockInner() {
   const handleAction = (onClick: () => void, actionId: string) => {
     if (!whisper) return;
     trackEvent("alma_whisper_action_clicked", {
-      metadata: { whisper_type: whisper.type, action_id: actionId },
+      // Lot A2 : le fait d'origine d'une relance, pour mesurer chaque bouton.
+      metadata: { whisper_type: whisper.type, action_id: actionId, fact_id: (whisper.metadata as any)?.fact_id ?? null },
     });
     onClick();
     doDismiss("action_clicked", actionId);
@@ -514,7 +536,7 @@ function AlmaDockInner() {
   const rawProposition = !whisper && !isSilent ? buildProposition(evolution, activeRole) : null;
   // Ne jamais proposer une action qui pointe vers la page courante.
   const proposition = rawProposition && rawProposition.ctaTo.split(/[?#]/)[0] === location.pathname ? null : rawProposition;
-  const stage = evolution?.stage ?? null;
+  const stage = bond?.stage ?? evolution?.stage ?? null;
   const avatarSize = stage
     ? ({ nouvelle: 40, eveillee: 44, complice: 46, fidele: 48 } as const)[stage]
     : 40;
@@ -821,6 +843,7 @@ function AlmaDockInner() {
           moodLine={isSilent || whisper ? null : almaMood.line}
           stageLabel={stage ? STAGE_SHORT_LABEL[stage] : undefined}
           stage={stage ?? undefined}
+          bondLine={bondLine}
           subject={entryContext?.subject}
           focusSignal={focusSignal}
           starters={starters}
@@ -834,6 +857,19 @@ function AlmaDockInner() {
           journal={journal}
           onJournalAction={onJournalAction}
           onJournalReply={onJournalReply}
+        />
+      )}
+
+      {/* Lot A7 : moment réel, aperçu seulement, jamais d'ouverture du panneau. */}
+      {!hideCollapsedPill && !compactDock && !expanded && !peekId && !isSilent && moment.celebration && (
+        <AlmaMomentBubble
+          celebration={moment.celebration}
+          onDismiss={moment.dismiss}
+          onAction={() => {
+            const href = moment.celebration!.action.href;
+            moment.act();
+            navigate(href);
+          }}
         />
       )}
 
@@ -1004,10 +1040,10 @@ function AlmaDockInner() {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="min-h-11 cursor-pointer"
-              onSelect={() => navigate("/alma")}
+              onSelect={() => navigate("/alma#carnet")}
             >
               <Route className="mr-2 h-4 w-4" aria-hidden />
-              <span>Mon parcours</span>
+              <span>Notre carnet</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               className="min-h-11 cursor-pointer"

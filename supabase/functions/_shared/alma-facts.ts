@@ -6,6 +6,10 @@
  * sur ce bloc. Pur : aucune requête ici, voir `loadVerifiedFacts`.
  */
 
+import { summarizeAwaiting } from "./applications-awaiting.ts";
+
+export { summarizeAwaiting };
+
 export interface RawSit {
   id: string;
   title: string | null;
@@ -13,6 +17,9 @@ export interface RawSit {
   city: string | null;
   start_date: string | null;
   end_date: string | null;
+  /** Lot A7 : dates lues pour le lien avec Alma. */
+  published_at?: string | null;
+  created_at?: string | null;
 }
 
 export interface RawSentApplication {
@@ -23,6 +30,8 @@ export interface RawSentApplication {
 }
 
 export interface RawReceivedApplication {
+  /** Lot A2 : identifiant, pour désigner la plus ancienne en attente. */
+  id?: string;
   sit_id: string;
   status: string;
   viewed_at: string | null;
@@ -35,6 +44,7 @@ export interface RawMission {
   status: string;
   mission_type: string;
   category: string | null;
+  created_at?: string | null;
 }
 
 export interface VerifiedFactsInput {
@@ -62,11 +72,47 @@ export interface VerifiedFacts {
   candidatures_envoyees_detail: Array<{ sit_id: string; statut: string; titre: string | null; ville: string | null; debut: string | null; envoyee_le: string }>;
   candidatures_recues: Record<string, number>;
   candidatures_recues_non_ouvertes: number;
+  /**
+   * Lot A2 (règle X3a) : candidatures reçues qui attendent une décision
+   * (pending, viewed, discussing) sur une annonce encore ouverte, et
+   * l'annonce de la plus ancienne.
+   */
+  candidatures_en_attente: CandidaturesEnAttente;
   annonces_publiees: Array<{ sit_id: string; titre: string | null; ville: string | null; debut: string | null }>;
   brouillons: Array<{ sit_id: string; titre: string | null; debut?: string | null }>;
   missions_publiees: Array<{ id: string; titre: string | null; type: string; statut: string }>;
   /** Plus ancienne candidature envoyée encore sans réponse, en jours. */
   candidature_sans_reponse_jours: number | null;
+}
+
+export interface CandidaturesEnAttente {
+  nombre: number;
+  nouvelles: number;
+  plus_ancienne_annonce: string | null;
+  plus_ancienne_jours: number | null;
+}
+
+export const NO_AWAITING: CandidaturesEnAttente = { nombre: 0, nouvelles: 0, plus_ancienne_annonce: null, plus_ancienne_jours: null };
+
+/** Lot A2 : résumé X3a des candidatures reçues, à partir des annonces du membre. */
+export function awaitingFromReceived(
+  received: RawReceivedApplication[],
+  ownSits: Array<{ id: string; status: string }>,
+  today: string,
+): CandidaturesEnAttente {
+  const statusById: Record<string, string> = {};
+  for (const s of ownSits) statusById[s.id] = s.status;
+  const summary = summarizeAwaiting(
+    received.map((a, i) => ({ id: a.id ?? `${a.sit_id}:${i}`, sit_id: a.sit_id, status: a.status, created_at: a.created_at })),
+    statusById,
+    new Date(`${today}T12:00:00Z`),
+  );
+  return {
+    nombre: summary.count,
+    nouvelles: summary.fresh,
+    plus_ancienne_annonce: summary.oldest?.sitId ?? null,
+    plus_ancienne_jours: summary.oldest ? summary.oldest.days : null,
+  };
 }
 
 const CONFIRMED_SIT = new Set(["confirmed", "in_progress"]);
@@ -117,6 +163,7 @@ export function buildVerifiedFacts(input: VerifiedFactsInput): VerifiedFacts {
     })),
     candidatures_recues: countBy(input.received, (a) => a.status),
     candidatures_recues_non_ouvertes: input.received.filter((a) => a.viewed_at === null && a.status === "pending").length,
+    candidatures_en_attente: awaitingFromReceived(input.received, input.ownSits, today),
     annonces_publiees: input.ownSits
       .filter((s) => s.status === "published")
       .map((s) => ({ sit_id: s.id, titre: s.title, ville: s.city, debut: s.start_date })),
@@ -177,25 +224,38 @@ export function moodTruthFromFacts(facts: VerifiedFacts, today: string): MoodTru
   return {
     ownerConfirmedSoon: facts.gardes_confirmees.some((c) => c.side === "proprietaire" && inWindow(c)),
     sitterConfirmedSoon: facts.gardes_confirmees.some((c) => c.side === "gardien" && inWindow(c)),
-    receivedPending: (facts.candidatures_recues.pending ?? 0) > 0,
+    // Lot A2 : pending, viewed et discussing sur annonce ouverte (règle X3a).
+    receivedPending: (facts.candidatures_en_attente?.nombre ?? 0) > 0,
   };
 }
 
-/** Chargement serveur, les deux côtés toujours. */
+/** Lot A7 : lignes brutes lues par loadVerifiedFacts, reprises pour le lien avec Alma. */
+export interface VerifiedFactsRaw {
+  ownSits: RawSit[];
+  sent: RawSentApplication[];
+  missions: RawMission[];
+}
+
+/** Chargement serveur, les deux côtés toujours. `raw` reçoit les lignes lues (lot A7), sans lecture de plus. */
 // deno-lint-ignore no-explicit-any
-export async function loadVerifiedFacts(client: any, userId: string, role: VerifiedFactsInput["role"], today: string): Promise<VerifiedFacts> {
+export async function loadVerifiedFacts(client: any, userId: string, role: VerifiedFactsInput["role"], today: string, raw?: VerifiedFactsRaw): Promise<VerifiedFacts> {
   const [ownRes, sentRes, missRes] = await Promise.all([
-    client.from("sits").select("id, title, status, city, start_date, end_date").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
+    client.from("sits").select("id, title, status, city, start_date, end_date, published_at, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
     client.from("applications").select("sit_id, status, created_at, sits(id, title, status, city, start_date, end_date)").eq("sitter_id", userId).order("created_at", { ascending: false }).limit(20),
-    client.from("small_missions").select("id, title, status, mission_type, category").eq("user_id", userId).order("created_at", { ascending: false }).limit(10),
+    client.from("small_missions").select("id, title, status, mission_type, category, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(10),
   ]);
   const ownSits = (ownRes?.data ?? []) as RawSit[];
   let received: RawReceivedApplication[] = [];
   if (ownSits.length > 0) {
-    const r = await client.from("applications").select("sit_id, status, viewed_at, created_at").in("sit_id", ownSits.map((s) => s.id)).limit(100);
+    const r = await client.from("applications").select("id, sit_id, status, viewed_at, created_at").in("sit_id", ownSits.map((s) => s.id)).limit(100);
     received = (r?.data ?? []) as RawReceivedApplication[];
   }
   // deno-lint-ignore no-explicit-any
   const sent = ((sentRes?.data ?? []) as any[]).map((a) => ({ sit_id: a.sit_id, status: a.status, created_at: a.created_at, sit: a.sits ?? null }));
+  if (raw) {
+    raw.ownSits = ownSits;
+    raw.sent = sent;
+    raw.missions = (missRes?.data ?? []) as RawMission[];
+  }
   return buildVerifiedFacts({ role, ownSits, received, sent, missions: (missRes?.data ?? []) as RawMission[], today });
 }

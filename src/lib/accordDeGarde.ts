@@ -109,7 +109,16 @@ export interface BuildAccordInput {
 export const ACCORD_HOUSE_GUIDE_COLUMNS =
   "vet_name, vet_phone, vet_address, neighbor_name, neighbor_phone, emergency_contact_name, emergency_contact_phone, forbidden_zones";
 
-const clean = (v: string | null | undefined): string => (typeof v === "string" ? v.trim() : "");
+/**
+ * Lot A1 (audit Alma du 14/10/2026) : une trame d'Alma laissée telle quelle
+ * (« {nom du vétérinaire} ») ne passe jamais dans l'accord, le champ reste vide.
+ */
+export const UNFILLED_PLACEHOLDER = /\{[^{}\n]{2,80}\}/;
+
+const clean = (v: string | null | undefined): string => {
+  const t = typeof v === "string" ? v.trim() : "";
+  return UNFILLED_PLACEHOLDER.test(t) ? "" : t;
+};
 
 /** Assemble les éléments renseignés, séparés par « · » (aucun séparateur orphelin). */
 export function joinFilled(parts: Array<string | null | undefined>): string {

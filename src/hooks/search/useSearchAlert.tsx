@@ -17,13 +17,19 @@ interface Params {
   zoneMode?: ZoneMode;
   /** Clés qui doivent réinitialiser l'état "alerte créée" (ex: city, radius). */
   resetKeys: unknown[];
+  /**
+   * Lot A6 : adresse d'inscription d'un visiteur. Renseignée, aucun appel
+   * d'alerte n'est fait (fonctions refusées à anon) : le visiteur part vers
+   * l'inscription, sans toast d'erreur.
+   */
+  visitorSignupUrl?: string | null;
 }
 
 /**
  * Encapsule la création d'alerte depuis la recherche
  * (state + appel RPC + toasts d'erreur, snap rayon, fallback INVALID_RADIUS).
  */
-export function useSearchAlert({ city, cityPostalCode, userPostalCode, radius, setRadius, zoneMode = "radius", resetKeys }: Params) {
+export function useSearchAlert({ city, cityPostalCode, userPostalCode, radius, setRadius, zoneMode = "radius", resetKeys, visitorSignupUrl = null }: Params) {
   const [alertCreated, setAlertCreated] = useState(false);
   const [isCreatingAlert, setIsCreatingAlert] = useState(false);
   const { toast } = useToast();
@@ -127,6 +133,10 @@ export function useSearchAlert({ city, cityPostalCode, userPostalCode, radius, s
   };
 
   const handleCreateAlert = async () => {
+    if (visitorSignupUrl) {
+      navigate(visitorSignupUrl);
+      return;
+    }
     if (alertCreated || isCreatingAlert) return;
     setIsCreatingAlert(true);
 

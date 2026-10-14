@@ -65,7 +65,9 @@ const base = (over: Partial<NextActionInput>): NextActionInput => ({
 describe("J2-A, base de connaissance", () => {
   const routes = appRoutes();
   const all = new Set(routes.map((r) => r.path));
-  const described = new Set(ALMA_SITE_KNOWLEDGE.flatMap((e) => [e.path, ...(e.aliases ?? [])]));
+  // Lot A2 : une entrée peut viser une rubrique (/settings?section=spaces) ;
+  // la route comparée à App.tsx est le chemin sans requête.
+  const described = new Set(ALMA_SITE_KNOWLEDGE.flatMap((e) => [e.path, ...(e.aliases ?? [])]).map((p) => p.split("?")[0]));
 
   it("chaque chemin décrit existe dans App.tsx", () => {
     expect([...described].filter((p) => !all.has(p))).toEqual([]);
@@ -90,12 +92,14 @@ describe("J2-A, base de connaissance", () => {
   });
 
   it("textes conformes : sans tiret long, sans voisin, sans gratuit, sans garde d'enfants", () => {
-    const text = JSON.stringify(ALMA_SITE_KNOWLEDGE);
+    // Lot A5 : « Guardiens est gratuit », seule forme permise (décision du 14/10/2026).
+    const text = JSON.stringify(ALMA_SITE_KNOWLEDGE).replace(/Guardiens est gratuit/g, "");
     expect(text).not.toMatch(/[\u2014\u2013]/);
     expect(text).not.toMatch(/voisin/i);
     expect(text).not.toMatch(/gratuit/i);
     expect(text).not.toMatch(/garde d'enfant/i);
-    expect(text).toMatch(/échecs/);
+    // Lot A5 : exemples alignés sur les tuiles de la page Entraide.
+    expect(text).toMatch(/arroser le potager/);
     expect(text).toMatch(/l'échange se fait en temps et en savoir-faire/);
   });
 
@@ -192,7 +196,7 @@ describe("J2-A, moteur de prochaine action", () => {
       accountRole: "both", activeRole: "sitter", helpIntent: true, largeAnimals: true, completion: 20,
       question: "je ne pose pas ma candidature je cherche au contraire de l'aide ! j'ai 15 chevaux et poneys",
     }));
-    expect(r.action?.path).toBe(`/petites-missions/creer?titre=${encodeURIComponent("Un coup de main pour mes chevaux et poneys")}`);
+    expect(r.action?.path).toBe(`/petites-missions/creer?titre=${encodeURIComponent("Un coup de main ponctuel pour mes chevaux et poneys")}`);
     expect(r.chips.some((c) => c.path?.startsWith("/sits/create"))).toBe(true);
     expect([r.action, ...r.chips].some((c) => c?.path?.includes("profile"))).toBe(false);
   });
@@ -205,16 +209,23 @@ describe("J2-A, moteur de prochaine action", () => {
       sent: [{ sit_id: "a", status: "pending", created_at: `${TODAY}T09:00:00Z`, sit: null }],
     });
     const r = computeNextAction(base({ facts, accountRole: "both", activeRole: "owner" }));
-    expect(r.action).toMatchObject({ path: "/sits", reason: "candidatures_non_ouvertes" });
+    // Lot A2 : le lien mène aux candidatures de l'annonce de la plus ancienne
+    // en attente (règle X3a), et non plus à la liste /sits.
+    expect(r.action).toMatchObject({ path: "/sits/s1#candidatures", reason: "candidatures_en_attente" });
   });
 
-  it("Jacqueline en Bretagne (propriétaire, 56) : répondre à la demande d'entraide proche, sans score", () => {
+  // Lot A2 : un propriétaire sans annonce ni brouillon reçoit d'abord la
+  // publication de sa garde (priorité : plus d'annonces publiées) ; la
+  // demande d'entraide proche reste proposée, en pastille.
+  it("Jacqueline en Bretagne (propriétaire, 56, sans annonce) : publier sa garde, l'entraide proche en pastille, sans score", () => {
     const r = computeNextAction(base({
       accountRole: "owner", activeRole: "owner", completion: 55,
       inventory: { ...emptyInventory({ postal_code: "56000" }), demandes_entraide: [{ titre: "Partie de Scrabble", ville: "Vannes", lien: "/petites-missions/m1", id: "m1" }] },
     }));
-    expect(r.action).toMatchObject({ path: "/petites-missions/m1", reason: "entraide_proche" });
-    expect(r.action?.label).toContain("Partie de Scrabble");
+    expect(r.action).toMatchObject({ reason: "intention_garde" });
+    expect(r.action?.path.startsWith("/sits/create")).toBe(true);
+    expect(r.chips.some((c) => c.path === "/petites-missions/m1" && c.label.includes("Partie de Scrabble"))).toBe(true);
+    expect([r.action, ...r.chips].some((c) => c?.path?.includes("profile"))).toBe(false);
   });
 
   it("gardien sans candidature, garde proche : la nommer et y postuler", () => {
@@ -331,9 +342,11 @@ describe("J2-A, rétrocompatibilité de la réponse", () => {
 
   it("le serveur garde answer et remaining, ajoute action et chips seulement s'ils existent", () => {
     const src = read("supabase/functions/alma-chat/index.ts");
-    expect(src).toContain("answer,\n      remaining:");
-    expect(src).toContain("...(action ? { action: { label: action.label, path: action.path } } : {})");
-    expect(src).toContain("...(chips.length ? { chips } : {})");
+    // Lot A4 : remaining vient du tour réservé avant l'appel au modèle.
+    expect(src).toContain("answer,\n      remaining,");
+    // Lot A3 : chemins marqués via=alma et motif transmis au moment de répondre.
+    expect(src).toContain("...(action ? { action: almaResponseAction(action) } : {})");
+    expect(src).toContain("...(chips.length ? { chips: almaResponseChips(chips) } : {})");
   });
 
   it("amorces : version du rôle", () => {
@@ -347,7 +360,9 @@ describe("J2-C, relecture des descriptions", () => {
   const byKey = (k: string) => ALMA_SITE_KNOWLEDGE.find((e) => e.key === k)!;
   it("parrainage et abonnement sans prix ni bascule tarifaire", () => {
     expect(byKey("parrainage").purpose).toBe("Lien personnel pour inviter des proches et des gens du coin à rejoindre Guardiens.");
-    expect(byKey("abonnement").purpose).toBe("État de l'accès gardien du compte.");
+    // Lot A5 : entrée réécrite selon la doctrine Y3, page Mon accès.
+    expect(byKey("abonnement").purpose).toMatch(/^Guardiens est gratuit, pour tous les membres/);
+    expect(byKey("abonnement").label).toBe("Mon accès");
   });
   it("identité affirmative", () => {
     expect(byKey("identite").purpose).toBe("Réglages du compte, préférences d'email et vérification d'identité, qui ajoute l'écusson Identité vérifiée sur le profil.");
@@ -362,7 +377,7 @@ describe("J2-C, relecture des descriptions", () => {
   });
   it("aucune formulation proscrite dans descriptions et amorces", () => {
     for (const e of ALMA_SITE_KNOWLEDGE) {
-      const t = `${e.purpose} ${e.opener ?? ""}`;
+      const t = `${e.purpose} ${e.opener ?? ""}`.replace(/Guardiens est gratuit/g, "");
       expect(t, e.key).not.toMatch(/gratuit|voisin|enfant|payant|\u2014|\u2013/i);
       expect(t, e.key).not.toMatch(/\b(ne|n')\s?\S+\s(pas|plus|jamais)\b|\baucune?\b/i);
     }

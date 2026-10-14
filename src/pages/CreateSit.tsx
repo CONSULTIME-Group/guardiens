@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, type MouseEvent as ReactMouse
 import ExpectationSuggestions from "@/components/sits/create/ExpectationSuggestions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { readFormPrefill } from "@/lib/formPrefill";
+import { readFormPrefill, readPublishVia } from "@/lib/formPrefill";
 import { supabase } from "@/integrations/supabase/client";
 import { petSpeciesLabelLower } from "@/lib/petLabels";
 import { useAuth } from "@/contexts/AuthContext";
@@ -441,6 +441,8 @@ const CreateSit = () => {
   const republishMode = (searchParams.get("mode") as "copy" | "adapt" | null) || null;
   const republishPrompt = searchParams.get("prompt") || "";
   const draftIdParam = searchParams.get("draftId") || searchParams.get("resume");
+  // Lot A3 : origine lue à l'ouverture, gardée même si l'adresse change ensuite.
+  const publishViaRef = useRef(readPublishVia(searchParams));
   // Parcours express (lot N5) : sans express=1, rien ne change.
   const expressParams = readExpressParams(searchParams);
   const expressActiveRef = useRef(false);
@@ -1778,6 +1780,7 @@ const CreateSit = () => {
             sit_id: sitId,
             duration_ms: Date.now() - funnelStartedAtRef.current,
             resumed_draft: !!draftIdParam,
+            via: publishViaRef.current ?? readPublishVia(searchParams),
           },
         });
       } catch {}

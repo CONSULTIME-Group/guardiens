@@ -126,7 +126,7 @@ export function buildConversationStagnantWhisper(params: {
     ...base("owner_conversation_stagnant"),
     audience: "owner",
     surface: "messages",
-    message: `Vous discutez avec ${params.firstName} depuis quelques jours. Voulez-vous fixer une rencontre ?`,
+    message: `Vous discutez avec ${params.firstName} depuis quelques jours. Si vous le souhaitez tous les deux, une rencontre avant la garde aide à faire connaissance.`,
     primaryAction: {
       label: "Proposer une rencontre",
       onClick: params.onProposeMeeting,

@@ -11,6 +11,8 @@
  * 5. Transparence : Alma est une IA et le dit, jamais de déni.
  */
 
+import { bondClaimsIn, type BondClaimKind } from "./alma-bond.ts";
+
 export const foldC = (s: string): string =>
   (s || "")
     .normalize("NFD")
@@ -269,6 +271,8 @@ export interface SpaceScopeInput {
   frenchNoneLabel: string | null;
   /** Mots du lieu demandé à ne jamais présenter comme disponibles (« Toscane »). */
   askedPlaceWords: string[];
+  /** Lot A5 : phrase de périmètre construite depuis les annonces publiées (scopeSentence). */
+  scopeSentence?: string;
   action: { label: string; path: string; reason: string };
   template: string;
 }
@@ -277,7 +281,7 @@ export function spaceScopeBrief(i: SpaceScopeInput): LockedBrief {
   const facts: LockedFact[] = [];
   if (i.foreignInCountry) {
     const country = foldC(i.foreignInCountry.replace(/^(en|au|aux)\s+/i, ""));
-    facts.push({ key: "france", text: "Guardiens propose des gardes en France, Polynésie française comprise.", present: (f) => /france/.test(f) });
+    facts.push({ key: "france", text: i.scopeSentence ?? "Guardiens propose des gardes en France.", present: (f) => /france/.test(f) });
     facts.push({ key: "pays_sans_garde", text: `Il n'y a aucune garde ${i.foreignInCountry} aujourd'hui.`, present: (f) => f.includes(country) && /\b(aucune?|pas de|n'y a pas)\b/.test(f) });
   }
   if (i.frenchNoneLabel) {
@@ -324,8 +328,9 @@ export function asksIfHuman(message: string): boolean {
 /** Lot L4b : trois gabarits, aucun n'ouvre sur « Je suis ». */
 export const AI_IDENTITY_TEMPLATES = [
   "Vous parlez à l'assistante IA de Guardiens, sous les traits d'Alma, la chienne de la maison. Pour échanger avec une personne, Jérémie et Elisa lisent les messages qu'on leur adresse. Dites-moi ce que vous cherchez, je regarde avec vous.",
-  "Bonne question, et la réponse est simple : une intelligence artificielle, celle de Guardiens, qui prend la voix d'Alma, notre chienne. Jérémie et Elisa, eux, lisent chaque message qu'on leur envoie. Sur quoi puis-je vous aider ?",
-  "C'est une IA qui vous répond, l'assistante de Guardiens, avec la voix d'Alma, la chienne de la maison. Derrière moi, Jérémie et Elisa lisent les messages qu'on leur écrit. Que puis-je regarder pour vous ?",
+  // Lot A4 : sans « Bonne question » ni formule de centre d'appel (audit du 14/10/2026).
+  "Une intelligence artificielle vous répond : celle de Guardiens, avec la voix d'Alma, notre chienne. Jérémie et Elisa reçoivent les messages qu'on leur adresse. Que cherchez-vous ?",
+  "C'est une IA qui vous répond, l'assistante de Guardiens, avec la voix d'Alma, la chienne de la maison. Derrière moi, Jérémie et Elisa lisent les messages qu'on leur écrit. Racontez-moi ce que vous cherchez.",
 ];
 export const AI_IDENTITY_TEMPLATE = AI_IDENTITY_TEMPLATES[0];
 
@@ -423,7 +428,7 @@ export const VOICE_EXAMPLES = [
   "EXEMPLES DE TON (lieux, dates et animaux entre crochets sont des places vides : ne reprends que ceux des faits de ce tour, jamais ceux des exemples) :",
   "1. Fiche d'annonce avec un yorkshire, question « Quel est le nom de votre village ? » : « La garde se trouve à [localisation de la fiche], du [dates de la fiche], avec un yorkshire de [âge] ans à la maison. À cet âge, un yorkshire apprécie surtout les siestes au chaud et les petits tours du jardin, je le comprends bien. Le nom exact du village, c'est le propriétaire qui vous le donnera : envoyez-lui votre candidature avec un message, il vous répondra. »",
   "2. Question « Comment supprimer la photo de ma maison ? » : « Les photos de votre logement se gèrent à un seul endroit, la Galerie de votre profil propriétaire. Chacune s'y remplace ou s'y supprime, et si c'était la couverture de votre annonce, la suivante prend sa place. Une maison bien montrée, c'est comme une porte entrouverte : on a envie d'y passer la truffe. »",
-  "3. Question « Je cherche une garde en Toscane » depuis l'espace propriétaire : « Il n'y a aucune garde en Italie aujourd'hui : Guardiens propose des gardes en France, Polynésie française comprise. Vous êtes dans votre espace propriétaire, qui montre vos propres annonces ; les gardes des autres membres vous attendent dans votre espace gardien. Côté France, il y a de belles balades à faire, j'en remue déjà la queue. »",
+  "3. Question « Je cherche une garde en Toscane » depuis l'espace propriétaire : « Il n'y a aucune garde en Italie aujourd'hui : Guardiens propose des gardes en France. Vous êtes dans votre espace propriétaire, qui montre vos propres annonces ; les gardes des autres membres vous attendent dans votre espace gardien. Côté France, il y a de belles balades à faire, j'en remue déjà la queue. »",
   "Dans ces exemples : une seule touche de chien, liée au sujet, jamais en ouverture ; prénom au plus une fois ; vouvoiement ; aucun tiret long.",
 ].join("\n");
 
@@ -493,6 +498,11 @@ export interface OutputGuardInput {
   hasPriorExchange: boolean;
   /** Question sur Alma elle-même : sa biographie (Lyon, Córdoba) peut être citée. */
   allowAlmaBio?: boolean;
+  /**
+   * Lot A7 : moments qu'Alma peut évoquer (bloc du lien et faits vérifiés).
+   * Absent : aucun contrôle ; présent : tout autre moment évoqué est un fantôme.
+   */
+  allowedClaims?: BondClaimKind[];
 }
 
 const stripAccents = (s: string) => (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -562,6 +572,9 @@ export function checkOutput(answer: string, g: OutputGuardInput): string[] {
       else if (!inText(g.contextText, k) && !(g.allowAlmaBio && ALMA_BIO.includes(k))) issues.add(`lieu_hors_faits:${k}`);
     }
     if (!g.hasPriorExchange && PHANTOM.test(f)) issues.add("echange_fantome");
+    if (g.allowedClaims) {
+      for (const k of bondClaimsIn(sentence)) if (!g.allowedClaims.includes(k)) issues.add(`moment_fantome:${k}`);
+    }
   }
   if (labelCopies(answer, g.actionLabels).length) issues.add("libelle_recopie");
   return [...issues];
@@ -569,7 +582,8 @@ export function checkOutput(answer: string, g: OutputGuardInput): string[] {
 
 /**
  * Réparation déterministe : verbe de bouton remis en minuscule, phrases qui
- * citent un lieu interdit ou un échange fantôme retirées.
+ * citent un lieu interdit, un échange fantôme ou un moment fantôme (lot A7)
+ * retirées.
  */
 export function repairOutput(answer: string, g: OutputGuardInput): string {
   let text = answer || "";
