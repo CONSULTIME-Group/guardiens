@@ -94,7 +94,7 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
         variant: "skills",
         eyebrow: "Dernière étape",
         title: "Déclarez au moins une compétence pour apparaître dans le feed d'entraide.",
-        description: "Bricolage, jardin, courses, garde d'enfants : ce que vous savez faire devient un atout pour les gens du coin.",
+        description: "Bricolage, jardin, courses, jeux de société : ce que vous savez faire devient un atout pour les gens du coin.",
         ctaLabel: "Ajouter mes compétences",
         ctaTo: "/profile?section=competences",
         urgency: "medium",
