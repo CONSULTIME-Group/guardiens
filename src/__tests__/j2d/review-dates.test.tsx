@@ -102,7 +102,7 @@ describe("ReviewsDisplay (onglet Avis d'une annonce)", () => {
     expect(from).not.toHaveBeenCalled();
     const periods = Array.from(container.querySelectorAll("[data-review-period]")).map((n) => n.textContent);
     const deposits = Array.from(container.querySelectorAll("[data-review-deposit]")).map((n) => n.textContent);
-    expect(periods).toEqual(["Garde du 3 au 10 août 2026 · ", "Garde du 1 au 8 mai 2026 · "]);
+    expect(periods).toEqual(["Garde du 3 au 10 août 2026 · ", "Garde du 1er au 8 mai 2026 · "]);
     expect(deposits).toEqual(["Avis du 12 août 2026", "Avis du 20 mai 2026"]);
   });
 });

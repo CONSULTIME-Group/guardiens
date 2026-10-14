@@ -19,6 +19,10 @@ export interface DatedReview {
   sit_end_date?: string | null;
 }
 
+/** Premier jour du mois écrit « 1er », comme en français courant. */
+const fmt = (d: Date, pattern: string): string =>
+  format(d, pattern, { locale: fr }).replace(/^1(?=\s|$)/, "1er");
+
 const parseDay = (value: string | null | undefined): Date | null => {
   if (!value) return null;
   const day = String(value).slice(0, 10);
@@ -34,14 +38,14 @@ export function reviewSitPeriodLabel(
   const s = parseDay(start);
   const e = parseDay(end) ?? s;
   if (!s || !e) return null;
-  const endLabel = format(e, "d MMMM yyyy", { locale: fr });
+  const endLabel = fmt(e, "d MMMM yyyy");
   if (s.getTime() === e.getTime()) return `Garde du ${endLabel}`;
   const startLabel =
     s.getFullYear() !== e.getFullYear()
-      ? format(s, "d MMMM yyyy", { locale: fr })
+      ? fmt(s, "d MMMM yyyy")
       : s.getMonth() !== e.getMonth()
-        ? format(s, "d MMMM", { locale: fr })
-        : format(s, "d", { locale: fr });
+        ? fmt(s, "d MMMM")
+        : fmt(s, "d");
   return `Garde du ${startLabel} au ${endLabel}`;
 }
 
@@ -49,7 +53,7 @@ export function reviewSitPeriodLabel(
 export function reviewDepositLabel(createdAt: string): string {
   const d = new Date(createdAt);
   if (Number.isNaN(d.getTime())) return "";
-  return `Avis du ${format(d, "d MMMM yyyy", { locale: fr })}`;
+  return `Avis du ${fmt(d, "d MMMM yyyy")}`;
 }
 
 /** Les deux mentions d'un avis : période de la garde (si l'avis porte sur une garde) et date de dépôt. */
