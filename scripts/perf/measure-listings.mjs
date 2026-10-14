@@ -6,7 +6,7 @@
  *
  * Mesure, pour chaque adresse, la première vraie carte d'annonce
  * ([data-testid="search-card-real"]), la photo de la première carte, ou le
- * titre d'une fiche (h1). Chaque adresse porte ?perf_lab=1 : la visite
+ * titre d'une fiche (#root h1, la fiche publique n'a pas de <main>). Chaque adresse porte ?perf_lab=1 : la visite
  * n'entre ni dans la mesure d'audience ni dans la mesure de vitesse
  * (src/lib/labTraffic.ts).
  *
@@ -69,7 +69,7 @@ async function measure(browser, url) {
     await page.goto(withLab(url), { waitUntil: "domcontentloaded", timeout: 90_000 });
     const isFiche = /\/(annonces|sits)\/[^/?]+/.test(new URL(url).pathname) && !/\/annonces\/international/.test(url);
     if (isFiche) {
-      out.content = await page.waitForSelector("main h1", { timeout: 90_000 }).then(() => Date.now() - t0).catch(() => null);
+      out.content = await page.waitForSelector("#root h1", { timeout: 90_000 }).then(() => Date.now() - t0).catch(() => null);
     } else {
       out.content = await page.waitForSelector('[data-testid="search-card-real"]', { timeout: 90_000 }).then(() => Date.now() - t0).catch(() => null);
       out.firstHref = await page.$eval('[data-testid="search-card-real"]', (el) => el.closest("a")?.getAttribute("href") ?? null).catch(() => null);
