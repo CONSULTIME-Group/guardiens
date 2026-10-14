@@ -421,9 +421,11 @@ export async function advanceGuide(
 
   // 3. Élargissement
   const round = Math.max(...requests.map((r) => r.round));
-  // Aucune réponse au dernier rayon : panne d'OpenStreetMap. Le passage ne
-  // compte pas, le guide garde son affichage et repasse plus tard.
-  if (!requests.some((r) => r.round === round && r.status === "done")) {
+  // Aucune réponse sur tout le guide : panne d'OpenStreetMap. Le passage ne
+  // compte pas, le guide garde son affichage et repasse plus tard. Un rayon
+  // élargi qui échoue seul (une catégorie, ex. vétérinaire à 80 km) garde les
+  // réponses des rayons précédents : le guide termine en partiel.
+  if (!requests.some((r) => r.status === "done")) {
     await supabase.from("guide_osm_requests").delete().eq("city_guide_id", guide.id);
     return { ...report, etape: "collecte", rayon: RADII_M[round], result: "overpass_indisponible" };
   }

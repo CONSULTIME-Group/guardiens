@@ -30,6 +30,8 @@ import {
   type OsmElement,
   type PlaceKind,
   displayName,
+  categoriesToWiden,
+  withinGuide,
   compactElements,
 } from "../../../supabase/functions/_shared/guide-places/source";
 
@@ -335,7 +337,8 @@ describe("GL2, textes et liens", () => {
   it("chaque catégorie a un rayon maximal et un minimum cohérents", () => {
     for (const c of ALL_CATEGORIES) {
       expect(CATEGORY_RULES[c].min).toBeLessThanOrEqual(CATEGORY_RULES[c].max);
-      expect(CATEGORY_RULES[c].maxRadius).toBeLessThanOrEqual(50000);
+      // 80 km pour un vétérinaire seulement (zone rurale), 50 km ailleurs.
+      expect(CATEGORY_RULES[c].maxRadius).toBeLessThanOrEqual(c === "vet" ? 80000 : 50000);
     }
   });
 });
@@ -506,5 +509,19 @@ describe("GL, noms lisibles (essai Marrakech du 14/10/2026)", () => {
     ];
     const out = compactElements(els as any, c);
     expect(out.map((e) => e.tags!.name)).toEqual(["Arset El Bilk", "Sentier de l'Ourika"]);
+  });
+});
+
+describe("GL, vétérinaire en zone rurale (Saint-Ludger, 14/10/2026)", () => {
+  it("80 km seulement pour une catégorie encore vide à 50 km", () => {
+    expect(categoriesToWiden({ vet: 0, pet_shop: 0, general_park: 4, walk_trail: 4, dog_park: 3, dog_friendly_cafe: 3, dog_friendly_restaurant: 3 }, 80000)).toEqual(["vet"]);
+    expect(categoriesToWiden({ vet: 1, pet_shop: 1, general_park: 4, walk_trail: 4, dog_park: 3, dog_friendly_cafe: 3, dog_friendly_restaurant: 3 }, 80000)).toEqual([]);
+    expect(categoriesToWiden({ vet: 1 }, 50000)).toContain("vet");
+  });
+
+  it("un vétérinaire à 75 km est gardé, une forêt à 75 km est écartée", () => {
+    expect(withinGuide("vet", 75000)).toBe(true);
+    expect(withinGuide("vet", 83000)).toBe(false);
+    expect(withinGuide("general_park", 75000)).toBe(false);
   });
 });

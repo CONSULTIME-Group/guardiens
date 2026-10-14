@@ -58,8 +58,15 @@ export interface GuideCenter {
   region: string | null;
 }
 
-/** Rayons de recherche successifs, en mètres. */
-export const RADII_M = [5000, 15000, 30000, 50000] as const;
+/**
+ * Rayons de recherche successifs, en mètres. Le dernier (80 km) ne sert qu'aux
+ * catégories encore vides à 50 km (voir `categoriesToWiden`) : essai à blanc de
+ * Saint-Ludger (Québec) du 14/10/2026, le vétérinaire le plus proche connu
+ * d'OpenStreetMap est à 52 km (décision de Jérémie du 14/10/2026).
+ */
+export const RADII_M = [5000, 15000, 30000, 50000, 80000] as const;
+/** Au-delà de ce rayon, seules les catégories sans aucun lieu sont cherchées. */
+export const NEAR_RADIUS_M = 50000;
 
 /**
  * Règles par catégorie :
@@ -71,7 +78,7 @@ export const CATEGORY_RULES: Record<GuideCategory, { min: number; max: number; m
   general_park: { min: 3, max: 4, maxRadius: 30000 },
   walk_trail: { min: 2, max: 4, maxRadius: 30000 },
   dog_park: { min: 1, max: 3, maxRadius: 15000 },
-  vet: { min: 2, max: 4, maxRadius: 50000 },
+  vet: { min: 2, max: 4, maxRadius: 80000 },
   pet_shop: { min: 1, max: 3, maxRadius: 50000 },
   dog_friendly_cafe: { min: 1, max: 3, maxRadius: 15000 },
   dog_friendly_restaurant: { min: 1, max: 3, maxRadius: 15000 },
@@ -305,9 +312,12 @@ export function categoriesToWiden(
   counts: Partial<Record<GuideCategory, number>>,
   nextRadiusM: number,
 ): GuideCategory[] {
-  return ALL_CATEGORIES.filter(
-    (c) => (counts[c] ?? 0) < CATEGORY_RULES[c].min && nextRadiusM <= CATEGORY_RULES[c].maxRadius,
-  );
+  return ALL_CATEGORIES.filter((c) => {
+    const n = counts[c] ?? 0;
+    if (n >= CATEGORY_RULES[c].min || nextRadiusM > CATEGORY_RULES[c].maxRadius) return false;
+    // Zone rurale : au-delà de 50 km, seulement si la catégorie est encore vide.
+    return nextRadiusM <= NEAR_RADIUS_M || n === 0;
+  });
 }
 
 /** « 800 m », « 3,2 km », « 18 km ». */
