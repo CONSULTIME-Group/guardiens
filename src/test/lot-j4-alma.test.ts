@@ -50,7 +50,8 @@ describe("J4, point 1 : aucun vide à la place d'un chemin", () => {
 describe("J4, point 2 : libellés des pages", () => {
   const app = read("src/App.tsx");
   it.each(Object.entries(ALMA_PAGE_LABELS))("%s existe et porte un nom lisible", (path, label) => {
-    expect(app).toContain(`path="${path}"`);
+    // Lot A2 : une rubrique (/settings?section=spaces) se vérifie par sa route.
+    expect(app).toContain(`path="${path.split("?")[0]}"`);
     expect(label.startsWith("/")).toBe(false);
   });
   it("créer une mission, c'est demander ; la page Entraide se nomme par son lieu (lot E5)", () => {

@@ -18,7 +18,7 @@ import {
   subscribeAlmaConversation,
 } from "@/lib/alma/conversation-store";
 import { ALMA_HUMAN_CONTACT_LABEL, AlmaHumanContactForm } from "./AlmaHumanContact";
-import { ALMA_PAGE_LABELS } from "../../../../supabase/functions/_shared/alma-page-labels";
+import { ALMA_PAGE_LABELS, almaPageLabel } from "../../../../supabase/functions/_shared/alma-page-labels";
 
 export const ALMA_THINKING_LINES = [
   "Je regarde.",
@@ -94,7 +94,8 @@ function readableSourceTitle(path: string): string {
 
 function extractedLink(path: string): ExtractedLink {
   const basePath = path.split(/[?#]/)[0];
-  const menuLabel = SECTION_LABELS[basePath];
+  // Lot A2 : la rubrique exacte (/settings?section=spaces) d'abord.
+  const menuLabel = almaPageLabel(path) ?? SECTION_LABELS[basePath];
   return menuLabel
     ? { href: path, title: menuLabel, kind: "action" }
     : {

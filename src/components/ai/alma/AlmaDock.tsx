@@ -322,6 +322,8 @@ function AlmaDockInner() {
         pathname: location.pathname,
         spontaneousAlreadyUsed: spontaneousUsedThisSession(),
         formFieldFocused: isFormFieldFocused(),
+        // Lot A2 : une relance d'usage s'annonce en aperçu, sans déplier le panneau.
+        whisperType: currentWhisper.type,
       });
       if (arrival === "open_spontaneous") {
         markSpontaneousUsed();
@@ -461,7 +463,8 @@ function AlmaDockInner() {
   const handleAction = (onClick: () => void, actionId: string) => {
     if (!whisper) return;
     trackEvent("alma_whisper_action_clicked", {
-      metadata: { whisper_type: whisper.type, action_id: actionId },
+      // Lot A2 : le fait d'origine d'une relance, pour mesurer chaque bouton.
+      metadata: { whisper_type: whisper.type, action_id: actionId, fact_id: (whisper.metadata as any)?.fact_id ?? null },
     });
     onClick();
     doDismiss("action_clicked", actionId);

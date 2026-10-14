@@ -96,8 +96,12 @@ export function useAlmaCulturalFact({
                   id: fact.id,
                   type: "usage_nudge",
                   content: fact.content,
-                  cta_label: null,
-                  cta_action: null,
+                  // Lot A2 (audit Alma du 14/10/2026) : le bouton vient de la
+                  // base (alma_cultural_facts.cta_label, cta_action) ; mis à
+                  // null, 794 relances sont restées sans bouton. Le clic est
+                  // mesuré par alma_whisper_action_clicked (AlmaDock).
+                  cta_label: fact.cta_label ?? null,
+                  cta_action: fact.cta_action ?? null,
                 },
                 audience,
                 surface,

@@ -24,7 +24,8 @@ export interface ReplayVerdict {
 }
 
 const KNOWN_ROUTES: string[] = [
-  ...ALMA_SITE_KNOWLEDGE.flatMap((e) => [e.path, ...(e.aliases ?? [])]),
+  // Lot A2 : chemin sans requête (une entrée peut viser /settings?section=spaces).
+  ...ALMA_SITE_KNOWLEDGE.flatMap((e) => [e.path, ...(e.aliases ?? [])]).map((p) => p.split("?")[0]),
   ...ALMA_KNOWLEDGE_EXCLUDED_ROUTES,
   "/contact",
 ];

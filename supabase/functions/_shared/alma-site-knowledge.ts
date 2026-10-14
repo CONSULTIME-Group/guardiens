@@ -291,6 +291,39 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     triggers: ["notification", "alerte recue"],
     opener: "Vos notifications sont sur /notifications.",
   },
+  // Lot A2 (audit Alma du 14/10/2026) : réponses fausses du 09/10 (« retirer
+  // un espace est impossible ») et du 12/10 (alertes mail placées dans Mon
+  // secteur), savoir-faire absent de la carte. Chemins vérifiés dans
+  // src/pages/Settings.tsx (sections spaces, alerts, notifications) et
+  // src/pages/SitterProfile.tsx, OwnerProfile.tsx (section savoir-faire).
+  {
+    key: "mes_espaces",
+    path: "/settings?section=spaces",
+    label: "Mes espaces",
+    purpose: "Dans les réglages, rubrique Mes espaces : chaque membre ajoute ou retire son espace gardien ou son espace propriétaire, et garde son compte et son historique. Un espace se retire une fois terminées ou retirées ses annonces, gardes et candidatures en cours ; au moins un espace reste actif.",
+    audience: "all",
+    triggers: ["mes espaces", "espace gardien", "espace proprietaire", "retirer mon espace", "retirer l'espace", "desactiver mon espace", "desactiver l'espace", "ajouter un espace", "ajouter l'espace", "activer l'espace", "double role", "deux espaces", "deux roles"],
+    opener: "Vos espaces s'ajoutent et se retirent dans /settings?section=spaces.",
+  },
+  {
+    key: "emails_alertes",
+    path: "/settings?section=alerts",
+    aliases: ["/settings?section=notifications"],
+    label: "Emails et alertes",
+    purpose: "Dans les réglages, la rubrique Alertes annonces règle ou coupe les alertes de gardes et de besoins d'entraide par zone, heure et fréquence ; la rubrique Notifications choisit les emails reçus (candidatures, messages, rappels, avis) et le rythme des emails de messages, avec un interrupteur pour tout couper.",
+    audience: "all",
+    triggers: ["alertes mail", "alerte mail", "alertes email", "alerte email", "alertes par mail", "alertes par email", "mail", "emails", "courriel", "newsletter", "annuler les alertes", "arreter les alertes", "couper les alertes", "desactiver les alertes", "supprimer les alertes", "couper les emails", "arreter les emails", "trop d'emails", "trop de mails", "me desabonner", "desabonner", "notifications par email", "notifications par mail", "frequence des emails"],
+    opener: "Vos emails et vos alertes se règlent dans /settings?section=alerts et /settings?section=notifications.",
+  },
+  {
+    key: "savoir_faire",
+    path: "/profile?section=savoir-faire",
+    label: "Mes savoir-faire",
+    purpose: "Rubrique du profil, la même pour les deux espaces : jusqu'à 10 savoir-faire (animaux, jardin et potager, maison, et d'autres) qui disent aux gens du coin pour quoi vous pouvez aider ; un savoir-faire rempli vous rend disponible pour l'entraide.",
+    audience: "all",
+    triggers: ["savoir-faire", "savoir faire", "mes competences", "competence", "ce que je sais faire", "mes talents", "proposer mon aide", "je peux aider"],
+    opener: "Vos savoir-faire se remplissent dans /profile?section=savoir-faire.",
+  },
   {
     key: "tableau_de_bord",
     path: "/dashboard",

@@ -35,10 +35,13 @@ describe("E5, gardien", () => {
 });
 
 describe("E5, propriétaire : les gardes d'abord", () => {
-  it("garde en cours, candidatures, annonce à raconter : phrase de garde", () => {
-    for (const state of [{ ongoingSit: true }, { pendingApps: true }, { noActiveSit: true }]) {
-      expect(pickAlmaRail({ variant: "owner", hidden: false, ownerState: owner(state), skillsMissing: true }).action).toBeNull();
-    }
+  // Lot A2 : les gardes passent toujours d'abord, mais candidatures et annonce
+  // à publier portent désormais leur propre lien (plus la conversation) ; la
+  // garde en cours garde la phrase seule.
+  it("garde en cours, candidatures, annonce à raconter : phrase de garde, jamais les savoir-faire", () => {
+    expect(pickAlmaRail({ variant: "owner", hidden: false, ownerState: owner({ ongoingSit: true }), skillsMissing: true }).action).toBeNull();
+    expect(pickAlmaRail({ variant: "owner", hidden: false, ownerState: owner({ pendingApps: true }), skillsMissing: true }).action?.id).toBe("lire_candidatures");
+    expect(pickAlmaRail({ variant: "owner", hidden: false, ownerState: owner({ noActiveSit: true }), skillsMissing: true }).action?.href).toBe("/sits/create");
   });
   it("annonce en ligne et calme : invitation aux savoir-faire", () => {
     const r = pickAlmaRail({ variant: "owner", hidden: false, ownerState: owner({}), skillsMissing: true });

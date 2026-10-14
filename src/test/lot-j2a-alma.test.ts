@@ -65,7 +65,9 @@ const base = (over: Partial<NextActionInput>): NextActionInput => ({
 describe("J2-A, base de connaissance", () => {
   const routes = appRoutes();
   const all = new Set(routes.map((r) => r.path));
-  const described = new Set(ALMA_SITE_KNOWLEDGE.flatMap((e) => [e.path, ...(e.aliases ?? [])]));
+  // Lot A2 : une entrée peut viser une rubrique (/settings?section=spaces) ;
+  // la route comparée à App.tsx est le chemin sans requête.
+  const described = new Set(ALMA_SITE_KNOWLEDGE.flatMap((e) => [e.path, ...(e.aliases ?? [])]).map((p) => p.split("?")[0]));
 
   it("chaque chemin décrit existe dans App.tsx", () => {
     expect([...described].filter((p) => !all.has(p))).toEqual([]);
@@ -205,16 +207,23 @@ describe("J2-A, moteur de prochaine action", () => {
       sent: [{ sit_id: "a", status: "pending", created_at: `${TODAY}T09:00:00Z`, sit: null }],
     });
     const r = computeNextAction(base({ facts, accountRole: "both", activeRole: "owner" }));
-    expect(r.action).toMatchObject({ path: "/sits", reason: "candidatures_non_ouvertes" });
+    // Lot A2 : le lien mène aux candidatures de l'annonce de la plus ancienne
+    // en attente (règle X3a), et non plus à la liste /sits.
+    expect(r.action).toMatchObject({ path: "/sits/s1#candidatures", reason: "candidatures_en_attente" });
   });
 
-  it("Jacqueline en Bretagne (propriétaire, 56) : répondre à la demande d'entraide proche, sans score", () => {
+  // Lot A2 : un propriétaire sans annonce ni brouillon reçoit d'abord la
+  // publication de sa garde (priorité : plus d'annonces publiées) ; la
+  // demande d'entraide proche reste proposée, en pastille.
+  it("Jacqueline en Bretagne (propriétaire, 56, sans annonce) : publier sa garde, l'entraide proche en pastille, sans score", () => {
     const r = computeNextAction(base({
       accountRole: "owner", activeRole: "owner", completion: 55,
       inventory: { ...emptyInventory({ postal_code: "56000" }), demandes_entraide: [{ titre: "Partie de Scrabble", ville: "Vannes", lien: "/petites-missions/m1", id: "m1" }] },
     }));
-    expect(r.action).toMatchObject({ path: "/petites-missions/m1", reason: "entraide_proche" });
-    expect(r.action?.label).toContain("Partie de Scrabble");
+    expect(r.action).toMatchObject({ reason: "intention_garde" });
+    expect(r.action?.path.startsWith("/sits/create")).toBe(true);
+    expect(r.chips.some((c) => c.path === "/petites-missions/m1" && c.label.includes("Partie de Scrabble"))).toBe(true);
+    expect([r.action, ...r.chips].some((c) => c?.path?.includes("profile"))).toBe(false);
   });
 
   it("gardien sans candidature, garde proche : la nommer et y postuler", () => {

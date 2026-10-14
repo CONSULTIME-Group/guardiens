@@ -91,7 +91,7 @@ import {
   type OutputGuardInput,
 } from "../_shared/alma-companion.ts";
 import { FRENCH_CITIES } from "../_shared/alma-places.ts";
-import type { VerifiedFacts } from "../_shared/alma-facts.ts";
+import { NO_AWAITING, summarizeAwaiting, type VerifiedFacts } from "../_shared/alma-facts.ts";
 
 /** Lot L4b : rejeu, faits vides puis complétés par le contexte simulé seul. */
 function simulatedFacts(role: string | null, extra: any): VerifiedFacts {
@@ -102,6 +102,7 @@ function simulatedFacts(role: string | null, extra: any): VerifiedFacts {
     candidatures_envoyees_detail: [],
     candidatures_recues: {},
     candidatures_recues_non_ouvertes: 0,
+    candidatures_en_attente: { ...NO_AWAITING },
     annonces_publiees: [],
     brouillons: [],
     missions_publiees: [],
@@ -685,7 +686,11 @@ Deno.serve(async (req) => {
           ),
           candidatures_recues: mine.length,
           candidatures_non_lues: mine.filter((a) => a.viewed_at === null).length,
-          candidatures_en_attente: mine.filter((a) => a.status === "pending").length,
+          // Lot A2 : règle X3a, pending, viewed et discussing sur annonce ouverte.
+          candidatures_en_attente: summarizeAwaiting(
+            mine.map((a, i) => ({ id: `${s.id}:${i}`, sit_id: s.id, status: a.status, created_at: a.created_at })),
+            { [s.id]: s.status },
+          ).count,
         };
       });
     } else {
