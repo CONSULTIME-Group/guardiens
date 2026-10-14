@@ -4,6 +4,7 @@ import { trackEvent } from "@/lib/analytics";
 import { captureUtmFromUrl } from "@/lib/campaignAttribution";
 import { trackGoogleAnalyticsPageView } from "@/lib/cookieConsent";
 import { recordPath } from "@/lib/navHistory";
+import { markNavigation } from "@/lib/perfMarks";
 
 /**
  * Track une vue de page à chaque changement de route.
@@ -35,6 +36,8 @@ const PageViewTracker = () => {
     if (isAssetNoise) return;
     // Lot M2 : page précédente, lue par les formulaires pour savoir d'où l'on vient.
     recordPath(path);
+    // Lot perf 1 : début d'une vue interne pour les jalons de vitesse.
+    markNavigation(path);
 
     const now = Date.now();
     if (lastPath.current === path && now - lastEmitAt.current < 1500) return;

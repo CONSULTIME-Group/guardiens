@@ -28,6 +28,7 @@ import { trackEvent } from "@/lib/analytics";
 import type { SitData } from "@/components/sits/views/types";
 import { useToast } from "@/hooks/use-toast";
 import { OWN_SIT_COLUMNS, ownSitLookupColumn } from "@/lib/ownSitAccess";
+import { markMilestone } from "@/lib/perfMarks";
 
 /**
  * Cible de notification disparue : au lieu d'une page introuvable, on renvoie
@@ -369,6 +370,11 @@ const SitDetail = () => {
     if (!user || !sit || user.id !== (sit as any).user_id) return;
     backfillOwnerGalleryDimensions(user.id);
   }, [user, sit]);
+
+  // Lot perf 1 : jalon SIT_HERO (contenu de la fiche affiché), src/lib/perfMarks.ts.
+  useEffect(() => {
+    if (!loading && sit) markMilestone("SIT_HERO");
+  }, [loading, sit]);
 
 
 

@@ -41,6 +41,7 @@ import { publicFirstName } from "@/lib/displayName";
 import { loadSitLocationLabel } from "@/lib/sitLocationLoad";
 import { applicationAvailability } from "@/lib/applicationCap";
 import { STARTED_SIT_NOTICE, isStartedOpenSit } from "@/lib/sitStarted";
+import { markMilestone } from "@/lib/perfMarks";
 
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
 
@@ -73,6 +74,11 @@ const PublicSitDetail = () => {
   const [viewerType, setViewerType] = useState<ViewerType>("anonymous");
 
  const sitViewFired = useRef(false);
+
+  // Lot perf 1 : jalon SIT_HERO (contenu de la fiche affiché), src/lib/perfMarks.ts.
+  useEffect(() => {
+    if (!loading && sit) markMilestone("SIT_HERO");
+  }, [loading, sit]);
 
   useEffect(() => {
     if (!loading && (loadError || !sit)) {

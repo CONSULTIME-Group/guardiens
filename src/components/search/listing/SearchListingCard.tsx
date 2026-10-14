@@ -9,6 +9,7 @@ import AffinityBadge from "@/components/matching/AffinityBadge";
 import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
 import { useDepartementNames } from "@/hooks/useDepartementNames";
 import { departementNameFromCode, formatCityDepartement } from "@/lib/locationLabel";
+import { markMilestone } from "@/lib/perfMarks";
 import { sitCommune, sitLocationLabel } from "@/lib/sitLocation";
 import { projetMetaLine, projetNatureLabel } from "@/lib/projets";
 import { STARTED_SIT_NOTICE, isStartedOpenSit } from "@/lib/sitStarted";
@@ -183,6 +184,7 @@ const SearchListingCard = ({
               alt=""
               className={`w-full h-full object-cover transition-transform duration-[900ms] ease-out ${isClickable ? "group-hover:scale-[1.03]" : ""}`}
               loading="lazy"
+              onLoad={listIndex === 0 ? () => markMilestone("FIRST_CARD_PHOTO") : undefined}
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/40">

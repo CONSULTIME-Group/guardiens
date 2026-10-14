@@ -73,6 +73,7 @@ import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { fetchIntlOpenSits, intlCountryCounts, carryOverParams, DEST_WORLD, DEST_ABROAD } from "@/lib/intlSitSearch";
 import DestinationCountrySelect from "@/components/search/DestinationCountrySelect";
 import { profilePlacePoint } from "@/lib/sitPlacePoint";
+import { markMilestone } from "@/lib/perfMarks";
 import { applyOpenSitFilter, checkGeocodedPoint, communeDeptFromCoords, pointUsable, fetchAllPages, fetchInChunks, isEndedSit, isFrancePlace, isOpenSit, isPastSit, isWithinRadius, parisTodayIso, resolveSitPlace, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -631,6 +632,15 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    lastListKeyRef.current = key;
    onShownListChange(state);
  }, [firstSearchSettled, loading, searchError, tab, results, visibleCount, onShownListChange]);
+
+ // Lot perf 1 : jalon FIRST_CARD (première vraie carte affichée), mesuré chez
+ // les visiteurs, navigation interne comprise (src/lib/perfMarks.ts).
+ useEffect(() => {
+   if (tab !== "sits" || !firstSearchSettled || loading || searchError) return;
+   const realCount = results.filter((r: any) => !r.is_demo).length;
+   if (realCount === 0) return;
+   markMilestone("FIRST_CARD", { with_point: !!(city || userCoords), sits_loaded: rawResults.length });
+ }, [tab, firstSearchSettled, loading, searchError, results, rawResults.length, city, userCoords]);
 
  const availableMembers = useMemo(() => {
    if (!(tab === "missions" && missionSubTab === "members")) return [];

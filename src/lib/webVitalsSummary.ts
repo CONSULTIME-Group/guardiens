@@ -8,7 +8,11 @@
 export const SUMMARY_HOST = "guardiens.fr";
 
 export type SummaryDevice = "mobile" | "tablet" | "desktop";
-export const SUMMARY_METRICS = ["LCP", "INP", "LONG_TASK"] as const;
+export const SUMMARY_METRICS = ["LCP", "INP", "LONG_TASK", "CONTENT"] as const;
+/**
+ * Lot perf 1 : CONTENT = première annonce affichée (FIRST_CARD sur une liste,
+ * SIT_HERO sur une fiche), vues abandonnées exclues du centile.
+ */
 export type SummaryMetric = (typeof SUMMARY_METRICS)[number];
 
 export interface VitalRow { metadata: unknown }
@@ -33,13 +37,17 @@ export function summarizeVitals(rows: VitalRow[], topN = 10): { paths: PathSumma
   const acc = new Map<string, { total: number; v: Record<string, number[]> }>();
   let measures = 0;
   for (const r of rows) {
-    const m = r.metadata as { host?: unknown; path?: unknown; device?: unknown; metrics?: Record<string, { value?: unknown }> } | null;
+    const m = r.metadata as { host?: unknown; path?: unknown; device?: unknown; metrics?: Record<string, { value?: unknown; rating?: unknown }> } | null;
     if (!m || m.host !== SUMMARY_HOST || typeof m.path !== "string" || !DEVICES.includes(m.device as SummaryDevice) || !m.metrics) continue;
     measures++;
     const e = acc.get(m.path) ?? { total: 0, v: {} };
     e.total++;
     for (const k of SUMMARY_METRICS) {
-      const val = m.metrics[k]?.value;
+      const entry = k === "CONTENT"
+        ? (m.metrics.FIRST_CARD ?? m.metrics.SIT_HERO) as { value?: unknown; rating?: unknown } | undefined
+        : m.metrics[k];
+      if (k === "CONTENT" && entry?.rating === "abandoned") continue;
+      const val = entry?.value;
       if (typeof val === "number" && Number.isFinite(val)) (e.v[`${m.device}:${k}`] ??= []).push(val);
     }
     acc.set(m.path, e);
