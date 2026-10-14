@@ -32,7 +32,7 @@ beforeEach(() => { fixture.sits = []; fixture.missions = []; fixture.loading = f
 afterEach(cleanup);
 
 describe("ItemList de l'accueil issu des vraies cartes", () => {
-  it("déclare exactement les quatre gardes et deux besoins visibles, dans leur ordre", async () => {
+  it("déclare exactement les cartes visibles, dans leur ordre", async () => {
     fixture.sits = Array.from({ length: 7 }, (_, i) => sit(String(i)));
     fixture.missions = Array.from({ length: 3 }, (_, i) => mission(String(i)));
     const { container } = render(<MemoryRouter><LiveListingsStrip /></MemoryRouter>);

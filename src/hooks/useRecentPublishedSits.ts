@@ -22,6 +22,11 @@ export interface RecentPublishedSit {
   cover_photo_url: string | null;
   is_urgent: boolean | null;
   owner: { latitude: number | null; longitude: number | null } | null;
+  /**
+   * Nombre de photos du logement (au moins 1 si une couverture existe).
+   * Sert à mettre en avant, sur la home, les annonces les mieux illustrées.
+   */
+  photo_count: number;
 }
 
 export function useRecentPublishedSits() {
@@ -33,19 +38,24 @@ export function useRecentPublishedSits() {
       const { data, error } = await supabase
         .from("sits")
         .select(
-          "id, slug, title, city, country, start_date, end_date, daily_routine, created_at, user_id, property_id, cover_photo_url, is_urgent"
+          // Photos du logement embarquées dans la même lecture (clé
+          // sits_property_id_fkey), lisibles par un visiteur via la règle
+          // « Properties are readable via active sits ». Aucune lecture en plus.
+          "id, slug, title, city, country, start_date, end_date, daily_routine, created_at, user_id, property_id, cover_photo_url, is_urgent, property:properties(photos)"
         )
         .eq("status", "published")
         .eq("accepting_applications", true)
         .or(`end_date.is.null,end_date.gte.${todayIso}`)
         .order("created_at", { ascending: false })
-        .limit(24);
+        .limit(40);
 
       if (error) {
         console.error("useRecentPublishedSits error", error);
         return [];
       }
-      const sits = (data ?? []) as Omit<RecentPublishedSit, "owner">[];
+      const sits = (data ?? []) as unknown as Array<
+        Omit<RecentPublishedSit, "owner" | "photo_count"> & { property?: { photos: string[] | null } | null }
+      >;
       // Coordonnées approchées via la vue publique (lisible par un visiteur),
       // uniquement pour le tri par distance. Un échec laisse la liste intacte.
       const coords = new Map<string, { latitude: number | null; longitude: number | null }>();
@@ -65,7 +75,14 @@ export function useRecentPublishedSits() {
           /* tri par distance indisponible, annonces conservées */
         }
       }
-      return sits.map((s) => ({ ...s, owner: coords.get(s.user_id) ?? null }));
+      return sits.map(({ property, ...s }) => ({
+        ...s,
+        owner: coords.get(s.user_id) ?? null,
+        photo_count: Math.max(
+          (property?.photos ?? []).filter(Boolean).length,
+          s.cover_photo_url ? 1 : 0,
+        ),
+      }));
     },
   });
 }
