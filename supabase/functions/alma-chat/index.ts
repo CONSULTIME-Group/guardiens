@@ -8,6 +8,7 @@
 // Journalisation dans public.alma_conversations (lecture admin uniquement).
 
 import { callLovableAI, CORS_HEADERS } from "../_shared/ai-gateway.ts";
+import { emptyAlmaUsage, recordModelCall } from "../_shared/alma-usage.ts";
 import {
   ALMA_CHAT_DAILY_LIMIT,
   ALMA_CHAT_LIMIT_MESSAGE,
@@ -33,7 +34,7 @@ import { normalizeContactMessage } from "../_shared/normalize-contact-message.ts
 import { formatKnowledge, selectKnowledge } from "../_shared/alma-site-knowledge.ts";
 import { isMoodLineTruthful, loadVerifiedFacts, moodTruthFromFacts } from "../_shared/alma-facts.ts";
 import { formatInventory, loadAlmaInventory } from "../_shared/alma-inventory.ts";
-import { applyDraftToAction, computeNextAction, formatActionDirective, isAnimalEmergency } from "../_shared/alma-next-action.ts";
+import { almaResponseAction, almaResponseChips, applyDraftToAction, computeNextAction, formatActionDirective, isAnimalEmergency } from "../_shared/alma-next-action.ts";
 import { isChildCareRequest } from "../_shared/mission-child-care.ts";
 import { ALMA_VERSION } from "../_shared/alma-version.ts";
 import { almaProfileVisibleToModel, polishAlmaAnswer } from "../_shared/alma-output.ts";
@@ -366,7 +367,8 @@ Deno.serve(async (req) => {
     // frustration maximale sans question). Sinon le modèle répond d'abord.
     if (shouldAnswerDirectly(intent)) {
       const direct = almaDirectAnswer(intent)!;
-      const classification = classificationFromPatterns(intent);
+      // Lot A3 : réponse fixe, aucun appel au modèle.
+      const classification = { ...classificationFromPatterns(intent), usage: emptyAlmaUsage() };
       const conversationId = await logConversation({
         user_id: userId,
         surface,
@@ -828,14 +830,20 @@ Deno.serve(async (req) => {
         { role: "system", content: CLASSIFICATION_DIRECTIVE },
         { role: "user", content: message },
     ];
-    const askModel = (extra?: string) => callLovableAI({
-      model: "google/gemini-2.5-flash",
-      // 0.85 : à 0.6 le modèle retombe sur les mêmes ouvertures.
-      temperature: 0.85,
-      messages: extra
-        ? [...baseMessages.slice(0, -1), { role: "system" as const, content: extra }, baseMessages[baseMessages.length - 1]]
-        : baseMessages,
-    });
+    // Lot A3 : appels au modèle et jetons du tour, dans classification.usage.
+    const usage = emptyAlmaUsage();
+    const askModel = async (extra?: string) => {
+      const res = await callLovableAI({
+        model: "google/gemini-2.5-flash",
+        // 0.85 : à 0.6 le modèle retombe sur les mêmes ouvertures.
+        temperature: 0.85,
+        messages: extra
+          ? [...baseMessages.slice(0, -1), { role: "system" as const, content: extra }, baseMessages[baseMessages.length - 1]]
+          : baseMessages,
+      });
+      recordModelCall(usage, res);
+      return res;
+    };
     const r = await askModel();
 
     if (!r.ok) {
@@ -844,7 +852,7 @@ Deno.serve(async (req) => {
       const fallback = locked
         ? locked.template
         : intent.frustration || intent.leaving ? almaDirectAnswer(intent) : null;
-      const classification: AlmaClassification = { ...classificationFromPatterns(intent), ...(locked ? { fallback_template: true, unanswered: false } : {}) } as AlmaClassification;
+      const classification: AlmaClassification = { ...classificationFromPatterns(intent), ...(locked ? { fallback_template: true, unanswered: false } : {}), usage } as AlmaClassification;
       const conversationId = await logConversation({
         user_id: userId,
         surface,
@@ -863,8 +871,8 @@ Deno.serve(async (req) => {
         return json({
           answer: fallback,
           remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
-          ...(locked?.action ? { action: { label: locked.action.label, path: locked.action.path } } : {}),
-          ...(lockedChips.length ? { chips: lockedChips } : {}),
+          ...(locked?.action ? { action: almaResponseAction(locked.action) } : {}),
+          ...(lockedChips.length ? { chips: almaResponseChips(lockedChips) } : {}),
           human_contact: true,
           ...(conversationId ? { conversation_id: conversationId } : {}),
         });
@@ -1010,6 +1018,7 @@ Deno.serve(async (req) => {
     }
     if (guardIssuesBefore.length) (classification as any).output_guard = guardIssuesBefore;
     if (retried) (classification as any).retried = true;
+    (classification as any).usage = usage;
     if (issues.some((x) => !x.startsWith("manque:") && !x.startsWith("interdit:")) && !(classification as any).fallback_template) {
       (classification as any).soft_issues = issues;
     }
@@ -1056,8 +1065,8 @@ Deno.serve(async (req) => {
     return json({
       answer,
       remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
-      ...(action ? { action: { label: action.label, path: action.path } } : {}),
-      ...(chips.length ? { chips } : {}),
+      ...(action ? { action: almaResponseAction(action) } : {}),
+      ...(chips.length ? { chips: almaResponseChips(chips) } : {}),
       ...(human ? { human_contact: true } : {}),
       ...(conversationId ? { conversation_id: conversationId } : {}),
       ...(isReplay

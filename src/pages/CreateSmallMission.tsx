@@ -3,7 +3,7 @@ import { previousPath } from "@/lib/navHistory";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { inferMissionCategory } from "@/lib/missionCategories";
-import { readFormPrefill } from "@/lib/formPrefill";
+import { readFormPrefill, readPublishVia } from "@/lib/formPrefill";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -161,6 +161,8 @@ const CreateSmallMission = () => {
   const [photoWaived, setPhotoWaived] = useState(false);
   // Lot J2-A : titre et description préremplis par Alma, relus avant publication.
   const prefill = useMemo(() => readFormPrefill(searchParams, { titleMax: MAX_TITLE_LEN, descriptionMax: MAX_DESCRIPTION_PREFILL }), []); // eslint-disable-line react-hooks/exhaustive-deps
+  // Lot A3 : besoin ouvert depuis Alma (?via=alma), repris à la publication.
+  const publishVia = useMemo(() => readPublishVia(searchParams), []); // eslint-disable-line react-hooks/exhaustive-deps
   const [title, setTitle] = useState(() => prefill.title);
   const [titleTouched, setTitleTouched] = useState(false);
   const [description, setDescription] = useState(() => prefill.description);
@@ -630,7 +632,7 @@ const CreateSmallMission = () => {
     }
     await queryClient.invalidateQueries({ queryKey: ["small-missions-all"] });
     submittedRef.current = true;
-    try { trackEvent("mission_composer_submitted", { metadata: { mission_id: inserted?.id, category, mission_type: missionType } }); } catch {}
+    try { trackEvent("mission_composer_submitted", { metadata: { mission_id: inserted?.id, category, mission_type: missionType, via: publishVia } }); } catch {}
     toast({ title: tp("toast_published_title"), description: tp("toast_published_desc"), duration: 3000 });
     const insertedAny = inserted as any;
     clearPublishIntent();

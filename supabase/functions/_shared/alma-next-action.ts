@@ -358,3 +358,33 @@ export function applyDraftToAction(
   const q = params.toString();
   return { answer: cleaned, action: { ...action, path: q ? `${base}?${q}` : base }, chips: outChips, title };
 }
+
+/**
+ * Lot A3 : formulaires de publication dont l'ouverture depuis Alma est
+ * mesurée. Le paramètre via=alma est ajouté au moment de répondre au site,
+ * jamais dans le moteur : titre, description et brouillon restent intacts.
+ */
+export const ALMA_VIA_FORMS = ["/sits/create", "/petites-missions/creer"] as const;
+
+export function withAlmaVia(path: string): string {
+  const hashAt = path.indexOf("#");
+  const beforeHash = hashAt >= 0 ? path.slice(0, hashAt) : path;
+  const hash = hashAt >= 0 ? path.slice(hashAt) : "";
+  const [base, query = ""] = beforeHash.split("?");
+  if (!(ALMA_VIA_FORMS as readonly string[]).includes(base)) return path;
+  if (new URLSearchParams(query).get("via") === "alma") return path;
+  const kept = query.split("&").filter((p) => p && !/^via=/.test(p));
+  kept.push("via=alma");
+  return `${base}?${kept.join("&")}${hash}`;
+}
+
+/** Action transmise au site : chemin marqué, motif du moteur conservé. */
+export function almaResponseAction(action: AlmaAction | null | undefined): AlmaAction | null {
+  if (!action) return null;
+  return { label: action.label, path: withAlmaVia(action.path), reason: action.reason };
+}
+
+/** Pastilles transmises au site, chemins marqués. */
+export function almaResponseChips<T extends { path?: string }>(chips: T[]): T[] {
+  return chips.map((c) => (c.path ? { ...c, path: withAlmaVia(c.path) } : c));
+}

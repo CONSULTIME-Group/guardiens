@@ -17,6 +17,8 @@ export type AlmaChatRole = "alma" | "user";
 export interface AlmaChatAction {
   label: string;
   path: string;
+  /** Lot A3 : motif calculé par le moteur, repris dans alma_action_clicked. */
+  reason?: string;
 }
 
 export interface AlmaChatChip {
@@ -53,7 +55,8 @@ function isInternalPath(v: unknown): v is string {
 export function readAlmaAction(raw: unknown): AlmaChatAction | undefined {
   const a = raw as any;
   if (!a || typeof a.label !== "string" || !a.label.trim() || !isInternalPath(a.path)) return undefined;
-  return { label: a.label.slice(0, 80), path: a.path };
+  const reason = typeof a.reason === "string" && /^[a-z0-9_]{1,64}$/.test(a.reason) ? a.reason : undefined;
+  return { label: a.label.slice(0, 80), path: a.path, ...(reason ? { reason } : {}) };
 }
 
 export function readAlmaChips(raw: unknown): AlmaChatChip[] | undefined {

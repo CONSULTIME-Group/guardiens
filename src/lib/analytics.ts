@@ -350,6 +350,7 @@ export type EventType =
   | "alma_usage_nudge_seen"                     // Usage nudge affiché (fact_id, surface, cta_action)
   | "alma_topbar_button_clicked"                // Bouton persistant Alma cliqué en topbar (surface)
   | "alma_first_meeting_cta_clicked"            // CTA principal du premier contact Alma cliqué (role, cta_action)
+  | "alma_action_clicked"                       // Lot A3 : lien suivi depuis la conversation d'Alma (reason, kind, path sans paramètres, surface)
   // Funnel création d'annonce ---------------------------------------------------
   | "sits_create_step_started"                  // Étape du wizard CreateSit entamée (step)
   | "sits_create_step_completed"                // Étape terminée (step, duration_ms)

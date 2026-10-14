@@ -23,6 +23,9 @@ import {
 } from "@/lib/alma/conversation-store";
 import { normalizeContactMessage } from "@/lib/normalizeContactMessage";
 
+// Lot A3 : sendAlmaMessage appelle trackEvent ; jamais d'écriture réelle en test.
+vi.mock("@/lib/analytics", () => ({ trackEvent: vi.fn(async () => undefined) }));
+
 const read = (p: string) => readFileSync(p, "utf8");
 
 describe("J2-B, faux positifs de J1 corrigés", () => {

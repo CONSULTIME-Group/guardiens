@@ -38,3 +38,17 @@ export function readFormPrefill(params: URLSearchParams, limits: FormPrefillLimi
   const category = limits.categories && limits.categories.includes(cat) ? cat : null;
   return { title, description, category };
 }
+
+/** Lot A3 : origines de publication mesurées (liste fermée). */
+export const PUBLISH_VIA_VALUES = ["alma"] as const;
+export type PublishVia = (typeof PUBLISH_VIA_VALUES)[number];
+
+/**
+ * Lot A3 : `?via=alma` posé par Alma sur /sits/create et
+ * /petites-missions/creer, repris dans l'événement de publication réussie.
+ * Toute autre valeur est ignorée.
+ */
+export function readPublishVia(params: URLSearchParams): PublishVia | null {
+  const raw = (params.get("via") || "").trim();
+  return (PUBLISH_VIA_VALUES as readonly string[]).includes(raw) ? (raw as PublishVia) : null;
+}
