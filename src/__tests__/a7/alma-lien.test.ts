@@ -179,7 +179,8 @@ describe("A7, bloc du prompt", () => {
     expect(ALMA_SYSTEM_PROMPT).toContain("LE LIEN");
     expect(ALMA_SYSTEM_PROMPT).toContain("Tu te souviens seulement de ce que ce bloc contient");
     expect(ALMA_SYSTEM_PROMPT).toContain("Un moment marqué RÉCENT se salue une fois");
-    expect(ALMA_VERSION).toBe("2026-10-14.a7");
+    // Lot A4 : la version a changé depuis (2026-10-14.a4), elle reste datée.
+    expect(ALMA_VERSION).toMatch(/^2026-10-14\.a\d+$/);
   });
 
   it("alma-chat envoie le bloc et lit le lien en une lecture", () => {

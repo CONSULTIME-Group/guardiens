@@ -24,6 +24,7 @@ import { useLocation, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { trackEvent } from "@/lib/analytics";
+import { isSafetyQuiet } from "@/lib/alma/safety-quiet";
 import {
   AlmaWhisper,
   AlmaWhisperType,
@@ -277,6 +278,8 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
 
   const isProactiveMuted = useCallback((): boolean => {
     if (verboseMode) return false;
+    // Lot A4 : 2 heures de silence après un gabarit de sûreté d'Alma.
+    if (isSafetyQuiet()) return true;
     if (isWhisperExcludedRoute(pathnameRef.current)) return true;
     if (inputFocusedRef.current) return true;
     if (Date.now() - lastInputFocusRef.current < INPUT_FOCUS_QUIET_MS) return true;

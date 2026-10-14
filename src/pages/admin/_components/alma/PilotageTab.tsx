@@ -12,10 +12,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ALMA_REPLAY_CASES } from "@/data/almaReplayCases";
 import { checkReplayAnswer, sameOpener } from "@/lib/alma/replayChecks";
 import { measureCompanion, SHARED_OPENER_TARGET, type CompanionMeasure } from "@/lib/alma/companionMetrics";
+import { replayFreshness, versionFromReplayMetas } from "@/lib/alma/replayVersion";
 
 interface RateRow { action_reason: string; register: string; answers: number; acted: number }
 interface ReplayResult { id: string; question: string; passed: boolean; reasons: string[]; answer: string }
-interface ReplayRun { id: string; created_at: string; total: number; passed: number; failed: number; results: ReplayResult[] }
+interface ReplayRun { id: string; created_at: string; total: number; passed: number; failed: number; results: ReplayResult[]; version?: string | null }
 
 const pct = (n: number, d: number) => (d > 0 ? `${Math.round((100 * n) / d)} %` : "·");
 
@@ -28,6 +29,8 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
   const [companionB, setCompanionB] = useState<Block<CompanionMeasure>>(loading);
   const [runsB, setRunsB] = useState<Block<ReplayRun[]>>(loading);
   const [replaying, setReplaying] = useState<{ done: number; total: number } | null>(null);
+  // Lot A4 : version servie par alma-chat, comparée au dernier rejeu.
+  const [liveVersion, setLiveVersion] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const version = useRef(0);
   const rates = ratesB.value;
@@ -57,10 +60,22 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
         return { value: { useful: vals.filter((x) => x === "useful").length, notUseful: vals.filter((x) => x === "not_useful").length }, truncated: res.truncated };
       }),
       run(setRunsB, async () => {
-        const h = await (supabase.from as any)("alma_replay_runs").select("id, created_at, total, passed, failed, results").order("created_at", { ascending: false }).limit(5);
+        // Lot A4 : la colonne version arrive avec la migration A4 ; sans elle, lecture d'avant.
+        const cols = "id, created_at, total, passed, failed, results";
+        let h = await (supabase.from as any)("alma_replay_runs").select(`${cols}, version`).order("created_at", { ascending: false }).limit(5);
+        if (h.error) h = await (supabase.from as any)("alma_replay_runs").select(cols).order("created_at", { ascending: false }).limit(5);
         if (h.error) throw h.error;
         return { value: (h.data ?? []) as ReplayRun[] };
       }),
+      (async () => {
+        try {
+          const { data } = await supabase.functions.invoke("alma-chat", { body: { kind: "version" } });
+          const v = typeof (data as any)?.version === "string" ? (data as any).version : null;
+          if (fresh()) setLiveVersion(v);
+        } catch {
+          if (fresh()) setLiveVersion(null);
+        }
+      })(),
       // Lot L4 : variété des amorces et replis sur gabarit, même lecture paginée que Conversations.
       run(setCompanionB, async () => {
         const res = await fetchAllRows<any>((from, to) =>
@@ -83,6 +98,7 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
   const replay = async () => {
     setError(null);
     const results: ReplayResult[] = [];
+    const metas: Array<{ version?: unknown } | null> = [];
     setReplaying({ done: 0, total: ALMA_REPLAY_CASES.length });
     for (const c of ALMA_REPLAY_CASES) {
       const ask = (recent?: string[]) => supabase.functions.invoke("alma-chat", {
@@ -99,6 +115,7 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
       });
       const { data, error: e } = await ask();
       const d = (data ?? {}) as any;
+      metas.push(d.replay_meta ?? null);
       const answer = typeof d.answer === "string" ? d.answer : "";
       const verdict = e || !answer
         ? { passed: false, reasons: ["aucune réponse"] }
@@ -111,6 +128,7 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
             frustration: d.replay_meta?.classification?.frustration ?? null,
             confirmedSit: d.replay_meta?.confirmed_sit ?? null,
             expect: c.expect ?? null,
+            safety: typeof d.safety === "string" ? d.safety : null,
           });
       // Lot L4 : deux réponses à la même question ne commencent pas pareil.
       if (c.varietyCheck && answer) {
@@ -126,19 +144,24 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
     }
     const { data: auth } = await supabase.auth.getUser();
     const passed = results.filter((r) => r.passed).length;
-    const { error: insErr } = await (supabase.from as any)("alma_replay_runs").insert({
+    const row = {
       run_by: auth?.user?.id,
       total: results.length,
       passed,
       failed: results.length - passed,
       results,
-    });
+    };
+    // Lot A4 : la version servie pendant le rejeu est enregistrée avec lui.
+    const runVersion = versionFromReplayMetas(metas) ?? liveVersion;
+    let { error: insErr } = await (supabase.from as any)("alma_replay_runs").insert({ ...row, version: runVersion });
+    if (insErr) ({ error: insErr } = await (supabase.from as any)("alma_replay_runs").insert(row));
     if (insErr) setError("Résultats non enregistrés.");
     setReplaying(null);
     void load();
   };
 
   const last = runs[0];
+  const freshness = replayFreshness(liveVersion, last ?? null);
   const measure = measureActionFollowUp(rates ?? []);
   // Lot J4 : les lignes « aucune » (échanges sans action, surtout d'avant J2-A)
   // ne remplissent plus le tableau ; elles sont comptées en une phrase.
@@ -215,8 +238,13 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
       )}
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Jeu de non-régression ({ALMA_REPLAY_CASES.length} cas réels)</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base">Jeu de non-régression ({ALMA_REPLAY_CASES.length} cas)</CardTitle></CardHeader>
         <CardContent className="space-y-3 text-sm">
+          {runsB.state === "ok" && (
+            <p data-testid="alma-replay-freshness" className={freshness.stale ? "font-medium text-destructive" : "text-muted-foreground"}>
+              {freshness.message}
+            </p>
+          )}
           <Button onClick={() => void replay()} disabled={!!replaying}>
             {replaying ? `Rejeu en cours, ${replaying.done} sur ${replaying.total}` : "Rejouer le jeu de test"}
           </Button>

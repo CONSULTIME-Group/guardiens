@@ -126,6 +126,10 @@ export function AlmaFirstMeeting({ role, onDone }: Props) {
             <span className="text-[10px] font-semibold uppercase tracking-wider text-primary/80">
               Alma
             </span>
+            {/* Lot A4 : transparence IA (règlement européen sur l'IA, article 50). */}
+            <span className="ml-2 text-[10px] text-muted-foreground" data-testid="alma-first-meeting-ai">
+              Compagne IA de Guardiens
+            </span>
             <p className="text-base font-semibold text-foreground leading-snug mt-0.5">
               Bonjour, je suis Alma.
             </p>
