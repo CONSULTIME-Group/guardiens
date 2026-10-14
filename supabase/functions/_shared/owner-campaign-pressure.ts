@@ -52,10 +52,27 @@ export function splitByPressure<T extends { email?: string | null }>(rows: T[], 
   return { rows: kept, pressureExcluded: rows.length - kept.length };
 }
 
+/**
+ * Lot W0 (point 9) : graphies à chercher dans email_send_log pour une liste
+ * d'adresses. Le journal garde l'adresse telle qu'envoyée, qui peut porter
+ * des majuscules : on cherche l'adresse telle que fournie et sa forme en
+ * minuscules, puis le comptage regroupe tout en minuscules.
+ */
+export function emailLookupVariants(emails: Array<string | null | undefined>): string[] {
+  const out = new Set<string>();
+  for (const e of emails) {
+    const t = (e ?? "").trim();
+    if (!t) continue;
+    out.add(t);
+    out.add(t.toLowerCase());
+  }
+  return [...out];
+}
+
 /** Lecture par paquets de email_send_log (lecture seule). */
 export async function loadRecentEmailCounts(client: Client, emails: string[], days = OWNER_CAMPAIGN_PRESSURE_DAYS): Promise<Map<string, number>> {
   const since = new Date(Date.now() - days * 86400000).toISOString();
-  const list = [...new Set(emails.map((e) => (e ?? "").trim().toLowerCase()).filter(Boolean))];
+  const list = emailLookupVariants(emails);
   const rows: SendLogLite[] = [];
   for (let i = 0; i < list.length; i += IN_CHUNK) {
     const chunk = list.slice(i, i + IN_CHUNK);
@@ -86,7 +103,7 @@ export function splitAlreadyReceived<T extends { email?: string | null }>(rows: 
 }
 
 export async function loadAlreadyReceived(client: Client, emails: string[], template: string): Promise<Set<string>> {
-  const list = [...new Set(emails.map((e) => (e ?? "").trim().toLowerCase()).filter(Boolean))];
+  const list = emailLookupVariants(emails);
   const out = new Set<string>();
   for (let i = 0; i < list.length; i += IN_CHUNK) {
     const chunk = list.slice(i, i + IN_CHUNK);

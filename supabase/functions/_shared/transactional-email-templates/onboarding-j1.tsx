@@ -25,8 +25,10 @@ interface OnboardingJ1Props {
   isOwner?: boolean
   /** ville du destinataire (owner) */
   city?: string | null
-  /** nb de gardiens vérifiés à ~30 km */
+  /** nombre de gardiens à moins de 50 km (owner-nearby.ts) */
   nearbySittersCount?: number | null
+  /** libellé « N gardiens à moins de 50 km de {commune} » (owner-nearby.ts) */
+  nearbySittersLabel?: string | null
   /** top 3 gardiens compatibles (owner only) */
   topSitters?: TopSitter[]
 }
@@ -37,10 +39,11 @@ const OnboardingJ1Email = ({
   firstName,
   isOwner,
   city,
-  nearbySittersCount,
+  nearbySittersLabel,
   topSitters,
 }: OnboardingJ1Props) => {
   const name = firstName || ''
+  const nearbyLabel = typeof nearbySittersLabel === 'string' && nearbySittersLabel.trim() ? nearbySittersLabel.trim() : null
   const hasSitters = Array.isArray(topSitters) && topSitters.length > 0
   const locationLabel = city ? ` près de ${city}` : ' près de chez vous'
 
@@ -64,10 +67,9 @@ const OnboardingJ1Email = ({
                 deux minutes. Guardiens est gratuit.
               </Text>
 
-              {typeof nearbySittersCount === 'number' && nearbySittersCount > 0 && (
+              {nearbyLabel && (
                 <Text style={textStrong}>
-                  {nearbySittersCount} gardien{nearbySittersCount > 1 ? 's' : ''} vérifié{nearbySittersCount > 1 ? 's' : ''}
-                  {locationLabel} peuvent voir votre annonce dès sa publication.
+                  Autour de vous&nbsp;: {nearbyLabel}.
                 </Text>
               )}
 
@@ -129,7 +131,7 @@ const OnboardingJ1Email = ({
           ) : (
             <>
               <Text style={text}>
-                Vous vous êtes inscrit(e) sur {SITE_NAME} hier, bienvenue dans la communauté.
+                Votre inscription sur {SITE_NAME} date d'hier, bienvenue dans la communauté.
               </Text>
               <Text style={text}>
                 Pour accéder aux annonces de garde et aux petites missions près de chez vous,
@@ -166,6 +168,7 @@ export const template = {
     isOwner: true,
     city: 'Lyon',
     nearbySittersCount: 12,
+    nearbySittersLabel: '12 gardiens à moins de 50 km de Lyon',
     topSitters: [
       { first_name: 'Camille', city: 'Villeurbanne', affinity_score: 82, distance_km: 4.2, avatar_url: null },
       { first_name: 'Léa', city: 'Lyon 3e', affinity_score: 78, distance_km: 6.1, avatar_url: null },

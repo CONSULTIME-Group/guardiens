@@ -19,6 +19,7 @@ import {
   type LockClientLike,
 } from "../_shared/worker-lock.ts";
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
+import { isAccountBlockedForMarketing } from "../_shared/account-email-block.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -246,8 +247,32 @@ Deno.serve(async (req) => {
         product: "product_emails",
       };
       const optOutFlag = FLAG_BY_CATEGORY[category] ?? "alert_emails";
-      const { data: profile } = await service
-        .from("profiles").select("id, first_name").eq("email", rawEmail).maybeSingle();
+      const emailPattern = String(rawEmail ?? "").trim().toLowerCase().replace(/[\\%_]/g, (c) => `\\${c}`);
+      const { data: profile, error: profileErr } = await service
+        .from("profiles").select("id, first_name, account_status, suspended_at, suspended_until")
+        .ilike("email", emailPattern).limit(1).maybeSingle();
+      // Lecture en échec : rien ne part, le message revient après son délai
+      // de visibilité et sera rejoué.
+      if (profileErr) {
+        console.error("[process-mass-email-queue] lecture du compte impossible, envoi reporté", profileErr.message);
+        // Rend le verrou : le passage suivant reprend la ligne.
+        await service.from("mass_email_sends").update({ status: "queued" }).eq("id", (locked as any).id);
+        skipped++;
+        continue;
+      }
+
+      // Lot W0 (point 7) : compte suspendu (échéance future ou sans échéance)
+      // ou inactif, aucun email non transactionnel, vérifié au moment de
+      // l'envoi (une suspension peut survenir après la mise en file).
+      if (category !== "transactional" && isAccountBlockedForMarketing(profile as any)) {
+        await service.from("mass_email_sends").update({
+          status: "suppressed", last_error: "account_suspended", last_attempt_at: new Date().toISOString(),
+        }).eq("id", (locked as any).id);
+        await service.rpc("delete_email", { queue_name: QUEUE, message_id: msg.msg_id });
+        skipped++;
+        continue;
+      }
+
       if (profile?.id && optOutFlag) {
         const { data: prefs } = await service
           .from("email_preferences").select(optOutFlag).eq("user_id", profile.id).maybeSingle();

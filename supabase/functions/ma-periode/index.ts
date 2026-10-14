@@ -22,6 +22,7 @@ import {
   type IntentRow,
 } from "../_shared/owner-departure-logic.ts";
 import { ownerReadiness } from "../_shared/owner-readiness.ts";
+import { ownerHasPublished } from "../_shared/published-sit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -125,8 +126,9 @@ Deno.serve(async (req) => {
       }
     }
 
-    const { count: publishedCount } = await service.from("sits").select("id", { count: "exact", head: true })
-      .eq("user_id", userId).or("status.neq.draft,published_at.not.is.null");
+    // Définition unique de « déjà publié » (lot W0) : published_at renseigné.
+    // Lecture en échec : même repli qu'avant (non publié), la page reste servie.
+    const hasPublished = await ownerHasPublished(service, userId!).catch(() => false);
     // Annonce publiée à venir (lot N7) : le bouton y mène directement.
     const todayParis = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
     const { data: upcoming } = await service.from("sits").select("id").eq("user_id", userId).eq("status", "published")
@@ -145,7 +147,7 @@ Deno.serve(async (req) => {
       answered_at: last?.answered_at ?? null,
       alma_state: almaDepartureState(last),
       holdout: isOwnerV2Holdout(userId!),
-      has_published: (publishedCount ?? 0) > 0,
+      has_published: hasPublished,
       upcoming_sit_id: (upcoming ?? [])[0]?.id ?? null,
     });
   } catch (e) {

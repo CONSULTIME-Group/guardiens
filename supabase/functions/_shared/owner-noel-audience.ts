@@ -9,6 +9,7 @@
 import { haversineKm } from "./nearby-open-sits.ts";
 import { emailAvatarUrl, emailCity } from "./entraide-card-data.ts";
 import { splitByPressure } from "./owner-campaign-pressure.ts";
+import { loadPublishedOwnerIdSet, publishedOwnerIdsFrom } from "./published-sit.ts";
 
 /** Garde-fou de pression (lot N4b) : 3 emails ou plus en 7 jours, exclu de l'envoi du jour. */
 export function applyNoelPressure<T extends { email?: string | null }>(rows: T[], recentCounts: Map<string, number>) {
@@ -73,13 +74,13 @@ export interface SitterRow {
 }
 export interface OwnerGeo { id: string; first_name?: string | null; city?: string | null; latitude?: number | null; longitude?: number | null }
 
-/** Profils ayant déjà publié : une annonce hors brouillon, ou une date de publication. */
+/**
+ * Profils ayant déjà publié : définition unique du lot W0 (published-sit.ts),
+ * une annonce avec published_at renseigné. Un brouillon jamais mis en ligne
+ * ne compte pas, quel que soit son statut.
+ */
 export function publishedOwnerIds(sits: SitRow[]): Set<string> {
-  const out = new Set<string>();
-  for (const s of sits) {
-    if ((s.status && s.status !== "draft") || s.published_at) out.add(s.user_id);
-  }
-  return out;
+  return publishedOwnerIdsFrom(sits);
 }
 
 /**
@@ -242,10 +243,8 @@ export async function loadSitterPool(client: Client): Promise<SitterRow[]> {
   return excludeStaffSitters(rows.filter((r) => !isSuspended(r, now)), admins);
 }
 
-export async function loadPublishedOwnerIds(client: Client): Promise<Set<string>> {
-  const sits = await pageAll<SitRow>((f, t) =>
-    client.from("sits").select("user_id, status, published_at").order("id", { ascending: true }).range(f, t));
-  return publishedOwnerIds(sits);
+export function loadPublishedOwnerIds(client: Client): Promise<Set<string>> {
+  return loadPublishedOwnerIdSet(client);
 }
 
 export async function loadFounderFollowupIds(client: Client, now = new Date()): Promise<Set<string>> {

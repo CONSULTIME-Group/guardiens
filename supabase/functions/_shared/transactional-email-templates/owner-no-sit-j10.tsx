@@ -15,12 +15,13 @@ interface Props {
   firstName?: string
   city?: string
   nearby_sitters_count?: number
+  /** Libellé « N gardiens à moins de 50 km de {commune} » (owner-nearby.ts). */
+  nearbySittersLabel?: string | null
 }
 
-const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
+const Email = ({ firstName, nearbySittersLabel }: Props) => {
   const name = firstName || ''
-  const cityLabel = city || 'chez vous'
-  const nearby = typeof nearby_sitters_count === 'number' ? nearby_sitters_count : 0
+  const label = typeof nearbySittersLabel === 'string' && nearbySittersLabel.trim() ? nearbySittersLabel.trim() : null
   const publishUrl = `${SITE_URL}/sits/create?utm_source=email&utm_campaign=owner_no_sit&utm_medium=j10`
 
   return (
@@ -38,9 +39,9 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
             de recevoir des candidatures et d'échanger avec la bonne personne.
           </Text>
 
-          {nearby > 0 ? (
+          {label ? (
             <Text style={text}>
-              À proximité de {cityLabel}, {nearby} gardiens sont inscrits.
+              Autour de vous&nbsp;: {label}.
             </Text>
           ) : null}
 
@@ -79,7 +80,7 @@ export const template = {
   component: Email,
   subject: 'Et si vous prépariez votre prochain départ ?',
   displayName: 'Propriétaire sans annonce, J+10',
-  previewData: { firstName: 'Camille', city: 'Lyon', nearby_sitters_count: 137 },
+  previewData: { firstName: 'Camille', city: 'Lyon', nearby_sitters_count: 137, nearbySittersLabel: '137 gardiens à moins de 50 km de Lyon' },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }

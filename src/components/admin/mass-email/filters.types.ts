@@ -29,7 +29,7 @@ export interface MassEmailFilters {
   // Dormants / inactifs
   no_signin_since_days?: number;      // last_sign_in_at < now - N jours (ou null)
   no_application_ever?: boolean;      // gardien n'ayant jamais postulé
-  no_sit_published_ever?: boolean;    // proprio n'ayant jamais publié d'annonce
+  no_sit_published_ever?: boolean;    // jamais publié : aucune annonce avec published_at (lot W0, même règle que never_published_sit)
   no_conversation_ever?: boolean;     // n'a jamais initié de conversation
   no_mission_ever?: boolean;          // n'a jamais publié de coup de main
 
@@ -49,8 +49,8 @@ export interface MassEmailFilters {
   received_mass_email_id?: string;   // relance : destinataires d'une campagne donnée
   prioritize_opened?: boolean;       // relance : ouvreurs en tête
   // Lot N3, Noël 2026
-  exclude_suspended?: boolean;          // comptes suspendus exclus
-  never_published_sit?: boolean;        // aucune annonce hors brouillon
+  exclude_suspended?: boolean;          // comptes suspendus exclus (toujours appliqué côté serveur depuis le lot W0)
+  never_published_sit?: boolean;        // jamais publié : aucune annonce avec published_at (lot W0)
   past_published_no_upcoming?: boolean; // lot N7 : a publié, rien de publié à venir
   exclude_founder_followup?: boolean;   // membres suivis à la main par un fondateur
   prioritize_recent_openers?: boolean;  // ouvreurs des 90 derniers jours en tête

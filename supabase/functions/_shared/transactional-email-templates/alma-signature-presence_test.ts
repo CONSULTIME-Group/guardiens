@@ -1,6 +1,6 @@
 /**
  * Garde-fou Alma Pass 3 C2 :
- * Les 6 templates signés par Alma DOIVENT importer et utiliser
+ * Les 5 templates signés par Alma DOIVENT importer et utiliser
  * <AlmaSignature /> (header) et <AlmaSignoff /> (footer). Les 3 digests
  * (sitter-daily-digest, mission-daily-digest, sit-draft-reminder) doivent
  * en plus utiliser <AlmaIntro />.
@@ -18,7 +18,8 @@ const ALMA_SIGNED = [
   'sit-draft-reminder.tsx',
   'owner-no-sit-j3.tsx',
   'owner-no-sit-j10.tsx',
-  'owner-no-sit-j21.tsx',
+  // owner-no-sit-j21 retiré au lot W0 (14/10/2026) : message personnel de
+  // Jérémie, une seule signature, la sienne.
 ]
 
 const ALMA_WITH_INTRO = new Set([

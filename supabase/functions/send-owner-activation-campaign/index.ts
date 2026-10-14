@@ -66,16 +66,17 @@ async function fetchSegment(sc: any): Promise<Recipient[]> {
 
   if (all.length === 0) return all;
 
-  // Exclude owners with at least one non-draft sit
+  // Exclut les propriétaires ayant déjà publié : définition unique du lot W0
+  // (_shared/published-sit.ts), une annonce avec published_at renseigné.
   const ids = all.map((r) => r.id);
   const publishedOwners = new Set<string>();
   const CHUNK = 500;
   for (let i = 0; i < ids.length; i += CHUNK) {
     const { data: sits } = await sc
       .from("sits")
-      .select("user_id, status")
+      .select("user_id, published_at")
       .in("user_id", ids.slice(i, i + CHUNK))
-      .in("status", ["published", "confirmed", "in_progress", "completed"]);
+      .not("published_at", "is", null);
     for (const s of (sits || []) as any[]) publishedOwners.add(s.user_id);
   }
 

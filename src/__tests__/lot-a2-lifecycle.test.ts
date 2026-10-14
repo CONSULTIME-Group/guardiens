@@ -119,7 +119,8 @@ describe("C. relance de brouillon : anti-doublon par annonce", () => {
     expect(src).toContain("logMetadata: { sit_id: draft.id");
   });
   it("garde un plafond d'une relance par personne et par jour", () => {
-    expect(src).toMatch(/\.eq\("recipient_email", profile\.email\)\s*\.gte\("created_at", startOfUtcDay\)/);
+    // Lot W0 : adresse comparée sans tenir compte de la casse.
+    expect(src).toMatch(/\.ilike\("recipient_email", emailPattern\)\s*\.gte\("created_at", startOfUtcDay\)/);
     expect(src).toContain("sentToday.has(emailKey)");
   });
 });

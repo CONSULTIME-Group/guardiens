@@ -20,6 +20,7 @@
  * ce endpoint n'agit que sur appel explicite (mode="send") de l'admin.
  */
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { isAccountBlockedForMarketing } from "../_shared/account-email-block.ts";
 import { resendFetch } from "../_shared/resend-guard.ts";
 import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
 import { expectedCountMismatch } from "../_shared/mass-email-dedupe.ts";
@@ -249,7 +250,7 @@ async function computeRecipients(
   while (true) {
     const { data, error } = await serviceClient
       .from("profiles")
-      .select("id, first_name, email, city, latitude, longitude, account_status")
+      .select("id, first_name, email, city, latitude, longitude, account_status, suspended_at, suspended_until")
       .not("latitude", "is", null)
       .not("longitude", "is", null)
       .gte("latitude", centerLat - latDelta)
@@ -261,7 +262,8 @@ async function computeRecipients(
     if (!data || data.length === 0) break;
     for (const p of data as any[]) {
       if (!p.email) continue;
-      if (p.account_status && p.account_status !== "active") continue;
+      // Lot W0 (point 7) : compte inactif ou suspendu, jamais destinataire.
+      if (isAccountBlockedForMarketing(p)) continue;
       if (p.id === (mission as any).user_id) continue;
       const d = haversineKm(centerLat, centerLon, Number(p.latitude), Number(p.longitude));
       if (d <= radiusKm) {

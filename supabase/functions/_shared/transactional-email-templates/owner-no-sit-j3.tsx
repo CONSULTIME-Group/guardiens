@@ -8,6 +8,7 @@ import { AlmaSignature } from './_alma-signature.tsx'
 import { AlmaSignoff } from './_alma-signoff.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
+import { j3CardsIntro, j3Preheader } from '../owner-sequence-rules.ts'
 
 const SITE_URL = "https://guardiens.fr"
 
@@ -32,8 +33,12 @@ interface Props {
   radius_km?: number
   top_3_sitter_names?: string[]
   top_3_sitters?: OwnerTopSitter[]
+  /** Libellé « N gardiens à moins de 50 km de {commune} » (owner-nearby.ts). */
+  nearbySittersLabel?: string | null
   /** Vrai quand une annonce commencée attend le propriétaire. */
   hasDraft?: boolean
+  /** Lien direct vers le brouillon (/sits/create?resume=…). */
+  resumeUrl?: string
 }
 
 const SitterCard = ({ sitter }: { sitter: OwnerTopSitter }) => {
@@ -61,29 +66,28 @@ const SitterCard = ({ sitter }: { sitter: OwnerTopSitter }) => {
 }
 
 const Email = ({
-  firstName, city, nearby_sitters_count, top_3_sitters, hasDraft,
+  firstName, nearbySittersLabel, top_3_sitters, hasDraft, resumeUrl,
 }: Props) => {
   const name = firstName || ''
-  const cityLabel = city || 'chez vous'
-  const nearby = typeof nearby_sitters_count === 'number' ? nearby_sitters_count : 0
   const cards = Array.isArray(top_3_sitters) ? top_3_sitters.slice(0, 3) : []
+  const label = typeof nearbySittersLabel === 'string' && nearbySittersLabel.trim() ? nearbySittersLabel.trim() : null
+  const intro = label ? j3CardsIntro(cards.length) : null
   const publishUrl = `${SITE_URL}/sits/create?utm_source=email&utm_campaign=owner_no_sit&utm_medium=j3`
-  const dashboardUrl = `${SITE_URL}/dashboard?utm_source=email&utm_campaign=owner_no_sit&utm_medium=j3`
+  const draftUrl = resumeUrl || `${SITE_URL}/dashboard?utm_source=email&utm_campaign=owner_no_sit&utm_medium=j3`
 
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>En voici trois, ils habitent à proximité.</Preview>
+      <Preview>{j3Preheader(label ? cards.length : 0)}</Preview>
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
           <AlmaSignature />
           <Heading style={h1}>{name ? `Bonjour ${name},` : 'Bonjour,'}</Heading>
 
-          {nearby > 0 ? (
+          {label ? (
             <Text style={text}>
-              Bienvenue sur Guardiens. Autour de {cityLabel}, {nearby} gardiens peuvent garder
-              votre maison et vos animaux. En voici trois&nbsp;:
+              Bienvenue sur Guardiens. Autour de vous&nbsp;: {label}.{intro ? ` ${intro}` : ''}
             </Text>
           ) : (
             <Text style={text}>
@@ -91,10 +95,10 @@ const Email = ({
             </Text>
           )}
 
-          {cards.map((s) => <SitterCard key={s.id} sitter={s} />)}
+          {label ? cards.map((s) => <SitterCard key={s.id} sitter={s} />) : null}
 
           <Text style={text}>
-            Votre annonce leur permet de vous écrire. Vous décrivez vos animaux, vos dates et ce
+            Votre annonce permet aux gardiens de vous écrire. Vous décrivez vos animaux, vos dates et ce
             qui compte pour vous, puis vous échangez avec les candidats avant de choisir.
           </Text>
 
@@ -107,7 +111,7 @@ const Email = ({
           {hasDraft ? (
             <Text style={textSmall}>
               Votre annonce commencée vous attend&nbsp;:{' '}
-              <a href={dashboardUrl} style={inlineLink}>Reprendre mon brouillon</a>
+              <a href={draftUrl} style={inlineLink}>Reprendre mon brouillon</a>
             </Text>
           ) : null}
 
@@ -140,7 +144,8 @@ export const template = {
     firstName: 'Camille',
     city: 'Lyon',
     nearby_sitters_count: 137,
-    radius_km: 30,
+    nearbySittersLabel: '137 gardiens à moins de 50 km de Lyon',
+    radius_km: 50,
     top_3_sitter_names: ['Théo (Lyon)', 'Marie (Villeurbanne)', 'Sofia (Bron)'],
     top_3_sitters: [
       { id: '11111111-1111-1111-1111-111111111111', first_name: 'Théo', city: 'Lyon', avatar_url: null, distance_km: 3, url: 'https://guardiens.fr/gardiens/11111111-1111-1111-1111-111111111111' },
@@ -148,6 +153,7 @@ export const template = {
       { id: '33333333-3333-3333-3333-333333333333', first_name: 'Sofia', city: 'Bron', avatar_url: null, distance_km: 9, url: 'https://guardiens.fr/gardiens/33333333-3333-3333-3333-333333333333' },
     ],
     hasDraft: true,
+    resumeUrl: 'https://guardiens.fr/sits/create?resume=00000000-0000-0000-0000-000000000000&utm_source=email&utm_campaign=owner_no_sit&utm_medium=j3',
   },
 } satisfies TemplateEntry
 

@@ -22,6 +22,8 @@ interface Props {
   /** Liste nommée de ce qui manque, dans les mots exacts du formulaire. */
   missingItems?: MissingItem[]
   nearbySittersCount?: number
+  /** Libellé « N gardiens à moins de 50 km de {commune} » (owner-nearby.ts). */
+  nearbySittersLabel?: string | null
   daysSinceCreated?: number
   resumeUrl?: string
   profileUrl?: string
@@ -43,7 +45,7 @@ const SitDraftReminderEmail = ({
   firstName = '',
   fieldsRemaining = 3,
   missingItems = [],
-  nearbySittersCount = 0,
+  nearbySittersLabel,
   daysSinceCreated,
   resumeUrl = 'https://guardiens.fr/dashboard',
   profileUrl = 'https://guardiens.fr/owner-profile',
@@ -52,6 +54,7 @@ const SitDraftReminderEmail = ({
   const count = items.length > 0 ? items.length : fieldsRemaining
   const formItems = items.filter((i) => !i.inProfile)
   const profileItems = items.filter((i) => i.inProfile)
+  const label = typeof nearbySittersLabel === 'string' && nearbySittersLabel.trim() ? nearbySittersLabel.trim() : null
   return (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
@@ -71,7 +74,7 @@ const SitDraftReminderEmail = ({
         </Text>
         <Text style={text}>
           {count === 0
-            ? 'Votre annonce est complète, il ne reste plus qu\u2019à la publier.'
+            ? 'Votre annonce est complète\u00a0: il reste à la publier.'
             : items.length > 0
               ? `Voici précisément ce qu'il reste à renseigner, ${count} point${count > 1 ? 's' : ''} :`
               : `Il vous reste environ ${count} champ${count > 1 ? 's' : ''} à remplir pour la publier.`}
@@ -87,8 +90,8 @@ const SitDraftReminderEmail = ({
           <>
             <Text style={text}>
               {profileItems.length > 1
-                ? 'Ces deux points ne se remplissent pas dans l\u2019annonce, ils vivent sur votre profil propriétaire :'
-                : 'Ce point ne se remplit pas dans l\u2019annonce, il vit sur votre profil propriétaire :'}
+                ? 'Ces points se remplissent sur votre profil propriétaire :'
+                : 'Ce point se remplit sur votre profil propriétaire :'}
             </Text>
             <ul style={list}>
               {profileItems.map((item) => (
@@ -96,13 +99,13 @@ const SitDraftReminderEmail = ({
               ))}
             </ul>
             <Text style={textSmall}>
-              Vous pouvez le compléter ici : <a href={profileUrl} style={link}>votre profil propriétaire</a>.
+              À compléter ici&nbsp;: <a href={profileUrl} style={link}>votre profil propriétaire</a>.
             </Text>
           </>
         ) : null}
-        {nearbySittersCount > 0 ? (
+        {label ? (
           <Text style={text}>
-            {nearbySittersCount} gardien{nearbySittersCount > 1 ? 's' : ''} vérifié{nearbySittersCount > 1 ? 's' : ''} dans un rayon de 30 km attendent une annonce comme la vôtre.
+            Autour de vous&nbsp;: {label}.
           </Text>
         ) : null}
         <Section style={{ textAlign: 'center', margin: '24px 0' }}>
@@ -111,8 +114,7 @@ const SitDraftReminderEmail = ({
           </Button>
         </Section>
         <Text style={textSmall}>
-          Vous pouvez aussi supprimer ce brouillon depuis votre dashboard si vous
-          préférez.
+          Ce brouillon se supprime aussi depuis votre tableau de bord, si vous le souhaitez.
         </Text>
         <AlmaSignoff />
         <LegalFooter purpose="l'accompagnement de votre brouillon d'annonce" basis="6.1.f" />
@@ -136,6 +138,7 @@ export const template = {
       { label: 'Au moins un animal déclaré sur votre logement', inProfile: true },
     ],
     nearbySittersCount: 12,
+    nearbySittersLabel: '12 gardiens à moins de 50 km de Lyon',
     daysSinceCreated: 12,
     resumeUrl: 'https://guardiens.fr/sits/create?resume=demo-sit-id',
     profileUrl: 'https://guardiens.fr/owner-profile',

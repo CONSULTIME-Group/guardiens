@@ -54,6 +54,25 @@ export function filterToFrozenCohort<T extends PlanLike>(
   }
 }
 
+/**
+ * Lot W0 (point 10) : refus d'envoi avant tout envoi réel.
+ *  - aucune cohorte figée pour la période : 409, jamais tout le plan ;
+ *  - cohorte présente mais croisement vide sur un plan non vide : 409.
+ * Un essai à blanc (dry_run) sans cohorte passe, pour préparer le gel ; il
+ * n'envoie rien.
+ */
+export function cohortRefusal(
+  f: Pick<CohortFilterResult<PlanLike>, 'cohortPresent' | 'planBrut' | 'cibleRetenue'>,
+  periodKey: string,
+  dryRun = false,
+): string | null {
+  if (!f.cohortPresent) return dryRun ? null : `aucune cohorte figée pour ${periodKey}, envoi refusé`
+  if (f.planBrut > 0 && f.cibleRetenue === 0) {
+    return `cohorte figée présente pour ${periodKey} mais croisement vide, envoi refusé`
+  }
+  return null
+}
+
 /** Entier borne, avec repli quand la valeur fournie n'est pas exploitable. */
 export function clampInt(value: unknown, min: number, max: number, fallback: number): number {
   if (typeof value !== 'number' || !Number.isFinite(value)) return fallback

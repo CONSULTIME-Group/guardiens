@@ -8,6 +8,9 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
 import { loadMissingDraftItems } from "../_shared/sit-draft-missing.ts";
+import { ownerHasPublished } from "../_shared/published-sit.ts";
+import { loadOwnerSitterPool, ownerNearbyContext, type SitterRow } from "../_shared/owner-nearby.ts";
+import { departureHoldsPublishAsk, loadLastDepartureAnswer } from "../_shared/owner-sequence-rules.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,53 +20,12 @@ const corsHeaders = {
 const TEMPLATE = "sit-draft-reminder";
 const MAX_PER_RUN = 25;
 
-const NEARBY_RADIUS_KM = 30;
-
-// Aligné sur send-mass-email-proximity/index.ts
-function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
-}
-
-// Compte les gardiens vérifiés dans un rayon de 30 km du lieu de la garde.
-// Ne doit jamais faire échouer l'envoi : retombe sur 0 en cas d'erreur.
-async function countNearbyVerifiedSitters(
-  supabase: any,
-  centerLat: number | null,
-  centerLon: number | null,
-): Promise<number> {
-  try {
-    if (typeof centerLat !== "number" || typeof centerLon !== "number") return 0;
-    const latDelta = NEARBY_RADIUS_KM / 111;
-    const lonDelta = NEARBY_RADIUS_KM / (111 * Math.max(0.1, Math.cos((centerLat * Math.PI) / 180)));
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("id, latitude, longitude")
-      .in("role", ["sitter", "both"])
-      .eq("identity_verified", true)
-      .eq("account_status", "active")
-      .not("latitude", "is", null)
-      .not("longitude", "is", null)
-      .gte("latitude", centerLat - latDelta)
-      .lte("latitude", centerLat + latDelta)
-      .gte("longitude", centerLon - lonDelta)
-      .lte("longitude", centerLon + lonDelta)
-      .limit(2000);
-    if (error || !data) return 0;
-    return data.filter(
-      (p: any) =>
-        haversineKm(centerLat, centerLon, Number(p.latitude), Number(p.longitude)) <= NEARBY_RADIUS_KM,
-    ).length;
-  } catch (_e) {
-    return 0;
-  }
-}
+// Lot W0 : gardiens à proximité par le calcul unique des emails propriétaires
+// (owner-nearby.ts, 50 km), relance suspendue par une réponse de départ
+// lointaine, « jamais publié » selon published-sit.ts, et aucune relance de
+// brouillon dans les 48 heures qui suivent un email de la séquence
+// propriétaire (une seule demande à la fois).
+const JOURNEY_SPACING_HOURS = 48;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -119,17 +81,22 @@ Deno.serve(async (req) => {
   let skipped = 0;
   const errors: Array<{ sit_id: string; reason: string }> = [];
   const sentToday = new Set<string>();
+  let sitterPool: SitterRow[] | null = null;
+  const held: string[] = [];
   const startOfUtcDay = new Date(new Date().toISOString().slice(0, 10) + "T00:00:00.000Z").toISOString();
 
   for (const draft of drafts) {
     try {
-      // Vérifier : owner n'a jamais publié
-      const { count: publishedCount } = await supabase
-        .from("sits")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", draft.user_id)
-        .in("status", ["published", "confirmed", "completed"]);
-      if ((publishedCount ?? 0) > 0) {
+      // Vérifier : owner n'a jamais publié (définition unique, published_at).
+      if (await ownerHasPublished(supabase, draft.user_id)) {
+        skipped++;
+        continue;
+      }
+
+      // Réponse « printemps », « été » ou « plus tard » de moins de 30 jours :
+      // la relance attend, elle repartira après l'échéance.
+      if (departureHoldsPublishAsk(await loadLastDepartureAnswer(supabase, draft.user_id))) {
+        held.push(draft.id);
         skipped++;
         continue;
       }
@@ -137,10 +104,27 @@ Deno.serve(async (req) => {
       // Charger le profil
       const { data: profile } = await supabase
         .from("profiles")
-        .select("email, first_name, latitude, longitude")
+        .select("email, first_name, city, latitude, longitude")
         .eq("id", draft.user_id)
         .maybeSingle();
       if (!profile?.email) {
+        skipped++;
+        continue;
+      }
+      const emailPattern = String(profile.email).trim().toLowerCase().replace(/[\\%_]/g, (c: string) => `\\${c}`);
+
+      // Une seule demande à la fois : un email de la séquence propriétaire
+      // parti dans les 48 dernières heures fait attendre la relance.
+      const journeySince = new Date(now - JOURNEY_SPACING_HOURS * 3600_000).toISOString();
+      const { data: recentJourney, error: recentJourneyErr } = await supabase
+        .from("email_send_log")
+        .select("id")
+        .ilike("recipient_email", emailPattern)
+        .in("status", ["sent", "pending", "deferred"])
+        .gte("created_at", journeySince)
+        .filter("metadata->>source", "like", "journey:%")
+        .limit(1);
+      if (recentJourneyErr || (recentJourney ?? []).length > 0) {
         skipped++;
         continue;
       }
@@ -168,7 +152,7 @@ Deno.serve(async (req) => {
         .from("email_send_log")
         .select("id", { count: "exact", head: true })
         .eq("template_name", TEMPLATE)
-        .eq("recipient_email", profile.email)
+        .ilike("recipient_email", emailPattern)
         .gte("created_at", startOfUtcDay);
       if ((sentTodayCount ?? 0) > 0) {
         skipped++;
@@ -197,11 +181,23 @@ Deno.serve(async (req) => {
         ? Math.max(0, Math.floor((now - new Date(draft.created_at as string).getTime()) / 86400000))
         : undefined;
 
-      // Lieu de la garde : pas de coordonnées sur sits ni properties,
-      // on retient donc celles du profil du propriétaire.
-      const centerLat = typeof (profile as any).latitude === "number" ? (profile as any).latitude : null;
-      const centerLon = typeof (profile as any).longitude === "number" ? (profile as any).longitude : null;
-      const nearbySittersCount = await countNearbyVerifiedSitters(supabase, centerLat, centerLon);
+      // Lieu : celui du profil du propriétaire (ni sits ni properties ne
+      // portent de coordonnées). Échec de lecture : l'email part sans phrase.
+      let nearbySittersCount = 0;
+      let nearbySittersLabel: string | null = null;
+      try {
+        if (sitterPool === null) sitterPool = await loadOwnerSitterPool(supabase);
+        const near = ownerNearbyContext({
+          id: draft.user_id,
+          city: (profile as any).city ?? null,
+          latitude: (profile as any).latitude ?? null,
+          longitude: (profile as any).longitude ?? null,
+        }, sitterPool);
+        nearbySittersCount = near.count;
+        nearbySittersLabel = near.label;
+      } catch (nearErr) {
+        console.warn("[sit-draft-reminder] nearby lookup failed", nearErr);
+      }
 
       const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
         method: 'POST',
@@ -218,6 +214,7 @@ Deno.serve(async (req) => {
             missingItems,
             profileUrl: "https://guardiens.fr/owner-profile",
             nearbySittersCount,
+            nearbySittersLabel,
             daysSinceCreated,
             resumeUrl,
           },
@@ -239,7 +236,7 @@ Deno.serve(async (req) => {
   }
 
   return new Response(
-    JSON.stringify({ ok: true, sent, skipped, total: drafts.length, errors }),
+    JSON.stringify({ ok: true, sent, skipped, held: held.length, total: drafts.length, errors }),
     { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
   );
 });
