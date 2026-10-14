@@ -326,8 +326,9 @@ export function asksIfHuman(message: string): boolean {
 /** Lot L4b : trois gabarits, aucun n'ouvre sur « Je suis ». */
 export const AI_IDENTITY_TEMPLATES = [
   "Vous parlez à l'assistante IA de Guardiens, sous les traits d'Alma, la chienne de la maison. Pour échanger avec une personne, Jérémie et Elisa lisent les messages qu'on leur adresse. Dites-moi ce que vous cherchez, je regarde avec vous.",
-  "Bonne question, et la réponse est simple : une intelligence artificielle, celle de Guardiens, qui prend la voix d'Alma, notre chienne. Jérémie et Elisa, eux, lisent chaque message qu'on leur envoie. Sur quoi puis-je vous aider ?",
-  "C'est une IA qui vous répond, l'assistante de Guardiens, avec la voix d'Alma, la chienne de la maison. Derrière moi, Jérémie et Elisa lisent les messages qu'on leur écrit. Que puis-je regarder pour vous ?",
+  // Lot A4 : sans « Bonne question » ni formule de centre d'appel (audit du 14/10/2026).
+  "Une intelligence artificielle vous répond : celle de Guardiens, avec la voix d'Alma, notre chienne. Jérémie et Elisa reçoivent les messages qu'on leur adresse. Que cherchez-vous ?",
+  "C'est une IA qui vous répond, l'assistante de Guardiens, avec la voix d'Alma, la chienne de la maison. Derrière moi, Jérémie et Elisa lisent les messages qu'on leur écrit. Racontez-moi ce que vous cherchez.",
 ];
 export const AI_IDENTITY_TEMPLATE = AI_IDENTITY_TEMPLATES[0];
 

@@ -7,6 +7,8 @@
 // - daily_email    : email quotidien, seulement quand le signal est critique
 // - weekly_summary : synthèse du lundi dans l'email
 // - animate        : carte « À animer » de l'accueil admin (hors file d'actions)
+// - immediate_email: email à l'équipe dès la levée du signal, envoyé par la
+//                    fonction qui le lève (lot A4, alma_safety), hors email de 8 h
 //
 // queueGroup regroupe plusieurs types en UNE entrée de file :
 // - sit          : par annonce (candidatures sans réponse, discussions à l'arrêt)
@@ -16,7 +18,7 @@
 // autoResolve : true si auto_resolve_admin_signals (ou le détecteur) résout seul le signal.
 // Un regroupement ne supprime aucune ligne : il affiche ensemble, ou résout le groupe.
 
-export type SignalDestination = 'action_queue' | 'daily_email' | 'weekly_summary' | 'animate'
+export type SignalDestination = 'action_queue' | 'daily_email' | 'weekly_summary' | 'animate' | 'immediate_email'
 export type SignalFamily =
   | 'candidatures' | 'annonces' | 'emails' | 'editorial' | 'couverture'
   | 'animation' | 'identite' | 'moderation' | 'technique' | 'accueil'
@@ -92,6 +94,9 @@ export const SIGNAL_TYPES: Record<string, SignalTypeConfig> = {
   alma_churn: { label: 'Membre qui veut partir', family: 'accueil', defaultSeverity: 'critical', destinations: Q, autoResolve: false },
   alma_unanswered: { label: 'Question restée sans réponse d\'Alma', family: 'accueil', defaultSeverity: 'info', destinations: ['weekly_summary'], autoResolve: false },
   alma_contact_request: { label: 'Membre qui écrit à Jérémie et Elisa depuis Alma', family: 'accueil', defaultSeverity: 'critical', destinations: Q, autoResolve: false },
+  // Lot A4 : sûreté (urgence animale, personne en danger, détresse, maltraitance,
+  // conflit de garde). Email immédiat, un par membre et par heure de Paris.
+  alma_safety: { label: 'Sujet de sûreté confié à Alma', family: 'accueil', defaultSeverity: 'critical', destinations: ['action_queue', 'immediate_email'], autoResolve: false },
   // Technique
   prerender_monthly_budget_reached: { label: 'Plafond mensuel de renders atteint', family: 'technique', defaultSeverity: 'critical', destinations: Q, autoResolve: false },
 }

@@ -10,6 +10,7 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchMyProfile } from "@/lib/myProfile";
 import { trackEvent } from "@/lib/analytics";
+import { isSafetyQuiet } from "@/lib/alma/safety-quiet";
 import {
   BOND_RULE_KEYS,
   planCelebration,
@@ -52,6 +53,8 @@ export function useAlmaMoment({ userId, bond, frequency, frequencyLoading, role,
 
   useEffect(() => {
     if (decided || !enabled || !userId || !bond || frequencyLoading) return;
+    // Lot A4 : silence de 2 heures après un gabarit de sûreté d'Alma.
+    if (isSafetyQuiet()) return;
     let alive = true;
     void (async () => {
       try {

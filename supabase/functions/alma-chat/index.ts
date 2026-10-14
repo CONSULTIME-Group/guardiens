@@ -20,7 +20,10 @@ import {
 } from "../_shared/alma-system-prompt.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { almaDirectAnswer, almaHelpDirective, detectAlmaIntent, shouldAnswerDirectly } from "../_shared/alma-intent.ts";
-import { recordAlmaSignal } from "../_shared/alma-signals.ts";
+import { raiseImmediateAlmaSignal, recordAlmaSignal, type ImmediateSignalEmail } from "../_shared/alma-signals.ts";
+import { SAFETY_QUIET_MINUTES, safetyReply } from "../_shared/alma-safety.ts";
+import { reserveAlmaTurn } from "../_shared/alma-turn-cap.ts";
+import { almaModelOptions, contactIdentity, modelFailureReply, serverTranscript, trustedHistory } from "../_shared/alma-integrity.ts";
 import {
   CLASSIFICATION_DIRECTIVE,
   classificationFromPatterns,
@@ -208,8 +211,11 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: { ...CORS_HEADERS, "X-Alma-Version": ALMA_VERSION } });
 
   const startedAt = Date.now();
+  let releaseReservation: (() => Promise<void>) | null = null;
   try {
     const body = await req.json().catch(() => ({}));
+    // Lot A4 : version servie, lue par l'onglet Pilotage (« Rejeu à refaire »).
+    if (body?.kind === "version") return json({ version: ALMA_VERSION });
     const message = typeof body?.message === "string" ? body.message.trim() : "";
     const isContact = body?.kind === "contact_humans";
     if (!isContact && (!message || message.length > 2000)) {
@@ -257,16 +263,20 @@ Deno.serve(async (req) => {
 
     // Lot J2-B : « Écrire à Jérémie et Elisa » depuis Alma.
     if (isContact) {
-      const name = normalizeContactMessage(String(body?.name ?? "")).slice(0, 120);
-      const email = String(body?.email ?? u.user.email ?? "").trim().slice(0, 200);
+      // Lot A4 : email du compte (auth), jamais celui saisi ; transcription
+      // relue en base, jamais celle du navigateur.
+      const [{ data: cp }, { data: lastRows }] = await Promise.all([
+        adminClient.from("profiles").select("first_name").eq("id", userId).maybeSingle(),
+        adminClient.from("alma_conversations").select("question, answer, created_at").eq("user_id", userId)
+          .not("answer", "is", null).gte("created_at", new Date(Date.now() - 24 * 3_600_000).toISOString())
+          .order("created_at", { ascending: false }).limit(3),
+      ]);
+      const identity = contactIdentity(u.user.email, (cp as any)?.first_name ?? null, normalizeContactMessage(String(body?.name ?? "")));
+      const name = identity?.name ?? "Membre";
+      const email = identity?.email ?? "";
       const text = normalizeContactMessage(String(body?.text ?? ""));
-      const transcript = Array.isArray(body?.transcript)
-        ? body.transcript
-            .filter((m: any) => m && (m.role === "user" || m.role === "alma") && typeof m.content === "string")
-            .slice(-6)
-            .map((m: any) => `${m.role === "alma" ? "Alma" : "Membre"} : ${normalizeContactMessage(String(m.content)).slice(0, 600)}`)
-        : [];
-      if (!text || text.length > 3000 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      const transcript = serverTranscript((lastRows ?? []) as any[], normalizeContactMessage);
+      if (!text || text.length > 3000 || !identity) {
         return json({ error: "Message ou email invalide." }, 400);
       }
       const full = [
@@ -301,18 +311,43 @@ Deno.serve(async (req) => {
     }
     // Lot L4 : contexte simulé du membre, rejeu admin uniquement.
     const rc = isReplay && body?.replay_context && typeof body.replay_context === "object" ? body.replay_context as Record<string, any> : null;
+    // Lot A4 : la ligne réservée avant l'appel au modèle est complétée, jamais doublée.
+    let reservedId: string | null = null;
     const logConversation = async (row: Record<string, unknown>): Promise<string | null> => {
       if (isReplay) return null;
+      const full: Record<string, unknown> = {
+        ...row,
+        page_path: pagePath,
+        classification: { ...((row.classification as Record<string, unknown> | null) ?? {}), version: ALMA_VERSION },
+      };
+      if (reservedId) {
+        const id = reservedId;
+        const { error } = await adminClient.from("alma_conversations").update(full).eq("id", id);
+        if (error) console.error("alma-chat log update failed", error);
+        return id;
+      }
       const { data } = await adminClient
         .from("alma_conversations")
-        .insert({
-          ...row,
-          page_path: pagePath,
-          classification: { ...((row.classification as Record<string, unknown> | null) ?? {}), version: ALMA_VERSION },
-        })
+        .insert(full)
         .select("id")
         .single();
       return (data as any)?.id ?? null;
+    };
+    releaseReservation = async () => {
+      if (!reservedId) return;
+      await adminClient.from("alma_conversations").update({ refusal_reason: "error", latency_ms: Date.now() - startedAt }).eq("id", reservedId);
+    };
+    // Lot A4 : email immédiat à l'équipe (signal alma_safety), par send-transactional-email.
+    const sendTeamEmail = async (email: ImmediateSignalEmail): Promise<boolean> => {
+      const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const res = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-transactional-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}`, apikey: key },
+        body: JSON.stringify(email),
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) console.error("alma_safety email failed", res.status, await res.text().catch(() => ""));
+      return res.ok;
     };
     const raiseSignals = async (c: AlmaClassification, conversationId: string | null) => {
       if (isReplay) return;
@@ -333,31 +368,82 @@ Deno.serve(async (req) => {
       }
     };
 
-    // Plafond anti-boucle : ALMA_CHAT_DAILY_LIMIT échanges par personne et par jour.
-    const dayStart = new Date();
-    dayStart.setUTCHours(0, 0, 0, 0);
-    const { count } = await adminClient
-      .from("alma_conversations")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", userId)
-      .gte("created_at", dayStart.toISOString());
-
-    if (!isReplay && (count ?? 0) >= ALMA_CHAT_DAILY_LIMIT) {
-      await adminClient.from("alma_conversations").insert({
+    // Lot A4 : sûreté avant toute détection d'intention et avant le plafond.
+    // Gabarit verrouillé, sans appel au modèle, sans action, sans réécriture
+    // de mots ; signal alma_safety par email immédiat (un par membre et par heure).
+    const safety = safetyReply(message);
+    if (safety) {
+      const classification = { safety: safety.kind, intent: "sensible", version: ALMA_VERSION };
+      const conversationId = await logConversation({
         user_id: userId,
         surface,
         active_role: activeRole,
         input_mode: inputMode,
         question: message,
-        answer: ALMA_CHAT_LIMIT_MESSAGE,
-        register,
-        refusal_reason: "daily_limit",
+        answer: safety.answer,
+        register: "sensible",
+        refusal_reason: "safety_template",
         latency_ms: Date.now() - startedAt,
-        classification: { version: ALMA_VERSION },
-
+        sources_count: 0,
+        classification,
       });
-      return json({ limited: true, message: ALMA_CHAT_LIMIT_MESSAGE });
+      // Contrairement aux autres signaux d'Alma (lot J3), un compte de
+      // l'équipe lève aussi alma_safety : la recette du lot se fait ainsi.
+      if (!isReplay) {
+        try {
+          await raiseImmediateAlmaSignal(adminClient, "alma_safety", userId, message, { pagePath, conversationId, safetyKind: safety.kind }, sendTeamEmail);
+        } catch (e) {
+          console.error("alma_safety signal failed", e);
+        }
+      }
+      return json({
+        answer: safety.answer,
+        safety: safety.kind,
+        quiet_minutes: SAFETY_QUIET_MINUTES,
+        ...(safety.humanContact ? { human_contact: true } : {}),
+        ...(conversationId ? { conversation_id: conversationId } : {}),
+        ...(isReplay ? { replay_meta: { register: "sensible", classification, confirmed_sit: false, version: ALMA_VERSION } } : {}),
+      });
     }
+
+    // Plafond anti-boucle : ALMA_CHAT_DAILY_LIMIT échanges par personne et par
+    // jour de Paris. Lot A4 : le tour est réservé AVANT l'appel au modèle
+    // (alma_reserve_turn), et une lecture du compteur en échec vaut refus.
+    let used = 0;
+    if (!isReplay) {
+      const reservation = await reserveAlmaTurn(adminClient, {
+        userId,
+        kind: "chat",
+        limit: ALMA_CHAT_DAILY_LIMIT,
+        row: { surface, active_role: activeRole, input_mode: inputMode, question: message, page_path: pagePath },
+        version: ALMA_VERSION,
+      });
+      if (!reservation.ok) {
+        const refusal = {
+          user_id: userId,
+          surface,
+          active_role: activeRole,
+          input_mode: inputMode,
+          question: message,
+          answer: ALMA_CHAT_LIMIT_MESSAGE,
+          register,
+          refusal_reason: reservation.reason,
+          latency_ms: Date.now() - startedAt,
+          page_path: pagePath,
+          classification: { version: ALMA_VERSION },
+        };
+        try {
+          if (reservation.id) await adminClient.from("alma_conversations").update(refusal).eq("id", reservation.id);
+          else await adminClient.from("alma_conversations").insert(refusal);
+        } catch (e) {
+          console.error("alma-chat refusal log failed", e);
+        }
+        return json({ limited: true, message: ALMA_CHAT_LIMIT_MESSAGE });
+      }
+      reservedId = reservation.id;
+      used = reservation.used;
+    }
+    const remaining = Math.max(0, ALMA_CHAT_DAILY_LIMIT - used);
 
     // Lot J1 : intention d'aide, frustration, départ.
     const intent = detectAlmaIntent(
@@ -387,10 +473,10 @@ Deno.serve(async (req) => {
       const human = needsHumanContact(classification);
       return json({
         answer: direct,
-        remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
+        remaining,
         ...(human ? { human_contact: true } : {}),
         ...(conversationId ? { conversation_id: conversationId } : {}),
-        ...(isReplay ? { replay_meta: { register, classification, confirmed_sit: false } } : {}),
+        ...(isReplay ? { replay_meta: { register, classification, confirmed_sit: false, version: ALMA_VERSION } } : {}),
       });
     }
     // Lots L2 et L4 : photo du logement, faits verrouillés, voix libre.
@@ -538,6 +624,11 @@ Deno.serve(async (req) => {
     const myPets: ListingPet[] = ((myPetsRes?.data ?? []) as any[]).map((p) => ({ name: p.name ?? null, species: p.species ?? null, breed: p.breed ?? null, age: typeof p.age === "number" ? p.age : null }));
     const recentRows = ((recentRes?.data ?? []) as any[]).filter((r) => typeof r?.answer === "string" && r.answer);
     const recentAnswers: string[] = recentRows.map((r) => r.answer);
+    // Lot A4 : un tour « assistant » du navigateur ne fait foi que s'il est
+    // une réponse d'Alma relue en base ; sinon il ne nourrit ni le modèle ni
+    // le filet de sortie. En rejeu admin, l'historique simulé reste tel quel.
+    const trusted = rc ? { history, dropped: 0 } : trustedHistory(history, recentAnswers);
+    const trustedTurns = trusted.history;
     // Lot L4b : le gabarit de repli varie aussi son ouverture.
     if (locked?.kind === "ai_identity") locked = aiIdentityBrief(pickAiIdentityTemplate(recentAnswers));
     const lastRow = rc?.last_exchange
@@ -773,7 +864,7 @@ Deno.serve(async (req) => {
           helpIntent: Boolean(helpDirective),
           largeAnimals: Boolean((intent as any).largeAnimals),
           completion,
-          profileAlreadySuggested: history.some((m: any) => m.role === "assistant" && /\/(owner-)?profile\b/.test(m.content)),
+          profileAlreadySuggested: trustedTurns.some((m: any) => m.role === "assistant" && /\/(owner-)?profile\b/.test(m.content)),
           pagePath,
           sitterIntent: expressed === "sitter",
           foreignOpen,
@@ -856,7 +947,7 @@ Deno.serve(async (req) => {
         { role: "system", content: formatKnowledge(knowledge) },
         ...(facts ? [{ role: "system" as const, content: `FAITS VÉRIFIÉS, seule base de toute phrase qui affirme un fait sur la personne :\n${JSON.stringify(facts, null, 2)}` }] : []),
         ...(inventory ? [{ role: "system" as const, content: formatInventory(inventory, { foreignOpen }) }] : []),
-        ...history,
+        ...trustedTurns,
         { role: "system", content: almaRegisterReminder(register) },
         ...(viewed
           ? [{
@@ -877,14 +968,15 @@ Deno.serve(async (req) => {
     // Lot A3 : appels au modèle et jetons du tour, dans classification.usage.
     const usage = emptyAlmaUsage();
     const askModel = async (extra?: string) => {
-      const res = await callLovableAI({
+      // Lot A4 : appel borné pour Alma seule (15 s, max_tokens).
+      const res = await callLovableAI(almaModelOptions({
         model: "google/gemini-2.5-flash",
         // 0.85 : à 0.6 le modèle retombe sur les mêmes ouvertures.
         temperature: 0.85,
-        messages: extra
+        messages: (extra
           ? [...baseMessages.slice(0, -1), { role: "system" as const, content: extra }, baseMessages[baseMessages.length - 1]]
-          : baseMessages,
-      });
+          : baseMessages) as any,
+      }));
       recordModelCall(usage, res);
       return res;
     };
@@ -893,9 +985,12 @@ Deno.serve(async (req) => {
     if (!r.ok) {
       // Secours : frustration ou départ, la réponse fixe prend le relais.
       // Lot L1 : une question au propriétaire reçoit la réponse factuelle.
-      const fallback = locked
-        ? locked.template
-        : intent.frustration || intent.leaving ? almaDirectAnswer(intent) : null;
+      // Lot A4 : un délai dépassé (15 s) rend une réponse de repli journalisée.
+      const reply = modelFailureReply(r, {
+        lockedTemplate: locked ? locked.template : null,
+        directAnswer: intent.frustration || intent.leaving ? almaDirectAnswer(intent) : null,
+      });
+      const fallback = reply?.answer ?? null;
       const classification: AlmaClassification = { ...classificationFromPatterns(intent), ...(locked ? { fallback_template: true, unanswered: false } : {}), usage } as AlmaClassification;
       const conversationId = await logConversation({
         user_id: userId,
@@ -905,7 +1000,7 @@ Deno.serve(async (req) => {
         question: message,
         answer: fallback,
         register,
-        refusal_reason: fallback ? "model_fallback" : r.code ?? `gateway_${r.status}`,
+        refusal_reason: reply?.refusalReason ?? r.code ?? `gateway_${r.status}`,
         latency_ms: Date.now() - startedAt,
         sources_count: sources.length,
         classification,
@@ -914,7 +1009,7 @@ Deno.serve(async (req) => {
       if (fallback) {
         return json({
           answer: fallback,
-          remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
+          remaining,
           ...(locked?.action ? { action: almaResponseAction(locked.action) } : {}),
           ...(lockedChips.length ? { chips: almaResponseChips(lockedChips) } : {}),
           human_contact: true,
@@ -975,7 +1070,7 @@ Deno.serve(async (req) => {
     ];
     const memberText = foldC([
       message,
-      ...history.map((m: any) => String(m?.content ?? "")),
+      ...trustedTurns.map((m: any) => String(m?.content ?? "")),
       JSON.stringify(facts ?? {}),
       JSON.stringify(dossier),
       prof.city ?? "",
@@ -995,7 +1090,7 @@ Deno.serve(async (req) => {
       gazetteer: placeNames,
       noListingPlaces: foreignWordsWithoutListings(publishedRows),
       actionLabels,
-      hasPriorExchange: history.length > 0 || Boolean(lastExchange),
+      hasPriorExchange: trustedTurns.length > 0 || Boolean(lastExchange),
       allowAlmaBio: register === "perso" || aboutAlma,
       // Lot A7 : un moment évoqué doit figurer dans le lien ou dans les faits.
       ...(bond ? { allowedClaims: allowedBondClaims(bond, facts) } : {}),
@@ -1066,6 +1161,7 @@ Deno.serve(async (req) => {
     if (guardIssuesBefore.length) (classification as any).output_guard = guardIssuesBefore;
     if (retried) (classification as any).retried = true;
     (classification as any).usage = usage;
+    if (trusted.dropped) (classification as any).history_dropped = trusted.dropped;
     if (issues.some((x) => !x.startsWith("manque:") && !x.startsWith("interdit:")) && !(classification as any).fallback_template) {
       (classification as any).soft_issues = issues;
     }
@@ -1111,17 +1207,22 @@ Deno.serve(async (req) => {
 
     return json({
       answer,
-      remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
+      remaining,
       ...(action ? { action: almaResponseAction(action) } : {}),
       ...(chips.length ? { chips: almaResponseChips(chips) } : {}),
       ...(human ? { human_contact: true } : {}),
       ...(conversationId ? { conversation_id: conversationId } : {}),
       ...(isReplay
-        ? { replay_meta: { register, classification, confirmed_sit: Boolean(facts && facts.gardes_confirmees.length > 0) } }
+        ? { replay_meta: { register, classification, confirmed_sit: Boolean(facts && facts.gardes_confirmees.length > 0), version: ALMA_VERSION } }
         : {}),
     });
   } catch (e) {
     console.error("alma-chat error", e);
+    try {
+      await releaseReservation?.();
+    } catch {
+      // La réservation reste comptée : mieux vaut un tour perdu qu'un plafond ouvert.
+    }
     return json({ error: "Erreur inattendue." }, 500);
   }
 });

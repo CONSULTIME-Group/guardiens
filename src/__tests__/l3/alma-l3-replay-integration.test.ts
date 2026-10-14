@@ -27,6 +27,10 @@ import * as childCare from "../../../supabase/functions/_shared/mission-child-ca
 import * as almaVersion from "../../../supabase/functions/_shared/alma-version";
 import * as almaUsage from "../../../supabase/functions/_shared/alma-usage";
 import * as almaBond from "../../../supabase/functions/_shared/alma-bond";
+// Lot A4 : sûreté, plafond réservé, intégrité des entrées.
+import * as almaSafety from "../../../supabase/functions/_shared/alma-safety";
+import * as turnCap from "../../../supabase/functions/_shared/alma-turn-cap";
+import * as almaIntegrity from "../../../supabase/functions/_shared/alma-integrity";
 import { ALMA_REPLAY_CASES } from "@/data/almaReplayCases";
 import { checkReplayAnswer } from "@/lib/alma/replayChecks";
 
@@ -50,6 +54,8 @@ function harness(profile: Record<string, unknown>, modelAnswers: string[] = ["R�
     chain.eq = (c: string, v: unknown) => { filters[c] = v; return chain; };
     chain.gte = chain.lte = chain.order = chain.in = chain.or = chain.like = chain.neq = chain.ilike = chain.not = chain.is = chain.limit = chain.contains = chain.overlaps = chain.filter = chain.range = () => chain;
     chain.maybeSingle = chain.single = () => { single = true; return chain; };
+    // Lot A4 : la ligne réservée est complétée par update.
+    chain.update = (row: any) => { writes.push({ table, row }); return { eq: () => Promise.resolve({ error: null }) }; };
     chain.insert = (row: any) => { writes.push({ table, row }); const p: any = Promise.resolve({ error: null }); p.select = () => ({ single: () => Promise.resolve({ data: { id: "conv-1" }, error: null }) }); return p; };
     chain.then = (resolve: (v: unknown) => unknown, reject: (r: unknown) => unknown) => {
       let rows: any[] = [];
@@ -62,7 +68,7 @@ function harness(profile: Record<string, unknown>, modelAnswers: string[] = ["R�
   });
   let call = 0;
   const callLovableAI = vi.fn(async () => ({ ok: true, data: { choices: [{ message: { content: modelAnswers[Math.min(call++, modelAnswers.length - 1)] } }] } }));
-  const client = { from, rpc: vi.fn(async () => ({ data: [], error: null })), auth: { getUser: vi.fn(async () => ({ data: { user: { id: MARTINE } }, error: null })) } };
+  const client = { from, rpc: vi.fn(async (name: string) => name === "alma_reserve_turn" ? { data: { ok: true, id: "conv-1", used: 1 }, error: null } : { data: [], error: null }), auth: { getUser: vi.fn(async () => ({ data: { user: { id: MARTINE } }, error: null })) } };
   const source = readFileSync("supabase/functions/alma-chat/index.ts", "utf8");
   const { outputText } = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } });
   const mods: Record<string, unknown> = {
@@ -70,6 +76,7 @@ function harness(profile: Record<string, unknown>, modelAnswers: string[] = ["R�
     "alma-facts.ts": almaFacts, "alma-inventory.ts": almaInventory, "alma-next-action.ts": nextAction,
     "alma-classify.ts": almaClassify, "alma-output.ts": almaOutput, "normalize-contact-message.ts": normalizeContact,
     "alma-owner-question.ts": ownerQuestion, "sit-location.ts": sitLocation, "alma-home-photo.ts": homePhoto, "alma-truth.ts": truth, "alma-companion.ts": companion, "alma-places.ts": places, "mission-child-care.ts": childCare, "alma-version.ts": almaVersion, "alma-usage.ts": almaUsage, "alma-bond.ts": almaBond,
+    "alma-safety.ts": almaSafety, "alma-turn-cap.ts": turnCap, "alma-integrity.ts": almaIntegrity,
   };
   runInNewContext(outputText, {
     exports: {}, Request, Response, Date, console: { error: vi.fn(), log: vi.fn() },
@@ -78,7 +85,7 @@ function harness(profile: Record<string, unknown>, modelAnswers: string[] = ["R�
       if (name.includes("supabase-js")) return { createClient: () => client };
       if (name.endsWith("ai-gateway.ts")) return { callLovableAI, CORS_HEADERS: {} };
       if (name.endsWith("alma-frustration-signal.ts")) return { recordAlmaFrustration: async () => {} };
-      if (name.endsWith("alma-signals.ts")) return { recordAlmaSignal: async () => {} };
+      if (name.endsWith("alma-signals.ts")) return { recordAlmaSignal: async () => ({ created: false }), raiseImmediateAlmaSignal: async () => ({ created: false, emailed: false }) };
       const key = Object.keys(mods).find((k) => name.endsWith(k));
       if (key) return mods[key];
       throw new Error(`Unexpected import ${name}`);

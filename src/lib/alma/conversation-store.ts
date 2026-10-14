@@ -9,6 +9,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
+import { applySafetyQuietFromResponse } from "@/lib/alma/safety-quiet";
 
 
 export type AlmaChatRole = "alma" | "user";
@@ -231,6 +232,8 @@ export async function sendAlmaMessage({
       return;
     }
     const answer = typeof (data as any)?.answer === "string" ? (data as any).answer.trim() : "";
+    // Lot A4 : un gabarit de sûreté fait taire les chuchotements 2 heures.
+    applySafetyQuietFromResponse(data);
     if (!answer) {
       setState({ sending: false, error: "Alma reste joignable dans un instant, réessayez." });
       return;
@@ -290,7 +293,8 @@ export async function sendAlmaFeedback(
 
 export interface HumanContactInput {
   name: string;
-  email: string;
+  /** Lot A4 : ignoré, alma-chat prend l'email du compte connecté. */
+  email?: string;
   text: string;
   surface: string;
   invoke?: typeof supabase.functions.invoke;
@@ -303,7 +307,6 @@ export async function sendAlmaHumanContact(input: HumanContactInput): Promise<bo
     body: {
       kind: "contact_humans",
       name: input.name,
-      email: input.email,
       text: input.text,
       surface: input.surface,
       page_path: typeof window !== "undefined" ? window.location.pathname : undefined,

@@ -340,7 +340,8 @@ describe("J2-A, rétrocompatibilité de la réponse", () => {
 
   it("le serveur garde answer et remaining, ajoute action et chips seulement s'ils existent", () => {
     const src = read("supabase/functions/alma-chat/index.ts");
-    expect(src).toContain("answer,\n      remaining:");
+    // Lot A4 : remaining vient du tour réservé avant l'appel au modèle.
+    expect(src).toContain("answer,\n      remaining,");
     // Lot A3 : chemins marqués via=alma et motif transmis au moment de répondre.
     expect(src).toContain("...(action ? { action: almaResponseAction(action) } : {})");
     expect(src).toContain("...(chips.length ? { chips: almaResponseChips(chips) } : {})");

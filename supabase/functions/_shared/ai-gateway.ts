@@ -9,6 +9,14 @@ export type GatewayCallOptions = {
   tools?: unknown[];
   tool_choice?: unknown;
   temperature?: number;
+  /** Lot A4 : plafond de jetons de sortie (Alma seule le passe). */
+  max_tokens?: number;
+  /**
+   * Lot A4 : délai (AbortSignal.timeout). Sans signal, le comportement des
+   * autres fonctions reste celui d'avant ; avec signal, un appel coupé rend
+   * { ok: false, status: 504, code: "AI_TIMEOUT" } au lieu de lever.
+   */
+  signal?: AbortSignal;
 };
 
 export type GatewayResult =
@@ -19,7 +27,7 @@ export async function callLovableAI(opts: GatewayCallOptions): Promise<GatewayRe
   const key = Deno.env.get("LOVABLE_API_KEY");
   if (!key) return { ok: false, status: 500, error: "LOVABLE_API_KEY manquant" };
 
-  const response = await fetch(AI_GATEWAY_URL, {
+  const doFetch = () => fetch(AI_GATEWAY_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${key}`,
@@ -31,8 +39,24 @@ export async function callLovableAI(opts: GatewayCallOptions): Promise<GatewayRe
       ...(opts.tools ? { tools: opts.tools } : {}),
       ...(opts.tool_choice ? { tool_choice: opts.tool_choice } : {}),
       ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
+      ...(opts.max_tokens !== undefined ? { max_tokens: opts.max_tokens } : {}),
     }),
+    ...(opts.signal ? { signal: opts.signal } : {}),
   });
+
+  let response: Response;
+  if (!opts.signal) {
+    response = await doFetch();
+  } else {
+    try {
+      response = await doFetch();
+    } catch (e) {
+      if (opts.signal.aborted || isAbortError(e)) {
+        return { ok: false, status: 504, code: "AI_TIMEOUT", error: "Délai de réponse IA dépassé." };
+      }
+      throw e;
+    }
+  }
 
   if (response.status === 429) {
     return { ok: false, status: 429, code: "AI_RATE_LIMITED", error: "Trop de requêtes IA, réessayez dans un instant." };
@@ -46,8 +70,24 @@ export async function callLovableAI(opts: GatewayCallOptions): Promise<GatewayRe
     return { ok: false, status: response.status, error: "Erreur fournisseur IA" };
   }
 
-  const data = await response.json();
-  return { ok: true, data };
+  if (!opts.signal) {
+    const data = await response.json();
+    return { ok: true, data };
+  }
+  try {
+    const data = await response.json();
+    return { ok: true, data };
+  } catch (e) {
+    if (opts.signal.aborted || isAbortError(e)) {
+      return { ok: false, status: 504, code: "AI_TIMEOUT", error: "Délai de réponse IA dépassé." };
+    }
+    throw e;
+  }
+}
+
+function isAbortError(e: unknown): boolean {
+  const name = (e as { name?: string } | null)?.name;
+  return name === "AbortError" || name === "TimeoutError";
 }
 
 export function extractToolArgs(data: any): any | null {
