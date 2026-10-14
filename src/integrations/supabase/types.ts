@@ -1148,6 +1148,42 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_departements_20261014: {
+        Row: {
+          h1_title: string | null
+          highlights: string | null
+          id: string | null
+          intro_text: string | null
+          meta_description: string | null
+          meta_title: string | null
+          published: boolean | null
+          saved_at: string | null
+          slug: string | null
+        }
+        Insert: {
+          h1_title?: string | null
+          highlights?: string | null
+          id?: string | null
+          intro_text?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          published?: boolean | null
+          saved_at?: string | null
+          slug?: string | null
+        }
+        Update: {
+          h1_title?: string | null
+          highlights?: string | null
+          id?: string | null
+          intro_text?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          published?: boolean | null
+          saved_at?: string | null
+          slug?: string | null
+        }
+        Relationships: []
+      }
       _backup_digest_cron_20260919: {
         Row: {
           active: boolean | null
@@ -1593,6 +1629,36 @@ export type Database = {
           schemaname?: string | null
           tablename?: string | null
           with_check?: string | null
+        }
+        Relationships: []
+      }
+      _backup_polynesie_20261014: {
+        Row: {
+          content: string | null
+          id: string | null
+          intro_text: string | null
+          meta_description: string | null
+          published: boolean | null
+          saved_at: string | null
+          slug: string | null
+        }
+        Insert: {
+          content?: string | null
+          id?: string | null
+          intro_text?: string | null
+          meta_description?: string | null
+          published?: boolean | null
+          saved_at?: string | null
+          slug?: string | null
+        }
+        Update: {
+          content?: string | null
+          id?: string | null
+          intro_text?: string | null
+          meta_description?: string | null
+          published?: boolean | null
+          saved_at?: string | null
+          slug?: string | null
         }
         Relationships: []
       }
@@ -6435,6 +6501,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      legal_acceptances: {
+        Row: {
+          accepted_at: string
+          document: string
+          id: string
+          source: string
+          user_id: string
+          version: string
+        }
+        Insert: {
+          accepted_at?: string
+          document: string
+          id?: string
+          source: string
+          user_id: string
+          version: string
+        }
+        Update: {
+          accepted_at?: string
+          document?: string
+          id?: string
+          source?: string
+          user_id?: string
+          version?: string
+        }
+        Relationships: []
+      }
+      legal_document_versions: {
+        Row: {
+          document: string
+          effective_on: string
+          published_on: string
+          requires_reaccept: boolean
+          version: string
+        }
+        Insert: {
+          document: string
+          effective_on: string
+          published_on: string
+          requires_reaccept?: boolean
+          version: string
+        }
+        Update: {
+          document?: string
+          effective_on?: string
+          published_on?: string
+          requires_reaccept?: boolean
+          version?: string
+        }
+        Relationships: []
       }
       location_profiles: {
         Row: {
@@ -13682,6 +13799,14 @@ export type Database = {
         Returns: Json
       }
       my_mutual_aid_radius_km: { Args: never; Returns: number }
+      my_pending_legal_documents: {
+        Args: never
+        Returns: {
+          document: string
+          effective_on: string
+          version: string
+        }[]
+      }
       normalize_analytics_source: { Args: { raw: string }; Returns: string }
       normalize_city_name: { Args: { txt: string }; Returns: string }
       notify_owner_of_new_application: {
@@ -13979,6 +14104,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      record_legal_acceptance_for: {
+        Args: { p_source: string; p_user: string }
+        Returns: undefined
+      }
+      record_my_legal_acceptance: {
+        Args: { p_source: string }
+        Returns: boolean
+      }
       refresh_all_sitter_reply_stats: { Args: never; Returns: number }
       refresh_sitter_reply_stats: {
         Args: { p_user_id: string }
@@ -14038,6 +14171,15 @@ export type Database = {
         Returns: Json
       }
       retry_missing_geocoding: { Args: never; Returns: Json }
+      review_sit_periods: {
+        Args: { p_review_ids: string[] }
+        Returns: {
+          review_id: string
+          sit_end_date: string
+          sit_id: string
+          sit_start_date: string
+        }[]
+      }
       school_zone_from_postal_code: { Args: { p_cp: string }; Returns: string }
       search_alma_knowledge: {
         Args: { p_limit?: number; p_query: string }
