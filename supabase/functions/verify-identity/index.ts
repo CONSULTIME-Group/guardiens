@@ -283,7 +283,7 @@ Rules:
           user_id: user.id,
           type: "identity_pending",
           title: "Pièce en cours de vérification",
-          body: "Votre pièce d'identité est en cours de vérification par l'équipe Guardiens. Réponse sous 24 h.",
+          body: "Votre pièce d'identité est en cours de vérification par l'équipe Guardiens.",
           link: "/settings?section=security&focus=identity",
         }),
         (async () => {

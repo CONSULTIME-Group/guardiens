@@ -69,7 +69,7 @@ const EmergencySitter = () => {
     areaServed: { "@type": "Country", name: "France" },
     audience: { "@type": "Audience", audienceType: "Propriétaires d'animaux ayant un besoin de garde imprévu" },
     description:
-      "Mobilisez les gardiens d'urgence près de chez vous pour vos animaux et votre maison en cas d'imprévu : hospitalisation, deuil, déplacement professionnel.",
+      "Bientôt disponible : un réseau de gardiens d'urgence près de chez vous, alertés en priorité pour vos animaux et votre maison en cas d'imprévu (hospitalisation, deuil, déplacement professionnel).",
   };
 
   return (
