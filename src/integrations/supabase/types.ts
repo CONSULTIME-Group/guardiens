@@ -1286,6 +1286,30 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_faq_urgence_20261014: {
+        Row: {
+          answer: string | null
+          id: string | null
+          published: boolean | null
+          question: string | null
+          saved_at: string | null
+        }
+        Insert: {
+          answer?: string | null
+          id?: string | null
+          published?: boolean | null
+          question?: string | null
+          saved_at?: string | null
+        }
+        Update: {
+          answer?: string | null
+          id?: string | null
+          published?: boolean | null
+          question?: string | null
+          saved_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_fn_acl_20260920: {
         Row: {
           acl: string | null
@@ -7358,6 +7382,7 @@ export type Database = {
           id: string
           send_condition: Json | null
           sequence_id: string
+          skip_condition: Json | null
           step_order: number
           template_name: string
         }
@@ -7368,6 +7393,7 @@ export type Database = {
           id?: string
           send_condition?: Json | null
           sequence_id: string
+          skip_condition?: Json | null
           step_order: number
           template_name: string
         }
@@ -7378,6 +7404,7 @@ export type Database = {
           id?: string
           send_condition?: Json | null
           sequence_id?: string
+          skip_condition?: Json | null
           step_order?: number
           template_name?: string
         }
@@ -13599,6 +13626,7 @@ export type Database = {
         Returns: boolean
       }
       has_active_subscription: { Args: { p_user_id: string }; Returns: boolean }
+      has_published_sit: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
