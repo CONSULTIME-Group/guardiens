@@ -1,7 +1,7 @@
 import { openCookiePreferences } from "@/lib/cookieConsent";
 import React from "react";
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { useInAppShell } from "./AppShellContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { PRESS_ARTICLE_URL } from "@/data/siteConstants";

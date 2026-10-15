@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { SUPPORTED_LANGS, loadLanguage } from "@/i18n";
 import { getStoredLang, isSupportedLang, setStoredLang } from "@/lib/lang";
 

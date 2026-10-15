@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { compressImageFile } from "@/lib/compressImage";
 import { ImagePlus, X, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { trackEvent } from "@/lib/analytics";
 import { Progress } from "@/components/ui/progress";
 import { safeUUID } from "@/lib/uuid";

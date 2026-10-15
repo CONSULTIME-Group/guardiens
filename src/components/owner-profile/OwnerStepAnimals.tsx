@@ -16,7 +16,7 @@ import BreedAutocompleteInput from "../breeds/BreedAutocompleteInput";
 import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { trackEvent } from "@/lib/analytics";
 import { readFormDraft, writeFormDraft, clearFormDraft, listFormDraftKeys, getFormDraftSavedAt } from "@/lib/formDraft";
 import DraftStatus, { type DraftState } from "@/components/shared/DraftStatus";

@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { ARTICLE_CATEGORIES, META_DESCRIPTION_MAX, nextPublishedState, type ArticleSaveAction } from "@/lib/admin/articleCategories";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { slugify } from "@/lib/normalize";
 import { compressArticleCoverFile } from "@/lib/compressImage";
 import { trackEvent } from "@/lib/analytics";

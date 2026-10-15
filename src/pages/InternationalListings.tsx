@@ -8,7 +8,7 @@ import MapErrorBoundary from "@/components/shared/MapErrorBoundary";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
 import { Globe2, MapPin, X } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import "leaflet/dist/leaflet.css";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";

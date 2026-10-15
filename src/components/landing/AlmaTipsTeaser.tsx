@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useInView } from "@/hooks/useInView";
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { supabase } from "@/integrations/supabase/client";
 import { AlmaAvatar } from "@/components/ai/alma/AlmaAvatar";
 import { Badge } from "@/components/ui/badge";

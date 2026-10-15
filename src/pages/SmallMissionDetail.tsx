@@ -1,5 +1,5 @@
 import { MISSION_CATEGORIES } from "@/lib/missionCategories";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { useState, useEffect, useLayoutEffect, useCallback, useRef } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { captureMissionSource, readMissionSource } from "@/lib/missionResponseSource";

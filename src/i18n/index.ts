@@ -1,6 +1,4 @@
-import i18n from "i18next";
-import { initReactI18next } from "react-i18next";
-import LanguageDetector from "i18next-browser-languagedetector";
+import { LiteI18n } from "./lite";
 // Lot P5 : seuls les textes du premier écran (en-tête, pied de page,
 // accessibilité) restent dans l'entrée ; le dictionnaire complet arrive en
 // parallèle et chaque page paresseuse l'attend (src/lib/dictionaryGate.ts).
@@ -14,6 +12,12 @@ import { LANG_STORAGE_KEY, migrateLegacyLangStorage } from "@/lib/langStorageKey
 // tous les appels t() fonctionnent à l'identique. Ce retrait concerne une
 // langue, pas l'internationalisation elle-même.
 //
+// Lot perf 7 (15/10/2026) : i18next, react-i18next et leur détecteur de
+// langue sont remplacés par un moteur léger (./lite.ts, ./react.tsx) qui
+// reprend exactement les usages du site, parité vérifiée contre i18next
+// clé par clé (src/__tests__/perf7/). 19 Ko compressés de moins sur
+// chaque page.
+//
 // Les anciennes variantes `?lang=de|it|es|en` connues de Google retombent sur
 // un rendu français indexable (voir LangUrlSync et resolveInitialLang).
 // Lot P2b : le dictionnaire est de nouveau importé statiquement. Le premier
@@ -26,33 +30,22 @@ export type SupportedLang = (typeof SUPPORTED_LANGS)[number];
 // détecteur sont reprises puis effacées avant toute détection.
 migrateLegacyLangStorage(SUPPORTED_LANGS as readonly string[]);
 
-void i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    fallbackLng: "fr",
-    supportedLngs: SUPPORTED_LANGS as unknown as string[],
-    defaultNS: "common",
-    ns: ["common"],
-    resources: { fr: { common: (globalThis as any).__I18N_FULL__ ?? { a11y, article, footer, nav } } },
-    // Conservée pour le jour où un dictionnaire arriverait après l'init :
-    // sans cette option, i18next considérerait une langue absente des
-    // resources comme non chargée et n'irait jamais la relire.
-    partialBundledLanguages: true,
-    load: "languageOnly",
-    detection: {
-      // Un lien explicite (`?lang=fr`) gagne toujours. Sans paramètre, le
-      // choix mémorisé prend le relais, puis la langue du navigateur. Avec
-      // un seul dictionnaire, tout cela converge vers le français.
-      // Une seule clé de stockage, définie dans src/lib/langStorageKey.ts.
-      order: ["querystring", "localStorage", "navigator"],
-      caches: ["localStorage"],
-      lookupQuerystring: "lang",
-      lookupLocalStorage: LANG_STORAGE_KEY,
-    },
-    interpolation: { escapeValue: false },
-    react: { useSuspense: false },
-  });
+const i18n = new LiteI18n({
+  lng: "fr",
+  supportedLngs: SUPPORTED_LANGS as unknown as string[],
+  ns: "common",
+  resources: { fr: { common: (globalThis as any).__I18N_FULL__ ?? { a11y, article, footer, nav } } },
+});
+
+// Mémoire de langue, comme le détecteur d'i18next (caches: localStorage) :
+// la langue retenue est écrite au démarrage puis à chaque changement. Un
+// lien explicite (`?lang=fr`), le choix mémorisé ou la langue du navigateur
+// convergent tous vers le français, seule langue proposée.
+const cacheLanguage = (lng: string) => {
+  try { if (typeof window !== "undefined") window.localStorage.setItem(LANG_STORAGE_KEY, lng); } catch { /* stockage indisponible */ }
+};
+i18n.on("cacheLanguage", cacheLanguage);
+cacheLanguage(i18n.language);
 
 let full: Promise<void> | null = null;
 /** Dictionnaire complet, chargé une fois (nouvelle tentative après un échec). */

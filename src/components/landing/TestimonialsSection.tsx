@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { RevealSection } from "@/components/ui/RevealSection";
 import RealMembersStrip from "@/components/landing/RealMembersStrip";

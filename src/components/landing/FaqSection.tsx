@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { RevealSection } from "@/components/ui/RevealSection";
 import { useInternationalSitsCount } from "@/hooks/useInternationalSitsCount";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";

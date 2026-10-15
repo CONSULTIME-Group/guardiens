@@ -1,7 +1,7 @@
 import { fetchMyProfile } from "@/lib/myProfile";
 import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import PageMeta from "@/components/PageMeta";
 import { logger } from "@/lib/logger";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";

@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { RevealSection } from "@/components/ui/RevealSection";
 import cle720 from "@/assets/landing/cle-ancienne-720.webp";
 import cle360 from "@/assets/landing/cle-ancienne-360.webp";

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import { Badge } from "@/components/ui/badge";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
 import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";

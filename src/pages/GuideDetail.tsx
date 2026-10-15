@@ -1,7 +1,7 @@
 import PublicLoadError from "@/components/seo/ErrorPage";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { slugify } from "@/lib/normalize";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";

@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { safeUUID } from "@/lib/uuid";
 import { compressGalleryFile } from "@/lib/compressImage";
 import { trackEvent } from "@/lib/analytics";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { readFormDraft, writeFormDraft, clearFormDraft, getFormDraftSavedAt } from "@/lib/formDraft";
 import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import DraftStatus, { type DraftState } from "@/components/shared/DraftStatus";

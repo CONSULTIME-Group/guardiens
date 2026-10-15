@@ -3,7 +3,7 @@
 // Les meta og:* sont injectées impérativement par PageMeta ; les caches sociaux liront index.html
 // après prerender (Prerender.io / Cloudflare Worker, TODO infra).
 import { Suspense, useState, useEffect, useLayoutEffect, useRef } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import i18n from "@/i18n";
 
 /**
