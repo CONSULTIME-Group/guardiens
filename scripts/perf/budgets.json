@@ -1,5 +1,5 @@
 {
-  "/annonces": 12000,
-  "/annonces?ville=Lyon&zone=radius": 15000,
-  "fiche": 15000
+  "/annonces": { "visible": 5000, "content": 7500 },
+  "/annonces?ville=Lyon&zone=radius": { "content": 9000 },
+  "fiche": { "content": 7500 }
 }

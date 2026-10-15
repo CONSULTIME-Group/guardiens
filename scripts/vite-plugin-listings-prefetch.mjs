@@ -83,6 +83,52 @@ if(C.b){var b=document.createElement("script");b.src=C.b;b.async=true;b.fetchPri
 }catch(e){}})();</script>`;
 }
 
+
+/**
+ * Lot perf 5 : fiche publique d'une annonce (/annonces/:slug) lue dès le HTML
+ * pour un visiteur, mêmes lectures que PublicSitDetail (parité verrouillée
+ * par src/__tests__/perf5/), reprises une fois par takeSitPrefetch
+ * (src/lib/sitPrefetch.ts).
+ */
+export const SIT_PREFETCH_GLOBAL = "__GUARDIENS_SIT__";
+export const SIT_PREFETCH_SPEC = {
+  owner: { table: "public_profiles", select: "id, first_name, city, postal_code, avatar_url, identity_verified, bio, completed_sits_count, is_founder", by: "id", from: "user_id", query: "limit=1" },
+  property: { table: "properties", select: "*", by: "id", from: "property_id", query: "limit=1" },
+  reviews: { rpc: "public_profile_reviews", arg: "p_user_id", from: "user_id" },
+  badges: { table: "public_badge_attributions", select: "badge_id", by: "user_id", from: "user_id", query: "" },
+  gallery: { table: "owner_gallery", select: "photo_url, position, width, height", by: "user_id", from: "user_id", query: "order=position.asc" },
+  pets: { table: "public_pets", select: "*", by: "property_id", from: "property_id", query: "" },
+  ownerProfile: { table: "public_owner_profiles", select: "presence_expected, welcome_notes, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace", by: "user_id", from: "user_id", query: "limit=2" },
+  houseGuide: { table: "house_guides", select: "id", by: "property_id", from: "property_id", query: "limit=2" },
+};
+
+export function sitPrefetchScript(supabaseUrl, anonKey) {
+  if (!supabaseUrl || !anonKey) return "";
+  const w = Object.entries(SIT_PREFETCH_SPEC).map(([k, v]) => v.rpc ? [k, 1, v.rpc, v.arg, v.from] : [k, 0, v.table, clean(v.select), v.by, v.from, v.query]);
+  const cfg = { u: supabaseUrl.replace(/\/+$/, ""), k: anonKey, w };
+  return `<script data-sit-prefetch>(function(){try{
+var C=${JSON.stringify(cfg)};
+var m=location.pathname.match(/^\\/annonces\\/([^\\/]+)\\/?$/);
+if(!m||m[1]==="international"||m[1]==="demo")return;
+try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i)||"";if(k.indexOf("sb-")===0&&/-auth-token$/.test(k))return;}}catch(e){return;}
+if(!window.fetch||!window.Promise)return;
+var param=decodeURIComponent(m[1]);
+var H={apikey:C.k,Authorization:"Bearer "+C.k,Accept:"application/json","Content-Type":"application/json"};
+var ok=function(r){if(!r.ok)throw new Error("http");return r.json();};
+var rpc=function(f,b){return fetch(C.u+"/rest/v1/rpc/"+f,{method:"POST",headers:H,body:JSON.stringify(b)}).then(ok);};
+var get=function(p){return fetch(C.u+"/rest/v1/"+p,{headers:H}).then(ok);};
+var p=rpc("get_public_sit",{p_param:param}).then(function(rows){
+if(!(rows instanceof Array))throw new Error("rows");
+var s=rows[0];if(!s)return {sit:rows};
+return Promise.all(C.w.map(function(x){var v=s[x[x[1]?4:5]];
+if(x[1]){var b={};b[x[3]]=v;return v?rpc(x[2],b):[];}
+if(!v)return [];return get(x[2]+"?select="+x[3]+"&"+x[4]+"=eq."+encodeURIComponent(v)+(x[6]?"&"+x[6]:""));})).then(function(r){
+var out={sit:rows};for(var j=0;j<C.w.length;j++)out[C.w[j][0]]=r[j];return out;});
+})["catch"](function(){return null;});
+window.${SIT_PREFETCH_GLOBAL}={at:Date.now(),param:param,p:p};
+}catch(e){}})();</script>`;
+}
+
 /** Textes du haut de /annonces, tirés du dictionnaire (mêmes clés que PublicListings). */
 export function bootTexts(dict) {
   const p = dict.public_listings, s = dict.search_results;
@@ -131,6 +177,12 @@ export async function buildBootListings(root) {
   return { code, fileName: `assets/boot-listings-${hash}.js` };
 }
 
+/** Premier affichage en ligne, après le script des lectures ; « </ » neutralisé. */
+export function bootInlineScript(boot) {
+  if (!boot?.code) return "";
+  return `<script data-boot-listings>${boot.code.replace(/<\//g, "<\\/")}</script>`;
+}
+
 export function listingsPrefetchPlugin() {
   let env = {};
   let root = process.cwd();
@@ -141,17 +193,21 @@ export function listingsPrefetchPlugin() {
     configResolved(cfg) { env = cfg.env || {}; root = cfg.root || root; },
     async buildStart() {
       boot = await buildBootListings(root);
-      this.emitFile({ type: "asset", fileName: boot.fileName, source: boot.code });
     },
     transformIndexHtml: {
       order: "post",
       handler(html) {
-        const script = listingsPrefetchScript(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY, boot ? `/${boot.fileName}` : null);
+        // Lot perf 5 : le premier affichage est écrit dans la page (environ
+        // 7 Ko compressés sur chaque page), il ne dépend plus d'un fichier qui
+        // partageait le réseau avec le code (2,2 s sur mobile ralenti en
+        // production le 15/10/2026, 0,6 s une fois en ligne).
+        const script = listingsPrefetchScript(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY, null);
         if (!script) return html;
         const at = html.indexOf('<script type="module"');
         if (at === -1) throw new Error("[perf3-listings-prefetch] script d'entrée introuvable");
         // Avant le script d'entrée : les lectures partent pendant son téléchargement.
-        return html.slice(0, at) + script.replace(/\n/g, "") + "\n    " + html.slice(at);
+        const sit = sitPrefetchScript(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY).replace(/\n/g, "");
+        return html.slice(0, at) + script.replace(/\n/g, "") + "\n    " + sit + "\n    " + bootInlineScript(boot) + "\n    " + html.slice(at);
       },
     },
   };
