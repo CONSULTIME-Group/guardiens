@@ -33,6 +33,47 @@ const BUILD_ID =
   BUILD_TIME.replace(/[:.]/g, "-");
 
 // https://vitejs.dev/config/
+/**
+ * Familles de dépendances regroupées hors de l'entrée (lot perf 6). Les
+ * composants Radix restent suivis par leurs pages (accordéon, menus,
+ * sélecteurs), seules leurs briques internes forment vendor-radix-core.
+ */
+function lazyVendorFamily(p: string, match: (name: string) => boolean): string | undefined {
+  // Superpositions communes à /annonces, à la fiche et aux pages membre.
+  if (
+    ["dialog", "popover", "tooltip", "popper", "arrow", "portal", "dismissable-layer", "focus-scope", "focus-guards", "use-escape-keydown", "use-size", "visually-hidden"].some((n) => match("@radix-ui/react-" + n))
+    || p.includes("@floating-ui/")
+    || ["react-remove-scroll", "react-remove-scroll-bar", "react-style-singleton", "use-callback-ref", "use-sidecar", "aria-hidden", "get-nonce", "detect-node-es"].some(match)
+  ) return "vendor-overlay";
+  // Briques internes de Radix partagées par l'accordéon de l'accueil et par
+  // les superpositions : sans groupe propre, Rollup les rangerait dans
+  // vendor-overlay et l'accueil le chargerait en entier.
+  if (
+    match("@radix-ui/primitive") || match("@radix-ui/number")
+    || ["primitive", "context", "compose-refs", "slot", "id", "presence", "collection", "direction", "use-controllable-state", "use-effect-event", "use-layout-effect", "use-callback-ref", "use-previous", "use-is-hydrated"].some((n) => match("@radix-ui/react-" + n))
+  ) return "vendor-radix-core";
+  return undefined;
+}
+
+const entryStaticCache = new WeakMap<object, Set<string>>();
+/** Modules importés statiquement depuis l'entrée, calculés une fois par build. */
+function entryStaticModules(meta: { getModuleInfo: (id: string) => any; getModuleIds: () => IterableIterator<string> }): Set<string> {
+  const cached = entryStaticCache.get(meta.getModuleInfo);
+  if (cached) return cached;
+  const seen = new Set<string>();
+  const stack = [...meta.getModuleIds()].filter((m) => meta.getModuleInfo(m)?.isEntry);
+  while (stack.length) {
+    const m = stack.pop()!;
+    if (seen.has(m)) continue;
+    seen.add(m);
+    // Les index de paquets qui réexportent tout (icônes, dates) ne disent
+    // pas ce que l'entrée utilise vraiment : on ne les suit pas.
+    for (const i of meta.getModuleInfo(m)?.importedIds ?? []) if (!/node_modules\/(lucide-react|date-fns)\//.test(i)) stack.push(i);
+  }
+  entryStaticCache.set(meta.getModuleInfo, seen);
+  return seen;
+}
+
 export default defineConfig(({ mode }) => ({
   define: {
     __BUILD_ID__: JSON.stringify(BUILD_ID),
@@ -82,6 +123,15 @@ export default defineConfig(({ mode }) => ({
           ]
         : []),
       { find: "@", replacement: path.resolve(__dirname, "./src") },
+      // Lot perf 6 : version de production de React Router (le paquet ne
+      // publie la sienne que sous dist/production, ses exports pointent sur
+      // la version de développement, avertissements compris).
+      ...(mode === "production"
+        ? [
+            { find: /^react-router$/, replacement: path.resolve(__dirname, "node_modules/react-router/dist/production/index.mjs") },
+            { find: /^react-router\/dom$/, replacement: path.resolve(__dirname, "node_modules/react-router/dist/production/dom-export.mjs") },
+          ]
+        : []),
     ],
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
   },
@@ -96,11 +146,20 @@ export default defineConfig(({ mode }) => ({
         // fusionnait des modules partagés, ce qui forçait l'entrée à charger
         // recharts sur toutes les pages, y compris les pages ville sans graphique.
         // Sans règle, recharts reste dans le graphe paresseux des pages admin.
-        manualChunks(id: string) {
-          // Lot P1 : les petits composants d'interface partagés forment un seul
-          // fichier au lieu d'une trentaine de fichiers de quelques Ko.
+        manualChunks(id: string, meta: { getModuleInfo: (id: string) => any; getModuleIds: () => IterableIterator<string> }) {
+          // Aide d'interopérabilité CommonJS utilisée par React : elle reste
+          // avec React, sinon vendor-react et vendor-base s'importent l'un
+          // l'autre et React n'est pas encore défini à l'exécution (verrou
+          // dans src/__tests__/p2/startup-build.test.ts).
+          if (id.startsWith("\0commonjsHelpers")) return "vendor-react";
           if (!id.includes("node_modules")) {
-            if (/\/src\/components\/ui\/(accordion|alert|alert-dialog|avatar|badge|button|card|checkbox|collapsible|dialog|dropdown-menu|input|label|popover|progress|radio-group|select|separator|sheet|skeleton|switch|tabs|textarea|tooltip|toast|toaster|use-toast)\.tsx?$/.test(id)) return "app-ui";
+            // Lot P1 : les petits composants d'interface partagés forment un
+            // seul fichier au lieu d'une trentaine de fichiers de quelques Ko.
+            // Lot perf 6 : seuls les petits composants sans dépendance lourde
+            // restent groupés ; Select, menus, Popover, Dialog, Accordion,
+            // Tooltip et Toast suivent leurs pages (ils emportaient Radix et
+            // floating-ui dans l'entrée).
+            if (/\/src\/components\/ui\/(alert|avatar|badge|button|card|input|label|progress|separator|skeleton|textarea)\.tsx?$/.test(id)) return "app-ui";
             return;
           }
           const p = id.split("node_modules/").pop() ?? "";
@@ -108,10 +167,23 @@ export default defineConfig(({ mode }) => ({
           if (match("use-sync-external-store") || match("react-is") || match("scheduler")) return "vendor-react";
           if (match("@tanstack/react-query")) return "vendor-query";
           if (match("@supabase/supabase-js")) return "vendor-supabase";
-          if (p.startsWith("@radix-ui/")) return "vendor-ui";
-          if (match("lucide-react")) return "vendor-icons";
-          if (match("date-fns")) return "vendor-date";
           if (match("react") || match("react-dom") || match("react-router-dom") || match("react-router")) return "vendor-react";
+          // Lot perf 6 : l'ancien groupe vendor-ui (Radix, 47 Ko compressés)
+          // partait avec l'entrée, accueil compris. Désormais :
+          // 1. icônes : chacune suit ses pages (le fichier d'index de
+          //    lucide-react importe toutes les icônes, un groupe les ferait
+          //    toutes entrer dans l'entrée) ;
+          // 2. date-fns : un fichier chargé par les pages qui datent ;
+          // 3. dépendances importées par l'entrée : vendor-base. Sans ce nom,
+          //    Rollup range une dépendance non assignée dans le groupe qui
+          //    l'importe aussi, et l'entrée chargerait ce groupe en entier ;
+          // 4. superpositions et briques Radix : groupes chargés par les pages
+          //    seulement (sans cela /annonces chargeait 120 fichiers).
+          if (match("lucide-react")) return;
+          if (match("date-fns")) return "vendor-date";
+          if (entryStaticModules(meta).has(id)) return "vendor-base";
+          const family = lazyVendorFamily(p, match);
+          if (family) return family;
         },
       },
     },

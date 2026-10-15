@@ -52,7 +52,7 @@ import MissionResponseCard from "@/components/missions/MissionResponseCard";
 import MissionResponseModal from "@/components/missions/MissionResponseModal";
 import RescheduleMissionDialog from "@/components/missions/RescheduleMissionDialog";
 import { isMissionDatePassed, missionReferenceDate, localIsoDay, daysBetween } from "@/lib/missionReschedule";
-import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
+import ApproximateLocationMap from "@/components/shared/LazyApproximateLocationMap";
 import { isAuthorOf } from "@/lib/ownership";
 import { isMissionSitMode, sitModeLine } from "@/lib/missionSitMode";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";

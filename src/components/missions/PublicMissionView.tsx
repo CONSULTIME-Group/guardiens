@@ -8,7 +8,7 @@ import { Share2, CheckCircle2, ShieldCheck, Eye, Users, Dog, Flower2, Home as Ho
 import { formatProjetPeriod, formatProjetMonths, formatProjetDay, projetParagraphs, projetDurationLabel, hebergementLabel, projetNatureLabel, savoirFaireLabel, offreLabel, externalRegistrationUrl, projetAccueilHours, projetSections } from "@/lib/projets";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
-import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
+import ApproximateLocationMap from "@/components/shared/LazyApproximateLocationMap";
 import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
 import Head from "@/components/seo/Head";
 import { avatarImageUrl } from "@/lib/storageImage";

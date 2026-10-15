@@ -23,7 +23,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { trackEvent } from "@/lib/analytics";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
 
-import AccordDeGarde from "@/components/gardes/AccordDeGarde";
+import AccordDeGarde from "@/components/gardes/LazyAccordDeGarde";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import ApplicationModal from "@/components/sits/ApplicationModal";
 import { applyDeepLinkTarget } from "@/lib/alma/applyDeepLink";

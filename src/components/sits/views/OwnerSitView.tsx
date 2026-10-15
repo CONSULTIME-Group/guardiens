@@ -63,7 +63,7 @@ import SitDateHistory from "@/components/sits/SitDateHistory";
 import ApplicationsList from "@/components/sits/ApplicationsList";
 import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
 import AccordOwnerStatusBanner from "@/components/gardes/AccordOwnerStatusBanner";
-import AccordDeGarde from "@/components/gardes/AccordDeGarde";
+import AccordDeGarde from "@/components/gardes/LazyAccordDeGarde";
 import { buildAccordDeGardeData, fetchAccordHouseGuide } from "@/lib/accordDeGarde";
 import CancelSitModal from "@/components/sits/CancelSitModal";
 import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";

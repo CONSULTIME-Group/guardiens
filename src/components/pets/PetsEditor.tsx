@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { Suspense, useState, useRef, useEffect } from "react";
 import { listFormDraftKeys } from "@/lib/formDraft";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Edit, Trash2, PawPrint } from "lucide-react";
@@ -17,7 +17,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import PetForm, { type PetFormValues } from "./PetForm";
+import type { PetFormValues } from "./PetForm";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
+import { runAfterFirstPaint } from "@/lib/bootSchedule";
+
+// Lot perf 6 : le formulaire d'animal (zod et react-hook-form, environ 35 Ko
+// compressés) ne part plus avec le tableau de bord ; préchargé après
+// l'affichage, il est prêt à l'ouverture de la fenêtre.
+const loadPetForm = () => import("./PetForm");
+const PetForm = lazyWithRetry(loadPetForm, "PetForm");
 
 // Libellés d'espèces : module unique src/lib/petLabels.ts. Valeur inconnue :
 // on masque plutôt que d'afficher la valeur brute de la base.
@@ -41,6 +49,7 @@ interface Props {
 }
 
 const PetsEditor = ({ propertyId, onChange }: Props) => {
+  useEffect(() => { runAfterFirstPaint(() => { void loadPetForm().catch(() => {}); }, 4000); }, []);
   const qc = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Pet | null>(null);
@@ -171,6 +180,7 @@ const PetsEditor = ({ propertyId, onChange }: Props) => {
               Ces informations aideront les gardiens à mieux préparer leur venue.
             </DialogDescription>
           </DialogHeader>
+          <Suspense fallback={<div className="h-64 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />}>
           <PetForm
             initialValues={editing ?? undefined}
             draftKey={`pet-form:${propertyId}:${editing?.id ?? "new"}`}
@@ -179,6 +189,7 @@ const PetsEditor = ({ propertyId, onChange }: Props) => {
             onCancel={() => { setFormDirty(false); setDialogOpen(false); setEditing(null); }}
             submitLabel={editing ? "Enregistrer" : "Ajouter"}
           />
+          </Suspense>
         </DialogContent>
       </Dialog>
 
