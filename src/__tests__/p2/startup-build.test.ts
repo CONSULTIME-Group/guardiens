@@ -90,6 +90,18 @@ describe("P2, build de production", () => {
     expect([...closure].filter((f) => /^vendor-(overlay|date)-/.test(f))).toEqual([]);
   });
 
+  it("lot perf 8 : le dictionnaire complet n'est ni importé statiquement ni préchargé", () => {
+    const assets = join(dir, "assets");
+    const dictionary = readdirSync(assets).filter((f) => /^common-[^.]+\.js$/.test(f));
+    for (const d of dictionary) {
+      expect(html.includes(d), `${d} préchargé par le HTML`).toBe(false);
+      const staticImporters = readdirSync(assets)
+        .filter((f) => f.endsWith(".js"))
+        .filter((f) => new RegExp(`(?:^|[;\\n}])\\s*import\\s*(?:[^"'()]*?from\\s*)?["']\\./${d.replace(".", "\\.")}["']`).test(readFileSync(join(assets, f), "utf8")));
+      expect(staticImporters, d).toEqual([]);
+    }
+  });
+
   it("bandeau de diagnostic et outil de débogage OAuth absents", () => {
     expect(allCode.includes("Restart preview")).toBe(false);
     expect(allCode.includes("preview-restart-button")).toBe(false);

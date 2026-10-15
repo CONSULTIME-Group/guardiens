@@ -64,6 +64,9 @@ export class LiteI18n {
   private readonly handlers = new Map<string, Set<Handler>>();
   private readonly rules = new Map<string, Intl.PluralRules>();
 
+  /** Lot perf 8 : appelé quand une clé vise un espace absent du dictionnaire chargé. */
+  onMissingNamespace: ((ns: string, key: string) => void) | null = null;
+
   constructor(opts: { lng: string; supportedLngs: string[]; ns?: string; resources?: Record<string, Record<string, Dict>> }) {
     this.language = opts.lng;
     this.languages = [opts.lng];
@@ -120,6 +123,13 @@ export class LiteI18n {
       if (found !== undefined) break;
     }
     const data = opts.replace && typeof opts.replace !== "string" ? (opts.replace as Record<string, unknown>) : (opts as Record<string, unknown>);
+    if (found === undefined && this.onMissingNamespace) {
+      const d = this.dict();
+      for (const k of list) {
+        const ns = String(k).split(".")[0];
+        if (ns && !(d && ns in d)) this.onMissingNamespace(ns, String(k));
+      }
+    }
     if (found === undefined) {
       if (typeof opts.defaultValue === "string") return interpolate(opts.defaultValue, data, opts);
       return usedKey;

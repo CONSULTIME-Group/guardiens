@@ -54,8 +54,32 @@ export function loadFullDictionary(): Promise<void> {
     .then((m) => { i18n.addResourceBundle("fr", "common", JSON.parse(m.default), true, true); })
     .catch((e) => { full = null; throw e; }));
 }
-setDictionaryGate(loadFullDictionary);
-void loadFullDictionary().catch(() => {});
+
+// Lot perf 8 : chaque fichier qui cite une clé apporte son espace du
+// dictionnaire (scripts/vite-plugin-i18n-namespaces.mjs). Plus aucune page
+// n'attend le dictionnaire complet (dictionaryGate n'est plus armé). Filet :
+// une clé dont l'espace manque charge le dictionnaire complet, redessine les
+// textes (événement namespacesLoaded) et laisse une trace dans le journal.
+declare const __I18N_LAZY_NAMESPACES__: string[] | undefined;
+const lazyNamespaces: readonly string[] | null =
+  typeof __I18N_LAZY_NAMESPACES__ !== "undefined" ? __I18N_LAZY_NAMESPACES__ : null;
+if (lazyNamespaces) {
+  const reported = new Set<string>();
+  i18n.onMissingNamespace = (ns, key) => {
+    if (!lazyNamespaces.includes(ns) || reported.has(ns)) return;
+    reported.add(ns);
+    void loadFullDictionary()
+      .then(() => i18n.emit("namespacesLoaded", ns))
+      .catch(() => { reported.delete(ns); });
+    void import("@/lib/errorLogger")
+      .then((m) => m.reportError(new Error(`i18n_namespace_fallback:${ns}`), { key, source: "i18n" }))
+      .catch(() => {});
+  };
+} else {
+  // Hors build (tests) : ancien comportement, le dictionnaire complet est attendu.
+  setDictionaryGate(loadFullDictionary);
+  void loadFullDictionary().catch(() => {});
+}
 
 /**
  * Monolingue français : il n'existe plus aucun dictionnaire à charger à la
