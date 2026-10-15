@@ -42,6 +42,7 @@ import { loadSitLocationLabel } from "@/lib/sitLocationLoad";
 import { applicationAvailability } from "@/lib/applicationCap";
 import { STARTED_SIT_NOTICE, isStartedOpenSit } from "@/lib/sitStarted";
 import { markMilestone } from "@/lib/perfMarks";
+import { takeSitPrefetch } from "@/lib/sitPrefetch";
 
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
 
@@ -100,7 +101,11 @@ const PublicSitDetail = () => {
         // Les dates sont masquées côté serveur par get_public_sit (fuite réseau).
         const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         const isUuid = UUID_RE.test(param);
-        const { data: sitRows, error: sitErr } = await supabase.rpc("get_public_sit", { p_param: param });
+        // Lot perf 5 : un visiteur reprend les lectures lancées par le HTML.
+        const pre = await takeSitPrefetch(param, !user);
+        const { data: sitRows, error: sitErr } = pre
+          ? { data: pre.sit as any, error: null }
+          : await supabase.rpc("get_public_sit", { p_param: param });
         if (!active) return;
         if (sitErr) throw sitErr;
         const sitData = (sitRows as any[])?.[0];
@@ -124,8 +129,11 @@ const PublicSitDetail = () => {
         // l'annonce connue (elles ne dépendent que d'elle et du membre). Six
         // salves en série auparavant : la fiche attendait 3,6 s sans ralenti.
         const propertyId = sitData.property_id ?? null;
+        // Même lecture que maybeSingle : une ligne, sinon rien.
+        const single = (rows: any[] | undefined) => (rows && rows.length === 1 ? rows[0] : null);
         const ownerProfileLoad = async (): Promise<any> => {
           if (!propertyId) return null;
+          if (pre) return single(pre.ownerProfile);
           try {
             if (!user) {
               // Visiteur : seule la vue publique lui est ouverte.
@@ -162,6 +170,7 @@ const PublicSitDetail = () => {
         };
         const petsLoad = async (): Promise<any[] | null> => {
           if (!propertyId) return null;
+          if (pre) return pre.pets ?? [];
           try {
             const { data: petsData } = await supabase.from("public_pets" as any).select("*").eq("property_id", propertyId);
             return (petsData as any[]) || [];
@@ -169,6 +178,7 @@ const PublicSitDetail = () => {
         };
         const houseGuideLoad = async (): Promise<boolean | null> => {
           if (!propertyId) return null;
+          if (pre) return !!single(pre.houseGuide);
           try {
             const { data: hgRow } = await supabase
               .from("house_guides")
@@ -203,7 +213,11 @@ const PublicSitDetail = () => {
           } catch { return false; }
         };
 
+        const asRes = (data: any[] | undefined) => Promise.resolve({ data: data ?? [], error: null } as any);
         const [ownerRes, propRes, reviewsRes, badgeRes, galleryRes, petsData, ownerProfileRow, hasGuide, appState, liveCount, isAdmin] = await Promise.all([
+          ...(pre
+            ? [asRes(pre.owner), asRes(pre.property), asRes(pre.reviews), asRes(pre.badges), asRes(pre.gallery)]
+            : [
           supabase.from("public_profiles").select("id, first_name, city, postal_code, avatar_url, identity_verified, bio, completed_sits_count, is_founder").eq("id", sitData.user_id).limit(1),
           supabase.from("properties").select("*").eq("id", sitData.property_id).limit(1),
           // Lot J2d (CGU 9.7) : fonction publique, ouverte aux visiteurs, qui
@@ -211,6 +225,7 @@ const PublicSitDetail = () => {
           supabase.rpc("public_profile_reviews", { p_user_id: sitData.user_id }),
           supabase.from("public_badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
           supabase.from("owner_gallery").select("photo_url, position, width, height").eq("user_id", sitData.user_id).order("position", { ascending: true }),
+            ]),
           petsLoad(),
           ownerProfileLoad(),
           houseGuideLoad(),

@@ -114,6 +114,6 @@ describe("garde-fous du code (lot perf 2)", () => {
     const src = readFileSync("src/components/search/SearchSitter.tsx", "utf8");
     expect(src).toMatch(/if \(loading \|\| deptCountsPending \|\| tab !== "sits"/);
     expect(src).toMatch(/if \(searchGenRef\.current !== gen\) return;\n  setResultCoords/);
-    expect(src).toMatch(/const sitBase = tab === "sits" \? loadSitBase\(\) : null;[\s\S]{0,400}await geocodeCity\(city\)/);
+    expect(src).toMatch(/const sitBase = tab === "sits" \? takeOrLoadSitBase\(\) : null;[\s\S]{0,400}await geocodeCity\(city\)/);
   });
 });

@@ -124,8 +124,13 @@ try {
     const row = { url, runs, visible_ms: median(samples.map((s) => s.visible ?? s.content)), content_ms: median(samples.map((s) => s.content)), photo_ms: median(samples.map((s) => s.photo)), samples };
     const u = new URL(url);
     const key = /^\/(annonces|sits)\/[^/]+$/.test(u.pathname) && !u.pathname.startsWith("/annonces/international") ? "fiche" : u.pathname + u.search;
-    const budget = budgets[key];
-    if (budget && (row.content_ms === null || row.content_ms > budget)) { row.over_budget = budget; failed = true; }
+    // Budget : nombre (vraie carte) ou { content, visible } (lot perf 5).
+    const b = budgets[key];
+    const limits = typeof b === "number" ? { content: b } : (b || {});
+    for (const [kind, limit] of Object.entries(limits)) {
+      const v = row[`${kind}_ms`];
+      if (typeof limit === "number" && (v === null || v === undefined || v > limit)) { row.over_budget = { ...(row.over_budget || {}), [kind]: limit }; failed = true; }
+    }
     report.push(row);
     const href = samples.map((x) => x.firstHref).find(Boolean);
     if (withFiche && !ficheAdded && href) {

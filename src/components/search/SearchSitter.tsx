@@ -524,7 +524,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   setDeptCountsPending(false);
  // Lot perf 2 : les lectures des annonces partent tout de suite, en même
  // temps que le géocodage de la ville cherchée (elles n'en dépendent pas).
- const sitBase = tab === "sits" ? loadSitBase() : null;
+ const sitBase = tab === "sits" ? takeOrLoadSitBase() : null;
  let searchCoords = userCoords;
  setGeocodeFailedCity(null);
  if (city && city !== userCity) {
@@ -688,6 +688,27 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    return items;
  }, [tab, missionSubTab, rawAvailableMembers, missionCategoryFilter, sort]);
 
+
+  // Lot perf 5 : les lectures des annonces partent à l'ouverture de la page,
+  // sans attendre la session ni le profil du membre ; les recherches des
+  // 20 premières secondes aux mêmes dates les reprennent (la recherche avec le
+  // point du membre suit souvent de peu la première).
+  const earlyBaseRef = useRef<{ key: string; at: number; p: Promise<SitBase> } | null>(null);
+  const sitBaseKey = () => `${isPublic}|${startDate}|${endDate}`;
+  const takeOrLoadSitBase = (): Promise<SitBase> => {
+   const early = earlyBaseRef.current;
+   if (early && early.key === sitBaseKey() && Date.now() - early.at < 20_000) return early.p;
+   earlyBaseRef.current = null;
+   return loadSitBase();
+  };
+  useEffect(() => {
+   if (tab !== "sits" || initialLoadDone.current) return;
+   const p = loadSitBase();
+   earlyBaseRef.current = { key: sitBaseKey(), at: Date.now(), p };
+   // Une lecture en échec n'est jamais reprise : « Réessayer » relit.
+   void p.then((b) => { if (b.error && earlyBaseRef.current?.p === p) earlyBaseRef.current = null; });
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
   if (initialLoadDone.current) return;

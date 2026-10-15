@@ -17,7 +17,7 @@ import SearchListingCard from "@/components/search/listing/SearchListingCard";
 import { bootCardHtml, bootFormatDate, bootListingsHtml, buildBootModel, escapeHtml, BOOT_VISIBLE } from "@/boot/bootListingsView";
 import { bootEligibleSearch } from "@/boot/bootListingsEntry";
 import { resolveSitPlace } from "@/lib/sitSearchRules";
-import { bootTexts, listingsPrefetchScript } from "../../../scripts/vite-plugin-listings-prefetch.mjs";
+import { bootTexts, bootInlineScript } from "../../../scripts/vite-plugin-listings-prefetch.mjs";
 import { readFileSync } from "node:fs";
 
 const TODAY = "2026-10-14";
@@ -110,10 +110,13 @@ describe("chargement et relais (lot perf 4)", () => {
     expect(bootEligibleSearch("?tri=recent")).toBe(false);
   });
 
-  it("le HTML charge le premier affichage en priorité haute, avant les préchargements", () => {
-    const html = listingsPrefetchScript("https://x.supabase.co", "anon", "/assets/boot-listings-abc.js");
-    expect(html).toMatch(/"b":"\/assets\/boot-listings-abc\.js"/);
-    expect(html).toMatch(/b\.fetchPriority="high"/);
+  it("lot perf 5 : premier affichage écrit dans la page, après les lectures, avant les préchargements", () => {
+    const tag = bootInlineScript({ code: 'var a="</div>";' });
+    expect(tag).toBe('<script data-boot-listings>var a="<\\/div>";</script>');
+    expect(bootInlineScript(null)).toBe("");
+    const plugin = readFileSync("scripts/vite-plugin-listings-prefetch.mjs", "utf8");
+    expect(plugin).toMatch(/script\.replace\(\/\\n\/g, ""\) \+ "\\n    " \+ sit \+ "\\n    " \+ bootInlineScript\(boot\) \+ "\\n    " \+ html\.slice\(at\)/);
+    expect(plugin).not.toMatch(/emitFile/);
     const cfg = readFileSync("vite.config.ts", "utf8");
     expect(cfg.indexOf("listingsPrefetchPlugin(),")).toBeLessThan(cfg.indexOf("routePreloadPlugin(),"));
   });
