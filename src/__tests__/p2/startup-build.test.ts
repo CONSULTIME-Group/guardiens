@@ -70,6 +70,26 @@ describe("P2, build de production", () => {
     expect(entryCode.includes("Pourquoi cela compte à Lyon")).toBe(false);
   });
 
+  it("lot perf 6 : fichiers de l'entrée sans import circulaire, superpositions et dates hors de l'entrée", () => {
+    const assets = join(dir, "assets");
+    const importsOf = (f: string) =>
+      [...readFileSync(join(assets, f), "utf8").matchAll(/(?:^|[;\n}])\s*import\s*(?:[^"'()]*?from\s*)?["']\.\/([^"']+\.js)["']/g)].map((m) => m[1]);
+    const start = entry.split("/").pop()!;
+    const closure = new Set<string>();
+    const walk = (f: string) => { if (closure.has(f)) return; closure.add(f); importsOf(f).forEach(walk); };
+    walk(start);
+    // Deux fichiers qui s'importent l'un l'autre exécutent l'un avant que
+    // l'autre ait défini ses valeurs (React indéfini au démarrage).
+    for (const f of closure) {
+      if (f === start) continue;
+      const reach = new Set<string>();
+      const go = (g: string) => { for (const i of importsOf(g)) if (!reach.has(i)) { reach.add(i); go(i); } };
+      go(f);
+      expect(reach.has(f), `cycle depuis ${f}`).toBe(false);
+    }
+    expect([...closure].filter((f) => /^vendor-(overlay|date)-/.test(f))).toEqual([]);
+  });
+
   it("bandeau de diagnostic et outil de débogage OAuth absents", () => {
     expect(allCode.includes("Restart preview")).toBe(false);
     expect(allCode.includes("preview-restart-button")).toBe(false);

@@ -30,7 +30,7 @@ import { reportError } from "@/lib/errorLogger";
 import { trackEvent } from "@/lib/analytics";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { publicFirstName } from "@/lib/displayName";
-import AccordDeGarde from "@/components/gardes/AccordDeGarde";
+import AccordDeGarde from "@/components/gardes/LazyAccordDeGarde";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export interface AcceptTarget {

@@ -1,14 +1,20 @@
 import { Suspense, useState } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
+import { optionalLazy } from "@/lib/optionalLazy";
+
+// Lot perf 6 : les deux zones de messages (Radix Toast et sonner) ne partent
+// plus avec l'entrée ; elles se montent dès que leur petit fichier arrive,
+// demandé au premier rendu, avant toute page. use-toast garde ses messages
+// en mémoire jusqu'au montage ; sonner n'affiche que ceux émis après le sien
+// (aucun écran n'en émet avant d'avoir chargé sa propre page).
+const Toaster = optionalLazy(() => import("@/components/ui/toaster").then((m) => ({ default: m.Toaster })));
+const Sonner = optionalLazy(() => import("@/components/ui/sonner").then((m) => ({ default: m.Toaster })));
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { registerAppQueryClient } from "@/lib/appQueryClient";
 import { BrowserRouter, Route, Routes, Navigate, useParams, useLocation, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -20,7 +26,6 @@ import RefCapture from "@/components/referral/RefCapture";
 import { useShellMode } from "@/components/layout/useShellMode";
 import { ChromeVisibilityProvider } from "@/components/layout/ChromeVisibility";
 // CookieConsent retiré (mesure d'audience exemptée CNIL)
-import { toast } from "sonner";
 import { reportError } from "@/lib/errorLogger";
 import { sanitizeRedirect } from "@/lib/safeRedirect";
 import { Button } from "@/components/ui/button";
@@ -254,7 +259,8 @@ const queryClient = new QueryClient({
       onError: (error) => {
         console.error("[Mutation error]", error);
         reportError(error, { source: "react-query-mutation" });
-        toast.error("Une erreur est survenue. Veuillez réessayer.");
+        // Lot perf 6 : sonner hors de l'entrée, chargé au premier message.
+        void import("sonner").then((m) => m.toast.error("Une erreur est survenue. Veuillez réessayer.")).catch(() => {});
       },
     },
   },
@@ -694,7 +700,7 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <TooltipProvider>
+        <>
           <AuthProvider>
             <MemberOnly>
               <Suspense fallback={null}>
@@ -702,8 +708,10 @@ const App = () => (
               </Suspense>
             </MemberOnly>
             <SkipToContent />
-            <Toaster />
-            <Sonner />
+            <Suspense fallback={null}>
+              <Toaster />
+              <Sonner />
+            </Suspense>
             <BrowserRouter>
               <ScrollToTop />
               <ScrollLockGuard />
@@ -740,7 +748,7 @@ const App = () => (
               </AfterFirstPaint>
             </BrowserRouter>
           </AuthProvider>
-        </TooltipProvider>
+        </>
       </ThemeProvider>
     </QueryClientProvider>
   </ErrorBoundary>

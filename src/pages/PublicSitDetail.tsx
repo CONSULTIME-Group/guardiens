@@ -2,7 +2,7 @@
 // Utilisée pour le partage externe (Facebook, LinkedIn, WhatsApp, lien direct).
 // Les meta og:* sont injectées impérativement par PageMeta ; les caches sociaux liront index.html
 // après prerender (Prerender.io / Cloudflare Worker, TODO infra).
-import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,7 +27,10 @@ import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 import LegacyProjetRedirect from "@/components/seo/LegacyProjetRedirect";
 
 
-import ApplicationModal from "@/components/sits/ApplicationModal";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
+// Lot perf 6 : fenêtre de candidature réservée aux membres, hors du fichier
+// de la fiche (un visiteur ne la charge jamais).
+const ApplicationModal = lazyWithRetry(() => import("@/components/sits/ApplicationModal"), "ApplicationModal");
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
@@ -804,6 +807,7 @@ const PublicSitDetail = () => {
       <PublicFooter />
 
       {!!user && sit && (
+        <Suspense fallback={null}>
         <ApplicationModal
           open={applyOpen}
           onOpenChange={setApplyOpen}
@@ -816,6 +820,7 @@ const PublicSitDetail = () => {
           endDate={formatDate(sit.end_date)}
           onSuccess={() => setHasApplied(true)}
         />
+        </Suspense>
       )}
     </div>
   );

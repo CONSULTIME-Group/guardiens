@@ -5,7 +5,14 @@ import { cn } from "@/lib/utils";
 
 const TooltipProvider = TooltipPrimitive.Provider;
 
-const Tooltip = TooltipPrimitive.Root;
+// Lot perf 6 : chaque infobulle porte son propre fournisseur (mêmes délais
+// par défaut). Le fournisseur global d'App.tsx est retiré : il emportait
+// Radix Tooltip et floating-ui dans l'entrée du site, sur toutes les pages.
+const Tooltip = (props: React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root>) => (
+  <TooltipPrimitive.Provider>
+    <TooltipPrimitive.Root {...props} />
+  </TooltipPrimitive.Provider>
+);
 
 const TooltipTrigger = TooltipPrimitive.Trigger;
 

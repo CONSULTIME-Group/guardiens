@@ -4,18 +4,12 @@ import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInAppShell } from "./AppShellContext";
-import UserMenu from "./UserMenu";
+import UserMenu from "./LazyUserMenu";
 import AppTopBar from "./AppTopBar";
 import { useShellMode } from "./useShellMode";
+import { runAfterFirstPaint } from "@/lib/bootSchedule";
 
 /** Vrai sous le point de rupture md de Tailwind (768 px). */
 const useIsMobileShell = () => {
@@ -37,6 +31,11 @@ const useIsMobileShell = () => {
 };
 
 const NotificationBell = lazy(() => import("./NotificationBell"));
+// Lot perf 6 : le menu mobile (Radix Dialog) n'est chargé qu'au premier
+// survol, focus ou toucher du bouton, et préchargé après le premier affichage.
+const loadMobileMenu = () => import("./PublicMobileMenu");
+const PublicMobileMenu = lazy(loadMobileMenu, "PublicMobileMenu");
+const preloadMobileMenu = () => { void loadMobileMenu().catch(() => {}); };
 const MessageBell = lazy(() => import("./MessageBell"));
 
 /** Vrai sous le point de rupture du header (960 px), la ou le burger est actif. */
@@ -74,7 +73,7 @@ export const NAV_DEFS: ReadonlyArray<{ key: string; shortKey?: string; to: strin
 
 /** Classes partagées des liens Connexion et Inscription sur ordinateur. */
 const AUTH_BTN = "min-h-11 whitespace-nowrap px-2 text-xs xl:px-3 xl:text-sm";
-const MOBILE_AUTH_BTN = "min-h-12 w-full";
+export const MOBILE_AUTH_BTN = "min-h-12 w-full";
 
 export default function PublicHeader({ authedVariant = false }: { authedVariant?: boolean }) {
   const location = useLocation();
@@ -94,9 +93,16 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   // pour un visiteur, rien ne change.
   const useAppTopBar = shellMode === "app" && isMobileShell;
   const [open, setOpen] = useState(false);
+  const [menuMounted, setMenuMounted] = useState(false);
   const [msgUnread, setMsgUnread] = useState(0);
   const [notifUnread, setNotifUnread] = useState(0);
   const fixedBarRef = useRef<HTMLDivElement | null>(null);
+
+  // Préchargement du menu mobile une fois la page affichée, sur petit écran.
+  useEffect(() => {
+    if (!isCompact) return;
+    runAfterFirstPaint(preloadMobileMenu, 4000);
+  }, [isCompact]);
 
   const onMsgUnread = useCallback((n: number) => setMsgUnread(n), []);
   const onNotifUnread = useCallback((n: number) => setNotifUnread(n), []);
@@ -217,76 +223,37 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
             <UserMenu compact />
           ) : null}
 
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button
-                size="icon"
-                variant="ghost"
-                aria-label={hasSession && hasUnread ? `${t("nav.menu")}, ${t("nav.unread_items")}` : `${t("nav.menu")}, ouvrir la navigation`}
-                aria-expanded={open}
-                className="relative h-11 w-11 min-h-11 min-w-11"
-              >
-                <Menu className="h-5 w-5" />
-                {hasSession && hasUnread && (
-                  <span aria-hidden="true" className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
-                )}
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[min(88vw,24rem)] border-primary/20 bg-background p-0 [&>button]:hidden">
-              <div className="flex min-h-full flex-col px-6 pb-8 pt-6">
-                <div className="flex min-h-11 items-center justify-between border-b border-border pb-4">
-                  <SheetTitle className="font-heading text-2xl font-bold">Navigation</SheetTitle>
-                  <SheetClose asChild>
-                    <Button variant="ghost" size="icon" className="h-11 w-11" aria-label="Fermer la navigation">
-                      <X className="h-5 w-5" />
-                    </Button>
-                  </SheetClose>
-                </div>
-
-                <nav aria-label="Navigation mobile" className="flex flex-1 flex-col py-5 font-body">
-                  {NAV_DEFS.map((l) => (
-                    <SheetClose asChild key={l.to}>
-                      <Link
-                        to={l.to}
-                        aria-current={isActive(l.to) ? "page" : undefined}
-                        className={`flex min-h-12 items-center rounded-md px-3 text-base font-medium transition-colors ${
-                          isActive(l.to) ? "bg-primary/10 text-primary font-semibold" : "text-foreground hover:bg-accent"
-                        }`}
-                      >
-                        {t(`nav.${l.shortKey ?? l.key}`)}
-                      </Link>
-                    </SheetClose>
-                  ))}
-
-                  <div className="mt-auto border-t border-border pt-5">
-                    {!authChecked ? (
-                      <div className="h-12 w-full rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
-                    ) : hasSession ? (
-                      <SheetClose asChild>
-                        <Button asChild className={MOBILE_AUTH_BTN}>
-                          <Link to="/dashboard">{mySpaceLabel}</Link>
-                        </Button>
-                      </SheetClose>
-                    ) : (
-                      <div className="space-y-3">
-                        <SheetClose asChild>
-                          <Button asChild variant="outline" className={MOBILE_AUTH_BTN}>
-                            <Link to="/login">{loginLabel}</Link>
-                          </Button>
-                        </SheetClose>
-                        <SheetClose asChild>
-                          <Button asChild className={MOBILE_AUTH_BTN}>
-                            <Link to="/inscription">{registerLabel}</Link>
-                          </Button>
-                        </SheetClose>
-                      </div>
-                    )}
-                    {isCompact && showBells && <div className="mt-4 flex items-center justify-center gap-2">{bells}</div>}
-                  </div>
-                </nav>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <Button
+            size="icon"
+            variant="ghost"
+            aria-label={hasSession && hasUnread ? `${t("nav.menu")}, ${t("nav.unread_items")}` : `${t("nav.menu")}, ouvrir la navigation`}
+            aria-expanded={open}
+            aria-haspopup="dialog"
+            className="relative h-11 w-11 min-h-11 min-w-11"
+            onPointerEnter={preloadMobileMenu}
+            onFocus={preloadMobileMenu}
+            onClick={() => { setMenuMounted(true); setOpen(true); }}
+          >
+            <Menu className="h-5 w-5" />
+            {hasSession && hasUnread && (
+              <span aria-hidden="true" className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
+            )}
+          </Button>
+          {menuMounted && (
+            <Suspense fallback={null}>
+              <PublicMobileMenu
+                open={open}
+                onOpenChange={setOpen}
+                isActive={isActive}
+                authChecked={authChecked}
+                hasSession={hasSession}
+                mySpaceLabel={mySpaceLabel}
+                loginLabel={loginLabel}
+                registerLabel={registerLabel}
+                bells={isCompact && showBells ? bells : null}
+              />
+            </Suspense>
+          )}
         </div>
       </div>
     </header>

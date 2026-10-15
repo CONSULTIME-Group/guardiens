@@ -8,7 +8,7 @@
  *
  * Le détail des comportements vit dans les sous-vues.
  */
-import { useState, useEffect, useCallback, useRef } from "react";
+import { Suspense, useState, useEffect, useCallback, useRef } from "react";
 import { useParams, Navigate, useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,10 +16,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { geocodeCity } from "@/lib/geocode";
 import { loadSitLocationLabel } from "@/lib/sitLocationLoad";
 import SitDetailSkeleton from "@/components/skeletons/SitDetailSkeleton";
-import OwnerSitView from "@/components/sits/views/OwnerSitView";
 import { IncompleteProfileBadge } from "@/components/sits/IncompleteProfileBadge";
-import SitterSitView from "@/components/sits/views/SitterSitView";
-import { useSitRealtime } from "@/components/sits/views/useSitRealtime";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
+
+// Lot perf 6 : vue propriétaire et vue gardien dans deux fichiers ; chacun ne
+// charge que la sienne. Celle de l'espace actif part dès l'ouverture de la
+// page, en même temps que les lectures de l'annonce.
+const loadOwnerView = () => import("@/components/sits/views/OwnerSitView");
+const loadSitterView = () => import("@/components/sits/views/SitterSitView");
+const OwnerSitView = lazyWithRetry(loadOwnerView, "OwnerSitView");
+const SitterSitView = lazyWithRetry(loadSitterView, "SitterSitView");import { useSitRealtime } from "@/components/sits/views/useSitRealtime";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
 import { backfillOwnerGalleryDimensions } from "@/lib/backfillGalleryDimensions";
@@ -62,6 +68,10 @@ const fallbackImageForGeo = (city: string | null, country: string | null): strin
 const SitDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { user, activeRole, switchRole } = useAuth();
+  useEffect(() => {
+    void (activeRole === "owner" ? loadOwnerView() : loadSitterView()).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Lot L1 : « Passer en espace gardien pour postuler » proposé par Alma.
@@ -409,6 +419,7 @@ const SitDetail = () => {
         </div>
       )}
 
+      <Suspense fallback={<SitDetailSkeleton />}>
       {isOwner ? (
         <OwnerSitView
           sit={sit}
@@ -450,6 +461,7 @@ const SitDetail = () => {
           activeRole={activeRole}
         />
       )}
+      </Suspense>
     </div>
   );
 };

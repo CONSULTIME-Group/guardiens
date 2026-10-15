@@ -11,7 +11,7 @@ import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import { publicFirstName } from "@/lib/displayName";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
-import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
+import ApproximateLocationMap from "@/components/shared/LazyApproximateLocationMap";
 import SitHero from "@/components/sits/views/tabs/SitHero";
 import AffinitySection from "@/components/matching/AffinitySection";
 import AffinityTeaser from "@/components/matching/AffinityTeaser";
