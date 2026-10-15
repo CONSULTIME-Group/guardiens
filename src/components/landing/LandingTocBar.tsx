@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 
 /**
  * Sommaire de page (maillage interne). En mobile le contenu dépasse la

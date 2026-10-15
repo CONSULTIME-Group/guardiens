@@ -2,7 +2,7 @@ import { useState } from "react";
 import { rememberLegalAcceptance } from "@/lib/legalAcceptance";
 import Head from "@/components/seo/Head";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";

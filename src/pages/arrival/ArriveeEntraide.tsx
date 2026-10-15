@@ -4,7 +4,7 @@
  */
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Trans } from "react-i18next";
+import { Trans } from "@/i18n/react";
 import Head from "@/components/seo/Head";
 import { useAuth } from "@/contexts/AuthContext";
 import { Label } from "@/components/ui/label";

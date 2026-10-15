@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { useSearchParams, Link, useParams, useNavigate, Navigate } from "react-router-dom";
 import NotFound from "@/pages/NotFound";

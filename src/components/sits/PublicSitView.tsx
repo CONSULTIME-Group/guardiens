@@ -2,7 +2,7 @@
 // Cible : visiteurs anonymes ET connectés (hors propriétaire de l'annonce).
 // Objectif : conversion + clarté. Pattern aligné avec PublicMissionView.
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Share2, CheckCircle2, Star } from "lucide-react";

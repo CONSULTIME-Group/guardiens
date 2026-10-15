@@ -10,7 +10,7 @@
  * - Bouton "Annuler ma participation" si gardien candidat sur garde confirmée
  */
 import { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle2, PawPrint, MapPin, CalendarDays, Users, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";

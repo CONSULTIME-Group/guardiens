@@ -22,7 +22,7 @@ import MessageComposer from "@/components/messages/MessageComposer";
 import ContactSharingNotice from "@/components/messages/ContactSharingNotice";
 import MessagesListSkeleton from "@/components/messages/MessagesListSkeleton";
 import { useToast } from "@/hooks/use-toast";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { trackFirstAction, trackEvent } from "@/lib/analytics";
 import { describeRetainedText, moderateContent, RETENTION_TITLE } from "@/lib/moderation";

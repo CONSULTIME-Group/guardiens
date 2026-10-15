@@ -3,8 +3,8 @@
  * Chargées à la demande avec les écrans, jamais dans l'entrée.
  */
 import { useEffect, useRef, type ReactNode } from "react";
-import i18n from "i18next";
-import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
+import { useTranslation } from "@/i18n/react";
 import arrivalFr from "@/i18n/locales/fr/arrival.json";
 import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";

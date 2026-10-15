@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { formatCity, ModeFilter, DURATION_LABELS } from "./constants";
 import { missionSpotKey } from "@/lib/missionSpot";
 import { MISSION_SPOT_LARGE } from "@/components/entraide/missionSpotImages";

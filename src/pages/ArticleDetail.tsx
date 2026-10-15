@@ -3,7 +3,7 @@ import LegacyProjetRedirect from "@/components/seo/LegacyProjetRedirect";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";

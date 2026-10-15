@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { useInternationalSitsCount } from "@/hooks/useInternationalSitsCount";
 // Lot P2b : constante légère, siteRoutes (22 Ko) reste hors de la page d'accueil.
 import { HOME_OG_IMAGE } from "@/data/siteConstants";

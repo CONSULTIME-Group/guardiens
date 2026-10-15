@@ -38,7 +38,7 @@ vi.mock("@/hooks/useAccessLevel", () => ({
 
 vi.mock("@/hooks/use-toast", () => ({ useToast: () => ({ toast: vi.fn() }) }));
 
-vi.mock("react-i18next", () => ({
+vi.mock("@/i18n/react", () => ({
   useTranslation: () => ({ t: (k: string) => k }),
 }));
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { WifiOff } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 
 const OfflineBanner = () => {
   const { t } = useTranslation();

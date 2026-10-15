@@ -14,7 +14,7 @@ import { compressGalleryFile } from "@/lib/compressImage";
 import { storageImageUrl } from "@/lib/storageImage";
 import { galleryPhotoAlt } from "@/lib/galleryPhotoAlt";
 import { trackEvent } from "@/lib/analytics";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { uploadGalleryBatch, GALLERY_MAX_PHOTOS, type GalleryUploadResult } from "@/lib/galleryBatchUpload";
 import { inferPhotoDate } from "@/lib/galleryPhotoDate";
 

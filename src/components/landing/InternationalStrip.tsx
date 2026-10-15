@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { useInternationalSitsCount } from "@/hooks/useInternationalSitsCount";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 import { trackEvent } from "@/lib/analytics";

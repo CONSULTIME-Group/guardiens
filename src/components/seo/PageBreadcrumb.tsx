@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import Head from "@/components/seo/Head";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 
 export interface BreadcrumbItem {
   label: string;

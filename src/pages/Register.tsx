@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import Head from "@/components/seo/Head";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
-import { useTranslation, Trans } from "react-i18next";
+import { useTranslation, Trans } from "@/i18n/react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";

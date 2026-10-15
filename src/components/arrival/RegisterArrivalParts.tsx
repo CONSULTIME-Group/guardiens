@@ -4,7 +4,7 @@
  */
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
-import { Trans } from "react-i18next";
+import { Trans } from "@/i18n/react";
 import { mailboxFor } from "@/lib/arrival";
 import { trackEvent } from "@/lib/analytics";
 import { Eyebrow, Gouache, useArrivalT, useArrivalViewed } from "./ArrivalUI";

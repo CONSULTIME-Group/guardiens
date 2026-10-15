@@ -18,7 +18,7 @@ import { safeUUID } from "@/lib/uuid";
 import { SITTER_ANIMAL_TYPES_OPTIONS } from "@/lib/profileMatchingOptions";
 import { compressGalleryFile } from "@/lib/compressImage";
 import { trackEvent } from "@/lib/analytics";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 
 const ANIMAL_TYPES = SITTER_ANIMAL_TYPES_OPTIONS;
 const EXPERIENCE_OPTIONS = ["Débutant", "1-3 ans", "3-5 ans", "5+ ans"];

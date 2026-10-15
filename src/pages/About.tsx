@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import PageMeta from "@/components/PageMeta";

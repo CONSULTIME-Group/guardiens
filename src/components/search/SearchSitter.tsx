@@ -5,7 +5,7 @@ import { sitHasPhotos } from "@/lib/cardFacts";
 import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
 import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutGrid, Map as MapIcon, SlidersHorizontal, Loader2, Home, Wrench } from "lucide-react";
 import { Link, useSearchParams, useNavigate, useLocation } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { sitPath } from "@/lib/sitUrl";
 
 const SearchMapView = lazyWithRetry(() => import("@/components/search/SearchMapView"), "SearchMapView");

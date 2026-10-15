@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import Head from "@/components/seo/Head";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";

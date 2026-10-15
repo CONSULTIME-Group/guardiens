@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/i18n/react";
 import PageMeta from "@/components/PageMeta";
 import BreedCardImage from "@/components/breeds/BreedCardImage";
 import { supabase } from "@/integrations/supabase/client";

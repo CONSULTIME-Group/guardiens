@@ -45,8 +45,10 @@ describe("une seule clé de stockage de langue", () => {
     expect(offenders, `clés de langue concurrentes : ${offenders.join(", ")}`).toEqual([]);
   });
 
-  it("le détecteur i18next pointe sur la clé canonique", () => {
+  it("la mémoire de langue du moteur de traduction écrit la clé canonique", () => {
+    // Lot perf 7 : le détecteur i18next est remplacé par l'écriture du moteur léger.
     const code = fs.readFileSync(path.join(SRC, "i18n/index.ts"), "utf8");
-    expect(code).toContain("lookupLocalStorage: LANG_STORAGE_KEY");
+    expect(code).toContain("localStorage.setItem(LANG_STORAGE_KEY, lng)");
+    expect(code).not.toMatch(/localStorage\.setItem\((?!LANG_STORAGE_KEY)/);
   });
 });
