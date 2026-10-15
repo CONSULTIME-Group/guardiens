@@ -22,13 +22,13 @@ const TOP = Number(opt("--top", "15"));
 
 export const ROUTES = {
   "/ (accueil, visiteur)": ["src/pages/Landing.tsx"],
-  "/annonces (visiteur)": ["src/pages/PublicListings.tsx", "src/components/search/SearchSitter.tsx", "src/i18n/locales/fr/common.json?raw"],
-  "/annonces/:slug (fiche, visiteur)": ["src/pages/PublicSitDetail.tsx", "src/i18n/locales/fr/common.json?raw"],
-  "/dashboard (membre)": ["src/components/layout/AppLayout.tsx", "src/pages/Dashboard.tsx", "src/i18n/locales/fr/common.json?raw"],
-  "/search (membre)": ["src/pages/SearchPage.tsx", "src/components/search/SearchSitter.tsx", "src/i18n/locales/fr/common.json?raw"],
-  "/messages (membre)": ["src/components/layout/AppLayout.tsx", "src/pages/Messages.tsx", "src/i18n/locales/fr/common.json?raw"],
-  "/sits/:id (membre, gardien)": ["src/components/layout/AppLayout.tsx", "src/pages/SitDetail.tsx", "src/components/sits/views/SitterSitView.tsx", "src/i18n/locales/fr/common.json?raw"],
-  "/sits/:id (membre, propriétaire)": ["src/components/layout/AppLayout.tsx", "src/pages/SitDetail.tsx", "src/components/sits/views/OwnerSitView.tsx", "src/i18n/locales/fr/common.json?raw"],
+  "/annonces (visiteur)": ["src/pages/PublicListings.tsx", "src/components/search/SearchSitter.tsx"],
+  "/annonces/:slug (fiche, visiteur)": ["src/pages/PublicSitDetail.tsx"],
+  "/dashboard (membre)": ["src/components/layout/AppLayout.tsx", "src/pages/Dashboard.tsx"],
+  "/search (membre)": ["src/pages/SearchPage.tsx", "src/components/search/SearchSitter.tsx"],
+  "/messages (membre)": ["src/components/layout/AppLayout.tsx", "src/pages/Messages.tsx"],
+  "/sits/:id (membre, gardien)": ["src/components/layout/AppLayout.tsx", "src/pages/SitDetail.tsx", "src/components/sits/views/SitterSitView.tsx"],
+  "/sits/:id (membre, propriétaire)": ["src/components/layout/AppLayout.tsx", "src/pages/SitDetail.tsx", "src/components/sits/views/OwnerSitView.tsx"],
 };
 
 let bundle = null;
@@ -66,7 +66,8 @@ const report = { entry: { files: entrySet.size, js_gz: [...entrySet].reduce((s, 
 for (const [name, roots] of Object.entries(ROUTES)) {
   const files = new Set(entrySet);
   for (const r of roots) {
-    const c = chunks.find((x) => x.facadeModuleId && x.facadeModuleId.endsWith(r));
+    const c = chunks.find((x) => x.facadeModuleId && x.facadeModuleId.endsWith(r))
+      ?? chunks.find((x) => x.isDynamicEntry && Object.keys(x.modules).some((m) => m.endsWith(r)));
     if (!c) { console.error(`racine introuvable : ${r}`); continue; }
     closure(c.fileName, files);
   }

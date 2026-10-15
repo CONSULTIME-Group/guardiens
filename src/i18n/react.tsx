@@ -22,7 +22,9 @@ export function useTranslation(): UseTranslationResult {
   useEffect(() => {
     const onChange = () => rerender();
     i18n.on("languageChanged", onChange);
-    return () => { i18n.off("languageChanged", onChange); };
+    // Lot perf 8 : filet d'un espace chargé après coup, les textes se redessinent.
+    i18n.on("namespacesLoaded", onChange);
+    return () => { i18n.off("languageChanged", onChange); i18n.off("namespacesLoaded", onChange); };
   }, []);
   const lng = i18n.language;
   return useMemo(() => {

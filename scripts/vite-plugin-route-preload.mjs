@@ -16,19 +16,18 @@
  * sur les autres adresses (verrou src/__tests__/p2/ : au plus 14
  * préchargements sur /).
  */
-// Dictionnaire complet : toute route chargée à la demande l'attend avant son
-// rendu (dictionaryGate, lot P2), il partait seulement après l'entrée.
-const DICTIONARY = "src/i18n/locales/fr/common.json?raw";
+// Lot perf 8 : le dictionnaire complet n'est plus attendu par les pages, ses
+// espaces voyagent avec les fichiers qui les citent (vite-plugin-i18n-namespaces).
 export const ROUTE_PRELOADS = [
   {
     // /annonces seulement (pas une fiche, pas /annonces/international).
     pattern: "^/annonces/?$",
-    roots: [DICTIONARY, "src/pages/PublicListings.tsx", "src/components/search/SearchSitter.tsx"],
+    roots: ["src/pages/PublicListings.tsx", "src/components/search/SearchSitter.tsx"],
   },
   {
     // Fiche publique d'une annonce (lien partagé, résultat de recherche).
     pattern: "^/annonces/(?!international/?$|demo/)[^/]+/?$",
-    roots: [DICTIONARY, "src/pages/PublicSitDetail.tsx"],
+    roots: ["src/pages/PublicSitDetail.tsx"],
   },
 ];
 
@@ -46,7 +45,9 @@ export function collectRouteFiles(chunks, roots) {
     for (const i of byFile.get(f)?.imports ?? []) walk(i);
   };
   for (const root of roots) {
-    const start = chunks.find((c) => c.facadeModuleId && c.facadeModuleId.endsWith(root));
+    const start = chunks.find((c) => c.facadeModuleId && c.facadeModuleId.endsWith(root))
+      // Une page sans façade propre (lot perf 8) reste trouvée par son contenu.
+      ?? chunks.find((c) => c.isDynamicEntry && Object.keys(c.modules ?? {}).some((m) => m.endsWith(root)));
     if (!start) throw new Error(`[perf2-route-preload] racine introuvable : ${root}`);
     walk(start.fileName);
   }

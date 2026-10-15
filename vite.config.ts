@@ -12,6 +12,8 @@ import { entryBudgetPlugin } from "./scripts/vite-plugin-entry-budget.mjs";
 import { routePreloadPlugin } from "./scripts/vite-plugin-route-preload.mjs";
 // @ts-expect-error greffon JS sans types
 import { listingsPrefetchPlugin } from "./scripts/vite-plugin-listings-prefetch.mjs";
+// @ts-expect-error greffon JS sans types
+import { i18nNamespacesPlugin } from "./scripts/vite-plugin-i18n-namespaces.mjs";
 
 /**
  * Le build n'appelle plus aucune fonction serveur. Le rafraichissement
@@ -88,6 +90,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   plugins: [
+    // Lot perf 8 : chaque fichier apporte les espaces du dictionnaire qu'il cite.
+    i18nNamespacesPlugin(),
     react(),
     mode === "development" && componentTagger(),
     mode === "production" && routeHashesPlugin(),

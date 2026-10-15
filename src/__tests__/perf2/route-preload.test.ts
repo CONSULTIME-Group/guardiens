@@ -9,7 +9,7 @@ const chunk = (fileName: string, facadeModuleId: string | null, imports: string[
   ({ type: "chunk", fileName, facadeModuleId, imports, isEntry });
 
 describe("préchargement par adresse (lot perf 2)", () => {
-  it("prend la page, ses imports et le dictionnaire, jamais les fichiers de l'entrée", () => {
+  it("prend la page et ses imports, jamais les fichiers de l'entrée ni le dictionnaire complet (lot perf 8)", () => {
     const chunks = [
       chunk("assets/index.js", "/x/src/main.tsx", ["assets/vendor-react.js"], true),
       chunk("assets/vendor-react.js", null),
@@ -21,8 +21,8 @@ describe("préchargement par adresse (lot perf 2)", () => {
       chunk("assets/PublicSitDetail.js", "/x/src/pages/PublicSitDetail.tsx", ["assets/rules.js"]),
     ];
     const files = collectRouteFiles(chunks, ROUTE_PRELOADS[0].roots);
-    expect(files.sort()).toEqual(["assets/PublicListings.js", "assets/SearchSitter.js", "assets/card.js", "assets/common.js", "assets/rules.js"]);
-    expect(collectRouteFiles(chunks, ROUTE_PRELOADS[1].roots).sort()).toEqual(["assets/PublicSitDetail.js", "assets/common.js", "assets/rules.js"]);
+    expect(files.sort()).toEqual(["assets/PublicListings.js", "assets/SearchSitter.js", "assets/card.js", "assets/rules.js"]);
+    expect(collectRouteFiles(chunks, ROUTE_PRELOADS[1].roots).sort()).toEqual(["assets/PublicSitDetail.js", "assets/rules.js"]);
   });
 
   it("une racine absente fait échouer le build", () => {
