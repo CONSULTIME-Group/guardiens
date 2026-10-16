@@ -5,7 +5,8 @@
  *
  * Trois états calculés côté RPC :
  *  - ok : 0 échec sur 7 j et dernière exécution dans la fenêtre attendue
- *  - degraded : au moins 1 échec sur 7 j
+ *  - degraded : au moins 1 échec ou passage partiel sur 7 j
+ *  - désactivé : toutes ses planifications cron.job inactives, hors liste (lot CRON1)
  *  - critical : aucune exécution dans la fenêtre attendue (2x la périodicité
  *    déclarée du cron, convention historique du contrôle de fraîcheur)
  *
@@ -113,12 +114,27 @@ const CronRow = ({ r }: { r: CronHealth }) => (
   </li>
 );
 
-/** Lot A13 : ligne de synthèse, en tâches, lisible d'un coup d'oeil. */
+/**
+ * Lot A13 : ligne de synthèse, en tâches, lisible d'un coup d'oeil.
+ * Lot CRON1 : une tâche critique est « à l'arrêt » (aucun passage dans la
+ * fenêtre attendue), une tâche dégradée a eu des incidents sur 7 jours mais
+ * tourne ; les deux ne se disent plus « en échec ».
+ */
 export function cronOneLine(rows: CronHealth[]): string {
-  const bad = rows.filter((r) => r.state !== "ok");
-  if (bad.length === 0) return `${rows.length} ${pluralize(rows.length, "tâche en bonne santé", "tâches en bonne santé")}`;
-  const names = bad.map((r) => displayText(r.label) || adminLabel(r.edge_name)).join(", ");
-  return `${bad.length} ${pluralize(bad.length, "tâche en échec", "tâches en échec")} : ${names}`;
+  const name = (r: CronHealth) => displayText(r.label) || adminLabel(r.edge_name);
+  const stopped = rows.filter((r) => r.state === "critical");
+  const degraded = rows.filter((r) => r.state === "degraded");
+  if (stopped.length === 0 && degraded.length === 0) {
+    return `${rows.length} ${pluralize(rows.length, "tâche en bonne santé", "tâches en bonne santé")}`;
+  }
+  const parts: string[] = [];
+  if (stopped.length) {
+    parts.push(`${stopped.length} ${pluralize(stopped.length, "tâche à l'arrêt", "tâches à l'arrêt")} : ${stopped.map(name).join(", ")}`);
+  }
+  if (degraded.length) {
+    parts.push(`${degraded.length} ${pluralize(degraded.length, "tâche avec incidents sur 7 jours", "tâches avec incidents sur 7 jours")} : ${degraded.map(name).join(", ")}`);
+  }
+  return `${parts.join(". ")}.`;
 }
 
 export const CronHealthCard = ({ enabled = true }: { enabled?: boolean }) => {
