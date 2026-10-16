@@ -26,6 +26,7 @@ const ALLOWED_TOPICS = [
   'deliverabilite_email',
   'verifications_identite',
   'retention_membres',
+  'rendu_seo',
 ] as const;
 
 /**

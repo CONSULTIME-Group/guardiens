@@ -617,6 +617,13 @@
       "when": 1791974227160,
       "tag": "0087_j2d_periodes_avis",
       "breakpoints": true
+    },
+    {
+      "idx": 88,
+      "version": "7",
+      "when": 1792150179772,
+      "tag": "0088_adm1_signaux_lisibles",
+      "breakpoints": true
     }
   ]
 }

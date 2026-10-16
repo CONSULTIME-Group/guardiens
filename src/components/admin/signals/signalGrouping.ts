@@ -167,5 +167,6 @@ export const SIGNAL_TOPIC: Record<string, string> = {
   repeated_cancellations: "retention_membres",
   repeated_republish: "retention_membres",
   pro_pending_review: "annuaire_pros",
+  prerender_monthly_budget_reached: "rendu_seo",
 };
 

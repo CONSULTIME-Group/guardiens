@@ -18,6 +18,7 @@
 
 import * as React from 'npm:react@18.3.1'
 import { Hr, Section, Text } from 'npm:@react-email/components@0.0.22'
+import { cadreDe } from '../legal-purpose.ts'
 
 const SITE_NAME = 'Guardiens'
 
@@ -49,7 +50,7 @@ export const LegalFooter = ({ purpose, basis = '6.1.b', extra, signoff = true }:
     <Hr style={hr} />
     <Text style={legal}>
       Email envoyé par <strong>{SITE_NAME}</strong>, SIRET 894 864 040 00015,
-      dans le cadre de {purpose} (art. {basis} RGPD,{' '}
+      dans le cadre {cadreDe(purpose)} (art. {basis} RGPD,{' '}
       {BASIS_LABEL[basis]}).
     </Text>
     {extra ? <Text style={legal}>{extra}</Text> : null}

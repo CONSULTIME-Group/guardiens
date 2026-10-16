@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { signalAdminLink, signalTypeLabel, type AdminSignalBase } from "./signalGrouping";
 import { SignalPriorityBadge } from "./PriorityBadge";
+import { SIGNAL_ACTIONS } from "../../../../supabase/functions/_shared/admin-signal-config.ts";
 
 /**
  * Carte générique des signaux sans rendu dédié : libellé français (repli
@@ -46,13 +47,16 @@ export const GenericSignalCard = ({ signal }: { signal: AdminSignalBase }) => {
           <p className="text-sm font-medium text-foreground">
             {signalTypeLabel(signal.signal_type)}
           </p>
+          {SIGNAL_ACTIONS[signal.signal_type] && (
+            <p className="text-sm text-foreground mt-0.5">{SIGNAL_ACTIONS[signal.signal_type]}</p>
+          )}
           {excerpt && (
             <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
               {excerpt}
             </p>
           )}
           <p className="text-xs text-muted-foreground mt-0.5">
-            {signal.entity_type} · {new Date(signal.detected_at).toLocaleString("fr-FR")}
+            Repéré le {new Date(signal.detected_at).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" })}
           </p>
         </div>
       </div>
