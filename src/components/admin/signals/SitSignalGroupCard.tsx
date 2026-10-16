@@ -6,7 +6,27 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { SignalPriorityBadge } from "./PriorityBadge";
 import type { AdminSignalBase } from "./signalGrouping";
-import { sitGroupLine } from "../../../../supabase/functions/_shared/admin-signal-config.ts";
+import {
+  daysUntilStart,
+  signalAction,
+  sitGroupLine,
+  SIT_ACTION_PRIORITY,
+} from "../../../../supabase/functions/_shared/admin-signal-config.ts";
+
+/** Lot ADM1 : échéance lisible de la garde (« commence aujourd'hui », « dans 3 jours »). */
+export function startCountdown(startDate: string | null | undefined, now: number = Date.now()): string | null {
+  const d = daysUntilStart(startDate, now);
+  if (d === null || d < 0) return null;
+  if (d === 0) return "La garde commence aujourd'hui.";
+  if (d === 1) return "La garde commence demain.";
+  return `La garde commence dans ${d} jours.`;
+}
+
+/** Lot ADM1 : verbe d'action de l'annonce, même règle que l'email du matin. */
+export function sitGroupAction(types: string[]): string {
+  const main = SIT_ACTION_PRIORITY.find((t) => types.includes(t)) ?? types[0] ?? "";
+  return signalAction(main);
+}
 
 export interface SitInfo {
   id: string;
@@ -36,6 +56,8 @@ export const SitSignalGroupCard = ({ sitId, sit, items, severity }: Props) => {
     items.map((s) => s.signal_type),
   );
 
+  const countdown = startCountdown(sit?.start_date);
+
   const resolveAll = async () => {
     setBusy(true);
     const { data: { user } } = await supabase.auth.getUser();
@@ -60,7 +82,11 @@ export const SitSignalGroupCard = ({ sitId, sit, items, severity }: Props) => {
   return (
     <div className="rounded-lg border border-border bg-card p-3 space-y-2" data-testid="sit-signal-group">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm text-foreground">{line}</p>
+        <div className="min-w-0 space-y-1">
+          <p className="text-sm font-medium text-foreground">{sitGroupAction(items.map((s) => s.signal_type))}</p>
+          <p className="text-sm text-muted-foreground">{line}</p>
+          {countdown && <p className="text-xs font-medium text-foreground" data-testid="sit-countdown">{countdown}</p>}
+        </div>
         <SignalPriorityBadge severity={severity} />
       </div>
       <div className="flex flex-wrap gap-2">

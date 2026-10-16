@@ -89,3 +89,19 @@ Deno.test('S2 : synthèse du lundi, couverture, éditorial, À animer', () => {
   ])
   assertEquals(weeklySummaryLines(rows, new Date('2026-09-29T06:00:00Z')), [])
 })
+
+Deno.test('ADM1 : une garde commencée la veille sort de l\'email, le jour même reste', () => {
+  const day = Date.parse('2026-10-16T05:30:00Z') // 7 h 30 à Paris
+  const started = new Map([
+    ['milo', { id: 'milo', title: 'Garde Milo', start_date: '2026-10-09' }],
+    ['cevennes', { id: 'cevennes', title: 'Garde en Cévennes', start_date: '2026-10-16' }],
+  ])
+  const lines = buildDigestLines([
+    app('milo', 'Milo'),
+    { signal_type: 'owner_sit_unconfirmed', severity: 'critical', detected_at: '2026-10-13T08:00:00Z',
+      entity_type: 'sit', entity_id: 'milo', metadata: {} },
+    { signal_type: 'owner_sit_unconfirmed', severity: 'critical', detected_at: '2026-10-13T08:00:00Z',
+      entity_type: 'sit', entity_id: 'cevennes', metadata: {} },
+  ], started, day)
+  assertEquals(lines.map((l) => l.key), ['sit:cevennes'])
+})

@@ -27,9 +27,24 @@ import { PriorityBadge } from "@/components/admin/signals/PriorityBadge";
 import { SitSignalGroupCard, type SitInfo } from "@/components/admin/signals/SitSignalGroupCard";
 import {
   buildActionQueue,
+  entryPriority,
+  entrySection,
+  sitIdOf,
   type QueueEntry,
   type SuggestedAction,
 } from "@/components/admin/signals/actionQueue";
+import {
+  QUEUE_SECTION_LABELS,
+  QUEUE_SECTION_ORDER,
+  SIT_TIMED_TYPES,
+  type QueueSection,
+} from "../../../../../supabase/functions/_shared/admin-signal-config.ts";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface Snapshot {
   signals: AdminSignalBase[];
@@ -47,6 +62,20 @@ export function signalsCountLine(shown: number, total?: number, critical?: numbe
     ? `${total} ${total > 1 ? "signaux" : "signal"} ouvert${total > 1 ? "s" : ""}`
     : `${shown} affichés sur ${total}`;
   return `${head}, ${critTxt}.`;
+}
+
+/**
+ * Lot ADM1 : ligne de compte par section, en actions et non en signaux bruts.
+ * « 7 actions : 4 membres à contacter, 1 en modération, 2 techniques. »
+ */
+export function queueSummaryLine(counts: Record<QueueSection, number>): string | null {
+  const total = counts.membres + counts.moderation + counts.technique;
+  if (total <= 0) return null;
+  const parts: string[] = [];
+  if (counts.membres) parts.push(`${counts.membres} ${counts.membres > 1 ? "membres" : "membre"} à contacter`);
+  if (counts.moderation) parts.push(`${counts.moderation} en modération`);
+  if (counts.technique) parts.push(`${counts.technique} ${counts.technique > 1 ? "techniques" : "technique"}`);
+  return `${total} ${total > 1 ? "actions" : "action"} : ${parts.join(", ")}.`;
 }
 
 /** Rendu unitaire d'un signal : carte dédiée si elle existe, générique sinon. */
@@ -115,6 +144,94 @@ const AiActionCard = ({ action }: { action: SuggestedAction }) => (
   </div>
 );
 
+/** Rendu d'une entrée de la file (annonce, groupe, signal ou suggestion IA). */
+function renderEntry(entry: QueueEntry, sitMap?: Map<string, SitInfo>) {
+  if (entry.kind === "group") {
+    return (
+      <li key={`group-${entry.group.signalType}`}>
+        <GroupedSignalCard
+          signalType={entry.group.signalType}
+          signals={entry.group.items}
+          severity={entry.group.severity}
+          renderDetail={renderSignal}
+        />
+      </li>
+    );
+  }
+  if (entry.kind === "sit") {
+    return (
+      <li key={`sit-${entry.sitId}`}>
+        <SitSignalGroupCard sitId={entry.sitId} sit={sitMap?.get(entry.sitId)} items={entry.items} severity={entry.severity} />
+      </li>
+    );
+  }
+  if (entry.kind === "signal") {
+    return <li key={entry.signal.id}>{renderSignal(entry.signal)}</li>;
+  }
+  return (
+    <li key={`ai-${entry.action.title}`}>
+      <AiActionCard action={entry.action} />
+    </li>
+  );
+}
+
+/**
+ * Lot ADM1 : une section de la file. « Membres à contacter » reste ouverte ;
+ * Modération et Technique et contenus sont repliées, sauf si une action de
+ * priorité haute s'y trouve.
+ */
+const QueueSectionBlock = ({
+  section,
+  entries,
+  sitMap,
+}: {
+  section: QueueSection;
+  entries: QueueEntry[];
+  sitMap?: Map<string, SitInfo>;
+}) => {
+  const high = entries.filter((e) => entryPriority(e) === "haute").length;
+  const label = QUEUE_SECTION_LABELS[section];
+  const meta = entries.length === 0
+    ? "rien à traiter"
+    : `${entries.length}${high ? `, dont ${high} en priorité haute` : ""}`;
+
+  if (section === "membres") {
+    return (
+      <section data-testid={`queue-section-${section}`} className="space-y-2">
+        <h3 className="text-sm font-semibold text-foreground">
+          {label} <span className="font-normal text-muted-foreground">({meta})</span>
+        </h3>
+        {entries.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Aucun membre à contacter pour le moment.</p>
+        ) : (
+          <ul className="space-y-2">{entries.map((e) => renderEntry(e, sitMap))}</ul>
+        )}
+      </section>
+    );
+  }
+
+  if (entries.length === 0) return null;
+  return (
+    <Accordion
+      type="single"
+      collapsible
+      defaultValue={high > 0 ? section : undefined}
+      data-testid={`queue-section-${section}`}
+    >
+      <AccordionItem value={section} className="rounded-lg border border-border">
+        <AccordionTrigger className="px-3 py-2 text-sm font-semibold hover:no-underline">
+          <span>
+            {label} <span className="font-normal text-muted-foreground">({meta})</span>
+          </span>
+        </AccordionTrigger>
+        <AccordionContent className="px-3 pb-3">
+          <ul className="space-y-2">{entries.map((e) => renderEntry(e, sitMap))}</ul>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  );
+};
+
 interface Props {
   aiActions: SuggestedAction[];
   aiLoading: boolean;
@@ -162,8 +279,12 @@ export const SignalsSection = ({ aiActions, aiLoading }: Props) => {
 
   const signals = flagEnabled ? (openSignals ?? data?.signals ?? []) : [];
 
+  // Lot ADM1 : dates de début aussi pour les signaux portés par l'annonce elle-même.
   const sitIds = [...new Set(
-    signals.map((s) => s.metadata?.sit_id).filter((x): x is string => typeof x === "string"),
+    signals
+      .filter((s) => typeof s.metadata?.sit_id === "string" || SIT_TIMED_TYPES.has(s.signal_type))
+      .map((s) => sitIdOf(s))
+      .filter((x): x is string => typeof x === "string"),
   )].sort();
   const { data: sitMap } = useQuery<Map<string, SitInfo>>({
     queryKey: ["admin_signal_sits", sitIds],
@@ -178,7 +299,10 @@ export const SignalsSection = ({ aiActions, aiLoading }: Props) => {
 
   if (flagLoading) return null;
 
-  const queue: QueueEntry[] = buildActionQueue(signals, aiActions);
+  const queue: QueueEntry[] = buildActionQueue(signals, aiActions, { sits: sitMap });
+  const bySection = Object.fromEntries(
+    QUEUE_SECTION_ORDER.map((sec) => [sec, queue.filter((e) => entrySection(e) === sec)]),
+  ) as Record<QueueSection, QueueEntry[]>;
 
   const loading = (flagEnabled && (isLoading || openLoading)) || aiLoading;
 
@@ -192,8 +316,11 @@ export const SignalsSection = ({ aiActions, aiLoading }: Props) => {
       </CardHeader>
       <CardContent className="space-y-3">
         {flagEnabled && data && (() => {
-          const queued = queue.flatMap((e) => e.kind === "ai" ? [] : e.kind === "signal" ? [e.signal] : e.kind === "sit" ? e.items : e.group.items);
-          const line = signalsCountLine(queued.length, queued.length, queued.filter((s) => s.severity === "critical").length);
+          const line = queueSummaryLine({
+            membres: bySection.membres.length,
+            moderation: bySection.moderation.length,
+            technique: bySection.technique.length,
+          });
           return line ? <p className="text-sm text-muted-foreground" data-testid="signals-count-line">{line}</p> : null;
         })()}
         {/* Lot A8 : la campagne d'activation est retirée, les envois passent par Envois groupés. */}
@@ -220,37 +347,11 @@ export const SignalsSection = ({ aiActions, aiLoading }: Props) => {
                 Tout est calme, aucune action en attente.
               </div>
             ) : (
-              <ul className="space-y-2">
-                {queue.map((entry) => {
-                  if (entry.kind === "group") {
-                    return (
-                      <li key={`group-${entry.group.signalType}`}>
-                        <GroupedSignalCard
-                          signalType={entry.group.signalType}
-                          signals={entry.group.items}
-                          severity={entry.group.severity}
-                          renderDetail={renderSignal}
-                        />
-                      </li>
-                    );
-                  }
-                  if (entry.kind === "sit") {
-                    return (
-                      <li key={`sit-${entry.sitId}`}>
-                        <SitSignalGroupCard sitId={entry.sitId} sit={sitMap?.get(entry.sitId)} items={entry.items} severity={entry.severity} />
-                      </li>
-                    );
-                  }
-                  if (entry.kind === "signal") {
-                    return <li key={entry.signal.id}>{renderSignal(entry.signal)}</li>;
-                  }
-                  return (
-                    <li key={`ai-${entry.action.title}`}>
-                      <AiActionCard action={entry.action} />
-                    </li>
-                  );
-                })}
-              </ul>
+              <div className="space-y-4">
+                {QUEUE_SECTION_ORDER.map((sec) => (
+                  <QueueSectionBlock key={sec} section={sec} entries={bySection[sec]} sitMap={sitMap} />
+                ))}
+              </div>
             )}
           </>
         )}

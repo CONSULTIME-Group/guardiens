@@ -2,7 +2,9 @@
 // Critiques actionnables seulement, une ligne par annonce, tri par échéance.
 // Lot S2 : le routage (quotidien, lundi, À animer) est lu dans
 // _shared/admin-signal-config.ts, seule source des destinations.
-import { hasDestination, sitGroupSummary, SIGNAL_TYPES } from '../_shared/admin-signal-config.ts'
+import {
+  hasDestination, isSitStarted, sitGroupSummary, signalAction, SIGNAL_TYPES, SIT_ACTION_PRIORITY, SIT_TIMED_TYPES,
+} from '../_shared/admin-signal-config.ts'
 
 export interface OpenSignal {
   signal_type: string
@@ -31,28 +33,7 @@ export const NON_ACTIONABLE_TYPES = new Set(
   Object.entries(SIGNAL_TYPES).filter(([, c]) => !c.destinations.includes('daily_email')).map(([t]) => t),
 )
 
-const ACTIONS: Record<string, string> = {
-  pending_application: 'Relancer le propriétaire pour qu\'il réponde aux candidatures.',
-  stalled_discussion: 'Relancer la discussion entre le propriétaire et le gardien.',
-  owner_sit_unconfirmed: 'Aider le propriétaire à confirmer son gardien avant le départ.',
-  stale_draft: 'Proposer au propriétaire de terminer et publier son annonce.',
-  no_applications: 'Diffuser l\'annonce auprès des gardiens proches.',
-  nurturing_run_anomaly: 'Vérifier le dernier passage des séquences email.',
-  digest_queue_stalled: 'Vérifier l\'envoi des digests gardiens.',
-  digest_queue_morning_backlog: 'Vérifier l\'envoi du digest du matin.',
-  email_delivery_low: 'Vérifier la délivrabilité des emails.',
-  email_queue_failures: 'Vérifier la file d\'envoi des emails.',
-  email_recipient_address_invalid: 'Corriger l\'adresse email du membre.',
-  notification_delivery_failed: 'Vérifier l\'envoi des notifications.',
-  sit_notification_claim_starvation: 'Vérifier la diffusion des annonces aux gardiens.',
-  suspicious_account: 'Examiner le compte signalé.',
-  content_defect_outside_freeze: 'Corriger les contenus signalés.',
-  prerender_monthly_budget_reached: 'Vérifier le budget de pré-rendu.',
-  alma_frustration: 'Écrire au membre : il cherchait de l\'aide et Alma ne l\'a pas orienté.',
-  alma_bug_report: 'Reproduire le problème décrit, puis répondre au membre.',
-  alma_churn: 'Écrire à ce membre depuis sa fiche avant son départ.',
-  alma_contact_request: 'Répondre au message reçu depuis Alma (Messages de contact).',
-}
+// Lot ADM1 : verbes d'action lus dans la configuration unique (partagés avec l'accueil admin).
 
 const LINKS: Record<string, string> = {
   stale_draft: 'https://guardiens.fr/admin/listings',
@@ -66,13 +47,11 @@ const LINKS: Record<string, string> = {
   email_delivery_low: 'https://guardiens.fr/admin/emails',
 }
 
-export const actionFor = (type: string) =>
-  ACTIONS[type] ?? 'Ouvrir le signal dans l\'administration et le traiter.'
+export const actionFor = (type: string) => signalAction(type)
 
 const linkFor = (type: string) => LINKS[type] ?? 'https://guardiens.fr/admin'
 
-// Priorité d'action quand une annonce porte plusieurs signaux.
-const PRIORITY = ['owner_sit_unconfirmed', 'stalled_discussion', 'pending_application', 'no_applications', 'stale_draft']
+const PRIORITY = SIT_ACTION_PRIORITY
 
 export const sitIdOf = (s: OpenSignal): string | null => {
   const m = s.metadata ?? {}
@@ -113,6 +92,9 @@ export function buildDigestLines(
     const sitId = key.startsWith('sit:') ? key.slice(4) : null
     const sit = sitId ? sits.get(sitId) : undefined
     const m = arr[0].metadata ?? {}
+    // Lot ADM1 : garde commencée, plus aucune action avant le départ.
+    const startDate = sit?.start_date ?? (m.start_date as string) ?? null
+    if (sitId && types.every((t) => SIT_TIMED_TYPES.has(t)) && isSitStarted(startDate, now)) continue
     const title = (key === 'group:digest_queue' ? 'File des digests' : sit?.title ?? (m.sit_title as string) ?? (m.title as string) ?? main)
       .replace(/[\u2014\u2013]/g, ',')
     const count = arr.length
@@ -131,7 +113,7 @@ export function buildDigestLines(
       key,
       title,
       action,
-      startDate: sit?.start_date ?? (m.start_date as string) ?? null,
+      startDate,
       ageDays: Math.floor((now - oldest) / 86_400_000),
       count,
       signalTypes: types,

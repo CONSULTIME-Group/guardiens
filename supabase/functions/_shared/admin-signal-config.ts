@@ -98,7 +98,113 @@ export const SIGNAL_TYPES: Record<string, SignalTypeConfig> = {
   // conflit de garde). Email immédiat, un par membre et par heure de Paris.
   alma_safety: { label: 'Sujet de sûreté confié à Alma', family: 'accueil', defaultSeverity: 'critical', destinations: ['action_queue', 'immediate_email'], autoResolve: false },
   // Technique
-  prerender_monthly_budget_reached: { label: 'Plafond mensuel de renders atteint', family: 'technique', defaultSeverity: 'critical', destinations: Q, autoResolve: false },
+  prerender_monthly_budget_reached: { label: 'Rendu SEO suspendu : plafond mensuel atteint', family: 'technique', defaultSeverity: 'critical', destinations: Q, autoResolve: false },
+}
+
+// Lot ADM1 : la file « À traiter » se lit en trois sections, par nature d'action.
+// - membres    : ce qui demande un message humain des fondateurs à un membre
+// - moderation : contrôles de contenus, de comptes et d'identité
+// - technique  : emails, diffusion, rendu SEO, contenus éditoriaux
+export type QueueSection = 'membres' | 'moderation' | 'technique'
+
+export const QUEUE_SECTION_LABELS: Record<QueueSection, string> = {
+  membres: 'Membres à contacter',
+  moderation: 'Modération',
+  technique: 'Technique et contenus',
+}
+
+export const QUEUE_SECTION_ORDER: QueueSection[] = ['membres', 'moderation', 'technique']
+
+const FAMILY_SECTION: Record<SignalFamily, QueueSection> = {
+  candidatures: 'membres',
+  annonces: 'membres',
+  accueil: 'membres',
+  animation: 'membres',
+  couverture: 'technique',
+  identite: 'moderation',
+  moderation: 'moderation',
+  emails: 'technique',
+  editorial: 'technique',
+  technique: 'technique',
+}
+
+// Types d'annonce qui relèvent de la diffusion ou du comportement, pas d'un message au propriétaire.
+const TYPE_SECTION: Record<string, QueueSection> = {
+  sit_publish_error: 'technique',
+  sit_published_zero_reach: 'technique',
+  listing_proximity_large_broadcast: 'technique',
+  sit_notification_claim_starvation: 'technique',
+  repeated_republish: 'moderation',
+  repeated_cancellations: 'moderation',
+}
+
+/** Section de la file d'un type de signal ; un type inconnu va en Technique. */
+export const queueSectionOf = (type: string): QueueSection => {
+  if (TYPE_SECTION[type]) return TYPE_SECTION[type]
+  const c = SIGNAL_TYPES[type]
+  return c ? FAMILY_SECTION[c.family] : 'technique'
+}
+
+// Lot ADM1 : verbe d'action par type, partagé par l'accueil admin et l'email du matin.
+export const SIGNAL_ACTIONS: Record<string, string> = {
+  pending_application: 'Relancer le propriétaire pour qu\'il réponde aux candidatures.',
+  stalled_discussion: 'Relancer la discussion entre le propriétaire et le gardien.',
+  owner_sit_unconfirmed: 'Aider le propriétaire à confirmer son gardien avant le départ.',
+  stale_draft: 'Proposer au propriétaire de terminer et publier son annonce.',
+  no_applications: 'Diffuser l\'annonce auprès des gardiens proches.',
+  nurturing_run_anomaly: 'Vérifier le dernier passage des séquences email.',
+  digest_queue_stalled: 'Vérifier l\'envoi des digests gardiens.',
+  digest_queue_morning_backlog: 'Vérifier l\'envoi du digest du matin.',
+  email_delivery_low: 'Vérifier la délivrabilité des emails.',
+  email_queue_failures: 'Vérifier la file d\'envoi des emails.',
+  email_recipient_address_invalid: 'Corriger l\'adresse email du membre.',
+  notification_delivery_failed: 'Vérifier l\'envoi des notifications.',
+  sit_notification_claim_starvation: 'Vérifier la diffusion des annonces aux gardiens.',
+  suspicious_account: 'Examiner le compte signalé.',
+  content_defect_outside_freeze: 'Corriger les contenus signalés.',
+  prerender_monthly_budget_reached: 'Relever le budget de pré-rendu : les nouvelles pages ne sont plus indexées.',
+  alma_frustration: 'Écrire au membre : il cherchait de l\'aide et Alma ne l\'a pas orienté.',
+  alma_bug_report: 'Reproduire le problème décrit, puis répondre au membre.',
+  alma_churn: 'Écrire à ce membre depuis sa fiche avant son départ.',
+  alma_contact_request: 'Répondre au message reçu depuis Alma (Messages de contact).',
+}
+
+export const signalAction = (type: string): string =>
+  SIGNAL_ACTIONS[type] ?? 'Ouvrir le signal dans l\'administration et le traiter.'
+
+// Priorité d'action quand une annonce porte plusieurs signaux.
+export const SIT_ACTION_PRIORITY = ['owner_sit_unconfirmed', 'stalled_discussion', 'pending_application', 'no_applications', 'stale_draft']
+
+// Lot ADM1 : signaux qui n'ont de sens qu'avant le début de la garde. Même
+// liste que le CTE sit_started de auto_resolve_admin_signals (drizzle 0088).
+export const SIT_TIMED_TYPES = new Set(['pending_application', 'stalled_discussion', 'owner_sit_unconfirmed', 'no_applications'])
+
+/** Une garde à moins de SIT_IMMINENT_DAYS jours passe en priorité haute. */
+export const SIT_IMMINENT_DAYS = 7
+
+/** Jour civil à Paris, au format AAAA-MM-JJ. */
+export function parisDay(now: number = Date.now()): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit' })
+    .format(new Date(now))
+}
+
+/** Jours entre aujourd'hui (Paris) et le début de garde ; null sans date lisible. */
+export function daysUntilStart(startDate: string | null | undefined, now: number = Date.now()): number | null {
+  if (!startDate || !/^\d{4}-\d{2}-\d{2}/.test(startDate)) return null
+  const start = Date.parse(`${startDate.slice(0, 10)}T00:00:00Z`)
+  const today = Date.parse(`${parisDay(now)}T00:00:00Z`)
+  return Math.round((start - today) / 86_400_000)
+}
+
+/** Garde commencée : la veille du jour de Paris ou avant. Le jour même reste actionnable. */
+export const isSitStarted = (startDate: string | null | undefined, now: number = Date.now()): boolean => {
+  const d = daysUntilStart(startDate, now)
+  return d !== null && d < 0
+}
+
+export const isSitImminent = (startDate: string | null | undefined, now: number = Date.now()): boolean => {
+  const d = daysUntilStart(startDate, now)
+  return d !== null && d >= 0 && d <= SIT_IMMINENT_DAYS
 }
 
 export const QUEUE_GROUP_LABELS: Record<SignalQueueGroup, string> = {
