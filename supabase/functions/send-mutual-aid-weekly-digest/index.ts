@@ -8,10 +8,15 @@
 // Body : { dry_run?: boolean, recipient_id?: string, manual?: boolean, pass?: 'catch_up' }
 // Rattrapage (lot A15) : second passage le mardi 10:00 UTC, meme plan, meme cle
 // anti-doublon, meme verification du journal sur 6 jours.
+// Lot CRON1 (16/10/2026) : envois un par un, espacés, attente du délai annoncé
+// par la limite de débit dans le budget du passage, puis arrêt propre ; le
+// reste part au rattrapage (le journal ne contient rien pour ces membres).
+// Avant : 30 envois par passage, 15 à 89 membres sans résumé chaque semaine.
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { requireCronCaller } from '../_shared/require-cron-caller.ts'
 import { startCronRun } from '../_shared/cron-run-log.ts'
-import { DIGEST_BATCH_PAUSE_MS, DIGEST_BATCH_SIZE, DigestErrorCollector, errorStatusKey, runInBatches } from '../_shared/digest-batching.ts'
+import { DigestErrorCollector, errorStatusKey } from '../_shared/digest-batching.ts'
+import { OUTBOUND_SEND_SPACING_MS, sendWithinRateLimit } from '../_shared/outbound-rate-limit.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -117,11 +122,14 @@ Deno.serve(async (req) => {
       answersCount: q.answers_count ?? 0,
     }))
 
-    // === 3. Envoi par lots de 5, pause de 700 ms (sous 10 envois/s Resend) ===
+    // === 3. Envoi un par un, espacé (lot CRON1) ===
     const collector = new DigestErrorCollector()
     const dayKey = new Date().toISOString().slice(0, 10)
 
-    async function processOne(row: PlanRow): Promise<'sent' | 'skipped' | 'failed'> {
+    let stopForRateLimit = false
+    let deferred = 0
+
+    async function processOne(row: PlanRow): Promise<'sent' | 'skipped' | 'failed' | 'deferred'> {
       const email = (row.email ?? '').trim()
       if (!email) return 'skipped'
 
@@ -143,10 +151,7 @@ Deno.serve(async (req) => {
         ? `${TEMPLATE}-${row.user_id}-${Date.now()}`
         : `${TEMPLATE}-${row.user_id}-${dayKey}`
 
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SERVICE_KEY}` },
-        body: JSON.stringify({
+      const sendBody = JSON.stringify({
           templateName: TEMPLATE,
           recipientEmail: email,
           idempotencyKey: idem,
@@ -160,25 +165,52 @@ Deno.serve(async (req) => {
             topMembers,
           },
           logMetadata: { digest: 'mutual_aid_weekly' },
-        }),
-      })
-      if (!res.ok) {
-        const txt = await res.text().catch(() => '')
-        console.error('send-transactional-email failed', res.status, txt.slice(0, 200))
-        collector.add(row.user_id, res.status, txt)
+        })
+      const outcome = await sendWithinRateLimit(async () => {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SERVICE_KEY}` },
+          body: sendBody,
+        })
+        return { ok: res.ok, status: res.status, body: res.ok ? '' : await res.text().catch(() => '') }
+      }, { startedAtMs: startedAt })
+      if (outcome.kind === 'rate_limited') {
+        stopForRateLimit = true
+        return 'deferred'
+      }
+      if (outcome.kind === 'failed') {
+        console.error('send-transactional-email failed', outcome.detail.slice(0, 200))
+        collector.add(row.user_id, outcome.detail.slice(0, 3), outcome.detail)
         return 'failed'
       }
       return 'sent'
     }
 
-    const { sent, skipped, failed } = await runInBatches(planRows, processOne, {
-      batchSize: DIGEST_BATCH_SIZE,
-      pauseMs: DIGEST_BATCH_PAUSE_MS,
-      onThrow: (row, e) => {
+    let sent = 0
+    let skipped = 0
+    let failed = 0
+    let lastSendAt = 0
+    for (let i = 0; i < planRows.length; i++) {
+      const row = planRows[i]
+      if (stopForRateLimit) {
+        deferred += planRows.length - i
+        break
+      }
+      const wait = OUTBOUND_SEND_SPACING_MS - (Date.now() - lastSendAt)
+      if (lastSendAt > 0 && wait > 0) await new Promise((r) => setTimeout(r, wait))
+      try {
+        const o = await processOne(row)
+        if (o === 'sent' || o === 'failed') lastSendAt = Date.now()
+        if (o === 'sent') sent++
+        else if (o === 'skipped') skipped++
+        else if (o === 'failed') failed++
+        else deferred++
+      } catch (e) {
         console.error('[send-mutual-aid-weekly-digest] recipient failed', row.user_id, e)
         collector.add(row.user_id, errorStatusKey(e), e)
-      },
-    })
+        failed++
+      }
+    }
 
     // Surveillance : un ecart d'envoi de plus de 20 pour cent remonte en
     // 'partial', pour que les alertes existantes voient le digest mourir.
@@ -186,13 +218,22 @@ Deno.serve(async (req) => {
     const avgMissions = planned > 0
       ? missionCounts.reduce((a, b) => a + b, 0) / planned
       : 0
-    const status = !body.dry_run && sent < planned * 0.8 ? 'partial' : 'success'
+    // Lot CRON1 : un reste reporté par la limite de débit au passage principal
+    // part au rattrapage sans alerte ; au rattrapage, tout membre non servi,
+    // tout vrai échec ou un écart de plus de 20 pour cent passe en 'partial'.
+    const served = sent + skipped
+    const status = body.dry_run
+      ? 'success'
+      : failed > 0 || (pass === 'catch_up' && (deferred > 0 || served < planned * 0.8))
+        ? 'partial'
+        : 'success'
 
     await run.finish(status, {
       planned,
       sent,
       skipped,
       failed,
+      deferred,
       avg_missions: Number(avgMissions.toFixed(2)),
       dry_run: !!body.dry_run,
       shortfall_ratio: planned > 0 ? Number((1 - sent / planned).toFixed(2)) : 0,

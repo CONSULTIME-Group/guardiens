@@ -9,8 +9,8 @@
  * proprietaire publiait, aucun gardien n'etait prevenu.
  *
  * Cadence : toutes les 15 minutes, sur les annonces passees en 'published'
- * dans les 30 dernieres minutes (fenetre volontairement plus large que la
- * cadence, pour absorber un passage rate).
+ * dans les 90 dernieres minutes (fenetre volontairement plus large que la
+ * cadence, pour absorber un passage rate ou arrete par la limite de debit).
  *
  * Ciblage : les preferences d'alerte actives, dans leur zone reelle.
  *   - 'rayon'       : le rayon choisi par la personne (radius_km), jamais
@@ -21,6 +21,14 @@
  * Idempotence stricte : une ligne 'sit_notification_log' par couple annonce et
  * gardien, cle 'publish-alert-{sit_id}-{user_id}'. Un second passage dans la
  * meme fenetre n'envoie rien de plus.
+ *
+ * Lot CRON1 (16/10/2026) : la limite de débit des appels entre fonctions
+ * (une trentaine par minute) arrêtait chaque passage à 30 envois ; les
+ * suivants partaient en échec et, la fenêtre de 30 minutes passée, n'étaient
+ * jamais rejoués (63 alertes perdues en 30 jours, base du 16/10/2026).
+ * Désormais : envois espacés, attente du délai annoncé dans le budget du
+ * passage, arrêt propre sinon, et toute alerte relâchée est reprise pendant
+ * RETRY_RELEASED_HOURS heures, pour ce seul gardien.
  */
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun } from "../_shared/cron-run-log.ts";
@@ -28,6 +36,8 @@ import { requireCronCaller } from "../_shared/require-cron-caller.ts";
 import { evaluateSitAlert, PUBLISHED_STATUS } from "../_shared/sit-alert-guard.ts";
 import { isFarForRecipient, isOwnerFarFromFrance } from "../_shared/far-listing.ts";
 import { isBothNeverPublished, parisDay, routeBothAlert } from "../_shared/both-alert-cap.ts";
+import { OUTBOUND_SEND_SPACING_MS, sendWithinRateLimit } from "../_shared/outbound-rate-limit.ts";
+import { isRetryOnlySit, RETRY_RELEASED_HOURS, sitIdFromPublishAlertKey } from "../_shared/publish-alert-retry.ts";
 import { loadPublishedOwnerIdSet } from "../_shared/published-sit.ts";
 import {
   APPLY_COMPLETION_THRESHOLD,
@@ -41,8 +51,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-/** Fenetre de rattrapage, en minutes, sur published_at. */
-export const PUBLISH_LOOKBACK_MINUTES = 30;
+/**
+ * Fenetre de rattrapage, en minutes, sur published_at. Lot CRON1 : 90 minutes
+ * (six passages), pour qu'un passage arrêté par la limite de débit laisse
+ * toujours plusieurs passages aux destinataires restants ; l'idempotence
+ * empêche tout second envoi.
+ */
+export const PUBLISH_LOOKBACK_MINUTES = 90;
 /**
  * Plafond de destinataires par ANNONCE, pas par execution : `targets` est
  * reconstruit dans la boucle sur les annonces. Dix annonces publiees dans la
@@ -211,6 +226,7 @@ Deno.serve(async (req) => {
     send_failed: 0,
     dropped_over_cap: 0,
     deferred_to_digest: 0,
+    deferred_rate_limited: 0,
   };
   const errors: string[] = [];
   // Lot W0 (point 11) : comptes « both » jamais publiés, une alerte immédiate
@@ -220,6 +236,9 @@ Deno.serve(async (req) => {
   const immediateTodayByUser = new Map<string, number>();
   const digestServes = new Map<string, boolean>();
   const today = parisDay();
+  const startedAtMs = Date.now();
+  let stopForRateLimit = false;
+  let lastSendAtMs = 0;
 
   try {
     const since = new Date(Date.now() - PUBLISH_LOOKBACK_MINUTES * 60_000).toISOString();
@@ -231,7 +250,34 @@ Deno.serve(async (req) => {
       .order("published_at", { ascending: true });
     if (sitsErr) throw sitsErr;
 
-    metrics.sits_considered = (sits ?? []).length;
+    // Lot CRON1 : alertes relâchées après un échec technique, reprises
+    // pendant RETRY_RELEASED_HOURS heures, quelle que soit la date de publication.
+    const retrySince = new Date(Date.now() - RETRY_RELEASED_HOURS * 3_600_000).toISOString();
+    const { data: releasedRows, error: releasedErr } = await supabase
+      .from("sit_notification_log")
+      .select("idempotency_key")
+      .eq("source", "notify-sitters-on-publish")
+      .eq("status", "released")
+      .gte("released_at", retrySince)
+      .limit(2000);
+    if (releasedErr) errors.push(`released lookup: ${releasedErr.message}`);
+    const releasedKeys = new Set<string>((releasedRows ?? []).map((r: any) => String(r.idempotency_key)));
+    const recentIds = new Set<string>((sits ?? []).map((x: any) => x.id as string));
+    const retrySitRows: any[] = [];
+    const retrySitIds = [...new Set([...releasedKeys].map(sitIdFromPublishAlertKey).filter((x): x is string => !!x))]
+      .filter((id) => !recentIds.has(id));
+    if (retrySitIds.length > 0) {
+      const { data: retrySits, error: retryErr } = await supabase
+        .from("sits")
+        .select("id, title, city, start_date, end_date, status, user_id, property_id, cover_photo_url, published_at")
+        .eq("status", PUBLISHED_STATUS)
+        .in("id", retrySitIds);
+      if (retryErr) errors.push(`retry sits: ${retryErr.message}`);
+      else retrySitRows.push(...((retrySits ?? []) as any[]));
+    }
+    const allSits = [...((sits ?? []) as any[]), ...retrySitRows];
+
+    metrics.sits_considered = allSits.length;
 
     // Zones d'alerte actives portant sur les gardes, chargees une fois.
     const { data: prefs, error: prefsErr } = await supabase
@@ -253,7 +299,9 @@ Deno.serve(async (req) => {
           (a.source == null ? 0 : 1) - (b.source == null ? 0 : 1),
       );
 
-    for (const sit of (sits ?? []) as any[]) {
+    for (const sit of allSits) {
+      if (stopForRateLimit) break;
+      const retryOnly = isRetryOnlySit(sit.published_at, since);
       const guard = evaluateSitAlert("nearby-sit-alert", sit.status);
       if (guard.block) continue;
 
@@ -493,7 +541,10 @@ Deno.serve(async (req) => {
       }
 
       for (const t of selected) {
+        if (stopForRateLimit) break;
         const idempotencyKey = `publish-alert-${sit.id}-${t.user_id}`;
+        // Lot CRON1 : une annonce reprise hors fenêtre ne vise que les alertes relâchées.
+        if (retryOnly && !releasedKeys.has(idempotencyKey)) continue;
 
         // Lot W0 (point 11) : plafond quotidien des comptes « both » jamais
         // publiés. Toute lecture en échec garde l'alerte immédiate (aucune
@@ -594,8 +645,10 @@ Deno.serve(async (req) => {
         }
 
 
-        const { error: sendErr } = await supabase.functions.invoke("send-transactional-email", {
-          body: {
+        // Lot CRON1 : envois espacés, limite de débit attendue dans le budget du passage.
+        const spacing = OUTBOUND_SEND_SPACING_MS - (Date.now() - lastSendAtMs);
+        if (lastSendAtMs > 0 && spacing > 0) await new Promise((r) => setTimeout(r, spacing));
+        const sendBody = JSON.stringify({
             templateName: "nearby-sit-alert",
             recipientEmail: t.email,
             idempotencyKey,
@@ -615,16 +668,33 @@ Deno.serve(async (req) => {
               completionSteps: completionByUser.get(t.user_id)?.steps ?? 0,
               completionHref: completionByUser.get(t.user_id)?.href,
             },
-          },
         });
-        if (sendErr) {
-          metrics.send_failed++;
-          errors.push(`send ${idempotencyKey}: ${sendErr.message}`);
-          // Relachement non destructif : la ligne reste, l'annonce reste
-          // envoyable au passage suivant.
+        const outcome = await sendWithinRateLimit(async () => {
+          lastSendAtMs = Date.now();
+          const res = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-transactional-email`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}` },
+            body: sendBody,
+          });
+          return { ok: res.ok, status: res.status, body: res.ok ? "" : await res.text().catch(() => "") };
+        }, { startedAtMs });
+        if (outcome.kind !== "sent") {
+          if (outcome.kind === "rate_limited") {
+            metrics.deferred_rate_limited++;
+            stopForRateLimit = true;
+          } else {
+            metrics.send_failed++;
+            errors.push(`send ${idempotencyKey}: ${outcome.detail}`);
+          }
+          // Relachement non destructif : la ligne reste, l'alerte est reprise
+          // au passage suivant pendant RETRY_RELEASED_HOURS heures.
           const { error: releaseErr } = await supabase
             .from("sit_notification_log")
-            .update({ status: "released", released_at: new Date().toISOString(), release_reason: "send_failed" })
+            .update({
+              status: "released",
+              released_at: new Date().toISOString(),
+              release_reason: outcome.kind === "rate_limited" ? "rate_limited" : "send_failed",
+            })
             .eq("idempotency_key", idempotencyKey);
           if (releaseErr) console.error("release failed", idempotencyKey, releaseErr);
           
