@@ -19,6 +19,10 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
     expect(container.querySelector('[data-cta-block="mid"]')).toBeNull();
     expect(container.textContent?.match(/Publier mon annonce de garde/g)).toHaveLength(1);
     expect(container.querySelector("h1")).toBeNull();
-    expect(container.querySelector("h2#organisation")).not.toBeNull();
+    expect(container.querySelector("h2[id]")).not.toBeNull();
+    for (const anchor of container.querySelectorAll('a[href^="#"]')) {
+      const target = anchor.getAttribute("href")!.slice(1);
+      expect([...container.querySelectorAll("[id]")].some(element => element.id === target), `${slug} #${target}`).toBe(true);
+    }
   });
 });

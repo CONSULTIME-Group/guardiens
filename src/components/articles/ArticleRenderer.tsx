@@ -116,6 +116,8 @@ export const PENSION_OWNER_ARTICLE_SLUG = "pension-chien-alternatives-guide";
 export const LONG_STAY_OWNER_ARTICLE_SLUG = "vacances-longues-garde-animal-2-semaines";
 export const CHOOSING_OWNER_ARTICLE_SLUG = "choisir-gardien-bons-criteres";
 export const NO_PETS_OWNER_ARTICLE_SLUG = "garder-une-maison-ce-n-est-pas-garder-un-animal";
+export const LISTING_OWNER_ARTICLE_SLUG = "rediger-bonne-annonce-house-sitting";
+export const PREPARATION_OWNER_ARTICLE_SLUG = "preparer-maison-avant-garde";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
   EXPAT_OWNER_ARTICLE_SLUG,
   REUNION_OWNER_ARTICLE_SLUG,
@@ -125,9 +127,25 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
   LONG_STAY_OWNER_ARTICLE_SLUG,
   CHOOSING_OWNER_ARTICLE_SLUG,
   NO_PETS_OWNER_ARTICLE_SLUG,
+  LISTING_OWNER_ARTICLE_SLUG,
+  PREPARATION_OWNER_ARTICLE_SLUG,
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [LISTING_OWNER_ARTICLE_SLUG]: {
+    midText: "Vous préparez une annonce de garde pour votre maison ?",
+    midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+    endHeading: "Votre besoin de garde est prêt à être présenté ?",
+    endText: "Rassemblez vos dates, les photos du logement et les tâches prévues, puis présentez votre garde aux personnes intéressées.",
+    endPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+  },
+  [PREPARATION_OWNER_ARTICLE_SLUG]: {
+    midText: "Vous préparez votre maison et cherchez encore un gardien ?",
+    midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+    endHeading: "Vous cherchez encore quelqu’un pour votre maison ?",
+    endText: "Présentez votre logement, vos dates et les tâches prévues. Les consignes détaillées se transmettront ensuite à la personne retenue.",
+    endPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+  },
   [CHOOSING_OWNER_ARTICLE_SLUG]: {
     midText: "Vous cherchez un gardien pour votre maison ?",
     midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
@@ -384,13 +402,14 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  LISTING_OWNER_ARTICLE_SLUG,
+  PREPARATION_OWNER_ARTICLE_SLUG,
   CHOOSING_OWNER_ARTICLE_SLUG,
   NO_PETS_OWNER_ARTICLE_SLUG,
   "c-est-quoi-le-house-sitting",
   "expat-proprietaire-faire-garder-maison-etranger",
   REUNION_OWNER_ARTICLE_SLUG,
   TAHITI_OWNER_ARTICLE_SLUG,
-  "preparer-maison-avant-garde",
   CALEDONIE_OWNER_ARTICLE_SLUG,
   "pension-chien-alternatives-guide",
   "vacances-longues-garde-animal-2-semaines",
