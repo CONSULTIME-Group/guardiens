@@ -133,10 +133,15 @@ export const AGREEMENT_OWNER_ARTICLE_SLUG = "commodat-garde-guardiens";
 export const INCIDENT_OWNER_ARTICLE_SLUG = "gerer-imprevu-pendant-garde";
 export const HOSPITAL_OWNER_ARTICLE_SLUG = "faire-garder-animal-pendant-hospitalisation";
 // Ces guides répondent aussi à un besoin immédiat : le CTA reste en fin de page, pour anticiper une garde.
-export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux"]);
+export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence"]);
 export const WELCOME_OWNER_ARTICLE_SLUG = "accueillir-gardien-bonnes-pratiques";
 export const DEPARTURE_OWNER_ARTICLE_SLUG = "checklist-partir-vacances-animaux";
+export const AT_HOME_OWNER_ARTICLE_SLUG = "garde-animaux-domicile-chien-chat";
+export const WELFARE_OWNER_ARTICLE_SLUG = "bien-etre-animal-pendant-absence";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
+  AT_HOME_OWNER_ARTICLE_SLUG,
+  WELFARE_OWNER_ARTICLE_SLUG,
+
   WELCOME_OWNER_ARTICLE_SLUG,
   DEPARTURE_OWNER_ARTICLE_SLUG,
   INCIDENT_OWNER_ARTICLE_SLUG,
@@ -166,6 +171,37 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [AT_HOME_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous souhaitez faire garder vos animaux chez vous ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Vous préparez une garde de vos animaux à domicile ?",
+    "endText": "Présentez votre logement, les dates et les besoins de chaque animal pour échanger avec les personnes intéressées par un séjour chez vous.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+  [WELFARE_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous préparez une prochaine garde pour votre animal ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Vous cherchez une garde adaptée pour une prochaine absence ?",
+    "endText": "Décrivez les besoins de votre animal, vos dates et le logement proposé pour préparer le séjour d’un gardien chez vous.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+
   [WELCOME_OWNER_ARTICLE_SLUG]: {
     midText: "Vous préparez une prochaine garde ?",
     midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
@@ -548,6 +584,9 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  AT_HOME_OWNER_ARTICLE_SLUG,
+  WELFARE_OWNER_ARTICLE_SLUG,
+
   WELCOME_OWNER_ARTICLE_SLUG,
   DEPARTURE_OWNER_ARTICLE_SLUG,
   INCIDENT_OWNER_ARTICLE_SLUG,
@@ -763,6 +802,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
     slug === "c-est-quoi-le-house-sitting" ||
+      slug === AT_HOME_OWNER_ARTICLE_SLUG || slug === WELFARE_OWNER_ARTICLE_SLUG ||
       slug === LISTING_OWNER_ARTICLE_SLUG || slug === PREPARATION_OWNER_ARTICLE_SLUG ||
       slug === CHRISTMAS_OWNER_ARTICLE_SLUG || slug === WEEKEND_OWNER_ARTICLE_SLUG ||
       slug === WINTER_OWNER_ARTICLE_SLUG || slug === GARDEN_OWNER_ARTICLE_SLUG ||

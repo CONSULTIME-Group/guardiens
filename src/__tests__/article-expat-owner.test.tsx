@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["garde-animaux-domicile-chien-chat", 7],
+  ["bien-etre-animal-pendant-absence", 6],
   ["accueillir-gardien-bonnes-pratiques", 6],
   ["checklist-partir-vacances-animaux", 6],
   ["gerer-imprevu-pendant-garde", 7],
