@@ -133,7 +133,7 @@ export const AGREEMENT_OWNER_ARTICLE_SLUG = "commodat-garde-guardiens";
 export const INCIDENT_OWNER_ARTICLE_SLUG = "gerer-imprevu-pendant-garde";
 export const HOSPITAL_OWNER_ARTICLE_SLUG = "faire-garder-animal-pendant-hospitalisation";
 // Ces guides répondent aussi à un besoin immédiat : le CTA reste en fin de page, pour anticiper une garde.
-export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere", "veterinaire-urgence-lyon-guide"]);
+export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere", "veterinaire-urgence-lyon-guide", "garde-ferme-animaux-monts-du-lyonnais"]);
 export const WELCOME_OWNER_ARTICLE_SLUG = "accueillir-gardien-bonnes-pratiques";
 export const DEPARTURE_OWNER_ARTICLE_SLUG = "checklist-partir-vacances-animaux";
 export const AT_HOME_OWNER_ARTICLE_SLUG = "garde-animaux-domicile-chien-chat";
@@ -154,7 +154,12 @@ export const ANNECY_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-annecy-haute
 export const GRENOBLE_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-grenoble-isere";
 export const LYON_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-lyon-guide";
 export const SITTER_GUIDE_ARTICLE_SLUGS = new Set<string>(["gerer-animaux-difficiles-garde"]);
+export const AIX_HOME_OWNER_ARTICLE_SLUG = "house-sitting-aix-les-bains";
+export const FARM_HOME_OWNER_ARTICLE_SLUG = "garde-ferme-animaux-monts-du-lyonnais";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
+  AIX_HOME_OWNER_ARTICLE_SLUG,
+  FARM_HOME_OWNER_ARTICLE_SLUG,
+
   LYON_VET_CONTACT_ARTICLE_SLUG,
 
   ANNECY_VET_CONTACT_ARTICLE_SLUG,
@@ -210,6 +215,37 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [AIX_HOME_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous préparez une garde de votre logement à Aix-les-Bains ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Préparer votre garde à Aix-les-Bains",
+    "endText": "Décrivez les dates, le logement, les accès et les besoins des animaux pour échanger avec les personnes intéressées.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+  [FARM_HOME_OWNER_ARTICLE_SLUG]: {
+    "midText": "Votre besoin relève d’une garde domestique ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Décrire une garde adaptée à votre maison et vos animaux",
+    "endText": "Pour une garde domestique, précisez les animaux, les tâches, les compétences nécessaires et le relais. Pour le fonctionnement d’une exploitation, contactez le service de remplacement adapté.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+
   ["gerer-animaux-difficiles-garde"]: {
   "midText": "Vous préparez votre prochaine garde ?",
   "midPrimary": {
@@ -871,6 +907,9 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  AIX_HOME_OWNER_ARTICLE_SLUG,
+  FARM_HOME_OWNER_ARTICLE_SLUG,
+
   ...SITTER_GUIDE_ARTICLE_SLUGS,
   LYON_VET_CONTACT_ARTICLE_SLUG,
 
@@ -1114,7 +1153,8 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const withoutH1 = stripLeadingH1(interpolated);
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
-    slug === "c-est-quoi-le-house-sitting" || SITTER_GUIDE_ARTICLE_SLUGS.has(slug ?? "") ||
+    slug === "c-est-quoi-le-house-sitting" ||
+      slug === AIX_HOME_OWNER_ARTICLE_SLUG || slug === FARM_HOME_OWNER_ARTICLE_SLUG || SITTER_GUIDE_ARTICLE_SLUGS.has(slug ?? "") ||
       slug === LYON_VET_CONTACT_ARTICLE_SLUG ||
       slug === ANNECY_VET_CONTACT_ARTICLE_SLUG || slug === GRENOBLE_VET_CONTACT_ARTICLE_SLUG ||
       slug === SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG || slug === HAUTE_SAVOIE_STAY_OWNER_ARTICLE_SLUG ||
