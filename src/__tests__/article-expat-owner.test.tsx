@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["gerer-imprevu-pendant-garde", 7],
+  ["faire-garder-animal-pendant-hospitalisation", 6],
   ["securite-confiance-house-sitting", 7],
   ["commodat-garde-guardiens", 6],
   ["garde-chien-faire-garder-son-chien", 7],
