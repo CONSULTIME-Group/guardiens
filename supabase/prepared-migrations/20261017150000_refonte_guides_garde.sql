@@ -19,7 +19,7 @@ Avec le house-sitting, un gardien est hébergé chez vous en échange de la gard
 
 **Dans ce guide**
 
-- [Les cinq alternatives et leurs différences](#alternatives)
+- [Les cinq alternatives et leurs différences](#solutions)
 - [Pension ou garde à domicile : le comparatif](#comparatif)
 - [Les besoins particuliers de votre chien](#profil)
 - [Si un précédent séjour s’est mal passé](#signaux)
@@ -28,7 +28,7 @@ Avec le house-sitting, un gardien est hébergé chez vous en échange de la gard
 - [Les points à confirmer avant le départ](#organisation)
 - [Les questions fréquentes](#faq)
 
-## <a id="alternatives"></a>Quelles sont les cinq alternatives à la pension pour chien ?
+## <a id="solutions"></a>Quelles sont les cinq alternatives à la pension pour chien ?
 
 Ces solutions se distinguent par le lieu de garde et la relation avec la personne. Certaines se recoupent : une famille d’accueil peut exercer comme professionnelle, et un proche peut venir habiter chez vous. Le détail de l’accord compte davantage que son nom.
 
@@ -63,6 +63,8 @@ Le gardien séjourne chez vous sans rémunération, en échange du logement et d
 Votre chien garde son lieu de vie et la maison est habitée. **Dormir sur place ne signifie pas rester à la maison toute la journée** : convenez des sorties du gardien et du temps de présence attendu. Les dépenses du chien restent à votre charge. Aucun nombre de candidatures ni remplacement n’est garanti ; prévoyez un relais que vous avez choisi.
 
 ## <a id="comparatif"></a>Pension ou garde à domicile : que faut-il comparer ?
+
+<a id="face-a-face"></a>
 
 Une pension peut convenir à votre chien, y compris si une autre expérience s’est mal passée. Les établissements et leurs conditions d’accueil varient. Comparez les organisations réelles, sans supposer qu’un mode de garde sera toujours meilleur.
 
