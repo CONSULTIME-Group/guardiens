@@ -33,6 +33,8 @@ it.each([
   ["preparer-maison-avant-garde", 5],
   ["house-sitting-noel-fetes-fin-annee", 6],
   ["house-sitting-week-end-court-sejour-aura", 5],
+  ["house-sitting-hiver-montagne-savoie", 6],
+  ["entretenir-jardin-pendant-absence", 6],
 ] as const)("FAQ visible et structurée cohérente pour %s", (slug, questionCount) => {
   const content = readFileSync(`docs/editorial/${slug}.md`, "utf8").replace(/^---\n[\s\S]*?\n---\n/, "").trim();
   const faq = parseFaqFromMarkdown(content);
