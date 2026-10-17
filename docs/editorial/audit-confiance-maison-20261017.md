@@ -30,6 +30,7 @@ Audit du 17 octobre 2026. Suite autorisée par Jérémie : poursuivre les refont
 | Images | Description fidèle de la poignée de main avec le chien ; hauteur spécifique pour conserver les deux sujets de cette couverture verticale. | Description littérale des volets fermés, sans en déduire que la maison est inoccupée. |
 | Conversion | Deux CTA vers l’annonce, au début et à la fin ; suppression des blocs mixtes propriétaire/gardien. | Même parcours, texte final propre à la maison sans animaux. |
 | Cohérence après le clic | Inscription propriétaire avec destination /sits/create ; membre directement vers la création. | Ancien avertissement rouge exigeant un animal corrigé dans CreateSit ; les règles autorisaient déjà la publication sans animaux. |
+| Récapitulatif final du formulaire | Le bouton et le récapitulatif utilisent la même liste de blocages effectifs. | Les animaux optionnels ne sont plus comptés parmi les éléments empêchant de publier ; les vrais prérequis restent affichés. |
 | SEO et réponses générées | Questions concrètes, informations nuancées et source visible. | Intention spécifique sans animaux, distincte des guides animaliers et de la définition générale. |
 
 ## Sources et preuves de fonctionnement
