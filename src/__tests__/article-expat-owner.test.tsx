@@ -28,11 +28,16 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
   });
 });
 
-it.each(["rediger-bonne-annonce-house-sitting", "preparer-maison-avant-garde"])("FAQ visible et structurée cohérente pour %s", (slug) => {
+it.each([
+  ["rediger-bonne-annonce-house-sitting", 5],
+  ["preparer-maison-avant-garde", 5],
+  ["house-sitting-noel-fetes-fin-annee", 6],
+  ["house-sitting-week-end-court-sejour-aura", 5],
+] as const)("FAQ visible et structurée cohérente pour %s", (slug, questionCount) => {
   const content = readFileSync(`docs/editorial/${slug}.md`, "utf8").replace(/^---\n[\s\S]*?\n---\n/, "").trim();
   const faq = parseFaqFromMarkdown(content);
   const { container } = render(<ArticleRenderer content={content} slug={slug} />);
-  expect(faq).toHaveLength(5);
+  expect(faq).toHaveLength(questionCount);
   expect([...container.querySelectorAll(".article-faq-question")].map(element => element.textContent)).toEqual(faq.map(item => item.question));
   expect(container.querySelectorAll("h2#faq")).toHaveLength(1);
   expect(container.querySelector(".article-faq-heading")).toBeNull();
