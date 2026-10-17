@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["boom-pet-sitting-lyon-2026", 6],
+  ["pet-sitting-villeurbanne", 5],
   ["pet-sitting-valence-drome", 5],
   ["pet-sitting-venissieux", 5],
   ["pet-sitting-grenoble-chartreuse", 6],
