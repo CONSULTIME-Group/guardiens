@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["meilleures-villes-vivre-chien-autour-lyon", 5],
+  ["arroser-plantes-vacances-lyon", 5],
   ["arroser-plantes-vacances-annecy", 5],
   ["arroser-plantes-vacances-grenoble", 5],
   ["boom-pet-sitting-lyon-2026", 6],

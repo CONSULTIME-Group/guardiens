@@ -133,7 +133,7 @@ export const AGREEMENT_OWNER_ARTICLE_SLUG = "commodat-garde-guardiens";
 export const INCIDENT_OWNER_ARTICLE_SLUG = "gerer-imprevu-pendant-garde";
 export const HOSPITAL_OWNER_ARTICLE_SLUG = "faire-garder-animal-pendant-hospitalisation";
 // Ces guides répondent aussi à un besoin immédiat : le CTA reste en fin de page, pour anticiper une garde.
-export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere", "veterinaire-urgence-lyon-guide", "garde-ferme-animaux-monts-du-lyonnais"]);
+export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere", "veterinaire-urgence-lyon-guide", "garde-ferme-animaux-monts-du-lyonnais", "meilleures-villes-vivre-chien-autour-lyon"]);
 export const WELCOME_OWNER_ARTICLE_SLUG = "accueillir-gardien-bonnes-pratiques";
 export const DEPARTURE_OWNER_ARTICLE_SLUG = "checklist-partir-vacances-animaux";
 export const AT_HOME_OWNER_ARTICLE_SLUG = "garde-animaux-domicile-chien-chat";
@@ -153,7 +153,7 @@ export const HAUTE_SAVOIE_STAY_OWNER_ARTICLE_SLUG = "house-sitting-haute-savoie-
 export const ANNECY_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-annecy-haute-savoie";
 export const GRENOBLE_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-grenoble-isere";
 export const LYON_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-lyon-guide";
-export const ENTRAIDE_GUIDE_ARTICLE_SLUGS = new Set<string>(["arroser-plantes-vacances-annecy", "arroser-plantes-vacances-grenoble"]);
+export const ENTRAIDE_GUIDE_ARTICLE_SLUGS = new Set<string>(["arroser-plantes-vacances-annecy", "arroser-plantes-vacances-grenoble", "arroser-plantes-vacances-lyon"]);
 export const SITTER_GUIDE_ARTICLE_SLUGS = new Set<string>(["gerer-animaux-difficiles-garde", "boom-pet-sitting-lyon-2026"]);
 export const AIX_HOME_OWNER_ARTICLE_SLUG = "house-sitting-aix-les-bains";
 export const FARM_HOME_OWNER_ARTICLE_SLUG = "garde-ferme-animaux-monts-du-lyonnais";
@@ -162,7 +162,10 @@ export const SAINT_ETIENNE_OWNER_ARTICLE_SLUG = "pet-sitting-saint-etienne-loire
 export const VALENCE_OWNER_ARTICLE_SLUG = "pet-sitting-valence-drome";
 export const VENISSIEUX_OWNER_ARTICLE_SLUG = "pet-sitting-venissieux";
 export const VILLEURBANNE_OWNER_ARTICLE_SLUG = "pet-sitting-villeurbanne";
+export const VILLES_CHIEN_OWNER_ARTICLE_SLUG = "meilleures-villes-vivre-chien-autour-lyon";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
+  VILLES_CHIEN_OWNER_ARTICLE_SLUG,
+
   VILLEURBANNE_OWNER_ARTICLE_SLUG,
 
   VALENCE_OWNER_ARTICLE_SLUG,
@@ -229,6 +232,37 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [VILLES_CHIEN_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous préparez une garde après votre installation ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Organiser une garde depuis votre nouveau logement",
+    "endText": "Décrivez vos dates, les accès au logement et les besoins de votre chien pour échanger avec les personnes intéressées par un séjour chez vous.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+
+"arroser-plantes-vacances-lyon": {
+  "midText": "Vous cherchez un relais pour vos plantes ?",
+  "midPrimary": {
+    "label": "Publier mon besoin d’arrosage",
+    "href": "/petites-missions/creer",
+    "role": "entraide"
+  },
+  "endHeading": "Chercher un coup de main pour vos plantes à Lyon",
+  "endText": "Présentez le secteur, les dates, les plantes et les conditions de passage pour préparer les échanges avec les personnes intéressées.",
+  "endPrimary": {
+    "label": "Publier mon besoin d’arrosage",
+    "href": "/petites-missions/creer",
+    "role": "entraide"
+  }
+},
 "arroser-plantes-vacances-annecy": {
   "midText": "Vous cherchez un relais pour vos plantes ?",
   "midPrimary": {
@@ -1045,6 +1079,8 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  VILLES_CHIEN_OWNER_ARTICLE_SLUG,
+
   ...ENTRAIDE_GUIDE_ARTICLE_SLUGS,
   VILLEURBANNE_OWNER_ARTICLE_SLUG,
 
@@ -1307,6 +1343,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
     ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || slug === "c-est-quoi-le-house-sitting" ||
+      slug === VILLES_CHIEN_OWNER_ARTICLE_SLUG ||
       slug === VILLEURBANNE_OWNER_ARTICLE_SLUG ||
       slug === VALENCE_OWNER_ARTICLE_SLUG || slug === VENISSIEUX_OWNER_ARTICLE_SLUG ||
       slug === GRENOBLE_STAY_OWNER_ARTICLE_SLUG || slug === SAINT_ETIENNE_OWNER_ARTICLE_SLUG ||
