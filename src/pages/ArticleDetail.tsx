@@ -14,7 +14,7 @@ import PageMeta from "@/components/PageMeta";
 import { logSeoSnapshot } from "@/lib/seoDebugLog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import ArticleRenderer, { resolveImagePath, GUIDE_ARTICLE_SLUGS, OWNER_GUIDE_ARTICLE_SLUGS, CHOOSING_OWNER_ARTICLE_SLUG, CHRISTMAS_OWNER_ARTICLE_SLUG, WEEKEND_OWNER_ARTICLE_SLUG, WINTER_OWNER_ARTICLE_SLUG, PLANTS_OWNER_ARTICLE_SLUG, SECURITY_OWNER_ARTICLE_SLUG, RECIPROCAL_OWNER_ARTICLE_SLUG, DOG_OWNER_ARTICLE_SLUG, TRUST_OWNER_ARTICLE_SLUG, AGREEMENT_OWNER_ARTICLE_SLUG } from "@/components/articles/ArticleRenderer";
+import ArticleRenderer, { resolveImagePath, GUIDE_ARTICLE_SLUGS, OWNER_GUIDE_ARTICLE_SLUGS, CHOOSING_OWNER_ARTICLE_SLUG, CHRISTMAS_OWNER_ARTICLE_SLUG, WEEKEND_OWNER_ARTICLE_SLUG, WINTER_OWNER_ARTICLE_SLUG, PLANTS_OWNER_ARTICLE_SLUG, SECURITY_OWNER_ARTICLE_SLUG, RECIPROCAL_OWNER_ARTICLE_SLUG, DOG_OWNER_ARTICLE_SLUG, TRUST_OWNER_ARTICLE_SLUG, AGREEMENT_OWNER_ARTICLE_SLUG, PREPARATION_ONLY_OWNER_ARTICLE_SLUGS } from "@/components/articles/ArticleRenderer";
 import HouseSittingDiagnostic from "@/components/articles/HouseSittingDiagnostic";
 import ArticleAuthorBio from "@/components/articles/ArticleAuthorBio";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -475,7 +475,7 @@ export default function ArticleDetail() {
    {article.excerpt}
  </p>
  )}
- {OWNER_GUIDE_ARTICLE_SLUGS.has(article.slug) && (
+ {OWNER_GUIDE_ARTICLE_SLUGS.has(article.slug) && !PREPARATION_ONLY_OWNER_ARTICLE_SLUGS.has(article.slug) && (
  <div className="mt-5 flex flex-col items-start gap-2">
    <Link
      to={isAuthenticated ? "/sits/create" : "/inscription?role=owner&redirect=%2Fsits%2Fcreate"}
