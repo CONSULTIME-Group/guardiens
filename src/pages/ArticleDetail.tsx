@@ -37,6 +37,8 @@ const CONTACT_FIRST_ARTICLE_SLUGS = new Set([
 
 // Ces couvertures gardent leur sujet dans le cadre de lecture du guide.
 const GUIDE_COVER_CLASSES: Record<string, string> = {
+  "arroser-plantes-vacances-annecy": "w-full h-[360px] sm:h-[520px] object-cover object-[center_15%]",
+  "arroser-plantes-vacances-grenoble": "w-full h-[360px] sm:h-[520px] object-cover object-[center_25%]",
   ["boom-pet-sitting-lyon-2026"]: "w-full h-[300px] sm:h-[360px] object-cover object-bottom",
   [VILLEURBANNE_OWNER_ARTICLE_SLUG]: "w-full h-[360px] sm:h-[560px] object-cover object-[center_60%]",
 
