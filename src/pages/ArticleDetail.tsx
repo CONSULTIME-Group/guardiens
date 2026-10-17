@@ -14,7 +14,7 @@ import PageMeta from "@/components/PageMeta";
 import { logSeoSnapshot } from "@/lib/seoDebugLog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import ArticleRenderer, { resolveImagePath, GUIDE_ARTICLE_SLUGS, OWNER_GUIDE_ARTICLE_SLUGS, CHOOSING_OWNER_ARTICLE_SLUG } from "@/components/articles/ArticleRenderer";
+import ArticleRenderer, { resolveImagePath, GUIDE_ARTICLE_SLUGS, OWNER_GUIDE_ARTICLE_SLUGS, CHOOSING_OWNER_ARTICLE_SLUG, CHRISTMAS_OWNER_ARTICLE_SLUG, WEEKEND_OWNER_ARTICLE_SLUG } from "@/components/articles/ArticleRenderer";
 import HouseSittingDiagnostic from "@/components/articles/HouseSittingDiagnostic";
 import ArticleAuthorBio from "@/components/articles/ArticleAuthorBio";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -27,6 +27,13 @@ import { trackEvent } from "@/lib/analytics";
 import { useContentStats } from "@/hooks/useContentStats";
 import { SITTER_PRICE_NUMERIC, SITTER_PRICE_CURRENCY, SITTER_PRICE_START_ISO } from "@/lib/pricing";
 import { withOrganizationGraph } from "@/lib/seo/organizationNode";
+
+// Ces couvertures verticales gardent les personnes et animaux dans le cadre.
+const PORTRAIT_GUIDE_COVER_CLASSES: Record<string, string> = {
+  [CHOOSING_OWNER_ARTICLE_SLUG]: "w-full h-[300px] sm:h-[360px] object-cover",
+  [CHRISTMAS_OWNER_ARTICLE_SLUG]: "w-full h-[300px] sm:h-[360px] object-cover object-[center_45%]",
+  [WEEKEND_OWNER_ARTICLE_SLUG]: "w-full h-[300px] sm:h-[360px] object-cover object-[center_70%]",
+};
 
 interface ArticleFull {
  id: string;
@@ -530,7 +537,7 @@ export default function ArticleDetail() {
         <img
           src={getOptimizedImageUrl(resolveImagePath(article.cover_image_url), 800, 75)}
           alt={altText}
-          className={isGuide ? (article.slug === "c-est-quoi-le-house-sitting" ? "w-full h-[200px] sm:h-[260px] object-cover object-[center_25%]" : article.slug === CHOOSING_OWNER_ARTICLE_SLUG ? "w-full h-[300px] sm:h-[360px] object-cover" : OWNER_GUIDE_ARTICLE_SLUGS.has(article.slug) ? "w-full h-[200px] sm:h-[260px] object-cover" : "w-full h-[200px] sm:h-[260px] object-contain bg-muted/30") : "w-full h-auto max-h-96 object-cover"}
+          className={isGuide ? (article.slug === "c-est-quoi-le-house-sitting" ? "w-full h-[200px] sm:h-[260px] object-cover object-[center_25%]" : PORTRAIT_GUIDE_COVER_CLASSES[article.slug] || (OWNER_GUIDE_ARTICLE_SLUGS.has(article.slug) ? "w-full h-[200px] sm:h-[260px] object-cover" : "w-full h-[200px] sm:h-[260px] object-contain bg-muted/30")) : "w-full h-auto max-h-96 object-cover"}
           loading="eager"
           decoding="async"
           width={800}

@@ -118,6 +118,8 @@ export const CHOOSING_OWNER_ARTICLE_SLUG = "choisir-gardien-bons-criteres";
 export const NO_PETS_OWNER_ARTICLE_SLUG = "garder-une-maison-ce-n-est-pas-garder-un-animal";
 export const LISTING_OWNER_ARTICLE_SLUG = "rediger-bonne-annonce-house-sitting";
 export const PREPARATION_OWNER_ARTICLE_SLUG = "preparer-maison-avant-garde";
+export const CHRISTMAS_OWNER_ARTICLE_SLUG = "house-sitting-noel-fetes-fin-annee";
+export const WEEKEND_OWNER_ARTICLE_SLUG = "house-sitting-week-end-court-sejour-aura";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
   EXPAT_OWNER_ARTICLE_SLUG,
   REUNION_OWNER_ARTICLE_SLUG,
@@ -129,9 +131,25 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
   NO_PETS_OWNER_ARTICLE_SLUG,
   LISTING_OWNER_ARTICLE_SLUG,
   PREPARATION_OWNER_ARTICLE_SLUG,
+  CHRISTMAS_OWNER_ARTICLE_SLUG,
+  WEEKEND_OWNER_ARTICLE_SLUG,
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [CHRISTMAS_OWNER_ARTICLE_SLUG]: {
+    midText: "Vous cherchez un gardien pour Noël ou le Nouvel An ?",
+    midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+    endHeading: "Vous préparez un départ pendant les fêtes ?",
+    endText: "Présentez votre maison, vos dates et la présence attendue pendant les réveillons, puis échangez avec les personnes intéressées.",
+    endPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+  },
+  [WEEKEND_OWNER_ARTICLE_SLUG]: {
+    midText: "Vous cherchez quelqu’un pour votre maison le temps d’un week-end ?",
+    midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+    endHeading: "Votre prochain week-end se prépare ?",
+    endText: "Indiquez vos dates, les besoins de votre maison et les horaires à couvrir pour organiser la garde avec les personnes intéressées.",
+    endPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+  },
   [LISTING_OWNER_ARTICLE_SLUG]: {
     midText: "Vous préparez une annonce de garde pour votre maison ?",
     midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
@@ -402,6 +420,8 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  CHRISTMAS_OWNER_ARTICLE_SLUG,
+  WEEKEND_OWNER_ARTICLE_SLUG,
   LISTING_OWNER_ARTICLE_SLUG,
   PREPARATION_OWNER_ARTICLE_SLUG,
   CHOOSING_OWNER_ARTICLE_SLUG,
@@ -600,7 +620,9 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const withoutH1 = stripLeadingH1(interpolated);
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
-    slug === "c-est-quoi-le-house-sitting" || slug === LISTING_OWNER_ARTICLE_SLUG || slug === PREPARATION_OWNER_ARTICLE_SLUG,
+    slug === "c-est-quoi-le-house-sitting" ||
+      slug === LISTING_OWNER_ARTICLE_SLUG || slug === PREPARATION_OWNER_ARTICLE_SLUG ||
+      slug === CHRISTMAS_OWNER_ARTICLE_SLUG || slug === WEEKEND_OWNER_ARTICLE_SLUG,
   );
   let html = marked.parse(preprocessed, { async: false }) as string;
 
