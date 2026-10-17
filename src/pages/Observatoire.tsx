@@ -8,6 +8,8 @@ import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { useSpeciesBreakdown, type BreakdownRow } from "@/hooks/useSpeciesBreakdown";
 import { BADGE_DEFINITIONS } from "@/components/badges/badge-definitions";
 import { ORGANIZATION_NODE } from "@/lib/seo/organizationNode";
+import { usePublicStats } from "@/hooks/usePublicStats";
+import { communityTotals } from "../../supabase/functions/_shared/community-totals.js";
 
 /** Nombre de badges dérivé du catalogue, jamais recopié à la main. */
 const BADGE_COUNT = Object.keys(BADGE_DEFINITIONS).length;
@@ -34,16 +36,17 @@ interface Stat {
  detail: string;
 }
 
-const KEY_STATS: Stat[] = [
+// Lot CPT1 : mêmes compteurs cumulés que l'accueil (communityTotals).
+const buildKeyStats = (totals: { houses: number; animals: number }): Stat[] => [
  {
  label: "Animaux accompagnés",
- value: "234",
- detail: "Animaux gardés depuis le démarrage de l'aventure fondateurs (2021-2026). Chiens, chats, NAC, en France entière.",
+ value: new Intl.NumberFormat("fr-FR").format(totals.animals),
+ detail: "Animaux gardés depuis 2021. Chiens, chats, NAC, en France entière.",
  },
  {
  label: "Maisons gardées",
- value: "37",
- detail: "Foyers confiés à un gardien Guardiens ou aux fondateurs. Du studio urbain à la maison de campagne avec dépendances.",
+ value: new Intl.NumberFormat("fr-FR").format(totals.houses),
+ detail: "Foyers gardés depuis 2021. Du studio urbain à la maison de campagne avec dépendances.",
  },
  {
  label: "Espace propriétaire",
@@ -171,13 +174,15 @@ const Observatoire = () => {
   const { data: counts } = useInventaireCounts();
   const { data: species, isError: speciesError } = useSpeciesBreakdown();
   const fmt = (n: number) => new Intl.NumberFormat("fr-FR").format(n || 0);
+  const { data: publicStats } = usePublicStats();
+  const KEY_STATS = buildKeyStats(communityTotals(publicStats));
 
  const datasetSchema = {
  "@context": "https://schema.org",
  "@type": "Dataset",
  name: "Observatoire de la garde d'animaux à domicile en France, Guardiens",
  description:
- "Chiffres-clés sur la garde d'animaux à domicile (house-sitting, pet-sitting) en France : volumes, modèle économique, dispositif de confiance. Le jeu de données décrit également les membres de la plateforme Guardiens, leurs animaux (espèces, autonomie, niveau d'activité) et leurs logements (type, environnement), ainsi que l'expérience des fondateurs (2021-2026).",
+ "Chiffres-clés sur la garde d'animaux à domicile (house-sitting, pet-sitting) en France : volumes, modèle économique, dispositif de confiance. Le jeu de données décrit également les membres de la plateforme Guardiens, leurs animaux (espèces, autonomie, niveau d'activité) et leurs logements (type, environnement), ainsi que les gardes réalisées depuis 2021.",
  url: PAGE_URL,
  variableMeasured: [
  "Répartition des animaux par espèce",
@@ -456,7 +461,7 @@ const Observatoire = () => {
  </h2>
  <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
  <p>
- Les chiffres « 37 maisons gardées » et « 234 animaux accompagnés » correspondent au cumul vécu par les fondateurs Jérémie et Elisa entre 2021 et 2026, période de validation terrain qui a précédé l'ouverture publique de Guardiens.
+ Les chiffres « maisons gardées » et « animaux accompagnés » cumulent les gardes réalisées depuis 2021. Ils se mettent à jour à chaque garde terminée, comme sur la page d'accueil.
  </p>
  <p>
  Guardiens est gratuit, nos engagements sont publiés sur <Link to="/tarifs" className="text-primary hover:underline">la page Nos engagements</Link>.

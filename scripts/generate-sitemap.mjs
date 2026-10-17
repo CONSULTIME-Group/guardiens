@@ -12,6 +12,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { createSitemapDocument } from "../supabase/functions/sitemap/live.js";
 import { collectSitemapData } from "../supabase/functions/_shared/sitemap-data.js";
+import { communityTotals, llmsTotalsLine, LLMS_TOTALS_LINE_RE } from "../supabase/functions/_shared/community-totals.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -110,6 +111,17 @@ async function main() {
         /^(- \[House-sitting par département\]\(\/departement\): .*?)\d+ départements couverts\.$/m,
         `$1${deptCount} départements couverts.`,
       );
+    // Lot CPT1 : compteurs cumulés, mêmes chiffres que l'accueil. Lecture en
+    // échec : la ligne existante reste telle quelle, le build continue.
+    try {
+      const { data: statsRows, error: statsErr } = await supabase.rpc("get_public_stats");
+      const statsRow = Array.isArray(statsRows) ? statsRows[0] : statsRows;
+      if (!statsErr && statsRow && LLMS_TOTALS_LINE_RE.test(llms)) {
+        llms = llms.replace(LLMS_TOTALS_LINE_RE, llmsTotalsLine(communityTotals(statsRow), buildNow));
+      }
+    } catch (e) {
+      console.warn("   llms.txt: compteurs non rafraîchis", e?.message ?? e);
+    }
     const assocLines = associations
       .map(a => `- [${a._name}](${a.loc}) : ${a._summary}, ${a._city} (${a._dept}).`)
       .join("\n");
