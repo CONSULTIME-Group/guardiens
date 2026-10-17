@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["pet-sitting-valence-drome", 5],
+  ["pet-sitting-venissieux", 5],
   ["pet-sitting-grenoble-chartreuse", 6],
   ["pet-sitting-saint-etienne-loire", 6],
   ["house-sitting-aix-les-bains", 6],
