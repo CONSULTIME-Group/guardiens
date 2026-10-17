@@ -9,6 +9,16 @@ import { readFileSync } from "node:fs";
 
 vi.stubGlobal("Deno", { env: { get: () => undefined } });
 
+// La base et les réponses OSM sont simulées : le géocodage inverse l'est aussi.
+// Aucun appel réel à Nominatim ne doit décider du résultat de ce test de protocole.
+vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+  const url = new URL(typeof input === "string" ? input : input instanceof URL ? input.href : input.url);
+  if (url.hostname === "nominatim.openstreetmap.org" && url.pathname === "/reverse") {
+    return new Response(JSON.stringify({ address: { village: "Saint Ludger", postcode: "G0M1W0" } }), { status: 200 });
+  }
+  throw new Error(`Appel réseau non simulé dans le test GL4 : ${url.href}`);
+}));
+
 import {
   advanceGuide,
   mirrorForTry,

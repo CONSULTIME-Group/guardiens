@@ -108,7 +108,16 @@ const CTA_DEFAUT: CtaCopy = {
  * adaptEndCTAsForRole : ces libellés survivent tels quels, y compris pour
  * une personne connectée, parce qu'ils portent le sujet de l'article.
  */
+export const EXPAT_OWNER_ARTICLE_SLUG = "expat-proprietaire-faire-garder-maison-etranger";
+
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [EXPAT_OWNER_ARTICLE_SLUG]: {
+    midText: "Vous préparez une absence ? Présentez votre maison et les besoins de vos animaux.",
+    midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+    endHeading: "Vous préparez votre prochain départ ?",
+    endText: "Présentez votre maison, vos dates et les besoins de vos animaux, puis faites connaissance avec les personnes intéressées.",
+    endPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+  },
   "oser-demander-coup-de-main-pres-de-chez-soi": {
     midText: "Un coup de main à demander, ou du temps à donner ?",
     midPrimary: { label: "Demander un coup de main", href: "/petites-missions/creer", role: "entraide" },
@@ -435,7 +444,7 @@ interface ArticleRendererProps {
  * Le CTA mid-article n'est pas réécrit non plus : il est masqué en CSS pour
  * les utilisateurs logués via le sélecteur `[data-cta-block="mid"]`.
  */
-function adaptEndCTAsForRole(html: string, role?: "owner" | "sitter" | "both"): string {
+function adaptEndCTAsForRole(html: string, role?: "owner" | "sitter" | "both", slug?: string): string {
   if (!role) return html;
 
   // Capture une balise <a ... data-cta-position="end" ...> avec son inner text,
@@ -446,6 +455,12 @@ function adaptEndCTAsForRole(html: string, role?: "owner" | "sitter" | "both"): 
     (full, attrs: string, _inner: string) => {
       const dataRole =
         attrs.match(/\bdata-cta-role="([^"]+)"/)?.[1] || null;
+
+      // Sur ce guide propriétaire, un membre gardien peut aussi préparer sa propre garde.
+      if (slug === EXPAT_OWNER_ARTICLE_SLUG && dataRole === "owner") {
+        const newAttrs = attrs.replace(/href="[^"]*"/, 'href="/sits/create"');
+        return `<a${newAttrs}>${_inner}</a>`;
+      }
 
       // owner logué → tous les CTAs end pointent vers une action proprio utile
       if (role === "owner" || role === "both") {
@@ -501,10 +516,15 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
 
   html = resolveArticleImages(html);
   html = rewriteMemberLinksInHtml(html);
-  html = injectCTA(html, slug);
+  if (slug === EXPAT_OWNER_ARTICLE_SLUG) {
+    // Les deux liens du brouillon éditorial sont rendus par l'en-tête et le bloc final.
+    html = html.replace(/<p><strong><a href="\/inscription\?role=owner(?:&amp;|&)redirect=%2Fsits%2Fcreate">Publier mon annonce de garde<\/a><\/strong><\/p>\s*/g, "");
+  } else {
+    html = injectCTA(html, slug);
+  }
   html = addBandedSections(html);
   html = addEndCTA(html, slug);
-  html = adaptEndCTAsForRole(html, userRole);
+  html = adaptEndCTAsForRole(html, userRole, slug);
   html = wrapTables(html);
   const isGuide = !!slug && GUIDE_ARTICLE_SLUGS.has(slug);
   if (isGuide) {
