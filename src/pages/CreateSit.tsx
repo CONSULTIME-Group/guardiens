@@ -3002,22 +3002,19 @@ const CreateSit = () => {
           <MaxApplicationsField value={maxApplications} onChange={setMaxApplications} />
 
 
-          {/* Animaux : sorti du bloc replié, c'est le point de blocage numéro un
-              des annonces non publiées. */}
+          {/* Les animaux restent visibles et optionnels, comme dans les règles
+              de publication : une garde de maison sans animaux est autorisée. */}
           <div
             id="pets-field"
-            className={cn(
-              "scroll-mt-24 rounded-lg border p-5",
-              pets.length === 0 ? "border-destructive/40 bg-destructive/5" : "border-border bg-card"
-            )}
+            className="scroll-mt-24 rounded-lg border border-border bg-card p-5"
           >
             <div className="flex items-center gap-2 mb-3">
-              <PawPrint className={cn("h-4 w-4", pets.length === 0 ? "text-destructive" : "text-primary")} />
-              <h3 className="font-heading text-sm font-semibold">Les animaux à faire garder</h3>
+              <PawPrint className="h-4 w-4 text-primary" />
+              <h3 className="font-heading text-sm font-semibold">Vos animaux, si vous en avez</h3>
             </div>
             {pets.length === 0 && (
-              <p className="text-sm text-destructive mb-3">
-                Votre annonce ne peut pas être publiée sans au moins un animal. Ajoutez-le ici, cela prend une minute.
+              <p className="text-sm text-muted-foreground mb-3">
+                Vous pouvez publier une garde sans animaux, pour votre maison, votre jardin ou vos plantes.
               </p>
             )}
             {property ? (
