@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["garde-chien-faire-garder-son-chien", 7],
+  ["garde-chat-domicile-house-sitting", 6],
   ["rediger-bonne-annonce-house-sitting", 5],
   ["preparer-maison-avant-garde", 5],
   ["house-sitting-noel-fetes-fin-annee", 6],
