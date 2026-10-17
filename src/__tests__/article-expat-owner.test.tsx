@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["house-sitting-auvergne-rhone-alpes", 6],
+  ["house-sitting-ete-aura-guide", 6],
   ["pet-sitting-lyon-guide-complet", 6],
   ["pet-sitting-lyon-ouest-lyonnais", 6],
   ["garde-animaux-croix-rousse-lyon", 6],
