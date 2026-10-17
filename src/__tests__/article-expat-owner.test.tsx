@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["garde-animaux-croix-rousse-lyon", 6],
+  ["garde-chat-presquile-lyon", 6],
   ["ou-faire-garder-chien-lyon-vacances", 6],
   ["garde-chat-domicile-lyon", 6],
   ["confier-sa-maison-absence-risques", 6],
