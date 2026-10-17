@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["house-sitting-aix-les-bains", 6],
+  ["garde-ferme-animaux-monts-du-lyonnais", 6],
   ["gerer-animaux-difficiles-garde", 6],
   ["veterinaire-urgence-lyon-guide", 6],
   ["veterinaire-urgence-annecy-haute-savoie", 6],
