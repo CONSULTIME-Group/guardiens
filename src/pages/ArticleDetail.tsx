@@ -43,7 +43,7 @@ const GUIDE_COVER_CLASSES: Record<string, string> = {
   [LYON_CAT_OWNER_ARTICLE_SLUG]: "w-full h-[300px] sm:h-[360px] object-cover object-[center_65%]",
 
   [ENTRUST_HOME_OWNER_ARTICLE_SLUG]: "w-full h-[300px] sm:h-[360px] object-cover object-[center_65%]",
-  [ABSENCE_SITUATIONS_OWNER_ARTICLE_SLUG]: "w-full h-[300px] sm:h-[360px] object-cover object-top",
+  [ABSENCE_SITUATIONS_OWNER_ARTICLE_SLUG]: "w-full h-[300px] sm:h-[420px] object-cover object-[center_45%]",
 
   [AT_HOME_OWNER_ARTICLE_SLUG]: "w-full h-[300px] sm:h-[360px] object-cover object-[center_65%]",
   [WELFARE_OWNER_ARTICLE_SLUG]: "w-full h-[300px] sm:h-[360px] object-cover object-[center_65%]",

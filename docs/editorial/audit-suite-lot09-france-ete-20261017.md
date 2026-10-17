@@ -38,3 +38,7 @@ URL, canoniques, auteurs, dates réelles et indexabilité conservés. Seule la c
 Les tests de rendu couvrent rôles, liens de publication, FAQ et ancres. Le contrôle public doit vérifier H1, métadonnées, canoniques, dates, chargement des deux images, tableaux, checklist, FAQ identiques au schéma et deux boutons par guide.
 
 Lorsque Search Console sera disponible, distinguer définition, choix d’une garde, préparation estivale et recherches urgentes de santé. Examiner les recouvrements avec les guides maison, bien-être et checklist. Pour l’été, comparer des périodes saisonnières cohérentes et observer la diversité des requêtes avant d’interpréter un CTR global. Comparer positions, impressions et clics par requête, appareil et pays. Suivre les clics utiles et les annonces publiées lorsque l’attribution est disponible. Aucun gain n’est supposé sans mesure.
+
+## Ajustement visuel associé
+
+Le contrôle du guide des huit situations d’absence montre une image de format vertical. Son cadre est agrandi et centré sur la zone du chien et de la valise, sur ce seul slug. Vérifier le résultat après intégration, puis en production ; son contenu et son fichier image sont préservés.
