@@ -14,7 +14,7 @@ import PageMeta from "@/components/PageMeta";
 import { logSeoSnapshot } from "@/lib/seoDebugLog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import ArticleRenderer, { resolveImagePath, GUIDE_ARTICLE_SLUGS, OWNER_GUIDE_ARTICLE_SLUGS, CHOOSING_OWNER_ARTICLE_SLUG, CHRISTMAS_OWNER_ARTICLE_SLUG, WEEKEND_OWNER_ARTICLE_SLUG, WINTER_OWNER_ARTICLE_SLUG, PLANTS_OWNER_ARTICLE_SLUG, SECURITY_OWNER_ARTICLE_SLUG } from "@/components/articles/ArticleRenderer";
+import ArticleRenderer, { resolveImagePath, GUIDE_ARTICLE_SLUGS, OWNER_GUIDE_ARTICLE_SLUGS, CHOOSING_OWNER_ARTICLE_SLUG, CHRISTMAS_OWNER_ARTICLE_SLUG, WEEKEND_OWNER_ARTICLE_SLUG, WINTER_OWNER_ARTICLE_SLUG, PLANTS_OWNER_ARTICLE_SLUG, SECURITY_OWNER_ARTICLE_SLUG, RECIPROCAL_OWNER_ARTICLE_SLUG } from "@/components/articles/ArticleRenderer";
 import HouseSittingDiagnostic from "@/components/articles/HouseSittingDiagnostic";
 import ArticleAuthorBio from "@/components/articles/ArticleAuthorBio";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -30,6 +30,7 @@ import { withOrganizationGraph } from "@/lib/seo/organizationNode";
 
 // Ces couvertures gardent leur sujet dans le cadre de lecture du guide.
 const GUIDE_COVER_CLASSES: Record<string, string> = {
+  [RECIPROCAL_OWNER_ARTICLE_SLUG]: "w-full h-[200px] sm:h-[260px] object-cover object-[center_30%]",
   [PLANTS_OWNER_ARTICLE_SLUG]: "w-full h-[200px] sm:h-[260px] object-cover object-[center_30%]",
   [SECURITY_OWNER_ARTICLE_SLUG]: "w-full h-[200px] sm:h-[260px] object-cover object-[center_65%]",
   [WINTER_OWNER_ARTICLE_SLUG]: "w-full h-[300px] sm:h-[360px] object-cover object-[center_65%]",

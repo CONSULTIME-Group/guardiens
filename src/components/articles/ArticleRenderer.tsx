@@ -124,6 +124,8 @@ export const WINTER_OWNER_ARTICLE_SLUG = "house-sitting-hiver-montagne-savoie";
 export const GARDEN_OWNER_ARTICLE_SLUG = "entretenir-jardin-pendant-absence";
 export const PLANTS_OWNER_ARTICLE_SLUG = "arroser-plantes-pendant-vacances-guide";
 export const SECURITY_OWNER_ARTICLE_SLUG = "securiser-maison-absence-prolongee";
+export const FRANCE_EXPAT_OWNER_ARTICLE_SLUG = "francais-etranger-garde-maison-france";
+export const RECIPROCAL_OWNER_ARTICLE_SLUG = "echange-reciproque-garde-maison-expatries";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
   EXPAT_OWNER_ARTICLE_SLUG,
   REUNION_OWNER_ARTICLE_SLUG,
@@ -141,9 +143,25 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
   GARDEN_OWNER_ARTICLE_SLUG,
   PLANTS_OWNER_ARTICLE_SLUG,
   SECURITY_OWNER_ARTICLE_SLUG,
+  FRANCE_EXPAT_OWNER_ARTICLE_SLUG,
+  RECIPROCAL_OWNER_ARTICLE_SLUG,
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [FRANCE_EXPAT_OWNER_ARTICLE_SLUG]: {
+    midText: "Vous cherchez un gardien pour votre maison restée en France ?",
+    midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+    endHeading: "Vous préparez la garde de votre maison en France ?",
+    endText: "Présentez votre logement, vos dates et les tâches prévues, puis échangez avec les personnes intéressées pour préparer leur arrivée.",
+    endPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+  },
+  [RECIPROCAL_OWNER_ARTICLE_SLUG]: {
+    midText: "Vous souhaitez présenter votre besoin de garde ?",
+    midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+    endHeading: "Commencez par la garde dont votre maison a besoin",
+    endText: "Décrivez le logement, vos dates et les tâches prévues. Un éventuel retour de garde se discutera et se confirmera séparément.",
+    endPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+  },
   [PLANTS_OWNER_ARTICLE_SLUG]: {
     midText: "Vous cherchez un gardien pour votre maison et vos plantes ?",
     midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
@@ -456,6 +474,8 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  FRANCE_EXPAT_OWNER_ARTICLE_SLUG,
+  RECIPROCAL_OWNER_ARTICLE_SLUG,
   PLANTS_OWNER_ARTICLE_SLUG,
   SECURITY_OWNER_ARTICLE_SLUG,
   WINTER_OWNER_ARTICLE_SLUG,
@@ -664,7 +684,8 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
       slug === LISTING_OWNER_ARTICLE_SLUG || slug === PREPARATION_OWNER_ARTICLE_SLUG ||
       slug === CHRISTMAS_OWNER_ARTICLE_SLUG || slug === WEEKEND_OWNER_ARTICLE_SLUG ||
       slug === WINTER_OWNER_ARTICLE_SLUG || slug === GARDEN_OWNER_ARTICLE_SLUG ||
-      slug === PLANTS_OWNER_ARTICLE_SLUG || slug === SECURITY_OWNER_ARTICLE_SLUG,
+      slug === PLANTS_OWNER_ARTICLE_SLUG || slug === SECURITY_OWNER_ARTICLE_SLUG ||
+      slug === FRANCE_EXPAT_OWNER_ARTICLE_SLUG || slug === RECIPROCAL_OWNER_ARTICLE_SLUG,
   );
   let html = marked.parse(preprocessed, { async: false }) as string;
 

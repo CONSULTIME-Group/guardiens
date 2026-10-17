@@ -37,6 +37,8 @@ it.each([
   ["entretenir-jardin-pendant-absence", 6],
   ["arroser-plantes-pendant-vacances-guide", 6],
   ["securiser-maison-absence-prolongee", 6],
+  ["francais-etranger-garde-maison-france", 6],
+  ["echange-reciproque-garde-maison-expatries", 6],
 ] as const)("FAQ visible et structurée cohérente pour %s", (slug, questionCount) => {
   const content = readFileSync(`docs/editorial/${slug}.md`, "utf8").replace(/^---\n[\s\S]*?\n---\n/, "").trim();
   const faq = parseFaqFromMarkdown(content);
