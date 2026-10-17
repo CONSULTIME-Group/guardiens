@@ -28,6 +28,12 @@ import { useContentStats } from "@/hooks/useContentStats";
 import { SITTER_PRICE_NUMERIC, SITTER_PRICE_CURRENCY, SITTER_PRICE_START_ISO } from "@/lib/pricing";
 import { withOrganizationGraph } from "@/lib/seo/organizationNode";
 
+// Les numéros utiles passent avant toute image sur ces pages d’urgence.
+const CONTACT_FIRST_ARTICLE_SLUGS = new Set([
+  "veterinaire-urgence-annecy-haute-savoie",
+  "veterinaire-urgence-grenoble-isere",
+]);
+
 // Ces couvertures gardent leur sujet dans le cadre de lecture du guide.
 const GUIDE_COVER_CLASSES: Record<string, string> = {
   [SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG]: "w-full h-[300px] sm:h-[360px] object-cover object-[center_60%]",
@@ -548,7 +554,7 @@ export default function ArticleDetail() {
       à fond transparent / coups de pinceau) sont rendues sans cadre ni crop,
       pour donner l'impression que l'illustration est peinte directement sur la
       page. Les couvertures JPG/WebP (photos) gardent le rendu encadré. */}
-  {article.cover_image_url ? (() => {
+  {!CONTACT_FIRST_ARTICLE_SLUGS.has(article.slug) && (article.cover_image_url ? (() => {
     const isTransparentArtwork = /\.png(\?|$)/i.test(article.cover_image_url);
     return isTransparentArtwork ? (
       <div className="mb-8 -mx-2 sm:-mx-4">
@@ -578,7 +584,7 @@ export default function ArticleDetail() {
   })() : (
     /* Article sans couverture (7/120) : repli typographique, jamais de trou. */
     <ArticleCoverFallback title={article.title} className="aspect-[16/9] rounded-xl mb-8" />
-  )}
+  ))}
 
  <ArticleRenderer content={article.content} userRole={isAuthenticated ? user?.role : undefined} slug={article.slug} placeholderValues={contentStats} />
 
