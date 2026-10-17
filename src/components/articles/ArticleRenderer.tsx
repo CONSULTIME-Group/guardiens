@@ -109,8 +109,20 @@ const CTA_DEFAUT: CtaCopy = {
  * une personne connectée, parce qu'ils portent le sujet de l'article.
  */
 export const EXPAT_OWNER_ARTICLE_SLUG = "expat-proprietaire-faire-garder-maison-etranger";
+export const REUNION_OWNER_ARTICLE_SLUG = "garde-kaz-house-sitting-la-reunion";
+export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
+  EXPAT_OWNER_ARTICLE_SLUG,
+  REUNION_OWNER_ARTICLE_SLUG,
+]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [REUNION_OWNER_ARTICLE_SLUG]: {
+    midText: "Vous cherchez quelqu’un pour votre maison à La Réunion ?",
+    midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+    endHeading: "Vous préparez votre départ de La Réunion ?",
+    endText: "Présentez votre commune, vos dates et votre maison, puis échangez avec les personnes intéressées.",
+    endPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+  },
   [EXPAT_OWNER_ARTICLE_SLUG]: {
     midText: "Vous préparez une absence ? Présentez votre maison et les besoins de vos animaux.",
     midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
@@ -320,6 +332,7 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
   "c-est-quoi-le-house-sitting",
   "expat-proprietaire-faire-garder-maison-etranger",
+  REUNION_OWNER_ARTICLE_SLUG,
   "preparer-maison-avant-garde",
   "pension-chien-alternatives-guide",
   "vacances-longues-garde-animal-2-semaines",
@@ -456,8 +469,8 @@ function adaptEndCTAsForRole(html: string, role?: "owner" | "sitter" | "both", s
       const dataRole =
         attrs.match(/\bdata-cta-role="([^"]+)"/)?.[1] || null;
 
-      // Sur ce guide propriétaire, un membre gardien peut aussi préparer sa propre garde.
-      if (slug === EXPAT_OWNER_ARTICLE_SLUG && dataRole === "owner") {
+      // Sur ces guides propriétaires, un membre gardien peut aussi préparer sa propre garde.
+      if (OWNER_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && dataRole === "owner") {
         const newAttrs = attrs.replace(/href="[^"]*"/, 'href="/sits/create"');
         return `<a${newAttrs}>${_inner}</a>`;
       }
@@ -516,8 +529,8 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
 
   html = resolveArticleImages(html);
   html = rewriteMemberLinksInHtml(html);
-  if (slug === EXPAT_OWNER_ARTICLE_SLUG) {
-    // Les deux liens du brouillon éditorial sont rendus par l'en-tête et le bloc final.
+  if (OWNER_GUIDE_ARTICLE_SLUGS.has(slug ?? "")) {
+    // Le parcours propriétaire est rendu par l'en-tête et le bloc final.
     html = html.replace(/<p><strong><a href="\/inscription\?role=owner(?:&amp;|&)redirect=%2Fsits%2Fcreate">Publier mon annonce de garde<\/a><\/strong><\/p>\s*/g, "");
   } else {
     html = injectCTA(html, slug);

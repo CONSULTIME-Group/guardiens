@@ -14,7 +14,7 @@ import PageMeta from "@/components/PageMeta";
 import { logSeoSnapshot } from "@/lib/seoDebugLog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import ArticleRenderer, { resolveImagePath, GUIDE_ARTICLE_SLUGS, EXPAT_OWNER_ARTICLE_SLUG } from "@/components/articles/ArticleRenderer";
+import ArticleRenderer, { resolveImagePath, GUIDE_ARTICLE_SLUGS, OWNER_GUIDE_ARTICLE_SLUGS } from "@/components/articles/ArticleRenderer";
 import HouseSittingDiagnostic from "@/components/articles/HouseSittingDiagnostic";
 import ArticleAuthorBio from "@/components/articles/ArticleAuthorBio";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -461,7 +461,7 @@ export default function ArticleDetail() {
    {article.excerpt}
  </p>
  )}
- {article.slug === EXPAT_OWNER_ARTICLE_SLUG && (
+ {OWNER_GUIDE_ARTICLE_SLUGS.has(article.slug) && (
  <div className="mt-5 flex flex-col items-start gap-2">
    <Link
      to={isAuthenticated ? "/sits/create" : "/inscription?role=owner&redirect=%2Fsits%2Fcreate"}
@@ -530,7 +530,7 @@ export default function ArticleDetail() {
         <img
           src={getOptimizedImageUrl(resolveImagePath(article.cover_image_url), 800, 75)}
           alt={altText}
-          className={isGuide ? (article.slug === "c-est-quoi-le-house-sitting" ? "w-full h-[200px] sm:h-[260px] object-cover object-[center_25%]" : article.slug === EXPAT_OWNER_ARTICLE_SLUG ? "w-full h-[200px] sm:h-[260px] object-cover" : "w-full h-[200px] sm:h-[260px] object-contain bg-muted/30") : "w-full h-auto max-h-96 object-cover"}
+          className={isGuide ? (article.slug === "c-est-quoi-le-house-sitting" ? "w-full h-[200px] sm:h-[260px] object-cover object-[center_25%]" : OWNER_GUIDE_ARTICLE_SLUGS.has(article.slug) ? "w-full h-[200px] sm:h-[260px] object-cover" : "w-full h-[200px] sm:h-[260px] object-contain bg-muted/30") : "w-full h-auto max-h-96 object-cover"}
           loading="eager"
           decoding="async"
           width={800}
