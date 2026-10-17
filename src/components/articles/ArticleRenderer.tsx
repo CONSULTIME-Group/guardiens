@@ -133,8 +133,12 @@ export const AGREEMENT_OWNER_ARTICLE_SLUG = "commodat-garde-guardiens";
 export const INCIDENT_OWNER_ARTICLE_SLUG = "gerer-imprevu-pendant-garde";
 export const HOSPITAL_OWNER_ARTICLE_SLUG = "faire-garder-animal-pendant-hospitalisation";
 // Ces guides répondent aussi à un besoin immédiat : le CTA reste en fin de page, pour anticiper une garde.
-export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG]);
+export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux"]);
+export const WELCOME_OWNER_ARTICLE_SLUG = "accueillir-gardien-bonnes-pratiques";
+export const DEPARTURE_OWNER_ARTICLE_SLUG = "checklist-partir-vacances-animaux";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
+  WELCOME_OWNER_ARTICLE_SLUG,
+  DEPARTURE_OWNER_ARTICLE_SLUG,
   INCIDENT_OWNER_ARTICLE_SLUG,
   HOSPITAL_OWNER_ARTICLE_SLUG,
   TRUST_OWNER_ARTICLE_SLUG,
@@ -162,6 +166,20 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [WELCOME_OWNER_ARTICLE_SLUG]: {
+    midText: "Vous préparez une prochaine garde ?",
+    midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+    endHeading: "Vous cherchez encore un gardien pour une prochaine absence ?",
+    endText: "Décrivez votre logement, les dates et les tâches prévues pour échanger avec les personnes intéressées avant d’organiser leur arrivée.",
+    endPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+  },
+  [DEPARTURE_OWNER_ARTICLE_SLUG]: {
+    midText: "Vous n’avez pas encore confirmé votre garde ?",
+    midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+    endHeading: "Vous n’avez pas encore trouvé de gardien ?",
+    endText: "Présentez vos dates et les besoins de vos animaux pour préparer une garde à l’avance. La publication d’une annonce ne constitue pas une prise en charge confirmée.",
+    endPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+  },
   [INCIDENT_OWNER_ARTICLE_SLUG]: {
     midText: "Vous préparez une prochaine garde à l’avance ?",
     midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
@@ -530,6 +548,8 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  WELCOME_OWNER_ARTICLE_SLUG,
+  DEPARTURE_OWNER_ARTICLE_SLUG,
   INCIDENT_OWNER_ARTICLE_SLUG,
   HOSPITAL_OWNER_ARTICLE_SLUG,
   TRUST_OWNER_ARTICLE_SLUG,
@@ -750,7 +770,8 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
       slug === FRANCE_EXPAT_OWNER_ARTICLE_SLUG || slug === RECIPROCAL_OWNER_ARTICLE_SLUG ||
       slug === DOG_OWNER_ARTICLE_SLUG || slug === CAT_OWNER_ARTICLE_SLUG ||
       slug === TRUST_OWNER_ARTICLE_SLUG || slug === AGREEMENT_OWNER_ARTICLE_SLUG ||
-      slug === INCIDENT_OWNER_ARTICLE_SLUG || slug === HOSPITAL_OWNER_ARTICLE_SLUG,
+      slug === INCIDENT_OWNER_ARTICLE_SLUG || slug === HOSPITAL_OWNER_ARTICLE_SLUG ||
+      slug === WELCOME_OWNER_ARTICLE_SLUG || slug === DEPARTURE_OWNER_ARTICLE_SLUG,
   );
   let html = marked.parse(preprocessed, { async: false }) as string;
 
