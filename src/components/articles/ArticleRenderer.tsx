@@ -112,14 +112,32 @@ export const EXPAT_OWNER_ARTICLE_SLUG = "expat-proprietaire-faire-garder-maison-
 export const REUNION_OWNER_ARTICLE_SLUG = "garde-kaz-house-sitting-la-reunion";
 export const TAHITI_OWNER_ARTICLE_SLUG = "garde-maison-animaux-tahiti";
 export const CALEDONIE_OWNER_ARTICLE_SLUG = "garde-maison-animaux-nouvelle-caledonie";
+export const PENSION_OWNER_ARTICLE_SLUG = "pension-chien-alternatives-guide";
+export const LONG_STAY_OWNER_ARTICLE_SLUG = "vacances-longues-garde-animal-2-semaines";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
   EXPAT_OWNER_ARTICLE_SLUG,
   REUNION_OWNER_ARTICLE_SLUG,
   TAHITI_OWNER_ARTICLE_SLUG,
   CALEDONIE_OWNER_ARTICLE_SLUG,
+  PENSION_OWNER_ARTICLE_SLUG,
+  LONG_STAY_OWNER_ARTICLE_SLUG,
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [PENSION_OWNER_ARTICLE_SLUG]: {
+    midText: "Vous envisagez un gardien hébergé chez vous pour votre chien ?",
+    midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+    endHeading: "Vous préférez faire garder votre chien à la maison ?",
+    endText: "Présentez votre logement, vos dates et les besoins de votre chien, puis échangez avec les personnes intéressées par la garde.",
+    endPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+  },
+  [LONG_STAY_OWNER_ARTICLE_SLUG]: {
+    midText: "Vous cherchez un gardien pour plusieurs semaines ?",
+    midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+    endHeading: "Vous préparez deux semaines d’absence ou davantage ?",
+    endText: "Indiquez toutes vos dates, les besoins de vos animaux et le logement proposé pour organiser votre garde avec les personnes intéressées.",
+    endPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+  },
   [CALEDONIE_OWNER_ARTICLE_SLUG]: {
     midText: "Vous cherchez un gardien pour votre maison en Nouvelle-Calédonie ?",
     midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
