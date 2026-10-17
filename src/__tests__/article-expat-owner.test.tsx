@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
-import ArticleRenderer, { OWNER_GUIDE_ARTICLE_SLUGS } from "@/components/articles/ArticleRenderer";
+import ArticleRenderer, { OWNER_GUIDE_ARTICLE_SLUGS, SITTER_GUIDE_ARTICLE_SLUGS } from "@/components/articles/ArticleRenderer";
 import { parseFaqFromMarkdown } from "@/lib/parseFaq";
 
 describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire", (slug) => {
@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["gerer-animaux-difficiles-garde", 6],
+  ["veterinaire-urgence-lyon-guide", 6],
   ["veterinaire-urgence-annecy-haute-savoie", 6],
   ["veterinaire-urgence-grenoble-isere", 6],
   ["garde-animaux-savoie-guide", 7],
@@ -74,6 +76,7 @@ it.each([
 });
 
 it.each([
+  ["veterinaire-urgence-lyon-guide", ["+33472304040", "+33478742961", "+33481091840", "+33478870707"]],
   ["veterinaire-urgence-annecy-haute-savoie", ["+33450222424", "+33450600900", "+33458173232"]],
   ["veterinaire-urgence-grenoble-isere", ["+33480423323", "+33458173232"]],
 ] as const)("les contacts de %s restent directement appelables après rendu", (slug, phones) => {
@@ -81,4 +84,23 @@ it.each([
   const { container } = render(<ArticleRenderer content={content} slug={slug} />);
   expect(container.querySelector("h2")?.id).toBe("contacts");
   for (const phone of phones) expect(container.querySelector(`a[href="tel:${phone}"]`)).not.toBeNull();
+});
+
+
+describe.each([...SITTER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours gardien", (slug) => {
+  it.each([undefined, "owner", "sitter", "both"] as const)("une seule action finale pour le rôle %s", (userRole) => {
+    const content = readFileSync(`docs/editorial/${slug}.md`, "utf8").replace(/^---\n[\s\S]*?\n---\n/, "").trim();
+    const { container } = render(<ArticleRenderer content={content} slug={slug} userRole={userRole} />);
+    const links = container.querySelectorAll('a[data-article-cta="true"]');
+    expect(links).toHaveLength(1);
+    expect(links[0].getAttribute("href")).toBe("/search");
+    expect(links[0].getAttribute("data-cta-position")).toBe("end");
+    expect(links[0].getAttribute("data-cta-role")).toBe("sitter");
+    expect(container.querySelector('[data-cta-block="mid"]')).toBeNull();
+    expect(container.querySelector("h1")).toBeNull();
+    for (const anchor of container.querySelectorAll('a[href^="#"]')) {
+      const target = anchor.getAttribute("href")!.slice(1);
+      expect([...container.querySelectorAll("[id]")].some(element => element.id === target), `${slug} #${target}`).toBe(true);
+    }
+  });
 });
