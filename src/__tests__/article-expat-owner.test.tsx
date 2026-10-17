@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["garde-animaux-savoie-guide", 7],
+  ["house-sitting-haute-savoie-annecy-megeve", 6],
   ["house-sitting-auvergne-rhone-alpes", 6],
   ["house-sitting-ete-aura-guide", 6],
   ["pet-sitting-lyon-guide-complet", 6],

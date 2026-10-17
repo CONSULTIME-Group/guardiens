@@ -148,7 +148,12 @@ export const LYON_HUB_OWNER_ARTICLE_SLUG = "pet-sitting-lyon-guide-complet";
 export const WEST_LYON_OWNER_ARTICLE_SLUG = "pet-sitting-lyon-ouest-lyonnais";
 export const FRANCE_PRACTICAL_OWNER_ARTICLE_SLUG = "house-sitting-auvergne-rhone-alpes";
 export const SUMMER_OWNER_ARTICLE_SLUG = "house-sitting-ete-aura-guide";
+export const SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG = "garde-animaux-savoie-guide";
+export const HAUTE_SAVOIE_STAY_OWNER_ARTICLE_SLUG = "house-sitting-haute-savoie-annecy-megeve";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
+  SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG,
+  HAUTE_SAVOIE_STAY_OWNER_ARTICLE_SLUG,
+
   FRANCE_PRACTICAL_OWNER_ARTICLE_SLUG,
   SUMMER_OWNER_ARTICLE_SLUG,
 
@@ -196,6 +201,37 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous envisagez un gardien hébergé pour vos animaux en Savoie ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Vous préparez une garde de vos animaux chez vous ?",
+    "endText": "Présentez votre logement, les dates et les soins et sorties nécessaires pour échanger avec les personnes intéressées par un séjour en Savoie.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+  [HAUTE_SAVOIE_STAY_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous souhaitez accueillir un gardien dans votre logement en Haute-Savoie ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Vous préparez une garde de votre appartement, maison ou chalet ?",
+    "endText": "Décrivez le logement, les accès, vos dates et les tâches nécessaires pour préparer les échanges avec les personnes intéressées.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+
   [FRANCE_PRACTICAL_OWNER_ARTICLE_SLUG]: {
     "midText": "Vous envisagez de confier votre logement pendant une absence ?",
     "midPrimary": {
@@ -764,6 +800,9 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG,
+  HAUTE_SAVOIE_STAY_OWNER_ARTICLE_SLUG,
+
   FRANCE_PRACTICAL_OWNER_ARTICLE_SLUG,
   SUMMER_OWNER_ARTICLE_SLUG,
 
@@ -997,6 +1036,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
     slug === "c-est-quoi-le-house-sitting" ||
+      slug === SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG || slug === HAUTE_SAVOIE_STAY_OWNER_ARTICLE_SLUG ||
       slug === FRANCE_PRACTICAL_OWNER_ARTICLE_SLUG || slug === SUMMER_OWNER_ARTICLE_SLUG ||
       slug === LYON_HUB_OWNER_ARTICLE_SLUG || slug === WEST_LYON_OWNER_ARTICLE_SLUG ||
       slug === CROIX_ROUSSE_OWNER_ARTICLE_SLUG || slug === PRESQUILE_CAT_OWNER_ARTICLE_SLUG ||
