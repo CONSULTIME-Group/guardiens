@@ -153,6 +153,7 @@ export const HAUTE_SAVOIE_STAY_OWNER_ARTICLE_SLUG = "house-sitting-haute-savoie-
 export const ANNECY_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-annecy-haute-savoie";
 export const GRENOBLE_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-grenoble-isere";
 export const LYON_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-lyon-guide";
+export const ENTRAIDE_GUIDE_ARTICLE_SLUGS = new Set<string>(["arroser-plantes-vacances-annecy", "arroser-plantes-vacances-grenoble"]);
 export const SITTER_GUIDE_ARTICLE_SLUGS = new Set<string>(["gerer-animaux-difficiles-garde", "boom-pet-sitting-lyon-2026"]);
 export const AIX_HOME_OWNER_ARTICLE_SLUG = "house-sitting-aix-les-bains";
 export const FARM_HOME_OWNER_ARTICLE_SLUG = "garde-ferme-animaux-monts-du-lyonnais";
@@ -228,6 +229,37 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+"arroser-plantes-vacances-annecy": {
+  "midText": "Vous cherchez un relais pour vos plantes ?",
+  "midPrimary": {
+    "label": "Publier mon besoin d’arrosage",
+    "href": "/petites-missions/creer",
+    "role": "entraide"
+  },
+  "endHeading": "Préparer un coup de main à Annecy",
+  "endText": "Décrivez les dates, les plantes, les passages et les conditions d’accès pour échanger avec les personnes intéressées.",
+  "endPrimary": {
+    "label": "Publier mon besoin d’arrosage",
+    "href": "/petites-missions/creer",
+    "role": "entraide"
+  }
+},
+"arroser-plantes-vacances-grenoble": {
+  "midText": "Vous cherchez un relais pour vos plantes ?",
+  "midPrimary": {
+    "label": "Publier mon besoin d’arrosage",
+    "href": "/petites-missions/creer",
+    "role": "entraide"
+  },
+  "endHeading": "Préparer un coup de main à Grenoble",
+  "endText": "Décrivez les dates, les plantes, les passages et les conditions d’accès pour échanger avec les personnes intéressées.",
+  "endPrimary": {
+    "label": "Publier mon besoin d’arrosage",
+    "href": "/petites-missions/creer",
+    "role": "entraide"
+  }
+},
+
   ["boom-pet-sitting-lyon-2026"]: {
   "midText": "Vous préparez un séjour en télétravail ?",
   "midPrimary": {
@@ -1013,6 +1045,7 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  ...ENTRAIDE_GUIDE_ARTICLE_SLUGS,
   VILLEURBANNE_OWNER_ARTICLE_SLUG,
 
   VALENCE_OWNER_ARTICLE_SLUG,
@@ -1211,6 +1244,12 @@ function adaptEndCTAsForRole(html: string, role?: "owner" | "sitter" | "both", s
       const dataRole =
         attrs.match(/\bdata-cta-role="([^"]+)"/)?.[1] || null;
 
+      if (ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && dataRole === "entraide") {
+        const href = CTA_PAR_SLUG[slug!].endPrimary.href;
+        const newAttrs = attrs.replace(/href="[^"]*"/, `href="${href}"`);
+        return `<a${newAttrs}>${_inner}</a>`;
+      }
+
       if (SITTER_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && dataRole === "sitter") return full;
 
       // Sur ces guides propriétaires, un membre gardien peut aussi préparer sa propre garde.
@@ -1267,7 +1306,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const withoutH1 = stripLeadingH1(interpolated);
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
-    slug === "c-est-quoi-le-house-sitting" ||
+    ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || slug === "c-est-quoi-le-house-sitting" ||
       slug === VILLEURBANNE_OWNER_ARTICLE_SLUG ||
       slug === VALENCE_OWNER_ARTICLE_SLUG || slug === VENISSIEUX_OWNER_ARTICLE_SLUG ||
       slug === GRENOBLE_STAY_OWNER_ARTICLE_SLUG || slug === SAINT_ETIENNE_OWNER_ARTICLE_SLUG ||
@@ -1298,7 +1337,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   if (OWNER_GUIDE_ARTICLE_SLUGS.has(slug ?? "")) {
     // Le parcours propriétaire est rendu par l'en-tête et le bloc final.
     html = html.replace(/<p><strong><a href="\/inscription\?role=owner(?:&amp;|&)redirect=%2Fsits%2Fcreate">Publier mon annonce de garde<\/a><\/strong><\/p>\s*/g, "");
-  } else if (!SITTER_GUIDE_ARTICLE_SLUGS.has(slug ?? "")) {
+  } else if (!SITTER_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && !ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "")) {
     html = injectCTA(html, slug);
   }
   html = addBandedSections(html);
