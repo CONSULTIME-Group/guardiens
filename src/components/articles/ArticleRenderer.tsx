@@ -133,12 +133,17 @@ export const AGREEMENT_OWNER_ARTICLE_SLUG = "commodat-garde-guardiens";
 export const INCIDENT_OWNER_ARTICLE_SLUG = "gerer-imprevu-pendant-garde";
 export const HOSPITAL_OWNER_ARTICLE_SLUG = "faire-garder-animal-pendant-hospitalisation";
 // Ces guides répondent aussi à un besoin immédiat : le CTA reste en fin de page, pour anticiper une garde.
-export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence"]);
+export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026"]);
 export const WELCOME_OWNER_ARTICLE_SLUG = "accueillir-gardien-bonnes-pratiques";
 export const DEPARTURE_OWNER_ARTICLE_SLUG = "checklist-partir-vacances-animaux";
 export const AT_HOME_OWNER_ARTICLE_SLUG = "garde-animaux-domicile-chien-chat";
 export const WELFARE_OWNER_ARTICLE_SLUG = "bien-etre-animal-pendant-absence";
+export const ENTRUST_HOME_OWNER_ARTICLE_SLUG = "confier-sa-maison-absence-risques";
+export const ABSENCE_SITUATIONS_OWNER_ARTICLE_SLUG = "s-absenter-avec-animal-guide-solutions-2026";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
+  ENTRUST_HOME_OWNER_ARTICLE_SLUG,
+  ABSENCE_SITUATIONS_OWNER_ARTICLE_SLUG,
+
   AT_HOME_OWNER_ARTICLE_SLUG,
   WELFARE_OWNER_ARTICLE_SLUG,
 
@@ -171,6 +176,37 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [ENTRUST_HOME_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous souhaitez accueillir un gardien chez vous pendant votre absence ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Vous préparez une garde de votre maison ?",
+    "endText": "Présentez les dates, le logement et les tâches à assurer pour échanger avec les personnes intéressées par un séjour chez vous.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+  [ABSENCE_SITUATIONS_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous préparez une prochaine garde à domicile ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Vous envisagez un gardien hébergé pour une prochaine absence ?",
+    "endText": "Décrivez vos dates, le logement proposé et les besoins de vos animaux pour préparer une garde compatible avec leur quotidien.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+
   [AT_HOME_OWNER_ARTICLE_SLUG]: {
     "midText": "Vous souhaitez faire garder vos animaux chez vous ?",
     "midPrimary": {
@@ -584,6 +620,9 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  ENTRUST_HOME_OWNER_ARTICLE_SLUG,
+  ABSENCE_SITUATIONS_OWNER_ARTICLE_SLUG,
+
   AT_HOME_OWNER_ARTICLE_SLUG,
   WELFARE_OWNER_ARTICLE_SLUG,
 
@@ -802,6 +841,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
     slug === "c-est-quoi-le-house-sitting" ||
+      slug === ENTRUST_HOME_OWNER_ARTICLE_SLUG || slug === ABSENCE_SITUATIONS_OWNER_ARTICLE_SLUG ||
       slug === AT_HOME_OWNER_ARTICLE_SLUG || slug === WELFARE_OWNER_ARTICLE_SLUG ||
       slug === LISTING_OWNER_ARTICLE_SLUG || slug === PREPARATION_OWNER_ARTICLE_SLUG ||
       slug === CHRISTMAS_OWNER_ARTICLE_SLUG || slug === WEEKEND_OWNER_ARTICLE_SLUG ||
