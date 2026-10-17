@@ -110,12 +110,21 @@ const CTA_DEFAUT: CtaCopy = {
  */
 export const EXPAT_OWNER_ARTICLE_SLUG = "expat-proprietaire-faire-garder-maison-etranger";
 export const REUNION_OWNER_ARTICLE_SLUG = "garde-kaz-house-sitting-la-reunion";
+export const TAHITI_OWNER_ARTICLE_SLUG = "garde-maison-animaux-tahiti";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
   EXPAT_OWNER_ARTICLE_SLUG,
   REUNION_OWNER_ARTICLE_SLUG,
+  TAHITI_OWNER_ARTICLE_SLUG,
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [TAHITI_OWNER_ARTICLE_SLUG]: {
+    midText: "Vous cherchez un gardien pour votre maison à Tahiti ?",
+    midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+    endHeading: "Vous préparez une absence à Tahiti ?",
+    endText: "Présentez votre commune, vos dates et les besoins de votre maison et de vos animaux.",
+    endPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+  },
   [REUNION_OWNER_ARTICLE_SLUG]: {
     midText: "Vous cherchez quelqu’un pour votre maison à La Réunion ?",
     midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
@@ -333,6 +342,7 @@ export const GUIDE_ARTICLE_SLUGS = new Set<string>([
   "c-est-quoi-le-house-sitting",
   "expat-proprietaire-faire-garder-maison-etranger",
   REUNION_OWNER_ARTICLE_SLUG,
+  TAHITI_OWNER_ARTICLE_SLUG,
   "preparer-maison-avant-garde",
   "pension-chien-alternatives-guide",
   "vacances-longues-garde-animal-2-semaines",
