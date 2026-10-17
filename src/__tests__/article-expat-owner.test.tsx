@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["ou-faire-garder-chien-lyon-vacances", 6],
+  ["garde-chat-domicile-lyon", 6],
   ["confier-sa-maison-absence-risques", 6],
   ["s-absenter-avec-animal-guide-solutions-2026", 6],
   ["garde-animaux-domicile-chien-chat", 7],
