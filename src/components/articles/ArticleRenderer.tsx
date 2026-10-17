@@ -156,7 +156,12 @@ export const LYON_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-lyon-guide";
 export const SITTER_GUIDE_ARTICLE_SLUGS = new Set<string>(["gerer-animaux-difficiles-garde"]);
 export const AIX_HOME_OWNER_ARTICLE_SLUG = "house-sitting-aix-les-bains";
 export const FARM_HOME_OWNER_ARTICLE_SLUG = "garde-ferme-animaux-monts-du-lyonnais";
+export const GRENOBLE_STAY_OWNER_ARTICLE_SLUG = "pet-sitting-grenoble-chartreuse";
+export const SAINT_ETIENNE_OWNER_ARTICLE_SLUG = "pet-sitting-saint-etienne-loire";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
+  GRENOBLE_STAY_OWNER_ARTICLE_SLUG,
+  SAINT_ETIENNE_OWNER_ARTICLE_SLUG,
+
   AIX_HOME_OWNER_ARTICLE_SLUG,
   FARM_HOME_OWNER_ARTICLE_SLUG,
 
@@ -215,6 +220,37 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [GRENOBLE_STAY_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous préparez une garde de votre logement à Grenoble ou en Chartreuse ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Préparer votre garde à Grenoble ou en Chartreuse",
+    "endText": "Décrivez les dates, les accès, les soins et les sorties nécessaires pour préparer les échanges avec les personnes intéressées.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+  [SAINT_ETIENNE_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous préparez une garde de votre maison et de vos animaux ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Organiser votre garde à Saint-Étienne et dans la Loire",
+    "endText": "Présentez votre logement, vos dates et les besoins des animaux pour vérifier les possibilités de séjour et les tâches avant de confirmer.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+
   [AIX_HOME_OWNER_ARTICLE_SLUG]: {
     "midText": "Vous préparez une garde de votre logement à Aix-les-Bains ?",
     "midPrimary": {
@@ -907,6 +943,9 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  GRENOBLE_STAY_OWNER_ARTICLE_SLUG,
+  SAINT_ETIENNE_OWNER_ARTICLE_SLUG,
+
   AIX_HOME_OWNER_ARTICLE_SLUG,
   FARM_HOME_OWNER_ARTICLE_SLUG,
 
@@ -1154,6 +1193,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
     slug === "c-est-quoi-le-house-sitting" ||
+      slug === GRENOBLE_STAY_OWNER_ARTICLE_SLUG || slug === SAINT_ETIENNE_OWNER_ARTICLE_SLUG ||
       slug === AIX_HOME_OWNER_ARTICLE_SLUG || slug === FARM_HOME_OWNER_ARTICLE_SLUG || SITTER_GUIDE_ARTICLE_SLUGS.has(slug ?? "") ||
       slug === LYON_VET_CONTACT_ARTICLE_SLUG ||
       slug === ANNECY_VET_CONTACT_ARTICLE_SLUG || slug === GRENOBLE_VET_CONTACT_ARTICLE_SLUG ||
