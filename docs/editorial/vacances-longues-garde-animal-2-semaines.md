@@ -1,6 +1,7 @@
 ---
 slug: vacances-longues-garde-animal-2-semaines
 canonical_url: https://guardiens.fr/actualites/vacances-longues-garde-animal-2-semaines
+hero_image_alt: "Une femme avec un chien et un chat dans un salon, près d’une valise"
 title: "Faire garder son animal pendant les vacances : deux semaines ou plus"
 meta_title: "Garde d'animaux pendant les vacances : 2 semaines et plus"
 meta_description: "Faire garder son chien ou son chat 2 semaines, 3 semaines ou un mois : solutions, budget total, consignes et relais pour préparer une longue absence."

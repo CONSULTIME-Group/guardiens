@@ -27,6 +27,7 @@ Audit du 17 octobre 2026. Deux articles existants, deux intentions complémentai
 | Conversion | Deux CTA vers l’annonce avec hébergement, en haut et en fin. | Même parcours ; texte final adapté à la longue absence. |
 | Continuité après le clic | Visiteur : inscription propriétaire avec retour vers /sits/create ; membre : création d’annonce. | Même règle pour tous les rôles connectés. |
 | Lecture et accessibilité | Sommaire lié aux H2, un H1, tableau à trois colonnes, FAQ en H3. | Sommaire, tableau de décision à trois colonnes et budget à quatre colonnes ; ancien fragment #checklist conservé. |
+| Description de la couverture | La promenade avec un chien correspond à la photo. | Le contrôle visuel a révélé un ancien texte décrivant un chien allongé seul ; il est remplacé par la femme, le chien, le chat et la valise réellement visibles, sans changer l’image. |
 | Recherche et réponses générées | Paragraphes autonomes, comparaisons nuancées, sources visibles ; pas de balisage artificiel. | Réponses explicites aux durées et aux imprévus, sans FAQ enrichie promise dans Google. |
 | Données techniques | Canonique, publication, auteur, couverture et indexabilité conservés. | Mêmes règles ; application des deux textes ensemble avec contrôle de version. |
 
