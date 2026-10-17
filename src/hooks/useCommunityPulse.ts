@@ -10,9 +10,11 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { communityTotals, FOUNDERS_ANIMALS, FOUNDERS_HOUSES } from "../../supabase/functions/_shared/community-totals.js";
 
-export const FOUNDERS_HOUSES_OFFSET = 37;
-export const FOUNDERS_ANIMALS_OFFSET = 234;
+// Lot CPT1 : socle et cumul lus dans le module partagé, mêmes chiffres que l'accueil.
+export const FOUNDERS_HOUSES_OFFSET = FOUNDERS_HOUSES;
+export const FOUNDERS_ANIMALS_OFFSET = FOUNDERS_ANIMALS;
 
 export interface CommunityPulse {
   maisonsGardees: number;
@@ -29,13 +31,10 @@ export function useCommunityPulse() {
     queryFn: async () => {
       const { data: rows } = await supabase.rpc("get_public_stats");
       const row = Array.isArray(rows) ? rows[0] : rows;
+      const totals = communityTotals(row);
       return {
-        maisonsGardees:
-          (typeof row?.maisons_gardees === "number" ? row.maisons_gardees : 0) +
-          FOUNDERS_HOUSES_OFFSET,
-        animauxAccompagnes:
-          (typeof row?.animaux_accompagnes === "number" ? row.animaux_accompagnes : 0) +
-          FOUNDERS_ANIMALS_OFFSET,
+        maisonsGardees: totals.houses,
+        animauxAccompagnes: totals.animals,
         totalInscrits: typeof row?.total_inscrits === "number" ? row.total_inscrits : 0,
         missionsEntraide:
           typeof row?.missions_entraide === "number" ? row.missions_entraide : 0,

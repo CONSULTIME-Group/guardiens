@@ -8,6 +8,7 @@ import { fetchMyProfile } from "@/lib/myProfile";
 import PageMeta from "@/components/PageMeta";
 
 import { usePublicStats } from "@/hooks/usePublicStats";
+import { communityTotals } from "../../supabase/functions/_shared/community-totals.js";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import { PRESS_ARTICLE_URL, PRESS_HIGHLIGHT_UNTIL, HOME_OG_IMAGE } from "@/data/siteConstants";
 import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
@@ -110,10 +111,8 @@ const Landing = () => {
   // par-dessus au fur et à mesure que la plateforme grandit. "Inscrits" et
   // "missions d'entraide" restent des compteurs plateforme purs, sans offset.
   // Rétablissement des quatre compteurs le 06/09/2026.
-  const FOUNDER_BASE_MAISONS = 37;
-  const FOUNDER_BASE_ANIMAUX = 234;
-  const kpiMaisons = FOUNDER_BASE_MAISONS + (publicStats?.maisons_gardees ?? 0);
-  const kpiAnimaux = FOUNDER_BASE_ANIMAUX + (publicStats?.animaux_accompagnes ?? 0);
+  // Lot CPT1 : calcul unique partagé (supabase/functions/_shared/community-totals.js).
+  const { houses: kpiMaisons, animals: kpiAnimaux } = communityTotals(publicStats);
   const kpiInscrits = publicStats?.total_inscrits ?? 0;
   const kpiMissions = publicStats?.missions_entraide ?? 0;
   const isPressHighlighted = new Date() < PRESS_HIGHLIGHT_UNTIL;
