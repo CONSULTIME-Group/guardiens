@@ -111,13 +111,22 @@ const CTA_DEFAUT: CtaCopy = {
 export const EXPAT_OWNER_ARTICLE_SLUG = "expat-proprietaire-faire-garder-maison-etranger";
 export const REUNION_OWNER_ARTICLE_SLUG = "garde-kaz-house-sitting-la-reunion";
 export const TAHITI_OWNER_ARTICLE_SLUG = "garde-maison-animaux-tahiti";
+export const CALEDONIE_OWNER_ARTICLE_SLUG = "garde-maison-animaux-nouvelle-caledonie";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
   EXPAT_OWNER_ARTICLE_SLUG,
   REUNION_OWNER_ARTICLE_SLUG,
   TAHITI_OWNER_ARTICLE_SLUG,
+  CALEDONIE_OWNER_ARTICLE_SLUG,
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [CALEDONIE_OWNER_ARTICLE_SLUG]: {
+    midText: "Vous cherchez un gardien pour votre maison en Nouvelle-Calédonie ?",
+    midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+    endHeading: "Vous préparez une absence du Caillou ?",
+    endText: "Présentez votre logement, vos dates et le quotidien de vos animaux, puis échangez avec les personnes intéressées.",
+    endPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+  },
   [TAHITI_OWNER_ARTICLE_SLUG]: {
     midText: "Vous cherchez un gardien pour votre maison à Tahiti ?",
     midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
@@ -344,6 +353,7 @@ export const GUIDE_ARTICLE_SLUGS = new Set<string>([
   REUNION_OWNER_ARTICLE_SLUG,
   TAHITI_OWNER_ARTICLE_SLUG,
   "preparer-maison-avant-garde",
+  CALEDONIE_OWNER_ARTICLE_SLUG,
   "pension-chien-alternatives-guide",
   "vacances-longues-garde-animal-2-semaines",
   "parcs-chiens-lyon-guide-complet",

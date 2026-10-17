@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
-import ArticleRenderer, { EXPAT_OWNER_ARTICLE_SLUG, REUNION_OWNER_ARTICLE_SLUG, TAHITI_OWNER_ARTICLE_SLUG } from "@/components/articles/ArticleRenderer";
+import ArticleRenderer, { EXPAT_OWNER_ARTICLE_SLUG, REUNION_OWNER_ARTICLE_SLUG, TAHITI_OWNER_ARTICLE_SLUG, CALEDONIE_OWNER_ARTICLE_SLUG } from "@/components/articles/ArticleRenderer";
 
-describe.each([EXPAT_OWNER_ARTICLE_SLUG, REUNION_OWNER_ARTICLE_SLUG, TAHITI_OWNER_ARTICLE_SLUG])("Guide %s, parcours propriétaire", (slug) => {
+describe.each([EXPAT_OWNER_ARTICLE_SLUG, REUNION_OWNER_ARTICLE_SLUG, TAHITI_OWNER_ARTICLE_SLUG, CALEDONIE_OWNER_ARTICLE_SLUG])("Guide %s, parcours propriétaire", (slug) => {
   const draft = readFileSync(`docs/editorial/${slug}.md`, "utf8");
   const content = draft.replace(/^---\n[\s\S]*?\n---\n/, "").trim();
   it.each([undefined, "owner", "sitter", "both"] as const)("un seul CTA final propriétaire pour le rôle %s", (userRole) => {
