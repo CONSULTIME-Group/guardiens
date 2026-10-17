@@ -128,7 +128,11 @@ export const FRANCE_EXPAT_OWNER_ARTICLE_SLUG = "francais-etranger-garde-maison-f
 export const RECIPROCAL_OWNER_ARTICLE_SLUG = "echange-reciproque-garde-maison-expatries";
 export const DOG_OWNER_ARTICLE_SLUG = "garde-chien-faire-garder-son-chien";
 export const CAT_OWNER_ARTICLE_SLUG = "garde-chat-domicile-house-sitting";
+export const TRUST_OWNER_ARTICLE_SLUG = "securite-confiance-house-sitting";
+export const AGREEMENT_OWNER_ARTICLE_SLUG = "commodat-garde-guardiens";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
+  TRUST_OWNER_ARTICLE_SLUG,
+  AGREEMENT_OWNER_ARTICLE_SLUG,
   DOG_OWNER_ARTICLE_SLUG,
   CAT_OWNER_ARTICLE_SLUG,
   EXPAT_OWNER_ARTICLE_SLUG,
@@ -152,6 +156,20 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [TRUST_OWNER_ARTICLE_SLUG]: {
+    midText: "Vous préparez la garde de votre maison ?",
+    midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+    endHeading: "Présentez votre besoin pour préparer une garde qui vous convient",
+    endText: "Décrivez votre logement, les dates et les tâches prévues, puis échangez avec les personnes intéressées sur l’organisation du séjour.",
+    endPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+  },
+  [AGREEMENT_OWNER_ARTICLE_SLUG]: {
+    midText: "Vous souhaitez organiser une garde chez vous ?",
+    midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+    endHeading: "Commencez par décrire la garde dont vous avez besoin",
+    endText: "Indiquez vos dates, le logement et les tâches à convenir. L’accord de garde sera proposé après confirmation du séjour.",
+    endPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
+  },
   [DOG_OWNER_ARTICLE_SLUG]: {
     midText: "Vous envisagez une garde de votre chien chez vous ?",
     midPrimary: { label: "Publier mon annonce de garde", href: "/inscription?role=owner&redirect=%2Fsits%2Fcreate", role: "owner" },
@@ -492,6 +510,8 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  TRUST_OWNER_ARTICLE_SLUG,
+  AGREEMENT_OWNER_ARTICLE_SLUG,
   DOG_OWNER_ARTICLE_SLUG,
   CAT_OWNER_ARTICLE_SLUG,
   FRANCE_EXPAT_OWNER_ARTICLE_SLUG,
@@ -706,7 +726,8 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
       slug === WINTER_OWNER_ARTICLE_SLUG || slug === GARDEN_OWNER_ARTICLE_SLUG ||
       slug === PLANTS_OWNER_ARTICLE_SLUG || slug === SECURITY_OWNER_ARTICLE_SLUG ||
       slug === FRANCE_EXPAT_OWNER_ARTICLE_SLUG || slug === RECIPROCAL_OWNER_ARTICLE_SLUG ||
-      slug === DOG_OWNER_ARTICLE_SLUG || slug === CAT_OWNER_ARTICLE_SLUG,
+      slug === DOG_OWNER_ARTICLE_SLUG || slug === CAT_OWNER_ARTICLE_SLUG ||
+      slug === TRUST_OWNER_ARTICLE_SLUG || slug === AGREEMENT_OWNER_ARTICLE_SLUG,
   );
   let html = marked.parse(preprocessed, { async: false }) as string;
 
