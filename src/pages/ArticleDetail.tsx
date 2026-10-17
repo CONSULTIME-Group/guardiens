@@ -30,12 +30,14 @@ import { withOrganizationGraph } from "@/lib/seo/organizationNode";
 
 // Les numéros utiles passent avant toute image sur ces pages d’urgence.
 const CONTACT_FIRST_ARTICLE_SLUGS = new Set([
+  "veterinaire-urgence-lyon-guide",
   "veterinaire-urgence-annecy-haute-savoie",
   "veterinaire-urgence-grenoble-isere",
 ]);
 
 // Ces couvertures gardent leur sujet dans le cadre de lecture du guide.
 const GUIDE_COVER_CLASSES: Record<string, string> = {
+  ["gerer-animaux-difficiles-garde"]: "w-full h-[300px] sm:h-[360px] object-contain bg-muted/30",
   [SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG]: "w-full h-[300px] sm:h-[360px] object-cover object-[center_60%]",
   [HAUTE_SAVOIE_STAY_OWNER_ARTICLE_SLUG]: "w-full h-[300px] sm:h-[360px] object-cover",
 

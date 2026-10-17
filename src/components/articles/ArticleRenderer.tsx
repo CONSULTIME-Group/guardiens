@@ -133,7 +133,7 @@ export const AGREEMENT_OWNER_ARTICLE_SLUG = "commodat-garde-guardiens";
 export const INCIDENT_OWNER_ARTICLE_SLUG = "gerer-imprevu-pendant-garde";
 export const HOSPITAL_OWNER_ARTICLE_SLUG = "faire-garder-animal-pendant-hospitalisation";
 // Ces guides répondent aussi à un besoin immédiat : le CTA reste en fin de page, pour anticiper une garde.
-export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere"]);
+export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere", "veterinaire-urgence-lyon-guide"]);
 export const WELCOME_OWNER_ARTICLE_SLUG = "accueillir-gardien-bonnes-pratiques";
 export const DEPARTURE_OWNER_ARTICLE_SLUG = "checklist-partir-vacances-animaux";
 export const AT_HOME_OWNER_ARTICLE_SLUG = "garde-animaux-domicile-chien-chat";
@@ -152,7 +152,11 @@ export const SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG = "garde-animaux-savoie-guide";
 export const HAUTE_SAVOIE_STAY_OWNER_ARTICLE_SLUG = "house-sitting-haute-savoie-annecy-megeve";
 export const ANNECY_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-annecy-haute-savoie";
 export const GRENOBLE_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-grenoble-isere";
+export const LYON_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-lyon-guide";
+export const SITTER_GUIDE_ARTICLE_SLUGS = new Set<string>(["gerer-animaux-difficiles-garde"]);
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
+  LYON_VET_CONTACT_ARTICLE_SLUG,
+
   ANNECY_VET_CONTACT_ARTICLE_SLUG,
   GRENOBLE_VET_CONTACT_ARTICLE_SLUG,
 
@@ -206,6 +210,37 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  ["gerer-animaux-difficiles-garde"]: {
+  "midText": "Vous préparez votre prochaine garde ?",
+  "midPrimary": {
+    "label": "Consulter les annonces de garde",
+    "href": "/search",
+    "role": "sitter"
+  },
+  "endHeading": "Choisir une garde adaptée à votre expérience",
+  "endText": "Lisez les besoins des animaux et les tâches prévues, puis posez vos questions au propriétaire avant de vous engager.",
+  "endPrimary": {
+    "label": "Consulter les annonces de garde",
+    "href": "/search",
+    "role": "sitter"
+  }
+},
+  [LYON_VET_CONTACT_ARTICLE_SLUG]: {
+    "midText": "Vous préparez une garde à venir ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Préparer une prochaine absence à Lyon",
+    "endText": "Décrivez votre logement et les besoins des animaux pour préparer une garde future, les contacts et le relais avant de confirmer.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+
   [ANNECY_VET_CONTACT_ARTICLE_SLUG]: {
     "midText": "Vous préparez une garde à venir ?",
     "midPrimary": {
@@ -836,6 +871,9 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  ...SITTER_GUIDE_ARTICLE_SLUGS,
+  LYON_VET_CONTACT_ARTICLE_SLUG,
+
   ANNECY_VET_CONTACT_ARTICLE_SLUG,
   GRENOBLE_VET_CONTACT_ARTICLE_SLUG,
 
@@ -1020,6 +1058,8 @@ function adaptEndCTAsForRole(html: string, role?: "owner" | "sitter" | "both", s
       const dataRole =
         attrs.match(/\bdata-cta-role="([^"]+)"/)?.[1] || null;
 
+      if (SITTER_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && dataRole === "sitter") return full;
+
       // Sur ces guides propriétaires, un membre gardien peut aussi préparer sa propre garde.
       if (OWNER_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && dataRole === "owner") {
         const newAttrs = attrs.replace(/href="[^"]*"/, 'href="/sits/create"');
@@ -1074,7 +1114,8 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const withoutH1 = stripLeadingH1(interpolated);
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
-    slug === "c-est-quoi-le-house-sitting" ||
+    slug === "c-est-quoi-le-house-sitting" || SITTER_GUIDE_ARTICLE_SLUGS.has(slug ?? "") ||
+      slug === LYON_VET_CONTACT_ARTICLE_SLUG ||
       slug === ANNECY_VET_CONTACT_ARTICLE_SLUG || slug === GRENOBLE_VET_CONTACT_ARTICLE_SLUG ||
       slug === SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG || slug === HAUTE_SAVOIE_STAY_OWNER_ARTICLE_SLUG ||
       slug === FRANCE_PRACTICAL_OWNER_ARTICLE_SLUG || slug === SUMMER_OWNER_ARTICLE_SLUG ||
@@ -1100,7 +1141,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   if (OWNER_GUIDE_ARTICLE_SLUGS.has(slug ?? "")) {
     // Le parcours propriétaire est rendu par l'en-tête et le bloc final.
     html = html.replace(/<p><strong><a href="\/inscription\?role=owner(?:&amp;|&)redirect=%2Fsits%2Fcreate">Publier mon annonce de garde<\/a><\/strong><\/p>\s*/g, "");
-  } else {
+  } else if (!SITTER_GUIDE_ARTICLE_SLUGS.has(slug ?? "")) {
     html = injectCTA(html, slug);
   }
   html = addBandedSections(html);
