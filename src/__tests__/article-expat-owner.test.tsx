@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["veterinaire-urgence-annecy-haute-savoie", 6],
+  ["veterinaire-urgence-grenoble-isere", 6],
   ["garde-animaux-savoie-guide", 7],
   ["house-sitting-haute-savoie-annecy-megeve", 6],
   ["house-sitting-auvergne-rhone-alpes", 6],
@@ -69,4 +71,14 @@ it.each([
   expect([...container.querySelectorAll(".article-faq-question")].map(element => element.textContent)).toEqual(faq.map(item => item.question));
   expect(container.querySelectorAll("h2#faq")).toHaveLength(1);
   expect(container.querySelector(".article-faq-heading")).toBeNull();
+});
+
+it.each([
+  ["veterinaire-urgence-annecy-haute-savoie", ["+33450222424", "+33450600900", "+33458173232"]],
+  ["veterinaire-urgence-grenoble-isere", ["+33480423323", "+33458173232"]],
+] as const)("les contacts de %s restent directement appelables après rendu", (slug, phones) => {
+  const content = readFileSync(`docs/editorial/${slug}.md`, "utf8").replace(/^---\n[\s\S]*?\n---\n/, "").trim();
+  const { container } = render(<ArticleRenderer content={content} slug={slug} />);
+  expect(container.querySelector("h2")?.id).toBe("contacts");
+  for (const phone of phones) expect(container.querySelector(`a[href="tel:${phone}"]`)).not.toBeNull();
 });
