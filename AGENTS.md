@@ -1,5 +1,7 @@
 # Décisions techniques
 
+- Article expatriés (décision de Jérémie du 17/10/2026, exception ciblée aux lots X3c/Y3) : l’accès est actuellement gratuit pour les deux rôles ; une participation aux frais de fonctionnement pourra être mise en place au plus tôt au second semestre 2027, avec un préavis de 30 jours. Le récit, les questions pratiques et les métadonnées vivent dans docs/editorial/expat-proprietaire-faire-garder-maison-etranger.md ; application par supabase/prepared-migrations/20261017110000_refonte_article_expatries.sql, sauvegarde privée et garde de version. Sur ce seul guide, un CTA propriétaire dans l’en-tête et un en fin remplacent les blocs génériques ; tout membre rejoint /sits/create, le visiteur passe par l’inscription propriétaire avec retour vers la création. Les autres pages conservent leurs règles.
+
 - Tableau de bord propriétaire (lot D1) : les blocs partagés avec le gardien changent par variante (prop `layout`/`variant`, défaut inchangé) ou par composant propriétaire dédié ; pourquoi : le rendu gardien reste intact jusqu'au lot D2.
 
 - Lectures d'autrui (profil propriétaire, écussons) : vues member_owner_profiles, public_owner_profiles, public_badge_attributions, tables réservées au titulaire, à l'admin et aux personnes engagées ; pourquoi : SEC1, aucune donnée de foyer ni lien donneur exposé.
