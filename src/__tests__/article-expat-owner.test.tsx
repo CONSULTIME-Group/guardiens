@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
 import ArticleRenderer, { OWNER_GUIDE_ARTICLE_SLUGS } from "@/components/articles/ArticleRenderer";
+import { parseFaqFromMarkdown } from "@/lib/parseFaq";
 
 describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire", (slug) => {
   const draft = readFileSync(`docs/editorial/${slug}.md`, "utf8");
@@ -25,4 +26,14 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
       expect([...container.querySelectorAll("[id]")].some(element => element.id === target), `${slug} #${target}`).toBe(true);
     }
   });
+});
+
+it.each(["rediger-bonne-annonce-house-sitting", "preparer-maison-avant-garde"])("FAQ visible et structurée cohérente pour %s", (slug) => {
+  const content = readFileSync(`docs/editorial/${slug}.md`, "utf8").replace(/^---\n[\s\S]*?\n---\n/, "").trim();
+  const faq = parseFaqFromMarkdown(content);
+  const { container } = render(<ArticleRenderer content={content} slug={slug} />);
+  expect(faq).toHaveLength(5);
+  expect([...container.querySelectorAll(".article-faq-question")].map(element => element.textContent)).toEqual(faq.map(item => item.question));
+  expect(container.querySelectorAll("h2#faq")).toHaveLength(1);
+  expect(container.querySelector(".article-faq-heading")).toBeNull();
 });

@@ -24,6 +24,7 @@ Audit du 17 octobre 2026, dans la suite des refontes autorisées par Jérémie. 
 | SEO et titre | Ajout d’un modèle à adapter dans le titre SEO et d’un exemple dans le H1. | H1 et titre SEO déjà pertinents conservés ; description précise le modèle de consignes. |
 | Structure | Sommaire, sept H2 ancrés, tableau à trois colonnes, modèle et cinq FAQ en H3. | Même structure ; ancres existantes checklist, guide-maison, animaux, remise-cles et imprevus conservées. |
 | Réponses générées | Informations compréhensibles par elles-mêmes, exemples identifiés et limites explicites. | Checklist et fiche séparées des engagements contractuels, sources primaires visibles. |
+| FAQ et données structurées | Cinq questions visibles issues du même bloc que le schéma, avec un seul titre FAQ. | Schéma FAQ conservé et actualisé ; aucune promesse de résultat enrichi Google. |
 | Cannibalisation | Rédaction et publication, sans refaire le guide du choix d’un gardien. | Préparation matérielle, sans refaire la définition du house sitting ou l’accueil du gardien. |
 | Maillage | Renvois au choix, à la préparation, aux gardes sans animaux et aux tarifs. | Liens vers l’annonce, les gardes sans animaux, le cadre français et les gardes longues. |
 | Liens entrants | Le guide du choix et le formulaire de création pointent déjà vers cet article. | Les guides du choix et sans animaux pointent déjà vers cette page. Pas de troisième article modifié. |
@@ -42,7 +43,7 @@ Audit du 17 octobre 2026, dans la suite des refontes autorisées par Jérémie. 
 
 ## Validation et mesure
 
-Application atomique des deux contenus, avec garde de version, sauvegarde privée et réexécution sans effet. La simulation vérifie un échec sur chacune des versions, l’annulation complète si le second article échoue, la correspondance au Markdown, les champs conservés, les liens réciproques et l’absence de modification d’un autre article. Le test existant de parcours s’étend aux deux guides et contrôle les quatre situations de rôle ainsi que les destinations des ancres du sommaire.
+Application atomique des deux contenus, avec garde de version, sauvegarde privée et réexécution sans effet. La simulation vérifie un échec sur chacune des versions, l’annulation complète si le second article échoue, la correspondance au Markdown, les champs conservés, les liens réciproques et l’absence de modification d’un autre article. Le test existant de parcours s’étend aux deux guides et contrôle les quatre situations de rôle ainsi que les destinations des ancres du sommaire. Deux cas vérifient aussi la parité entre les questions visibles et celles du schéma, sans titre de FAQ dupliqué.
 
 Contrôles publics à effectuer après publication : contenu, titre, description, canonique, robots, date de publication, sommaire, tableaux, alternatives des couvertures et les deux CTA. Les vérifications d’inscription s’arrêtent avant toute création de compte ou acceptation des conditions.
 

@@ -126,6 +126,7 @@ Gardez une version à jour et une copie accessible si la connexion ne fonctionne
 
 ## <a id="faq"></a>Questions fréquentes avant une garde de maison
 
+:::faq
 ### Faut-il vider sa maison avant l’arrivée du gardien ?
 
 Non. Préparez les espaces convenus, rangez vos affaires personnelles et expliquez les limites d’accès. Le logement doit pouvoir être utilisé dans les conditions annoncées.
@@ -145,3 +146,4 @@ Envoyez une consigne écrite précise et vérifiez qu’elle a été reçue. Si 
 ### Qui paie les fournitures et les imprévus ?
 
 Mettez-vous d’accord avant la garde sur les fournitures, les achats autorisés et les remboursements. La plateforme Guardiens est actuellement 100 % gratuite pour les deux rôles. Une contribution à ses frais de fonctionnement pourra être mise en place au plus tôt au second semestre 2027, avec 30 jours de préavis ; consultez les conditions à jour sur la page [tarifs](/tarifs).
+:::

@@ -460,7 +460,7 @@ function transformFaqBlocks(content: string, omitHeading = false): string {
     /:::faq\s*\n([\s\S]*?):::/g,
     (_, inner: string) => {
       const lines = inner.split("\n");
-      // Guide définition : le titre FAQ est le H2 #faq du markdown, on ne
+      // Guides ciblés : le titre FAQ est le H2 #faq du markdown, on ne
       // rajoute pas l'intitulé par défaut (un seul titre FAQ).
       let html = omitHeading
         ? '<div class="article-faq-block">'
@@ -600,7 +600,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const withoutH1 = stripLeadingH1(interpolated);
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
-    slug === "c-est-quoi-le-house-sitting",
+    slug === "c-est-quoi-le-house-sitting" || slug === LISTING_OWNER_ARTICLE_SLUG || slug === PREPARATION_OWNER_ARTICLE_SLUG,
   );
   let html = marked.parse(preprocessed, { async: false }) as string;
 

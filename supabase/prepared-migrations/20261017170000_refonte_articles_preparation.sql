@@ -129,6 +129,7 @@ Gardez une version à jour et une copie accessible si la connexion ne fonctionne
 
 ## <a id="faq"></a>Questions fréquentes avant une garde de maison
 
+:::faq
 ### Faut-il vider sa maison avant l’arrivée du gardien ?
 
 Non. Préparez les espaces convenus, rangez vos affaires personnelles et expliquez les limites d’accès. Le logement doit pouvoir être utilisé dans les conditions annoncées.
@@ -147,7 +148,8 @@ Envoyez une consigne écrite précise et vérifiez qu’elle a été reçue. Si 
 
 ### Qui paie les fournitures et les imprévus ?
 
-Mettez-vous d’accord avant la garde sur les fournitures, les achats autorisés et les remboursements. La plateforme Guardiens est actuellement 100 % gratuite pour les deux rôles. Une contribution à ses frais de fonctionnement pourra être mise en place au plus tôt au second semestre 2027, avec 30 jours de préavis ; consultez les conditions à jour sur la page [tarifs](/tarifs).$preparation_content_0_20261017$;
+Mettez-vous d’accord avant la garde sur les fournitures, les achats autorisés et les remboursements. La plateforme Guardiens est actuellement 100 % gratuite pour les deux rôles. Une contribution à ses frais de fonctionnement pourra être mise en place au plus tôt au second semestre 2027, avec 30 jours de préavis ; consultez les conditions à jour sur la page [tarifs](/tarifs).
+:::$preparation_content_0_20261017$;
 BEGIN
   SELECT * INTO STRICT before_row FROM public.articles WHERE id='fa36743d-99b5-49e5-a4a9-bb11d5cc49b2'::uuid AND slug='preparer-maison-avant-garde';
   IF before_row.published IS NOT TRUE OR before_row.noindex IS TRUE
@@ -278,6 +280,7 @@ Si vous avez une souplesse réelle sur l’arrivée ou le départ, indiquez-la. 
 
 ## <a id="faq"></a>Questions fréquentes sur les annonces de house sitting
 
+:::faq
 ### Peut-on publier sans animaux à garder ?
 
 Oui. Décrivez la maison, le logement proposé, la présence attendue et les tâches convenues, par exemple l’arrosage ou le courrier. Il n’est pas nécessaire d’ajouter un animal fictif.
@@ -296,7 +299,8 @@ Séparez les fournitures nécessaires à la garde des dépenses personnelles du 
 
 ### Que faire après avoir retenu un gardien ?
 
-Confirmez les dates, les tâches et les conditions de séjour, puis préparez les clés et les consignes. Notre [checklist avant une garde](/actualites/preparer-maison-avant-garde#checklist) aide à organiser cette transmission.$preparation_content_1_20261017$;
+Confirmez les dates, les tâches et les conditions de séjour, puis préparez les clés et les consignes. Notre [checklist avant une garde](/actualites/preparer-maison-avant-garde#checklist) aide à organiser cette transmission.
+:::$preparation_content_1_20261017$;
 BEGIN
   SELECT * INTO STRICT before_row FROM public.articles WHERE id='4af7e670-0be8-4eec-8402-42015b31a346'::uuid AND slug='rediger-bonne-annonce-house-sitting';
   IF before_row.published IS NOT TRUE OR before_row.noindex IS TRUE

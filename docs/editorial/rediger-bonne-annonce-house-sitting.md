@@ -99,6 +99,7 @@ Si vous avez une souplesse réelle sur l’arrivée ou le départ, indiquez-la. 
 
 ## <a id="faq"></a>Questions fréquentes sur les annonces de house sitting
 
+:::faq
 ### Peut-on publier sans animaux à garder ?
 
 Oui. Décrivez la maison, le logement proposé, la présence attendue et les tâches convenues, par exemple l’arrosage ou le courrier. Il n’est pas nécessaire d’ajouter un animal fictif.
@@ -118,3 +119,4 @@ Séparez les fournitures nécessaires à la garde des dépenses personnelles du 
 ### Que faire après avoir retenu un gardien ?
 
 Confirmez les dates, les tâches et les conditions de séjour, puis préparez les clés et les consignes. Notre [checklist avant une garde](/actualites/preparer-maison-avant-garde#checklist) aide à organiser cette transmission.
+:::
