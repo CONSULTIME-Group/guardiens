@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
+import { withCronRunLog } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,7 +34,7 @@ const HARD_MAX_RELANCES = 3;
 const MIN_DAYS_BY_COUNT = [1, 7, 21];
 
 
-serve(async (req) => {
+serve(withCronRunLog("relance-cp-manquant", async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -192,4 +193,4 @@ serve(async (req) => {
       status: 500,
     });
   }
-});
+}));

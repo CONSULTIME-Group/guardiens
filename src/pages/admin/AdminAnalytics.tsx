@@ -11,6 +11,7 @@ import {
 import { format, subDays, startOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import FacebookReferralCard from "@/components/admin/analytics/FacebookReferralCard";
+import { measureBreakNotice } from "@/lib/admin/measureBreak";
 
 type Range = 1 | 7 | 30;
 type RoleFilter = "all" | "owner" | "sitter" | "both";
@@ -326,6 +327,16 @@ const AdminAnalytics = () => {
           </Tabs>
         </div>
       </div>
+
+      {(() => {
+        // Lot ADM6 : la période comparée chevauche la rupture de mesure du 14/10.
+        const notice = measureBreakNotice(startOfDay(subDays(startOfDay(subDays(new Date(), range - 1)), range)));
+        return notice ? (
+          <p className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-foreground" data-testid="measure-break-notice">
+            {notice}
+          </p>
+        ) : null;
+      })()}
 
       {error && (
         <Card className="border-destructive bg-destructive/5">

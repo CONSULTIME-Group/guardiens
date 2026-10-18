@@ -20,6 +20,7 @@
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { withCronRunLog } from "../_shared/cron-run-log.ts";
 
 /** Découpe une liste en lots : un `.in()` de plusieurs centaines de valeurs
  *  dépasse la longueur d'URL acceptée et échoue silencieusement. */
@@ -45,7 +46,7 @@ interface Candidate {
   first_name: string | null;
 }
 
-Deno.serve(async (req) => {
+Deno.serve(withCronRunLog("nudge-sitter-gallery-photo", async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
@@ -246,4 +247,4 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+}));

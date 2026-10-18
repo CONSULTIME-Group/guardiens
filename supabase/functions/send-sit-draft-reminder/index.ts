@@ -12,6 +12,7 @@ import { loadMissingDraftItems } from "../_shared/sit-draft-missing.ts";
 import { ownerHasPublished } from "../_shared/published-sit.ts";
 import { loadOwnerSitterPool, ownerNearbyContext, type SitterRow } from "../_shared/owner-nearby.ts";
 import { departureHoldsPublishAsk, loadLastDepartureAnswer } from "../_shared/owner-sequence-rules.ts";
+import { withCronRunLog } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,7 +29,7 @@ const MAX_PER_RUN = 25;
 // propriétaire (une seule demande à la fois).
 const JOURNEY_SPACING_HOURS = 48;
 
-Deno.serve(async (req) => {
+Deno.serve(withCronRunLog("send-sit-draft-reminder", async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   // Auth guard: only accept the service-role key (used by pg_cron via pg_net).
@@ -255,4 +256,4 @@ Deno.serve(async (req) => {
     JSON.stringify({ ok: true, sent, skipped, held: held.length, total: drafts.length, errors }),
     { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
   );
-});
+}));

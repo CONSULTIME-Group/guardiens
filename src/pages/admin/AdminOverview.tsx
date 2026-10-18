@@ -11,6 +11,7 @@ import { ActivityAnalysisCard } from "./_components/dashboard/ActivityAnalysisCa
 import { CronHealthCard } from "./_components/dashboard/CronHealthCard";
 import { CollapsibleSection } from "./_components/dashboard/CollapsibleSection";
 import { AnimateCard } from "./_components/dashboard/AnimateCard";
+import { SiteHealthStrip } from "./_components/dashboard/SiteHealthStrip";
 
 // Import différé : recharts ne se charge qu'à l'ouverture de Tendances.
 const TrendsPanel = lazy(() => import("./_components/dashboard/TrendsPanel"), "TrendsPanel");
@@ -37,8 +38,11 @@ const AdminOverview = () => {
     <div className="space-y-6">
       <AdminPageHeader
         title="Vue d'ensemble"
-        description="Ce qui attend une action, puis les chiffres clés et l'activité récente."
+        description="L'état du site, ce qui attend une action, puis les chiffres clés et l'activité récente."
       />
+
+      {/* Lot ADM6 : six voyants, rien à lire quand tout est vert. */}
+      <div data-block="etat-du-site"><SiteHealthStrip /></div>
 
       <div data-block="a-traiter">
         <SignalsSection aiActions={freshAiActions(analysis)} aiLoading={analysisLoading} />

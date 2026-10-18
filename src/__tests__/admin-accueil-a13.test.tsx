@@ -76,8 +76,8 @@ describe("Vue d'ensemble", () => {
   it("blocs dans l'ordre cible, sans Pilotage ni lanceur de campagne", async () => {
     const { container } = renderOverview();
     const order = [...container.querySelectorAll("[data-block]")].map((n) => n.getAttribute("data-block"));
-    // Lot ADM2 : l'accueil ouvre sur l'action, le reste est replié dans « Plus ».
-    expect(order).toEqual(["a-traiter", "chiffres", "activite", "plus"]);
+    // Lot ADM2 puis ADM6 : état du site, puis l'action ; le reste est replié dans « Plus ».
+    expect(order).toEqual(["etat-du-site", "a-traiter", "chiffres", "activite", "plus"]);
     await screen.findByText("Annonces en ligne");
     expect(screen.queryByText(/Pilotage/)).toBeNull();
     expect(screen.queryByText(/Réveiller les propriétaires/)).toBeNull();
