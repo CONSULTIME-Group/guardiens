@@ -51,6 +51,16 @@ export function hasActionPoint<T extends ActionPoint>(point: T): point is T & { 
     && !(point.latitude === 0 && point.longitude === 0);
 }
 
+/** Préférence de rayon propre au membre, partagée par le bloc et le rail. */
+export const localActionRadiusKey = (userId: string) => `guardiens.local-actions-radius.${userId}`;
+export function readStoredLocalActionRadius(userId: string): number {
+  try {
+    const km = Number(localStorage.getItem(localActionRadiusKey(userId)));
+    if (LOCAL_ACTION_RADII.includes(km as 5 | 15 | 30)) return km;
+  } catch { /* Préférence facultative. */ }
+  return DEFAULT_LOCAL_ACTION_RADIUS_KM;
+}
+
 export function localActionDay(now = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
 }
@@ -181,7 +191,9 @@ export function missionLocalAction(row: MissionActionSource, userId: string, now
   const today = localActionDay(now);
   const until = row.end_date || row.date_needed || null;
   if ((until && (!validDay(until) || until < today)) || (row.date_needed && !validDay(row.date_needed))) return null;
-  const confirmedOn = row.created_at?.slice(0, 10) ?? "";
+  // Jour de publication à Paris, pas en UTC (une publication à 1 h 30 compte pour ce jour-là).
+  const created = row.created_at ? new Date(row.created_at) : null;
+  const confirmedOn = created && Number.isFinite(created.getTime()) ? localActionDay(created) : "";
   // Sans date, une ancienne publication ne prouve pas un besoin encore actuel.
   if (!until && !isRecentActionConfirmation(confirmedOn, now)) return null;
   const project = row.category === "projet";

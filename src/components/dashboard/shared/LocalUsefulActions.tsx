@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocalUsefulActions } from "@/hooks/useLocalUsefulActions";
-import { DEFAULT_LOCAL_ACTION_RADIUS_KM, LOCAL_ACTION_RADII, selectLocalUsefulActions, type SelectedLocalAction } from "@/lib/localUsefulActions";
+import { LOCAL_ACTION_RADII, localActionRadiusKey, readStoredLocalActionRadius, selectLocalUsefulActions, type SelectedLocalAction } from "@/lib/localUsefulActions";
 import { formatCityLabel } from "@/lib/cityLabel";
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import { trackEvent } from "@/lib/analytics";
@@ -32,7 +32,7 @@ export function LocalUsefulActionsView({ actions, radius, onRadiusChange }: {
               <p className="mt-1 break-words text-sm font-semibold text-foreground">{action.title}</p>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                 {formatCityLabel(action.city)} · ≈ {Math.max(1, Math.round(action.distanceKm))} km
-                {" · "}{/^\d{4}-\d{2}-\d{2}$/.test(action.when) ? formatDateRangeFr(action.when, null) : action.when}
+                {" · "}{/^\d{4}-\d{2}-\d{2}$/.test(action.when) ? formatDateRangeFr(action.when, action.until && action.until !== action.when ? action.until : null) : action.when}
                 {" · "}{action.duration}
               </p>
               <span className="mt-2 inline-block text-xs font-semibold text-primary group-hover:underline">Découvrir l’action →</span>
@@ -46,11 +46,8 @@ export function LocalUsefulActionsView({ actions, radius, onRadiusChange }: {
 }
 
 function MemberLocalUsefulActions({ userId }: { userId: string }) {
-  const storageKey = `guardiens.local-actions-radius.${userId}`;
-  const [radius, setRadius] = useState(() => {
-    try { const km = Number(localStorage.getItem(storageKey)); if (LOCAL_ACTION_RADII.includes(km as 5 | 15 | 30)) return km; } catch { /* Préférence facultative. */ }
-    return DEFAULT_LOCAL_ACTION_RADIUS_KM;
-  });
+  const storageKey = localActionRadiusKey(userId);
+  const [radius, setRadius] = useState(() => readStoredLocalActionRadius(userId));
   const [changed, setChanged] = useState(false);
   const { data, isError } = useLocalUsefulActions(userId);
   if (!data?.point || isError) return null;
