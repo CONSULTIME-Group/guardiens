@@ -138,3 +138,9 @@ Deno.test('ADM2 : files humaines en lignes lisibles, vides écartées', () => {
   assertEquals(humanQueueLines(null, NOW), [])
   for (const l of lines) assertEquals(/[\u2014\u2013]/.test(l.action + l.title), false)
 })
+
+Deno.test('ADM5 : un brouillon sans titre garde une ligne lisible', () => {
+  const draft: OpenSignal = { signal_type: 'stale_draft', severity: 'critical', detected_at: '2026-09-27T06:00:00Z', entity_type: 'sit', entity_id: 'brassac', metadata: {} }
+  const lines = buildDigestLines([draft], new Map([['brassac', { id: 'brassac', title: '  ', start_date: '2027-01-28' }]]), NOW)
+  assertEquals(lines[0].title, 'Annonce sans titre')
+})

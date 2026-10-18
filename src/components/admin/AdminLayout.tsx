@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Outlet, Navigate, NavLink, useNavigate, useLocation } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
-import { AdminSidebar, adminNavGroups_export, BADGE_TITLES, resolveNavActive } from "./AdminSidebar";
+import { AdminSidebar, adminNavGroups_export, BADGE_TITLES, isToolPath, resolveNavActive, sumBadges } from "./AdminSidebar";
 import { useAdminBadges } from "@/hooks/useAdminBadges";
 import { AdminBadgePill, resolveBadge } from "./AdminBadgePill";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useAuth } from "@/contexts/AuthContext";
-import { Menu, X, ArrowLeft, LogOut } from "lucide-react";
+import { Menu, X, ArrowLeft, LogOut, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -37,9 +37,15 @@ export const AdminLayout = () => {
   const location = useLocation();
   const adminTitle = resolveAdminTitle(location.pathname);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Lot ADM4 : Outils replié sur mobile aussi, ouvert sur une page d'outil.
+  const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
   // Le hook est appelé avant la garde : on lui passe l'état admin pour qu'il
   // ne lise rien tant que l'admin n'est pas confirmé.
   const { badges, unavailable } = useAdminBadges(!authLoading && !adminLoading && isAuthenticated && isAdmin);
+  const allItems = adminNavGroups_export.flatMap((g) => g.items);
+  const totalBadges = sumBadges(allItems, badges as Record<string, number | undefined>);
+  const toolsBadge = sumBadges(adminNavGroups_export.filter((g) => g.tool).flatMap((g) => g.items), badges as Record<string, number | undefined>);
+  const mobileToolsShown = mobileToolsOpen || isToolPath(location.pathname);
 
   if (authLoading || adminLoading) {
     return (
@@ -72,8 +78,18 @@ export const AdminLayout = () => {
             Guardiens <span className="text-muted-foreground font-normal">Admin</span>
           </span>
         </div>
-        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"} aria-expanded={mobileMenuOpen} className="p-1.5 rounded-lg hover:bg-accent transition-colors">
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label={mobileMenuOpen ? "Fermer le menu" : totalBadges > 0 ? `Ouvrir le menu, ${totalBadges} en attente` : "Ouvrir le menu"}
+          aria-expanded={mobileMenuOpen}
+          className="relative p-1.5 rounded-lg hover:bg-accent transition-colors"
+          data-testid="admin-mobile-menu-button"
+        >
           {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {/* Lot ADM4 : total des pastilles sur le bouton du menu mobile. */}
+          {!mobileMenuOpen && totalBadges > 0 && (
+            <AdminBadgePill compact text={String(totalBadges)} label={`${totalBadges} en attente`} className="absolute -top-1 -right-1" />
+          )}
         </button>
       </div>
 
@@ -81,8 +97,28 @@ export const AdminLayout = () => {
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-40 bg-background/95 backdrop-blur-sm pt-16 overflow-y-auto">
           <nav className="px-4 py-4">
-            {adminNavGroups_export.map((group) => (
-              <div key={group.label} className="mb-4">
+
+            {adminNavGroups_export.map((group, gi, arr) => {
+              const firstTool = !!group.tool && !arr[gi - 1]?.tool;
+              const toolsToggle = firstTool ? (
+                <button
+                  key="tools-toggle"
+                  type="button"
+                  onClick={() => setMobileToolsOpen((o) => !o)}
+                  aria-expanded={mobileToolsShown}
+                  className="mb-3 flex w-full items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold tracking-widest text-muted-foreground uppercase hover:bg-accent"
+                  data-testid="admin-mobile-tools-toggle"
+                >
+                  <span className="flex-1 text-left">Outils</span>
+                  {toolsBadge > 0 && <AdminBadgePill text={String(toolsBadge)} label={`${toolsBadge} en attente dans les outils`} />}
+                  {mobileToolsShown ? <ChevronUp className="h-4 w-4" aria-hidden /> : <ChevronDown className="h-4 w-4" aria-hidden />}
+                </button>
+              ) : null;
+              if (group.tool && !mobileToolsShown) return toolsToggle;
+              return (
+              <Fragment key={group.label}>
+              {toolsToggle}
+              <div className="mb-4">
                 <p className="px-4 py-1.5 text-[10px] font-semibold tracking-widest text-muted-foreground/60 uppercase">
                   {group.label}
                 </p>
@@ -124,7 +160,9 @@ export const AdminLayout = () => {
                   })}
                 </div>
               </div>
-            ))}
+              </Fragment>
+              );
+            })}
             <div className="border-t border-border mt-4 pt-4 space-y-1">
               <button
                 onClick={() => { setMobileMenuOpen(false); navigate("/dashboard"); }}

@@ -6,7 +6,7 @@ import {
   Compass, Handshake, Briefcase, CreditCard, MessageSquare, ScrollText, Settings,
   Lightbulb, AlertTriangle, Bug, Stethoscope, Sprout, BarChart3, Send,
   Sparkles, UserX, HeartHandshake, Hammer, Building2, Award, MailCheck, Inbox, SearchCheck, PawPrint, Scale,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, ChevronDown, ChevronUp,
   Map as MapIcon, SlidersHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -53,55 +53,57 @@ export const BADGE_TITLES: Record<string, string> = {
 interface NavGroup {
   label: string;
   items: NavItem[];
+  /** Lot ADM4 : groupe rangé sous « Outils », replié par défaut. */
+  tool?: boolean;
 }
 
-// Groupes dédupliqués, vocabulaire unifié
+// Lot ADM4 (audit global du 18/10/2026) : 12 entrées au quotidien (files où
+// un membre attend, annonces, entraide, membres, Alma, trafic, erreurs), le
+// reste rangé sous « Outils », replié. Toutes les routes restent intactes.
 const adminNavGroups: NavGroup[] = [
   {
-    label: "PILOTAGE",
+    label: "AU QUOTIDIEN",
     items: [
       { to: "/admin", icon: LayoutDashboard, label: "Vue d'ensemble", end: true },
-      { to: "/admin/traffic", icon: BarChart3, label: "Trafic" },
+      { to: "/admin/listings", icon: Megaphone, label: "Annonces", badgeKey: "sitsToStaff", badgeTo: "/admin/listings?filter=to_staff" },
+      { to: "/admin/small-missions", icon: Handshake, label: "Entraide", tabParam: "entraide", defaultTab: "entraide" },
+      { to: "/admin/contact-messages", icon: Mail, label: "Messages contact", badgeKey: "contactMessages" },
+      { to: "/admin/reports", icon: Flag, label: "Signalements", badgeKey: "reports" },
+      { to: "/admin/verifications", icon: ShieldCheck, label: "Vérifications ID", badgeKey: "verifications" },
+      { to: "/admin/reviews", icon: Star, label: "Avis", badgeKey: "reviewsModeration" },
+      { to: "/admin/demandes-suppression", icon: UserX, label: "Demandes RGPD", badgeKey: "deletionRequests" },
+      { to: "/admin/users", icon: Users, label: "Utilisateurs" },
       { to: "/admin/alma", icon: Sparkles, label: "Alma" },
+      { to: "/admin/traffic", icon: BarChart3, label: "Trafic" },
+      { to: "/admin/errors", icon: Bug, label: "Erreurs", badgeKey: "errors" },
+    ],
+  },
+  {
+    label: "ACTIVITÉ",
+    tool: true,
+    items: [
+      { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
+      { to: "/admin/small-missions?tab=projets", icon: Hammer, label: "Projets", tabParam: "projets", defaultTab: "entraide" },
+      // Pilotage produit de l'entraide, jusqu'ici accessible seulement depuis
+      // un onglet de la page Emails, donc introuvable.
+      { to: "/admin/pilotage-entraide", icon: BarChart3, label: "Pilotage entraide" },
       { to: "/admin/affinity", icon: HeartHandshake, label: "Affinité" },
     ],
   },
   {
     label: "COMMUNAUTÉ",
+    tool: true,
     items: [
-      { to: "/admin/users", icon: Users, label: "Utilisateurs" },
-      { to: "/admin/verifications", icon: ShieldCheck, label: "Vérifications ID", badgeKey: "verifications" },
       { to: "/admin/associations", icon: Building2, label: "Associations" },
       { to: "/admin/experiences", icon: Award, label: "Expériences", badgeKey: "experiences" },
       { to: "/admin/skills", icon: Lightbulb, label: "Compétences", badgeKey: "skills" },
-    ],
-  },
-  {
-    label: "ACTIVITÉ",
-    items: [
-      { to: "/admin/listings", icon: Megaphone, label: "Annonces", badgeKey: "sitsToStaff", badgeTo: "/admin/listings?filter=to_staff" },
-      { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
-      { to: "/admin/small-missions", icon: Handshake, label: "Entraide", tabParam: "entraide", defaultTab: "entraide" },
-      { to: "/admin/small-missions?tab=projets", icon: Hammer, label: "Projets", tabParam: "projets", defaultTab: "entraide" },
-      // Pilotage produit de l'entraide, jusqu'ici accessible seulement depuis
-      // un onglet de la page Emails, donc introuvable.
-      { to: "/admin/pilotage-entraide", icon: BarChart3, label: "Pilotage entraide" },
-    ],
-  },
-  {
-    label: "MODÉRATION",
-    items: [
-      { to: "/admin/reviews", icon: Star, label: "Avis", badgeKey: "reviewsModeration" },
       { to: "/admin/review-disputes", icon: AlertTriangle, label: "Contestations", badgeKey: "reviewDisputes" },
-      { to: "/admin/reports", icon: Flag, label: "Signalements", badgeKey: "reports" },
-      { to: "/admin/contact-messages", icon: Mail, label: "Messages contact", badgeKey: "contactMessages" },
       { to: "/admin/messages", icon: MessageSquare, label: "Messagerie", badgeKey: "adminMessageFailed" },
-      { to: "/admin/errors", icon: Bug, label: "Erreurs", badgeKey: "errors" },
-      { to: "/admin/demandes-suppression", icon: UserX, label: "Demandes RGPD", badgeKey: "deletionRequests" },
     ],
   },
   {
     label: "EMAILS",
+    tool: true,
     items: [
       { to: "/admin/emails", icon: MailCheck, label: "Santé email" },
       { to: "/admin/emails-transactionnels", icon: Inbox, label: "Emails transactionnels" },
@@ -113,6 +115,7 @@ const adminNavGroups: NavGroup[] = [
   },
   {
     label: "CONTENU ET SYSTÈME",
+    tool: true,
     items: [
       { to: "/admin/articles", icon: FileText, label: "Articles" },
       // Articles longue traîne : module verrouillé depuis le 11/07, hors menu, route conservée.
@@ -131,13 +134,29 @@ const adminNavGroups: NavGroup[] = [
   },
 ];
 
+/** Lot ADM4 : somme des pastilles d'une liste d'entrées (pastilles indisponibles ignorées). */
+export function sumBadges(items: NavItem[], badges: Record<string, number | undefined>): number {
+  return items.reduce((n, it) => n + (it.badgeKey ? Number(badges[it.badgeKey] ?? 0) || 0 : 0), 0);
+}
+
+/** Lot ADM4 : la page courante est-elle dans les Outils ? (ouvre le groupe replié) */
+export function isToolPath(pathname: string, groups: NavGroup[] = adminNavGroups): boolean {
+  const daily = groups.filter((g) => !g.tool).flatMap((g) => g.items).map((i) => i.to.split("?")[0]);
+  if (daily.some((p) => pathname === p)) return false;
+  return groups.filter((g) => g.tool).flatMap((g) => g.items).some((i) => {
+    const p = i.to.split("?")[0];
+    return pathname === p || pathname.startsWith(p + "/");
+  });
+}
+
 // « Abonnements » : masqué du menu tant que le pricing est inactif (la route
 // /admin/subscriptions reste accessible par son URL).
 if (PRICING_IS_ACTIVE) {
-  adminNavGroups[0].items.push({ to: "/admin/subscriptions", icon: CreditCard, label: "Abonnements" });
+  adminNavGroups[adminNavGroups.length - 1].items.push({ to: "/admin/subscriptions", icon: CreditCard, label: "Abonnements" });
 }
 
 const STORAGE_KEY = "admin.sidebar.collapsed";
+const TOOLS_KEY = "admin.sidebar.tools-open";
 
 /** Deux entrées peuvent viser la même page avec un onglet différent : l'état
  *  actif se lit alors sur le paramètre `tab` et non sur le seul chemin. */
@@ -174,6 +193,79 @@ export const AdminSidebar = () => {
     }
   }, [collapsed]);
 
+  const [toolsOpen, setToolsOpen] = useState<boolean>(() => {
+    try { return typeof window !== "undefined" && localStorage.getItem(TOOLS_KEY) === "1"; } catch { return false; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(TOOLS_KEY, toolsOpen ? "1" : "0"); } catch { /* stockage indisponible */ }
+  }, [toolsOpen]);
+  const dailyGroups = adminNavGroups.filter((g) => !g.tool);
+  const toolGroups = adminNavGroups.filter((g) => g.tool);
+  const showTools = toolsOpen || isToolPath(location.pathname);
+  const toolsBadge = sumBadges(toolGroups.flatMap((g) => g.items), badges as Record<string, number | undefined>);
+
+  const renderItem = (item: NavItem) => {
+    const badge = resolveBadge(item.badgeKey, badges as Record<string, number | undefined>, unavailable, BADGE_TITLES);
+    const badgeLabel = badge.show ? badge.label : undefined;
+    return (
+      <NavLink
+        key={item.to}
+        to={item.to}
+        end={item.end}
+        title={collapsed ? item.label : undefined}
+        className={({ isActive }) =>
+          cn(
+            "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            collapsed && "justify-center",
+            resolveNavActive(item, location, isActive)
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:bg-accent hover:text-foreground"
+          )
+        }
+        aria-label={collapsed ? `${item.label}${badgeLabel ? `, ${badgeLabel}` : ""}` : undefined}
+      >
+        <span className="relative shrink-0">
+          <item.icon className="h-4 w-4" />
+          {collapsed && badge.show && (
+            <AdminBadgePill compact text={badge.text} label={badge.label} className="absolute -top-1.5 -right-2" />
+          )}
+        </span>
+        {!collapsed && (
+          <>
+            <span className="truncate flex-1">{item.label}</span>
+            {badge.show && (item.badgeTo ? (
+              <span
+                role="link"
+                tabIndex={0}
+                className="ml-auto rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label={`${item.label} : ${badge.label}`}
+                title={badge.label}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(item.badgeTo!); }}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); navigate(item.badgeTo!); } }}
+              >
+                <AdminBadgePill text={badge.text} label={badge.label} />
+              </span>
+            ) : (
+              <AdminBadgePill text={badge.text} label={badge.label} className="ml-auto" />
+            ))}
+          </>
+        )}
+      </NavLink>
+    );
+  };
+
+  const renderGroup = (group: NavGroup, gi: number) => (
+    <div key={group.label} className={cn(gi > 0 && "mt-3")}>
+      {!collapsed && (
+        <p className="px-3 py-1.5 text-[10px] font-semibold tracking-widest text-muted-foreground/60 uppercase">
+          {group.label}
+        </p>
+      )}
+      {collapsed && gi > 0 && <div className="my-2 border-t border-border/60" />}
+      <div className="space-y-0.5">{group.items.map(renderItem)}</div>
+    </div>
+  );
+
   return (
     <aside
       className={cn(
@@ -200,67 +292,26 @@ export const AdminSidebar = () => {
       </div>
 
       <nav className="flex-1 px-2 overflow-y-auto" aria-label="Sections d'administration">
-        {adminNavGroups.map((group, gi) => (
-          <div key={group.label} className={cn(gi > 0 && "mt-3")}>
-            {!collapsed && (
-              <p className="px-3 py-1.5 text-[10px] font-semibold tracking-widest text-muted-foreground/60 uppercase">
-                {group.label}
-              </p>
-            )}
-            {collapsed && gi > 0 && <div className="my-2 border-t border-border/60" />}
-            <div className="space-y-0.5">
-              {group.items.map((item) => {
-                const badge = resolveBadge(item.badgeKey, badges as Record<string, number | undefined>, unavailable, BADGE_TITLES);
-                const badgeLabel = badge.show ? badge.label : undefined;
-                return (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    end={item.end}
-                    title={collapsed ? item.label : undefined}
-                    className={({ isActive }) =>
-                      cn(
-                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                        collapsed && "justify-center",
-                        resolveNavActive(item, location, isActive)
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                      )
-                    }
-                    aria-label={collapsed ? `${item.label}${badgeLabel ? `, ${badgeLabel}` : ""}` : undefined}
-                  >
-                    <span className="relative shrink-0">
-                      <item.icon className="h-4 w-4" />
-                      {collapsed && badge.show && (
-                        <AdminBadgePill compact text={badge.text} label={badge.label} className="absolute -top-1.5 -right-2" />
-                      )}
-                    </span>
-                    {!collapsed && (
-                      <>
-                        <span className="truncate flex-1">{item.label}</span>
-                        {badge.show && (item.badgeTo ? (
-                          <span
-                            role="link"
-                            tabIndex={0}
-                            className="ml-auto rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            aria-label={`${item.label} : ${badge.label}`}
-                            title={badge.label}
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(item.badgeTo!); }}
-                            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); navigate(item.badgeTo!); } }}
-                          >
-                            <AdminBadgePill text={badge.text} label={badge.label} />
-                          </span>
-                        ) : (
-                          <AdminBadgePill text={badge.text} label={badge.label} className="ml-auto" />
-                        ))}
-                      </>
-                    )}
-                  </NavLink>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+        {dailyGroups.map((group, gi) => renderGroup(group, gi))}
+        {/* Lot ADM4 : Outils, replié ; ouvert sur une page d'outil, total des pastilles visible. */}
+        <div className="mt-3">
+          {collapsed ? (
+            <div className="my-2 border-t border-border/60" />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setToolsOpen((o) => !o)}
+              aria-expanded={showTools}
+              className="flex w-full items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-semibold tracking-widest text-muted-foreground/80 uppercase hover:bg-accent"
+              data-testid="admin-tools-toggle"
+            >
+              <span className="flex-1 text-left">Outils</span>
+              {toolsBadge > 0 && <AdminBadgePill text={String(toolsBadge)} label={`${toolsBadge} en attente dans les outils`} />}
+              {showTools ? <ChevronUp className="h-3 w-3" aria-hidden /> : <ChevronDown className="h-3 w-3" aria-hidden />}
+            </button>
+          )}
+          {(showTools || collapsed) && toolGroups.map((group, gi) => renderGroup(group, gi + 1))}
+        </div>
       </nav>
 
       <div className="p-2 border-t border-border space-y-1">
