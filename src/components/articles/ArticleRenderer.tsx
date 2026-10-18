@@ -154,7 +154,7 @@ export const ANNECY_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-annecy-haute
 export const GRENOBLE_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-grenoble-isere";
 export const LYON_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-lyon-guide";
 export const PROJECT_GUIDE_ARTICLE_SLUGS = new Set<string>(["chantier-participatif-low-tech-participer-lancer-projet", "chantier-participatif-projet-collectif-cadre-legal", "apprendre-menuiserie-permaculture-ecoconstruction-gratuitement"]);
-export const RESOURCE_GUIDE_ARTICLE_SLUGS = new Set<string>(["house-sitting-annecy", "house-sitting-aura-guide-complet", "guide-house-sitting-lyon", "guide-lieu-meilleurs-parcs-chiens-lyon", "gardiennage-maison-vacances-aura", "golden-retriever-lyon-guide-race", "garde-a-domicile-vs-pension", "garde-chien-lyon-solutions", "devenir-pet-sitter-guide-debutant", "erreurs-premiere-garde", "conseils-garder-chien", "devenir-gardien-guide-complet", "bouledogue-francais-lyon-guide-race", "conseil-gardien-creer-profil-attractif-lyon", "berger-australien-guide", "border-collie-lyon-guide-race", "abandon-animaux-france-chiffres-causes"]);
+export const RESOURCE_GUIDE_ARTICLE_SLUGS = new Set<string>(["house-sitting-caluire-et-cuire", "house-sitting-chambery", "house-sitting-annecy", "house-sitting-aura-guide-complet", "guide-house-sitting-lyon", "guide-lieu-meilleurs-parcs-chiens-lyon", "gardiennage-maison-vacances-aura", "golden-retriever-lyon-guide-race", "garde-a-domicile-vs-pension", "garde-chien-lyon-solutions", "devenir-pet-sitter-guide-debutant", "erreurs-premiere-garde", "conseils-garder-chien", "devenir-gardien-guide-complet", "bouledogue-francais-lyon-guide-race", "conseil-gardien-creer-profil-attractif-lyon", "berger-australien-guide", "border-collie-lyon-guide-race", "abandon-animaux-france-chiffres-causes"]);
 export const MIXED_GUIDE_ARTICLE_SLUGS = new Set<string>(["premiers-pas-sur-guardiens", "comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers", "notre-histoire-pet-sitting-argentine-lyon"]);
 export const ENTRAIDE_GUIDE_ARTICLE_SLUGS = new Set<string>(["technologie-recreer-lien-pres-de-chez-soi", "se-sentir-utile-pres-de-chez-soi", "petites-missions-entraide-guardiens", "reseau-entraide-quartier-lyon-aura", "oser-demander-coup-de-main-pres-de-chez-soi", "jardinage-entraide-quartier-lyon", "jardinage-entraide-locale-grenoble", "jardinage-entraide-quartier-annecy", "idees-coups-de-main-entraide-pres-de-chez-soi", "courses-aide-domicile-entraide-senior-lyon", "demenagement-entraide-locale-france", "bricolage-montage-meubles-entraide-grenoble-lyon", "arroser-plantes-vacances-annecy", "arroser-plantes-vacances-grenoble", "arroser-plantes-vacances-lyon"]);
 export const SITTER_PROFILE_GUIDE_ARTICLE_SLUGS = new Set<string>(["creer-profil-gardien-attractif", "comment-devenir-home-sitter-france-guide-debutant", "devenir-gardien-pro-animalier", "devenir-gardien-urgence-guardiens"]);
@@ -274,6 +274,36 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  "house-sitting-chambery": {
+  "midText": "Retrouver les repères détaillés",
+  "midPrimary": {
+    "label": "Lire le guide actuel",
+    "href": "/house-sitting/chambery",
+    "role": "ressource"
+  },
+  "endHeading": "Poursuivre avec le guide actuel",
+  "endText": "Retrouvez les préparatifs, les questions utiles et les conditions à convenir dans le guide consacré à ce besoin.",
+  "endPrimary": {
+    "label": "Lire le guide actuel",
+    "href": "/house-sitting/chambery",
+    "role": "ressource"
+  }
+},
+  "house-sitting-caluire-et-cuire": {
+  "midText": "Retrouver les repères détaillés",
+  "midPrimary": {
+    "label": "Lire le guide actuel",
+    "href": "/house-sitting/lyon",
+    "role": "ressource"
+  },
+  "endHeading": "Poursuivre avec le guide actuel",
+  "endText": "Retrouvez les préparatifs, les questions utiles et les conditions à convenir dans le guide consacré à ce besoin.",
+  "endPrimary": {
+    "label": "Lire le guide actuel",
+    "href": "/house-sitting/lyon",
+    "role": "ressource"
+  }
+},
   "house-sitting-aura-guide-complet": {
   "midText": "Retrouver les repères détaillés",
   "midPrimary": {
