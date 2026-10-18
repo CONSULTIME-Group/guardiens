@@ -133,7 +133,7 @@ export const AGREEMENT_OWNER_ARTICLE_SLUG = "commodat-garde-guardiens";
 export const INCIDENT_OWNER_ARTICLE_SLUG = "gerer-imprevu-pendant-garde";
 export const HOSPITAL_OWNER_ARTICLE_SLUG = "faire-garder-animal-pendant-hospitalisation";
 // Ces guides répondent aussi à un besoin immédiat : le CTA reste en fin de page, pour anticiper une garde.
-export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere", "veterinaire-urgence-lyon-guide", "garde-ferme-animaux-monts-du-lyonnais", "meilleures-villes-vivre-chien-autour-lyon", "parcs-balades-chiens-annecy-guide", "parcs-balades-chiens-grenoble-guide", "bengal-guide-race", "berger-allemand-guide-race", "berger-australien-guide-race", "border-collie-guide-race-complet", "bouledogue-francais-guide-race-complet"]);
+export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere", "veterinaire-urgence-lyon-guide", "garde-ferme-animaux-monts-du-lyonnais", "meilleures-villes-vivre-chien-autour-lyon", "parcs-balades-chiens-annecy-guide", "parcs-balades-chiens-grenoble-guide", "bengal-guide-race", "berger-allemand-guide-race", "berger-australien-guide-race", "border-collie-guide-race-complet", "bouledogue-francais-guide-race-complet", "cavalier-king-charles-guide-race"]);
 export const WELCOME_OWNER_ARTICLE_SLUG = "accueillir-gardien-bonnes-pratiques";
 export const DEPARTURE_OWNER_ARTICLE_SLUG = "checklist-partir-vacances-animaux";
 export const AT_HOME_OWNER_ARTICLE_SLUG = "garde-animaux-domicile-chien-chat";
@@ -156,7 +156,7 @@ export const LYON_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-lyon-guide";
 export const PROJECT_GUIDE_ARTICLE_SLUGS = new Set<string>(["apprendre-menuiserie-permaculture-ecoconstruction-gratuitement"]);
 export const RESOURCE_GUIDE_ARTICLE_SLUGS = new Set<string>(["abandon-animaux-france-chiffres-causes"]);
 export const MIXED_GUIDE_ARTICLE_SLUGS = new Set<string>(["premiers-pas-sur-guardiens", "comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers", "notre-histoire-pet-sitting-argentine-lyon"]);
-export const ENTRAIDE_GUIDE_ARTICLE_SLUGS = new Set<string>(["arroser-plantes-vacances-annecy", "arroser-plantes-vacances-grenoble", "arroser-plantes-vacances-lyon"]);
+export const ENTRAIDE_GUIDE_ARTICLE_SLUGS = new Set<string>(["bricolage-montage-meubles-entraide-grenoble-lyon", "arroser-plantes-vacances-annecy", "arroser-plantes-vacances-grenoble", "arroser-plantes-vacances-lyon"]);
 export const SITTER_PROFILE_GUIDE_ARTICLE_SLUGS = new Set<string>(["creer-profil-gardien-attractif", "comment-devenir-home-sitter-france-guide-debutant", "devenir-gardien-pro-animalier", "devenir-gardien-urgence-guardiens"]);
 export const SITTER_GUIDE_ARTICLE_SLUGS = new Set<string>([...SITTER_PROFILE_GUIDE_ARTICLE_SLUGS, "temoignage-premiere-garde-auvergne", "voyager-gratuitement-france-house-sitting", "devenir-gardien-maison-etranger", "reussir-premiere-garde-house-sitting", "gerer-animaux-difficiles-garde", "boom-pet-sitting-lyon-2026"]);
 export const AIX_HOME_OWNER_ARTICLE_SLUG = "house-sitting-aix-les-bains";
@@ -174,7 +174,10 @@ export const BERGER_ALLEMAND_OWNER_ARTICLE_SLUG = "berger-allemand-guide-race";
 export const BERGER_AUSTRALIEN_OWNER_ARTICLE_SLUG = "berger-australien-guide-race";
 export const BORDER_COLLIE_OWNER_ARTICLE_SLUG = "border-collie-guide-race-complet";
 export const BOULEDOGUE_FRANCAIS_OWNER_ARTICLE_SLUG = "bouledogue-francais-guide-race-complet";
+export const CAVALIER_OWNER_ARTICLE_SLUG = "cavalier-king-charles-guide-race";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
+  CAVALIER_OWNER_ARTICLE_SLUG,
+
   BORDER_COLLIE_OWNER_ARTICLE_SLUG,
   BOULEDOGUE_FRANCAIS_OWNER_ARTICLE_SLUG,
 
@@ -254,6 +257,22 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [CAVALIER_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous préparez la garde de votre Cavalier ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Présenter les besoins de votre Cavalier dans une annonce",
+    "endText": "Décrivez les dates, les habitudes et les soins éventuels. Échangez sur les possibilités du gardien avant de confirmer le séjour.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+
   [BORDER_COLLIE_OWNER_ARTICLE_SLUG]: {
     "midText": "Vous préparez la garde de votre chien ?",
     "midPrimary": {
@@ -1272,14 +1291,20 @@ const CTA_PAR_SLUG: Record<string, CtaCopy> = {
     endSecondary: { label: "Voir les coups de main près de chez moi", href: "/petites-missions", role: "entraide" },
   },
   "bricolage-montage-meubles-entraide-grenoble-lyon": {
-    midText: "Un coup de main à demander, ou du temps à donner ?",
-    midPrimary: { label: "Demander un coup de main", href: "/petites-missions/creer", role: "entraide" },
-    midSecondary: { label: "Proposer mon aide", href: "/profile?section=savoir-faire", role: "entraide" },
-    endHeading: "Le premier coup de main est souvent le plus simple",
-    endText: "Publiez votre demande en quelques minutes : les membres du coin la reçoivent le lendemain matin. Pour aider, dites sur votre profil ce que vous savez faire.",
-    endPrimary: { label: "Demander un coup de main", href: "/petites-missions/creer", role: "entraide" },
-    endSecondary: { label: "Voir les coups de main près de chez moi", href: "/petites-missions", role: "entraide" },
+  "midText": "Vous avez un petit montage à préparer ?",
+  "midPrimary": {
+    "label": "Demander un coup de main",
+    "href": "/petites-missions/creer",
+    "role": "entraide"
   },
+  "endHeading": "Décrire le coup de main dont vous avez besoin",
+  "endText": "Indiquez le meuble, les gestes attendus, le matériel et les accès. Échangez sur les limites et les conditions avant de convenir du rendez-vous.",
+  "endPrimary": {
+    "label": "Demander un coup de main",
+    "href": "/petites-missions/creer",
+    "role": "entraide"
+  }
+},
   "courses-aide-domicile-entraide-senior-lyon": {
     midText: "Un coup de main à demander, ou du temps à donner ?",
     midPrimary: { label: "Demander un coup de main", href: "/petites-missions/creer", role: "entraide" },
@@ -1432,6 +1457,8 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  CAVALIER_OWNER_ARTICLE_SLUG,
+
   BORDER_COLLIE_OWNER_ARTICLE_SLUG,
   BOULEDOGUE_FRANCAIS_OWNER_ARTICLE_SLUG,
 
@@ -1719,6 +1746,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
     PROJECT_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || RESOURCE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || MIXED_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || slug === "c-est-quoi-le-house-sitting" ||
+      slug === CAVALIER_OWNER_ARTICLE_SLUG ||
       slug === BORDER_COLLIE_OWNER_ARTICLE_SLUG || slug === BOULEDOGUE_FRANCAIS_OWNER_ARTICLE_SLUG ||
       slug === BERGER_ALLEMAND_OWNER_ARTICLE_SLUG || slug === BERGER_AUSTRALIEN_OWNER_ARTICLE_SLUG ||
       slug === BENGAL_OWNER_ARTICLE_SLUG ||
