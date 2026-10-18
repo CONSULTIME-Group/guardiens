@@ -55,6 +55,17 @@ Deno.serve(async (req) => {
       : await admin.rpc('auto_resolve_admin_signals')
     if (arErr) console.error('auto_resolve_admin_signals error', arErr)
 
+    // Lot ADM2 : ce qui empêche l'email de dire vrai est écrit dans l'email
+    // (jamais de « rien à traiter » quand une lecture a échoué).
+    const notices: string[] = []
+    if (arErr) notices.push('Clôtures automatiques en échec ce matin : certains signaux réglés restent affichés.')
+    const { data: flag, error: flagErr } = await admin
+      .from('feature_flags').select('enabled').eq('key', 'admin_signals_active').maybeSingle()
+    if (flagErr) console.error('feature_flags error', flagErr)
+    else if (flag && flag.enabled === false) {
+      notices.push('Signaux désactivés dans Paramètres : aucun nouveau signal ni relance automatique depuis la coupure.')
+    }
+
     // 2) Signaux restants
     const { data: open, error: openErr } = await admin
       .from('admin_signals')
@@ -76,7 +87,10 @@ Deno.serve(async (req) => {
     // Lot ADM2 : files humaines (contact, signalements, RGPD, contestations,
     // vérifications) en tête, puis les signaux.
     const { data: queues, error: qErr } = await admin.rpc('admin_human_queues')
-    if (qErr) console.error('admin_human_queues error', qErr)
+    if (qErr) {
+      console.error('admin_human_queues error', qErr)
+      notices.push('Lecture des files humaines impossible (contact, signalements, RGPD, contestations, vérifications) : ouvrez l\'accueil admin.')
+    }
     const humanLines = humanQueueLines(qErr ? [] : (queues as HumanQueue[] | null), now)
     const lines = [...humanLines, ...buildDigestLines(rows, sits, now)]
     // Lundi : couverture, qualité éditoriale, À animer, dans le paragraphe de synthèse existant.
@@ -89,7 +103,7 @@ Deno.serve(async (req) => {
     }
     const coverageLine = [...weeklySummaryLines(rows), ...almaWeeklyLines(almaStats)].join(' ') || null
     const warningCount = rows.filter((r) => r.severity === 'warning').length
-    const staleCount = lines.filter((l) => l.ageDays > 3).length
+    const staleCount = lines.filter((l) => (l.ageDays ?? 0) > 3).length
 
     // 3) Lot ADM2 : l'email part chaque matin, « Rien à traiter » compris
     // (décision de Jérémie du 18/10/2026) : son arrivée prouve que l'alerte vit.
@@ -107,7 +121,7 @@ Deno.serve(async (req) => {
         auto_resolved: autoResolved ?? [],
         critical_open: lines.length, human_queues: humanLines.length,
         warning_open: warningCount, stale_count: staleCount,
-        coverage_line: coverageLine, lines,
+        coverage_line: coverageLine, notices, lines,
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
@@ -124,6 +138,7 @@ Deno.serve(async (req) => {
           warningCount,
           staleCount,
           coverageLine,
+          notices,
           lines: lines.slice(0, 20),
         },
       }),
@@ -131,8 +146,12 @@ Deno.serve(async (req) => {
     const txt = res.ok ? '' : await res.text().catch(() => '')
     if (!res.ok) console.error('send-transactional-email failed', res.status, txt)
 
-    const metrics = { sent: res.ok, lines: lines.length, human_queues: humanLines.length, warning_open: warningCount }
-    await finishRun(res.ok ? 'success' : 'failed', metrics, res.ok ? undefined : `send-transactional-email ${res.status}`)
+    const metrics = { sent: res.ok, lines: lines.length, human_queues: humanLines.length, warning_open: warningCount, notices }
+    await finishRun(
+      !res.ok ? 'failed' : notices.length ? 'partial' : 'success',
+      metrics,
+      res.ok ? (notices.length ? notices.join(' ') : undefined) : `send-transactional-email ${res.status}`,
+    )
 
     return new Response(JSON.stringify({
       ok: res.ok, sent: res.ok, recipient: RECIPIENT,

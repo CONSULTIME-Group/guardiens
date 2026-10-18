@@ -11,7 +11,7 @@ export interface AdminSignalLine {
   title: string
   action: string
   startDate: string | null
-  ageDays: number
+  ageDays: number | null
   count: number
   link: string
 }
@@ -21,6 +21,8 @@ interface Props {
   warningCount?: number
   staleCount?: number
   coverageLine?: string | null
+  /** Lot ADM2 : lectures en échec ou signaux coupés, écrits en tête. */
+  notices?: string[]
   lines?: AdminSignalLine[]
 }
 
@@ -30,11 +32,26 @@ const fmtDate = (d: string | null) => {
   return `${day}/${m}/${y}`
 }
 
+const ageText = (d: number | null) =>
+  d === null ? null : `ouvert depuis ${d} jour${d > 1 ? 's' : ''}`
+
+/** « Début de garde le 31/10/2026, ouvert depuis 9 jours », sans morceau vide. */
+const itemWhen = (l: AdminSignalLine): string | null => {
+  const parts = [
+    fmtDate(l.startDate) ? `Début de garde le ${fmtDate(l.startDate)}` : null,
+    ageText(l.ageDays),
+  ].filter((x): x is string => !!x)
+  if (!parts.length) return null
+  const t = parts.join(', ')
+  return t.charAt(0).toUpperCase() + t.slice(1)
+}
+
 const Email = ({
   criticalCount = 0,
   warningCount = 0,
   staleCount = 0,
   coverageLine = null,
+  notices = [],
   lines = [],
 }: Props) => (
   <Html lang="fr" dir="ltr">
@@ -46,7 +63,11 @@ const Email = ({
         <Heading style={h1}>
           {criticalCount > 0 ? `Le point du matin, ${criticalCount} action(s) à mener` : 'Le point du matin, rien à traiter'}
         </Heading>
-        {criticalCount === 0 && (
+        {notices.map((n, i) => (
+          <Text key={`n${i}`} style={alert}>{n}</Text>
+        ))}
+
+        {criticalCount === 0 && notices.length === 0 && (
           <Text style={text}>
             Files humaines vides, annonces sans urgence. Cet email arrive chaque matin : son arrivée confirme que la surveillance tourne.
           </Text>
@@ -62,10 +83,7 @@ const Email = ({
           {lines.map((l, i) => (
             <Section key={i} style={item}>
               <Text style={itemTitle}>{l.title}</Text>
-              <Text style={itemDetail}>
-                {fmtDate(l.startDate) ? `Début de garde le ${fmtDate(l.startDate)}, o` : 'O'}
-                {`uvert depuis ${l.ageDays} jour${l.ageDays > 1 ? 's' : ''}`}
-              </Text>
+              {itemWhen(l) ? <Text style={itemDetail}>{itemWhen(l)}</Text> : null}
               <Text style={itemDetail}>{l.action}</Text>
               <Text style={itemDetail}>
                 <Link href={l.link} style={link}>Ouvrir dans l'administration</Link>

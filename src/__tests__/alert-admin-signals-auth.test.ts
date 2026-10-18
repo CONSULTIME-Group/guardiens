@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from "vitest";
 const serviceKey = "fixture-service-secret";
 const forgedJwt = `eyJhbGciOiJIUzI1NiJ9.${Buffer.from(JSON.stringify({ role: "service_role" })).toString("base64url")}.invalid`;
 
-function harness(options: { signal?: boolean; noServiceKey?: boolean; readError?: boolean; queues?: Array<{ key: string; count: number; oldest: string | null }> } = {}) {
+function harness(options: { signal?: boolean; noServiceKey?: boolean; readError?: boolean; queues?: Array<{ key: string; count: number; oldest: string | null }>; flagOff?: boolean; queuesError?: boolean } = {}) {
   let handler: (request: Request) => Promise<Response>;
   const writes: string[] = [];
   const from = vi.fn((table: string) => {
@@ -21,6 +21,13 @@ function harness(options: { signal?: boolean; noServiceKey?: boolean; readError?
       chain.maybeSingle = async () => ({ data: { id: "run-1" }, error: null });
       return chain;
     }
+    if (table === "feature_flags") {
+      const chain: Record<string, any> = {};
+      chain.select = () => chain;
+      chain.eq = () => chain;
+      chain.maybeSingle = async () => ({ data: { enabled: !options.flagOff }, error: null });
+      return chain;
+    }
     if (table !== "admin_signals") throw new Error(`Unexpected table ${table}`);
     const result = { data: options.signal ? [{ signal_type: "fixture-critical", severity: "critical", detected_at: new Date().toISOString(), metadata: { detail: "fixture" } }] : [], error: options.readError ? { message: "fixture read failure" } : null };
     const chain: Record<string, any> = {};
@@ -29,7 +36,9 @@ function harness(options: { signal?: boolean; noServiceKey?: boolean; readError?
     chain.then = (resolve: (value: unknown) => unknown) => Promise.resolve(result).then(resolve);
     return chain;
   });
-  const rpc = vi.fn(async (name: string) => ({ data: name === "admin_human_queues" ? (options.queues ?? []) : [], error: null }));
+  const rpc = vi.fn(async (name: string) => (name === "admin_human_queues" && options.queuesError
+    ? { data: null, error: { message: "fixture queues failure" } }
+    : { data: name === "admin_human_queues" ? (options.queues ?? []) : [], error: null }));
   const createClient = vi.fn(() => ({ from, rpc }));
   const fetch = vi.fn(async () => new Response(JSON.stringify({ success: true, sent: true }), { status: 200 }));
   const env = { SUPABASE_URL: "https://fixture.invalid", SUPABASE_SERVICE_ROLE_KEY: options.noServiceKey ? undefined : serviceKey };
@@ -58,7 +67,7 @@ function harness(options: { signal?: boolean; noServiceKey?: boolean; readError?
       throw new Error(`Unexpected import ${specifier}`);
     },
   });
-  const reads = () => (from.mock.calls as unknown[][]).filter(([t]) => t !== "cron_run_log");
+  const reads = () => (from.mock.calls as unknown[][]).filter(([t]) => t !== "cron_run_log" && t !== "feature_flags");
   const writeRpcs = () => (rpc.mock.calls as unknown[][]).filter(([n]) => n !== "alma_weekly_summary" && n !== "admin_human_queues");
   return { from, rpc, fetch, writes, reads, writeRpcs, invoke: (request: Request) => handler(request) };
 }
@@ -120,6 +129,16 @@ describe("alert-admin-signals service authorization", () => {
     const data = JSON.parse(String(init.body)).templateData;
     expect(data.criticalCount).toBe(2);
     expect(data.lines[0]).toMatchObject({ title: "2 messages de contact", ageDays: 2, link: "https://guardiens.fr/admin/contact-messages" });
+  });
+
+  it("writes failed reads and switched-off signals into the email, never a false calm", async () => {
+    const h = harness({ flagOff: true, queuesError: true });
+    await h.invoke(new Request("https://fixture.invalid", { method: "POST", headers: { authorization: `Bearer ${serviceKey}` }, body: "{}" }));
+    const [, init] = h.fetch.mock.calls[0] as unknown as [string, RequestInit];
+    const notices: string[] = JSON.parse(String(init.body)).templateData.notices;
+    expect(notices).toHaveLength(2);
+    expect(notices.join(" ")).toMatch(/Signaux désactivés/);
+    expect(notices.join(" ")).toMatch(/Lecture des files humaines impossible/);
   });
 
   it("does not reconcile on a dry run", async () => {

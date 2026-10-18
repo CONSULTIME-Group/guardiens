@@ -52,7 +52,7 @@ export const RepeatedCancellationsCard = ({ signal }: Props) => {
   const [writeTarget, setWriteTarget] = useState<WriteToMemberTarget | null>(null);
   const handleSent = async () => {
     const { error } = await resolve("member_written");
-    if (error) { toast.error("Email envoyé, mais le signal reste ouvert."); return; }
+    if (error) { toast.error("Message accepté, mais le signal reste ouvert."); return; }
     invalidate();
   };
 

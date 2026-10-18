@@ -306,7 +306,7 @@ BEGIN
           WHERE e.template_name = 'contact-reply'
             AND lower(e.recipient_email) = lower(c.email)
             AND e.created_at >= c.created_at
-            AND e.status IN ('sent', 'deferred'))))
+            AND e.status = 'sent')))
   ), no_applications_sit_closed AS (
     -- Lot ADM2 : annonce supprimée ou qui n'est plus publiée.
     SELECT s.id, s.signal_type, 'auto_resolved_sit_no_longer_published'::text AS reason

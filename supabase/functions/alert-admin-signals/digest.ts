@@ -22,7 +22,8 @@ export interface DigestLine {
   title: string
   action: string
   startDate: string | null
-  ageDays: number
+  /** null : file sans date fiable (vérifications d'identité), âge non affiché. */
+  ageDays: number | null
   count: number
   signalTypes: string[]
   link: string
@@ -107,7 +108,7 @@ export function humanQueueLines(queues: HumanQueue[] | null | undefined, now: nu
       title: `${count} ${count > 1 ? def.many : def.one}`,
       action: def.action,
       startDate: null,
-      ageDays: Number.isFinite(oldest) ? Math.max(0, Math.floor((now - oldest) / 86_400_000)) : 0,
+      ageDays: Number.isFinite(oldest) ? Math.max(0, Math.floor((now - oldest) / 86_400_000)) : null,
       count,
       signalTypes: [],
       link: def.link,
@@ -184,7 +185,7 @@ export function buildDigestLines(
     if (a.startDate && b.startDate) return a.startDate.localeCompare(b.startDate)
     if (a.startDate) return -1
     if (b.startDate) return 1
-    return b.ageDays - a.ageDays
+    return (b.ageDays ?? 0) - (a.ageDays ?? 0)
   })
 }
 
