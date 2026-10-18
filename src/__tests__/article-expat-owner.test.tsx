@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["house-sitting-cadre-juridique-france", 6],
+  ["parcs-chiens-lyon-guide-complet", 4],
   ["preparer-maison-avant-vacances", 2],
   ["proprietaire-preparer-garde-maison", 2],
   ["pet-sitting-grenoble-guide", 2],
