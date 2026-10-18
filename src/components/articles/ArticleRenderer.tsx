@@ -154,7 +154,8 @@ export const ANNECY_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-annecy-haute
 export const GRENOBLE_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-grenoble-isere";
 export const LYON_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-lyon-guide";
 export const ENTRAIDE_GUIDE_ARTICLE_SLUGS = new Set<string>(["arroser-plantes-vacances-annecy", "arroser-plantes-vacances-grenoble", "arroser-plantes-vacances-lyon"]);
-export const SITTER_GUIDE_ARTICLE_SLUGS = new Set<string>(["gerer-animaux-difficiles-garde", "boom-pet-sitting-lyon-2026"]);
+export const SITTER_PROFILE_GUIDE_ARTICLE_SLUGS = new Set<string>(["creer-profil-gardien-attractif"]);
+export const SITTER_GUIDE_ARTICLE_SLUGS = new Set<string>([...SITTER_PROFILE_GUIDE_ARTICLE_SLUGS, "reussir-premiere-garde-house-sitting", "gerer-animaux-difficiles-garde", "boom-pet-sitting-lyon-2026"]);
 export const AIX_HOME_OWNER_ARTICLE_SLUG = "house-sitting-aix-les-bains";
 export const FARM_HOME_OWNER_ARTICLE_SLUG = "garde-ferme-animaux-monts-du-lyonnais";
 export const GRENOBLE_STAY_OWNER_ARTICLE_SLUG = "pet-sitting-grenoble-chartreuse";
@@ -237,6 +238,37 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+"creer-profil-gardien-attractif": {
+  "midText": "Vous préparez un séjour de house-sitting ?",
+  "midPrimary": {
+    "label": "Préparer mon profil gardien",
+    "href": "/inscription?role=sitter&redirect=%2Fprofile",
+    "role": "sitter"
+  },
+  "endHeading": "Présenter votre expérience et vos disponibilités",
+  "endText": "Mettez à jour votre profil avec des informations concrètes sur les tâches que vous connaissez et les séjours que vous pouvez envisager.",
+  "endPrimary": {
+    "label": "Préparer mon profil gardien",
+    "href": "/inscription?role=sitter&redirect=%2Fprofile",
+    "role": "sitter"
+  }
+},
+"reussir-premiere-garde-house-sitting": {
+  "midText": "Vous préparez un séjour de house-sitting ?",
+  "midPrimary": {
+    "label": "Consulter les annonces de garde",
+    "href": "/search",
+    "role": "sitter"
+  },
+  "endHeading": "Chercher une première garde adaptée à vos possibilités",
+  "endText": "Lisez les tâches, les soins et les conditions de séjour, puis posez vos questions avant de confirmer votre disponibilité.",
+  "endPrimary": {
+    "label": "Consulter les annonces de garde",
+    "href": "/search",
+    "role": "sitter"
+  }
+},
+
   [ANNECY_WALKS_OWNER_ARTICLE_SLUG]: {
     "midText": "Vous préparez une garde avec des promenades à Annecy ?",
     "midPrimary": {
@@ -1325,6 +1357,10 @@ function adaptEndCTAsForRole(html: string, role?: "owner" | "sitter" | "both", s
         return `<a${newAttrs}>${_inner}</a>`;
       }
 
+      if (SITTER_PROFILE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && dataRole === "sitter") {
+        const newAttrs = attrs.replace(/href="[^"]*"/, 'href="/profile"');
+        return `<a${newAttrs}>${_inner}</a>`;
+      }
       if (SITTER_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && dataRole === "sitter") return full;
 
       // Sur ces guides propriétaires, un membre gardien peut aussi préparer sa propre garde.
