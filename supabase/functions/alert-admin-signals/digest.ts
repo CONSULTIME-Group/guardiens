@@ -147,7 +147,9 @@ export function buildDigestLines(
     // Lot ADM1 : garde commencée, plus aucune action avant le départ.
     const startDate = sit?.start_date ?? (m.start_date as string) ?? null
     if (sitId && types.every((t) => SIT_TIMED_TYPES.has(t)) && isSitStarted(startDate, now)) continue
-    const title = (key === 'group:digest_queue' ? 'File des digests' : sit?.title ?? (m.sit_title as string) ?? (m.title as string) ?? main)
+    // Lot ADM5 : un titre vide (brouillon sans titre) ne laisse jamais une ligne muette.
+    const firstText = (...v: unknown[]) => v.map((x) => (typeof x === 'string' ? x.trim() : '')).find((x) => x) ?? ''
+    const title = (key === 'group:digest_queue' ? 'File des digests' : firstText(sit?.title, m.sit_title, m.title) || (sitId ? 'Annonce sans titre' : SIGNAL_TYPES[main]?.label ?? main))
       .replace(/[\u2014\u2013]/g, ',')
     const count = arr.length
     let action = actionFor(main)

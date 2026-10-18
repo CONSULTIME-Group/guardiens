@@ -61,11 +61,52 @@ Deno.serve(async (req) => {
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     // Lot A9 : suppression limitée aux annonces sans garde engagée.
-    const { data: sit, error: sitError } = await adminClient.from("sits").select("status").eq("id", listingId).maybeSingle();
+    const { data: sit, error: sitError } = await adminClient
+      .from("sits").select("status, title, user_id").eq("id", listingId).maybeSingle();
     if (sitError) return json({ error: sitError.message }, 500);
     if (!sit) return json({ error: "Annonce introuvable ou déjà supprimée" }, 404);
     if (!DELETABLE_STATUSES.includes(String(sit.status))) {
       return json({ error: "Suppression réservée aux annonces en ligne, brouillons, archivées ou expirées" }, 409);
+    }
+
+    // Lot ADM5 (audit admin du 18/10/2026) : trace écrite par le serveur
+    // AVANT tout effacement, avec ce qui va disparaître. Sans trace, rien
+    // n'est supprimé.
+    const countOf = async (table: string, column: string, values: string | string[]) => {
+      const q = adminClient.from(table).select("id", { count: "exact", head: true });
+      const { count: n, error } = Array.isArray(values) ? await q.in(column, values) : await q.eq(column, values);
+      if (error) throw error;
+      return n ?? 0;
+    };
+    const { data: convRows, error: convCountError } = await adminClient
+      .from("conversations").select("id").eq("sit_id", listingId);
+    if (convCountError) return json({ error: convCountError.message }, 500);
+    const convIds = (convRows ?? []).map((c) => c.id);
+    let counts: Record<string, number>;
+    try {
+      counts = {
+        reviews: await countOf("reviews", "sit_id", listingId),
+        applications: await countOf("applications", "sit_id", listingId),
+        conversations: convIds.length,
+        messages: convIds.length ? await countOf("messages", "conversation_id", convIds) : 0,
+      };
+    } catch (e) {
+      return json({ error: e instanceof Error ? e.message : "Lecture des dépendances impossible" }, 500);
+    }
+    const { error: logError } = await adminClient.from("admin_action_logs").insert({
+      admin_id: caller.id,
+      action: "listing_delete",
+      target_type: "sit",
+      target_id: listingId,
+      metadata: {
+        title: sit.title ?? listingTitle ?? null,
+        owner_id: sit.user_id ?? ownerUserId ?? null,
+        status: sit.status,
+        ...counts,
+      },
+    });
+    if (logError) {
+      return json({ error: `Trace d'audit impossible, suppression annulée : ${logError.message}` }, 500);
     }
 
     // Cleanup dépendances liées à un sit
