@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["preparer-maison-avant-vacances", 2],
+  ["proprietaire-preparer-garde-maison", 2],
   ["pet-sitting-grenoble-guide", 2],
   ["petites-missions-entraide-guide", 2],
   ["pet-sitting-chambery-savoie", 2],
