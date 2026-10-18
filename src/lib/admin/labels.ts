@@ -231,6 +231,9 @@ export function digestToResume(text: string): string {
 }
 
 export const AUDIT_ACTION_LABELS: Dict = {
+  publish_on_behalf: "Publication d'un brouillon à la place du propriétaire",
+  hide_listing: "Annonce masquée",
+  restore_listing: "Annonce remise en ligne",
   suspend_user: "Suspension de compte",
   update_admin_note: "Note interne modifiée",
   unsuspend_user: "Levée de suspension",
