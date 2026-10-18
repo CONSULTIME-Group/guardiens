@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
-import ArticleRenderer, { OWNER_GUIDE_ARTICLE_SLUGS, SITTER_GUIDE_ARTICLE_SLUGS, ENTRAIDE_GUIDE_ARTICLE_SLUGS } from "@/components/articles/ArticleRenderer";
+import ArticleRenderer, { OWNER_GUIDE_ARTICLE_SLUGS, SITTER_GUIDE_ARTICLE_SLUGS, SITTER_PROFILE_GUIDE_ARTICLE_SLUGS, ENTRAIDE_GUIDE_ARTICLE_SLUGS } from "@/components/articles/ArticleRenderer";
 import { parseFaqFromMarkdown } from "@/lib/parseFaq";
 
 describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire", (slug) => {
@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["creer-profil-gardien-attractif", 5],
+  ["reussir-premiere-garde-house-sitting", 6],
   ["parcs-balades-chiens-annecy-guide", 5],
   ["parcs-balades-chiens-grenoble-guide", 5],
   ["meilleures-villes-vivre-chien-autour-lyon", 5],
@@ -107,7 +109,8 @@ describe.each([...SITTER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours gardien", (sl
     const { container } = render(<ArticleRenderer content={content} slug={slug} userRole={userRole} />);
     const links = container.querySelectorAll('a[data-article-cta="true"]');
     expect(links).toHaveLength(1);
-    expect(links[0].getAttribute("href")).toBe("/search");
+    const expectedHref = SITTER_PROFILE_GUIDE_ARTICLE_SLUGS.has(slug) ? (userRole ? "/profile" : "/inscription?role=sitter&redirect=%2Fprofile") : "/search";
+    expect(links[0].getAttribute("href")).toBe(expectedHref);
     expect(links[0].getAttribute("data-cta-position")).toBe("end");
     expect(links[0].getAttribute("data-cta-role")).toBe("sitter");
     expect(container.querySelector('[data-cta-block="mid"]')).toBeNull();
