@@ -153,6 +153,7 @@ export const HAUTE_SAVOIE_STAY_OWNER_ARTICLE_SLUG = "house-sitting-haute-savoie-
 export const ANNECY_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-annecy-haute-savoie";
 export const GRENOBLE_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-grenoble-isere";
 export const LYON_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-lyon-guide";
+export const MIXED_GUIDE_ARTICLE_SLUGS = new Set<string>(["premiers-pas-sur-guardiens", "comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers"]);
 export const ENTRAIDE_GUIDE_ARTICLE_SLUGS = new Set<string>(["arroser-plantes-vacances-annecy", "arroser-plantes-vacances-grenoble", "arroser-plantes-vacances-lyon"]);
 export const SITTER_PROFILE_GUIDE_ARTICLE_SLUGS = new Set<string>(["creer-profil-gardien-attractif", "comment-devenir-home-sitter-france-guide-debutant", "devenir-gardien-pro-animalier", "devenir-gardien-urgence-guardiens"]);
 export const SITTER_GUIDE_ARTICLE_SLUGS = new Set<string>([...SITTER_PROFILE_GUIDE_ARTICLE_SLUGS, "devenir-gardien-maison-etranger", "reussir-premiere-garde-house-sitting", "gerer-animaux-difficiles-garde", "boom-pet-sitting-lyon-2026"]);
@@ -238,6 +239,57 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+"premiers-pas-sur-guardiens": {
+  "midText": "Vous préparez une garde de maison ?",
+  "midPrimary": {
+    "label": "Publier mon annonce de garde",
+    "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+    "role": "owner"
+  },
+  "midSecondary": {
+    "label": "Préparer mon profil gardien",
+    "href": "/inscription?role=sitter&redirect=%2Fprofile",
+    "role": "sitter"
+  },
+  "endHeading": "Choisir votre première démarche",
+  "endText": "Vous souhaitez confier votre logement ? Préparez une annonce. Vous souhaitez proposer des gardes ? Présentez votre expérience et vos possibilités dans votre profil.",
+  "endPrimary": {
+    "label": "Publier mon annonce de garde",
+    "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+    "role": "owner"
+  },
+  "endSecondary": {
+    "label": "Préparer mon profil gardien",
+    "href": "/inscription?role=sitter&redirect=%2Fprofile",
+    "role": "sitter"
+  }
+},
+"comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers": {
+  "midText": "Vous préparez une garde de maison ?",
+  "midPrimary": {
+    "label": "Publier mon annonce de garde",
+    "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+    "role": "owner"
+  },
+  "midSecondary": {
+    "label": "Préparer mon profil gardien",
+    "href": "/inscription?role=sitter&redirect=%2Fprofile",
+    "role": "sitter"
+  },
+  "endHeading": "Préparer un échange qui vous convient",
+  "endText": "Décrivez votre besoin de garde ou présentez ce que vous pouvez assurer. Vous pourrez échanger avant de confirmer un séjour.",
+  "endPrimary": {
+    "label": "Publier mon annonce de garde",
+    "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+    "role": "owner"
+  },
+  "endSecondary": {
+    "label": "Préparer mon profil gardien",
+    "href": "/inscription?role=sitter&redirect=%2Fprofile",
+    "role": "sitter"
+  }
+},
+
 "devenir-gardien-pro-animalier": {
   "midText": "Vous souhaitez présenter vos possibilités de garde ?",
   "midPrimary": {
@@ -1209,6 +1261,7 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  ...MIXED_GUIDE_ARTICLE_SLUGS,
   ANNECY_WALKS_OWNER_ARTICLE_SLUG,
   GRENOBLE_WALKS_OWNER_ARTICLE_SLUG,
 
@@ -1413,6 +1466,11 @@ function adaptEndCTAsForRole(html: string, role?: "owner" | "sitter" | "both", s
       const dataRole =
         attrs.match(/\bdata-cta-role="([^"]+)"/)?.[1] || null;
 
+      if (MIXED_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && (dataRole === "owner" || dataRole === "sitter")) {
+        const href = dataRole === "owner" ? "/sits/create" : "/profile";
+        const newAttrs = attrs.replace(/href="[^"]*"/, `href="${href}"`);
+        return `<a${newAttrs}>${_inner}</a>`;
+      }
       if (ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && dataRole === "entraide") {
         const href = CTA_PAR_SLUG[slug!].endPrimary.href;
         const newAttrs = attrs.replace(/href="[^"]*"/, `href="${href}"`);
@@ -1479,7 +1537,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const withoutH1 = stripLeadingH1(interpolated);
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
-    ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || slug === "c-est-quoi-le-house-sitting" ||
+    MIXED_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || slug === "c-est-quoi-le-house-sitting" ||
       slug === ANNECY_WALKS_OWNER_ARTICLE_SLUG || slug === GRENOBLE_WALKS_OWNER_ARTICLE_SLUG ||
       slug === VILLES_CHIEN_OWNER_ARTICLE_SLUG ||
       slug === VILLEURBANNE_OWNER_ARTICLE_SLUG ||
@@ -1512,7 +1570,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   if (OWNER_GUIDE_ARTICLE_SLUGS.has(slug ?? "")) {
     // Le parcours propriétaire est rendu par l'en-tête et le bloc final.
     html = html.replace(/<p><strong><a href="\/inscription\?role=owner(?:&amp;|&)redirect=%2Fsits%2Fcreate">Publier mon annonce de garde<\/a><\/strong><\/p>\s*/g, "");
-  } else if (!SITTER_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && !ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "")) {
+  } else if (!SITTER_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && !ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && !MIXED_GUIDE_ARTICLE_SLUGS.has(slug ?? "")) {
     html = injectCTA(html, slug);
   }
   html = addBandedSections(html);
