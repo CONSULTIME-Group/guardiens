@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["garde-a-domicile-vs-pension", 2],
+  ["garde-chien-lyon-solutions", 2],
   ["devenir-pet-sitter-guide-debutant", 2],
   ["erreurs-premiere-garde", 2],
   ["conseils-garder-chien", 2],
