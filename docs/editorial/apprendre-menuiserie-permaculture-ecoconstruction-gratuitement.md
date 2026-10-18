@@ -52,6 +52,8 @@ Les mêmes questions comptent pour la terre, la chaux ou la pierre sèche : quel
 
 ## <a id="projet"></a>Quelles questions poser avant de participer à un projet Guardiens ?
 
+Les activités proposées sur Guardiens doivent aussi respecter les [CGU](/cgu) : construction, démolition, toiture, travail en hauteur, interventions électriques, de gaz ou de chauffage, élagage et abattage sont notamment exclus de ce cadre. Une ressource de formation extérieure sur ces techniques ne signifie pas qu’un projet correspondant est admissible sur la plateforme. Vérifiez l’activité avant de proposer ou de rejoindre un projet.
+
 Les projets permettent un échange de temps et de savoir-faire entre particuliers. La présentation distingue **« Ce qu’il faut savoir faire »** et **« Ce que vous transmettez »**. Lisez les deux : une annonce accueillant les débutants doit tout de même expliquer les tâches et l’accompagnement prévu.
 
 Demandez les horaires, les gestes envisagés, la personne présente pour les expliquer et le matériel fourni. Clarifiez aussi les assurances et ce qui se passe si une tâche dépasse vos possibilités. Vous restez libre de refuser une activité que vous ne pouvez pas assurer.
@@ -85,5 +87,5 @@ Il peut apporter une pratique et des explications, sans garantir une maîtrise e
 Cela dépend de l’annonce et de l’accord avec le porteur. Vérifiez les conditions avant de confirmer votre venue. Le cadre du projet prévoit un échange de temps et de savoir-faire sans paiement entre les personnes.
 
 ### Guardiens garantit-il l’encadrement technique d’un projet ?
-La plateforme met en relation les participants et les porteurs. Leurs déclarations ne constituent pas une validation technique du chantier. Clarifiez les tâches, l’accompagnement, le matériel et les assurances avant de participer.
+La plateforme met en relation les participants et les porteurs. Leurs déclarations ne constituent pas une validation technique du chantier. Clarifiez les tâches, l’accompagnement, le matériel et les assurances avant de participer. Les activités doivent aussi respecter les exclusions des CGU, notamment construction et travail en hauteur.
 :::

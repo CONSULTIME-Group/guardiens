@@ -156,7 +156,7 @@ export const LYON_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-lyon-guide";
 export const PROJECT_GUIDE_ARTICLE_SLUGS = new Set<string>(["chantier-participatif-low-tech-participer-lancer-projet", "chantier-participatif-projet-collectif-cadre-legal", "apprendre-menuiserie-permaculture-ecoconstruction-gratuitement"]);
 export const RESOURCE_GUIDE_ARTICLE_SLUGS = new Set<string>(["abandon-animaux-france-chiffres-causes"]);
 export const MIXED_GUIDE_ARTICLE_SLUGS = new Set<string>(["premiers-pas-sur-guardiens", "comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers", "notre-histoire-pet-sitting-argentine-lyon"]);
-export const ENTRAIDE_GUIDE_ARTICLE_SLUGS = new Set<string>(["se-sentir-utile-pres-de-chez-soi", "petites-missions-entraide-guardiens", "reseau-entraide-quartier-lyon-aura", "oser-demander-coup-de-main-pres-de-chez-soi", "jardinage-entraide-quartier-lyon", "jardinage-entraide-locale-grenoble", "jardinage-entraide-quartier-annecy", "idees-coups-de-main-entraide-pres-de-chez-soi", "courses-aide-domicile-entraide-senior-lyon", "demenagement-entraide-locale-france", "bricolage-montage-meubles-entraide-grenoble-lyon", "arroser-plantes-vacances-annecy", "arroser-plantes-vacances-grenoble", "arroser-plantes-vacances-lyon"]);
+export const ENTRAIDE_GUIDE_ARTICLE_SLUGS = new Set<string>(["technologie-recreer-lien-pres-de-chez-soi", "se-sentir-utile-pres-de-chez-soi", "petites-missions-entraide-guardiens", "reseau-entraide-quartier-lyon-aura", "oser-demander-coup-de-main-pres-de-chez-soi", "jardinage-entraide-quartier-lyon", "jardinage-entraide-locale-grenoble", "jardinage-entraide-quartier-annecy", "idees-coups-de-main-entraide-pres-de-chez-soi", "courses-aide-domicile-entraide-senior-lyon", "demenagement-entraide-locale-france", "bricolage-montage-meubles-entraide-grenoble-lyon", "arroser-plantes-vacances-annecy", "arroser-plantes-vacances-grenoble", "arroser-plantes-vacances-lyon"]);
 export const SITTER_PROFILE_GUIDE_ARTICLE_SLUGS = new Set<string>(["creer-profil-gardien-attractif", "comment-devenir-home-sitter-france-guide-debutant", "devenir-gardien-pro-animalier", "devenir-gardien-urgence-guardiens"]);
 export const SITTER_GUIDE_ARTICLE_SLUGS = new Set<string>([...SITTER_PROFILE_GUIDE_ARTICLE_SLUGS, "temoignage-premiere-garde-auvergne", "voyager-gratuitement-france-house-sitting", "devenir-gardien-maison-etranger", "reussir-premiere-garde-house-sitting", "gerer-animaux-difficiles-garde", "boom-pet-sitting-lyon-2026"]);
 export const AIX_HOME_OWNER_ARTICLE_SLUG = "house-sitting-aix-les-bains";
@@ -1547,14 +1547,20 @@ const CTA_PAR_SLUG: Record<string, CtaCopy> = {
   }
 },
   "technologie-recreer-lien-pres-de-chez-soi": {
-    midText: "Un coup de main à demander, ou du temps à donner ?",
-    midPrimary: { label: "Voir l'entraide près de chez moi", href: "/petites-missions", role: "projet" },
-    midSecondary: { label: "Lire le guide des projets", href: "/actualites/chantier-participatif-low-tech-participer-lancer-projet", role: "projet" },
-    endHeading: "Et si vous commenciez par un petit service ?",
-    endText: "Demandez un coup de main ou proposez le vôtre, à quelques kilomètres de chez vous.",
-    endPrimary: { label: "Voir l'entraide près de chez moi", href: "/petites-missions", role: "projet" },
-    endSecondary: { label: "Lire le guide des projets", href: "/actualites/chantier-participatif-low-tech-participer-lancer-projet", role: "projet" },
+  "midText": "Vous avez envie de commencer un échange ?",
+  "midPrimary": {
+    "label": "Découvrir l’entraide près de chez moi",
+    "href": "/petites-missions",
+    "role": "entraide"
   },
+  "endHeading": "Découvrir une première occasion de s’entraider",
+  "endText": "Consultez les besoins, présentez vos savoir-faire ou préparez votre demande. Les conditions se conviennent ensuite avec la personne intéressée.",
+  "endPrimary": {
+    "label": "Découvrir l’entraide près de chez moi",
+    "href": "/petites-missions",
+    "role": "entraide"
+  }
+},
 
   "chantier-participatif-low-tech-participer-lancer-projet": {
   "midText": "Vous préparez un projet participatif ?",
