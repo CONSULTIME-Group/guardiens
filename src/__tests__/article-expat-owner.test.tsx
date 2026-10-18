@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["bricolage-montage-meubles-entraide-grenoble-lyon", 6],
+  ["cavalier-king-charles-guide-race", 6],
   ["border-collie-guide-race-complet", 6],
   ["bouledogue-francais-guide-race-complet", 6],
   ["berger-allemand-guide-race", 6],
@@ -145,7 +147,7 @@ describe.each([...ENTRAIDE_GUIDE_ARTICLE_SLUGS])("Guide %s, demande de coup de m
     const { container } = render(<ArticleRenderer content={content} slug={slug} userRole={userRole} />);
     const links = container.querySelectorAll('a[data-article-cta="true"]');
     expect(links).toHaveLength(1);
-    expect(links[0].textContent).toBe("Publier mon besoin d’arrosage");
+    expect(links[0].textContent).toBe(slug.startsWith("arroser-plantes-vacances-") ? "Publier mon besoin d’arrosage" : "Demander un coup de main");
     expect(links[0].getAttribute("href")).toBe(userRole ? "/petites-missions/creer" : "/inscription?redirect=%2Fpetites-missions%2Fcreer");
     expect(links[0].getAttribute("data-cta-role")).toBe("entraide");
     expect(links[0].getAttribute("data-cta-position")).toBe("end");
