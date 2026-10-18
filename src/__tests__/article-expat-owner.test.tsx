@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["house-sitting-grenoble", 2],
+  ["house-sitting-lyon", 2],
   ["house-sitting-caluire-et-cuire", 2],
   ["house-sitting-chambery", 2],
   ["house-sitting-annecy", 2],
