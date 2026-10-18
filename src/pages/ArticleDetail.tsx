@@ -37,6 +37,9 @@ const CONTACT_FIRST_ARTICLE_SLUGS = new Set([
 
 // Ces couvertures gardent leur sujet dans le cadre de lecture du guide.
 const GUIDE_COVER_CLASSES: Record<string, string> = {
+  "jardinage-entraide-locale-grenoble": "w-full h-[360px] sm:h-[520px] object-contain bg-muted/30",
+  "jardinage-entraide-quartier-annecy": "w-full h-[360px] sm:h-[520px] object-contain bg-muted/30",
+
   "idees-coups-de-main-entraide-pres-de-chez-soi": "w-full h-[360px] sm:h-[520px] object-contain bg-muted/30",
   [GOLDEN_OWNER_ARTICLE_SLUG]: "w-full h-[360px] sm:h-[520px] object-contain bg-muted/30",
 

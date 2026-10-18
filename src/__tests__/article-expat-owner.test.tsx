@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["jardinage-entraide-locale-grenoble", 6],
+  ["jardinage-entraide-quartier-annecy", 6],
   ["idees-coups-de-main-entraide-pres-de-chez-soi", 6],
   ["golden-retriever-guide-race-complet", 6],
   ["courses-aide-domicile-entraide-senior-lyon", 6],
