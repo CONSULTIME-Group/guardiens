@@ -44,6 +44,8 @@ Si un gardien séjourne chez vous, parlez de ses sorties et de ses horaires. Dor
 
 Expliquez son comportement avec une personne nouvelle, ses cachettes, ses jeux et sa manière de demander ou de refuser le contact. Un chat discret peut avoir besoin de temps ; le gardien n’a pas à le forcer à sortir ou à se laisser porter.
 
+Les guides du [bengal](/actualites/bengal-guide-race), du [maine coon](/actualites/maine-coon-guide-race), du [persan](/actualites/persan-guide-race) et du [siamois](/actualites/siamois-guide-race) proposent des points à décrire pour préparer la garde. Ils complètent vos observations : la race seule ne détermine ni le besoin de présence ni les soins de votre chat.
+
 Demandez à la personne comment elle organise une journée de garde, ce qu’elle observe chez un chat et quelles expériences correspondent à votre besoin. Pour des soins prescrits, vérifiez qu’elle sait les réaliser et qu’elle peut respecter les horaires. Si ce n’est pas le cas, cherchez une prise en charge adaptée avec votre vétérinaire.
 
 Consultez le profil et les avis lorsqu’ils existent, puis échangez sur les points concrets. Un badge de vérification d’identité ne garantit pas les compétences ou la qualité de la garde. Une rencontre est possible **si vous le souhaitez tous les deux**, sans être obligatoire sur Guardiens. Le guide pour [choisir un gardien](/actualites/choisir-gardien-bons-criteres) complète ces critères.

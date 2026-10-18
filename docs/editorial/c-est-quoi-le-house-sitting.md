@@ -105,6 +105,8 @@ Pour commencer sur Guardiens :
 
 Le guide complet est sur la page [devenir home sitter](/devenir-home-sitter).
 
+Pour organiser vos premiers séjours, le guide du [voyage en France avec le house-sitting](/actualites/voyager-gratuitement-france-house-sitting) détaille la préparation et les dépenses à prévoir. Le guide pour [devenir gardien de maison à l’étranger](/actualites/devenir-gardien-maison-etranger) développe les vérifications propres à un séjour international ; les formalités dépendent de votre situation et de la destination.
+
 ## <a id="comparatif"></a>House sitting, pet sitter rémunéré ou pension : comparatif
 
 | Critère | House sitting d'échange | Pet sitter rémunéré | Pension |
@@ -132,6 +134,8 @@ Quatre points à caler avant de vous engager :
 
 Le lieu du séjour change aussi la préparation. Pour [faire garder sa maison et ses animaux à Tahiti](/actualites/garde-maison-animaux-tahiti), notre guide détaille les solutions, les prix en F CFP, les déplacements et les consignes à prévoir avant de partir.
 
+À La Réunion, le guide de la [garde kaz et du house-sitting](/actualites/garde-kaz-house-sitting-la-reunion) aide à préparer le logement, les déplacements et les échanges avec le gardien, en distinguant l’accès à la plateforme des dépenses du séjour.
+
 ## <a id="legislation"></a>Assurance, accord écrit et imprévus
 
 **Assurance.** Avant la garde, interrogez votre assureur habitation sur la présence d'une personne dans votre logement pendant votre absence : garanties, exclusions, durée d'inoccupation au-delà de laquelle certaines garanties changent. Le gardien vérifie de son côté son assurance responsabilité civile. Service Public explique l'assurance liée aux animaux de compagnie ([F17603](https://www.service-public.gouv.fr/particuliers/vosdroits/F17603)) et les démarches d’indemnisation en cas de préjudice ([F1422](https://www.service-public.gouv.fr/particuliers/vosdroits/F1422)).
@@ -149,6 +153,8 @@ Le lieu du séjour change aussi la préparation. Pour [faire garder sa maison et
 Avec ma femme Elisa, qui est argentine, nous avons pratiqué la garde de maison pendant cinq ans avant de créer Guardiens. J’aurais aimé disposer de ce type d’application lorsque je vivais à l’étranger : un réseau francophone pour organiser une garde et trouver des occasions de s’entraider.
 
 Le but est de construire ce réseau progressivement. Des besoins précis, des limites exprimées et les retours des membres nous aident à améliorer le service ; une inscription ne crée pas à elle seule la confiance.
+
+[Notre histoire, de l’Argentine à Lyon](/actualites/notre-histoire-pet-sitting-argentine-lyon), revient sur l’origine du projet. Pour passer du principe à une préparation concrète, le guide d’une [première garde en Auvergne](/actualites/temoignage-premiere-garde-auvergne) présente les questions d’accès, de tâches et de relais à poser avant de confirmer.
 
 Jérémie et Elisa
 
