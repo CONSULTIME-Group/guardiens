@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["maine-coon-guide-race", 6],
+  ["malinois-guide-race-complet", 6],
   ["jardinage-entraide-quartier-lyon", 6],
   ["labrador-retriever-guide-race", 6],
   ["jardinage-entraide-locale-grenoble", 6],
