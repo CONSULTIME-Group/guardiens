@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["malinois-lyon-guide-race", 2],
+  ["pet-sitting-annecy-guide", 2],
   ["house-sitting-saint-etienne-guide", 2],
   ["house-sitting-vs-pension-comparatif", 2],
   ["house-sitting-grenoble", 2],
