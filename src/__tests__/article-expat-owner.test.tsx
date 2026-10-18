@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["pet-sitting-grenoble-guide", 2],
+  ["petites-missions-entraide-guide", 2],
   ["pet-sitting-chambery-savoie", 2],
   ["pet-sitting-clermont-ferrand-guide", 2],
   ["malinois-lyon-guide-race", 2],
