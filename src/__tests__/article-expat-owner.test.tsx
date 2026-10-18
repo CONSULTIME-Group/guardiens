@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["border-collie-guide-race-complet", 6],
+  ["bouledogue-francais-guide-race-complet", 6],
   ["berger-allemand-guide-race", 6],
   ["berger-australien-guide-race", 6],
   ["apprendre-menuiserie-permaculture-ecoconstruction-gratuitement", 6],
