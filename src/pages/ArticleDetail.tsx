@@ -37,6 +37,8 @@ const CONTACT_FIRST_ARTICLE_SLUGS = new Set([
 
 // Ces couvertures gardent leur sujet dans le cadre de lecture du guide.
 const GUIDE_COVER_CLASSES: Record<string, string> = {
+  "abandon-animaux-france-chiffres-causes": "w-full h-[360px] sm:h-[480px] object-cover object-center",
+  "temoignage-premiere-garde-auvergne": "w-full h-[360px] sm:h-[560px] object-cover object-[center_60%]",
   "voyager-gratuitement-france-house-sitting": "w-full h-[300px] sm:h-[420px] object-cover object-center",
   "notre-histoire-pet-sitting-argentine-lyon": "w-full h-[360px] sm:h-[560px] object-contain bg-muted/30",
   "premiers-pas-sur-guardiens": "w-full h-[360px] sm:h-[560px] object-cover object-[center_45%]",
