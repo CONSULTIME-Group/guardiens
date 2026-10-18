@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["parcs-balades-chiens-annecy-guide", 5],
+  ["parcs-balades-chiens-grenoble-guide", 5],
   ["meilleures-villes-vivre-chien-autour-lyon", 5],
   ["arroser-plantes-vacances-lyon", 5],
   ["arroser-plantes-vacances-annecy", 5],
