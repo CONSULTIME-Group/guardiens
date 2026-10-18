@@ -37,6 +37,9 @@ const CONTACT_FIRST_ARTICLE_SLUGS = new Set([
 
 // Ces couvertures gardent leur sujet dans le cadre de lecture du guide.
 const GUIDE_COVER_CLASSES: Record<string, string> = {
+  "preparer-maison-avant-vacances": "w-full h-[360px] sm:h-[520px] object-contain bg-muted/30",
+  "proprietaire-preparer-garde-maison": "w-full h-[360px] sm:h-[520px] object-contain bg-muted/30",
+
   "pet-sitting-grenoble-guide": "w-full h-[360px] sm:h-[520px] object-contain bg-muted/30",
   "petites-missions-entraide-guide": "w-full h-[360px] sm:h-[520px] object-contain bg-muted/30",
 
