@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["gardiennage-maison-vacances-aura", 2],
+  ["golden-retriever-lyon-guide-race", 2],
   ["garde-a-domicile-vs-pension", 2],
   ["garde-chien-lyon-solutions", 2],
   ["devenir-pet-sitter-guide-debutant", 2],
