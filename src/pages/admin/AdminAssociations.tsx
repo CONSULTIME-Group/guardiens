@@ -167,13 +167,18 @@ export default function AdminAssociations() {
 
   const saveEditing = async () => {
     if (!editing) return;
-    const invalidAction = (editing.needs_details ?? []).some(need => need.local_action?.enabled
-      && (!associationLocalActionReady(need.local_action, need.url)
-        || !isRecentActionConfirmation(need.local_action.confirmed_on)));
-    if (invalidAction) {
-      toast.error("Complétez l’action locale : titre, commune choisie, période, durée, lien et confirmation récente. Précisez les savoir-faire ou l’accueil des débutants.");
+    const needs = Array.isArray(editing.needs_details) ? editing.needs_details : [];
+    // Bloque seulement une action incomplète. Une confirmation ancienne n'empêche pas
+    // d'enregistrer la fiche : l'action reste simplement masquée côté membres.
+    const incomplete = needs.flatMap((need, i) => need?.local_action?.enabled
+      && !associationLocalActionReady(need.local_action, need.url) ? [i + 1] : []);
+    if (incomplete.length) {
+      toast.error(`Action locale incomplète (besoin ${incomplete.join(", ")}) : titre, commune choisie, période, durée, lien, et savoir-faire ou accueil des débutants.`);
       return;
     }
+    const stale = needs.flatMap((need, i) => need?.local_action?.enabled
+      && !isRecentActionConfirmation(need.local_action.confirmed_on) ? [i + 1] : []);
+    if (stale.length) toast.warning(`Confirmation de plus de 30 jours (besoin ${stale.join(", ")}) : l’action n’est plus proposée aux membres tant qu’elle n’est pas reconfirmée.`);
     setSaving(true);
     const { id, ...values } = editing;
     // Le champ année est saisi en texte : la colonne attend un entier ou rien.

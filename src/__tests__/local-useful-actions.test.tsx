@@ -79,9 +79,11 @@ describe("Savoir-faire et découverte", () => {
     expect(select([action({ requiredSkills: ["bois", "potager"] })], ["Travail du bois"])).toHaveLength(0);
     expect(select([action({ requiredSkills: ["bois", "potager"] })], ["Travail du bois", "Potager"])).toHaveLength(1);
   });
-  it("utilise les centres d'intérêt pour la découverte, sans les transformer en prérequis acquis", () => {
+  it("utilise les centres d'intérêt pour classer, jamais pour ouvrir une tâche non débutante", () => {
     const context = { point, skills: [], interests: ["Potager"], now };
-    expect(selectLocalUsefulActions([action({ beginnerFriendly: false })], context)).toHaveLength(1);
+    expect(selectLocalUsefulActions([action({ beginnerFriendly: false })], context)).toHaveLength(0);
+    expect(selectLocalUsefulActions([action({ beginnerFriendly: false })], { ...context, skills: ["Potager"] })).toHaveLength(1);
+    expect(selectLocalUsefulActions([action({ beginnerFriendly: true })], context)[0]?.matchingSkill).toBe(true);
     expect(selectLocalUsefulActions([action({ requiredSkills: ["potager"] })], context)).toHaveLength(0);
   });
 });
