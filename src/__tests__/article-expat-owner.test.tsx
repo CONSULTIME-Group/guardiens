@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
-import ArticleRenderer, { OWNER_GUIDE_ARTICLE_SLUGS, SITTER_GUIDE_ARTICLE_SLUGS, SITTER_PROFILE_GUIDE_ARTICLE_SLUGS, ENTRAIDE_GUIDE_ARTICLE_SLUGS } from "@/components/articles/ArticleRenderer";
+import ArticleRenderer, { OWNER_GUIDE_ARTICLE_SLUGS, SITTER_GUIDE_ARTICLE_SLUGS, SITTER_PROFILE_GUIDE_ARTICLE_SLUGS, ENTRAIDE_GUIDE_ARTICLE_SLUGS, MIXED_GUIDE_ARTICLE_SLUGS } from "@/components/articles/ArticleRenderer";
 import { parseFaqFromMarkdown } from "@/lib/parseFaq";
 
 describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire", (slug) => {
@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["premiers-pas-sur-guardiens", 6],
+  ["comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers", 6],
   ["devenir-gardien-pro-animalier", 5],
   ["devenir-gardien-urgence-guardiens", 5],
   ["comment-devenir-home-sitter-france-guide-debutant", 6],
@@ -137,6 +139,28 @@ describe.each([...ENTRAIDE_GUIDE_ARTICLE_SLUGS])("Guide %s, demande de coup de m
     expect(links[0].getAttribute("href")).toBe(userRole ? "/petites-missions/creer" : "/inscription?redirect=%2Fpetites-missions%2Fcreer");
     expect(links[0].getAttribute("data-cta-role")).toBe("entraide");
     expect(links[0].getAttribute("data-cta-position")).toBe("end");
+    expect(container.querySelector('[data-cta-block="mid"]')).toBeNull();
+    expect(container.querySelector("h1")).toBeNull();
+    for (const anchor of container.querySelectorAll('a[href^="#"]')) {
+      const target = anchor.getAttribute("href")!.slice(1);
+      expect([...container.querySelectorAll("[id]")].some(element => element.id === target), `${slug} #${target}`).toBe(true);
+    }
+  });
+});
+
+
+describe.each([...MIXED_GUIDE_ARTICLE_SLUGS])("Guide %s, choix du rôle", (slug) => {
+  it.each([undefined, "owner", "sitter", "both"] as const)("deux actions distinctes en fin de page pour le rôle %s", (userRole) => {
+    const content = readFileSync(`docs/editorial/${slug}.md`, "utf8").replace(/^---\n[\s\S]*?\n---\n/, "").trim();
+    const { container } = render(<ArticleRenderer content={content} slug={slug} userRole={userRole} />);
+    const links = container.querySelectorAll('a[data-article-cta="true"]');
+    expect(links).toHaveLength(2);
+    expect(links[0].getAttribute("href")).toBe(userRole ? "/sits/create" : "/inscription?role=owner&redirect=%2Fsits%2Fcreate");
+    expect(links[1].getAttribute("href")).toBe(userRole ? "/profile" : "/inscription?role=sitter&redirect=%2Fprofile");
+    expect(links[0].textContent).toBe("Publier mon annonce de garde");
+    expect(links[1].textContent).toBe("Préparer mon profil gardien");
+    expect([...links].map(link => link.getAttribute("data-cta-position"))).toEqual(["end", "end"]);
+    expect([...links].map(link => link.getAttribute("data-cta-role"))).toEqual(["owner", "sitter"]);
     expect(container.querySelector('[data-cta-block="mid"]')).toBeNull();
     expect(container.querySelector("h1")).toBeNull();
     for (const anchor of container.querySelectorAll('a[href^="#"]')) {
