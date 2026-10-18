@@ -154,7 +154,7 @@ export const CronHealthCard = ({ enabled = true }: { enabled?: boolean }) => {
   if (flagLoading || !flagEnabled) return null;
 
   const rows = data ?? [];
-  const attention = rows.filter((r) => r.state !== "ok").sort((a) => (a.state === "critical" ? -1 : 1));
+  const attention = rows.filter((r) => r.state !== "ok").sort((a, b) => (a.state === "critical" ? 0 : 1) - (b.state === "critical" ? 0 : 1));
   const ok = rows.filter((r) => r.state === "ok");
 
   return (

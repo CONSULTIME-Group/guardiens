@@ -6,6 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SignalPriorityBadge } from "./PriorityBadge";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  WriteToMemberDialog,
+  type WriteToMemberTarget,
+} from "@/pages/admin/_components/users/WriteToMemberDialog";
 
 export interface RepeatedCancellationsSignal {
   id: string;
@@ -44,12 +48,11 @@ export const RepeatedCancellationsCard = ({ signal }: Props) => {
   };
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin_dashboard_snapshot"] });
 
-  const handleWarn = async () => {
-    setBusy("warn");
-    const { error } = await resolve("warning_sent");
-    setBusy(null);
-    if (error) { toast.error("Action impossible."); return; }
-    toast.success("Avertissement noté (envoi manuel à faire).");
+  // Lot ADM2 : un vrai email au membre ; le signal ne se ferme qu'après un envoi accepté.
+  const [writeTarget, setWriteTarget] = useState<WriteToMemberTarget | null>(null);
+  const handleSent = async () => {
+    const { error } = await resolve("member_written");
+    if (error) { toast.error("Email envoyé, mais le signal reste ouvert."); return; }
     invalidate();
   };
 
@@ -84,8 +87,12 @@ export const RepeatedCancellationsCard = ({ signal }: Props) => {
                   Voir historique
                 </a>
               </Button>
-              <Button size="sm" onClick={handleWarn} disabled={busy !== null}>
-                Envoyer avertissement
+              <Button
+                size="sm"
+                onClick={() => setWriteTarget({ userId: signal.entity_id, userName: m.first_name || "ce membre" })}
+                disabled={busy !== null}
+              >
+                Écrire au membre
               </Button>
               <Button size="sm" variant="ghost" onClick={handleIgnore} disabled={busy !== null}>
                 Ignorer
@@ -94,6 +101,7 @@ export const RepeatedCancellationsCard = ({ signal }: Props) => {
           </div>
         </div>
       </CardContent>
+      <WriteToMemberDialog target={writeTarget} onClose={() => setWriteTarget(null)} onSent={() => { void handleSent(); }} />
     </Card>
   );
 };

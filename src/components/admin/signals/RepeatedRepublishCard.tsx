@@ -6,6 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SignalPriorityBadge } from "./PriorityBadge";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  WriteToMemberDialog,
+  type WriteToMemberTarget,
+} from "@/pages/admin/_components/users/WriteToMemberDialog";
 
 export interface RepeatedRepublishSignal {
   id: string;
@@ -42,12 +46,11 @@ export const RepeatedRepublishCard = ({ signal }: Props) => {
   };
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin_dashboard_snapshot"] });
 
-  const handleAdvice = async () => {
-    setBusy("advice");
-    const { error } = await resolve("advice_sent");
-    setBusy(null);
-    if (error) { toast.error("Action impossible."); return; }
-    toast.success("Contact conseil noté (envoi manuel à faire).");
+  // Lot ADM2 : un vrai email au propriétaire ; le signal ne se ferme qu'après un envoi accepté.
+  const [writeTarget, setWriteTarget] = useState<WriteToMemberTarget | null>(null);
+  const handleSent = async () => {
+    const { error } = await resolve("member_written");
+    if (error) { toast.error("Email envoyé, mais le signal reste ouvert."); return; }
     invalidate();
   };
 
@@ -76,8 +79,12 @@ export const RepeatedRepublishCard = ({ signal }: Props) => {
               {first} a republié « {pattern}... » {count} fois en 180 jours.
             </div>
             <div className="flex flex-wrap gap-2 pt-1">
-              <Button size="sm" onClick={handleAdvice} disabled={busy !== null}>
-                Contacter avec conseils
+              <Button
+                size="sm"
+                onClick={() => setWriteTarget({ userId: signal.entity_id, userName: m.first_name || "ce propriétaire" })}
+                disabled={busy !== null}
+              >
+                Écrire au propriétaire
               </Button>
               <Button size="sm" variant="ghost" asChild>
                 <a href={listingsUrl} target="_blank" rel="noopener noreferrer">
@@ -92,6 +99,7 @@ export const RepeatedRepublishCard = ({ signal }: Props) => {
           </div>
         </div>
       </CardContent>
+      <WriteToMemberDialog target={writeTarget} onClose={() => setWriteTarget(null)} onSent={() => { void handleSent(); }} />
     </Card>
   );
 };

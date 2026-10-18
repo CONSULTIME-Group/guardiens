@@ -60,9 +60,60 @@ export const sitIdOf = (s: OpenSignal): string | null => {
   return null
 }
 
-export function isActionableCritical(s: OpenSignal): boolean {
+// Lot ADM2 : âge réel d'un signal en heures. La gravité d'une candidature est
+// figée à l'insertion ; hours_since_created (au repérage) plus le temps écoulé
+// depuis le repérage donne l'âge vrai de la candidature.
+export const PENDING_APPLICATION_EMAIL_HOURS = 96
+
+export function signalAgeHours(s: OpenSignal, now: number = Date.now()): number {
+  const base = Number((s.metadata ?? {}).hours_since_created)
+  const since = (now - new Date(s.detected_at).getTime()) / 3_600_000
+  return (Number.isFinite(base) ? base : 0) + Math.max(0, since)
+}
+
+// Lot ADM2 : annonce publiée sans candidature (warning), dans l'email du matin.
+// Le niveau « info » (aucun gardien éligible à proximité) reste sur l'écran.
+const EMAIL_WARNING_TYPES = new Set(['no_applications'])
+
+export function isActionableCritical(s: OpenSignal, now: number = Date.now()): boolean {
   if (!hasDestination(s.signal_type, 'daily_email')) return false
-  return s.severity === 'critical' || SIGNAL_TYPES[s.signal_type]?.dailyEmailAnySeverity === true
+  if (s.severity === 'critical' || SIGNAL_TYPES[s.signal_type]?.dailyEmailAnySeverity === true) return true
+  if (s.severity !== 'warning') return false
+  if (EMAIL_WARNING_TYPES.has(s.signal_type)) return true
+  return s.signal_type === 'pending_application' && signalAgeHours(s, now) >= PENDING_APPLICATION_EMAIL_HOURS
+}
+
+// Lot ADM2 : files où un membre attend une réponse humaine (admin_human_queues),
+// placées en tête de l'email. Même forme que les lignes de signaux.
+export interface HumanQueue { key: string; count: number; oldest: string | null }
+
+const HUMAN_QUEUES: Record<string, { one: string; many: string; action: string; link: string }> = {
+  contactMessages: { one: 'message de contact', many: 'messages de contact', action: 'Répondre depuis Messages contact : le bouton Répondre envoie l\'email et le trace.', link: 'https://guardiens.fr/admin/contact-messages' },
+  reports: { one: 'signalement', many: 'signalements', action: 'Traiter le signalement : décision et message au membre.', link: 'https://guardiens.fr/admin/reports' },
+  deletionRequests: { one: 'demande RGPD', many: 'demandes RGPD', action: 'Traiter la demande de suppression (délai légal d\'un mois).', link: 'https://guardiens.fr/admin/demandes-suppression' },
+  reviewDisputes: { one: 'contestation d\'avis', many: 'contestations d\'avis', action: 'Trancher la contestation.', link: 'https://guardiens.fr/admin/review-disputes' },
+  verifications: { one: 'vérification d\'identité', many: 'vérifications d\'identité', action: 'Valider ou refuser la pièce d\'identité.', link: 'https://guardiens.fr/admin/verifications' },
+}
+
+export function humanQueueLines(queues: HumanQueue[] | null | undefined, now: number = Date.now()): DigestLine[] {
+  const out: DigestLine[] = []
+  for (const q of queues ?? []) {
+    const def = HUMAN_QUEUES[q?.key]
+    const count = Number(q?.count ?? 0)
+    if (!def || !Number.isFinite(count) || count <= 0) continue
+    const oldest = q.oldest ? new Date(q.oldest).getTime() : NaN
+    out.push({
+      key: `queue:${q.key}`,
+      title: `${count} ${count > 1 ? def.many : def.one}`,
+      action: def.action,
+      startDate: null,
+      ageDays: Number.isFinite(oldest) ? Math.max(0, Math.floor((now - oldest) / 86_400_000)) : 0,
+      count,
+      signalTypes: [],
+      link: def.link,
+    })
+  }
+  return out
 }
 
 export function buildDigestLines(
@@ -71,7 +122,7 @@ export function buildDigestLines(
   now: number = Date.now(),
 ): DigestLine[] {
   const groups = new Map<string, OpenSignal[]>()
-  for (const s of signals.filter(isActionableCritical)) {
+  for (const s of signals.filter((x) => isActionableCritical(x, now))) {
     const sitId = sitIdOf(s)
     const group = SIGNAL_TYPES[s.signal_type]?.queueGroup
     const key = sitId
@@ -108,6 +159,12 @@ export function buildDigestLines(
       action = `${actionFor(main)} Messages : ${quotes}`.replace(/[\u2014\u2013]/g, ',')
     } else if (main === 'pending_application' && count > 1) {
       action = `Relancer le propriétaire : ${count} candidatures attendent sa réponse.`
+    }
+    // Lot ADM2 : âge vrai de la plus ancienne candidature, en jours.
+    if (types.includes('pending_application')) {
+      const maxH = Math.max(...arr.filter((x) => x.signal_type === 'pending_application').map((x) => signalAgeHours(x, now)))
+      const d = Math.floor(maxH / 24)
+      if (d >= 1) action = `${action} La plus ancienne attend depuis ${d} jour${d > 1 ? 's' : ''}.`
     }
     lines.push({
       key,

@@ -39,11 +39,18 @@ const Email = ({
 }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>{`${criticalCount} action(s) à mener aujourd'hui`}</Preview>
+    <Preview>{criticalCount > 0 ? `${criticalCount} action(s) à mener aujourd'hui` : 'Rien à traiter ce matin'}</Preview>
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
-        <Heading style={h1}>Signaux admin, {criticalCount} action(s) à mener</Heading>
+        <Heading style={h1}>
+          {criticalCount > 0 ? `Le point du matin, ${criticalCount} action(s) à mener` : 'Le point du matin, rien à traiter'}
+        </Heading>
+        {criticalCount === 0 && (
+          <Text style={text}>
+            Files humaines vides, annonces sans urgence. Cet email arrive chaque matin : son arrivée confirme que la surveillance tourne.
+          </Text>
+        )}
 
         {staleCount > 0 && (
           <Text style={alert}>
@@ -56,9 +63,8 @@ const Email = ({
             <Section key={i} style={item}>
               <Text style={itemTitle}>{l.title}</Text>
               <Text style={itemDetail}>
-                {fmtDate(l.startDate) ? `Début de garde le ${fmtDate(l.startDate)}` : 'Sans date de garde'}
-                {`, ouvert depuis ${l.ageDays} jour${l.ageDays > 1 ? 's' : ''}`}
-                {l.count > 1 ? `, ${l.count} signaux regroupés` : ''}
+                {fmtDate(l.startDate) ? `Début de garde le ${fmtDate(l.startDate)}, o` : 'O'}
+                {`uvert depuis ${l.ageDays} jour${l.ageDays > 1 ? 's' : ''}`}
               </Text>
               <Text style={itemDetail}>{l.action}</Text>
               <Text style={itemDetail}>
@@ -72,7 +78,7 @@ const Email = ({
 
         {coverageLine ? <Text style={text}>{coverageLine}</Text> : null}
         <Text style={text}>
-          Signaux warning ouverts : {warningCount}.
+          Autres signaux ouverts, sur l'accueil admin : {warningCount}.
         </Text>
 
         <LegalFooter purpose="le suivi opérationnel de la plateforme" basis="6.1.f" />
@@ -83,8 +89,8 @@ const Email = ({
 
 export const template = {
   component: Email,
-  subject: 'Signaux admin critiques ouverts',
-  displayName: 'Admin, signaux critiques ouverts',
+  subject: 'Guardiens admin, le point du matin',
+  displayName: 'Admin, le point du matin',
   to: 'contact@guardiens.fr',
   previewData: {
     criticalCount: 2,
@@ -92,6 +98,14 @@ export const template = {
     staleCount: 1,
     coverageLine: 'Couverture : 5 villes suivies comptent moins de 3 gardiens à 30 km.',
     lines: [
+      {
+        title: '2 messages de contact',
+        action: 'Répondre depuis Messages contact : le bouton Répondre envoie l\'email et le trace.',
+        startDate: null,
+        ageDays: 2,
+        count: 2,
+        link: 'https://guardiens.fr/admin/contact-messages',
+      },
       {
         title: 'Garde 2 chats centre ville de Marseille',
         action: 'Relancer le propriétaire : 4 candidatures attendent sa réponse.',

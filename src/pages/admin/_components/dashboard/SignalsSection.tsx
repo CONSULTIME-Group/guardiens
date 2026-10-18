@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { ADMIN_BADGES_QUERY_KEY, fetchAdminBadges, type AdminBadges } from "@/hooks/useAdminBadges";
 import { NoApplicationsCard } from "@/components/admin/signals/NoApplicationsCard";
 import { PendingApplicationCard } from "@/components/admin/signals/PendingApplicationCard";
 import { DormantSitterCard } from "@/components/admin/signals/DormantSitterCard";
@@ -77,6 +78,57 @@ export function queueSummaryLine(counts: Record<QueueSection, number>): string |
   if (counts.technique) parts.push(`${counts.technique} ${counts.technique > 1 ? "techniques" : "technique"}`);
   return `${total} ${total > 1 ? "actions" : "action"} : ${parts.join(", ")}.`;
 }
+
+/**
+ * Lot ADM2 : files où un membre attend une réponse humaine. Mêmes définitions
+ * que les pastilles du menu (admin_menu_badges), un lien par file non vide.
+ */
+export const WAITING_QUEUES: { key: keyof AdminBadges; one: string; many: string; to: string }[] = [
+  { key: "contactMessages", one: "message de contact", many: "messages de contact", to: "/admin/contact-messages" },
+  { key: "reports", one: "signalement", many: "signalements", to: "/admin/reports" },
+  { key: "deletionRequests", one: "demande RGPD", many: "demandes RGPD", to: "/admin/demandes-suppression" },
+  { key: "reviewDisputes", one: "contestation d'avis", many: "contestations d'avis", to: "/admin/review-disputes" },
+  { key: "verifications", one: "vérification d'identité", many: "vérifications d'identité", to: "/admin/verifications" },
+];
+
+export function waitingQueueItems(badges: Partial<AdminBadges>) {
+  return WAITING_QUEUES
+    .map((q) => ({ ...q, count: Number(badges[q.key] ?? 0) }))
+    .filter((q) => q.count > 0)
+    .map((q) => ({ to: q.to, label: `${q.count} ${q.count > 1 ? q.many : q.one}` }));
+}
+
+const WaitingMembersLine = () => {
+  // Même lecture que les pastilles du menu ; la clé sous « admin-badges » est
+  // rafraîchie par refreshAdminBadges() après chaque action sur une file.
+  const { data: badges, isError } = useQuery<AdminBadges>({
+    queryKey: [...ADMIN_BADGES_QUERY_KEY, "accueil"],
+    queryFn: fetchAdminBadges,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  });
+  if (isError) {
+    return (
+      <p className="text-sm text-muted-foreground" data-testid="waiting-members">
+        Membres qui attendent : lecture indisponible, ouvrez les files depuis le menu.
+      </p>
+    );
+  }
+  const items = waitingQueueItems(badges ?? {});
+  if (items.length === 0) return null;
+  return (
+    <div className="rounded-lg border border-border bg-accent/40 p-3" data-testid="waiting-members">
+      <p className="text-sm font-semibold text-foreground">Membres qui attendent une réponse</p>
+      <ul className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
+        {items.map((it) => (
+          <li key={it.to}>
+            <Link to={it.to} className="text-sm text-primary underline underline-offset-2">{it.label}</Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
 
 /** Rendu unitaire d'un signal : carte dédiée si elle existe, générique sinon. */
 function renderSignal(s: AdminSignalBase) {
@@ -260,8 +312,10 @@ export const SignalsSection = ({ aiActions, aiLoading }: Props) => {
 
   // Lot S2 : la file lit tous les signaux ouverts (hors info) pour que les
   // regroupements par annonce et par famille soient complets.
+  // Lot ADM2 : clé rangée sous « admin_dashboard_snapshot », que toutes les
+  // cartes invalident après une action : la carte traitée disparaît aussitôt.
   const { data: openSignals, isLoading: openLoading } = useQuery<AdminSignalBase[]>({
-    queryKey: ["admin_open_signals"],
+    queryKey: ["admin_dashboard_snapshot", "open"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("admin_signals")
@@ -323,11 +377,7 @@ export const SignalsSection = ({ aiActions, aiLoading }: Props) => {
           });
           return line ? <p className="text-sm text-muted-foreground" data-testid="signals-count-line">{line}</p> : null;
         })()}
-        {/* Lot A8 : la campagne d'activation est retirée, les envois passent par Envois groupés. */}
-        <p className="text-xs text-muted-foreground" data-testid="mass-email-redirect">
-          Les campagnes propriétaires partent depuis{" "}
-          <Link to="/admin/envois-groupes" className="underline">Envois groupés</Link>.
-        </p>
+        <WaitingMembersLine />
 
         {loading ? (
           <div className="space-y-2">
@@ -341,7 +391,12 @@ export const SignalsSection = ({ aiActions, aiLoading }: Props) => {
                 Chargement des signaux impossible. Réessayez plus tard.
               </p>
             )}
-            {queue.length === 0 ? (
+            {!flagEnabled ? (
+              <p className="text-sm text-foreground" data-testid="signals-disabled">
+                Les signaux sont désactivés : la file ne se remplit plus et les relances automatiques sont coupées.{" "}
+                <Link to="/admin/settings" className="underline">Réactiver dans Paramètres</Link>.
+              </p>
+            ) : queue.length === 0 ? (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <CheckCircle2 className="h-4 w-4 text-success" aria-hidden />
                 Tout est calme, aucune action en attente.

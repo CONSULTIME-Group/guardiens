@@ -2,14 +2,13 @@
  * Lot X3c : mécanique du code (audit E du 13/10/2026).
  * E-04 : « Proposer mon aide » des articles mène aux savoir-faire du profil.
  * E-05 : les avis de la section « Gardien d'urgence » viennent de reviews.
- * E-06 : chaque bouton « Relancer » des signaux vise une fonction présente.
+ * E-06 : la relance de masse sans cible est retirée (lot ADM2), la relance unitaire reste.
  * E-07 : notify-mission-event lit first_name seul.
  */
 import { describe, it, expect } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { rewriteMemberHref } from "@/components/articles/ArticleRenderer";
-import { SIGNAL_RELAUNCH_FN } from "@/components/admin/signals/signalGrouping";
 
 const root = join(__dirname, "..", "..", "..");
 const read = (p: string) => readFileSync(join(root, p), "utf8");
@@ -51,14 +50,15 @@ describe("E-05 · avis reçus dans la section Gardien d'urgence", () => {
 });
 
 describe("E-06 · relances admin des signaux", () => {
-  it("le signal dormant_top_sitter n'a plus de bouton Relancer", () => {
-    expect(SIGNAL_RELAUNCH_FN.dormant_top_sitter).toBeUndefined();
+  const GROUP = read("src/components/admin/signals/GroupedSignalCard.tsx");
+  it("la carte de groupe n'appelle plus de fonction de relance sans cible (lot ADM2)", () => {
+    expect(GROUP).not.toContain("functions.invoke");
+    expect(GROUP).not.toContain("Relancer les");
   });
 
-  it("chaque fonction de relance existe dans supabase/functions", () => {
-    for (const fn of Object.values(SIGNAL_RELAUNCH_FN)) {
-      expect(existsSync(join(root, "supabase/functions", fn, "index.ts")), fn).toBe(true);
-    }
+  it("les relances unitaires passent en mode manuel avec leur cible", () => {
+    expect(read("src/components/admin/signals/StaleDraftCard.tsx")).toContain('mode: "manual", sit_id: sitId');
+    expect(read("src/components/admin/signals/PendingApplicationCard.tsx")).toContain('mode: "manual"');
   });
 });
 
