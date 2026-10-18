@@ -133,7 +133,7 @@ export const AGREEMENT_OWNER_ARTICLE_SLUG = "commodat-garde-guardiens";
 export const INCIDENT_OWNER_ARTICLE_SLUG = "gerer-imprevu-pendant-garde";
 export const HOSPITAL_OWNER_ARTICLE_SLUG = "faire-garder-animal-pendant-hospitalisation";
 // Ces guides répondent aussi à un besoin immédiat : le CTA reste en fin de page, pour anticiper une garde.
-export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere", "veterinaire-urgence-lyon-guide", "garde-ferme-animaux-monts-du-lyonnais", "meilleures-villes-vivre-chien-autour-lyon", "parcs-balades-chiens-annecy-guide", "parcs-balades-chiens-grenoble-guide", "bengal-guide-race", "berger-allemand-guide-race", "berger-australien-guide-race", "border-collie-guide-race-complet", "bouledogue-francais-guide-race-complet", "cavalier-king-charles-guide-race", "golden-retriever-guide-race-complet", "labrador-retriever-guide-race", "maine-coon-guide-race", "malinois-guide-race-complet", "persan-guide-race", "siamois-guide-race", "house-sitting-cadre-juridique-france", "parcs-chiens-lyon-guide-complet"]);
+export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere", "veterinaire-urgence-lyon-guide", "garde-ferme-animaux-monts-du-lyonnais", "meilleures-villes-vivre-chien-autour-lyon", "parcs-balades-chiens-annecy-guide", "parcs-balades-chiens-grenoble-guide", "bengal-guide-race", "berger-allemand-guide-race", "berger-australien-guide-race", "border-collie-guide-race-complet", "bouledogue-francais-guide-race-complet", "cavalier-king-charles-guide-race", "golden-retriever-guide-race-complet", "labrador-retriever-guide-race", "maine-coon-guide-race", "malinois-guide-race-complet", "persan-guide-race", "siamois-guide-race", "house-sitting-cadre-juridique-france", "parcs-chiens-lyon-guide-complet", "chien-reactif-agressif-garde-solutions", "garde-animaux-haute-savoie-guide"]);
 export const WELCOME_OWNER_ARTICLE_SLUG = "accueillir-gardien-bonnes-pratiques";
 export const DEPARTURE_OWNER_ARTICLE_SLUG = "checklist-partir-vacances-animaux";
 export const AT_HOME_OWNER_ARTICLE_SLUG = "garde-animaux-domicile-chien-chat";
@@ -183,7 +183,12 @@ export const PERSAN_OWNER_ARTICLE_SLUG = "persan-guide-race";
 export const SIAMOIS_OWNER_ARTICLE_SLUG = "siamois-guide-race";
 export const LEGAL_HOME_OWNER_ARTICLE_SLUG = "house-sitting-cadre-juridique-france";
 export const LYON_WALKS_OWNER_ARTICLE_SLUG = "parcs-chiens-lyon-guide-complet";
+export const REACTIVE_DOG_OWNER_ARTICLE_SLUG = "chien-reactif-agressif-garde-solutions";
+export const HAUTE_SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG = "garde-animaux-haute-savoie-guide";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
+  REACTIVE_DOG_OWNER_ARTICLE_SLUG,
+  HAUTE_SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG,
+
   LEGAL_HOME_OWNER_ARTICLE_SLUG,
   LYON_WALKS_OWNER_ARTICLE_SLUG,
 
@@ -279,6 +284,37 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [REACTIVE_DOG_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous préparez une garde adaptée à votre chien ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Décrire les conditions réelles de votre garde",
+    "endText": "Présentez les réactions connues, la présence et les capacités nécessaires. Vous pourrez échanger sur les limites et décider si une garde peut être confirmée.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+  [HAUTE_SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous avez une absence à préparer en Haute-Savoie ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Préparer une demande adaptée à votre logement",
+    "endText": "Décrivez votre secteur, les accès, les besoins des animaux et la présence attendue avant d’échanger avec les personnes intéressées.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+
   [LEGAL_HOME_OWNER_ARTICLE_SLUG]: {
     "midText": "Vous préparez une garde de maison ?",
     "midPrimary": {
@@ -2126,6 +2162,9 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  REACTIVE_DOG_OWNER_ARTICLE_SLUG,
+  HAUTE_SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG,
+
   LEGAL_HOME_OWNER_ARTICLE_SLUG,
   LYON_WALKS_OWNER_ARTICLE_SLUG,
 
@@ -2224,9 +2263,7 @@ export const GUIDE_ARTICLE_SLUGS = new Set<string>([
   CALEDONIE_OWNER_ARTICLE_SLUG,
   "pension-chien-alternatives-guide",
   "vacances-longues-garde-animal-2-semaines",
-  "garde-animaux-haute-savoie-guide",
   "pet-sitting-clermont-ferrand",
-  "chien-reactif-agressif-garde-solutions",
 ]);
 
 /** Déplace l'ancre vide `<h2><a id="x"></a>Titre` sur le titre lui-même. */
@@ -2432,6 +2469,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
     PROJECT_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || RESOURCE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || MIXED_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || slug === "c-est-quoi-le-house-sitting" ||
+      slug === REACTIVE_DOG_OWNER_ARTICLE_SLUG || slug === HAUTE_SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG ||
       slug === LEGAL_HOME_OWNER_ARTICLE_SLUG || slug === LYON_WALKS_OWNER_ARTICLE_SLUG ||
       slug === SIAMOIS_OWNER_ARTICLE_SLUG ||
       slug === PERSAN_OWNER_ARTICLE_SLUG ||

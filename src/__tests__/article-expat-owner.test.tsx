@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["chien-reactif-agressif-garde-solutions", 6],
+  ["garde-animaux-haute-savoie-guide", 6],
   ["house-sitting-cadre-juridique-france", 6],
   ["parcs-chiens-lyon-guide-complet", 4],
   ["preparer-maison-avant-vacances", 2],
