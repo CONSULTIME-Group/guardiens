@@ -54,8 +54,13 @@ function MemberLocalUsefulActions({ userId }: { userId: string }) {
   const [changed, setChanged] = useState(false);
   const { data, isError } = useLocalUsefulActions(userId);
   if (!data?.point || isError) return null;
-  const actions = selectLocalUsefulActions(data.actions, { point: data.point, skills: data.skills, interests: data.interests, radiusKm: radius });
-  if (actions.length === 0 && !changed) return null;
+  const context = { point: data.point, skills: data.skills, interests: data.interests };
+  const actions = selectLocalUsefulActions(data.actions, { ...context, radiusKm: radius });
+  // Aucun élargissement automatique : le sélecteur reste seulement accessible
+  // si une action admissible existe dans un rayon que le membre peut choisir.
+  const reachable = actions.length > 0 || LOCAL_ACTION_RADII.some(km => km !== radius
+    && selectLocalUsefulActions(data.actions, { ...context, radiusKm: km }).length > 0);
+  if (!reachable && !changed) return null;
   return <LocalUsefulActionsView actions={actions} radius={radius} onRadiusChange={km => {
     setRadius(km); setChanged(true);
     try { localStorage.setItem(storageKey, String(km)); } catch { /* Le choix reste utilisable sans stockage. */ }

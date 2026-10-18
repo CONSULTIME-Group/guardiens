@@ -15,7 +15,12 @@ export default function LocalActionEditor({ value, onChange, index }: {
   // La recherche de commune est asynchrone : elle conserve les autres champs édités entre-temps.
   const current = useRef(a);
   current.current = a;
-  const patch = (next: Partial<AssociationLocalAction>) => onChange({ ...current.current, ...next });
+  // Deux rappels synchrones (code postal vidé puis commune vidée) se cumulent au lieu de s'écraser.
+  const patch = (next: Partial<AssociationLocalAction>) => {
+    const merged = { ...current.current, ...next };
+    current.current = merged;
+    onChange(merged);
+  };
   return (
     <details className="rounded-lg bg-muted/30 p-3">
       <summary className="cursor-pointer text-sm font-medium">Proposer une action sur les tableaux de bord</summary>
@@ -47,7 +52,7 @@ export default function LocalActionEditor({ value, onChange, index }: {
           <label className="block space-y-1 text-sm"><span>Horaires ou disponibilité</span><Input value={a.when_label ?? ""} placeholder="Samedi de 9 h à 12 h, à confirmer ensemble" maxLength={160} onChange={e => patch({ when_label: e.target.value })} /></label>
           <label className="block space-y-1 text-sm"><span>Temps à prévoir</span><Input value={a.duration ?? ""} placeholder="Deux heures" maxLength={80} onChange={e => patch({ duration: e.target.value })} /></label>
           <label className="block space-y-1 text-sm"><span>Besoin confirmé le</span><Input type="date" max={localActionDay()} value={a.confirmed_on ?? ""} onChange={e => patch({ confirmed_on: e.target.value })} /></label>
-          <label className="block space-y-1 text-sm"><span>Savoir-faire nécessaires, séparés par des virgules</span><Input value={a.required_skills?.join(", ") ?? ""} placeholder="Couture, conduite…" onChange={e => patch({ required_skills: e.target.value.split(",").map(s => s.trim()) })} /></label>
+          <label className="block space-y-1 text-sm"><span>Savoir-faire nécessaires, séparés par des virgules</span><Input value={a.required_skills?.join(", ") ?? ""} placeholder="Couture, conduite…" onChange={e => patch({ required_skills: e.target.value.split(",").map(s => s.replace(/^\s+/, "")) })} /></label>
         </div>
         <label className="flex items-center gap-2 text-sm"><Checkbox checked={a.beginner_friendly === true} onCheckedChange={checked => patch({ beginner_friendly: checked === true })} />Les débutants sont bienvenus</label>
         <p className="text-xs text-muted-foreground">La confirmation est à renouveler au bout de 30 jours. Le lien du besoin doit mener à la page de l’organisateur.</p>
