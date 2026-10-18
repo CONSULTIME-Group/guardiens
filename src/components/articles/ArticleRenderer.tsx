@@ -133,7 +133,7 @@ export const AGREEMENT_OWNER_ARTICLE_SLUG = "commodat-garde-guardiens";
 export const INCIDENT_OWNER_ARTICLE_SLUG = "gerer-imprevu-pendant-garde";
 export const HOSPITAL_OWNER_ARTICLE_SLUG = "faire-garder-animal-pendant-hospitalisation";
 // Ces guides répondent aussi à un besoin immédiat : le CTA reste en fin de page, pour anticiper une garde.
-export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere", "veterinaire-urgence-lyon-guide", "garde-ferme-animaux-monts-du-lyonnais", "meilleures-villes-vivre-chien-autour-lyon", "parcs-balades-chiens-annecy-guide", "parcs-balades-chiens-grenoble-guide", "bengal-guide-race", "berger-allemand-guide-race", "berger-australien-guide-race", "border-collie-guide-race-complet", "bouledogue-francais-guide-race-complet", "cavalier-king-charles-guide-race", "golden-retriever-guide-race-complet", "labrador-retriever-guide-race"]);
+export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere", "veterinaire-urgence-lyon-guide", "garde-ferme-animaux-monts-du-lyonnais", "meilleures-villes-vivre-chien-autour-lyon", "parcs-balades-chiens-annecy-guide", "parcs-balades-chiens-grenoble-guide", "bengal-guide-race", "berger-allemand-guide-race", "berger-australien-guide-race", "border-collie-guide-race-complet", "bouledogue-francais-guide-race-complet", "cavalier-king-charles-guide-race", "golden-retriever-guide-race-complet", "labrador-retriever-guide-race", "maine-coon-guide-race", "malinois-guide-race-complet"]);
 export const WELCOME_OWNER_ARTICLE_SLUG = "accueillir-gardien-bonnes-pratiques";
 export const DEPARTURE_OWNER_ARTICLE_SLUG = "checklist-partir-vacances-animaux";
 export const AT_HOME_OWNER_ARTICLE_SLUG = "garde-animaux-domicile-chien-chat";
@@ -177,7 +177,12 @@ export const BOULEDOGUE_FRANCAIS_OWNER_ARTICLE_SLUG = "bouledogue-francais-guide
 export const CAVALIER_OWNER_ARTICLE_SLUG = "cavalier-king-charles-guide-race";
 export const GOLDEN_OWNER_ARTICLE_SLUG = "golden-retriever-guide-race-complet";
 export const LABRADOR_OWNER_ARTICLE_SLUG = "labrador-retriever-guide-race";
+export const MAINE_COON_OWNER_ARTICLE_SLUG = "maine-coon-guide-race";
+export const MALINOIS_OWNER_ARTICLE_SLUG = "malinois-guide-race-complet";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
+  MAINE_COON_OWNER_ARTICLE_SLUG,
+  MALINOIS_OWNER_ARTICLE_SLUG,
+
   LABRADOR_OWNER_ARTICLE_SLUG,
 
   GOLDEN_OWNER_ARTICLE_SLUG,
@@ -263,6 +268,37 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [MAINE_COON_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous préparez une garde ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Présenter les habitudes de votre Maine Coon",
+    "endText": "Précisez les dates, la présence et les consignes utiles, puis échangez avec les personnes intéressées avant de confirmer.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+  [MALINOIS_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous préparez une garde ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Présenter les habitudes de votre Malinois",
+    "endText": "Précisez les dates, la présence et les consignes utiles, puis échangez avec les personnes intéressées avant de confirmer.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+
   [LABRADOR_OWNER_ARTICLE_SLUG]: {
     "midText": "Vous préparez la garde de votre Labrador ?",
     "midPrimary": {
@@ -1545,6 +1581,9 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  MAINE_COON_OWNER_ARTICLE_SLUG,
+  MALINOIS_OWNER_ARTICLE_SLUG,
+
   LABRADOR_OWNER_ARTICLE_SLUG,
 
   GOLDEN_OWNER_ARTICLE_SLUG,
@@ -1843,6 +1882,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
     PROJECT_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || RESOURCE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || MIXED_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || slug === "c-est-quoi-le-house-sitting" ||
+      slug === MAINE_COON_OWNER_ARTICLE_SLUG || slug === MALINOIS_OWNER_ARTICLE_SLUG ||
       slug === LABRADOR_OWNER_ARTICLE_SLUG ||
       slug === GOLDEN_OWNER_ARTICLE_SLUG ||
       slug === CAVALIER_OWNER_ARTICLE_SLUG ||
