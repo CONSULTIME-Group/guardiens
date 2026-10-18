@@ -42,21 +42,10 @@ export const SIGNAL_TYPE_LABELS: Record<string, string> = {
 export const signalTypeLabel = (type: string): string =>
   SIGNAL_TYPE_LABELS[type] ?? `Signal inconnu : ${type}`;
 
-/**
- * Fonction de relance associée à un type de signal, quand il en existe une.
- * Ces fonctions acceptent un appel admin (même garde que les crons).
- */
-export const SIGNAL_RELAUNCH_FN: Record<string, string> = {
-  affinity_onboarding_stale: "nudge-affinity-onboarding",
-  dormant_sitter: "nudge-sitter-dormant",
-  // Lot X3c : dormant_top_sitter n'a plus de bouton « Relancer », sa fonction
-  // nudge-dormant-top-sitters n'existe pas (l'appel échouait à chaque clic).
-  stale_draft: "nudge-stale-draft",
-  stale_verification: "nudge-verification-stale",
-  no_applications: "nudge-owner-no-applications",
-  pending_application: "nudge-owner-pending-application",
-  owner_sit_unconfirmed: "nudge-owner-unconfirmed-sit",
-};
+// Lot ADM2 : « Relancer les N » est retiré. Appelée sans cible, chaque
+// fonction de relance tournait en mode détection et n'envoyait aucun email
+// (26 signaux clos « relancés » sur 30 jours, 0 email). La relance se fait
+// carte par carte, depuis le détail du groupe, en mode manuel.
 
 const ENTITY_NOUNS: Record<string, { one: string; many: string }> = {
   profile: { one: "membre", many: "membres" },

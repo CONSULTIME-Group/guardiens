@@ -17,6 +17,8 @@ export interface WriteToMemberTarget {
 interface Props {
   target: WriteToMemberTarget | null;
   onClose: () => void;
+  /** Lot ADM2 : appelé seulement après un envoi accepté (envoyé ou programmé), jamais à l'annulation. */
+  onSent?: () => void;
 }
 
 /**
@@ -24,7 +26,7 @@ interface Props {
  * aperçu du rendu réel (serveur) puis envoi. Le contrôle admin est fait
  * par la fonction serveur admin-personal-message.
  */
-export const WriteToMemberDialog = ({ target, onClose }: Props) => {
+export const WriteToMemberDialog = ({ target, onClose, onSent }: Props) => {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [linkLabel, setLinkLabel] = useState("");
@@ -80,9 +82,11 @@ export const WriteToMemberDialog = ({ target, onClose }: Props) => {
     if (!data) return;
     if (data.sent) {
       toast.success(`Email envoyé à ${target?.userName}.`);
+      onSent?.();
       onClose();
     } else if (data.deferred) {
       toast.message("Envoi programmé plus tard par la file d'envoi.");
+      onSent?.();
       onClose();
     } else {
       toast.error(String(data.reason ?? "Envoi non effectué."));

@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, ChevronUp, Send } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +9,6 @@ import {
   entityNoun,
   signalAdminLink,
   signalTypeLabel,
-  SIGNAL_RELAUNCH_FN,
   type AdminSignalBase,
 } from "./signalGrouping";
 import { SignalPriorityBadge } from "./PriorityBadge";
@@ -22,17 +21,17 @@ interface Props {
 }
 
 /**
- * Carte de regroupement (> 3 signaux non résolus du même type) : compteur,
- * action de masse et détail pliable. "Tout ignorer" et la relance posent
- * resolved_at sur TOUTES les lignes du groupe, pas seulement la première.
+ * Carte de regroupement (2 signaux ou plus du même type) : compteur, détail
+ * pliable et « Tout ignorer », qui pose resolved_at sur TOUTES les lignes du
+ * groupe. Lot ADM2 : la relance se fait carte par carte dans le détail, où
+ * chaque carte appelle sa fonction en mode manuel (un email réel par membre).
  */
 export const GroupedSignalCard = ({ signalType, signals, severity, renderDetail }: Props) => {
   const qc = useQueryClient();
   const [expanded, setExpanded] = useState(false);
-  const [busy, setBusy] = useState<"relaunch" | "ignore" | null>(null);
+  const [busy, setBusy] = useState<"ignore" | null>(null);
 
   const count = signals.length;
-  const relaunchFn = SIGNAL_RELAUNCH_FN[signalType];
   const lastDetected = signals.reduce(
     (max, s) => (s.detected_at > max ? s.detected_at : max),
     signals[0]?.detected_at ?? "",
@@ -52,23 +51,6 @@ export const GroupedSignalCard = ({ signalType, signals, severity, renderDetail 
         admin_id: user?.id ?? null,
       })
       .in("id", signals.map((s) => s.id));
-  };
-
-  const handleRelaunch = async () => {
-    if (!relaunchFn) return;
-    setBusy("relaunch");
-    try {
-      const { error } = await supabase.functions.invoke(relaunchFn, { body: {} });
-      if (error) throw error;
-      const { error: resolveError } = await resolveAll("email_sent_manual");
-      if (resolveError) throw resolveError;
-      toast.success(`Relance déclenchée pour les ${count} signaux.`);
-      invalidate();
-    } catch (e) {
-      toast.error(`Relance impossible : ${(e as Error).message}`);
-    } finally {
-      setBusy(null);
-    }
   };
 
   const handleIgnoreAll = async () => {
@@ -97,12 +79,6 @@ export const GroupedSignalCard = ({ signalType, signals, severity, renderDetail 
         </div>
       </div>
       <div className="flex flex-wrap gap-2">
-        {relaunchFn && (
-          <Button size="sm" onClick={handleRelaunch} disabled={busy !== null}>
-            <Send className="h-4 w-4 mr-2" aria-hidden />
-            {busy === "relaunch" ? "Envoi..." : `Relancer les ${count}`}
-          </Button>
-        )}
         <Button size="sm" variant="outline" asChild>
           <Link to={link}>Ouvrir la page</Link>
         </Button>

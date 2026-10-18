@@ -4,6 +4,10 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import {
+  WriteToMemberDialog,
+  type WriteToMemberTarget,
+} from "@/pages/admin/_components/users/WriteToMemberDialog";
 import { SignalPriorityBadge } from "./PriorityBadge";
 import type { AdminSignalBase } from "./signalGrouping";
 import {
@@ -42,10 +46,24 @@ interface Props {
   severity: "critical" | "warning";
 }
 
+/** Lot ADM2 : propriétaire de l'annonce, lu dans les métadonnées du groupe. */
+export function sitGroupOwner(items: AdminSignalBase[]): { userId: string; name: string } | null {
+  for (const s of items) {
+    const id = s.metadata?.owner_id;
+    if (typeof id === "string" && id) {
+      const first = s.metadata?.owner_first_name;
+      return { userId: id, name: typeof first === "string" && first.trim() ? first.trim() : "le propriétaire" };
+    }
+  }
+  return null;
+}
+
 /**
  * Lot S2 : une entrée par annonce pour les candidatures sans réponse et les
  * discussions à l'arrêt. « Marquer comme traité » résout TOUS les signaux du
  * groupe, aucune ligne n'est supprimée.
+ * Lot ADM2 : « Écrire au propriétaire » envoie un vrai email (admin-personal-message)
+ * et ne ferme les signaux qu'après un envoi accepté.
  */
 export const SitSignalGroupCard = ({ sitId, sit, items, severity }: Props) => {
   const qc = useQueryClient();
@@ -57,15 +75,17 @@ export const SitSignalGroupCard = ({ sitId, sit, items, severity }: Props) => {
   );
 
   const countdown = startCountdown(sit?.start_date);
+  const owner = sitGroupOwner(items);
+  const [writeTarget, setWriteTarget] = useState<WriteToMemberTarget | null>(null);
 
-  const resolveAll = async () => {
+  const resolveAll = async (action: "resolved_sit_group" | "owner_written" = "resolved_sit_group") => {
     setBusy(true);
     const { data: { user } } = await supabase.auth.getUser();
     const { error } = await supabase
       .from("admin_signals")
       .update({
         resolved_at: new Date().toISOString(),
-        action_taken: "resolved_sit_group",
+        action_taken: action,
         admin_id: user?.id ?? null,
       })
       .in("id", items.map((s) => s.id));
@@ -74,8 +94,8 @@ export const SitSignalGroupCard = ({ sitId, sit, items, severity }: Props) => {
       toast.error("Mise à jour impossible. Réessayez plus tard.");
       return;
     }
-    toast.success("Annonce marquée comme traitée.");
-    qc.invalidateQueries({ queryKey: ["admin_open_signals"] });
+    if (action === "resolved_sit_group") toast.success("Annonce marquée comme traitée.");
+    // La file lit ["admin_dashboard_snapshot", "open"] : le préfixe la rafraîchit.
     qc.invalidateQueries({ queryKey: ["admin_dashboard_snapshot"] });
   };
 
@@ -90,13 +110,27 @@ export const SitSignalGroupCard = ({ sitId, sit, items, severity }: Props) => {
         <SignalPriorityBadge severity={severity} />
       </div>
       <div className="flex flex-wrap gap-2">
+        {owner && (
+          <Button
+            size="sm"
+            onClick={() => setWriteTarget({ userId: owner.userId, userName: owner.name, sitId })}
+            disabled={busy}
+          >
+            Écrire au propriétaire
+          </Button>
+        )}
         <Button asChild size="sm" variant="outline">
-          <Link to={`/annonces/${sitId}`}>Voir l'annonce</Link>
+          <Link to={`/admin/listings?sit=${sitId}`}>Voir l'annonce</Link>
         </Button>
-        <Button size="sm" variant="ghost" onClick={resolveAll} disabled={busy}>
+        <Button size="sm" variant="ghost" onClick={() => resolveAll()} disabled={busy}>
           Marquer comme traité
         </Button>
       </div>
+      <WriteToMemberDialog
+        target={writeTarget}
+        onClose={() => setWriteTarget(null)}
+        onSent={() => { void resolveAll("owner_written"); }}
+      />
     </div>
   );
 };

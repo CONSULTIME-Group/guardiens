@@ -1,9 +1,9 @@
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { LoadingState } from "@/components/admin/ui";
 import { useKeyFigures, useRecentActivity } from "./_components/dashboard/useDashboardData";
-import { useActivityAnalysis } from "./_components/dashboard/useActivityAnalysis";
+import { freshAiActions, useActivityAnalysis } from "./_components/dashboard/useActivityAnalysis";
 import { KeyFiguresRow } from "./_components/dashboard/KeyFiguresRow";
 import { RecentActivity } from "./_components/dashboard/RecentActivity";
 import { SignalsSection } from "./_components/dashboard/SignalsSection";
@@ -16,26 +16,18 @@ import { AnimateCard } from "./_components/dashboard/AnimateCard";
 const TrendsPanel = lazy(() => import("./_components/dashboard/TrendsPanel"), "TrendsPanel");
 
 /**
- * Vue d'ensemble admin (lot A13), lisible en 30 secondes, sans squelette
- * global : chaque bloc charge et s'affiche seul.
- * 1. Chiffres clés (membres, annonces, gardes, liquidité)
- * 2. À traiter  3. À animer
- * 4. Activité récente (dépliée)  5. Tendances (repliée, chargement différé)
- * 6. Santé des crons (une ligne, lecture différée)
- * 7. Analyse IA (repliée, lecture en base, génération au clic)
+ * Vue d'ensemble admin. Lot ADM2 : l'accueil ouvre sur l'action.
+ * 1. À traiter : membres qui attendent, puis la file d'actions
+ * 2. Chiffres clés  3. Activité récente
+ * 4. « Plus », replié : À animer, Tendances, Santé des crons, Analyse IA,
+ *    chargés seulement à l'ouverture.
+ * Les suggestions IA de plus de 24 h quittent la file.
  */
 const AdminOverview = () => {
-  const [trendsOpened, setTrendsOpened] = useState(false);
+  const [moreOpened, setMoreOpened] = useState(false);
   const keyFigures = useKeyFigures();
   const activity = useRecentActivity();
   const { analysis, loading: analysisLoading, error: analysisError, refreshing, refresh } = useActivityAnalysis();
-
-  // Crons : lecture lancée après l'affichage des chiffres clés, jamais bloquante.
-  const [cronReady, setCronReady] = useState(false);
-  useEffect(() => {
-    if (cronReady) return;
-    if (!keyFigures.isLoading) setCronReady(true);
-  }, [keyFigures.isLoading, cronReady]);
 
   const merged = [...(keyFigures.data?.recentSignups ?? []), ...(activity.data ?? [])]
     .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
@@ -45,42 +37,42 @@ const AdminOverview = () => {
     <div className="space-y-6">
       <AdminPageHeader
         title="Vue d'ensemble"
-        description="Chiffres clés, actions à traiter et activité récente de Guardiens."
+        description="Ce qui attend une action, puis les chiffres clés et l'activité récente."
       />
 
-      <div data-block="chiffres"><KeyFiguresRow /></div>
-
       <div data-block="a-traiter">
-        <SignalsSection aiActions={Array.isArray(analysis?.actions) ? analysis!.actions : []} aiLoading={analysisLoading} />
+        <SignalsSection aiActions={freshAiActions(analysis)} aiLoading={analysisLoading} />
       </div>
 
-      <div data-block="a-animer"><AnimateCard /></div>
+      <div data-block="chiffres"><KeyFiguresRow /></div>
 
       <div data-block="activite">
         <RecentActivity activity={merged} loading={activity.isLoading} error={!!activity.error} />
       </div>
 
-      <div data-block="tendances">
-        <CollapsibleSection title="Tendances" onOpenChange={(o) => o && setTrendsOpened(true)}>
-          {trendsOpened && (
-            <Suspense fallback={<LoadingState label="Chargement des tendances…" />}>
-              <TrendsPanel />
-            </Suspense>
+      <div data-block="plus">
+        <CollapsibleSection
+          title="Plus : animation, tendances, santé des crons, analyse IA"
+          testId="overview-more"
+          onOpenChange={(o) => o && setMoreOpened(true)}
+        >
+          {moreOpened && (
+            <div className="space-y-6">
+              <AnimateCard />
+              <Suspense fallback={<LoadingState label="Chargement des tendances…" />}>
+                <TrendsPanel />
+              </Suspense>
+              <CronHealthCard />
+              <ActivityAnalysisCard
+                analysis={analysis}
+                loading={analysisLoading}
+                error={analysisError}
+                refreshing={refreshing}
+                onRefresh={refresh}
+              />
+            </div>
           )}
         </CollapsibleSection>
-      </div>
-
-      <div data-block="crons"><CronHealthCard enabled={cronReady} /></div>
-
-      <div data-block="analyse">
-        <ActivityAnalysisCard
-          collapsible
-          analysis={analysis}
-          loading={analysisLoading}
-          error={analysisError}
-          refreshing={refreshing}
-          onRefresh={refresh}
-        />
       </div>
     </div>
   );

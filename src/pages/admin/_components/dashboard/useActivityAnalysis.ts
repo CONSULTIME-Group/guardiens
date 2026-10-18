@@ -11,6 +11,19 @@ export interface ActivityAnalysis {
   actions: SuggestedAction[];
 }
 
+/** Lot ADM2 : au-delà de 24 h, une suggestion IA décrit une situation passée et quitte la file. */
+export const AI_ACTIONS_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+export function freshAiActions(
+  analysis: Pick<ActivityAnalysis, "generated_at" | "actions"> | null | undefined,
+  now: number = Date.now(),
+): SuggestedAction[] {
+  if (!analysis || !Array.isArray(analysis.actions)) return [];
+  const t = Date.parse(analysis.generated_at);
+  if (!Number.isFinite(t) || now - t > AI_ACTIONS_MAX_AGE_MS) return [];
+  return analysis.actions;
+}
+
 /**
  * Lot A13 : la dernière analyse est lue directement dans la table
  * admin_activity_analysis (lecture réservée aux admins), sans appel de

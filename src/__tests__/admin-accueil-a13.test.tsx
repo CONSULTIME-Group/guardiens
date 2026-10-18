@@ -76,7 +76,8 @@ describe("Vue d'ensemble", () => {
   it("blocs dans l'ordre cible, sans Pilotage ni lanceur de campagne", async () => {
     const { container } = renderOverview();
     const order = [...container.querySelectorAll("[data-block]")].map((n) => n.getAttribute("data-block"));
-    expect(order).toEqual(["chiffres", "a-traiter", "a-animer", "activite", "tendances", "crons", "analyse"]);
+    // Lot ADM2 : l'accueil ouvre sur l'action, le reste est replié dans « Plus ».
+    expect(order).toEqual(["a-traiter", "chiffres", "activite", "plus"]);
     await screen.findByText("Annonces en ligne");
     expect(screen.queryByText(/Pilotage/)).toBeNull();
     expect(screen.queryByText(/Réveiller les propriétaires/)).toBeNull();
@@ -88,7 +89,9 @@ describe("Vue d'ensemble", () => {
   it("aucun appel de fonction serveur au montage, et moins de 16 lectures", async () => {
     renderOverview();
     await screen.findByText("7");
-    await waitFor(() => expect(mocks.calls).toContain("rpc:admin_cron_health"));
+    await waitFor(() => expect(mocks.calls).toContain("rpc:admin_menu_badges"));
+    // « Plus » replié : santé des crons et compteurs d'animation lus à l'ouverture seulement.
+    expect(mocks.calls).not.toContain("rpc:admin_cron_health");
     expect(mocks.calls).not.toContain("fn");
     expect(mocks.invoke).not.toHaveBeenCalled();
     expect(mocks.calls.length).toBeLessThanOrEqual(16);
