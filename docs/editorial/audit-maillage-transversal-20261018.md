@@ -1,37 +1,30 @@
-# Contrôle final des 133 refontes et maillage complémentaire
+# Bilan public du maillage des articles Guardiens
 
-## État vérifié avant cette intervention
+Contrôle du 18 octobre 2026 après la [fusion de la PR 158](https://github.com/CONSULTIME-Group/guardiens/pull/158).
 
-Le contrôle du 18 octobre 2026 a comparé les 133 sources Markdown de `docs/editorial/` aux 133 articles publiés renvoyés par l’API publique : les corps et les métadonnées présents dans les sources correspondaient tous à la base. Le dernier commit de la série précédente était `261a93f09e1c15bc73c80ee444662b0495d55bf8`, daté du 18 octobre à 04:02:30 UTC, soit 06:02:30 à Paris. Les anciens décomptes de 26 articles revus et 77 restants étaient donc obsolètes.
+Les 133 articles publiés correspondent aux sources éditoriales vérifiées. Six guides ont reçu 26 liens contextuels supplémentaires. Aucun article sans drapeau noindex ne reste sans lien entrant depuis un autre article sans ce drapeau ; aucune cible d’article absente ou en noindex n’a été trouvée dans ce contrôle. Ce résultat ne mesure pas l’indexation par Google.
 
-Les 30 anciennes versions restent en `noindex`. Parmi les 103 lignes sans ce drapeau, quatre articles d’entraide conservent leur canonique de regroupement vers `petites-missions-entraide-guardiens`, conformément à la décision P5. Les 99 autres sont leurs propres canoniques, explicitement ou par le calcul de la page. Aucune règle d’indexabilité n’est modifiée par cette intervention.
+## Pages relues après publication
 
-Les contrôles des corps et des liens de ressources n’ont trouvé aucune cible d’article absente ou en `noindex` depuis les articles sans ce drapeau. En revanche, 26 articles ne recevaient aucun lien depuis ces autres articles. Cela ne démontre pas qu’ils étaient orphelins à l’échelle du site : les pages de races, le journal, les villes ou le pied de page peuvent aussi les lier.
-
-## Trois lots de deux articles
-
-| Lot | Guides enrichis | Cibles auparavant sans lien entrant depuis les autres articles |
+| Guide | Liens ajoutés présents | Questions FAQ conservées |
 | --- | --- | --- |
-| 01 | Garde de chien ; garde de chat à domicile | Berger allemand, berger australien, border collie, malinois, labrador, cavalier King Charles, bouledogue français ; bengal, maine coon, persan, siamois. |
-| 02 | Pet-sitting Lyon ; house-sitting en France | Villeurbanne, Vénissieux, villes autour de Lyon avec un chien ; Saint-Étienne, Valence, Clermont-Ferrand, chiffres de l’abandon et pistes d’aide. |
-| 03 | Petites missions d’entraide ; définition du house-sitting | Jardinage Grenoble, jardinage Annecy, technologie et lien social ; voyages en France, garde à l’étranger, La Réunion, histoire du projet, préparation d’une première garde en Auvergne. |
+| [Garde de chien](https://guardiens.fr/actualites/garde-chien-faire-garder-son-chien) | 7 | 7 |
+| [Garde de chat à domicile](https://guardiens.fr/actualites/garde-chat-domicile-house-sitting) | 4 | 6 |
+| [Pet-sitting à Lyon](https://guardiens.fr/actualites/pet-sitting-lyon-guide-complet) | 3 | 6 |
+| [House-sitting en France](https://guardiens.fr/actualites/house-sitting-auvergne-rhone-alpes) | 4 | 6 |
+| [Petites missions d’entraide](https://guardiens.fr/actualites/petites-missions-entraide-guardiens) | 3 | 6 |
+| [Définition du house-sitting](https://guardiens.fr/actualites/c-est-quoi-le-house-sitting) | 5 | 13 |
 
-Les 26 liens sont insérés dans les sections correspondant au besoin du lecteur. Les guides de races complètent les observations sur l’animal et ne déterminent ni ses besoins ni les compétences d’une personne. Les exemples locaux ne prouvent aucune disponibilité. La garde temporaire n’est pas présentée comme une réponse à toutes les difficultés durables. Le guide d’Auvergne n’est pas présenté comme un témoignage réel.
+Les ancres de sommaire correspondent à des sections présentes. Le guide de définition affiche les nouveaux boutons « Préparer mon annonce » et « Préparer mon profil gardien », avec les retours attendus après inscription. Voir [la capture du rendu public](verification-publication-20261018.jpg) et [les observations des six pages](controles-publication-20261018.json).
 
-Les corps enrichis ne changent ni les FAQ, ni les appels à l’action, ni les titres et descriptions, ni les auteurs, ni les dates de publication, ni les URL, ni les canoniques. Les liens de ressources sont complétés à partir des mêmes ajouts. Aucun chiffre Search Console, effet sur le classement ou taux de conversion n’est inventé.
+Le [registre](registre-refonte-20261018.json) présente les résultats agrégés. Les 666 tests de rendu ciblés ont passé.
 
-## Application et contrôles
+## Suite proposée
 
-Les trois transactions préparées `20261018090100`, `20261018090200` et `20261018090300` prennent les deux lignes dans un ordre stable, contrôlent version et empreinte du contenu, puis sauvegardent leur état dans une table privée avec RLS. Une erreur sur le second article annule tout le lot. Un nouvel appel sur la version déjà appliquée ne modifie rien. Seuls `content`, `internal_links` et `updated_at` sont écrits.
+1. Dans Search Console, comparer le test en direct à la dernière version indexée : contenu reçu, date d’exploration et canonique choisie par Google. Reprendre la gestion Prerender selon la consigne du propriétaire.
+2. Tester sur téléphone et ordinateur les parcours article, inscription, retour vers l’action, formulaire et publication, puis vérifier les conversions mesurées.
+3. Croiser les requêtes et les URL pour repérer les pages locales et articles qui répondent au même besoin, avant de décider de nouveaux regroupements.
+4. Revérifier les sources des passages datés ou sensibles : prix, assurances, transports, statistiques et témoignages. Contrôler également les tableaux, images et temps de chargement sur mobile.
+5. Mesurer après réexploration les impressions, clics, CTR et conversions sur des périodes comparables.
 
-Validation locale : les trois transactions ont été simulées sur les 133 lignes publiques. Concurrence, annulation complète, conservation des autres lignes et champs, protection des sauvegardes et idempotence passent. Les deux suites existantes `article-guide-house-sitting` et `article-expat-owner` passent : **666 tests**, avant puis après l’ajout du maillage. Le graphe éditorial des sources ne conserve aucune cible d’article absente, non indexable ou sans lien entrant depuis un autre article sans drapeau `noindex`.
-
-Un contrôle du navigateur sur le guide de Lyon a montré la version refondue, son résumé, son visuel, les tableaux, la FAQ et les destinations des deux boutons propriétaires. Le moteur de recherche renvoyait encore une ancienne version de cette même page. La gestion du cache Prerender reste différée conformément à la consigne du propriétaire ; ce document ne prétend pas que les moteurs ont déjà reçu les nouvelles versions.
-
-## État de livraison
-
-Les trois lots de maillage sont préparés dans la [PR 158](https://github.com/CONSULTIME-Group/guardiens/pull/158), sans application en production. Les vérifications GitHub du contenu proposé ont toutes passé sur `608e910ce47c37edad60008153bba8daa84304aa` : TypeScript, garde différentielle et cinq cycles SQL. La fusion a ensuite été refusée par la validation automatique, qui exige un accord explicite pour fusionner et publier. Les trois transactions n’ont donc pas été exécutées et le rendu n’a pas été publié dans cette intervention.
-
-La nouvelle lecture de la base est consignée dans `registre-refonte-20261018.json`. Elle confirme les 133 refontes de la série initiale au commit `261a93f09e1c15bc73c80ee444662b0495d55bf8` ; elle distingue les six sources enrichies sur la branche de proposition, dont les ajouts ne sont pas encore en base. Le registre ne remplace ni une inspection visuelle de chaque URL, ni une vérification de chaque source externe, ni une mesure ultérieure dans Search Console.
-
-Les six guides concernés ont été ouverts dans le navigateur : H1, ancres et nombres de FAQ conformes. Les FAQ de Lyon sont aussi identiques au schéma FAQPage visible dans le DOM. Sur le guide de définition, le rendu public conserve des boutons anciens, sans le retour vers l’action après inscription prévu dans le code testé. La publication du dernier rendu doit donc être vérifiée après autorisation, puis les six pages relues avec leurs nouveaux liens. Aucun compte ni annonce fictive n’a été créé.
+Le contrôle visuel a porté sur ces six guides, pas sur les 133 pages. Toutes les sources externes n’ont pas été revérifiées pendant cette intervention. Aucun gain de classement, de trafic ou de conversion n’est affirmé.

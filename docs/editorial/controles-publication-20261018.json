@@ -1,0 +1,170 @@
+[
+  {
+    "slug": "garde-chien-faire-garder-son-chien",
+    "brokenAnchors": [],
+    "faq": 7,
+    "h1": "Garde de chien : quelle solution choisir pendant votre absence ?",
+    "links": [
+      {
+        "present": true,
+        "target": "berger-allemand-guide-race"
+      },
+      {
+        "present": true,
+        "target": "berger-australien-guide-race"
+      },
+      {
+        "present": true,
+        "target": "border-collie-guide-race-complet"
+      },
+      {
+        "present": true,
+        "target": "malinois-guide-race-complet"
+      },
+      {
+        "present": true,
+        "target": "labrador-retriever-guide-race"
+      },
+      {
+        "present": true,
+        "target": "cavalier-king-charles-guide-race"
+      },
+      {
+        "present": true,
+        "target": "bouledogue-francais-guide-race-complet"
+      }
+    ],
+    "url": "https://guardiens.fr/actualites/garde-chien-faire-garder-son-chien?perf_lab=1"
+  },
+  {
+    "slug": "garde-chat-domicile-house-sitting",
+    "url": "https://guardiens.fr/actualites/garde-chat-domicile-house-sitting?perf_lab=1",
+    "brokenAnchors": [],
+    "faq": 6,
+    "h1": "Garde de chat à domicile : visites ou gardien sur place ?",
+    "links": [
+      {
+        "present": true,
+        "target": "bengal-guide-race"
+      },
+      {
+        "present": true,
+        "target": "maine-coon-guide-race"
+      },
+      {
+        "present": true,
+        "target": "persan-guide-race"
+      },
+      {
+        "present": true,
+        "target": "siamois-guide-race"
+      }
+    ]
+  },
+  {
+    "slug": "pet-sitting-lyon-guide-complet",
+    "url": "https://guardiens.fr/actualites/pet-sitting-lyon-guide-complet?perf_lab=1",
+    "brokenAnchors": [],
+    "faq": 6,
+    "h1": "Pet-sitting à Lyon : choisir et organiser la garde de vos animaux",
+    "links": [
+      {
+        "present": true,
+        "target": "pet-sitting-villeurbanne"
+      },
+      {
+        "present": true,
+        "target": "pet-sitting-venissieux"
+      },
+      {
+        "present": true,
+        "target": "meilleures-villes-vivre-chien-autour-lyon"
+      }
+    ]
+  },
+  {
+    "slug": "house-sitting-auvergne-rhone-alpes",
+    "url": "https://guardiens.fr/actualites/house-sitting-auvergne-rhone-alpes?perf_lab=1",
+    "brokenAnchors": [],
+    "faq": 6,
+    "h1": "House-sitting en France : choisir une garde adaptée au logement",
+    "links": [
+      {
+        "present": true,
+        "target": "pet-sitting-saint-etienne-loire"
+      },
+      {
+        "present": true,
+        "target": "pet-sitting-valence-drome"
+      },
+      {
+        "present": true,
+        "target": "pet-sitting-clermont-ferrand"
+      },
+      {
+        "present": true,
+        "target": "abandon-animaux-france-chiffres-causes"
+      }
+    ]
+  },
+  {
+    "slug": "petites-missions-entraide-guardiens",
+    "url": "https://guardiens.fr/actualites/petites-missions-entraide-guardiens?perf_lab=1",
+    "brokenAnchors": [],
+    "faq": 6,
+    "h1": "Petites missions Guardiens : demander ou proposer un coup de main",
+    "links": [
+      {
+        "present": true,
+        "target": "jardinage-entraide-locale-grenoble"
+      },
+      {
+        "present": true,
+        "target": "jardinage-entraide-quartier-annecy"
+      },
+      {
+        "present": true,
+        "target": "technologie-recreer-lien-pres-de-chez-soi"
+      }
+    ]
+  },
+  {
+    "slug": "c-est-quoi-le-house-sitting",
+    "url": "https://guardiens.fr/actualites/c-est-quoi-le-house-sitting?perf_lab=1",
+    "brokenAnchors": [],
+    "ctas": [
+      {
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "text": "Préparer mon annonce"
+      },
+      {
+        "href": "/inscription?role=sitter&redirect=%2Fprofile",
+        "text": "Préparer mon profil gardien"
+      }
+    ],
+    "faq": 13,
+    "h1": "House sitting : définition, prix et fonctionnement d'un home sitter",
+    "links": [
+      {
+        "present": true,
+        "target": "voyager-gratuitement-france-house-sitting"
+      },
+      {
+        "present": true,
+        "target": "devenir-gardien-maison-etranger"
+      },
+      {
+        "present": true,
+        "target": "garde-kaz-house-sitting-la-reunion"
+      },
+      {
+        "present": true,
+        "target": "notre-histoire-pet-sitting-argentine-lyon"
+      },
+      {
+        "present": true,
+        "target": "temoignage-premiere-garde-auvergne"
+      }
+    ]
+  }
+]
