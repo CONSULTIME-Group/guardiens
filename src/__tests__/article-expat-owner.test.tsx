@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["comment-devenir-home-sitter-france-guide-debutant", 6],
+  ["devenir-gardien-maison-etranger", 6],
   ["creer-profil-gardien-attractif", 5],
   ["reussir-premiere-garde-house-sitting", 6],
   ["parcs-balades-chiens-annecy-guide", 5],
