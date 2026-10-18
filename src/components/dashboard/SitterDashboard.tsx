@@ -10,6 +10,8 @@ import { useAlmaFirstMeeting } from "@/hooks/useAlmaFirstMeeting";
 import { AlmaFirstMeeting } from "@/components/ai/alma/AlmaFirstMeeting";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams } from "react-router-dom";
+import { useLocalUsefulActions } from "@/hooks/useLocalUsefulActions";
+import { readStoredLocalActionRadius, selectLocalUsefulActions } from "@/lib/localUsefulActions";
 import { useAccessLevel, MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
 import { useNearbyHelpers } from "@/hooks/useNearbyHelpers";
@@ -63,9 +65,21 @@ const SitterDashboard = () => {
     pendingAppsCount, unreadCount, isAvailable, competencesCount, interestsCount,
     postalCode, avatarUrl, bio, hasAnimalExperience,
     nextGuard, nextGuardError,
-    nearbyListings, nearbyError, nearbyMissions,
+    nearbyListings, nearbyError,
     myMissions, reload,
   } = useSitterDashboardData(user?.id);
+  // Lot UA2 : le rail propose le même coup de main que le bloc commun (même lecture
+  // partagée par React Query, même rayon choisi, mêmes règles de savoir-faire).
+  const { data: localSources } = useLocalUsefulActions(user?.id);
+  const nearbyMissions = localSources?.point && user?.id
+    ? selectLocalUsefulActions(localSources.actions, {
+      point: localSources.point, skills: localSources.skills, interests: localSources.interests,
+      radiusKm: readStoredLocalActionRadius(user.id),
+    }).filter((a) => a.kind !== "association").map((a) => ({
+      id: a.id.replace(/^mission:/, ""), title: a.title, city: a.city,
+      category: a.kind === "projet" ? "projet" : null, status: "open",
+    }))
+    : [];
 
   const rawIsNewSitter = useIsNewSitter({ totalApps: totalApps ?? 0, completedSits: completedSits ?? 0 });
   // Aperçu design : ?sitterView=confirmed ou ?sitterView=new force la branche.

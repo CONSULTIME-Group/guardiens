@@ -3,8 +3,8 @@
  * propriétaire de SitterEntraideSection : le rendu gardien reste inchangé.
  *
  * Reprend aussi le contenu utile de MesCoupsDeMain (échange en cours avec
- * son action, sinon dernier échange terminé), de MutualAidRadiusLine (rayon)
- * et de NearbyAssociationCard (repliée en une ligne).
+ * son action, sinon dernier échange terminé) et de MutualAidRadiusLine (rayon).
+ * La découverte locale passe par le bloc commun LocalUsefulActions.
  */
 import { Link } from "react-router-dom";
 import entraideGouache from "@/assets/illustrations/sitter-entraide-empty.webp";
