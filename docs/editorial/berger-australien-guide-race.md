@@ -5,7 +5,7 @@ title: "Faire garder un Berger australien : activité, repos et consignes de san
 meta_title: "Garde du Berger australien : activité, repos et MDR1"
 meta_description: "Préparez la garde de votre Berger australien : routine, solitude, sorties et informations MDR1 à transmettre, sans quota d’exercice ni avis médical improvisé."
 excerpt: "Activités habituelles, temps de repos, absences et informations de santé : les questions utiles pour choisir et préparer la garde de votre Berger australien."
-hero_image_alt: "Berger australien, illustration du guide de garde."
+hero_image_alt: "Un Berger australien se tient dans un jardin à côté d’hortensias en fleurs."
 ---
 # Faire garder un Berger australien : activité, repos et consignes de santé
 

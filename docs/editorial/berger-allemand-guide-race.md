@@ -5,7 +5,7 @@ title: "Faire garder un Berger allemand : habitudes, sorties et passation"
 meta_title: "Garde du Berger allemand : préparer les consignes"
 meta_description: "Sorties, accueil du gardien, repas et santé : préparez la garde de votre Berger allemand avec des consignes adaptées à votre chien et à votre logement."
 excerpt: "Préparez une garde adaptée à votre Berger allemand : maniement en promenade, visiteurs, habitudes et consignes vétérinaires, sans règle identique pour tous."
-hero_image_alt: "Berger allemand, illustration du guide de garde."
+hero_image_alt: "Portrait d’un Berger allemand à la tête légèrement inclinée."
 ---
 # Faire garder un Berger allemand : habitudes, sorties et passation
 

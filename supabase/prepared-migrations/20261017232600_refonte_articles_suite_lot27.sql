@@ -102,7 +102,7 @@ BEGIN
     AND before_row.excerpt IS NOT DISTINCT FROM 'Préparez une garde adaptée à votre Berger allemand : maniement en promenade, visiteurs, habitudes et consignes vétérinaires, sans règle identique pour tous.'
     AND before_row.meta_title IS NOT DISTINCT FROM 'Garde du Berger allemand : préparer les consignes'
     AND before_row.meta_description IS NOT DISTINCT FROM 'Sorties, accueil du gardien, repas et santé : préparez la garde de votre Berger allemand avec des consignes adaptées à votre chien et à votre logement.'
-    AND before_row.hero_image_alt IS NOT DISTINCT FROM 'Berger allemand, illustration du guide de garde.'
+    AND before_row.hero_image_alt IS NOT DISTINCT FROM 'Portrait d’un Berger allemand à la tête légèrement inclinée.'
     AND before_row.internal_links IS NOT DISTINCT FROM '[{"text":"comparatif des solutions de garde de chien","url":"/actualites/garde-chien-faire-garder-son-chien"},{"text":"guide pour préparer la garde d’un chien réactif","url":"/actualites/chien-reactif-agressif-garde-solutions"},{"text":"repères pour gérer un imprévu pendant une garde","url":"/actualites/gerer-imprevu-pendant-garde"},{"text":"guide pour choisir un gardien","url":"/actualites/choisir-gardien-bons-criteres"},{"text":"conditions tarifaires","url":"/tarifs"}]'::jsonb
     AND before_row.content=new_content THEN RETURN; END IF;
   IF before_row.updated_at IS DISTINCT FROM '2026-10-12 15:40:12.317424+00'::timestamptz THEN
@@ -118,7 +118,7 @@ BEGIN
     excerpt='Préparez une garde adaptée à votre Berger allemand : maniement en promenade, visiteurs, habitudes et consignes vétérinaires, sans règle identique pour tous.',
     meta_title='Garde du Berger allemand : préparer les consignes',
     meta_description='Sorties, accueil du gardien, repas et santé : préparez la garde de votre Berger allemand avec des consignes adaptées à votre chien et à votre logement.',
-    hero_image_alt='Berger allemand, illustration du guide de garde.',
+    hero_image_alt='Portrait d’un Berger allemand à la tête légèrement inclinée.',
     internal_links='[{"text":"comparatif des solutions de garde de chien","url":"/actualites/garde-chien-faire-garder-son-chien"},{"text":"guide pour préparer la garde d’un chien réactif","url":"/actualites/chien-reactif-agressif-garde-solutions"},{"text":"repères pour gérer un imprévu pendant une garde","url":"/actualites/gerer-imprevu-pendant-garde"},{"text":"guide pour choisir un gardien","url":"/actualites/choisir-gardien-bons-criteres"},{"text":"conditions tarifaires","url":"/tarifs"}]'::jsonb,
     content=new_content, updated_at=now()
   WHERE id=before_row.id AND slug='berger-allemand-guide-race' AND updated_at=before_row.updated_at;
@@ -223,7 +223,7 @@ BEGIN
     AND before_row.excerpt IS NOT DISTINCT FROM 'Activités habituelles, temps de repos, absences et informations de santé : les questions utiles pour choisir et préparer la garde de votre Berger australien.'
     AND before_row.meta_title IS NOT DISTINCT FROM 'Garde du Berger australien : activité, repos et MDR1'
     AND before_row.meta_description IS NOT DISTINCT FROM 'Préparez la garde de votre Berger australien : routine, solitude, sorties et informations MDR1 à transmettre, sans quota d’exercice ni avis médical improvisé.'
-    AND before_row.hero_image_alt IS NOT DISTINCT FROM 'Berger australien, illustration du guide de garde.'
+    AND before_row.hero_image_alt IS NOT DISTINCT FROM 'Un Berger australien se tient dans un jardin à côté d’hortensias en fleurs.'
     AND before_row.internal_links IS NOT DISTINCT FROM '[{"text":"guide des solutions pour faire garder son chien","url":"/actualites/garde-chien-faire-garder-son-chien"},{"text":"guide de garde des animaux difficiles","url":"/actualites/gerer-animaux-difficiles-garde"},{"text":"guide des imprévus pendant une garde","url":"/actualites/gerer-imprevu-pendant-garde"},{"text":"guide de préparation de la maison","url":"/actualites/preparer-maison-avant-garde"},{"text":"conditions tarifaires","url":"/tarifs"}]'::jsonb
     AND before_row.content=new_content THEN RETURN; END IF;
   IF before_row.updated_at IS DISTINCT FROM '2026-10-12 16:10:12.537032+00'::timestamptz THEN
@@ -239,7 +239,7 @@ BEGIN
     excerpt='Activités habituelles, temps de repos, absences et informations de santé : les questions utiles pour choisir et préparer la garde de votre Berger australien.',
     meta_title='Garde du Berger australien : activité, repos et MDR1',
     meta_description='Préparez la garde de votre Berger australien : routine, solitude, sorties et informations MDR1 à transmettre, sans quota d’exercice ni avis médical improvisé.',
-    hero_image_alt='Berger australien, illustration du guide de garde.',
+    hero_image_alt='Un Berger australien se tient dans un jardin à côté d’hortensias en fleurs.',
     internal_links='[{"text":"guide des solutions pour faire garder son chien","url":"/actualites/garde-chien-faire-garder-son-chien"},{"text":"guide de garde des animaux difficiles","url":"/actualites/gerer-animaux-difficiles-garde"},{"text":"guide des imprévus pendant une garde","url":"/actualites/gerer-imprevu-pendant-garde"},{"text":"guide de préparation de la maison","url":"/actualites/preparer-maison-avant-garde"},{"text":"conditions tarifaires","url":"/tarifs"}]'::jsonb,
     content=new_content, updated_at=now()
   WHERE id=before_row.id AND slug='berger-australien-guide-race' AND updated_at=before_row.updated_at;
