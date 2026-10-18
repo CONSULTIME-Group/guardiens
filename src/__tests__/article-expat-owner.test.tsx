@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["berger-australien-guide", 2],
+  ["border-collie-lyon-guide-race", 2],
   ["technologie-recreer-lien-pres-de-chez-soi", 6],
   ["se-sentir-utile-pres-de-chez-soi", 6],
   ["siamois-guide-race", 6],
@@ -210,7 +212,14 @@ describe.each([...RESOURCE_GUIDE_ARTICLE_SLUGS])("Guide %s, aide et préparation
     const { container } = render(<ArticleRenderer content={content} slug={slug} userRole={userRole} />);
     const links = container.querySelectorAll('a[data-article-cta="true"]');
     expect(links).toHaveLength(1);
-    expect(links[0].getAttribute("href")).toBe("/actualites/faire-garder-animal-pendant-hospitalisation");
+    const draft = readFileSync(`docs/editorial/${slug}.md`, "utf8");
+    const canonical = JSON.parse(draft.match(/^canonical_url: (.+)$/m)![1]) as string;
+    const expectedHref = slug === "abandon-animaux-france-chiffres-causes" ? "/actualites/faire-garder-animal-pendant-hospitalisation" : new URL(canonical).pathname;
+    expect(links[0].getAttribute("href")).toBe(expectedHref);
+    if (slug !== "abandon-animaux-france-chiffres-causes") {
+      expect(expectedHref).not.toBe(`/actualites/${slug}`);
+      expect(links[0].textContent).toBe("Lire le guide actuel");
+    }
     expect(links[0].getAttribute("data-cta-role")).toBe("ressource");
     expect(links[0].getAttribute("data-cta-position")).toBe("end");
     expect(container.querySelector('[data-cta-block="mid"]')).toBeNull();
