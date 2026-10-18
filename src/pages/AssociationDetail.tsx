@@ -1,6 +1,6 @@
 import PublicLoadError from "@/components/seo/ErrorPage";
-import { useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import PageMeta from "@/components/PageMeta";
@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isAssociationIndexable } from "@/lib/associationIndexability";
+import { associationLocalActions } from "@/lib/localUsefulActions";
+import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import {
   associationInitials,
   associationNeedCtaLabel,
@@ -105,6 +107,7 @@ export const buildAssociationFaq = (
 
 export default function AssociationDetail() {
   const { slug } = useParams<{ slug: string }>();
+  const { hash } = useLocation();
   const [failedPhotos, setFailedPhotos] = useState<Record<number, boolean>>({});
   const [logoFailed, setLogoFailed] = useState(false);
 
@@ -123,6 +126,11 @@ export default function AssociationDetail() {
   });
 
   const photos = useMemo(() => normalizePhotos(data?.photos).slice(0, MAX_PHOTOS), [data?.photos]);
+  useEffect(() => {
+    if (data && /^#besoin-\d+$/.test(hash)) {
+      document.getElementById(hash.slice(1))?.scrollIntoView({ block: "start" });
+    }
+  }, [data, hash]);
   const visiblePhotos = photos.filter((_, i) => !failedPhotos[i]);
   const allStored = photos.length > 0 && photos.every((p) => p.hosting === "storage");
 
@@ -150,13 +158,14 @@ export default function AssociationDetail() {
     MAX_KEY_FIGURES,
   );
   const press = normalizeJsonArray<AssociationPressItem>(data.press);
-  const needsDetails = normalizeJsonArray<AssociationNeedDetail>(data.needs_details).filter(
-    (d) => d && d.need,
+  const needsDetails = normalizeJsonArray<AssociationNeedDetail>(data.needs_details).flatMap(
+    (d, localIndex) => d && d.need ? [{ ...d, localIndex }] : [],
   );
 
   const faqItems = buildAssociationFaq({ ...data, needs_details: needsDetails });
 
   const needsSummary = data.needs.map((n) => associationNeedLabel(n).toLowerCase()).join(", ");
+  const localActions = associationLocalActions(data);
   const baseDescription = data.tagline?.trim() || data.description;
   const metaDescription = truncate(
     needsSummary ? `${baseDescription} Besoins : ${needsSummary}.` : baseDescription,
@@ -388,7 +397,8 @@ export default function AssociationDetail() {
               {needsDetails.map((need, i) => (
                 <div
                   key={`${need.need}-${i}`}
-                  className="rounded-xl border border-border bg-card p-4"
+                  id={`besoin-${need.localIndex}`}
+                  className="scroll-mt-24 rounded-xl border border-border bg-card p-4"
                 >
                   <p className="text-sm font-semibold text-foreground">
                     {associationNeedDetailLabel(String(need.need))}
@@ -398,6 +408,12 @@ export default function AssociationDetail() {
                       {need.detail}
                     </p>
                   )}
+                  {localActions.filter(a => a.id === `association:${data.slug}:${need.localIndex}`).map(action => (
+                    <div key={action.id} className="mt-3 rounded-lg bg-muted/40 p-3 text-sm">
+                      <p className="font-semibold">{action.title}</p>
+                      <p className="mt-1 text-muted-foreground">{action.city} · {/^\d{4}-\d{2}-\d{2}$/.test(action.when) ? formatDateRangeFr(action.when, null) : action.when} · {action.duration}</p>
+                    </div>
+                  ))}
                   {need.url && (
                     <Button asChild size="sm" variant="outline" className="mt-3">
                       <a href={need.url} target="_blank" rel="noopener">

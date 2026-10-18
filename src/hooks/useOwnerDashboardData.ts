@@ -1,6 +1,6 @@
 import { publicProfilesLoader, publishedReviewsLoader, sitterAffinityLoader } from "@/lib/batchedReads";
 import { fetchMyReviewsBothWays } from "@/lib/ownerSpaceReads";
-import { fetchMySmallMissionsIndex, fetchMyProperties, fetchMyPets, fetchApplicationsOnMySits, fetchOpenSmallMissions, fetchMySitsFull } from "@/lib/dashboardShared";
+import { fetchMySmallMissionsIndex, fetchMyProperties, fetchMyPets, fetchApplicationsOnMySits, fetchMySitsFull } from "@/lib/dashboardShared";
 import { fetchMyProfile } from "@/lib/myProfile";
 import { pickActiveEntraideMission, type ActiveEntraideMission } from "@/lib/activeEntraideMission";
 import { useEffect, useRef, useState } from "react";
@@ -109,14 +109,13 @@ export function useOwnerDashboardData(userId: string | undefined) {
       try {
         // Vague 1 : tout ce qui ne dépend que de userId part ensemble.
         const [
-          sitsRes, propsRes, profileRes, highlightsRes, missionsRes,
+          sitsRes, propsRes, profileRes, highlightsRes,
           myMissionsDataRes, allMyMissionsCountRes,
         ] = await Promise.all([
           fetchMySitsFull(userId!, { fresh: refreshTick > 0 }).then((data) => ({ data, error: null as any })).catch((error) => ({ data: [] as any[], error })),
           fetchMyProperties(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error })),
           fetchMyProfile(userId!),
           supabase.from("owner_highlights").select("*").eq("owner_id", userId).eq("hidden", false).order("created_at", { ascending: false }).limit(5),
-          fetchOpenSmallMissions().then((r) => ({ data: r.rows.slice(0, 2), error: r.error as any })),
           fetchMySmallMissionsIndex(userId!).then((data) => ({ data: data.slice(0, 3), error: null })).catch((error) => ({ data: [] as any[], error })),
           fetchMySmallMissionsIndex(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error })),
         ]);
@@ -383,7 +382,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
           recentApps,
           reviews: (reviewsRes.data || []) as { overall_rating: number }[],
           highlights: rawHighlights as HighlightRow[],
-          smallMissions: (missionsRes.data || []) as SmallMission[],
+          smallMissions: [], // Découverte locale assurée par le bloc commun différé.
           myMissions: (myMissionsDataRes.data || []) as SmallMission[],
           activeMission: pickActiveEntraideMission(allMyMissions as any[]),
           verificationStatus: verStatus,

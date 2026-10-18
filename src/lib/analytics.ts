@@ -9,6 +9,7 @@ import { getSafeLocalStorage } from "@/lib/storageFallback";
 import { isLabOrBotTraffic } from "@/lib/labTraffic";
 
 export type EventType =
+  | "local_useful_action_clicked"   // Tableau de bord : type, identifiant et rayon, sans coordonnées.
   // Lot V1, email de Noël v3 : écran affiché et clic sur « Publier mon annonce ».
   | "noel_v3_page_step"
   | "noel_v3_publish_clicked"

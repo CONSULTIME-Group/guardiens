@@ -26,6 +26,7 @@ export interface AssociationNeedDetail {
   need?: string | null;
   detail?: string | null;
   url?: string | null;
+  local_action?: import("@/lib/localUsefulActions").AssociationLocalAction | null;
 }
 
 export interface PublicAssociation {

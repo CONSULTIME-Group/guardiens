@@ -1,5 +1,5 @@
 import { publicProfilesLoader } from "@/lib/batchedReads";
-import { fetchMyBadges, fetchMyEmergencyProfileId, fetchMySmallMissionsIndex, fetchMyConversationsIndex, fetchOpenPublishedSits, fetchMyApplicationsIndex, fetchOpenSmallMissions } from "@/lib/dashboardShared";
+import { fetchMyBadges, fetchMyEmergencyProfileId, fetchMySmallMissionsIndex, fetchMyConversationsIndex, fetchOpenPublishedSits, fetchMyApplicationsIndex } from "@/lib/dashboardShared";
 import { fetchMyProfile, fetchMyPublicProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -137,7 +137,7 @@ export function useSitterDashboardData(userId: string | undefined) {
       const [
         appsRes, sitterRes, profileRes, reviewsRes,
         badgesRes, articlesRes, unreadRes, allBadgesRes, emProfileRes, reputationRes,
-        meApproxRes, listingsRes, openMissionsRes, myMissionsRes,
+        meApproxRes, listingsRes, myMissionsRes,
       ] = await Promise.all([
         fetchMyApplicationsIndex(userId!).then((data) => ({ data: data.map((a) => ({ ...a })), error: null })).catch((error) => ({ data: null, error })),
         fetchMySitterProfile(userId!),
@@ -161,9 +161,6 @@ export function useSitterDashboardData(userId: string | undefined) {
         Promise.resolve({ data: null, error: null }),
         // Annonces publiées et non terminées (end_date >= aujourd'hui).
         fetchOpenPublishedSits(userId!).then((r) => ({ data: r.rows.map((x) => ({ ...x })), error: r.error as any })),
-        // Missions ouvertes : lancées toujours, traitées seulement si le
-        // gardien a un département connu.
-        fetchOpenSmallMissions().then((r) => ({ data: r.rows, error: r.error as any })),
         fetchMySmallMissionsIndex(userId!)
           .then((data) => ({ data: data.filter((m) => m.status === "open" || m.status === "completed").slice(0, 8), error: null }))
           .catch((error) => ({ data: [] as any[], error })),
@@ -247,22 +244,11 @@ export function useSitterDashboardData(userId: string | undefined) {
 
       // Étape A : tout ce qui se calcule en mémoire à partir de la vague 1,
       // sans aucune requête réseau.
-      const userDept = profile?.postal_code?.slice(0, 2);
 
       const allListings = (listingsRes.error ? null : listingsRes.data) as any[] | null;
       const candidateOwnerIds = listingsRes.error
         ? []
         : Array.from(new Set((allListings || []).map((s: any) => s.user_id)));
-
-      const deptMissions: any[] = userDept && !openMissionsRes.error
-        ? ((openMissionsRes.data as any[]) || [])
-            .filter((m: any) => m.user_id !== userId && m.postal_code?.startsWith(userDept))
-        : [];
-      // Coords des auteurs de missions : utiles seulement si on a notre
-      // propre position (sinon aucune distance ne serait calculée).
-      const authorIds = hasMyCoords
-        ? Array.from(new Set(deptMissions.map((m: any) => m.user_id)))
-        : [];
 
       const now = new Date();
       const futureGuards = acceptedApps
@@ -270,13 +256,13 @@ export function useSitterDashboardData(userId: string | undefined) {
         .sort((a: any, b: any) => new Date(a.sit.start_date).getTime() - new Date(b.sit.start_date).getTime());
 
       // Étape B, vague 2 : un seul Promise.all.
-      // 1) Coordonnées de l'union dédupliquée propriétaires + auteurs, en
+      // 1) Coordonnées des propriétaires, en
       //    lots de 150 ids lancés en parallèle. Obligatoire : au-delà d'environ
       //    390 UUID dans un .in(), l'URL PostgREST dépasse la limite serveur et
       //    la requête échoue. Chaque lot lit aussi `error`.
       // 2) Prénom du propriétaire de la prochaine garde (si elle existe).
       // 3) Animaux de la prochaine garde (si elle existe).
-      const coordsIds = Array.from(new Set([...candidateOwnerIds, ...authorIds]));
+      const coordsIds = candidateOwnerIds;
       // Lot P1b : chargeur partagé (lots de 150 et cache par identifiant).
       const coordsBatches = [publicProfilesLoader.rows(coordsIds)];
       const neutralResult = Promise.resolve({ data: null, error: null } as any);
@@ -359,38 +345,9 @@ export function useSitterDashboardData(userId: string | undefined) {
         }
       }
 
-      // Nearby missions, conserve la logique département (entraide locale,
-      // pas de trajets longs). À migrer séparément si besoin.
-      let nearbyMissions: any[] = [];
-      let nearbyMissionsError: string | null = null;
-      if (userDept) {
-        if (openMissionsRes.error) {
-          nearbyMissionsError = "Impossible de charger les échanges autour de vous.";
-        } else {
-          // Lot de coordonnées en erreur : authorCoords reste vide, les
-          // distances de missions passent à null sans faire échouer le reste.
-          const authorCoords = new Map<string, { lat: number; lng: number }>();
-          if (!coordsErr && hasMyCoords) {
-            authorIds.forEach((id) => {
-              const a = coordById.get(id);
-              if (a && typeof a.latitude_approx === "number" && typeof a.longitude_approx === "number") {
-                authorCoords.set(id, { lat: a.latitude_approx, lng: a.longitude_approx });
-              }
-            });
-          }
-          const enriched = deptMissions.map((m: any) => {
-            const c = authorCoords.get(m.user_id);
-            const distance_km = c && hasMyCoords
-              ? haversineDistance({ lat: meLat as number, lng: meLng as number }, c)
-              : null;
-            return { ...m, distance_km };
-          });
-          if (hasMyCoords) {
-            enriched.sort((a, b) => (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity));
-          }
-          nearbyMissions = enriched.slice(0, 4);
-        }
-      }
+      // La découverte locale est différée dans LocalUsefulActions, commune aux deux rôles.
+      const nearbyMissions: any[] = [];
+      const nearbyMissionsError: string | null = null;
 
       // My missions, published by the sitter (open + completed),
       // with response counts. Chargées en vague 1.
