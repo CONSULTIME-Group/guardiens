@@ -37,6 +37,8 @@ const CONTACT_FIRST_ARTICLE_SLUGS = new Set([
 
 // Ces couvertures gardent leur sujet dans le cadre de lecture du guide.
 const GUIDE_COVER_CLASSES: Record<string, string> = {
+  "devenir-gardien-pro-animalier": "w-full h-[360px] sm:h-[520px] object-cover object-[center_55%]",
+  "devenir-gardien-urgence-guardiens": "w-full h-[360px] sm:h-[560px] object-contain bg-muted/30",
   "comment-devenir-home-sitter-france-guide-debutant": "w-full h-[360px] sm:h-[560px] object-cover object-[center_65%]",
   "devenir-gardien-maison-etranger": "w-full h-[320px] sm:h-[480px] object-cover object-[center_65%]",
   "creer-profil-gardien-attractif": "w-full h-[360px] sm:h-[520px] object-cover object-[center_20%]",

@@ -154,7 +154,7 @@ export const ANNECY_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-annecy-haute
 export const GRENOBLE_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-grenoble-isere";
 export const LYON_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-lyon-guide";
 export const ENTRAIDE_GUIDE_ARTICLE_SLUGS = new Set<string>(["arroser-plantes-vacances-annecy", "arroser-plantes-vacances-grenoble", "arroser-plantes-vacances-lyon"]);
-export const SITTER_PROFILE_GUIDE_ARTICLE_SLUGS = new Set<string>(["creer-profil-gardien-attractif", "comment-devenir-home-sitter-france-guide-debutant"]);
+export const SITTER_PROFILE_GUIDE_ARTICLE_SLUGS = new Set<string>(["creer-profil-gardien-attractif", "comment-devenir-home-sitter-france-guide-debutant", "devenir-gardien-pro-animalier", "devenir-gardien-urgence-guardiens"]);
 export const SITTER_GUIDE_ARTICLE_SLUGS = new Set<string>([...SITTER_PROFILE_GUIDE_ARTICLE_SLUGS, "devenir-gardien-maison-etranger", "reussir-premiere-garde-house-sitting", "gerer-animaux-difficiles-garde", "boom-pet-sitting-lyon-2026"]);
 export const AIX_HOME_OWNER_ARTICLE_SLUG = "house-sitting-aix-les-bains";
 export const FARM_HOME_OWNER_ARTICLE_SLUG = "garde-ferme-animaux-monts-du-lyonnais";
@@ -238,6 +238,37 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+"devenir-gardien-pro-animalier": {
+  "midText": "Vous souhaitez présenter vos possibilités de garde ?",
+  "midPrimary": {
+    "label": "Mettre à jour mon profil",
+    "href": "/inscription?role=sitter&redirect=%2Fprofile",
+    "role": "sitter"
+  },
+  "endHeading": "Présenter votre activité et vos formations",
+  "endText": "Indiquez la spécialité et les formations qui correspondent à votre parcours, puis précisez les tâches que vous pouvez assurer pendant une garde.",
+  "endPrimary": {
+    "label": "Mettre à jour mon profil",
+    "href": "/inscription?role=sitter&redirect=%2Fprofile",
+    "role": "sitter"
+  }
+},
+"devenir-gardien-urgence-guardiens": {
+  "midText": "Vous souhaitez présenter vos possibilités de garde ?",
+  "midPrimary": {
+    "label": "Préparer mon profil gardien",
+    "href": "/inscription?role=sitter&redirect=%2Fprofile",
+    "role": "sitter"
+  },
+  "endHeading": "Participer aux gardes classiques dès aujourd’hui",
+  "endText": "Présentez vos possibilités pour des séjours préparés avec les propriétaires. Cette démarche ne vaut pas activation du futur réseau d’urgence.",
+  "endPrimary": {
+    "label": "Préparer mon profil gardien",
+    "href": "/inscription?role=sitter&redirect=%2Fprofile",
+    "role": "sitter"
+  }
+},
+
 "comment-devenir-home-sitter-france-guide-debutant": {
   "midText": "Vous préparez un séjour de house-sitting ?",
   "midPrimary": {

@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["devenir-gardien-pro-animalier", 5],
+  ["devenir-gardien-urgence-guardiens", 5],
   ["comment-devenir-home-sitter-france-guide-debutant", 6],
   ["devenir-gardien-maison-etranger", 6],
   ["creer-profil-gardien-attractif", 5],
