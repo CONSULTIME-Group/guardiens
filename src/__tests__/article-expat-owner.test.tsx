@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["se-sentir-utile-pres-de-chez-soi", 6],
+  ["siamois-guide-race", 6],
   ["petites-missions-entraide-guardiens", 6],
   ["reseau-entraide-quartier-lyon-aura", 6],
   ["oser-demander-coup-de-main-pres-de-chez-soi", 6],
@@ -164,8 +166,9 @@ describe.each([...ENTRAIDE_GUIDE_ARTICLE_SLUGS])("Guide %s, demande de coup de m
     const links = container.querySelectorAll('a[data-article-cta="true"]');
     expect(links).toHaveLength(1);
     const publicDiscovery = ["idees-coups-de-main-entraide-pres-de-chez-soi", "reseau-entraide-quartier-lyon-aura"].includes(slug);
-    expect(links[0].textContent).toBe(publicDiscovery ? "Découvrir l’entraide près de chez moi" : slug.startsWith("arroser-plantes-vacances-") ? "Publier mon besoin d’arrosage" : "Demander un coup de main");
-    expect(links[0].getAttribute("href")).toBe(publicDiscovery ? "/petites-missions" : userRole ? "/petites-missions/creer" : "/inscription?redirect=%2Fpetites-missions%2Fcreer");
+    const offerHelp = slug === "se-sentir-utile-pres-de-chez-soi";
+    expect(links[0].textContent).toBe(offerHelp ? "Proposer mon aide" : publicDiscovery ? "Découvrir l’entraide près de chez moi" : slug.startsWith("arroser-plantes-vacances-") ? "Publier mon besoin d’arrosage" : "Demander un coup de main");
+    expect(links[0].getAttribute("href")).toBe(offerHelp ? (userRole ? "/profile?section=savoir-faire" : "/inscription?redirect=%2Fprofile%3Fsection%3Dsavoir-faire") : publicDiscovery ? "/petites-missions" : userRole ? "/petites-missions/creer" : "/inscription?redirect=%2Fpetites-missions%2Fcreer");
     expect(links[0].getAttribute("data-cta-role")).toBe("entraide");
     expect(links[0].getAttribute("data-cta-position")).toBe("end");
     expect(container.querySelector('[data-cta-block="mid"]')).toBeNull();
