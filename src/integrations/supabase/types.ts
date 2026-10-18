@@ -19409,6 +19409,10 @@ export type Database = {
         Args: { p_content: string; p_target_user_id: string }
         Returns: string
       }
+      admin_signal_is_expected_noise: {
+        Args: { p_metadata: Json; p_type: string }
+        Returns: boolean
+      }
       admin_sit_exit_reasons: {
         Args: { p_days?: number }
         Returns: {
@@ -19422,6 +19426,7 @@ export type Database = {
         }[]
       }
       admin_sit_view_paths: { Args: { p_sit_id: string }; Returns: string[] }
+      admin_site_health: { Args: never; Returns: Json }
       admin_top_message_users: {
         Args: { _limit?: number; _since?: string }
         Returns: Json
