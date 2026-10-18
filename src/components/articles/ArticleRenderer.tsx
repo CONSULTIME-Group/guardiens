@@ -153,10 +153,10 @@ export const HAUTE_SAVOIE_STAY_OWNER_ARTICLE_SLUG = "house-sitting-haute-savoie-
 export const ANNECY_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-annecy-haute-savoie";
 export const GRENOBLE_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-grenoble-isere";
 export const LYON_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-lyon-guide";
-export const MIXED_GUIDE_ARTICLE_SLUGS = new Set<string>(["premiers-pas-sur-guardiens", "comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers"]);
+export const MIXED_GUIDE_ARTICLE_SLUGS = new Set<string>(["premiers-pas-sur-guardiens", "comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers", "notre-histoire-pet-sitting-argentine-lyon"]);
 export const ENTRAIDE_GUIDE_ARTICLE_SLUGS = new Set<string>(["arroser-plantes-vacances-annecy", "arroser-plantes-vacances-grenoble", "arroser-plantes-vacances-lyon"]);
 export const SITTER_PROFILE_GUIDE_ARTICLE_SLUGS = new Set<string>(["creer-profil-gardien-attractif", "comment-devenir-home-sitter-france-guide-debutant", "devenir-gardien-pro-animalier", "devenir-gardien-urgence-guardiens"]);
-export const SITTER_GUIDE_ARTICLE_SLUGS = new Set<string>([...SITTER_PROFILE_GUIDE_ARTICLE_SLUGS, "devenir-gardien-maison-etranger", "reussir-premiere-garde-house-sitting", "gerer-animaux-difficiles-garde", "boom-pet-sitting-lyon-2026"]);
+export const SITTER_GUIDE_ARTICLE_SLUGS = new Set<string>([...SITTER_PROFILE_GUIDE_ARTICLE_SLUGS, "voyager-gratuitement-france-house-sitting", "devenir-gardien-maison-etranger", "reussir-premiere-garde-house-sitting", "gerer-animaux-difficiles-garde", "boom-pet-sitting-lyon-2026"]);
 export const AIX_HOME_OWNER_ARTICLE_SLUG = "house-sitting-aix-les-bains";
 export const FARM_HOME_OWNER_ARTICLE_SLUG = "garde-ferme-animaux-monts-du-lyonnais";
 export const GRENOBLE_STAY_OWNER_ARTICLE_SLUG = "pet-sitting-grenoble-chartreuse";
@@ -239,6 +239,47 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+"voyager-gratuitement-france-house-sitting": {
+  "midText": "Vous préparez un séjour de house-sitting ?",
+  "midPrimary": {
+    "label": "Consulter les annonces de garde",
+    "href": "/search",
+    "role": "sitter"
+  },
+  "endHeading": "Chercher un séjour adapté à votre organisation",
+  "endText": "Lisez les tâches, les conditions du logement et les dates proposées, puis échangez avant de confirmer votre voyage.",
+  "endPrimary": {
+    "label": "Consulter les annonces de garde",
+    "href": "/search",
+    "role": "sitter"
+  }
+},
+"notre-histoire-pet-sitting-argentine-lyon": {
+  "midText": "Vous souhaitez participer au réseau ?",
+  "midPrimary": {
+    "label": "Publier mon annonce de garde",
+    "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+    "role": "owner"
+  },
+  "midSecondary": {
+    "label": "Préparer mon profil gardien",
+    "href": "/inscription?role=sitter&redirect=%2Fprofile",
+    "role": "sitter"
+  },
+  "endHeading": "Participer à cette histoire",
+  "endText": "Vous pouvez décrire votre besoin de garde ou présenter vos possibilités comme gardien. Vos retours nous aideront à améliorer Guardiens.",
+  "endPrimary": {
+    "label": "Publier mon annonce de garde",
+    "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+    "role": "owner"
+  },
+  "endSecondary": {
+    "label": "Préparer mon profil gardien",
+    "href": "/inscription?role=sitter&redirect=%2Fprofile",
+    "role": "sitter"
+  }
+},
+
 "premiers-pas-sur-guardiens": {
   "midText": "Vous préparez une garde de maison ?",
   "midPrimary": {

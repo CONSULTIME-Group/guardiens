@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["voyager-gratuitement-france-house-sitting", 6],
+  ["notre-histoire-pet-sitting-argentine-lyon", 3],
   ["premiers-pas-sur-guardiens", 6],
   ["comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers", 6],
   ["devenir-gardien-pro-animalier", 5],
