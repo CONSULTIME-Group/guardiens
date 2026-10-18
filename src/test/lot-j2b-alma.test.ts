@@ -128,7 +128,9 @@ describe("J2-B, signaux", () => {
     const s = (type: string, severity: string) => ({ signal_type: type, severity, detected_at: "", entity_type: "profile", entity_id: "x", metadata: {} });
     expect(isActionableCritical(s("alma_bug_report", "warning"))).toBe(true);
     expect(isActionableCritical(s("alma_unanswered", "info"))).toBe(false);
-    expect(isActionableCritical(s("no_applications", "warning"))).toBe(false);
+    // Lot ADM2 : l'annonce sans candidature entre dans l'email ; une discussion à l'arrêt reste sur l'écran.
+    expect(isActionableCritical(s("no_applications", "warning"))).toBe(true);
+    expect(isActionableCritical(s("stalled_discussion", "warning"))).toBe(false);
   });
 
   it("un signal par membre, par type et par jour, erreurs techniques jointes pour un bug", () => {

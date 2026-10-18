@@ -54,7 +54,8 @@ describe("Lot A8, sécurité du formulaire", () => {
   it("carte activation retirée du tableau de bord", () => {
     const s = read("src/pages/admin/_components/dashboard/SignalsSection.tsx");
     expect(s).not.toContain("<OwnerActivationCampaignCard");
-    expect(s).toContain("/admin/envois-groupes");
+    // Lot ADM2 : la phrase de renvoi vers Envois groupés quitte la file ; l'entrée reste au menu.
+    expect(read("src/components/admin/AdminSidebar.tsx")).toContain('"/admin/envois-groupes"');
   });
   it("digests : confirmation avant envoi, 8 h", () => {
     expect(read("src/pages/admin/_components/SitterDigestTab.tsx")).toContain("DigestSendConfirm");
