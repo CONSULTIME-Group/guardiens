@@ -153,7 +153,7 @@ export const HAUTE_SAVOIE_STAY_OWNER_ARTICLE_SLUG = "house-sitting-haute-savoie-
 export const ANNECY_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-annecy-haute-savoie";
 export const GRENOBLE_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-grenoble-isere";
 export const LYON_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-lyon-guide";
-export const PROJECT_GUIDE_ARTICLE_SLUGS = new Set<string>(["apprendre-menuiserie-permaculture-ecoconstruction-gratuitement"]);
+export const PROJECT_GUIDE_ARTICLE_SLUGS = new Set<string>(["chantier-participatif-low-tech-participer-lancer-projet", "chantier-participatif-projet-collectif-cadre-legal", "apprendre-menuiserie-permaculture-ecoconstruction-gratuitement"]);
 export const RESOURCE_GUIDE_ARTICLE_SLUGS = new Set<string>(["abandon-animaux-france-chiffres-causes"]);
 export const MIXED_GUIDE_ARTICLE_SLUGS = new Set<string>(["premiers-pas-sur-guardiens", "comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers", "notre-histoire-pet-sitting-argentine-lyon"]);
 export const ENTRAIDE_GUIDE_ARTICLE_SLUGS = new Set<string>(["bricolage-montage-meubles-entraide-grenoble-lyon", "arroser-plantes-vacances-annecy", "arroser-plantes-vacances-grenoble", "arroser-plantes-vacances-lyon"]);
@@ -1360,14 +1360,20 @@ const CTA_PAR_SLUG: Record<string, CtaCopy> = {
     endSecondary: { label: "Voir les coups de main près de chez moi", href: "/petites-missions", role: "entraide" },
   },
   "chantier-participatif-projet-collectif-cadre-legal": {
-    midText: "Vous avez un chantier chez vous qui demande des bras ?",
-    midPrimary: { label: "Publier mon projet", href: "/projets/publier", role: "projet" },
-    midSecondary: { label: "Aider une association", href: "/associations", role: "projet" },
-    endHeading: "Un chantier à mener, ou du temps à donner ?",
-    endText: "Publiez votre projet pour trouver des participants, ou rejoignez une association qui cherche un coup de main près de chez vous.",
-    endPrimary: { label: "Publier mon projet", href: "/projets/publier", role: "projet" },
-    endSecondary: { label: "Aider une association", href: "/associations", role: "projet" },
+  "midText": "Vous préparez un projet participatif ?",
+  "midPrimary": {
+    "label": "Décrire mon projet participatif",
+    "href": "/projets/publier",
+    "role": "projet"
   },
+  "endHeading": "Préparer un projet dans le cadre de Guardiens",
+  "endText": "Après vérification des activités, des conditions d’accueil et de vos assurances, décrivez ce que vous souhaitez partager et transmettre.",
+  "endPrimary": {
+    "label": "Décrire mon projet participatif",
+    "href": "/projets/publier",
+    "role": "projet"
+  }
+},
   "technologie-recreer-lien-pres-de-chez-soi": {
     midText: "Un coup de main à demander, ou du temps à donner ?",
     midPrimary: { label: "Voir l'entraide près de chez moi", href: "/petites-missions", role: "projet" },
@@ -1379,12 +1385,20 @@ const CTA_PAR_SLUG: Record<string, CtaCopy> = {
   },
 
   "chantier-participatif-low-tech-participer-lancer-projet": {
-    midText: "Un projet à mener chez vous, ou envie d'apprendre en participant ?",
-    midPrimary: { label: "Publier mon projet", href: "/projets/publier", role: "projet" },
-    endHeading: "Votre projet mérite du monde",
-    endText: "Publiez-le en quelques minutes : cochez ce que vous transmettez, ce que vous proposez, et les participants vous écrivent.",
-    endPrimary: { label: "Publier mon projet", href: "/projets/publier", role: "projet" },
+  "midText": "Vous préparez un projet participatif ?",
+  "midPrimary": {
+    "label": "Consulter les projets participatifs",
+    "href": "/projets",
+    "role": "projet"
   },
+  "endHeading": "Trouver un projet adapté à votre niveau",
+  "endText": "Lisez les savoir-faire et les conditions proposées, puis échangez avec le porteur avant d’organiser votre venue.",
+  "endPrimary": {
+    "label": "Consulter les projets participatifs",
+    "href": "/projets",
+    "role": "projet"
+  }
+},
 
   "c-est-quoi-le-house-sitting": {
     midText: "Vous partez bientôt et vous cherchez quelqu'un pour veiller sur votre maison ?",
@@ -1674,6 +1688,11 @@ function adaptEndCTAsForRole(html: string, role?: "owner" | "sitter" | "both", s
       const dataRole =
         attrs.match(/\bdata-cta-role="([^"]+)"/)?.[1] || null;
 
+      if (PROJECT_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && dataRole === "projet") {
+        const href = CTA_PAR_SLUG[slug!].endPrimary.href;
+        const newAttrs = attrs.replace(/href="[^"]*"/, `href="${href}"`);
+        return `<a${newAttrs}>${_inner}</a>`;
+      }
       if (MIXED_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && (dataRole === "owner" || dataRole === "sitter")) {
         const href = dataRole === "owner" ? "/sits/create" : "/profile";
         const newAttrs = attrs.replace(/href="[^"]*"/, `href="${href}"`);

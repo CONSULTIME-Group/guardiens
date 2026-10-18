@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["chantier-participatif-low-tech-participer-lancer-projet", 6],
+  ["chantier-participatif-projet-collectif-cadre-legal", 7],
   ["bricolage-montage-meubles-entraide-grenoble-lyon", 6],
   ["cavalier-king-charles-guide-race", 6],
   ["border-collie-guide-race-complet", 6],
@@ -202,13 +204,15 @@ describe.each([...RESOURCE_GUIDE_ARTICLE_SLUGS])("Guide %s, aide et préparation
 });
 
 
-describe.each([...PROJECT_GUIDE_ARTICLE_SLUGS])("Guide %s, découverte des projets", (slug) => {
-  it.each([undefined, "owner", "sitter", "both"] as const)("une action de consultation publique pour le rôle %s", (userRole) => {
+describe.each([...PROJECT_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours de projet", (slug) => {
+  it.each([undefined, "owner", "sitter", "both"] as const)("une action de projet adaptée pour le rôle %s", (userRole) => {
     const content = readFileSync(`docs/editorial/${slug}.md`, "utf8").replace(/^---\n[\s\S]*?\n---\n/, "").trim();
     const { container } = render(<ArticleRenderer content={content} slug={slug} userRole={userRole} />);
     const links = container.querySelectorAll('a[data-article-cta="true"]');
     expect(links).toHaveLength(1);
-    expect(links[0].getAttribute("href")).toBe("/projets");
+    const publishesProject = slug === "chantier-participatif-projet-collectif-cadre-legal";
+    expect(links[0].getAttribute("href")).toBe(publishesProject ? (userRole ? "/projets/publier" : "/inscription?redirect=%2Fprojets%2Fpublier") : "/projets");
+    expect(links[0].textContent).toBe(publishesProject ? "Décrire mon projet participatif" : "Consulter les projets participatifs");
     expect(links[0].getAttribute("data-cta-role")).toBe("projet");
     expect(links[0].getAttribute("data-cta-position")).toBe("end");
     expect(container.querySelector('[data-cta-block="mid"]')).toBeNull();
