@@ -37,6 +37,8 @@ const CONTACT_FIRST_ARTICLE_SLUGS = new Set([
 
 // Ces couvertures gardent leur sujet dans le cadre de lecture du guide.
 const GUIDE_COVER_CLASSES: Record<string, string> = {
+  "voyager-gratuitement-france-house-sitting": "w-full h-[300px] sm:h-[420px] object-cover object-center",
+  "notre-histoire-pet-sitting-argentine-lyon": "w-full h-[360px] sm:h-[560px] object-contain bg-muted/30",
   "premiers-pas-sur-guardiens": "w-full h-[360px] sm:h-[560px] object-cover object-[center_45%]",
   "comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers": "w-full h-[360px] sm:h-[520px] object-cover object-bottom",
   "devenir-gardien-pro-animalier": "w-full h-[360px] sm:h-[520px] object-cover object-[center_55%]",
