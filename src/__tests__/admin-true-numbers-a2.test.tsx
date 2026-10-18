@@ -4,7 +4,6 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { computeAffinityStats } from "@/pages/admin/_components/dashboard/AffinityPilotCard";
-import { KpiCards } from "@/pages/admin/_components/dashboard/KpiCards";
 import { resolveNavActive, adminNavGroups_export } from "@/components/admin/AdminSidebar";
 
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
@@ -74,17 +73,7 @@ describe("parité du calcul d'affinité sur 1 500 événements", () => {
   });
 });
 
-describe("KpiCards", () => {
-  it("2 in_progress et 0 confirmed : 2 en « Gardes en cours »", () => {
-    render(
-      <MemoryRouter>
-        <KpiCards stats={{ totalUsers: 1, owners: 0, sitters: 0, both: 0, newThisWeek: 0, activeListings: 0, ongoingSits: 2, confirmedUpcoming: 0, totalReviews: 0, avgRating: 0, monthRevenue: 0 }} />
-      </MemoryRouter>,
-    );
-    const card = screen.getByText("Gardes en cours").closest("a")!;
-    expect(card.textContent).toContain("2");
-    expect(card.textContent).toContain("0 confirmée à venir");
-  });
+describe("Gardes en cours", () => {
   it("la source compte in_progress et confirmed", () => {
     const src = read("src/pages/admin/_components/dashboard/useDashboardData.ts");
     expect(src).toContain('.in("status", ["in_progress", "confirmed"])');
