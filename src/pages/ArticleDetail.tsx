@@ -37,6 +37,9 @@ const CONTACT_FIRST_ARTICLE_SLUGS = new Set([
 
 // Ces couvertures gardent leur sujet dans le cadre de lecture du guide.
 const GUIDE_COVER_CLASSES: Record<string, string> = {
+  "courses-aide-domicile-entraide-senior-lyon": "w-full h-[360px] sm:h-[520px] object-contain bg-muted/30",
+  "demenagement-entraide-locale-france": "w-full h-[360px] sm:h-[520px] object-contain bg-muted/30",
+
   "chantier-participatif-low-tech-participer-lancer-projet": "w-full h-[360px] sm:h-[520px] object-contain bg-muted/30",
   "chantier-participatif-projet-collectif-cadre-legal": "w-full h-[360px] sm:h-[520px] object-contain bg-muted/30",
   "bricolage-montage-meubles-entraide-grenoble-lyon": "w-full h-[360px] sm:h-[520px] object-contain bg-muted/30",

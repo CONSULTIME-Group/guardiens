@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["courses-aide-domicile-entraide-senior-lyon", 6],
+  ["demenagement-entraide-locale-france", 6],
   ["chantier-participatif-low-tech-participer-lancer-projet", 6],
   ["chantier-participatif-projet-collectif-cadre-legal", 7],
   ["bricolage-montage-meubles-entraide-grenoble-lyon", 6],
