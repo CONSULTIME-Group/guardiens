@@ -133,7 +133,7 @@ export const AGREEMENT_OWNER_ARTICLE_SLUG = "commodat-garde-guardiens";
 export const INCIDENT_OWNER_ARTICLE_SLUG = "gerer-imprevu-pendant-garde";
 export const HOSPITAL_OWNER_ARTICLE_SLUG = "faire-garder-animal-pendant-hospitalisation";
 // Ces guides répondent aussi à un besoin immédiat : le CTA reste en fin de page, pour anticiper une garde.
-export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere", "veterinaire-urgence-lyon-guide", "garde-ferme-animaux-monts-du-lyonnais", "meilleures-villes-vivre-chien-autour-lyon", "parcs-balades-chiens-annecy-guide", "parcs-balades-chiens-grenoble-guide"]);
+export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere", "veterinaire-urgence-lyon-guide", "garde-ferme-animaux-monts-du-lyonnais", "meilleures-villes-vivre-chien-autour-lyon", "parcs-balades-chiens-annecy-guide", "parcs-balades-chiens-grenoble-guide", "bengal-guide-race"]);
 export const WELCOME_OWNER_ARTICLE_SLUG = "accueillir-gardien-bonnes-pratiques";
 export const DEPARTURE_OWNER_ARTICLE_SLUG = "checklist-partir-vacances-animaux";
 export const AT_HOME_OWNER_ARTICLE_SLUG = "garde-animaux-domicile-chien-chat";
@@ -153,6 +153,7 @@ export const HAUTE_SAVOIE_STAY_OWNER_ARTICLE_SLUG = "house-sitting-haute-savoie-
 export const ANNECY_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-annecy-haute-savoie";
 export const GRENOBLE_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-grenoble-isere";
 export const LYON_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-lyon-guide";
+export const PROJECT_GUIDE_ARTICLE_SLUGS = new Set<string>(["apprendre-menuiserie-permaculture-ecoconstruction-gratuitement"]);
 export const RESOURCE_GUIDE_ARTICLE_SLUGS = new Set<string>(["abandon-animaux-france-chiffres-causes"]);
 export const MIXED_GUIDE_ARTICLE_SLUGS = new Set<string>(["premiers-pas-sur-guardiens", "comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers", "notre-histoire-pet-sitting-argentine-lyon"]);
 export const ENTRAIDE_GUIDE_ARTICLE_SLUGS = new Set<string>(["arroser-plantes-vacances-annecy", "arroser-plantes-vacances-grenoble", "arroser-plantes-vacances-lyon"]);
@@ -168,7 +169,10 @@ export const VILLEURBANNE_OWNER_ARTICLE_SLUG = "pet-sitting-villeurbanne";
 export const VILLES_CHIEN_OWNER_ARTICLE_SLUG = "meilleures-villes-vivre-chien-autour-lyon";
 export const ANNECY_WALKS_OWNER_ARTICLE_SLUG = "parcs-balades-chiens-annecy-guide";
 export const GRENOBLE_WALKS_OWNER_ARTICLE_SLUG = "parcs-balades-chiens-grenoble-guide";
+export const BENGAL_OWNER_ARTICLE_SLUG = "bengal-guide-race";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
+  BENGAL_OWNER_ARTICLE_SLUG,
+
   ANNECY_WALKS_OWNER_ARTICLE_SLUG,
   GRENOBLE_WALKS_OWNER_ARTICLE_SLUG,
 
@@ -240,6 +244,22 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [BENGAL_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous préparez la garde de votre Bengal ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Décrire les habitudes de votre chat pour préparer sa garde",
+    "endText": "Précisez les dates, le logement, la présence et les routines à assurer. Vous pourrez échanger avec les gardiens intéressés avant de confirmer.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+
 "abandon-animaux-france-chiffres-causes": {
   "midText": "Vous préparez une absence temporaire ?",
   "midPrimary": {
@@ -1280,14 +1300,20 @@ const CTA_PAR_SLUG: Record<string, CtaCopy> = {
   },
 
   "apprendre-menuiserie-permaculture-ecoconstruction-gratuitement": {
-    midText: "Apprendre sur un vrai chantier, près de chez vous ?",
-    midPrimary: { label: "Recevoir les projets près de chez moi", href: "/inscription?redirect=/projets", role: "projet" },
-    midSecondary: { label: "Voir les coups de main", href: "/petites-missions", role: "projet" },
-    endHeading: "Le prochain chantier est peut-être à côté de chez vous",
-    endText: "Créez votre compte, indiquez votre ville, et recevez chaque matin les projets et coups de main publiés près de chez vous.",
-    endPrimary: { label: "Créer mon compte", href: "/inscription?redirect=/projets", role: "projet" },
-    endSecondary: { label: "Publier mon projet", href: "/projets/publier", role: "projet" },
+  "midText": "Vous souhaitez apprendre en participant à un projet ?",
+  "midPrimary": {
+    "label": "Consulter les projets participatifs",
+    "href": "/projets",
+    "role": "projet"
   },
+  "endHeading": "Chercher un projet adapté à votre niveau",
+  "endText": "Lisez les savoir-faire attendus et transmis, puis échangez sur les tâches et les conditions avant de proposer votre participation.",
+  "endPrimary": {
+    "label": "Consulter les projets participatifs",
+    "href": "/projets",
+    "role": "projet"
+  }
+},
 };
 
 /**
@@ -1334,6 +1360,9 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  ...PROJECT_GUIDE_ARTICLE_SLUGS,
+  BENGAL_OWNER_ARTICLE_SLUG,
+
   ...RESOURCE_GUIDE_ARTICLE_SLUGS,
   ...MIXED_GUIDE_ARTICLE_SLUGS,
   ANNECY_WALKS_OWNER_ARTICLE_SLUG,
@@ -1611,7 +1640,8 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const withoutH1 = stripLeadingH1(interpolated);
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
-    RESOURCE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || MIXED_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || slug === "c-est-quoi-le-house-sitting" ||
+    PROJECT_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || RESOURCE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || MIXED_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || slug === "c-est-quoi-le-house-sitting" ||
+      slug === BENGAL_OWNER_ARTICLE_SLUG ||
       slug === ANNECY_WALKS_OWNER_ARTICLE_SLUG || slug === GRENOBLE_WALKS_OWNER_ARTICLE_SLUG ||
       slug === VILLES_CHIEN_OWNER_ARTICLE_SLUG ||
       slug === VILLEURBANNE_OWNER_ARTICLE_SLUG ||
@@ -1644,7 +1674,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   if (OWNER_GUIDE_ARTICLE_SLUGS.has(slug ?? "")) {
     // Le parcours propriétaire est rendu par l'en-tête et le bloc final.
     html = html.replace(/<p><strong><a href="\/inscription\?role=owner(?:&amp;|&)redirect=%2Fsits%2Fcreate">Publier mon annonce de garde<\/a><\/strong><\/p>\s*/g, "");
-  } else if (!SITTER_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && !ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && !MIXED_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && !RESOURCE_GUIDE_ARTICLE_SLUGS.has(slug ?? "")) {
+  } else if (!SITTER_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && !ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && !MIXED_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && !RESOURCE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && !PROJECT_GUIDE_ARTICLE_SLUGS.has(slug ?? "")) {
     html = injectCTA(html, slug);
   }
   html = addBandedSections(html);

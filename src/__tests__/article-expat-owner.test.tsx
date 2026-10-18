@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
-import ArticleRenderer, { OWNER_GUIDE_ARTICLE_SLUGS, SITTER_GUIDE_ARTICLE_SLUGS, SITTER_PROFILE_GUIDE_ARTICLE_SLUGS, ENTRAIDE_GUIDE_ARTICLE_SLUGS, MIXED_GUIDE_ARTICLE_SLUGS, RESOURCE_GUIDE_ARTICLE_SLUGS } from "@/components/articles/ArticleRenderer";
+import ArticleRenderer, { OWNER_GUIDE_ARTICLE_SLUGS, SITTER_GUIDE_ARTICLE_SLUGS, SITTER_PROFILE_GUIDE_ARTICLE_SLUGS, ENTRAIDE_GUIDE_ARTICLE_SLUGS, MIXED_GUIDE_ARTICLE_SLUGS, RESOURCE_GUIDE_ARTICLE_SLUGS, PROJECT_GUIDE_ARTICLE_SLUGS } from "@/components/articles/ArticleRenderer";
 import { parseFaqFromMarkdown } from "@/lib/parseFaq";
 
 describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire", (slug) => {
@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["apprendre-menuiserie-permaculture-ecoconstruction-gratuitement", 6],
+  ["bengal-guide-race", 6],
   ["abandon-animaux-france-chiffres-causes", 6],
   ["temoignage-premiere-garde-auvergne", 5],
   ["voyager-gratuitement-france-house-sitting", 6],
@@ -183,6 +185,25 @@ describe.each([...RESOURCE_GUIDE_ARTICLE_SLUGS])("Guide %s, aide et préparation
     expect(links).toHaveLength(1);
     expect(links[0].getAttribute("href")).toBe("/actualites/faire-garder-animal-pendant-hospitalisation");
     expect(links[0].getAttribute("data-cta-role")).toBe("ressource");
+    expect(links[0].getAttribute("data-cta-position")).toBe("end");
+    expect(container.querySelector('[data-cta-block="mid"]')).toBeNull();
+    expect(container.querySelector("h1")).toBeNull();
+    for (const anchor of container.querySelectorAll('a[href^="#"]')) {
+      const target = anchor.getAttribute("href")!.slice(1);
+      expect([...container.querySelectorAll("[id]")].some(element => element.id === target), `${slug} #${target}`).toBe(true);
+    }
+  });
+});
+
+
+describe.each([...PROJECT_GUIDE_ARTICLE_SLUGS])("Guide %s, découverte des projets", (slug) => {
+  it.each([undefined, "owner", "sitter", "both"] as const)("une action de consultation publique pour le rôle %s", (userRole) => {
+    const content = readFileSync(`docs/editorial/${slug}.md`, "utf8").replace(/^---\n[\s\S]*?\n---\n/, "").trim();
+    const { container } = render(<ArticleRenderer content={content} slug={slug} userRole={userRole} />);
+    const links = container.querySelectorAll('a[data-article-cta="true"]');
+    expect(links).toHaveLength(1);
+    expect(links[0].getAttribute("href")).toBe("/projets");
+    expect(links[0].getAttribute("data-cta-role")).toBe("projet");
     expect(links[0].getAttribute("data-cta-position")).toBe("end");
     expect(container.querySelector('[data-cta-block="mid"]')).toBeNull();
     expect(container.querySelector("h1")).toBeNull();
