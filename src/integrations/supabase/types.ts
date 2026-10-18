@@ -32,6 +32,96 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_article_expat_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_article_house_sitting_20261001: {
         Row: {
           admin_notes: string | null
@@ -395,6 +485,96 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_article_reunion_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_articles_a5_20261014: {
         Row: {
           content: string | null
@@ -413,6 +593,456 @@ export type Database = {
           id?: string | null
           saved_at?: string | null
           slug?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_caledonie_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_chien_chat_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_confiance_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_expatries_echange_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_gardes_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -686,6 +1316,96 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_articles_hiver_jardin_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_articles_lot3_20261004: {
         Row: {
           admin_notes: string | null
@@ -867,6 +1587,5766 @@ export type Database = {
         Relationships: []
       }
       _backup_articles_lot6_20261004: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_maillage_lot01_20261018: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_maillage_lot02_20261018: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_maillage_lot03_20261018: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_plantes_securite_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_preparation_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_saisons_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot01_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot02_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot03_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot04_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot05_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot06_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot07_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot08_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot09_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot10_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot11_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot12_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot13_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot14_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot15_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot16_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot17_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot18_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot19_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot20_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot21_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot22_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot23_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot24_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot25_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot26_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot27_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot28_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot29_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot30_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot31_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot32_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot33_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot34_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot35_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot36_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot37_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot38_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot39_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot40_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot41_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot42_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot43_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot44_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot45_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot46_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot47_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot48_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot49_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot50_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot51_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot52_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot53_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot54_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot55_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot56_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_suite_lot57_20261017: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_tahiti_20261017: {
         Row: {
           admin_notes: string | null
           author_name: string | null
@@ -12867,6 +19347,7 @@ export type Database = {
         }[]
       }
       admin_get_user_email: { Args: { p_user_id: string }; Returns: string }
+      admin_human_queues: { Args: never; Returns: Json }
       admin_liquidity_snapshot: { Args: never; Returns: Json }
       admin_list_conversations: {
         Args: {
@@ -13840,6 +20321,7 @@ export type Database = {
           title: string
         }[]
       }
+      local_useful_action_sources: { Args: never; Returns: Json }
       log_client_error: {
         Args: {
           _col_no?: number
