@@ -68,7 +68,7 @@ function harness(options: { signal?: boolean; noServiceKey?: boolean; readError?
     },
   });
   const reads = () => (from.mock.calls as unknown[][]).filter(([t]) => t !== "cron_run_log" && t !== "feature_flags");
-  const writeRpcs = () => (rpc.mock.calls as unknown[][]).filter(([n]) => n !== "alma_weekly_summary" && n !== "admin_human_queues");
+  const writeRpcs = () => (rpc.mock.calls as unknown[][]).filter(([n]) => n !== "alma_weekly_summary" && n !== "admin_human_queues" && n !== "admin_site_health");
   return { from, rpc, fetch, writes, reads, writeRpcs, invoke: (request: Request) => handler(request) };
 }
 

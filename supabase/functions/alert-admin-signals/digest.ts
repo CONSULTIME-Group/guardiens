@@ -117,6 +117,31 @@ export function humanQueueLines(queues: HumanQueue[] | null | undefined, now: nu
   return out
 }
 
+// Lot ADM6 : voyants rouges de l'état du site (admin_site_health), en tête de
+// l'email. Le rendu SEO est déjà porté par son signal critique : jamais deux fois.
+export interface SiteHealthCheck { key: string; label: string; state: string; detail?: string | null; link?: string | null }
+
+const SITE_HEALTH_EMAIL_SKIP = new Set(['seo'])
+
+export function siteHealthLines(checks: SiteHealthCheck[] | null | undefined): DigestLine[] {
+  const out: DigestLine[] = []
+  for (const c of Array.isArray(checks) ? checks : []) {
+    if (!c || typeof c.key !== 'string' || c.state !== 'alert' || SITE_HEALTH_EMAIL_SKIP.has(c.key)) continue
+    const path = typeof c.link === 'string' && c.link.startsWith('/admin') ? c.link : '/admin'
+    out.push({
+      key: `health:${c.key}`,
+      title: `État du site : ${c.label}`,
+      action: (typeof c.detail === 'string' && c.detail) ? c.detail : 'À regarder depuis l\'accueil admin.',
+      startDate: null,
+      ageDays: null,
+      count: 1,
+      signalTypes: [],
+      link: `https://guardiens.fr${path}`,
+    })
+  }
+  return out
+}
+
 export function buildDigestLines(
   signals: OpenSignal[],
   sits: Map<string, SitInfo>,

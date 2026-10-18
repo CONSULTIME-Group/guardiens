@@ -1,6 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
-import { almaWeeklyLines, buildDigestLines, humanQueueLines, isActionableCritical, sitIdOf, weeklySummaryLines, type AlmaWeeklyStats, type HumanQueue, type OpenSignal, type SitInfo } from './digest.ts'
+import { almaWeeklyLines, buildDigestLines, humanQueueLines, isActionableCritical, siteHealthLines, sitIdOf, weeklySummaryLines, type AlmaWeeklyStats, type HumanQueue, type OpenSignal, type SiteHealthCheck, type SitInfo } from './digest.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -92,7 +92,14 @@ Deno.serve(async (req) => {
       notices.push('Lecture des files humaines impossible (contact, signalements, RGPD, contestations, vérifications) : ouvrez l\'accueil admin.')
     }
     const humanLines = humanQueueLines(qErr ? [] : (queues as HumanQueue[] | null), now)
-    const lines = [...humanLines, ...buildDigestLines(rows, sits, now)]
+    // Lot ADM6 : voyants rouges de l'état du site en tête (lecture en échec écrite en avis).
+    const { data: health, error: hErr } = await admin.rpc('admin_site_health')
+    if (hErr) {
+      console.error('admin_site_health error', hErr)
+      notices.push('Lecture de l\'état du site impossible : ouvrez l\'accueil admin.')
+    }
+    const healthLines = siteHealthLines(hErr ? [] : (health as SiteHealthCheck[] | null))
+    const lines = [...healthLines, ...humanLines, ...buildDigestLines(rows, sits, now)]
     // Lundi : couverture, qualité éditoriale, À animer, dans le paragraphe de synthèse existant.
     // Lot J2-B : section Alma du lundi, lue en lecture seule.
     let almaStats: AlmaWeeklyStats | null = null
@@ -119,7 +126,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({
         ok: true, sent: false, dry_run: true,
         auto_resolved: autoResolved ?? [],
-        critical_open: lines.length, human_queues: humanLines.length,
+        critical_open: lines.length, human_queues: humanLines.length, site_health: healthLines.length,
         warning_open: warningCount, stale_count: staleCount,
         coverage_line: coverageLine, notices, lines,
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })

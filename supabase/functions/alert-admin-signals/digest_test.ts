@@ -1,5 +1,5 @@
 import { assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts'
-import { buildDigestLines, humanQueueLines, isActionableCritical, signalAgeHours, weeklyCoverageLine, weeklySummaryLines, type OpenSignal } from './digest.ts'
+import { buildDigestLines, humanQueueLines, siteHealthLines, isActionableCritical, signalAgeHours, weeklyCoverageLine, weeklySummaryLines, type OpenSignal } from './digest.ts'
 
 const NOW = Date.parse('2026-09-28T06:00:00Z')
 const app = (sit: string, title: string, d = '2026-09-19T09:00:00Z'): OpenSignal => ({
@@ -143,4 +143,18 @@ Deno.test('ADM5 : un brouillon sans titre garde une ligne lisible', () => {
   const draft: OpenSignal = { signal_type: 'stale_draft', severity: 'critical', detected_at: '2026-09-27T06:00:00Z', entity_type: 'sit', entity_id: 'brassac', metadata: {} }
   const lines = buildDigestLines([draft], new Map([['brassac', { id: 'brassac', title: '  ', start_date: '2027-01-28' }]]), NOW)
   assertEquals(lines[0].title, 'Annonce sans titre')
+})
+
+Deno.test('ADM6 : seuls les voyants rouges passent, le rendu SEO jamais (porté par son signal)', () => {
+  const lines = siteHealthLines([
+    { key: 'tasks', label: 'Tâches planifiées', state: 'ok', detail: '41 tâches suivies', link: null },
+    { key: 'ai', label: 'IA', state: 'alert', detail: 'Aucune analyse quotidienne depuis 17/10', link: '/admin/alma' },
+    { key: 'seo', label: 'Rendu SEO', state: 'alert', detail: 'Plafond atteint', link: '/admin/prerender' },
+    { key: 'errors', label: 'Erreurs du site', state: 'alert', detail: '', link: 'https://ailleurs.example' },
+  ])
+  assertEquals(lines.map((l) => l.key), ['health:ai', 'health:errors'])
+  assertEquals(lines[0].title, 'État du site : IA')
+  assertEquals(lines[0].link, 'https://guardiens.fr/admin/alma')
+  assertEquals(lines[1].link, 'https://guardiens.fr/admin')
+  assertEquals(siteHealthLines(null), [])
 })

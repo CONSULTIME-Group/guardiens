@@ -12,6 +12,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
 import { createReminderSlot } from "../_shared/reminder-daily-slot.ts";
 import { checkNotificationPreference, readNotificationPreferences } from "../_shared/notification-preferences.ts";
+import { withCronRunLog } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -29,7 +30,7 @@ interface ConversationRow {
   small_mission_id: string | null;
 }
 
-Deno.serve(async (req) => {
+Deno.serve(withCronRunLog("send-message-reminders", async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const denied = await requireCronCaller(req, corsHeaders, "send-message-reminders");
   if (denied) return denied;
@@ -177,4 +178,4 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+}));
