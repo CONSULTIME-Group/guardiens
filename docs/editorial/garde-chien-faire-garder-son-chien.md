@@ -43,6 +43,8 @@ Pour plusieurs semaines, vérifiez que la personne est disponible sur toute la p
 
 Partez de ce que vous observez au quotidien plutôt que de sa seule race ou de son gabarit. Votre chien sait-il rester seul ? Accepte-t-il une personne nouvelle ? Comment réagit-il aux congénères, aux enfants, aux vélos ou aux bruits ? Peut-il monter les escaliers et se déplacer facilement ?
 
+Pour préparer les questions propres à votre chien, consultez aussi nos guides du [berger allemand](/actualites/berger-allemand-guide-race), du [berger australien](/actualites/berger-australien-guide-race), du [border collie](/actualites/border-collie-guide-race-complet) et du [malinois](/actualites/malinois-guide-race-complet), ou ceux du [labrador](/actualites/labrador-retriever-guide-race), du [cavalier King Charles](/actualites/cavalier-king-charles-guide-race) et du [bouledogue français](/actualites/bouledogue-francais-guide-race-complet). Ces repères complètent la description de votre animal ; ils ne permettent pas de déduire son comportement ni les compétences du gardien.
+
 - **Chiot :** décrivez les sorties, les repas, l’apprentissage en cours et les courtes absences qu’il connaît déjà. Vérifiez que le rythme est réalisable pour la personne.
 - **Chien âgé ou sous traitement :** préparez les besoins avec votre vétérinaire et vérifiez que le gardien sait assurer les gestes prescrits et les déplacements nécessaires.
 - **Difficultés à rester seul :** convenez d’une présence adaptée et demandez conseil à votre vétérinaire. La [RSPCA explique que la détresse liée à la séparation peut apparaître très rapidement](https://www.rspca.org.uk/adviceandwelfare/pets/dogs/behaviour/separationrelatedbehaviour) ; changer de gardien ne constitue pas un traitement.

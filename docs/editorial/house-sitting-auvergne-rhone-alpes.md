@@ -58,6 +58,8 @@ Vérifiez le trajet aux jours et horaires du séjour, l’accès aux courses, le
 
 Pour un accès de montagne ou une période hivernale, prévoyez l’organisation adaptée aux conditions réelles. Le [guide des gardes en hiver et en montagne](/actualites/house-sitting-hiver-montagne-savoie) développe ces vérifications. Ni la commune ni l’altitude ne permettent de déduire toutes les possibilités du séjour.
 
+Pour des exemples d’organisation en ville et dans les environs, consultez les guides de [garde à Saint-Étienne et dans la Loire](/actualites/pet-sitting-saint-etienne-loire), de [garde à Valence et dans la Drôme](/actualites/pet-sitting-valence-drome) et de [garde à Clermont-Ferrand](/actualites/pet-sitting-clermont-ferrand). Ils complètent ces questions générales par des points à vérifier sur les accès, le logement et les déplacements.
+
 ## <a id="questions"></a>Quelles questions poser avant de choisir ?
 
 ### Côté propriétaire
@@ -87,6 +89,8 @@ Sur Guardiens, un accord de garde est proposé après confirmation, avec signatu
 ## <a id="decision"></a>Confirmer la garde ou revoir l’organisation ?
 
 Un point essentiel reste incompatible ? Vous pouvez adapter les horaires, confier une tâche à un professionnel ou chercher une autre solution. Une candidature ne vous oblige pas à accepter un séjour qui ne couvre pas les soins nécessaires.
+
+Si la difficulté dépasse une absence temporaire, notre guide sur les [chiffres de l’abandon d’animaux et les pistes d’aide](/actualites/abandon-animaux-france-chiffres-causes) distingue les situations et les relais à envisager. Une garde temporaire ne résout pas toutes les difficultés durables.
 
 **Exemple fictif :** le gardien peut dormir dans la maison, mais s’absente aux heures d’un traitement prescrit. La présence de nuit ne résout pas ce besoin. Il faut préparer une prise en charge compatible, avec l’avis du vétérinaire si nécessaire, avant de confirmer.
 

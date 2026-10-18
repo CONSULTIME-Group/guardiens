@@ -38,6 +38,8 @@ Le formulaire vous fait décrire le besoin puis son organisation. **Il ne vous d
 
 Les [idées de coups de main](/actualites/idees-coups-de-main-entraide-pres-de-chez-soi) aident à choisir une première tâche ; les [conseils pour demander simplement](/actualites/oser-demander-coup-de-main-pres-de-chez-soi) proposent un exemple de message. Une annonce précise facilite la compréhension sans garantir un délai de réponse.
 
+Pour une aide au jardin, les guides de [jardinage en entraide à Grenoble](/actualites/jardinage-entraide-locale-grenoble) et de [jardinage en entraide à Annecy](/actualites/jardinage-entraide-quartier-annecy) montrent comment délimiter les tâches, les accès et le matériel. Ces exemples de préparation ne constituent pas une offre de personnes disponibles.
+
 ## <a id="reponse"></a>Comment proposer son aide et confirmer les conditions ?
 
 Pour rendre visibles vos compétences, utilisez les [savoir-faire du profil](/profile?section=savoir-faire). Expliquez ce que vous savez faire, le matériel dont vous disposez éventuellement et ce que vous préférez refuser. Ce profil ne constitue pas une certification professionnelle.
@@ -75,6 +77,8 @@ En cas d’urgence, contactez les secours ou le professionnel adapté ; une urge
 Pour un dommage, conservez les éléments utiles, prévenez la personne concernée et contactez les assureurs selon la situation. La responsabilité ne se règle pas automatiquement par un geste symbolique ou à la charge d’une seule personne. Signalez à la plateforme les comportements contraires aux règles, sans attendre d’elle une prise en charge d’assurance ou un résultat de médiation garanti.
 
 Après une mission terminée, vous pouvez laisser le retour proposé dans le parcours. Restez factuel sur l’échange réalisé et préservez les informations privées ; aucun avis positif ne doit être exigé à l’avance. Pour aller plus loin, le [guide du réseau d’entraide de proximité](/actualites/reseau-entraide-quartier-lyon-aura) propose des étapes pour renouveler les échanges librement.
+
+Notre article sur la [technologie et le lien social de proximité](/actualites/technologie-recreer-lien-pres-de-chez-soi) explique ce qu’un outil de mise en relation peut faciliter, et ce qui reste à construire entre les personnes.
 
 ## <a id="faq"></a>Questions fréquentes
 

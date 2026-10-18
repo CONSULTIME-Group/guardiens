@@ -69,6 +69,8 @@ Indiquez l’étage, l’ascenseur s’il existe, les portes à franchir et les 
 
 Les guides [Croix-Rousse](/actualites/garde-animaux-croix-rousse-lyon) et [Presqu’île](/actualites/garde-chat-presquile-lyon) développent les escaliers, les parcours et l’arrivée dans le centre. Pour une maison, le [guide Ouest lyonnais](/actualites/pet-sitting-lyon-ouest-lyonnais) précise l’entretien, les équipements et les déplacements.
 
+Votre logement se trouve dans une commune voisine ? Les guides de [garde à Villeurbanne](/actualites/pet-sitting-villeurbanne) et de [garde à Vénissieux](/actualites/pet-sitting-venissieux) abordent les accès et l’organisation du séjour. Pour préparer les sorties ou un séjour en périphérie, le guide des [villes autour de Lyon avec un chien](/actualites/meilleures-villes-vivre-chien-autour-lyon) apporte d’autres repères à vérifier selon votre adresse.
+
 ### Les sorties du chien
 
 Transmettez des parcours adaptés à votre chien et autorisés. Un espace vert ou une berge ne signifie pas que le chien peut y être détaché. Le [guide des promenades à Lyon](/actualites/parcs-chiens-lyon-guide-complet) aide à préparer les sorties ; vérifiez les règles affichées sur place.
