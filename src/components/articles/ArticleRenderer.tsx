@@ -133,7 +133,7 @@ export const AGREEMENT_OWNER_ARTICLE_SLUG = "commodat-garde-guardiens";
 export const INCIDENT_OWNER_ARTICLE_SLUG = "gerer-imprevu-pendant-garde";
 export const HOSPITAL_OWNER_ARTICLE_SLUG = "faire-garder-animal-pendant-hospitalisation";
 // Ces guides répondent aussi à un besoin immédiat : le CTA reste en fin de page, pour anticiper une garde.
-export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere", "veterinaire-urgence-lyon-guide", "garde-ferme-animaux-monts-du-lyonnais", "meilleures-villes-vivre-chien-autour-lyon", "parcs-balades-chiens-annecy-guide", "parcs-balades-chiens-grenoble-guide", "bengal-guide-race"]);
+export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere", "veterinaire-urgence-lyon-guide", "garde-ferme-animaux-monts-du-lyonnais", "meilleures-villes-vivre-chien-autour-lyon", "parcs-balades-chiens-annecy-guide", "parcs-balades-chiens-grenoble-guide", "bengal-guide-race", "berger-allemand-guide-race", "berger-australien-guide-race"]);
 export const WELCOME_OWNER_ARTICLE_SLUG = "accueillir-gardien-bonnes-pratiques";
 export const DEPARTURE_OWNER_ARTICLE_SLUG = "checklist-partir-vacances-animaux";
 export const AT_HOME_OWNER_ARTICLE_SLUG = "garde-animaux-domicile-chien-chat";
@@ -170,7 +170,12 @@ export const VILLES_CHIEN_OWNER_ARTICLE_SLUG = "meilleures-villes-vivre-chien-au
 export const ANNECY_WALKS_OWNER_ARTICLE_SLUG = "parcs-balades-chiens-annecy-guide";
 export const GRENOBLE_WALKS_OWNER_ARTICLE_SLUG = "parcs-balades-chiens-grenoble-guide";
 export const BENGAL_OWNER_ARTICLE_SLUG = "bengal-guide-race";
+export const BERGER_ALLEMAND_OWNER_ARTICLE_SLUG = "berger-allemand-guide-race";
+export const BERGER_AUSTRALIEN_OWNER_ARTICLE_SLUG = "berger-australien-guide-race";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
+  BERGER_ALLEMAND_OWNER_ARTICLE_SLUG,
+  BERGER_AUSTRALIEN_OWNER_ARTICLE_SLUG,
+
   BENGAL_OWNER_ARTICLE_SLUG,
 
   ANNECY_WALKS_OWNER_ARTICLE_SLUG,
@@ -244,6 +249,37 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [BERGER_ALLEMAND_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous préparez la garde de votre Berger allemand ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Présenter les habitudes de votre chien dans votre annonce",
+    "endText": "Précisez les dates, la présence, les sorties et les contraintes à assurer. Échangez avec les personnes intéressées avant de confirmer un séjour.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+  [BERGER_AUSTRALIEN_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous préparez la garde de votre Berger australien ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Présenter les habitudes de votre chien dans votre annonce",
+    "endText": "Précisez les dates, la présence, les sorties et les contraintes à assurer. Échangez avec les personnes intéressées avant de confirmer un séjour.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+
   [BENGAL_OWNER_ARTICLE_SLUG]: {
     "midText": "Vous préparez la garde de votre Bengal ?",
     "midPrimary": {
@@ -1360,6 +1396,9 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  BERGER_ALLEMAND_OWNER_ARTICLE_SLUG,
+  BERGER_AUSTRALIEN_OWNER_ARTICLE_SLUG,
+
   ...PROJECT_GUIDE_ARTICLE_SLUGS,
   BENGAL_OWNER_ARTICLE_SLUG,
 
@@ -1641,6 +1680,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
     PROJECT_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || RESOURCE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || MIXED_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || slug === "c-est-quoi-le-house-sitting" ||
+      slug === BERGER_ALLEMAND_OWNER_ARTICLE_SLUG || slug === BERGER_AUSTRALIEN_OWNER_ARTICLE_SLUG ||
       slug === BENGAL_OWNER_ARTICLE_SLUG ||
       slug === ANNECY_WALKS_OWNER_ARTICLE_SLUG || slug === GRENOBLE_WALKS_OWNER_ARTICLE_SLUG ||
       slug === VILLES_CHIEN_OWNER_ARTICLE_SLUG ||
