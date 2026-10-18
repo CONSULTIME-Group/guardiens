@@ -37,6 +37,9 @@ const CONTACT_FIRST_ARTICLE_SLUGS = new Set([
 
 // Ces couvertures gardent leur sujet dans le cadre de lecture du guide.
 const GUIDE_COVER_CLASSES: Record<string, string> = {
+  "petites-missions-entraide-guardiens": "w-full h-[360px] sm:h-[520px] object-contain bg-muted/30",
+  "reseau-entraide-quartier-lyon-aura": "w-full h-[360px] sm:h-[520px] object-contain bg-muted/30",
+
   "oser-demander-coup-de-main-pres-de-chez-soi": "w-full h-[360px] sm:h-[520px] object-contain bg-muted/30",
 
   [PERSAN_OWNER_ARTICLE_SLUG]: "w-full h-[360px] sm:h-[520px] object-contain bg-muted/30",

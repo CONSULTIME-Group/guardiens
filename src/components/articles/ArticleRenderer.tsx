@@ -156,7 +156,7 @@ export const LYON_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-lyon-guide";
 export const PROJECT_GUIDE_ARTICLE_SLUGS = new Set<string>(["chantier-participatif-low-tech-participer-lancer-projet", "chantier-participatif-projet-collectif-cadre-legal", "apprendre-menuiserie-permaculture-ecoconstruction-gratuitement"]);
 export const RESOURCE_GUIDE_ARTICLE_SLUGS = new Set<string>(["abandon-animaux-france-chiffres-causes"]);
 export const MIXED_GUIDE_ARTICLE_SLUGS = new Set<string>(["premiers-pas-sur-guardiens", "comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers", "notre-histoire-pet-sitting-argentine-lyon"]);
-export const ENTRAIDE_GUIDE_ARTICLE_SLUGS = new Set<string>(["oser-demander-coup-de-main-pres-de-chez-soi", "jardinage-entraide-quartier-lyon", "jardinage-entraide-locale-grenoble", "jardinage-entraide-quartier-annecy", "idees-coups-de-main-entraide-pres-de-chez-soi", "courses-aide-domicile-entraide-senior-lyon", "demenagement-entraide-locale-france", "bricolage-montage-meubles-entraide-grenoble-lyon", "arroser-plantes-vacances-annecy", "arroser-plantes-vacances-grenoble", "arroser-plantes-vacances-lyon"]);
+export const ENTRAIDE_GUIDE_ARTICLE_SLUGS = new Set<string>(["petites-missions-entraide-guardiens", "reseau-entraide-quartier-lyon-aura", "oser-demander-coup-de-main-pres-de-chez-soi", "jardinage-entraide-quartier-lyon", "jardinage-entraide-locale-grenoble", "jardinage-entraide-quartier-annecy", "idees-coups-de-main-entraide-pres-de-chez-soi", "courses-aide-domicile-entraide-senior-lyon", "demenagement-entraide-locale-france", "bricolage-montage-meubles-entraide-grenoble-lyon", "arroser-plantes-vacances-annecy", "arroser-plantes-vacances-grenoble", "arroser-plantes-vacances-lyon"]);
 export const SITTER_PROFILE_GUIDE_ARTICLE_SLUGS = new Set<string>(["creer-profil-gardien-attractif", "comment-devenir-home-sitter-france-guide-debutant", "devenir-gardien-pro-animalier", "devenir-gardien-urgence-guardiens"]);
 export const SITTER_GUIDE_ARTICLE_SLUGS = new Set<string>([...SITTER_PROFILE_GUIDE_ARTICLE_SLUGS, "temoignage-premiere-garde-auvergne", "voyager-gratuitement-france-house-sitting", "devenir-gardien-maison-etranger", "reussir-premiere-garde-house-sitting", "gerer-animaux-difficiles-garde", "boom-pet-sitting-lyon-2026"]);
 export const AIX_HOME_OWNER_ARTICLE_SLUG = "house-sitting-aix-les-bains";
@@ -1378,14 +1378,20 @@ const CTA_PAR_SLUG: Record<string, CtaCopy> = {
     endSecondary: { label: "Voir les coups de main près de chez moi", href: "/petites-missions", role: "entraide" },
   },
   "petites-missions-entraide-guardiens": {
-    midText: "Un coup de main à demander, ou du temps à donner ?",
-    midPrimary: { label: "Demander un coup de main", href: "/petites-missions/creer", role: "entraide" },
-    midSecondary: { label: "Proposer mon aide", href: "/profile?section=savoir-faire", role: "entraide" },
-    endHeading: "Le premier coup de main est souvent le plus simple",
-    endText: "Publiez votre demande en quelques minutes : les membres du coin la reçoivent le lendemain matin. Pour aider, dites sur votre profil ce que vous savez faire.",
-    endPrimary: { label: "Demander un coup de main", href: "/petites-missions/creer", role: "entraide" },
-    endSecondary: { label: "Voir les coups de main près de chez moi", href: "/petites-missions", role: "entraide" },
+  "midText": "Vous avez une aide ponctuelle à organiser ?",
+  "midPrimary": {
+    "label": "Demander un coup de main",
+    "href": "/petites-missions/creer",
+    "role": "entraide"
   },
+  "endHeading": "Décrire votre besoin ponctuel",
+  "endText": "Précisez la tâche, le lieu et les conditions utiles, puis échangez avec les personnes intéressées avant de convenir de l’organisation.",
+  "endPrimary": {
+    "label": "Demander un coup de main",
+    "href": "/petites-missions/creer",
+    "role": "entraide"
+  }
+},
   "petites-missions-entraide-guide": {
     midText: "Un coup de main à demander, ou du temps à donner ?",
     midPrimary: { label: "Demander un coup de main", href: "/petites-missions/creer", role: "entraide" },
@@ -1486,14 +1492,20 @@ const CTA_PAR_SLUG: Record<string, CtaCopy> = {
   }
 },
   "reseau-entraide-quartier-lyon-aura": {
-    midText: "Un coup de main à demander, ou du temps à donner ?",
-    midPrimary: { label: "Demander un coup de main", href: "/petites-missions/creer", role: "entraide" },
-    midSecondary: { label: "Proposer mon aide", href: "/profile?section=savoir-faire", role: "entraide" },
-    endHeading: "Le premier coup de main est souvent le plus simple",
-    endText: "Publiez votre demande en quelques minutes : les membres du coin la reçoivent le lendemain matin. Pour aider, dites sur votre profil ce que vous savez faire.",
-    endPrimary: { label: "Demander un coup de main", href: "/petites-missions/creer", role: "entraide" },
-    endSecondary: { label: "Voir les coups de main près de chez moi", href: "/petites-missions", role: "entraide" },
+  "midText": "Vous cherchez une première occasion d’échanger ?",
+  "midPrimary": {
+    "label": "Découvrir l’entraide près de chez moi",
+    "href": "/petites-missions",
+    "role": "entraide"
   },
+  "endHeading": "Découvrir un premier échange près de chez vous",
+  "endText": "Consultez les besoins et choisissez ce qui correspond à vos capacités et disponibilités. Les conditions se construisent ensuite avec la personne intéressée.",
+  "endPrimary": {
+    "label": "Découvrir l’entraide près de chez moi",
+    "href": "/petites-missions",
+    "role": "entraide"
+  }
+},
   "chantier-participatif-projet-collectif-cadre-legal": {
   "midText": "Vous préparez un projet participatif ?",
   "midPrimary": {
