@@ -34,7 +34,6 @@ import OwnerStarSection from "./owner/OwnerStarSection";
 import OwnerAnnonceSection from "./owner/OwnerAnnonceSection";
 import ApplicationCapSection from "./owner/ApplicationCapSection";
 import OwnerFamilySection from "./owner/OwnerFamilySection";
-import { useFirstNearbyMission } from "@/hooks/useFirstNearbyMission";
 import NextStepRailCard from "./shared/NextStepRailCard";
 import { selectOwnerStarVariant } from "@/lib/ownerStarVariant";
 import RailReadingsCard from "./shared/RailReadingsCard";
@@ -93,7 +92,6 @@ const OwnerDashboard = () => {
   // communauté » (rayon 30 km), jamais la taille d'une liste plafonnée.
   const { data: helpersProximity } = useHelpersProximityCount(user?.id);
   const nearbyHelpersCount = helpersProximity?.localCount ?? nearbyHelpersData?.helpers?.length ?? 0;
-  const { mission: firstNearbyMission } = useFirstNearbyMission(user?.id);
   // Lot X3b (C-04) : besoin en cours de l'auteur, transmis au bandeau entraide
   // (calculé sur tout l'index partagé, priorité aux propositions en attente).
   const myActiveMission = useMemo(
@@ -480,7 +478,6 @@ const OwnerDashboard = () => {
               <OwnerEntraideBand
                 helpersCount={nearbyHelpersCount}
                 helpersRadiusKm={helpersProximity?.radiusKm ?? 30}
-                mission={firstNearbyMission}
                 activeMission={myActiveMission}
               />
             </DeferredMount>

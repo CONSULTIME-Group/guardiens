@@ -32,6 +32,8 @@ import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VolunteersTab from "./_components/associations/VolunteersTab";
 import { VolunteerAvailabilityCard } from "./_components/dashboard/VolunteerAvailabilityCard";
+import LocalActionEditor from "./_components/associations/LocalActionEditor";
+import { associationLocalActionReady, isRecentActionConfirmation } from "@/lib/localUsefulActions";
 
 type AssociationRow = {
   id: string;
@@ -165,6 +167,13 @@ export default function AdminAssociations() {
 
   const saveEditing = async () => {
     if (!editing) return;
+    const invalidAction = (editing.needs_details ?? []).some(need => need.local_action?.enabled
+      && (!associationLocalActionReady(need.local_action, need.url)
+        || !isRecentActionConfirmation(need.local_action.confirmed_on)));
+    if (invalidAction) {
+      toast.error("Complétez l’action locale : titre, commune choisie, période, durée, lien et confirmation récente. Précisez les savoir-faire ou l’accueil des débutants.");
+      return;
+    }
     setSaving(true);
     const { id, ...values } = editing;
     // Le champ année est saisi en texte : la colonne attend un entier ou rien.
@@ -735,6 +744,9 @@ export default function AdminAssociations() {
                   >
                     Retirer
                   </Button>
+                  <LocalActionEditor index={index} value={need.local_action} onChange={local_action => setEditing(current => current ? {
+                    ...current, needs_details: current.needs_details.map((n, i) => i === index ? { ...n, local_action } : n),
+                  } : current)} />
                 </div>
               ))}
               <Button

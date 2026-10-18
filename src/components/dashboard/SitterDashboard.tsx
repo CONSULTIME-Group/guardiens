@@ -157,7 +157,6 @@ const SitterDashboard = () => {
   if (helpsWithMissing) todos.push({ key: "helps", label: "Votre phrase d'entraide", to: "/ma-ligne" });
 
   const myActiveMission = myMissions.find((m: any) => m.status !== "completed" && m.status !== "cancelled") ?? null;
-  const firstNearbyMission = nearbyMissions[0] ?? null;
   const showAccessGate = !(level === 4 || level === "3B");
 
   const railContent = (
@@ -247,7 +246,6 @@ const SitterDashboard = () => {
               <OwnerEntraideBand
                 helpersCount={nearbyHelpersCount}
                 helpersRadiusKm={helpersProximity?.radiusKm ?? 30}
-                mission={firstNearbyMission}
                 activeMission={myActiveMission}
                 headline={SITTER_ENTRAIDE_HEADLINE}
               />

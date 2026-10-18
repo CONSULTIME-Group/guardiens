@@ -12,7 +12,7 @@ import MeetupAnswer from "@/components/entraide/MeetupAnswer";
 import { useMyHelpExchanges, HelpProposalsList, type HelpRow } from "@/components/dashboard/MesCoupsDeMain";
 import type { HelpProposal } from "@/lib/myHelpProposals";
 import { useMutualAidRadiusKm, ALERT_SETTINGS_PATH, radiusLineText } from "@/components/entraide/MutualAidRadiusLine";
-import { useNearbyAssociation } from "@/components/associations/NearbyAssociationCard";
+import LocalUsefulActions from "@/components/dashboard/shared/LocalUsefulActions";
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import { formatCityLabel } from "@/lib/cityLabel";
 import DashEyebrow from "./DashEyebrow";
@@ -61,7 +61,6 @@ export function OwnerEntraideBandView({
   busyId,
   onAnswer,
   mutualRadiusKm,
-  association,
   headline,
   activeMission,
   proposals = [],
@@ -203,14 +202,6 @@ export function OwnerEntraideBandView({
             <Link to={ALERT_SETTINGS_PATH} className="font-semibold text-primary hover:underline underline-offset-4">Modifier</Link>
           </p>
         )}
-        {association && (
-          <p className="mt-[8px] text-muted-foreground text-[12.5px]">
-            {association.name}, près de chez vous, cherche des bénévoles.{" "}
-            <Link to={`/associations/${association.slug}`} className="font-semibold text-primary hover:underline underline-offset-4">
-              Découvrir l'association
-            </Link>
-          </p>
-        )}
       </div>
     </section>
   );
@@ -225,16 +216,17 @@ export default function OwnerEntraideBand(props: {
 }) {
   const { rows, proposals, busy, answer } = useMyHelpExchanges();
   const mutualRadiusKm = useMutualAidRadiusKm();
-  const association = useNearbyAssociation();
   return (
-    <OwnerEntraideBandView
+    <div>
+      <OwnerEntraideBandView
       {...props}
       exchanges={rows}
       proposals={proposals}
       busyId={busy}
       onAnswer={(id, h, w, p) => void answer(id, h, w, p)}
       mutualRadiusKm={mutualRadiusKm}
-      association={association}
-    />
+      />
+      <LocalUsefulActions />
+    </div>
   );
 }
