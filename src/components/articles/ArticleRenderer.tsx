@@ -133,7 +133,7 @@ export const AGREEMENT_OWNER_ARTICLE_SLUG = "commodat-garde-guardiens";
 export const INCIDENT_OWNER_ARTICLE_SLUG = "gerer-imprevu-pendant-garde";
 export const HOSPITAL_OWNER_ARTICLE_SLUG = "faire-garder-animal-pendant-hospitalisation";
 // Ces guides répondent aussi à un besoin immédiat : le CTA reste en fin de page, pour anticiper une garde.
-export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere", "veterinaire-urgence-lyon-guide", "garde-ferme-animaux-monts-du-lyonnais", "meilleures-villes-vivre-chien-autour-lyon", "parcs-balades-chiens-annecy-guide", "parcs-balades-chiens-grenoble-guide", "bengal-guide-race", "berger-allemand-guide-race", "berger-australien-guide-race", "border-collie-guide-race-complet", "bouledogue-francais-guide-race-complet", "cavalier-king-charles-guide-race", "golden-retriever-guide-race-complet", "labrador-retriever-guide-race", "maine-coon-guide-race", "malinois-guide-race-complet", "persan-guide-race", "siamois-guide-race", "house-sitting-cadre-juridique-france", "parcs-chiens-lyon-guide-complet", "chien-reactif-agressif-garde-solutions", "garde-animaux-haute-savoie-guide"]);
+export const PREPARATION_ONLY_OWNER_ARTICLE_SLUGS = new Set<string>([INCIDENT_OWNER_ARTICLE_SLUG, HOSPITAL_OWNER_ARTICLE_SLUG, "accueillir-gardien-bonnes-pratiques", "checklist-partir-vacances-animaux", "bien-etre-animal-pendant-absence", "s-absenter-avec-animal-guide-solutions-2026", "veterinaire-urgence-annecy-haute-savoie", "veterinaire-urgence-grenoble-isere", "veterinaire-urgence-lyon-guide", "garde-ferme-animaux-monts-du-lyonnais", "meilleures-villes-vivre-chien-autour-lyon", "parcs-balades-chiens-annecy-guide", "parcs-balades-chiens-grenoble-guide", "bengal-guide-race", "berger-allemand-guide-race", "berger-australien-guide-race", "border-collie-guide-race-complet", "bouledogue-francais-guide-race-complet", "cavalier-king-charles-guide-race", "golden-retriever-guide-race-complet", "labrador-retriever-guide-race", "maine-coon-guide-race", "malinois-guide-race-complet", "persan-guide-race", "siamois-guide-race", "house-sitting-cadre-juridique-france", "parcs-chiens-lyon-guide-complet", "chien-reactif-agressif-garde-solutions", "garde-animaux-haute-savoie-guide", "pet-sitting-clermont-ferrand"]);
 export const WELCOME_OWNER_ARTICLE_SLUG = "accueillir-gardien-bonnes-pratiques";
 export const DEPARTURE_OWNER_ARTICLE_SLUG = "checklist-partir-vacances-animaux";
 export const AT_HOME_OWNER_ARTICLE_SLUG = "garde-animaux-domicile-chien-chat";
@@ -155,7 +155,7 @@ export const GRENOBLE_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-grenoble-i
 export const LYON_VET_CONTACT_ARTICLE_SLUG = "veterinaire-urgence-lyon-guide";
 export const PROJECT_GUIDE_ARTICLE_SLUGS = new Set<string>(["chantier-participatif-low-tech-participer-lancer-projet", "chantier-participatif-projet-collectif-cadre-legal", "apprendre-menuiserie-permaculture-ecoconstruction-gratuitement"]);
 export const RESOURCE_GUIDE_ARTICLE_SLUGS = new Set<string>(["preparer-maison-avant-vacances", "proprietaire-preparer-garde-maison", "pet-sitting-grenoble-guide", "petites-missions-entraide-guide", "pet-sitting-chambery-savoie", "pet-sitting-clermont-ferrand-guide", "malinois-lyon-guide-race", "pet-sitting-annecy-guide", "house-sitting-saint-etienne-guide", "house-sitting-vs-pension-comparatif", "house-sitting-grenoble", "house-sitting-lyon", "house-sitting-caluire-et-cuire", "house-sitting-chambery", "house-sitting-annecy", "house-sitting-aura-guide-complet", "guide-house-sitting-lyon", "guide-lieu-meilleurs-parcs-chiens-lyon", "gardiennage-maison-vacances-aura", "golden-retriever-lyon-guide-race", "garde-a-domicile-vs-pension", "garde-chien-lyon-solutions", "devenir-pet-sitter-guide-debutant", "erreurs-premiere-garde", "conseils-garder-chien", "devenir-gardien-guide-complet", "bouledogue-francais-lyon-guide-race", "conseil-gardien-creer-profil-attractif-lyon", "berger-australien-guide", "border-collie-lyon-guide-race", "abandon-animaux-france-chiffres-causes"]);
-export const MIXED_GUIDE_ARTICLE_SLUGS = new Set<string>(["premiers-pas-sur-guardiens", "comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers", "notre-histoire-pet-sitting-argentine-lyon"]);
+export const MIXED_GUIDE_ARTICLE_SLUGS = new Set<string>(["c-est-quoi-le-house-sitting", "premiers-pas-sur-guardiens", "comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers", "notre-histoire-pet-sitting-argentine-lyon"]);
 export const ENTRAIDE_GUIDE_ARTICLE_SLUGS = new Set<string>(["technologie-recreer-lien-pres-de-chez-soi", "se-sentir-utile-pres-de-chez-soi", "petites-missions-entraide-guardiens", "reseau-entraide-quartier-lyon-aura", "oser-demander-coup-de-main-pres-de-chez-soi", "jardinage-entraide-quartier-lyon", "jardinage-entraide-locale-grenoble", "jardinage-entraide-quartier-annecy", "idees-coups-de-main-entraide-pres-de-chez-soi", "courses-aide-domicile-entraide-senior-lyon", "demenagement-entraide-locale-france", "bricolage-montage-meubles-entraide-grenoble-lyon", "arroser-plantes-vacances-annecy", "arroser-plantes-vacances-grenoble", "arroser-plantes-vacances-lyon"]);
 export const SITTER_PROFILE_GUIDE_ARTICLE_SLUGS = new Set<string>(["creer-profil-gardien-attractif", "comment-devenir-home-sitter-france-guide-debutant", "devenir-gardien-pro-animalier", "devenir-gardien-urgence-guardiens"]);
 export const SITTER_GUIDE_ARTICLE_SLUGS = new Set<string>([...SITTER_PROFILE_GUIDE_ARTICLE_SLUGS, "temoignage-premiere-garde-auvergne", "voyager-gratuitement-france-house-sitting", "devenir-gardien-maison-etranger", "reussir-premiere-garde-house-sitting", "gerer-animaux-difficiles-garde", "boom-pet-sitting-lyon-2026"]);
@@ -185,7 +185,10 @@ export const LEGAL_HOME_OWNER_ARTICLE_SLUG = "house-sitting-cadre-juridique-fran
 export const LYON_WALKS_OWNER_ARTICLE_SLUG = "parcs-chiens-lyon-guide-complet";
 export const REACTIVE_DOG_OWNER_ARTICLE_SLUG = "chien-reactif-agressif-garde-solutions";
 export const HAUTE_SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG = "garde-animaux-haute-savoie-guide";
+export const CLERMONT_ANIMALS_OWNER_ARTICLE_SLUG = "pet-sitting-clermont-ferrand";
 export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
+  CLERMONT_ANIMALS_OWNER_ARTICLE_SLUG,
+
   REACTIVE_DOG_OWNER_ARTICLE_SLUG,
   HAUTE_SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG,
 
@@ -284,6 +287,22 @@ export const OWNER_GUIDE_ARTICLE_SLUGS = new Set<string>([
 ]);
 
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  [CLERMONT_ANIMALS_OWNER_ARTICLE_SLUG]: {
+    "midText": "Vous préparez une absence à Clermont-Ferrand ?",
+    "midPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    },
+    "endHeading": "Décrire les besoins de votre future garde",
+    "endText": "Précisez vos dates, les accès, les animaux éventuels et la présence attendue. Les disponibilités et les conditions se confirment ensuite avec la personne intéressée.",
+    "endPrimary": {
+        "label": "Publier mon annonce de garde",
+        "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+        "role": "owner"
+    }
+},
+
   [REACTIVE_DOG_OWNER_ARTICLE_SLUG]: {
     "midText": "Vous préparez une garde adaptée à votre chien ?",
     "midPrimary": {
@@ -2092,14 +2111,30 @@ const CTA_PAR_SLUG: Record<string, CtaCopy> = {
 },
 
   "c-est-quoi-le-house-sitting": {
-    midText: "Vous partez bientôt et vous cherchez quelqu'un pour veiller sur votre maison ?",
-    midPrimary: { label: "Faire garder ma maison", href: "/inscription?role=owner", role: "owner" },
-    midSecondary: { label: "Devenir gardien", href: "/devenir-home-sitter", role: "sitter" },
-    endHeading: "Préparez votre annonce de garde",
-    endText: "Décrivez vos dates, votre logement et vos animaux : les gardiens intéressés vous écrivent, vous choisissez après échange.",
-    endPrimary: { label: "Préparer mon annonce", href: "/inscription?role=owner", role: "owner" },
-    endSecondary: { label: "Je veux garder une maison", href: "/devenir-home-sitter", role: "sitter" },
+  "midText": "Vous souhaitez faire garder votre maison ou proposer une garde ?",
+  "midPrimary": {
+    "label": "Préparer mon annonce",
+    "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+    "role": "owner"
   },
+  "midSecondary": {
+    "label": "Préparer mon profil gardien",
+    "href": "/inscription?role=sitter&redirect=%2Fprofile",
+    "role": "sitter"
+  },
+  "endHeading": "Préparer une garde selon votre besoin",
+  "endText": "Décrivez votre logement et la présence attendue, ou présentez vos expériences et limites comme gardien. Les conditions se construisent ensuite dans l’échange.",
+  "endPrimary": {
+    "label": "Préparer mon annonce",
+    "href": "/inscription?role=owner&redirect=%2Fsits%2Fcreate",
+    "role": "owner"
+  },
+  "endSecondary": {
+    "label": "Préparer mon profil gardien",
+    "href": "/inscription?role=sitter&redirect=%2Fprofile",
+    "role": "sitter"
+  }
+},
 
   "apprendre-menuiserie-permaculture-ecoconstruction-gratuitement": {
   "midText": "Vous souhaitez apprendre en participant à un projet ?",
@@ -2162,6 +2197,8 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * les autres articles gardent le rendu historique.
  */
 export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  CLERMONT_ANIMALS_OWNER_ARTICLE_SLUG,
+
   REACTIVE_DOG_OWNER_ARTICLE_SLUG,
   HAUTE_SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG,
 
@@ -2256,14 +2293,12 @@ export const GUIDE_ARTICLE_SLUGS = new Set<string>([
   PREPARATION_OWNER_ARTICLE_SLUG,
   CHOOSING_OWNER_ARTICLE_SLUG,
   NO_PETS_OWNER_ARTICLE_SLUG,
-  "c-est-quoi-le-house-sitting",
   "expat-proprietaire-faire-garder-maison-etranger",
   REUNION_OWNER_ARTICLE_SLUG,
   TAHITI_OWNER_ARTICLE_SLUG,
   CALEDONIE_OWNER_ARTICLE_SLUG,
   "pension-chien-alternatives-guide",
   "vacances-longues-garde-animal-2-semaines",
-  "pet-sitting-clermont-ferrand",
 ]);
 
 /** Déplace l'ancre vide `<h2><a id="x"></a>Titre` sur le titre lui-même. */
@@ -2469,6 +2504,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
     PROJECT_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || RESOURCE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || MIXED_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") || slug === "c-est-quoi-le-house-sitting" ||
+      slug === CLERMONT_ANIMALS_OWNER_ARTICLE_SLUG ||
       slug === REACTIVE_DOG_OWNER_ARTICLE_SLUG || slug === HAUTE_SAVOIE_ANIMALS_OWNER_ARTICLE_SLUG ||
       slug === LEGAL_HOME_OWNER_ARTICLE_SLUG || slug === LYON_WALKS_OWNER_ARTICLE_SLUG ||
       slug === SIAMOIS_OWNER_ARTICLE_SLUG ||

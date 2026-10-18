@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["c-est-quoi-le-house-sitting", 13],
+  ["pet-sitting-clermont-ferrand", 6],
   ["chien-reactif-agressif-garde-solutions", 6],
   ["garde-animaux-haute-savoie-guide", 6],
   ["house-sitting-cadre-juridique-france", 6],
@@ -224,7 +226,7 @@ describe.each([...MIXED_GUIDE_ARTICLE_SLUGS])("Guide %s, choix du rôle", (slug)
     expect(links).toHaveLength(2);
     expect(links[0].getAttribute("href")).toBe(userRole ? "/sits/create" : "/inscription?role=owner&redirect=%2Fsits%2Fcreate");
     expect(links[1].getAttribute("href")).toBe(userRole ? "/profile" : "/inscription?role=sitter&redirect=%2Fprofile");
-    expect(links[0].textContent).toBe("Publier mon annonce de garde");
+    expect(links[0].textContent).toBe(slug === "c-est-quoi-le-house-sitting" ? "Préparer mon annonce" : "Publier mon annonce de garde");
     expect(links[1].textContent).toBe("Préparer mon profil gardien");
     expect([...links].map(link => link.getAttribute("data-cta-position"))).toEqual(["end", "end"]);
     expect([...links].map(link => link.getAttribute("data-cta-role"))).toEqual(["owner", "sitter"]);
