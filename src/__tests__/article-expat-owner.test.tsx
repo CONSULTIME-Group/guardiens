@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["oser-demander-coup-de-main-pres-de-chez-soi", 6],
+  ["persan-guide-race", 6],
   ["maine-coon-guide-race", 6],
   ["malinois-guide-race-complet", 6],
   ["jardinage-entraide-quartier-lyon", 6],
