@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["house-sitting-annecy", 2],
+  ["house-sitting-aura-guide-complet", 2],
   ["guide-house-sitting-lyon", 2],
   ["guide-lieu-meilleurs-parcs-chiens-lyon", 2],
   ["gardiennage-maison-vacances-aura", 2],
