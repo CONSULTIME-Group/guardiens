@@ -7,6 +7,7 @@ import { postalToDept } from "@/lib/departments";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { statusChangeActivity } from "@/lib/admin/activityLabels";
+import { loadReadyDrafts } from "@/lib/admin/draftReadiness";
 import type { ActivityItem, WeeklySignup, DeptData } from "./types";
 
 /** Comptes supprimés exclus de tous les compteurs de membres (lot A10). */
@@ -55,6 +56,33 @@ export function useKeyFigures() {
           type: "inscription" as const,
         })),
       };
+    },
+  });
+}
+
+/**
+ * Lot ADM3 : flux de publication, le critère d'arbitrage du produit.
+ * Publiées sur 7 jours (published_at, dernière publication) contre les
+ * 7 jours d'avant, et brouillons prêts à publier (règle du formulaire).
+ */
+export interface ListingFlow { publishedLast7d: number; publishedPrev7d: number; readyDrafts: number }
+
+export function useListingFlow() {
+  return useQuery<ListingFlow>({
+    queryKey: ["admin_overview_listing_flow"],
+    staleTime: 60_000,
+    queryFn: async () => {
+      const now = Date.now();
+      const d7 = new Date(now - 7 * 86400_000).toISOString();
+      const d14 = new Date(now - 14 * 86400_000).toISOString();
+      const [last, prev] = await Promise.all([
+        supabase.from("sits").select("id", { count: "exact", head: true }).gte("published_at", d7),
+        supabase.from("sits").select("id", { count: "exact", head: true }).gte("published_at", d14).lt("published_at", d7),
+      ]);
+      const failed = [last, prev].find((r: any) => r.error);
+      if (failed) { reportAdminReadError("Vue d'ensemble : publications", failed.error); throw failed.error; }
+      const ready = await loadReadyDrafts(supabase);
+      return { publishedLast7d: last.count ?? 0, publishedPrev7d: prev.count ?? 0, readyDrafts: ready.length };
     },
   });
 }

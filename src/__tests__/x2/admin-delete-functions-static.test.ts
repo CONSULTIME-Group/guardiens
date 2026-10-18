@@ -124,3 +124,23 @@ describe("écrans et décisions", () => {
     for (const f of files) expect(read(f)).not.toMatch(/[\u2013\u2014]/);
   });
 });
+
+describe("ADM5 · trace serveur de la suppression d'annonce", () => {
+  const SRC = read("supabase/functions/admin-delete-listing/index.ts");
+  it("écrit listing_delete au journal avant tout effacement, avec les comptes", () => {
+    const log = SRC.indexOf('action: "listing_delete"');
+    expect(log).toBeGreaterThan(0);
+    for (const step of ['from("reviews").delete()', 'from("applications")\n      .delete()', 'from("sits")\n      .delete(']) {
+      const i = SRC.indexOf(step);
+      expect(i, step).toBeGreaterThan(log);
+    }
+    for (const k of ["reviews:", "applications:", "conversations:", "messages:"]) expect(SRC).toContain(k);
+  });
+  it("une trace impossible annule la suppression", () => {
+    expect(SRC).toContain("Trace d'audit impossible, suppression annulée");
+    expect(SRC.indexOf("if (logError)")).toBeLessThan(SRC.indexOf('from("reviews").delete()'));
+  });
+  it("le contrôle admin précède la trace", () => {
+    expect(SRC.indexOf('"has_role"')).toBeLessThan(SRC.indexOf('action: "listing_delete"'));
+  });
+});

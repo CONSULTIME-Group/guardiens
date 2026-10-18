@@ -24,6 +24,7 @@ import { Eye, EyeOff, Trash2, Search, Sparkles, Share2, Link2, Mail, BarChart3, 
 import { buildCsv, downloadCsv } from "@/lib/admin/csv";
 import { ErrorState } from "@/components/admin/ui";
 import DossierDetailSheet from "@/components/admin/DossierDetailSheet";
+import { draftReadiness, loadOwnerDraftContexts, parisToday, type OwnerDraftContext } from "@/lib/admin/draftReadiness";
 import { LISTING_FILTERS, LISTING_FILTER_LABELS, listingCity, listingFilterScope, sitDistribution, sitSituation, SIT_BUCKETS_PRIMARY, SIT_BUCKETS_SECONDARY, type ListingFilter, type SitBucket } from "@/lib/admin/listingSituation";
 import { useMessageAiAssistant, type MessageAiAction } from "@/hooks/useMessageAiAssistant";
 import {
@@ -99,6 +100,9 @@ const AdminListings = () => {
   const [deleteModal, setDeleteModal] = useState<string | null>(null);
   const [hideModal, setHideModal] = useState<string | null>(null);
   const [restoreModal, setRestoreModal] = useState<string | null>(null);
+  // Lot ADM3 : publier à la place du propriétaire un brouillon complet.
+  const [publishModal, setPublishModal] = useState<string | null>(null);
+  const [publishing, setPublishing] = useState(false);
 
   // Répartition complète (indépendante des filtres), rechargée après chaque action.
   const [kpis, setKpis] = useState<{ total: number; counts: Record<SitBucket, number>; newLast7d: number } | null>(null);
@@ -163,6 +167,7 @@ const AdminListings = () => {
       if (scope.status) q = q.eq("status", scope.status as any);
       if (scope.statusIn) q = q.in("status", scope.statusIn as any);
       if (scope.statusNeq) q = q.neq("status", scope.statusNeq as any);
+      if (scope.publishedSinceDays) q = q.gte("published_at", new Date(Date.now() - scope.publishedSinceDays * 86400_000).toISOString());
       if (scope.unpublished === "null") q = q.is("unpublished_at", null);
       if (scope.unpublished === "not_null") q = q.not("unpublished_at", "is", null);
       if (scope.hiddenBy === "null") q = q.is("hidden_by", null);
@@ -194,6 +199,23 @@ const AdminListings = () => {
   }, [filterStatus, focusSitId, focusOwnerId]);
 
   useEffect(() => { fetchListings(); }, [fetchListings]);
+
+  // Lot ADM3 : contexte propriétaire (logement, photos, animaux) des brouillons
+  // affichés, pour juger « prêt à publier » avec la règle du formulaire.
+  const [draftCtx, setDraftCtx] = useState<Map<string, OwnerDraftContext> | null>(null);
+  const [draftCtxError, setDraftCtxError] = useState<string | null>(null);
+  useEffect(() => {
+    const owners = listings.filter((l: any) => l.status === "draft").map((l: any) => l.user_id).filter(Boolean);
+    if (!owners.length) { setDraftCtx(new Map()); setDraftCtxError(null); return; }
+    let cancelled = false;
+    setDraftCtx(null);
+    loadOwnerDraftContexts(supabase, owners)
+      .then((m) => { if (!cancelled) { setDraftCtx(m); setDraftCtxError(null); } })
+      .catch((e) => { if (!cancelled) { setDraftCtx(new Map()); setDraftCtxError(e?.message || "lecture refusée"); } });
+    return () => { cancelled = true; };
+  }, [listings]);
+  const today = parisToday();
+  const isReady = (l: any) => !!draftCtx && !draftCtxError && draftReadiness(l, draftCtx.get(l.user_id), today).ready;
 
   // Repère visuel : couverture absente ou couverture montrant un animal
   useEffect(() => {
@@ -355,6 +377,51 @@ const AdminListings = () => {
     toast.success("Annonce remise en ligne"); setRestoreModal(null); refreshAfterAction();
   };
 
+  const handlePublishOnBehalf = async (id: string) => {
+    const listing = listings.find((l) => l.id === id);
+    if (!listing || !isReady(listing)) {
+      toast.error("Ce brouillon n'est plus prêt à publier. Rechargez la liste.");
+      setPublishModal(null);
+      return;
+    }
+    setPublishing(true);
+    const { data: userRes } = await supabase.auth.getUser();
+    const adminId = userRes?.user?.id ?? null;
+    const { data: updated, error } = await supabase
+      .from("sits")
+      .update({ status: "published" } as any)
+      .eq("id", id)
+      .eq("status", "draft")
+      .is("unpublished_at", null)
+      .select("id, published_at");
+    setPublishing(false);
+    if (error) {
+      // Message des garde-fous de la base (photo, ville, description) affiché tel quel.
+      toast.error(`Publication refusée : ${error.message}`);
+      return;
+    }
+    if (!updated || updated.length === 0) {
+      toast.error("Publication non effectuée : le brouillon a changé entre-temps.");
+      setPublishModal(null);
+      refreshAfterAction();
+      return;
+    }
+    if (adminId) {
+      const { error: logErr } = await supabase.from("admin_action_logs").insert({
+        admin_id: adminId, action: "publish_on_behalf", target_type: "sit", target_id: id,
+        metadata: { title: listing.title ?? null, owner_id: listing.user_id ?? null },
+      } as any);
+      if (logErr) console.error("admin_action_logs publish_on_behalf:", logErr);
+    }
+    toast.success("Annonce publiée. Prévenez le propriétaire.");
+    setPublishModal(null);
+    refreshAfterAction();
+    if (listing.user_id) {
+      const ownerName = `${listing.owner?.first_name || ""}`.trim();
+      setWriteTarget({ userId: listing.user_id, userName: ownerName || "le propriétaire", sitId: id });
+    }
+  };
+
   const [deleteCounts, setDeleteCounts] = useState<DeleteCounts | null>(null);
   const [deleteCountsError, setDeleteCountsError] = useState<string | null>(null);
   useEffect(() => {
@@ -399,6 +466,7 @@ const AdminListings = () => {
   const filtered = listings.filter((l) => {
     if (search && !l.title?.toLowerCase().includes(search.toLowerCase()) && !l.owner?.first_name?.toLowerCase().includes(search.toLowerCase())) return false;
     if (filterCity && filterCity !== "all_cities" && listingCity(l).city !== filterCity) return false;
+    if (filterStatus === "ready" && !focusSitId && !focusOwnerId && !isReady(l)) return false;
     if (filterStatus === "to_staff" && !focusSitId && !focusOwnerId) {
       // Sans statistiques chargées, on ne sait pas : on n'affiche pas l'annonce.
       if (!stats[l.id]) return false;
@@ -679,6 +747,8 @@ const AdminListings = () => {
               <TableRow><TableCell colSpan={6} className="text-center py-8 text-destructive">Indisponible</TableCell></TableRow>
             ) : countUnknown ? (
               <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{statsError ? "Indisponible, candidatures non lues" : "Chargement des candidatures…"}</TableCell></TableRow>
+            ) : filterStatus === "ready" && !focusSitId && !focusOwnerId && (draftCtxError || !draftCtx) ? (
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{draftCtxError ? "Indisponible, logements et animaux non lus" : "Lecture des logements et des animaux…"}</TableCell></TableRow>
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
             ) : paginated.map((listing) => {
@@ -745,6 +815,11 @@ const AdminListings = () => {
                   <TableCell className="text-right text-sm tabular-nums">{st?.views ?? "·"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end items-center gap-1 whitespace-nowrap">
+                      {isReady(listing) && (
+                        <Button size="sm" onClick={() => setPublishModal(listing.id)} data-testid="publish-on-behalf">
+                          <Send className="h-4 w-4 mr-1" /> Publier à sa place
+                        </Button>
+                      )}
                       <Button variant="outline" size="sm" onClick={() => setDetailListing(listing)}>
                         <Info className="h-4 w-4 mr-1" /> Détails
                       </Button>
@@ -932,6 +1007,22 @@ const AdminListings = () => {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Lot ADM3 : publication à la place du propriétaire */}
+      <Dialog open={!!publishModal} onOpenChange={(o) => !o && !publishing && setPublishModal(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Publier ce brouillon à la place du propriétaire ?</DialogTitle></DialogHeader>
+          <DialogDescription>
+            Le brouillon est complet. Une fois publié, les gardiens proches reçoivent l'alerte habituelle et l'action est inscrite au journal d'audit. Un message au propriétaire s'ouvre ensuite pour le prévenir.
+          </DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPublishModal(null)} disabled={publishing}>Annuler</Button>
+            <Button onClick={() => publishModal && handlePublishOnBehalf(publishModal)} disabled={publishing}>
+              {publishing && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}Publier
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Hide confirmation */}
       <Dialog open={!!hideModal} onOpenChange={(o) => !o && setHideModal(null)}>

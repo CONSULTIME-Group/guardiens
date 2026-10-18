@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -87,8 +87,8 @@ describe("abonnements et paramètres", () => {
     expect(src).not.toContain("2026-09-30");
     expect(src).not.toContain("La fin de cette phase");
   });
-  it("carte KPI « Annonces actives » retirée", () => {
-    expect(read("src/pages/admin/_components/dashboard/KpiCards.tsx")).not.toContain('title: "Annonces actives"');
+  it("carte KPI « Annonces actives » retirée avec KpiCards (lot ADM4)", () => {
+    expect(existsSync("src/pages/admin/_components/dashboard/KpiCards.tsx")).toBe(false);
   });
 });
 
