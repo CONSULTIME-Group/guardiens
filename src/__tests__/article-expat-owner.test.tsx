@@ -29,6 +29,8 @@ describe.each([...OWNER_GUIDE_ARTICLE_SLUGS])("Guide %s, parcours propriétaire"
 });
 
 it.each([
+  ["conseils-garder-chien", 2],
+  ["devenir-gardien-guide-complet", 2],
   ["bouledogue-francais-lyon-guide-race", 2],
   ["conseil-gardien-creer-profil-attractif-lyon", 2],
   ["berger-australien-guide", 2],
