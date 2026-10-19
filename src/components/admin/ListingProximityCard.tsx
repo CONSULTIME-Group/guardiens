@@ -34,7 +34,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MAX_RADIUS_KM, LARGE_RADIUS_WARN_KM, PROXIMITY_DEDUP_DAYS, clampRadiusInput } from "@/lib/proximityRadius";
+import {
+  MAX_RADIUS_KM,
+  LARGE_RADIUS_WARN_KM,
+  PROXIMITY_DEDUP_DAYS,
+  clampRadiusInput,
+  needsRadiusConfirmation,
+  radiusConfirmationTitle,
+} from "@/lib/proximityRadius";
+import { SitOwnerAbsenceNotice } from "@/components/admin/OwnerAbsenceBadge";
 import { Loader2, Search, Send, AlertTriangle } from "lucide-react";
 
 interface PreviewRecipient {
@@ -73,7 +81,10 @@ const ListingProximityCard = ({
   hideHeader = false,
   onClose,
 }: ListingProximityCardProps) => {
-  const [radiusKm, setRadiusKm] = useState<number>(initialRadiusKm);
+  const [radiusKm, setRadiusKm] = useState<number>(clampRadiusInput(initialRadiusKm));
+  // Lot P2 : au-delà de 200 km, le rayon se confirme explicitement dans le dialogue.
+  const [radiusConfirmed, setRadiusConfirmed] = useState(false);
+  const radiusNeedsConfirm = needsRadiusConfirmation(radiusKm);
 
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -232,7 +243,7 @@ const ListingProximityCard = ({
             onChange={(e) => setRadiusKm(clampRadiusInput(e.target.value))}
           />
           <p className="text-[11px] text-muted-foreground">
-            Rayon libre. Les gardiens déjà servis pour cette annonce, ou touchés par une diffusion dans les {PROXIMITY_DEDUP_DAYS} derniers jours, sont exclus.
+            Rayon jusqu'à {MAX_RADIUS_KM.toLocaleString("fr-FR")} km, confirmé au-delà de {LARGE_RADIUS_WARN_KM} km. Les gardiens déjà servis pour cette annonce, ou touchés par une diffusion dans les {PROXIMITY_DEDUP_DAYS} derniers jours, sont exclus.
           </p>
         </div>
         <Button onClick={handlePreview} disabled={loading} size="sm" variant="outline">
@@ -243,6 +254,8 @@ const ListingProximityCard = ({
           )}
         </Button>
       </div>
+
+      <SitOwnerAbsenceNotice sitId={sitId} />
 
       {radiusKm >= LARGE_RADIUS_WARN_KM && (
         <Alert variant="default" className="border-warning/40 bg-warning/5 py-2">
@@ -356,6 +369,7 @@ const ListingProximityCard = ({
       <Button
         onClick={() => {
           setConfirmInput("");
+          setRadiusConfirmed(false);
           setConfirmOpen(true);
         }}
         disabled={sending || !preview || recipientCount === 0}
@@ -396,12 +410,17 @@ const ListingProximityCard = ({
         open={confirmOpen}
         onOpenChange={(open) => {
           setConfirmOpen(open);
-          if (!open) setConfirmInput("");
+          if (!open) {
+            setConfirmInput("");
+            setRadiusConfirmed(false);
+          }
         }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer l'envoi aux gardiens du coin</AlertDialogTitle>
+            <AlertDialogTitle>
+              {radiusNeedsConfirm ? radiusConfirmationTitle(radiusKm) : "Confirmer l'envoi aux gardiens du coin"}
+            </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-3 text-sm">
                 <p>
@@ -416,6 +435,20 @@ const ListingProximityCard = ({
                   value={confirmInput}
                   onChange={(e) => setConfirmInput(e.target.value.replace(/\D/g, ""))}
                 />
+                {radiusNeedsConfirm && (
+                  <label className="flex items-start gap-2 text-sm text-foreground">
+                    <input
+                      type="checkbox"
+                      data-testid="radius-confirm-checkbox"
+                      className="mt-0.5 h-4 w-4 accent-primary"
+                      checked={radiusConfirmed}
+                      onChange={(e) => setRadiusConfirmed(e.target.checked)}
+                    />
+                    <span>
+                      Je diffuse à {radiusKm.toLocaleString("fr-FR")} km, au-delà de {LARGE_RADIUS_WARN_KM} km.
+                    </span>
+                  </label>
+                )}
                 <p className="text-xs text-muted-foreground">
                   Un email personnalisé par destinataire, jamais de copie groupée. Action irréversible.
                 </p>
@@ -429,7 +462,8 @@ const ListingProximityCard = ({
               disabled={
                 sending ||
                 !preview ||
-                Number(confirmInput) !== preview.count
+                Number(confirmInput) !== preview.count ||
+                (radiusNeedsConfirm && !radiusConfirmed)
               }
             >
               {sending ? (

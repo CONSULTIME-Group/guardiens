@@ -94,6 +94,7 @@ import {
 
 import { shouldPromptAnimalMention } from "@/lib/sitAnimalMention";
 import { shouldOfferPublishExitChoice, type DraftHoldReason } from "@/lib/draftHoldReasons";
+import { buildAbandonMetadata, resolveStep0Field, type AbandonExit, type Step0Field } from "@/lib/sitCreateAbandon";
 import { reportError } from "@/lib/errorLogger";
 import { isBareCreateEntry, periodsOverlap, resumeRedirectFor, type LiveSitLike } from "@/lib/ownerLiveSit";
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
@@ -479,14 +480,45 @@ const CreateSit = () => {
   // réellement affiché, sinon l'étape 0 absorbe le temps de mise en route.
 
 
-  // Analytics : abandon si unmount sans publication
+  // Lot P2 : mesure de l'abandon à l'étape 0, portée par sits_create_abandoned
+  // (nom du dernier champ touché, brouillon enregistré ou non, formulaire
+  // affiché ou non). Jamais de valeur saisie : src/lib/sitCreateAbandon.ts.
+  const step0LastFieldRef = useRef<Step0Field | null>(null);
+  const draftSavedRef = useRef(false);
+  const formShownRef = useRef(false);
+  const abandonEmittedRef = useRef(false);
+  const noteStep0Field = useCallback((target: EventTarget | null) => {
+    const field = resolveStep0Field(target);
+    if (field) step0LastFieldRef.current = field;
+  }, []);
+
+  // Analytics : abandon sans publication, au changement de route (démontage)
+  // ou à la fermeture de page (pagehide hors mise en cache), une seule fois.
   useEffect(() => {
+    abandonEmittedRef.current = false;
+    const emit = (exit: AbandonExit) => {
+      if (publishedRef.current || abandonEmittedRef.current) return;
+      abandonEmittedRef.current = true;
+      void trackEvent("sits_create_abandoned", {
+        transport: exit === "page_close" ? "beacon" : "default",
+        metadata: buildAbandonMetadata({
+          step: lastStepRef.current,
+          hasDraftParam: !!draftIdParam,
+          exit,
+          formShown: formShownRef.current,
+          lastField: step0LastFieldRef.current,
+          draftSaved: draftSavedRef.current,
+        }),
+      });
+    };
+    const onPageHide = (event: PageTransitionEvent) => {
+      if (event.persisted) return;
+      emit("page_close");
+    };
+    window.addEventListener("pagehide", onPageHide);
     return () => {
-      if (!publishedRef.current) {
-        void trackEvent("sits_create_abandoned", {
-          metadata: { step: lastStepRef.current, has_draft: !!draftIdParam },
-        });
-      }
+      window.removeEventListener("pagehide", onPageHide);
+      emit("route_change");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -1296,6 +1328,7 @@ const CreateSit = () => {
         accepts_sitter_children: acceptsSitterChildren,
       };
       const markSaved = () => {
+        draftSavedRef.current = true;
         saveFailCountRef.current = 0;
         saveFailToastShownRef.current = false;
         setRemoteSaveFailed(false);
@@ -2041,6 +2074,7 @@ const CreateSit = () => {
       stepStartedAtRef.current = Date.now();
       const isBackward = step < lastStepRef.current || visitedStepsRef.current.has(step);
       void trackEvent("sits_create_step_started", { metadata: { step, is_backward: isBackward } });
+      formShownRef.current = true;
       visitedStepsRef.current.add(step);
       lastStepRef.current = step;
     }
@@ -2487,7 +2521,12 @@ const CreateSit = () => {
 
       {/* ===================== STEP 0 : L'ESSENTIEL ===================== */}
       {currentStep === 0 && (
-        <div className="px-4 max-w-3xl mx-auto space-y-6">
+        <div
+          className="px-4 max-w-3xl mx-auto space-y-6"
+          data-testid="create-sit-step0"
+          onFocusCapture={(e) => noteStep0Field(e.target)}
+          onPointerDownCapture={(e) => noteStep0Field(e.target)}
+        >
           {/* ===== Filtre d'usage bloquant : garde à domicile uniquement ===== */}
           <div id="sit-location-field" className="scroll-mt-24 rounded-xl border border-primary/30 bg-primary/5 p-5">
             <p className="font-heading text-base font-semibold text-foreground mb-1">
