@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { checkLink, prefilledLink } from "@/lib/admin/personalMessageLink";
 
 export interface WriteToMemberTarget {
   userId: string;
@@ -39,19 +40,24 @@ export const WriteToMemberDialog = ({ target, onClose, onSent }: Props) => {
     if (target) {
       setSubject("");
       setBody("");
-      setLinkLabel("");
-      setLinkUrl(target.sitId ? `https://guardiens.fr/sits/${target.sitId}` : "");
+      // Lot ADM9 : adresse de l'annonce préremplie avec son libellé, le lien part entier.
+      const link = prefilledLink(target.sitId);
+      setLinkLabel(link.linkLabel);
+      setLinkUrl(link.linkUrl);
       setPreviewHtml(null);
       setRequestId(crypto.randomUUID());
     }
   }, [target]);
+
+  // Lot ADM9 : même règle que le serveur, un lien entier ou aucun lien.
+  const linkCheck = checkLink(linkLabel, linkUrl);
 
   const payload = (mode: "preview" | "send") => ({
     mode,
     recipientUserId: target?.userId,
     subject,
     body,
-    ...(linkLabel.trim() || linkUrl.trim() ? { linkLabel, linkUrl } : {}),
+    ...(linkCheck.ok && linkCheck.link ? linkCheck.link : {}),
     ...(target?.sitId ? { sitId: target.sitId } : {}),
     requestId,
   });
@@ -93,7 +99,7 @@ export const WriteToMemberDialog = ({ target, onClose, onSent }: Props) => {
     }
   };
 
-  const canSubmit = subject.trim().length > 0 && body.trim().length > 0 && !busy;
+  const canSubmit = subject.trim().length > 0 && body.trim().length > 0 && linkCheck.ok && !busy;
 
   return (
     <Dialog open={!!target} onOpenChange={(o) => !o && !busy && onClose()}>
@@ -120,7 +126,7 @@ export const WriteToMemberDialog = ({ target, onClose, onSent }: Props) => {
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="wtm-label">Libellé du lien (facultatif)</Label>
+                <Label htmlFor="wtm-label">Libellé du lien</Label>
                 <Input id="wtm-label" value={linkLabel} maxLength={60} onChange={(e) => setLinkLabel(e.target.value)} />
               </div>
               <div className="space-y-1.5">
@@ -128,6 +134,11 @@ export const WriteToMemberDialog = ({ target, onClose, onSent }: Props) => {
                 <Input id="wtm-url" value={linkUrl} placeholder="https://guardiens.fr/..." onChange={(e) => setLinkUrl(e.target.value)} />
               </div>
             </div>
+            {linkCheck.ok ? (
+              <p className="text-xs text-muted-foreground">Lien facultatif : remplissez les deux champs, ou videz les deux.</p>
+            ) : (
+              <p role="alert" data-testid="wtm-link-error" className="text-xs text-destructive">{linkCheck.error}</p>
+            )}
           </div>
         )}
         <DialogFooter className="gap-2">

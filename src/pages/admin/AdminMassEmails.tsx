@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { ARCHIVED_PRESET_KEYS, exclusionRecap, internalTextBlocking } from "@/lib/admin/massEmailSafety";
 import { countsByCampaign, type CampaignCounts, type MassSendRow } from "@/lib/admin/massEmailCounts";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { deferredSentByCampaign, massOutcome, MASS_OUTCOME_LABELS, type DeferredRow, type MassOutcome } from "@/lib/admin/trueCounts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,6 +46,7 @@ interface MassEmail {
   sent_count?: number | null;
   failed_count?: number | null;
   skipped_count?: number | null;
+  filters?: { sit_id?: string; template_name?: string } | null;
 }
 
 export const templatePreviewNotice = (name: string) =>
@@ -71,6 +73,13 @@ const STATUS_META: Record<string, StatusMeta> = {
 };
 
 const CANCELLABLE_STATUSES = new Set(["sending", "paused", "enqueuing"]);
+
+/** Lot ADM9 : motif lisible d'un envoi terminé sans envoi direct. */
+const OUTCOME_META: Record<Exclude<MassOutcome, null>, StatusMeta> = {
+  sent: STATUS_META.done,
+  sent_later: { label: MASS_OUTCOME_LABELS.sent_later, variant: "default" },
+  cancelled: { label: MASS_OUTCOME_LABELS.cancelled, variant: "outline", className: "bg-muted text-muted-foreground border-transparent" },
+};
 
 // Campagnes prédéfinies
 const OSER_SUBJECT = "Et si vous osiez demander, vous aussi ?";
@@ -679,26 +688,55 @@ const AdminMassEmails = () => {
   const [history, setHistory] = useState<MassEmail[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
   const [historyCounts, setHistoryCounts] = useState<Map<string, CampaignCounts> | null>(null);
+  const [historyDeferred, setHistoryDeferred] = useState<Map<string, number> | null>(null);
 
   const loadHistory = useCallback(async () => {
     setHistoryLoading(true);
     const { data } = await supabase
       .from("mass_emails")
-      .select("id, created_at, segment, subject, body, cta_label, cta_url, recipients_count, status, enqueued_count, sent_count, failed_count, skipped_count")
+      .select("id, created_at, segment, subject, body, cta_label, cta_url, recipients_count, status, enqueued_count, sent_count, failed_count, skipped_count, filters")
       .order("created_at", { ascending: false })
       .limit(20);
     const rows = (data as MassEmail[]) || [];
     setHistory(rows);
     // Lot A8 : destinataires et envoyés lus dans mass_email_sends (hors ignorés).
+    let counts: Map<string, CampaignCounts> | null = null;
     try {
       const ids = rows.map((r) => r.id);
       const res = ids.length ? await fetchAllRows<MassSendRow>((from, to) =>
         supabase.from("mass_email_sends").select("mass_email_id,recipient_email,status,first_clicked_at")
           .in("mass_email_id", ids).order("created_at", { ascending: true }).order("id", { ascending: true }).range(from, to) as any) : { rows: [] as MassSendRow[] };
-      setHistoryCounts(countsByCampaign(res.rows));
+      counts = countsByCampaign(res.rows);
+      setHistoryCounts(counts);
     } catch (e) {
       console.error("[AdminMassEmails] compteurs d'envoi indisponibles", e);
       setHistoryCounts(null);
+    }
+    // Lot ADM9 : un envoi « Terminé » sans envoi direct a pu partir plus tard
+    // par la file des reports (heures calmes, plafond) ; on lit ses reports
+    // envoyés dans email_deferred_queue pour afficher « Envoyé plus tard » ou « Annulé ».
+    if (counts) {
+      try {
+        const candidates = rows.filter((r) => massOutcome(r.status, counts!.get(r.id)?.sent ?? 0, 0) !== null);
+        const prefixes = new Set<string>();
+        for (const r of candidates) {
+          const sit = r.segment === "listing_proximity" ? r.filters?.sit_id : undefined;
+          if (sit && /^[0-9a-f-]{36}$/i.test(sit)) prefixes.add(`listing-proximity-${sit}-`);
+          else prefixes.add(`mass-${r.id}-`);
+        }
+        const deferred: DeferredRow[] = [];
+        for (const prefix of prefixes) {
+          const res = await fetchAllRows<DeferredRow>((from, to) =>
+            supabase.from("email_deferred_queue").select("id,idempotency_key,status,created_at")
+              .like("idempotency_key", `${prefix}%`).eq("status", "sent")
+              .order("id", { ascending: true }).range(from, to) as any);
+          deferred.push(...res.rows);
+        }
+        setHistoryDeferred(deferredSentByCampaign(rows, deferred));
+      } catch (e) {
+        console.error("[AdminMassEmails] reports indisponibles", e);
+        setHistoryDeferred(null);
+      }
     }
     setHistoryLoading(false);
   }, []);
@@ -1253,9 +1291,12 @@ const AdminMassEmails = () => {
                   </TableHeader>
                   <TableBody>
                     {history.map((row) => {
-                      const meta = STATUS_META[row.status] ?? { label: row.status, variant: "outline" as const };
                       const live = historyCounts?.get(row.id);
                       const sent = live ? live.sent : 0;
+                      const later = historyDeferred?.get(row.id) ?? 0;
+                      // Lot ADM9 : « Terminé » à 0 envoyé relu avec son motif.
+                      const outcome = live && historyDeferred ? massOutcome(row.status, sent, later) : null;
+                      const meta = outcome ? OUTCOME_META[outcome] : STATUS_META[row.status] ?? { label: row.status, variant: "outline" as const };
                       const enq = row.enqueued_count ?? 0;
                       const failed = row.failed_count ?? 0;
                       const skipped = row.skipped_count ?? 0;
@@ -1279,6 +1320,9 @@ const AdminMassEmails = () => {
                                     {failed > 0 ? ` · ${failed} échec${failed > 1 ? "s" : ""}` : ""}
                                     {skipped > 0 ? ` · ${skipped} ignoré${skipped > 1 ? "s" : ""}` : ""}
                                   </span>
+                                )}
+                                {outcome === "sent_later" && (
+                                  <span className="text-muted-foreground">{` · ${later} parti${later > 1 ? "s" : ""} plus tard`}</span>
                                 )}
                               </span>
                             ) : (

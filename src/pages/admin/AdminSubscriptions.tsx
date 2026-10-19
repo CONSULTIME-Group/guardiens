@@ -14,6 +14,7 @@ import { fr } from "date-fns/locale";
 import { CreditCard, Users, Crown, AlertTriangle, Clock, Plus, Minus, ShieldCheck, ShieldX, Search, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { PRICING_IS_ACTIVE } from "@/config/pricing";
 
 const planLabels: Record<string, { label: string; color: string }> = {
   founder_free: { label: "Fondateur", color: "bg-warning-soft text-warning-foreground dark:bg-warning/30 dark:text-warning" },
@@ -21,6 +22,15 @@ const planLabels: Record<string, { label: string; color: string }> = {
   free_launch: { label: "Lancement gratuit", color: "bg-success-soft text-success" },
   owner_free: { label: "Propriétaire (accès libre)", color: "bg-muted text-muted-foreground" },
 };
+
+/**
+ * Lot ADM9 : les gestes d'écriture (prolonger, attribuer ou retirer le badge
+ * Fondateur, rétrograder) écrivent depuis le navigateur sans journal ; ils
+ * restent désactivés tant que PRICING_IS_ACTIVE vaut false.
+ */
+export const SUBSCRIPTION_WRITES_ENABLED = PRICING_IS_ACTIVE;
+// « Gratuit » dit simplement, sans durée (verrou Z2, src/__tests__/z2/finitions-front.test.ts).
+export const SUBSCRIPTION_FREE_NOTICE = "Guardiens est gratuit : rien à modifier ici.";
 
 const AdminSubscriptions = () => {
   const navigate = useNavigate();
@@ -73,10 +83,17 @@ const AdminSubscriptions = () => {
     }
     setSubscriptions(subs);
 
+    // Lot ADM9 : les fondateurs se lisent sur profiles.is_founder (197 le
+    // 19/10/2026), subscriptions est vide tant que Guardiens est gratuit.
+    const { count: founderCount } = await supabase
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("is_founder", true);
+
     const monthAgo = new Date(Date.now() - 30 * 86400000);
     setMetrics({
       active: allData.filter(s => s.status === "active").length,
-      founders: allData.filter(s => s.plan === "founder_free" && s.status === "active").length,
+      founders: founderCount ?? 0,
       expiredMonth: allData.filter(s => s.status === "expired" && s.expires_at && new Date(s.expires_at) >= monthAgo).length,
     });
     setLoading(false);
@@ -95,6 +112,8 @@ const AdminSubscriptions = () => {
   const handleAction = async () => {
     const { sub, action, duration, motif } = actionModal;
     if (!sub) return;
+    // Lot ADM9 : aucune écriture tant que Guardiens est gratuit.
+    if (!SUBSCRIPTION_WRITES_ENABLED) return;
 
     // Lot Z2 : l'action « Offrir Premium » est retirée. Guardiens est gratuit
     // pour tous (PRICING_IS_ACTIVE = false) et aucune notification
@@ -172,6 +191,10 @@ const AdminSubscriptions = () => {
           </CardContent>
         </Card>
       </div>
+
+      {!SUBSCRIPTION_WRITES_ENABLED && (
+        <p data-testid="subscriptions-free-notice" className="text-sm text-muted-foreground">{SUBSCRIPTION_FREE_NOTICE}</p>
+      )}
 
       {/* Expiring alert */}
       {expiringCount > 0 && (
@@ -256,15 +279,15 @@ const AdminSubscriptions = () => {
                       <Button variant="ghost" size="icon" title="Voir profil" onClick={() => navigate(`/gardiens/${sub.user_id}`)}>
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" title="Prolonger" onClick={() => setActionModal({ open: true, sub, action: "extend", duration: "1", motif: "" })}>
+                      <Button variant="ghost" size="icon" title={SUBSCRIPTION_WRITES_ENABLED ? "Prolonger" : SUBSCRIPTION_FREE_NOTICE} disabled={!SUBSCRIPTION_WRITES_ENABLED} onClick={() => setActionModal({ open: true, sub, action: "extend", duration: "1", motif: "" })}>
                         <Plus className="h-4 w-4" />
                       </Button>
                       {sub.profile?.is_founder ? (
-                        <Button variant="ghost" size="icon" title="Révoquer Fondateur" onClick={() => setActionModal({ open: true, sub, action: "revoke_founder", duration: "", motif: "" })}>
+                        <Button variant="ghost" size="icon" title={SUBSCRIPTION_WRITES_ENABLED ? "Révoquer Fondateur" : SUBSCRIPTION_FREE_NOTICE} disabled={!SUBSCRIPTION_WRITES_ENABLED} onClick={() => setActionModal({ open: true, sub, action: "revoke_founder", duration: "", motif: "" })}>
                           <ShieldX className="h-4 w-4 text-destructive" />
                         </Button>
                       ) : (
-                        <Button variant="ghost" size="icon" title="Attribuer Fondateur" onClick={() => setActionModal({ open: true, sub, action: "grant_founder", duration: "", motif: "" })}>
+                        <Button variant="ghost" size="icon" title={SUBSCRIPTION_WRITES_ENABLED ? "Attribuer Fondateur" : SUBSCRIPTION_FREE_NOTICE} disabled={!SUBSCRIPTION_WRITES_ENABLED} onClick={() => setActionModal({ open: true, sub, action: "grant_founder", duration: "", motif: "" })}>
                           <ShieldCheck className="h-4 w-4 text-warning" />
                         </Button>
                       )}
@@ -309,7 +332,7 @@ const AdminSubscriptions = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setActionModal({ open: false, sub: null, action: "", duration: "1", motif: "" })}>Annuler</Button>
-            <Button onClick={handleAction} variant={actionModal.action === "revoke_founder" ? "destructive" : "default"}>Confirmer</Button>
+            <Button onClick={handleAction} disabled={!SUBSCRIPTION_WRITES_ENABLED} variant={actionModal.action === "revoke_founder" ? "destructive" : "default"}>Confirmer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

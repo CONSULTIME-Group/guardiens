@@ -12,6 +12,7 @@ import { format, subDays, startOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import FacebookReferralCard from "@/components/admin/analytics/FacebookReferralCard";
 import { measureBreakNotice } from "@/lib/admin/measureBreak";
+import { distinctCohortPeople, rateOf, ONBOARDING_DEFINITION } from "@/lib/admin/trueCounts";
 
 type Range = 1 | 7 | 30;
 type RoleFilter = "all" | "owner" | "sitter" | "both";
@@ -67,6 +68,8 @@ const AdminAnalytics = () => {
     eventsCount24h: 0,
   });
   const [totalInscrits, setTotalInscrits] = useState(0);
+  // Lot ADM9 : personnes distinctes de la cohorte avec l'événement onboarding_completed.
+  const [onboardedPeople, setOnboardedPeople] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -90,6 +93,20 @@ const AdminAnalytics = () => {
           supabase
             .from("profiles")
             .select("id, created_at, role")
+            .gte("created_at", since.toISOString())
+            .lt("created_at", until.toISOString())
+            .order("id")
+            .range(from, to) as any,
+        ).then((r) => ({ data: r.rows, error: null as any })).catch((e) => ({ data: null, error: e }));
+
+        // ── 1 bis. Lot ADM9 : auteurs des événements onboarding_completed de la
+        // période, pour compter des personnes distinctes et non des événements
+        // (100 événements pour 44 personnes du 12 au 19/10/2026).
+        const onboardingQuery = fetchAllRows<{ user_id: string | null }>((from, to) =>
+          supabase
+            .from("analytics_events")
+            .select("id, user_id")
+            .eq("event_type", "onboarding_completed")
             .gte("created_at", since.toISOString())
             .lt("created_at", until.toISOString())
             .order("id")
@@ -160,6 +177,7 @@ const AdminAnalytics = () => {
           { data: breakdownData, error: breakdownErr },
           { data: lastEv },
           { count: count24h },
+          { data: onboardingData, error: onboardingErr },
         ] = await Promise.all([
           profilesQuery,
           countsRolePromise,
@@ -171,9 +189,10 @@ const AdminAnalytics = () => {
           breakdownPromise,
           lastEvPromise,
           count24hPromise,
+          onboardingQuery,
         ]);
 
-        const firstErr = profilesErr || countsRoleErr || countsAllErr || prevCountsErr || prevCountsAllErr || dailyErr || topErr || breakdownErr;
+        const firstErr = profilesErr || countsRoleErr || countsAllErr || prevCountsErr || prevCountsAllErr || dailyErr || topErr || breakdownErr || onboardingErr;
         if (firstErr) {
           throw new Error(firstErr.message);
         }
@@ -189,6 +208,10 @@ const AdminAnalytics = () => {
           roleFilter === "all" ? true : p.role === roleFilter
         );
         setTotalInscrits(filteredProfiles.length);
+        setOnboardedPeople(distinctCohortPeople(
+          filteredProfiles.map((p: any) => p.id as string),
+          (onboardingData || []).map((e) => e.user_id),
+        ));
 
         // Map des counts (role-aware vs role-agnostic)
         const roleMap = new Map<string, number>();
@@ -275,11 +298,12 @@ const AdminAnalytics = () => {
     return {
       signupConversionRate: started > 0 ? clamp(Math.round((realSignups / started) * 100)) : 0,
       formSubmissionRate: started > 0 ? clamp(Math.round((formSubmitted / started) * 100)) : 0,
-      activationRate: realSignups > 0 ? clamp(Math.round((onboardingCompleted / realSignups) * 100)) : 0,
+      // Lot ADM9 : numérateur en personnes distinctes de la cohorte, aucun plafond.
+      activationRate: rateOf(onboardedPeople, realSignups),
       deepActivationRate: onboardingCompleted > 0 ? clamp(Math.round((firstAction / onboardingCompleted) * 100)) : 0,
       globalConversion: started > 0 ? clamp(Math.round((firstAction / started) * 100)) : 0,
     };
-  }, [funnelCounts, totalInscrits]);
+  }, [funnelCounts, totalInscrits, onboardedPeople]);
 
   const funnelChartData = useMemo(() => {
     const colors = [
@@ -424,7 +448,8 @@ const AdminAnalytics = () => {
                 <ConversionTile
                   label="Compte créé → Onboarding terminé"
                   value={kpis.activationRate}
-                  hint={`${funnelCounts.onboarding_completed || 0} / ${totalInscrits}`}
+                  hint={`${onboardedPeople} / ${totalInscrits} personnes`}
+                  definition={ONBOARDING_DEFINITION}
                 />
                 <ConversionTile
                   label="Onboarding → 1ère action"
@@ -606,7 +631,7 @@ const StatCard = ({ label, value, delta, icon: Icon, hint }: {
   </Card>
 );
 
-const ConversionTile = ({ label, value, hint }: { label: string; value: number; hint: string }) => {
+export const ConversionTile = ({ label, value, hint, definition }: { label: string; value: number; hint: string; definition?: string }) => {
   const colorClass =
     value >= 50 ? "text-success" :
     value >= 25 ? "text-warning" :
@@ -616,6 +641,7 @@ const ConversionTile = ({ label, value, hint }: { label: string; value: number; 
       <p className="text-xs text-muted-foreground leading-tight mb-2">{label}</p>
       <p className={`text-2xl font-bold tabular-nums ${colorClass}`}>{value}%</p>
       <p className="text-[10px] text-muted-foreground mt-1 tabular-nums">{hint}</p>
+      {definition && <p className="text-[10px] text-muted-foreground mt-1 leading-snug">{definition}</p>}
     </div>
   );
 };
