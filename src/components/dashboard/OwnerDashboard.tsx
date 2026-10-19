@@ -225,7 +225,7 @@ const OwnerDashboard = () => {
       return awaitingSentence(awaiting) ?? `${pendingAppCount} candidature${pendingAppCount > 1 ? "s" : ""} à examiner.`;
     }
     if (sits.some(s => s.status === "published")) {
-      return "Votre annonce est en ligne, les candidatures arrivent.";
+      return "Votre annonce est en ligne. Une notification vous prévient dès qu'un gardien se propose.";
     }
     if (latestDraft) {
       return "Vous avez commencé une annonce. Reprenez où vous en étiez.";

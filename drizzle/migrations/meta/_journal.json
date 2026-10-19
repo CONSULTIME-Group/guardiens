@@ -659,6 +659,13 @@
       "when": 1792337060815,
       "tag": "0093_adm7_moins_de_bruit",
       "breakpoints": true
+    },
+    {
+      "idx": 94,
+      "version": "7",
+      "when": 1792337061815,
+      "tag": "0094_p1_publication_proprietaire",
+      "breakpoints": true
     }
   ]
 }
