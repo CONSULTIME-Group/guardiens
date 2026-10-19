@@ -4,6 +4,7 @@ import { isSitterProfileIndexable } from "./sitterProfileIndexability.js";
 import { mergedBreedTarget } from "./breeds/breedFicheMerges.js";
 import { isIndexableEntraideMission, isIndexableProjetMission } from "./entraideMissionIndexability.js";
 import { normalizeLastmod } from "./sitemap-core.js";
+import { departmentsWithPublishedCity } from "./departmentIndexability.js";
 
 const PRIORITY_MAP = {
   guide_central: "0.9",
@@ -55,6 +56,11 @@ export async function collectSitemapData({ readAll, fetchOrCache, maxUpdatedAtWi
 
 
 
+  // Tête des pages villes publiées, partagée par la source villes et par la
+  // source départements (lot SEO1 : une ville publiée rend son département
+  // indexable).
+  const cityPagesHead = () => maxUpdatedAtWithCount("seo_city_pages", "updated_at", q => q.eq("published", true));
+
   const [articles, seoCity, guides, depts, breeds, profiles, sits, associations, entraideMissions, projetMissions] = await Promise.all([
     fetchOrCache(
       "articles", cache,
@@ -81,7 +87,7 @@ export async function collectSitemapData({ readAll, fetchOrCache, maxUpdatedAtWi
       // servirait un sitemap périmé (cf. scripts/lib/sitemapCache.mjs).
       // Le compteur de lignes publiées fait partie de la clé : une
       // dépublication laisse la date max intacte (cas papeete, 24/08/2026).
-      () => maxUpdatedAtWithCount("seo_city_pages", "updated_at", q => q.eq("published", true)),
+      cityPagesHead,
       () => readAll("seo_city_pages", "seo_city_pages", "id, slug, updated_at", "id", q => q.eq("published", true).or("noindex.is.null,noindex.eq.false")),
       rows => rows.map(cp => ({
         loc: `/house-sitting/${cp.slug}`,
@@ -102,10 +108,29 @@ export async function collectSitemapData({ readAll, fetchOrCache, maxUpdatedAtWi
         priority: "0.7",
       }))
     ),
+    // Lot SEO1 (19/10/2026) : une page département entre au sitemap dès sa
+    // première ville publiée (règle partagée departmentIndexability.js, même
+    // règle que le meta robots de DepartmentPage). Clé versionnée et composite :
+    // une ville publiée ou dépubliée change aussi la clé des départements.
     fetchOrCache(
-      "seo_department_pages", cache,
-      () => maxUpdatedAtWithCount("seo_department_pages", "updated_at", q => q.eq("published", true)),
-      () => readAll("seo_department_pages", "seo_department_pages", "id, slug, updated_at", "id", q => q.eq("published", true).or("noindex.is.null,noindex.eq.false")),
+      "seo_department_pages_v2", cache,
+      async () => {
+        const [deptHead, cityHead] = await Promise.all([
+          maxUpdatedAtWithCount("seo_department_pages", "updated_at", q => q.eq("published", true)),
+          cityPagesHead(),
+        ]);
+        return deptHead != null && cityHead != null ? `${deptHead}#${cityHead}` : null;
+      },
+      async () => {
+        const [pages, cities] = await Promise.all([
+          readAll("seo_department_pages", "seo_department_pages", "id, slug, department, updated_at", "id", q => q.eq("published", true).or("noindex.is.null,noindex.eq.false")),
+          readAll("seo_city_pages:departements", "seo_city_pages", "id, slug, department, published", "id", q => q.eq("published", true)),
+        ]);
+        const withCity = departmentsWithPublishedCity(cities);
+        const kept = pages.filter(dp => withCity.has(dp.department));
+        console.log(`[sitemap] départements : ${kept.length} avec une ville publiée sur ${pages.length}`);
+        return kept;
+      },
       rows => rows.map(dp => ({
         loc: `/departement/${dp.slug}`,
         lastmod: NO_RELIABLE_LASTMOD,

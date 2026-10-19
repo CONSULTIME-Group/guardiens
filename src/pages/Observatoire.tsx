@@ -412,7 +412,7 @@ const Observatoire = () => {
  Un système de <strong>{BADGE_COUNT} badges de reconnaissance</strong> distingue les profils particulièrement fiables, expérimentés ou engagés (Super Sitter, Identité vérifiée, Spécialiste NAC, Sceau de cire fondateur, etc.). Les badges sont attribués automatiquement selon des règles publiques.
  </p>
  <p>
- En cas d'imprévu, une alerte prioritaire peut être envoyée aux membres éligibles du réseau <strong>Gardien d'Urgence</strong> sur les zones couvertes, en complément du gardien titulaire.
+ Le réseau <strong>Gardien d'Urgence</strong> est à venir : il ouvrira dès que chaque secteur comptera assez de gardiens expérimentés. Une alerte prioritaire pourra alors être envoyée à ses membres éligibles, en complément du gardien titulaire.
  </p>
  </div>
  </section>
@@ -468,7 +468,7 @@ const Observatoire = () => {
  </p>
 
  <p>
- Les éléments structurels (vérification d'identité, badges, Trust Score, réseau Gardien d'Urgence) sont décrits sur <Link to="/a-propos" className="text-primary hover:underline">la page À propos</Link> et dans la <Link to="/faq" className="text-primary hover:underline">FAQ</Link>.
+ Les éléments structurels (vérification d'identité, badges, Trust Score, futur réseau Gardien d'Urgence) sont décrits sur <Link to="/a-propos" className="text-primary hover:underline">la page À propos</Link> et dans la <Link to="/faq" className="text-primary hover:underline">FAQ</Link>.
  </p>
  <p>
  Données librement réutilisables avec attribution à Guardiens (https://guardiens.fr) et indication de la date de consultation.

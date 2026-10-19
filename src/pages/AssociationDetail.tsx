@@ -24,10 +24,10 @@ import {
 import { AssociationFaq } from "@/components/associations/AssociationFaq";
 import VolunteerCountByDepartment from "@/components/associations/VolunteerCountByDepartment";
 import { faqPageJsonLd, type AssociationFaqItem } from "@/lib/associationFaq";
+import { associationMedia } from "@/lib/associationMedia";
 import {
   PUBLIC_ASSOCIATION_COLUMNS,
   normalizeJsonArray,
-  normalizePhotos,
   type AssociationKeyFigure,
   type AssociationNeedDetail,
   type AssociationPressItem,
@@ -125,7 +125,10 @@ export default function AssociationDetail() {
     },
   });
 
-  const photos = useMemo(() => normalizePhotos(data?.photos).slice(0, MAX_PHOTOS), [data?.photos]);
+  // Lot SEO1 : photos et logo seulement avec l'accord de l'association.
+  const media = useMemo(() => associationMedia(data), [data]);
+  const photos = useMemo(() => media.photos.slice(0, MAX_PHOTOS), [media]);
+  const logoUrl = media.logoUrl;
   useEffect(() => {
     if (data && /^#besoin-\d+$/.test(hash)) {
       document.getElementById(hash.slice(1))?.scrollIntoView({ block: "start" });
@@ -179,7 +182,7 @@ export default function AssociationDetail() {
     description: data.description,
     ...(data.website_url ? { url: data.website_url } : {}),
     ...(sameAs.length > 0 ? { sameAs } : {}),
-    ...(data.logo_url ? { logo: data.logo_url } : {}),
+    ...(logoUrl ? { logo: logoUrl } : {}),
     ...(data.founded_year ? { foundingDate: String(data.founded_year) } : {}),
     ...(data.siren
       ? {
@@ -244,14 +247,13 @@ export default function AssociationDetail() {
         {/* 1. En tête */}
         <header className="mb-6 flex items-start gap-4">
           <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm">
-            {data.logo_url && !logoFailed ? (
+            {logoUrl && !logoFailed ? (
               <img
-                src={data.logo_url}
+                src={logoUrl}
                 alt={`Logo de ${data.name}`}
                 width={64}
                 height={64}
                 decoding="async"
-                referrerPolicy="no-referrer"
                 onError={() => setLogoFailed(true)}
                 className="h-full w-full object-contain"
               />
@@ -333,7 +335,6 @@ export default function AssociationDetail() {
                       alt={photo.alt || `${data.name}, ${data.city}`}
                       loading={i === 0 ? undefined : "lazy"}
                       decoding="async"
-                      referrerPolicy="no-referrer"
                       onError={() => setFailedPhotos((prev) => ({ ...prev, [i]: true }))}
                       className="h-full w-full object-cover"
                     />

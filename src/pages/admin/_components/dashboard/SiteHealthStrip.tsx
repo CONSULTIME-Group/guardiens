@@ -6,6 +6,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { PrerenderResumeLine } from "./PrerenderResumeLine";
 
 export interface SiteHealthCheck {
   key: string;
@@ -100,6 +101,7 @@ export function SiteHealthStrip() {
                   <Link to={c.link} className="text-primary underline underline-offset-2">Voir</Link>
                 </>
               )}
+              {c.key === "seo" && <PrerenderResumeLine />}
             </li>
           ))}
         </ul>

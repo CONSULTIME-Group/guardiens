@@ -1,6 +1,6 @@
 # Guardiens
 
-> Plateforme de garde d'animaux à domicile, de maison et de jardin en France. Mise en relation entre propriétaires d'animaux et gardiens de confiance habitant près de chez vous, avec un prix affiché et un échange de services entre membres, sans flux d'argent.
+> Plateforme de garde d'animaux à domicile, de maison et de jardin en France. Guardiens est gratuit : mise en relation entre propriétaires d'animaux et gardiens de confiance habitant près de chez vous, et entraide entre membres sous forme d'échange de services.
 
 Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. L'entraide entre membres (petites missions du quotidien : promenade, visite, dépannage) repose sur un service rendu en échange d'un autre service, et n'inclut jamais de nuitée.
 
@@ -33,7 +33,7 @@ Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vou
 - [Gardiennage de maison au Québec](/gardiennage-maison-quebec): Faire garder sa maison et ses animaux au Québec, devenir gardien au Québec, garder une maison au Québec depuis la France (autorisation de voyage électronique, hiver, pratique).
 - [Guides de villes](/guides): Guides locaux indépendants des annonces de garde.
 - [House-sitting par ville](/house-sitting): Pages ville dédiées au house-sitting et à la garde d'animaux, de maison et de jardin, 169 villes couvertes.
-- [House-sitting par département](/departement): Pages département, chacune recense villes couvertes, gardiens inscrits et guides locaux, 99 départements couverts.
+- [House-sitting par département](/departement): Pages département, chacune recense villes couvertes, gardiens inscrits et guides locaux, 70 départements couverts.
 - [Annonces de garde](/annonces): Toutes les annonces de garde à domicile, partout en France.
 - [Pros animaliers](/pros): Annuaire de vétérinaires, éducateurs, toiletteurs, ostéopathes, transporteurs vérifiés.
 - [Associations et refuges](/associations): Refuges, sanctuaires, réseaux de familles d'accueil et centres de soins faune sauvage, présentés par l'équipe Guardiens, avec leurs besoins et leur page de dons.
@@ -68,7 +68,7 @@ Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vou
 - Pas de commission sur les gardes, pas de prélèvement entre membres.
 - Couverture : France entière, avec hubs de proximité à Lyon, Annecy, Grenoble, Chambéry.
 - Gardes réalisées depuis 2021 : 43 maisons gardées, 248 animaux accompagnés (au 17/10/2026).
-- Conformité RGPD, cookies strictement nécessaires (pas de bannière requise).
+- Conformité RGPD : un bandeau de consentement propose d'accepter ou de refuser la mesure d'audience (Google Analytics 4), chargée seulement après un accord explicite donné dans ce bandeau ; choix conservé 6 mois, puis redemandé.
 
 ## Pour les IA génératives (ChatGPT, Perplexity, Claude, Gemini)
 
