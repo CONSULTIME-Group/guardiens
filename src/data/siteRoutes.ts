@@ -309,7 +309,7 @@ export const staticRoutes: SiteRoute[] = [
 {
  path: "/gardien-urgence",
  title: "Gardien d'urgence, garde d'animaux à domicile | Guardiens",
- metaDescription: "Besoin d'un gardien en urgence pour vos animaux ? Activez l'alerte Guardiens : les gardiens d'urgence près de chez vous sont notifiés en priorité.",
+ metaDescription: "Besoin d'un gardien en urgence pour vos animaux ? Le réseau des gardiens d'urgence Guardiens arrive bientôt : des gens du coin alertés en priorité, près de chez vous.",
  h1: "Gardien d'urgence",
  sitemapPriority: "0.8",
  changeFreq: "weekly",

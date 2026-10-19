@@ -1,5 +1,7 @@
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { priceComparisonCheck, PRICE_COMPARISON_RULE } from "@/lib/admin/priceComparisonCheck";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +45,29 @@ const legalPages = [
   },
 ];
 
+/**
+ * Lot SEO1 (19/10/2026) : la ligne « comparaison tarifaire » se calcule sur
+ * les articles publiés (src/lib/admin/priceComparisonCheck.ts), jamais en dur.
+ */
+const usePriceComparisonArticles = () =>
+  useQuery({
+    queryKey: ["admin-legal-price-comparison"],
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("articles")
+        .select("slug")
+        .eq("published", true)
+        .like("content", PRICE_COMPARISON_RULE.price)
+        .like("content", PRICE_COMPARISON_RULE.externalLink)
+        .order("slug");
+      if (error) throw error;
+      return ((data ?? []) as Array<{ slug: string }>).map((r) => r.slug);
+    },
+  });
+
 const AdminLegal = () => {
+  const price = priceComparisonCheck(usePriceComparisonArticles());
   return (
     <div className="space-y-6">
       <AdminPageHeader title="Pages légales" description="Consultez les pages légales du site. Toute modification se fait dans le code source." />
@@ -103,7 +127,6 @@ const AdminLegal = () => {
               { label: "Bandeau cookies : accepter, refuser, personnaliser, choix conservé 6 mois", done: true },
               { label: "Lien de désabonnement dans les emails", done: true },
               { label: "Droit de suppression de compte (RGPD Art. 17)", done: true },
-              { label: "Comparaison tarifaire avec clause de bonne foi", done: true },
             ].map((item) => (
               <div key={item.label} className="flex items-center gap-2">
                 <div className={`h-2 w-2 rounded-full ${item.done ? "bg-success" : "bg-warning"}`} />
@@ -111,6 +134,22 @@ const AdminLegal = () => {
                 {item.done && <Badge variant="outline" className="text-[10px] h-4">OK</Badge>}
               </div>
             ))}
+            <div data-testid="legal-price-comparison" data-state={price.state} className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div className={`h-2 w-2 rounded-full ${price.state === "ok" ? "bg-success" : price.state === "loading" ? "bg-muted-foreground" : "bg-warning"}`} />
+                <span className="text-xs text-muted-foreground">{price.label}</span>
+                {price.state === "ok" && <Badge variant="outline" className="text-[10px] h-4">OK</Badge>}
+              </div>
+              {price.slugs.length > 0 && (
+                <ul className="ml-4 list-disc space-y-0.5 pl-3 text-[11px] text-muted-foreground">
+                  {price.slugs.map((slug) => (
+                    <li key={slug}>
+                      <a href={`/actualites/${slug}`} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{slug}</a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -12,8 +12,10 @@ const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf8");
 // statique, sitemap edge et régénération du cache prerendu.
 describe("pages programmatiques : cohérence du garde-fou noindex", () => {
   it("la page département transmet le flag noindex à PageMeta", () => {
+    // Lot SEO1 : flag noindex de la base ET première ville publiée, par la
+    // règle partagée avec le sitemap (departmentIndexability.js).
     const src = read("src/pages/DepartmentPage.tsx");
-    expect(src).toContain("noindex={page.noindex === true}");
+    expect(src).toContain("noindex={!isDepartmentIndexable(page, cityPages.length)}");
   });
 
   it("le sitemap statique exclut les pages ville et département en noindex", () => {

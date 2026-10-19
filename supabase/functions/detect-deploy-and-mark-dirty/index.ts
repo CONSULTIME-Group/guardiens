@@ -78,8 +78,10 @@ const MIN_MARK_INTERVAL_HOURS = 72;
  * robots et a l'autre domaine. Meme valeur que public.seo_reserve_render,
  * qui borne le consommateur.
  *
- * Le detecteur compte les lignes de public.prerender_recache_log de la
- * fenetre et refuse de marquer une vague qui ferait franchir ce plafond.
+ * Le detecteur compte les lignes reussies (ok = true, lot SEO1 du 19/10/2026)
+ * de public.prerender_recache_log de la fenetre et refuse de marquer une
+ * vague qui ferait franchir ce plafond. Ses propres refus, journalises avec
+ * ok = false, n'entrent pas dans le compte.
  */
 const MONTHLY_RENDER_BUDGET = 10_000;
 export const RENDER_BUDGET_WINDOW_DAYS = 30;
@@ -332,9 +334,14 @@ Deno.serve(async (req) => {
 
     if (toMark.length > 0) {
       const monthStart = budgetWindowStart();
+      // Lot SEO1 (19/10/2026) : seuls les rendus réussis (ok = true) comptent.
+      // Les refus « monthly_budget_exceeded » que ce détecteur journalise
+      // (ok = false, jusqu'à 144 par jour) ne consomment aucun rendu et
+      // repoussaient la reprise d'un jour.
       const { count: usedCount, error: usedError } = await sb
         .from("prerender_recache_log")
         .select("id", { count: "exact", head: true })
+        .eq("ok", true)
         .gte("created_at", monthStart.toISOString());
       if (usedError) throw usedError;
       monthlyUsed = usedCount ?? 0;
@@ -440,9 +447,11 @@ Deno.serve(async (req) => {
       let used = monthlyUsed;
       if (toMark.length === 0) {
         const monthStart = budgetWindowStart();
+        // Lot SEO1 : même compte que plus haut, refus exclus (ok = true).
         const { count, error: cErr } = await sb
           .from("prerender_recache_log")
           .select("id", { count: "exact", head: true })
+          .eq("ok", true)
           .gte("created_at", monthStart.toISOString());
         if (cErr) throw cErr;
         used = count ?? 0;

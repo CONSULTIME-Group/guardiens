@@ -97,6 +97,10 @@ async function main() {
   const { xml, entries, locs } = createSitemapDocument(routeConfig, collections, today);
 
   // llms.txt : compteurs calculés depuis le sitemap, préparés AVANT toute écriture.
+  // Lot SEO1 (19/10/2026) : le sitemap ne garde que les départements qui ont
+  // au moins une ville publiée (departmentsWithPublishedCity, sitemap-data.js),
+  // « départements couverts » compte donc ces seuls départements (70 au
+  // 19/10/2026, 30 pages à zéro ville en noindex).
   const cityCount = locs.filter((l) => /^\/house-sitting\/[^/]+$/.test(l)).length;
   const deptCount = locs.filter((l) => /^\/departement\/[^/]+$/.test(l)).length;
   const llmsPath = path.resolve(__dirname, "../public/llms.txt");

@@ -20,6 +20,7 @@ import { interpolatePlaceholders } from "@/lib/contentPlaceholders";
 import { departmentIn, departmentInCapitalized, departmentOf, rewriteDepartmentMention } from "@/lib/departmentGrammar";
 import { countLabel } from "@/lib/pluralizeFr";
 import DepartmentSitterLinks, { useDepartmentPublicSitters } from "@/components/seo/DepartmentSitterLinks";
+import { isDepartmentIndexable } from "@/lib/departmentIndexability";
 
 const DepartmentPage = () => {
  const { slug } = useParams<{ slug: string }>();
@@ -70,7 +71,9 @@ const DepartmentPage = () => {
   });
 
  // Fetch city pages in this department
- const { data: cityPages = [] } = useQuery({
+ // Lot SEO1 : la même liste décide de l'indexation (noindex jusqu'à la
+ // première ville publiée, règle partagée avec le sitemap).
+ const { data: cityPages = [], isLoading: citiesLoading, isError: citiesFailed } = useQuery({
  queryKey: ["department-cities", page?.department],
  queryFn: async () => {
  const { data, error } = await supabase
@@ -120,7 +123,7 @@ const DepartmentPage = () => {
  enabled: !!page?.department,
  });
 
- if (pageFailed || redirectFailed) return <PublicLoadError />;
+ if (pageFailed || redirectFailed || citiesFailed) return <PublicLoadError />;
 
  if (isLoading) {
  return (
@@ -205,9 +208,9 @@ const DepartmentPage = () => {
   title={metaTitle}
   description={metaDescription}
  path={`/departement/${page.slug}`}
-  noindex={page.noindex === true}
+  noindex={!isDepartmentIndexable(page, cityPages.length)}
   image={buildOgImageUrl({ title: page.department, subtitle: countLabel(cityPages.length, "ville couverte"), kind: "departement" })}
-  ready={!contentStatsLoading && !deptSitters.isLoading}
+  ready={!contentStatsLoading && !deptSitters.isLoading && !citiesLoading}
   />
 
  <div className="min-h-screen bg-background">
@@ -378,7 +381,7 @@ const DepartmentPage = () => {
       Chaque garde Guardiens s'accompagne d'un guide de maison où le propriétaire renseigne le vétérinaire habituel, la clinique d'urgence la plus proche et la conduite à tenir en cas d'incident. {deptInCap}, les cliniques vétérinaires de garde couvrent la plupart des villes moyennes, avec des permanences 24h/24 dans les chefs-lieux.
     </p>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Consultez <Link to="/observatoire-garde-animaux" className="underline text-primary">l'observatoire Guardiens de la garde d'animaux</Link> pour les chiffres nationaux (densité de vétérinaires, cliniques d'urgence, tarifs moyens). En cas d'imprévu majeur pendant une garde, le réseau <Link to="/gardien-urgence" className="underline text-primary">gardien d'urgence</Link> peut relayer votre gardien titulaire.
+      Consultez <Link to="/observatoire-garde-animaux" className="underline text-primary">l'observatoire Guardiens de la garde d'animaux</Link> pour les chiffres nationaux (densité de vétérinaires, cliniques d'urgence, tarifs moyens). Le réseau <Link to="/gardien-urgence" className="underline text-primary">gardien d'urgence</Link> est à venir : il ouvrira dès que chaque secteur comptera assez de gardiens expérimentés, et il pourra alors relayer votre gardien titulaire en cas d'imprévu majeur.
     </p>
   </section>
 

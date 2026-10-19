@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { associationInitials, associationNeedChipLabel } from "@/lib/associationLabels";
 import type { PublicAssociation } from "@/components/associations/types";
+import { associationMedia } from "@/lib/associationMedia";
 
 const ELIGIBLE_NEEDS = ["benevoles", "familles_accueil"] as const;
 const MAX_ENTRIES = 8;
@@ -71,6 +72,8 @@ const AssociationNeedCard = ({
 }) => {
   const [logoFailed, setLogoFailed] = useState(false);
   const chip = associationNeedChipLabel(need);
+  // Lot SEO1 : logo seulement avec l'accord de l'association.
+  const logoUrl = associationMedia(association).logoUrl;
 
   return (
     <Link to={`/associations/${association.slug}`} className="block group">
@@ -78,15 +81,14 @@ const AssociationNeedCard = ({
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
-              {association.logo_url && !logoFailed ? (
+              {logoUrl && !logoFailed ? (
                 <img
-                  src={association.logo_url}
+                  src={logoUrl}
                   alt={`Logo de ${association.name}`}
                   width={40}
                   height={40}
                   loading="lazy"
                   decoding="async"
-                  referrerPolicy="no-referrer"
                   onError={() => setLogoFailed(true)}
                   className="h-full w-full object-contain"
                 />

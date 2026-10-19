@@ -32,7 +32,8 @@ function collector(tables: Record<string, any[]>, today: Date) {
 
 describe("sitemap actuel sans nouvelle publication", () => {
   it("retire suppression, depublication et noindex a la lecture suivante", async () => {
-    const tables = { articles: [{ id: "a", slug: "article", published: true }], seo_city_pages: [{ id: "c", slug: "paris", published: true, noindex: false }], seo_department_pages: [{ id: "d", slug: "rhone", published: true, noindex: false }] };
+    // Lot SEO1 : un département entre au sitemap avec au moins une ville publiée du même département.
+    const tables = { articles: [{ id: "a", slug: "article", published: true }], seo_city_pages: [{ id: "c", slug: "paris", department: "Rhône", published: true, noindex: false }], seo_department_pages: [{ id: "d", slug: "rhone", department: "Rhône", published: true, noindex: false }] };
     const today = new Date("2026-10-03T12:00:00Z");
     expect(createSitemapDocument(config, await collector(tables, today), today).locs).toEqual(expect.arrayContaining(["/actualites/article", "/house-sitting/paris", "/departement/rhone"]));
     tables.articles = []; tables.seo_city_pages[0].published = false; tables.seo_department_pages[0].noindex = true;

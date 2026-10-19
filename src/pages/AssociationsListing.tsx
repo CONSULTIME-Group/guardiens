@@ -24,9 +24,9 @@ import AssociationNeedsHighlight from "@/components/associations/AssociationNeed
 import { isAssociationIndexable } from "@/lib/associationIndexability";
 import {
   PUBLIC_ASSOCIATION_COLUMNS,
-  normalizePhotos,
   type PublicAssociation,
 } from "@/components/associations/types";
+import { associationMedia } from "@/lib/associationMedia";
 
 const META_TITLE = "Associations et refuges pour animaux en France | Guardiens";
 const META_DESCRIPTION =
@@ -35,8 +35,9 @@ const META_DESCRIPTION =
 const AssociationCard = ({ association }: { association: PublicAssociation }) => {
   const [photoFailed, setPhotoFailed] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
-  const photos = normalizePhotos(association.photos);
-  const cover = photos[0];
+  // Lot SEO1 : photo et logo seulement avec l'accord de l'association.
+  const media = associationMedia(association);
+  const cover = media.photos[0];
   const firstNeed = association.needs?.[0];
   const needChip = firstNeed ? associationNeedChipLabel(firstNeed) : "";
 
@@ -50,7 +51,6 @@ const AssociationCard = ({ association }: { association: PublicAssociation }) =>
               alt={cover.alt || association.name}
               loading="lazy"
               decoding="async"
-              referrerPolicy="no-referrer"
               onError={() => setPhotoFailed(true)}
               className="h-full w-full object-cover"
             />
@@ -60,15 +60,14 @@ const AssociationCard = ({ association }: { association: PublicAssociation }) =>
             </span>
           )}
           <span className="absolute bottom-2 left-2 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-background shadow-sm">
-            {association.logo_url && !logoFailed ? (
+            {media.logoUrl && !logoFailed ? (
               <img
-                src={association.logo_url}
+                src={media.logoUrl}
                 alt={`Logo de ${association.name}`}
                 width={40}
                 height={40}
                 loading="lazy"
                 decoding="async"
-                referrerPolicy="no-referrer"
                 onError={() => setLogoFailed(true)}
                 className="h-full w-full object-contain"
               />
