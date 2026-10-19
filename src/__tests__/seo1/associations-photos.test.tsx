@@ -80,7 +80,8 @@ describe("vue public_animal_associations : migration préparée, non appliquée"
     expect(sql).toContain("a.consent_status = 'granted'::text AS photos_authorized");
     expect(sql).toMatch(/^BEGIN;$/m);
   });
-  it("aucun fichier drizzle ne l'applique", () => {
-    expect(read("drizzle/migrations/meta/_journal.json")).not.toContain("seo1");
+  it("appliquée le 19/10/2026 par drizzle 0095", () => {
+    expect(read("drizzle/migrations/meta/_journal.json")).toContain("0095_seo1_rendu_et_associations");
+    expect(read("drizzle/migrations/0095_seo1_rendu_et_associations.sql")).toContain("WHEN a.consent_status = 'granted'::text THEN a.logo_url");
   });
 });

@@ -1,7 +1,7 @@
 /**
  * Lot SEO1 (19/10/2026) : les refus « monthly_budget_exceeded » (ok = false)
  * sortent du compte des 30 jours, côté détecteur et côté seo_reserve_render
- * (migration préparée, non appliquée). La Vue d'ensemble affiche la reprise
+ * (migration appliquée le 19/10/2026, drizzle 0095). La Vue d'ensemble affiche la reprise
  * estimée et l'arriéré quand le voyant « Rendu SEO » est rouge.
  */
 import { describe, it, expect, vi } from "vitest";
@@ -71,8 +71,9 @@ describe("seo_reserve_render : migration préparée", () => {
     expect(sql).toMatch(/^BEGIN;$/m);
     expect(sql).toContain("GRANT EXECUTE ON FUNCTION public.seo_reserve_render(uuid) TO service_role;");
   });
-  it("non appliquée : aucun fichier drizzle ne la reprend", () => {
-    expect(read("drizzle/migrations/meta/_journal.json")).not.toContain("seo1");
+  it("appliquée le 19/10/2026 : drizzle 0095 reprend le filtre ok", () => {
+    expect(read("drizzle/migrations/meta/_journal.json")).toContain("0095_seo1_rendu_et_associations");
+    expect(read("drizzle/migrations/0095_seo1_rendu_et_associations.sql")).toContain("interval '30 days' AND ok");
   });
 });
 
