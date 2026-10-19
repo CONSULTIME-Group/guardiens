@@ -54,3 +54,6 @@ jobs:
 
       - name: Email de Noël v3, jetons et photo obligatoire, lot V1 (Postgres local)
         run: npm run test:sql:v1
+
+      - name: Publication réservée au propriétaire, lot P1 (Postgres local)
+        run: npm run test:sql:p1

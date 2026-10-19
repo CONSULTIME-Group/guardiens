@@ -95,6 +95,12 @@ import {
 import { shouldPromptAnimalMention } from "@/lib/sitAnimalMention";
 import { shouldOfferPublishExitChoice, type DraftHoldReason } from "@/lib/draftHoldReasons";
 import { reportError } from "@/lib/errorLogger";
+import { isBareCreateEntry, periodsOverlap, resumeRedirectFor, type LiveSitLike } from "@/lib/ownerLiveSit";
+import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
+
+type LiveSitRow = LiveSitLike & { status: string };
+/** Lot P1 : choix « Préparer une autre garde » mémorisé pour la session. */
+const liveChoiceKey = (userId: string) => `guardiens.create-live-choice.${userId}`;
 
 /** Lot 1 : compte arrivée v2 (copie locale de src/lib/arrivalFlag.ts, évite un module de plus dans la coquille). */
 const isArrivalV2Account = (f: { enabled: boolean; appliesSince: string | null }, created: string | null | undefined) =>
@@ -572,6 +578,13 @@ const CreateSit = () => {
   const [ownerHasCoords, setOwnerHasCoords] = useState(false);
   // Annonce publiée à venir (lot N7) : le parcours express la signale.
   const [upcomingPublishedSitId, setUpcomingPublishedSitId] = useState<string | null>(null);
+  // Lot P1 (19/10/2026) : annonces en ligne ou gardes confirmées à venir du
+  // propriétaire. Elles servent à l'écran de choix d'une entrée nue (avant
+  // toute saisie, donc avant tout brouillon) et à l'alerte de dates qui se
+  // recoupent.
+  const [liveSits, setLiveSits] = useState<LiveSitRow[]>([]);
+  const bareEntry = isBareCreateEntry(searchParams);
+  const [liveChoice, setLiveChoice] = useState<"checking" | "show" | "done">(bareEntry ? "checking" : "done");
   const [ownerBio, setOwnerBio] = useState<string>("");
   // Identité minimale (prénom, code postal, pays) collectée sur place quand
   // elle manque au profil, et date d'inscription pour sit_first_publish.
@@ -582,6 +595,31 @@ const CreateSit = () => {
   const arrivalFlag = useFeatureFlag("arrival_v2");
   const arrivalV2Account = isArrivalV2Account(arrivalFlag, profileCreatedAt);
   const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    const todayIso = new Date().toISOString().slice(0, 10);
+    void supabase
+      .from("sits")
+      .select("id, status, title, start_date, end_date")
+      .eq("user_id", user.id)
+      .in("status", ["published", "confirmed"])
+      .order("start_date", { ascending: true })
+      .then(({ data }) => {
+        if (cancelled) return;
+        const rows = ((data ?? []) as LiveSitRow[]).filter((s) => !s.end_date || s.end_date >= todayIso);
+        setLiveSits(rows);
+        setLiveChoice((prev) => {
+          if (prev !== "checking") return prev;
+          if (rows.length === 0) return "done";
+          try {
+            if (sessionStorage.getItem(liveChoiceKey(user.id)) === "other") return "done";
+          } catch { /* stockage indisponible : l'écran s'affiche */ }
+          return "show";
+        });
+      }, () => { if (!cancelled) setLiveChoice("done"); });
+    return () => { cancelled = true; };
+  }, [user?.id]);
   const [publishing, setPublishing] = useState(false);
   const [isRepublish, setIsRepublish] = useState(false);
   const [sourceSitTitle, setSourceSitTitle] = useState<string | null>(null);
@@ -962,17 +1000,20 @@ const CreateSit = () => {
         if (draftIdParam) {
           draftRes = await supabase.from("sits").select("*").eq("id", draftIdParam).eq("user_id", user.id).eq("status", "draft").maybeSingle();
           if (!draftRes?.data) {
-            // ?resume= explicite mais brouillon inexistant ou pas au user : on redirige proprement.
-            toast({
-              variant: "destructive",
-              title: "Brouillon introuvable",
-              description: "Ce brouillon n'existe pas ou ne vous appartient pas.",
-            });
-            navigate("/dashboard");
+            // Lot P1 : le lien ne désigne plus un brouillon (souvent un ancien
+            // email de relance après publication). Seconde lecture par
+            // identifiant et propriétaire, puis redirection et message neutre.
+            const { data: current } = await supabase
+              .from("sits").select("id, status").eq("id", draftIdParam).eq("user_id", user.id).maybeSingle();
+            const redirect = resumeRedirectFor((current as { id: string; status?: string } | null) ?? null);
+            toast({ title: redirect.title, description: redirect.description });
+            navigate(redirect.to, { replace: true });
             return;
           }
         } else {
-          draftRes = await supabase.from("sits").select("*").eq("user_id", user.id).eq("status", "draft").order("created_at", { ascending: false }).limit(1).maybeSingle();
+          // Lot P1 : même brouillon que la carte du tableau de bord (le plus
+          // récemment modifié).
+          draftRes = await supabase.from("sits").select("*").eq("user_id", user.id).eq("status", "draft").order("updated_at", { ascending: false }).limit(1).maybeSingle();
         }
         if (draftRes?.data) {
           const d = draftRes.data;
@@ -1559,6 +1600,16 @@ const CreateSit = () => {
     ? Math.max(1, Math.round((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000) + 1)
     : 0;
 
+  // Lot P1 : alerte douce, jamais bloquante, quand les dates recoupent une
+  // annonce en ligne du propriétaire. Comparaison par dates, jamais par titre.
+  const overlappingLiveSit = startDate
+    ? liveSits.find((s) => s.id !== draftId && periodsOverlap(startDate, endDate || startDate, s.start_date, s.end_date)) ?? null
+    : null;
+  const overlapKey = `${startDate}|${endDate}`;
+  const [overlapAckKey, setOverlapAckKey] = useState<string | null>(null);
+  const overlapAcknowledged = overlapAckKey === overlapKey;
+  const setOverlapAcknowledged = (v: boolean) => setOverlapAckKey(v ? overlapKey : null);
+
   const buildSuggestedTitle = () => {
     if (!startDate || !endDate || dateError) return "";
     const speciesCount: Record<string, number> = {};
@@ -2123,8 +2174,53 @@ const CreateSit = () => {
     }
   };
 
-  if (loading) {
+  if (loading || liveChoice === "checking") {
     return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
+  }
+
+  // Lot P1 : propriétaire avec une annonce en ligne, entrée nue (bouton
+  // « Publier », menu). Le choix vient avant toute saisie : aucun brouillon
+  // n'est créé tant que la personne n'a pas choisi.
+  if (liveChoice === "show" && liveSits.length > 0 && user) {
+    const live = liveSits[0];
+    const range = formatDateRangeFr(live.start_date, live.end_date);
+    return (
+      <div className="animate-fade-in py-8">
+        <Head><meta name="robots" content="noindex, nofollow" /></Head>
+        <section
+          data-testid="create-live-choice"
+          aria-labelledby="create-live-choice-title"
+          className="px-4 max-w-xl mx-auto"
+        >
+          <h1 id="create-live-choice-title" className="font-heading text-2xl font-semibold text-foreground">
+            Vous avez déjà une annonce en ligne
+          </h1>
+          <p className="mt-3 text-foreground">
+            {live.title || "Votre annonce"}{range ? `, ${range}` : ""}.
+          </p>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <Button asChild variant="outline" className="h-auto min-h-[48px] whitespace-normal">
+              <Link to={`/sits/${live.id}/edit`}>Modifier mon annonce</Link>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-auto min-h-[48px] whitespace-normal"
+              onClick={() => {
+                try { sessionStorage.setItem(liveChoiceKey(user.id), "other"); } catch { /* sans stockage, le choix vaut pour cette page */ }
+                setLiveChoice("done");
+              }}
+            >
+              Préparer une autre garde
+            </Button>
+          </div>
+          <p className="mt-4 text-sm">
+            <Link to={`/sits/${live.id}`} className="text-primary hover:underline underline-offset-4 font-medium">
+              Voir mon annonce
+            </Link>
+          </p>
+        </section>
+      </div>
+    );
   }
 
   // Le préflight n'est plus un cul de sac : c'est la première étape éditable du
@@ -2543,6 +2639,29 @@ const CreateSit = () => {
                 Durée : <span className="font-medium text-foreground">{nDays} {nDays > 1 ? "jours" : "jour"}</span>
               </p>
             ) : null}
+            {overlappingLiveSit && !overlapAcknowledged && (
+              <div
+                data-testid="create-dates-overlap"
+                role="status"
+                className="mt-3 rounded-lg border border-border bg-muted/40 p-3 text-sm text-foreground"
+              >
+                <p>
+                  Ces dates recoupent votre annonce {formatDateRangeFr(overlappingLiveSit.start_date, overlappingLiveSit.end_date) || "en ligne"}.
+                </p>
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
+                  <Link to={`/sits/${overlappingLiveSit.id}`} className="text-primary font-medium hover:underline underline-offset-4">
+                    Voir mon annonce
+                  </Link>
+                  <button
+                    type="button"
+                    className="text-primary font-medium hover:underline underline-offset-4"
+                    onClick={() => setOverlapAcknowledged(true)}
+                  >
+                    Garder ces dates
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Description */}

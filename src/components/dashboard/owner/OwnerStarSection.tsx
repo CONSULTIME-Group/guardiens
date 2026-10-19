@@ -442,6 +442,46 @@ const DraftStar = ({ draft, onCtaClick }: { draft: SitRow; onCtaClick?: () => vo
 };
 
 /* ================================================================== */
+/*  C bis. Lot P1 : brouillon sous une annonce en ligne               */
+/* ================================================================== */
+/**
+ * L'annonce en ligne occupe la carte ; un brouillon devient une ligne
+ * secondaire. Libellé neutre : le brouillon peut préparer une autre période
+ * (jamais « cette garde »), jamais rapproché par titre.
+ */
+export const DraftLine = ({ draft, onCtaClick }: { draft: SitRow; onCtaClick?: () => void }) => {
+  const dates = formatDateRangeFr(draft.start_date, draft.end_date) || "dates à choisir";
+  return (
+    <div
+      data-testid="owner-star-draft-line"
+      className="mt-[18px] border-t border-border px-4 sm:px-5 md:px-8 pt-[16px]"
+    >
+      <p className="text-foreground" style={{ fontSize: "14px", lineHeight: 1.45 }}>
+        <span style={{ fontWeight: 600 }}>Brouillon en cours :</span>{" "}
+        {draft.title || "sans titre"}, {dates}.
+      </p>
+      <div className="mt-[10px] flex flex-wrap items-center gap-x-[18px] gap-y-[8px]">
+        <Link
+          to={`/sits/create?draftId=${draft.id}`}
+          onClick={onCtaClick}
+          className="inline-flex items-center rounded-full border border-border text-foreground hover:bg-muted/40 transition-colors"
+          style={{ padding: "8px 16px", minHeight: "44px", fontSize: "13.5px", fontWeight: 600 }}
+        >
+          Continuer ce brouillon
+        </Link>
+        <Link
+          to="/sits?tab=drafts"
+          className="text-primary hover:underline underline-offset-4"
+          style={{ fontSize: "13.5px", fontWeight: 600 }}
+        >
+          Voir mes brouillons
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+/* ================================================================== */
 /*  D. Aucune annonce active                                          */
 /* ================================================================== */
 /** Lot A6 : destination unique du bouton de publication de la vedette. */
@@ -537,6 +577,7 @@ const OwnerStarSection = ({
   const variant = selectOwnerStarVariant({
     ongoingSit,
     pendingAppsCount: pendingApps.length,
+    hasActiveAnnonce: !!activeAnnonce,
     latestDraft,
   });
 
@@ -579,10 +620,16 @@ const OwnerStarSection = ({
         oldestWaitingDays={oldestWaitingDays}
       />
     );
+  } else if (activeAnnonce) {
+    // Lot P1 : l'annonce en ligne passe avant le brouillon.
+    content = (
+      <>
+        {activeAnnonce}
+        {latestDraft && <DraftLine draft={latestDraft} onCtaClick={onCtaClick} />}
+      </>
+    );
   } else if (latestDraft) {
     content = <DraftStar draft={latestDraft} onCtaClick={onCtaClick} />;
-  } else if (activeAnnonce) {
-    content = activeAnnonce;
   } else {
     content = <PublishStar primaryAction={primaryAction} onCtaClick={onCtaClick} />;
   }
