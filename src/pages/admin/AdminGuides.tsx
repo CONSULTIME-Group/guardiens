@@ -4,6 +4,8 @@ import { useState } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { countPlacesByGuide } from "@/lib/admin/trueCounts";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,18 +74,17 @@ const AdminGuides = () => {
     queryKey: ["admin-guide-place-counts", guides.map((g) => g.id).join(",")],
     enabled: guides.length > 0,
     queryFn: async () => {
-      // Optimisation: ne récupère que la colonne d'agrégation, filtré sur les guides chargés
+      // Lot ADM9 : l'API coupe à 1 000 lignes (2 757 lieux le 19/10/2026),
+      // lecture par pages sur un ordre stable puis comptage par guide.
       const ids = guides.map((g) => g.id);
-      const { data, error } = await supabase
-        .from("city_guide_places" as any)
-        .select("city_guide_id")
-        .in("city_guide_id", ids);
-      if (error) throw error;
-      const counts: Record<string, number> = {};
-      ((data || []) as any[]).forEach((p: any) => {
-        counts[p.city_guide_id] = (counts[p.city_guide_id] || 0) + 1;
-      });
-      return counts;
+      const { rows } = await fetchAllRows<{ city_guide_id: string }>((from, to) =>
+        (supabase.from("city_guide_places" as any) as any)
+          .select("id, city_guide_id")
+          .in("city_guide_id", ids)
+          .order("id", { ascending: true })
+          .range(from, to),
+      );
+      return countPlacesByGuide(rows);
     },
   });
 

@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { campaignCounts, clickRate, type MassSendRow } from "@/lib/admin/massEmailCounts";
+import { proximityStats } from "@/lib/admin/trueCounts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -26,9 +27,17 @@ type MassEmailRow = {
   subject: string;
   cta_url: string | null;
   status: string;
-  filters?: { template_name?: string } | null;
+  segment?: string | null;
+  filters?: { template_name?: string; sit_id?: string } | null;
   created_at: string;
 };
+
+type ApplicationRow = { id: string; sit_id: string; created_at: string };
+
+/** Lot ADM9 : les diffusions de proximité n'ont ni utm_campaign ni gabarit, elles se rangent sous leur segment. */
+export const PROXIMITY_KEY = "listing_proximity";
+export const campaignKeyOf = (m: MassEmailRow): string | null =>
+  m.segment === PROXIMITY_KEY ? PROXIMITY_KEY : extractCampaign(m.cta_url) ?? m.filters?.template_name ?? null;
 
 type CampaignStats = {
   campaign: string;
@@ -61,6 +70,7 @@ export default function AdminMassEmailsStats() {
   const [events, setEvents] = useState<EventRow[]>([]);
   const [massEmails, setMassEmails] = useState<MassEmailRow[]>([]);
   const [sends, setSends] = useState<MassSendRow[]>([]);
+  const [applications, setApplications] = useState<ApplicationRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState<number>(30);
 
@@ -79,7 +89,7 @@ export default function AdminMassEmailsStats() {
 
       let meQ = supabase
         .from("mass_emails")
-        .select("id,subject,cta_url,status,created_at,filters")
+        .select("id,subject,cta_url,status,created_at,filters,segment")
         .order("created_at", { ascending: false })
         .limit(500);
       if (since) meQ = meQ.gte("created_at", since);
@@ -103,8 +113,17 @@ export default function AdminMassEmailsStats() {
           rows.push(...res.rows);
         } catch (e) { console.error(e); }
       }
+      // Lot ADM9 : candidatures lues par la fonction admin (applications est
+      // fermée en lecture directe), rapprochées des diffusions de proximité.
+      let apps: ApplicationRow[] = [];
+      if (list.some((m) => m.segment === PROXIMITY_KEY)) {
+        const { data: appData, error: appErr } = await supabase.rpc("admin_get_applications_diagnostic");
+        if (appErr) console.error(appErr);
+        apps = ((appData ?? []) as any[]).map((a) => ({ id: a.id, sit_id: a.sit_id, created_at: a.created_at }));
+      }
       if (cancelled) return;
       setSends(rows);
+      setApplications(apps);
       setLoading(false);
     })();
     return () => {
@@ -115,10 +134,9 @@ export default function AdminMassEmailsStats() {
   const stats: CampaignStats[] = useMemo(() => {
     // Lot A8 : une campagne = utm_campaign du CTA, sinon gabarit. Destinataires
     // et cliqueurs uniques par adresse, depuis mass_email_sends.
-    const keyOf = (m: MassEmailRow) => extractCampaign(m.cta_url) ?? m.filters?.template_name ?? null;
     const idsByKey = new Map<string, Set<string>>();
     for (const m of massEmails) {
-      const k = keyOf(m);
+      const k = campaignKeyOf(m);
       if (!k) continue;
       if (!idsByKey.has(k)) idsByKey.set(k, new Set());
       idsByKey.get(k)!.add(m.id);
@@ -143,6 +161,11 @@ export default function AdminMassEmailsStats() {
       })
       .sort((a, b) => b.sent - a.sent || b.clicks - a.clicks);
   }, [events, massEmails, sends]);
+
+  const proximity = useMemo(
+    () => proximityStats(massEmails.filter((m) => m.segment === PROXIMITY_KEY), sends, applications),
+    [massEmails, sends, applications],
+  );
 
   const totals = useMemo(
     () => ({
@@ -184,6 +207,25 @@ export default function AdminMassEmailsStats() {
         <Metric label="Clics uniques" value={totals.clicks} card />
         <Metric label="Missions attribuées" value={totals.missions} card />
       </div>
+
+      {!loading && proximity.broadcasts > 0 && (
+        <Card data-testid="proximity-stats">
+          <CardHeader>
+            <CardTitle>Annonces à proximité</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <Metric label="Diffusions envoyées" value={proximity.broadcasts} />
+              <Metric label="Envoyés" value={proximity.sent} />
+              <Metric label="Clics uniques" value={proximity.clickers} />
+              <Metric label="Candidatures sous 7 jours" value={proximity.applications} />
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Candidatures reçues sur l'annonce diffusée dans les 7 jours qui suivent chaque diffusion, chacune comptée une fois. Lien de cause à effet non établi.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
