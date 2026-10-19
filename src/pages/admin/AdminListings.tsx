@@ -40,6 +40,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import DraftStatsPanel from "@/components/admin/DraftStatsPanel";
 import ListingDrilldownDialog from "@/components/admin/ListingDrilldownDialog";
 import ListingProximityCard from "@/components/admin/ListingProximityCard";
+import { OwnerAbsenceBadge } from "@/components/admin/OwnerAbsenceBadge";
 import ListingCoverPickerDialog from "@/components/admin/ListingCoverPickerDialog";
 import { getCountryName } from "@/lib/countries";
 import { avatarImageUrl } from "@/lib/storageImage";
@@ -158,7 +159,7 @@ const AdminListings = () => {
     const build = () => {
       let q = supabase
         .from("sits")
-        .select(`*, owner:profiles!sits_user_id_fkey(first_name, last_name, city, avatar_url)`)
+        .select(`*, owner:profiles!sits_user_id_fkey(first_name, last_name, city, avatar_url, last_seen_at)`)
         .order("created_at", { ascending: false })
         .order("id", { ascending: true });
       if (focusSitId) return q.eq("id", focusSitId);
@@ -777,6 +778,7 @@ const AdminListings = () => {
                       {listing.owner?.avatar_url && <img src={avatarImageUrl(listing.owner.avatar_url, 24)} alt="" className="w-4 h-4 rounded-full object-cover" />}
                       <span className="truncate">{ownerName || "Propriétaire non renseigné"}</span>
                     </div>
+                    <OwnerAbsenceBadge lastSeenAt={listing.owner?.last_seen_at} className="mt-1" />
                     {st && !statsError ? (
                       <Button variant="link" onClick={() => openDrill(listing, "conversations")} className="h-auto justify-start p-0 mt-1 text-xs">
                         {st.messages} message{st.messages !== 1 ? "s" : ""}

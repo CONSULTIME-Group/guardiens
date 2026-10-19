@@ -14,7 +14,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MAX_RADIUS_KM, LARGE_RADIUS_WARN_KM, PROXIMITY_DEDUP_DAYS, clampRadiusInput } from "@/lib/proximityRadius";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  MAX_RADIUS_KM,
+  LARGE_RADIUS_WARN_KM,
+  PROXIMITY_DEDUP_DAYS,
+  clampRadiusInput,
+  needsRadiusConfirmation,
+  radiusConfirmationTitle,
+} from "@/lib/proximityRadius";
+import { SitOwnerAbsenceNotice } from "@/components/admin/OwnerAbsenceBadge";
 import type { AdminSignal } from "./NoApplicationsCard";
 
 interface Props {
@@ -44,7 +62,9 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
   const m = signal.metadata ?? {};
   const sitId = signal.entity_id;
 
-  const [radiusKm, setRadiusKm] = useState<number>(m.eligible_radius_km ?? 150);
+  const [radiusKm, setRadiusKm] = useState<number>(clampRadiusInput(m.eligible_radius_km ?? 150));
+  // Lot P2 : au-delà de 200 km, l'envoi passe par « Diffuser à N km ? ».
+  const [radiusConfirmOpen, setRadiusConfirmOpen] = useState(false);
   const [preview, setPreview] = useState<PreviewData | null>(null);
   const [previewing, setPreviewing] = useState(false);
   const [sending, setSending] = useState(false);
@@ -56,6 +76,7 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
       setPreviewing(false);
       setSending(false);
       setErrorMessage(null);
+      setRadiusConfirmOpen(false);
     }
   }, [open]);
 
@@ -104,8 +125,18 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
     }
   };
 
+  const requestSend = () => {
+    if (!preview || preview.count === 0) return;
+    if (needsRadiusConfirmation(radiusKm)) {
+      setRadiusConfirmOpen(true);
+      return;
+    }
+    void doSend();
+  };
+
   const doSend = async () => {
     if (!preview || preview.count === 0) return;
+    setRadiusConfirmOpen(false);
     setSending(true);
     setErrorMessage(null);
     try {
@@ -168,7 +199,7 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
                 onChange={(e) => setRadiusKm(clampRadiusInput(e.target.value))}
               />
               <p className="text-[11px] text-muted-foreground">
-                Rayon libre. Les gardiens déjà servis pour cette annonce, ou touchés par une diffusion dans les {PROXIMITY_DEDUP_DAYS} derniers jours, sont exclus.
+                Rayon jusqu'à {MAX_RADIUS_KM.toLocaleString("fr-FR")} km, confirmé au-delà de {LARGE_RADIUS_WARN_KM} km. Les gardiens déjà servis pour cette annonce, ou touchés par une diffusion dans les {PROXIMITY_DEDUP_DAYS} derniers jours, sont exclus.
               </p>
             </div>
             <p
@@ -178,6 +209,8 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
               « {m.sit_title ?? sitId} »
             </p>
           </div>
+
+          <SitOwnerAbsenceNotice sitId={sitId} />
 
           {showLargeRadiusWarning && (
             <Alert variant="default" className="border-warning/40 bg-warning/5 py-2">
@@ -256,7 +289,7 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
               Fermer
             </Button>
             <Button
-              onClick={doSend}
+              onClick={requestSend}
               disabled={sending || !preview || recipientCount === 0}
             >
               {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
@@ -265,6 +298,23 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
           </div>
         </DialogFooter>
       </DialogContent>
+
+      <AlertDialog open={radiusConfirmOpen} onOpenChange={setRadiusConfirmOpen}>
+        <AlertDialogContent data-testid="radius-confirm-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{radiusConfirmationTitle(radiusKm)}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Le rayon dépasse {LARGE_RADIUS_WARN_KM} km : {recipientCount} gardien{recipientCount > 1 ? "s" : ""} recevront l'annonce « {m.sit_title ?? sitId} ».
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Revoir le rayon</AlertDialogCancel>
+            <AlertDialogAction onClick={() => void doSend()} disabled={sending}>
+              Diffuser à {radiusKm.toLocaleString("fr-FR")} km
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 };
