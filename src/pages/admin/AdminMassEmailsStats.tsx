@@ -36,6 +36,9 @@ type ApplicationRow = { id: string; sit_id: string; created_at: string };
 
 /** Lot ADM9 : les diffusions de proximité n'ont ni utm_campaign ni gabarit, elles se rangent sous leur segment. */
 export const PROXIMITY_KEY = "listing_proximity";
+
+/** Taux à une décimale, virgule française (8,2). */
+const frPercent = (v: number): string => v.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 export const campaignKeyOf = (m: MassEmailRow): string | null =>
   m.segment === PROXIMITY_KEY ? PROXIMITY_KEY : extractCampaign(m.cta_url) ?? m.filters?.template_name ?? null;
 
@@ -216,12 +219,12 @@ export default function AdminMassEmailsStats() {
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <Metric label="Diffusions envoyées" value={proximity.broadcasts} />
-              <Metric label="Envoyés" value={proximity.sent} />
+              <Metric label="Envois cumulés" value={proximity.sent} />
               <Metric label="Clics uniques" value={proximity.clickers} />
               <Metric label="Candidatures sous 7 jours" value={proximity.applications} />
             </div>
             <p className="text-xs text-muted-foreground mt-3">
-              Candidatures reçues sur l'annonce diffusée dans les 7 jours qui suivent chaque diffusion, chacune comptée une fois. Lien de cause à effet non établi.
+              Envois cumulés : une personne compte une fois par diffusion, donc plusieurs fois si elle a reçu plusieurs diffusions (le tableau compte chaque personne une seule fois). Candidatures reçues sur l'annonce diffusée dans les 7 jours qui suivent chaque diffusion, chacune comptée une fois. Lien de cause à effet non établi.
             </p>
           </CardContent>
         </Card>
@@ -259,8 +262,8 @@ export default function AdminMassEmailsStats() {
                     <TableCell className="text-right">
                       {s.missions > 0 ? <Badge variant="secondary">{s.missions}</Badge> : <span className="text-muted-foreground">0</span>}
                     </TableCell>
-                    <TableCell className="text-right">{s.sent > 0 ? `${s.ctr.toFixed(1)} %` : "·"}</TableCell>
-                    <TableCell className="text-right">{s.uniqueVisitors > 0 ? `${s.conversionRate.toFixed(1)} %` : "·"}</TableCell>
+                    <TableCell className="text-right">{s.sent > 0 ? `${frPercent(s.ctr)} %` : "·"}</TableCell>
+                    <TableCell className="text-right">{s.uniqueVisitors > 0 ? `${frPercent(s.conversionRate)} %` : "·"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
