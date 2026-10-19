@@ -277,7 +277,7 @@ describe("ADM9 · 2e. Annonces à proximité dans Stats campagnes", () => {
     const { container } = wrap(<Page />);
     const block = await screen.findByTestId("proximity-stats");
     expect(block.textContent).toMatch(/Diffusions envoyées1/);
-    expect(block.textContent).toMatch(/Envoyés5/);
+    expect(block.textContent).toMatch(/Envois cumulés5/);
     expect(block.textContent).toMatch(/Clics uniques2/);
     expect(block.textContent).toMatch(/Candidatures sous 7 jours1/);
     const rows = Array.from(container.querySelectorAll("tbody tr")).map((r) => r.textContent ?? "");

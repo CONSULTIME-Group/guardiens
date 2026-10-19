@@ -330,6 +330,7 @@ export const CAMPAIGN_LABELS: Dict = {
   mission_nudge_feedback: "Relance retour d'entraide",
   mission_nudge_no_response: "Relance entraide sans réponse",
   dormant_sitter: "Gardiens inactifs",
+  owner_departure_question: "Question de départ aux propriétaires",
 };
 
 export const EVENT_LABELS: Dict = {
