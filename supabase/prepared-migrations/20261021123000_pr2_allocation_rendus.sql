@@ -1,7 +1,8 @@
 -- Lot PR2 (21/10/2026) : allocation ponctuelle de rendus Prerender au-delà
 -- du plafond de 9 900 rendus sur 30 jours glissants.
 --
--- PRÉPARÉ, NON APPLIQUÉ (21/10/2026) : en attente du GO de Jérémie.
+-- APPLIQUÉ EN PRODUCTION le 21/10/2026 à 12 h 48 (GO explicite de Jérémie),
+-- contrôle : allocation 1 000, expiration 2026-11-03 23:00 UTC, fonction à jour.
 --
 -- Constat (production, 21/10/2026) :
 -- - 18 674 rendus réussis sur 30 jours glissants : le plafond bloque tout envoi
