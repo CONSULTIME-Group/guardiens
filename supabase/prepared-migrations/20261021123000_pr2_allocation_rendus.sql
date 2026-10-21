@@ -79,3 +79,14 @@ COMMIT;
 -- SELECT remaining, expires_at FROM public.seo_render_allowance;
 -- SELECT created_at::date, source, count(*) FILTER (WHERE ok) FROM public.prerender_recache_log
 --  WHERE created_at > now() - interval '1 day' GROUP BY 1,2 ORDER BY 1,2;
+
+-- Complément du 21/10/2026, 14 h 35 (GO de Jérémie), opération de données
+-- appliquée en production, sans changement de schéma :
+-- - allocation portée à 1 500 rendus au total (+500) ;
+-- - rendu complet du sitemap (787 URL) : seo_dirty_at = now() sur articles
+--   publiés indexables, city_guides publiés, seo_city_pages et
+--   seo_department_pages publiées indexables, profiles avec seo_indexed_at ;
+--   seo_url_outbox pour pages fixes (en tête de file), races, annonces ouvertes,
+--   missions et projets ouverts, associations.
+-- Motif : 53 mises en ligne entre le 15/10 et le 21/10 refusées par le
+-- plafond du détecteur, gabarits jamais repoussés à Prerender.
