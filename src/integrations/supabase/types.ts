@@ -16052,6 +16052,30 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_render_allowance: {
+        Row: {
+          created_at: string
+          expires_at: string
+          reason: string | null
+          remaining: number
+          singleton: boolean
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          reason?: string | null
+          remaining: number
+          singleton?: boolean
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          reason?: string | null
+          remaining?: number
+          singleton?: boolean
+        }
+        Relationships: []
+      }
       seo_render_budget: {
         Row: {
           attempts: number
