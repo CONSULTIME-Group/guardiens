@@ -3,7 +3,7 @@
 // Lot S2 : le routage (quotidien, lundi, À animer) est lu dans
 // _shared/admin-signal-config.ts, seule source des destinations.
 import {
-  hasDestination, isSitStarted, sitGroupSummary, signalAction, SIGNAL_TYPES, SIT_ACTION_PRIORITY, SIT_TIMED_TYPES,
+  hasDestination, isSitImminent, isSitStarted, sitGroupSummary, signalAction, signalNature, SIGNAL_TYPES, SIT_ACTION_PRIORITY, SIT_TIMED_TYPES,
 } from '../_shared/admin-signal-config.ts'
 
 export interface OpenSignal {
@@ -172,6 +172,9 @@ export function buildDigestLines(
     // Lot ADM1 : garde commencée, plus aucune action avant le départ.
     const startDate = sit?.start_date ?? (m.start_date as string) ?? null
     if (sitId && types.every((t) => SIT_TIMED_TYPES.has(t)) && isSitStarted(startDate, now)) continue
+    // Lot ADM10 : une situation que le site relance déjà seul (nature auto)
+    // n'entre dans l'email qu'à 7 jours du départ ou moins, comme sur l'accueil.
+    if (types.every((t) => signalNature(t) === 'auto') && !isSitImminent(startDate, now)) continue
     // Lot ADM5 : un titre vide (brouillon sans titre) ne laisse jamais une ligne muette.
     const firstText = (...v: unknown[]) => v.map((x) => (typeof x === 'string' ? x.trim() : '')).find((x) => x) ?? ''
     const title = (key === 'group:digest_queue' ? 'File des digests' : firstText(sit?.title, m.sit_title, m.title) || (sitId ? 'Annonce sans titre' : SIGNAL_TYPES[main]?.label ?? main))

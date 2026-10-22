@@ -26,7 +26,7 @@ vi.mock("@/integrations/supabase/client", () => {
       ? { data: null, count: null, error: { message: "boom" } }
       : { data: table === "admin_activity_analysis" ? null : [], count: 0, error: null });
     const b: any = {};
-    ["select", "or", "gte", "in", "eq", "is", "neq", "order", "limit", "range", "not"].forEach((m) => { b[m] = () => b; });
+    ["select", "or", "gte", "lt", "like", "in", "eq", "is", "neq", "order", "limit", "range", "not"].forEach((m) => { b[m] = () => b; });
     b.maybeSingle = () => Promise.resolve(res());
     b.upsert = () => Promise.resolve({ error: null });
     b.insert = (row: any) => { mocks.inserts.push({ table, row }); return Promise.resolve({ error: null }); };
@@ -76,9 +76,9 @@ describe("Vue d'ensemble", () => {
   it("blocs dans l'ordre cible, sans Pilotage ni lanceur de campagne", async () => {
     const { container } = renderOverview();
     const order = [...container.querySelectorAll("[data-block]")].map((n) => n.getAttribute("data-block"));
-    // Lot ADM2 puis ADM6 : état du site, puis l'action ; le reste est replié dans « Plus ».
-    expect(order).toEqual(["etat-du-site", "a-traiter", "chiffres", "activite", "plus"]);
-    await screen.findByText("Annonces en ligne");
+    // Lot ADM10 : trois questions (site, ce qui vous attend, avancée), puis le système, puis « Plus ».
+    expect(order).toEqual(["site", "a-faire", "avance", "systeme", "plus"]);
+    await screen.findByText("Annonces publiées, 7 jours");
     expect(screen.queryByText(/Pilotage/)).toBeNull();
     expect(screen.queryByText(/Réveiller les propriétaires/)).toBeNull();
     expect(screen.queryByText(/Bénévolat en association/)).toBeNull();
@@ -88,8 +88,10 @@ describe("Vue d'ensemble", () => {
 
   it("aucun appel de fonction serveur au montage, et moins de 16 lectures", async () => {
     renderOverview();
-    await screen.findByText("7");
+    await screen.findByText("Gardes confirmées à venir");
     await waitFor(() => expect(mocks.calls).toContain("rpc:admin_menu_badges"));
+    // Lot ADM10 : activité récente et analyse IA lues à l'ouverture de « Plus » seulement.
+    expect(mocks.calls).not.toContain("from:admin_activity_analysis");
     // « Plus » replié : santé des crons et compteurs d'animation lus à l'ouverture seulement.
     expect(mocks.calls).not.toContain("rpc:admin_cron_health");
     expect(mocks.calls).not.toContain("fn");
@@ -101,16 +103,16 @@ describe("Vue d'ensemble", () => {
     mocks.failTables.add("profiles");
     mocks.failRpcs.add("admin_get_recent_applications_activity");
     renderOverview();
-    expect(await screen.findByText("7")).toBeInTheDocument(); // liquidité intacte
+    expect(await screen.findByText("Candidatures sans réponse")).toBeInTheDocument(); // liquidité intacte
     await waitFor(() => expect(screen.getAllByText("Chiffre indisponible").length).toBeGreaterThanOrEqual(2));
-    expect(screen.getByText("À traiter")).toBeInTheDocument();
+    expect(screen.getByText("Ce qui vous attend aujourd'hui")).toBeInTheDocument();
   });
 
   it("Tendances : recharts en import différé seulement", () => {
     const src = read("src/pages/admin/AdminOverview.tsx");
     expect(src).not.toMatch(/from "recharts"|DashboardCharts/);
     expect(src).toContain(`lazy(() => import("./_components/dashboard/TrendsPanel")`);
-    for (const f of ["KeyFiguresRow", "RecentActivity", "CronHealthCard", "ActivityAnalysisCard", "useDashboardData", "LiquidityBlock"]) {
+    for (const f of ["PilotageBlocks", "KeyFiguresRow", "RecentActivity", "CronHealthCard", "ActivityAnalysisCard", "useDashboardData", "LiquidityBlock"]) {
       const p = `src/pages/admin/_components/dashboard/${f}.${f.startsWith("use") ? "ts" : "tsx"}`;
       expect(read(p)).not.toMatch(/recharts|DashboardCharts/);
     }

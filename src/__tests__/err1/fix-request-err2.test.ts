@@ -41,8 +41,9 @@ describe("migration 0096", () => {
     for (const col of ["fix_requested_at", "fix_requested_by", "fix_attempted_at", "fix_pr_url"]) {
       expect(sql).toContain(`ADD COLUMN IF NOT EXISTS ${col}`);
     }
+    // Lovable a rejoué la même migration en 0097 (idempotente) en l'appliquant le 22/10.
     const journal = JSON.parse(src("drizzle/migrations/meta/_journal.json"));
-    const last = journal.entries[journal.entries.length - 1];
-    expect(last.tag).toBe("0096_err2_correction_confiee");
+    const tags = journal.entries.map((e: { tag: string }) => e.tag);
+    expect(tags).toContain("0096_err2_correction_confiee");
   });
 });
