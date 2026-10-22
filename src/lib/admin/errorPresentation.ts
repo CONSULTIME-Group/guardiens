@@ -22,6 +22,39 @@ export interface ErrorRecord {
   resolved_by: string | null;
   admin_notes: string | null;
   created_at: string;
+  /** Lot ERR2 : correction confiée à Claude depuis l'admin. */
+  fix_requested_at?: string | null;
+  fix_requested_by?: string | null;
+  fix_attempted_at?: string | null;
+  fix_pr_url?: string | null;
+}
+
+/** Lot ERR2 : heure de passage de la tâche planifiée, affichée dans l'admin. */
+export const FIX_TASK_SCHEDULE_LABEL = "chaque matin vers 7 h";
+
+export type FixRequestState = "none" | "requested" | "pr_opened" | "attempted";
+
+/**
+ * Lot ERR2 : état d'une demande de correction confiée à Claude.
+ * requested : en attente du prochain passage ; pr_opened : PR à fusionner ;
+ * attempted : passage sans PR (la note dit pourquoi).
+ */
+export function fixRequestState(row: Pick<ErrorRecord, "fix_requested_at" | "fix_attempted_at" | "fix_pr_url">): FixRequestState {
+  if (!row.fix_requested_at) return "none";
+  const requested = new Date(row.fix_requested_at).getTime();
+  const attempted = row.fix_attempted_at ? new Date(row.fix_attempted_at).getTime() : null;
+  if (attempted === null || attempted < requested) return "requested";
+  return row.fix_pr_url ? "pr_opened" : "attempted";
+}
+
+/** Lot ERR2 : incident que l'on peut confier (ni refus attendu, ni hors du site, ni déjà en attente). */
+export function canRequestFix(row: { resolved_at: string | null; refusalReason?: string | null; hostingReason?: string | null } & Pick<ErrorRecord, "fix_requested_at" | "fix_attempted_at" | "fix_pr_url">): boolean {
+  return !row.resolved_at && !row.refusalReason && !row.hostingReason && fixRequestState(row) !== "requested";
+}
+
+/** Lot ERR2 : lien de PR affichable (GitHub du dépôt seulement). */
+export function safePrUrl(url: string | null | undefined): string | null {
+  return typeof url === "string" && /^https:\/\/github\.com\/CONSULTIME-Group\/guardiens\/pull\/\d+$/.test(url) ? url : null;
 }
 
 export function safeLogText(text: string): string {

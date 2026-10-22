@@ -18,7 +18,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import {
-  AlertTriangle, CheckCircle2, RefreshCw, Search, Trash2, ExternalLink, Archive, ShieldAlert, Info, Wand2, History,
+  AlertTriangle, CheckCircle2, RefreshCw, Search, Trash2, ExternalLink, Archive, ShieldAlert, Info, Wand2, History, Copy, GitPullRequest,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -26,7 +26,7 @@ import { toast } from "sonner";
 import NetworkErrorsSection from "@/components/admin/NetworkErrorsSection";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 
-import { presentError, filterErrors, errorViewStats, priorResolutions, type ErrorRecord, type PresentedError, type ErrorPeriod } from "@/lib/admin/errorPresentation";
+import { presentError, filterErrors, errorViewStats, priorResolutions, fixRequestState, canRequestFix, safePrUrl, FIX_TASK_SCHEDULE_LABEL, type ErrorRecord, type PresentedError, type ErrorPeriod } from "@/lib/admin/errorPresentation";
 import { buildFixBrief } from "@/lib/admin/errorFixBrief";
 
 /** Lot ERR1 : copie dans le presse-papiers, avec repli pour les navigateurs sans API. */
@@ -146,6 +146,9 @@ const AdminErrors = () => {
   // Lot ERR1 : récidives lues sur tout l'historique, pas seulement la vue filtrée.
   const prior = useMemo(() => priorResolutions(errors), [errors]);
   const fixable = useMemo(() => filtered.filter(e => !e.resolved_at && !e.refusalReason && !e.hostingReason), [filtered]);
+  // Lot ERR2 : incidents à confier (hors demandes déjà en attente).
+  const delegable = useMemo(() => filtered.filter(canRequestFix), [filtered]);
+  const pendingFix = useMemo(() => errors.filter(e => !e.resolved_at && fixRequestState(e) === "requested").length, [errors]);
   const stats = useMemo(() => errorViewStats(filtered), [filtered]);
   const appErrors = filtered.filter(e => e.source !== "NetworkErrorMonitor");
   const networkErrors = filtered.filter(e => e.source === "NetworkErrorMonitor");
@@ -191,11 +194,46 @@ const AdminErrors = () => {
       toast.error("Copie impossible", { description: "Le navigateur a refusé l'accès au presse-papiers." });
       return;
     }
-    toast.success(`Brief de correction copié (${rows.length} dossier${rows.length > 1 ? "s" : ""})`, {
-      description: "Collez-le dans une conversation Claude du projet Guardiens : correctif, tests et PR à fusionner.",
+    toast.success(`Brief copié (${rows.length} dossier${rows.length > 1 ? "s" : ""})`, {
+      description: "À coller dans une conversation Claude du projet Guardiens, pour une correction immédiate.",
       duration: 10000,
       action: { label: "Ouvrir Claude", onClick: () => { window.open("https://claude.ai/new", "_blank", "noopener"); } },
     });
+  };
+
+  // Lot ERR2 : la demande est posée en base ; la tâche planifiée la reprend
+  // (diagnostic, correctif, PR, note). Fusion et résolution restent manuelles.
+  const [delegating, setDelegating] = useState(false);
+  const delegateFix = async (rows: ErrorLog[]) => {
+    const targets = rows.filter(canRequestFix);
+    if (targets.length === 0) {
+      toast.info("Aucun incident à confier dans cette vue");
+      return;
+    }
+    setDelegating(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    const at = new Date().toISOString();
+    const ids = targets.map(e => e.id);
+    const { error } = await supabase
+      .from("error_logs")
+      .update({ fix_requested_at: at, fix_requested_by: user?.id ?? null })
+      .in("id", ids);
+    setDelegating(false);
+    if (error) { toast.error("Demande non enregistrée"); return; }
+    toast.success(`${ids.length} incident${ids.length > 1 ? "s" : ""} confié${ids.length > 1 ? "s" : ""} à Claude`, {
+      description: `Reprise ${FIX_TASK_SCHEDULE_LABEL} : correctif et PR à fusionner, note dans chaque dossier.`,
+    });
+    const patch = (e: ErrorLog): ErrorLog => ids.includes(e.id) ? { ...e, fix_requested_at: at, fix_requested_by: user?.id ?? null } : e;
+    setErrors(prev => prev.map(patch));
+    setSelected(prev => prev ? patch(prev) : prev);
+  };
+  const cancelFix = async (id: string) => {
+    const { error } = await supabase.from("error_logs").update({ fix_requested_at: null, fix_requested_by: null }).eq("id", id);
+    if (error) { toast.error("Échec"); return; }
+    toast.success("Demande retirée");
+    const patch = (e: ErrorLog): ErrorLog => e.id === id ? { ...e, fix_requested_at: null, fix_requested_by: null } : e;
+    setErrors(prev => prev.map(patch));
+    setSelected(prev => prev ? patch(prev) : prev);
   };
 
   const [noteDraft, setNoteDraft] = useState("");
@@ -259,14 +297,26 @@ const AdminErrors = () => {
             confirmLabel="Marquer les résultats résolus"
             onConfirm={archiveAll}
           />
+          <ConfirmDialog
+            trigger={
+              <Button size="sm" className="gap-2" disabled={delegating || loading || loadError || delegable.length === 0}>
+                <Wand2 className="h-4 w-4" /> Confier à Claude ({delegable.length})
+              </Button>
+            }
+            title={`Confier ${delegable.length} incident${delegable.length > 1 ? "s" : ""} à Claude ?`}
+            description={`Claude reprend les demandes ${FIX_TASK_SCHEDULE_LABEL} : diagnostic, correctif testé, PR sur GitHub et note dans chaque dossier. Rien n'est fusionné ni mis en ligne sans vous.`}
+            confirmLabel="Confier à Claude"
+            onConfirm={() => delegateFix(delegable)}
+          />
           <Button
             onClick={() => void requestFix(fixable)}
+            variant="outline"
             size="sm"
             className="gap-2"
             disabled={loading || loadError || fixable.length === 0}
-            title="Copie un brief complet des incidents non résolus de la vue, prêt à coller dans Claude"
+            title="Copie un brief complet des incidents non résolus de la vue, à coller dans Claude pour une correction immédiate"
           >
-            <Wand2 className="h-4 w-4" /> Demander la correction ({fixable.length})
+            <Copy className="h-4 w-4" /> Copier le brief ({fixable.length})
           </Button>
           <Button onClick={load} variant="outline" size="sm" className="gap-2">
             <RefreshCw className="h-4 w-4" /> Actualiser
@@ -340,6 +390,7 @@ const AdminErrors = () => {
 
       <p className="text-sm text-muted-foreground">
         {loadError ? "Indisponible" : loading ? "Chargement…" : `${filtered.length} dossiers dans la vue filtrée : ${stats.app} application, ${stats.network} réseau. ${stats.expected} refus attendus, ${stats.hosting} hors du site.`}
+        {!loading && !loadError && pendingFix > 0 && ` ${pendingFix} confié${pendingFix > 1 ? "s" : ""} à Claude, reprise ${FIX_TASK_SCHEDULE_LABEL}.`}
         {truncated && " Données partielles : plafond de lecture atteint."}
         {" Les sessions anonymes ne sont pas comptées parmi les comptes identifiés."}
       </p>
@@ -389,6 +440,13 @@ const AdminErrors = () => {
                         {e.refusalReason && <Badge variant="outline" title={e.refusalReason}>Refus attendu</Badge>}
                         {e.hostingReason && <Badge variant="outline" title={e.hostingReason}>Hors du site</Badge>}
                         {prior.get(e.id) && <Badge variant="destructive" className="gap-1" title="Une erreur de la même famille avait été marquée résolue"><History className="h-3 w-3" />Récidive</Badge>}
+                        {(() => {
+                          const st = fixRequestState(e);
+                          if (st === "requested") return <Badge variant="secondary" className="gap-1"><Wand2 className="h-3 w-3" />Confiée à Claude</Badge>;
+                          if (st === "pr_opened") return <Badge variant="outline" className="gap-1 text-primary border-primary"><GitPullRequest className="h-3 w-3" />PR à fusionner</Badge>;
+                          if (st === "attempted") return <Badge variant="outline">Examinée par Claude</Badge>;
+                          return null;
+                        })()}
                         <Badge variant="outline">×{e.occurrences}</Badge>
                         {e.resolved_at && (
                           <Badge variant="outline" className="text-primary border-primary">
@@ -470,6 +528,22 @@ const AdminErrors = () => {
                           Conservée à titre informatif (1 entrée max par heure et par empreinte). Aucune action requise.
                         </p>
                       </div>
+                    </div>
+                  );
+                })()}
+
+                {(() => {
+                  const st = fixRequestState(selected);
+                  if (st === "none") return null;
+                  const pr = safePrUrl(selected.fix_pr_url);
+                  return (
+                    <div className="rounded-lg border border-border p-3 text-sm space-y-1">
+                      <p className="font-medium flex items-center gap-2"><Wand2 className="h-4 w-4" />
+                        {st === "requested" ? `Confiée à Claude le ${format(new Date(selected.fix_requested_at!), "Pp", { locale: fr })}, reprise ${FIX_TASK_SCHEDULE_LABEL}.`
+                          : st === "pr_opened" ? "Correctif proposé par Claude, à relire et fusionner."
+                          : "Examinée par Claude sans PR : voir la note de correction."}
+                      </p>
+                      {pr && <a href={pr} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1"><GitPullRequest className="h-3 w-3" />{pr.replace("https://github.com/", "")}</a>}
                     </div>
                   );
                 })()}
@@ -578,9 +652,17 @@ const AdminErrors = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-2 pt-3 border-t border-border">
+                  {canRequestFix(selected) && (
+                    <Button className="gap-2" disabled={delegating} onClick={() => void delegateFix([selected])}>
+                      <Wand2 className="h-4 w-4" /> Confier à Claude
+                    </Button>
+                  )}
+                  {fixRequestState(selected) === "requested" && !selected.resolved_at && (
+                    <Button variant="outline" onClick={() => void cancelFix(selected.id)}>Retirer la demande</Button>
+                  )}
                   {!selected.resolved_at && !selected.refusalReason && !selected.hostingReason && (
                     <Button variant="outline" className="gap-2" onClick={() => void requestFix([selected])}>
-                      <Wand2 className="h-4 w-4" /> Demander la correction
+                      <Copy className="h-4 w-4" /> Copier le brief
                     </Button>
                   )}
                   {selected.resolved_at ? (

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import type { PresentedError, PriorResolution } from "@/lib/admin/errorPresentation";
+import { fixRequestState, type PresentedError, type PriorResolution } from "@/lib/admin/errorPresentation";
 
 interface Props {
   rows: PresentedError[];
@@ -44,6 +44,8 @@ export const NetworkErrorsSection = ({ rows, prior, loading, loadError, onRetry,
                   : row.hostingReason ? <><Badge variant="outline">Hors du site</Badge><p className="mt-1 text-xs">{row.hostingReason}</p></>
                   : "Incident technique"}
                 {prior?.get(row.id) && <p className="mt-1"><Badge variant="destructive">Récidive</Badge></p>}
+                {fixRequestState(row) === "requested" && <p className="mt-1"><Badge variant="secondary">Confiée à Claude</Badge></p>}
+                {fixRequestState(row) === "pr_opened" && <p className="mt-1"><Badge variant="outline">PR à fusionner</Badge></p>}
                 {row.admin_notes && <p className="mt-1 text-xs line-clamp-2"><span className="font-medium">Note :</span> {row.admin_notes}</p>}
                 {row.resolved_at && <p className="text-xs text-muted-foreground">Marqué résolu</p>}
               </TableCell>
