@@ -94,7 +94,7 @@ export function waitingQueueItems(badges: Partial<AdminBadges>) {
     .map((q) => ({ to: q.to, label: `${q.count} ${q.count > 1 ? q.many : q.one}` }));
 }
 
-const WaitingMembersLine = () => {
+export const WaitingMembersLine = () => {
   // Même lecture que les pastilles du menu ; la clé sous « admin-badges » est
   // rafraîchie par refreshAdminBadges() après chaque action sur une file.
   const { data: badges, isError } = useQuery<AdminBadges>({
@@ -186,7 +186,7 @@ const AiActionCard = ({ action }: { action: SuggestedAction }) => (
 );
 
 /** Rendu d'une entrée de la file (annonce, groupe, signal ou suggestion IA). */
-function renderEntry(entry: QueueEntry, sitMap?: Map<string, SitInfo>) {
+export function renderEntry(entry: QueueEntry, sitMap?: Map<string, SitInfo>) {
   if (entry.kind === "group") {
     return (
       <li key={`group-${entry.group.signalType}`}>

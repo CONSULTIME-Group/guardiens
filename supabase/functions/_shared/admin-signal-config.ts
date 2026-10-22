@@ -253,3 +253,33 @@ export function sitGroupLine(
   const date = frDate(sit.start_date)
   return `${head}${date ? `, début le ${date}` : ''} : ${sitGroupSummary(types)}`.replace(/[\u2014\u2013]/g, ',')
 }
+
+// Lot ADM10 (22/10/2026, maquette validée par Jérémie) : nature de pilotage
+// d'un type de signal, lue par l'accueil admin et par l'email du matin.
+// - vous      : seul un fondateur peut agir (diffusion, modération, message Alma)
+// - auto      : le site relance déjà le membre ; remonte seulement si le départ
+//               approche (SIT_IMMINENT_DAYS) ou si une relance échoue
+// - technique : panne ou réglage du site, lue avec l'état du site
+// - hebdo     : synthèse du lundi (animation, couverture)
+export type SignalNature = 'vous' | 'auto' | 'technique' | 'hebdo'
+
+/** Types relancés automatiquement auprès du membre (fonctions nudge-* et rappels). */
+export const AUTO_HANDLED_TYPES = new Set(['pending_application', 'stalled_discussion', 'owner_sit_unconfirmed', 'stale_draft'])
+
+/** Gabarits des relances automatiques de ces types, lus dans email_send_log. */
+export const AUTO_RELANCE_TEMPLATES = [
+  'owner-pending-application-nudge',
+  'owner-sit-unconfirmed',
+  'sit-draft-reminder',
+  'unread-messages-reminder',
+]
+
+/** Nature d'un type ; un type inconnu revient aux fondateurs, pour ne jamais le perdre. */
+export const signalNature = (type: string): SignalNature => {
+  if (AUTO_HANDLED_TYPES.has(type)) return 'auto'
+  const c = SIGNAL_TYPES[type]
+  if (!c) return 'vous'
+  if (!c.destinations.includes('action_queue')) return 'hebdo'
+  if (queueSectionOf(type) === 'technique') return 'technique'
+  return 'vous'
+}

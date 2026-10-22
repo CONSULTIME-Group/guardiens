@@ -16,6 +16,8 @@ export const NOT_DELETED_FILTER = "account_status.is.null,account_status.neq.del
 export interface KeyFigures {
   totalUsers: number;
   newThisWeek: number;
+  /** Lot ADM10 : inscrits des 7 jours d'avant, pour la comparaison. */
+  newPrevWeek: number;
   /** Gardes en status in_progress (une garde démarrée passe en in_progress). */
   ongoingSits: number;
   /** Gardes confirmées, pas encore démarrées. */
@@ -35,17 +37,20 @@ export function useKeyFigures() {
     staleTime: 30_000,
     queryFn: async () => {
       const oneWeekAgo = new Date(Date.now() - 7 * 86400_000).toISOString();
-      const [total, week, sits] = await Promise.all([
+      const twoWeeksAgo = new Date(Date.now() - 14 * 86400_000).toISOString();
+      const [total, week, sits, prevWeek] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }).or(NOT_DELETED_FILTER),
         supabase.from("profiles").select("id, first_name, role, created_at", { count: "exact" }).gte("created_at", oneWeekAgo).or(NOT_DELETED_FILTER).order("created_at", { ascending: false }).limit(5),
         supabase.from("sits").select("status").in("status", ["in_progress", "confirmed"]),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", twoWeeksAgo).lt("created_at", oneWeekAgo).or(NOT_DELETED_FILTER),
       ]);
-      const failed = [total, week, sits].find((r: any) => r.error);
+      const failed = [total, week, sits, prevWeek].find((r: any) => r.error);
       if (failed) { reportAdminReadError("Vue d'ensemble : chiffres clés", failed.error); throw failed.error; }
       const rows = (sits.data ?? []) as Array<{ status: string }>;
       return {
         totalUsers: total.count ?? 0,
         newThisWeek: week.count ?? 0,
+        newPrevWeek: prevWeek.count ?? 0,
         ongoingSits: rows.filter((r) => r.status === "in_progress").length,
         confirmedUpcoming: rows.filter((r) => r.status === "confirmed").length,
         recentSignups: ((week.data ?? []) as any[]).map((p) => ({
