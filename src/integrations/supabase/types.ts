@@ -12266,10 +12266,6 @@ export type Database = {
           created_at: string
           fingerprint: string
           first_seen_at: string
-          fix_attempted_at: string | null
-          fix_pr_url: string | null
-          fix_requested_at: string | null
-          fix_requested_by: string | null
           id: string
           last_seen_at: string
           line_no: number | null
@@ -12292,10 +12288,6 @@ export type Database = {
           created_at?: string
           fingerprint: string
           first_seen_at?: string
-          fix_attempted_at?: string | null
-          fix_pr_url?: string | null
-          fix_requested_at?: string | null
-          fix_requested_by?: string | null
           id?: string
           last_seen_at?: string
           line_no?: number | null
@@ -12318,10 +12310,6 @@ export type Database = {
           created_at?: string
           fingerprint?: string
           first_seen_at?: string
-          fix_attempted_at?: string | null
-          fix_pr_url?: string | null
-          fix_requested_at?: string | null
-          fix_requested_by?: string | null
           id?: string
           last_seen_at?: string
           line_no?: number | null
