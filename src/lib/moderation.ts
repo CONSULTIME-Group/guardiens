@@ -23,14 +23,35 @@ export type ModerationVerdict = {
   rule?: AutomatedRuleId | string;
 };
 
+/**
+ * Lot ERR1 : délai d'attente côté site. Au-delà, le texte passe (même règle
+ * qu'une IA indisponible) ; le serveur borne aussi son appel IA à 12 s.
+ */
+export const MODERATION_CLIENT_TIMEOUT_MS = 20_000;
+
+const MODERATION_TIMEOUT = Symbol("moderation-timeout");
+
 export async function moderateContent(
   contentType: "sit" | "message" | "bio",
   text: string,
+  timeoutMs: number = MODERATION_CLIENT_TIMEOUT_MS,
 ): Promise<ModerationVerdict> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    const { data, error } = await supabase.functions.invoke("moderate-content", {
+    const call = supabase.functions.invoke("moderate-content", {
       body: { content_type: contentType, text },
     });
+    const timeout = new Promise<typeof MODERATION_TIMEOUT>((resolve) => {
+      timer = setTimeout(() => resolve(MODERATION_TIMEOUT), timeoutMs);
+    });
+    const raced = await Promise.race([call, timeout]);
+    if (raced === MODERATION_TIMEOUT) {
+      // L'appel continue en arrière-plan : son issue ne doit rien lever.
+      void call.catch(() => undefined);
+      console.warn("moderation timeout");
+      return { status: "ok", reasons: [] };
+    }
+    const { data, error } = raced;
     if (error) throw error;
     const d = data as any;
     if (!d || d.error) return { status: "ok", reasons: [] };
@@ -43,6 +64,8 @@ export async function moderateContent(
   } catch (e) {
     console.warn("moderation unavailable", e);
     return { status: "ok", reasons: [] };
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }
 

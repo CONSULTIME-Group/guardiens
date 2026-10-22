@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { pickPlaceCover, sortForCover } from "@/lib/coverPriority";
 import { appendPropertyPhoto } from "@/lib/uploadOwnerPhoto";
+import { readFunctionErrorBody } from "@/lib/functionErrorBody";
 
 interface GalleryPhoto {
   id: string;
@@ -140,8 +141,10 @@ const SitPhotoManager = ({
           body: { imageUrls: toAnalyze.map((p) => p.photo_url) },
         });
         if (error) {
-          const ctx: any = (error as any).context;
-          const code = ctx?.code ?? (data as any)?.code;
+          // Lot ERR1 : le code métier se lit dans le corps de la réponse
+          // (error.context est la Response), jamais dans context.code.
+          const body = await readFunctionErrorBody(error);
+          const code = body.code ?? (data as any)?.code;
           if (code === "DAILY_QUOTA_REACHED") {
             toast({
               variant: "destructive",
@@ -191,6 +194,15 @@ const SitPhotoManager = ({
         return;
       }
       setSuggestion(best);
+    } catch (e) {
+      // Lot ERR1 : un échec de l'analyse reste un message à l'écran, jamais
+      // une promesse rejetée sans suite (2 dossiers sur /sits/:id/edit).
+      console.warn("analyze-photo-quality indisponible", e);
+      toast({
+        variant: "destructive",
+        title: "Analyse indisponible",
+        description: "Impossible d'analyser vos photos pour le moment. Réessayez dans quelques minutes.",
+      });
     } finally {
       setSuggesting(false);
     }

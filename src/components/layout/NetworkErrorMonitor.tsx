@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { reportError } from "@/lib/errorLogger";
+import { networkFingerprintKey } from "@/lib/networkFingerprint";
 
 /**
  * Routes critiques où une réponse réseau non-2xx doit déclencher
@@ -48,6 +49,10 @@ const IGNORED_URL_PATTERNS: RegExp[] = [
   /\/functions\/v1\/geocode-guide-places(\?|$|\/)/,
   /\/functions\/v1\/og-/,           // OG image previews
   /\/functions\/v1\/fetch-seo-data/, // SEO scraping best-effort
+  // Lot ERR1 : mesure d'audience injectée par l'hébergeur (Lovable), hors du
+  // code du site ; un 503 y affichait « Problème de connexion au service » à un
+  // visiteur de /petites-missions et /search sans que rien ne soit cassé.
+  /\/__l5e\//,
 ];
 
 /**
@@ -241,7 +246,11 @@ const NetworkErrorMonitor = () => {
                 window.location.reload();
               };
 
-              toast.error("Problème de connexion au service", {
+              // Lot ERR1 : aucune alerte sur un onglet en arrière-plan (le
+              // dossier est tout de même enregistré).
+              const pageVisible =
+                typeof document === "undefined" || document.visibilityState !== "hidden";
+              if (pageVisible) toast.error("Problème de connexion au service", {
                 description: `Une requête a échoué (statut ${status}). Veuillez réessayer.`,
                 duration: 8000,
                 action: {
@@ -260,7 +269,8 @@ const NetworkErrorMonitor = () => {
                   status,
                   ...(responseBody ? { response_body: responseBody } : {}),
                   ...pgFields,
-                }
+                },
+                { fingerprintKey: networkFingerprintKey(method, url, status) },
               );
             })();
           }

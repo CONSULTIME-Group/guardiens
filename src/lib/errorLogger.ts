@@ -446,9 +446,17 @@ export function extractLogicalSource(
   return typeof source === "string" && source.trim() !== "" ? source : null;
 }
 
-export function reportError(error: unknown, context?: Record<string, any>) {
+export function reportError(
+  error: unknown,
+  context?: Record<string, any>,
+  options?: { fingerprintKey?: string },
+) {
   const err = error instanceof Error ? error : new Error(String(error));
-  const fp = fingerprint(err.message, err.stack?.split("\n")[1]);
+  // Lot ERR1 : une clé stable fournie par l'appelant (dossiers réseau) prime
+  // sur la première ligne de pile, qui change à chaque mise en ligne.
+  const fp = options?.fingerprintKey
+    ? fingerprint(options.fingerprintKey)
+    : fingerprint(err.message, err.stack?.split("\n")[1]);
   void send({
     fingerprint: fp,
     message: err.message,
