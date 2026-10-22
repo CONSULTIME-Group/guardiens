@@ -1,4 +1,5 @@
 import { sanitizeUrlSecrets } from "@/lib/errorLogger";
+import { networkFingerprintKey } from "@/lib/networkFingerprint";
 
 export interface ErrorRecord {
   id: string;
@@ -62,13 +63,64 @@ export function expectedRefusal(row: Pick<ErrorRecord, "context" | "url">): stri
   return null;
 }
 
+/**
+ * Lot ERR1 : dossier né hors du code du site (mesure d'audience de
+ * l'hébergeur). Le site ne l'enregistre plus depuis le lot ERR1 ; les
+ * dossiers anciens s'affichent comme tels.
+ */
+export function hostingNoise(row: Pick<ErrorRecord, "context" | "message">): string | null {
+  const ctx = row.context ?? {};
+  const url = typeof ctx.url === "string" ? ctx.url : row.message ?? "";
+  if (/\/__l5e\//.test(url)) return "Mesure d'audience de l'hébergeur, hors du code du site. Rien à corriger.";
+  return null;
+}
+
+/**
+ * Lot ERR1 : famille d'un dossier, stable d'une mise en ligne à l'autre
+ * (réseau : méthode, chemin, statut ; application : message sans nom de
+ * fichier compilé). Sert à repérer une récidive après résolution.
+ */
+export function errorFamilyKey(row: Pick<ErrorRecord, "context" | "message" | "source">): string {
+  const ctx = row.context ?? {};
+  if (row.source === "NetworkErrorMonitor" && typeof ctx.status === "number" && typeof ctx.url === "string") {
+    return networkFingerprintKey(typeof ctx.method === "string" ? ctx.method : "GET", ctx.url, ctx.status);
+  }
+  return `app|${(row.message ?? "").replace(/-[A-Za-z0-9_-]{8}\.js/g, ".js").trim()}`;
+}
+
 export function presentError(row: ErrorRecord) {
   const safe = maskLogValue(row) as ErrorRecord;
   let safeHref: string | null = null;
   if (row.url && safe.url === row.url && !/\[redacted\]/i.test(safe.url)) {
     try { const url = new URL(row.url); if (/^https?:$/.test(url.protocol) && !url.username && !url.password) safeHref = safe.url; } catch { /* Text only. */ }
   }
-  return { ...safe, safeHref, refusalReason: expectedRefusal(row) };
+  return { ...safe, safeHref, refusalReason: expectedRefusal(row), hostingReason: hostingNoise(safe), familyKey: errorFamilyKey(safe) };
+}
+
+export type PriorResolution = { resolved_at: string; admin_notes: string | null };
+
+/**
+ * Lot ERR1 : pour chaque dossier non résolu, la dernière résolution d'un
+ * dossier de la même famille, vue avant sa première occurrence (récidive).
+ */
+export function priorResolutions(rows: Array<{ id: string; familyKey: string; resolved_at: string | null; admin_notes: string | null; first_seen_at: string }>): Map<string, PriorResolution> {
+  const resolvedByFamily = new Map<string, PriorResolution[]>();
+  for (const r of rows) {
+    if (!r.resolved_at) continue;
+    const list = resolvedByFamily.get(r.familyKey) ?? [];
+    list.push({ resolved_at: r.resolved_at, admin_notes: r.admin_notes });
+    resolvedByFamily.set(r.familyKey, list);
+  }
+  const out = new Map<string, PriorResolution>();
+  for (const r of rows) {
+    if (r.resolved_at) continue;
+    const firstSeen = new Date(r.first_seen_at).getTime();
+    const prior = (resolvedByFamily.get(r.familyKey) ?? [])
+      .filter(p => new Date(p.resolved_at).getTime() <= firstSeen)
+      .sort((a, b) => b.resolved_at.localeCompare(a.resolved_at))[0];
+    if (prior) out.set(r.id, prior);
+  }
+  return out;
 }
 
 export type PresentedError = ReturnType<typeof presentError>;
@@ -95,5 +147,6 @@ export function errorViewStats(rows: PresentedError[], now = Date.now()) {
     app: rows.filter(r => r.source !== "NetworkErrorMonitor").length,
     network: rows.filter(r => r.source === "NetworkErrorMonitor").length,
     expected: rows.filter(r => r.refusalReason).length,
+    hosting: rows.filter(r => r.hostingReason).length,
   };
 }

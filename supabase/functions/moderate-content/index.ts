@@ -12,6 +12,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, STYLE_GUARDRAILS_MESSAGING, CORS_HEADERS } from "../_shared/ai-gateway.ts";
 import { AUTOMATED_RULE_IDS, type AutomatedRuleId } from "../_shared/moderation-rules.ts";
 
+// Lot ERR1 : l'appel IA est borné. Au-delà, la vérification se limite aux
+// heuristiques (même règle qu'un quota IA) : le 14/10/2026, un appel sans délai
+// a tenu la publication d'une annonce jusqu'au plafond de 150 s (504).
+export const MODERATION_AI_TIMEOUT_MS = 12_000;
+
 // Regex sans flag /g : .test() sur une regex globale fait avancer lastIndex,
 // ce qui rend la détection intermittente dans un isolate Deno réutilisé.
 const PHONE_RE = /(?:(?:\+33|0033|0)\s?[1-9](?:[\s.\-]?\d{2}){4})/;
@@ -170,6 +175,7 @@ ${rules}
         }],
         tool_choice: { type: "function", function: { name: "return_moderation" } },
         temperature: 0.1,
+        signal: AbortSignal.timeout(MODERATION_AI_TIMEOUT_MS),
       });
 
       if (r.ok) {
@@ -180,8 +186,8 @@ ${rules}
           suggestion = parsed.suggestion?.replaceAll("—", ",") || undefined;
           llmRule = asRule(parsed.rule);
         }
-      } else if (r.status === 429 || r.status === 402) {
-        // Tolérance : si quota IA, on ne bloque pas l'utilisateur. Heuristiques only.
+      } else if (r.status === 429 || r.status === 402 || r.code === "AI_TIMEOUT") {
+        // Tolérance : quota IA ou délai dépassé, on ne bloque pas l'utilisateur. Heuristiques seules.
         console.warn("Moderation LLM skipped:", r.code);
       }
     }

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { readFunctionErrorBody } from "@/lib/functionErrorBody";
 
 /**
  * Sélection intelligente de la photo de couverture.
@@ -36,8 +37,8 @@ export async function pickSmartCover(
       body: { imageUrls: sample },
     });
     if (error) {
-      const ctx: any = (error as any).context;
-      const code = ctx?.code ?? (data as any)?.code;
+      // Lot ERR1 : le code se lit dans le corps de la Response (error.context).
+      const code = (await readFunctionErrorBody(error)).code ?? (data as any)?.code;
       if (code && SOFT_FAIL_CODES.has(code)) {
         memo.set(key, fallback);
         return fallback;

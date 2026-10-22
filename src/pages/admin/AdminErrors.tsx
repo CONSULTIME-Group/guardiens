@@ -7,6 +7,7 @@ import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Card, CardContent, CardHeader, CardTitle, CardDescription,
 } from "@/components/ui/card";
@@ -17,7 +18,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import {
-  AlertTriangle, CheckCircle2, RefreshCw, Search, Trash2, ExternalLink, Archive, ShieldAlert, Info,
+  AlertTriangle, CheckCircle2, RefreshCw, Search, Trash2, ExternalLink, Archive, ShieldAlert, Info, Wand2, History,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -25,7 +26,32 @@ import { toast } from "sonner";
 import NetworkErrorsSection from "@/components/admin/NetworkErrorsSection";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 
-import { presentError, filterErrors, errorViewStats, type ErrorRecord, type PresentedError, type ErrorPeriod } from "@/lib/admin/errorPresentation";
+import { presentError, filterErrors, errorViewStats, priorResolutions, type ErrorRecord, type PresentedError, type ErrorPeriod } from "@/lib/admin/errorPresentation";
+import { buildFixBrief } from "@/lib/admin/errorFixBrief";
+
+/** Lot ERR1 : copie dans le presse-papiers, avec repli pour les navigateurs sans API. */
+async function copyText(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch { /* repli ci-dessous */ }
+  try {
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(area);
+    return ok;
+  } catch {
+    return false;
+  }
+}
 
 type ErrorLog = PresentedError;
 
@@ -117,6 +143,9 @@ const AdminErrors = () => {
   useEffect(() => { void load(); return () => { readVersion.current++; }; }, []);
 
   const filtered = useMemo(() => filterErrors(errors, { state: filter, severity: severityFilter, period, search }), [errors, filter, severityFilter, period, search]);
+  // Lot ERR1 : récidives lues sur tout l'historique, pas seulement la vue filtrée.
+  const prior = useMemo(() => priorResolutions(errors), [errors]);
+  const fixable = useMemo(() => filtered.filter(e => !e.resolved_at && !e.refusalReason && !e.hostingReason), [filtered]);
   const stats = useMemo(() => errorViewStats(filtered), [filtered]);
   const appErrors = filtered.filter(e => e.source !== "NetworkErrorMonitor");
   const networkErrors = filtered.filter(e => e.source === "NetworkErrorMonitor");
@@ -150,6 +179,37 @@ const AdminErrors = () => {
     const { error } = await supabase.from("error_logs").delete().eq("id", id);
     if (error) toast.error("Échec");
     else { toast.success("Supprimée"); load(); setSelected(null); window.dispatchEvent(new Event("admin-badges-refresh")); }
+  };
+
+  const requestFix = async (rows: ErrorLog[]) => {
+    if (rows.length === 0) {
+      toast.info("Aucun incident à corriger dans cette vue");
+      return;
+    }
+    const ok = await copyText(buildFixBrief(rows, { prior }));
+    if (!ok) {
+      toast.error("Copie impossible", { description: "Le navigateur a refusé l'accès au presse-papiers." });
+      return;
+    }
+    toast.success(`Brief de correction copié (${rows.length} dossier${rows.length > 1 ? "s" : ""})`, {
+      description: "Collez-le dans une conversation Claude du projet Guardiens : correctif, tests et PR à fusionner.",
+      duration: 10000,
+      action: { label: "Ouvrir Claude", onClick: () => { window.open("https://claude.ai/new", "_blank", "noopener"); } },
+    });
+  };
+
+  const [noteDraft, setNoteDraft] = useState("");
+  const [savingNote, setSavingNote] = useState(false);
+  useEffect(() => { setNoteDraft(selected?.admin_notes ?? ""); }, [selected?.id, selected?.admin_notes]);
+  const saveNote = async (id: string) => {
+    setSavingNote(true);
+    const note = noteDraft.trim() || null;
+    const { error } = await supabase.from("error_logs").update({ admin_notes: note }).eq("id", id);
+    setSavingNote(false);
+    if (error) { toast.error("Note non enregistrée"); return; }
+    toast.success("Note enregistrée");
+    setErrors(prev => prev.map(e => e.id === id ? { ...e, admin_notes: note } : e));
+    setSelected(prev => prev && prev.id === id ? { ...prev, admin_notes: note } : prev);
   };
 
   const [archiving, setArchiving] = useState(false);
@@ -199,6 +259,15 @@ const AdminErrors = () => {
             confirmLabel="Marquer les résultats résolus"
             onConfirm={archiveAll}
           />
+          <Button
+            onClick={() => void requestFix(fixable)}
+            size="sm"
+            className="gap-2"
+            disabled={loading || loadError || fixable.length === 0}
+            title="Copie un brief complet des incidents non résolus de la vue, prêt à coller dans Claude"
+          >
+            <Wand2 className="h-4 w-4" /> Demander la correction ({fixable.length})
+          </Button>
           <Button onClick={load} variant="outline" size="sm" className="gap-2">
             <RefreshCw className="h-4 w-4" /> Actualiser
           </Button>
@@ -270,11 +339,11 @@ const AdminErrors = () => {
       </div>
 
       <p className="text-sm text-muted-foreground">
-        {loadError ? "Indisponible" : loading ? "Chargement…" : `${filtered.length} dossiers dans la vue filtrée : ${stats.app} application, ${stats.network} réseau. ${stats.expected} refus attendus.`}
+        {loadError ? "Indisponible" : loading ? "Chargement…" : `${filtered.length} dossiers dans la vue filtrée : ${stats.app} application, ${stats.network} réseau. ${stats.expected} refus attendus, ${stats.hosting} hors du site.`}
         {truncated && " Données partielles : plafond de lecture atteint."}
         {" Les sessions anonymes ne sont pas comptées parmi les comptes identifiés."}
       </p>
-      <NetworkErrorsSection rows={networkErrors} loading={loading} loadError={loadError} onRetry={load} onSelect={setSelected} />
+      <NetworkErrorsSection rows={networkErrors} prior={prior} loading={loading} loadError={loadError} onRetry={load} onSelect={setSelected} />
       {/* Liste */}
       <Card>
         <CardContent className="p-0">
@@ -318,6 +387,8 @@ const AdminErrors = () => {
                           );
                         })()}
                         {e.refusalReason && <Badge variant="outline" title={e.refusalReason}>Refus attendu</Badge>}
+                        {e.hostingReason && <Badge variant="outline" title={e.hostingReason}>Hors du site</Badge>}
+                        {prior.get(e.id) && <Badge variant="destructive" className="gap-1" title="Une erreur de la même famille avait été marquée résolue"><History className="h-3 w-3" />Récidive</Badge>}
                         <Badge variant="outline">×{e.occurrences}</Badge>
                         {e.resolved_at && (
                           <Badge variant="outline" className="text-primary border-primary">
@@ -335,6 +406,9 @@ const AdminErrors = () => {
                       </p>
                       {e.user_email && (
                         <p className="text-xs text-muted-foreground mt-0.5">Membre : {e.user_email}</p>
+                      )}
+                      {e.admin_notes && (
+                        <p className="text-xs text-foreground mt-1 line-clamp-2"><span className="font-medium">Note :</span> {e.admin_notes}</p>
                       )}
                     </div>
                   </div>
@@ -363,6 +437,18 @@ const AdminErrors = () => {
 
               <div className="space-y-4 mt-2">
                 {selected.refusalReason && <p className="text-sm"><Badge variant="outline">Refus attendu</Badge> {selected.refusalReason}</p>}
+                {selected.hostingReason && <p className="text-sm"><Badge variant="outline">Hors du site</Badge> {selected.hostingReason}</p>}
+                {(() => {
+                  const p = prior.get(selected.id);
+                  if (!p) return null;
+                  return (
+                    <p className="text-sm">
+                      <Badge variant="destructive" className="gap-1"><History className="h-3 w-3" />Récidive</Badge>{" "}
+                      Même famille marquée résolue le {format(new Date(p.resolved_at), "Pp", { locale: fr })}
+                      {p.admin_notes ? ` : ${p.admin_notes}` : "."}
+                    </p>
+                  );
+                })()}
                 {(() => {
                   const tp = getThirdPartyInfo(selected.context);
                   if (!tp) return null;
@@ -471,7 +557,32 @@ const AdminErrors = () => {
                   </div>
                 )}
 
+                <div>
+                  <p className="text-xs uppercase text-muted-foreground mb-1">Note de correction</p>
+                  <Textarea
+                    value={noteDraft}
+                    onChange={(ev) => setNoteDraft(ev.target.value)}
+                    placeholder="Cause et correctif (PR, date de mise en ligne)"
+                    className="text-sm min-h-[72px]"
+                  />
+                  <div className="mt-2 flex justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={savingNote || (noteDraft.trim() || null) === (selected.admin_notes ?? null)}
+                      onClick={() => void saveNote(selected.id)}
+                    >
+                      {savingNote ? "Enregistrement…" : "Enregistrer la note"}
+                    </Button>
+                  </div>
+                </div>
+
                 <div className="flex flex-wrap gap-2 pt-3 border-t border-border">
+                  {!selected.resolved_at && !selected.refusalReason && !selected.hostingReason && (
+                    <Button variant="outline" className="gap-2" onClick={() => void requestFix([selected])}>
+                      <Wand2 className="h-4 w-4" /> Demander la correction
+                    </Button>
+                  )}
                   {selected.resolved_at ? (
                     <ConfirmDialog trigger={<Button variant="outline">Rouvrir</Button>} title="Rouvrir ce dossier ?" description="Le dossier sera de nouveau marqué non résolu." confirmLabel="Rouvrir" onConfirm={() => reopen(selected.id)} />
                   ) : (
