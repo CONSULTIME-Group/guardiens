@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
-import { HelperCard, NeedRow, openHelperConversation, type EntraideNeed, type NeedRowState, type PublicHelper } from "@/components/entraide/EntraideCards";
+import { HelperCard, NeedRow, needMetaLine, openHelperConversation, type EntraideNeed, type NeedRowState, type PublicHelper } from "@/components/entraide/EntraideCards";
+import { needExcerpt } from "@/lib/needExcerpt";
 import type { MissionBadgeRow } from "@/components/missions/MissionBadgesReceived";
 import EntraideProofs from "@/components/entraide/EntraideProofs";
 import { useAuth } from "@/contexts/AuthContext";
@@ -159,7 +160,7 @@ const EntraideHub = () => {
   useEffect(() => {
     const load = async () => {
       const [needsResult, helpersResult, countsResult] = await Promise.all([
-        supabase.from("public_small_missions").select("id, user_id, slug, title, city, category, date_needed, end_date, latitude, longitude, photos, sit_mode").eq("status", "open").eq("mission_type", "besoin").order("created_at", { ascending: false }),
+        supabase.from("public_small_missions").select("id, user_id, slug, title, description, city, category, date_needed, end_date, latitude, longitude, photos, sit_mode").eq("status", "open").eq("mission_type", "besoin").order("created_at", { ascending: false }),
         supabase.from("public_helpers").select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, helps_with, competences, last_active_on"),
         supabase.from("public_mission_response_counts").select("mission_id, response_count"),
       ]);
@@ -586,6 +587,9 @@ const EntraideHub = () => {
             open={confirmNeed !== null}
             firstName={confirmFirstName}
             needTitle={confirmNeed?.title || ""}
+            needMeta={confirmNeed ? needMetaLine(confirmNeed, needDistance(confirmNeed)) : null}
+            needDescription={confirmNeed ? needExcerpt(confirmNeed.description, confirmNeed.title) : null}
+            detailPath={confirmNeed ? detailPath(confirmNeed) : null}
             sending={responding !== null}
             onCancel={() => setConfirmNeed(null)}
             onSend={(message) => { if (confirmNeed) void sendCanHelp(confirmNeed, message); }}
