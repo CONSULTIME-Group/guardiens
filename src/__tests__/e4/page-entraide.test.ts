@@ -64,7 +64,8 @@ describe("E4, branchements", () => {
   });
   it("un seul bouton plein par carte : Je peux et Écrire à en contour", () => {
     const cards = readFileSync("src/components/entraide/EntraideCards.tsx", "utf8");
-    expect(cards).toContain('<Button type="button" size="sm" variant="outline" onClick={onCanHelp}');
+    // Lot E13 : « Je peux » reste en contour, cible tactile de 44 px.
+    expect(cards).toContain('<Button type="button" variant="outline" className="min-h-11 rounded-full px-5" onClick={onCanHelp}');
     expect(cards).toContain('<Button type="button" size="sm" variant="outline" className="mt-4" onClick={contact}');
   });
   it("lien vers les savoir-faire gardé pour une personne disponible (lot E1)", () => {

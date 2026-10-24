@@ -12,11 +12,14 @@ import { capitalizeFirstName, publicFirstName } from "@/lib/displayName";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { missionSpotKey } from "@/lib/missionSpot";
 import { MISSION_SPOT_LARGE, MISSION_SPOT_SMALL } from "@/components/entraide/missionSpotImages";
+import { needExcerpt } from "@/lib/needExcerpt";
 
 export interface EntraideNeed {
   id: string;
   slug: string | null;
   title: string;
+  /** Lot E13 : description lue par la liste, extrait affiché sous le titre. */
+  description?: string | null;
   city: string | null;
   date_needed: string | null;
   end_date: string | null;
@@ -46,7 +49,7 @@ export interface PublicHelper {
   last_active_on?: string | null;
 }
 
-const dateLabel = (need: EntraideNeed) => {
+export const dateLabel = (need: Pick<EntraideNeed, "end_date" | "date_needed">) => {
   const value = need.end_date || need.date_needed;
   if (!value) return "À convenir ensemble";
   return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" }).format(new Date(value));
@@ -133,9 +136,24 @@ export const NeedCard = ({ need, distance, showDistance, compact = false }: {
 
 export type NeedRowState = "default" | "own" | "responded";
 
+/** Lot E13 : lieu, date et nombre de « Je peux », partagés par la ligne et la fenêtre. */
+export function needMetaLine(need: EntraideNeed, distance: number | null): string {
+  const city = capitalizeFirstName(need.city) || "Près de chez vous";
+  const place = distance === null
+    ? city
+    : distance < 2
+      ? `${city}, tout près de chez vous`
+      : `à ${Math.round(distance)} km, ${city}`;
+  return [place, dateLabel(need), need.response_count > 0 ? `${need.response_count} « Je peux »` : null]
+    .filter(Boolean).join(" · ");
+}
+
 /**
- * Ligne compacte de besoin, vue liste de l'Entraide.
- * La ligne entière ouvre le détail, le bouton « Je peux » reste au-dessus.
+ * Ligne de besoin, vue liste de l'Entraide.
+ * Lot E13 (24/10/2026) : sur téléphone, le titre prend toute la largeur (le
+ * bouton passe sous l'extrait), en police de lecture et non de titre, et un
+ * extrait de la description dit ce qui est demandé avant le « Je peux ».
+ * La ligne entière ouvre le détail, le bouton reste au-dessus.
  */
 export const NeedRow = ({ need, distance, state, onCanHelp, pending = false }: {
   need: EntraideNeed;
@@ -150,17 +168,15 @@ export const NeedRow = ({ need, distance, state, onCanHelp, pending = false }: {
   const [avatarFailed, setAvatarFailed] = useState(false);
   const authorAvatar = !photo && !avatarFailed ? need.author_avatar_url || null : null;
   const authorName = capitalizeFirstName(need.author_first_name) || null;
-  const city = capitalizeFirstName(need.city) || "Près de chez vous";
-  const place = distance === null
-    ? city
-    : distance < 2
-      ? `${city}, tout près de chez vous`
-      : `à ${Math.round(distance)} km, ${city}`;
-  const meta = [place, dateLabel(need), need.response_count > 0 ? `${need.response_count} « Je peux »` : null]
-    .filter(Boolean).join(" · ");
+  const meta = needMetaLine(need, distance);
+  const excerpt = needExcerpt(need.description, need.title, 280);
+  const thumb = "h-14 w-14 sm:h-[72px] sm:w-[72px] shrink-0 rounded-md border border-border";
 
   return (
-    <li className="relative flex items-center gap-3 rounded-lg border border-border bg-card p-3">
+    <li
+      className="relative grid grid-cols-[56px_minmax(0,1fr)] gap-x-3 gap-y-2 rounded-lg border border-border bg-card p-3 sm:grid-cols-[72px_minmax(0,1fr)] sm:p-4"
+      data-testid="need-row"
+    >
       {photo ? (
         <img
           src={photo}
@@ -169,7 +185,7 @@ export const NeedRow = ({ need, distance, state, onCanHelp, pending = false }: {
           height={72}
           loading="lazy"
           decoding="async"
-          className="h-[72px] w-[72px] shrink-0 rounded-md border border-border object-cover"
+          className={`${thumb} object-cover sm:row-span-3`}
         />
       ) : authorAvatar ? (
         <img
@@ -180,7 +196,7 @@ export const NeedRow = ({ need, distance, state, onCanHelp, pending = false }: {
           loading="lazy"
           decoding="async"
           onError={() => setAvatarFailed(true)}
-          className="h-[72px] w-[72px] shrink-0 rounded-md border border-border object-cover"
+          className={`${thumb} object-cover sm:row-span-3`}
         />
       ) : (
         <img
@@ -192,27 +208,33 @@ export const NeedRow = ({ need, distance, state, onCanHelp, pending = false }: {
           loading="lazy"
           decoding="async"
           data-testid="need-row-spot"
-          className="h-[72px] w-[72px] shrink-0 rounded-md border border-border bg-muted/40 object-contain p-1"
+          className={`${thumb} bg-muted/40 object-contain p-1 sm:row-span-3`}
         />
       )}
-      <div className="min-w-0 flex-1">
-        <h3 className="line-clamp-2 sm:line-clamp-1 font-heading text-base font-semibold text-foreground">
-          <Link to={`/petites-missions/${need.slug || need.id}`} className="after:absolute after:inset-0 after:content-['']">
-            {need.title}
-          </Link>
-        </h3>
-        <p className="line-clamp-1 text-xs text-muted-foreground">{meta}</p>
-      </div>
-      <div className="relative z-10 shrink-0">
-        {state === "own" ? (
-          <span className="text-xs font-semibold text-muted-foreground">Votre besoin</span>
-        ) : state === "responded" ? (
-          <span className="text-xs font-semibold text-primary">Vous avez dit je peux</span>
-        ) : (
-          <Button type="button" size="sm" variant="outline" onClick={onCanHelp} disabled={pending}>
-            {pending ? "Envoi..." : "Je peux"}
-          </Button>
-        )}
+      {/* Police de lecture : le style global des titres (Playfair) est écarté ici. */}
+      <h3 className="self-center font-body line-clamp-3 text-[15px] font-semibold leading-snug text-foreground sm:line-clamp-2">
+        <Link to={`/petites-missions/${need.slug || need.id}`} className="after:absolute after:inset-0 after:content-['']">
+          {need.title}
+        </Link>
+      </h3>
+      {excerpt && (
+        <p className="col-span-2 line-clamp-2 text-sm leading-relaxed text-foreground/80 sm:col-span-1 sm:col-start-2" data-testid="need-row-excerpt">
+          {excerpt}
+        </p>
+      )}
+      <div className="col-span-2 flex items-center justify-between gap-3 sm:col-span-1 sm:col-start-2">
+        <p className="min-w-0 line-clamp-2 text-xs leading-snug text-muted-foreground">{meta}</p>
+        <div className="relative z-10 shrink-0">
+          {state === "own" ? (
+            <span className="text-xs font-semibold text-muted-foreground">Votre besoin</span>
+          ) : state === "responded" ? (
+            <span className="text-xs font-semibold text-primary">Vous avez dit je peux</span>
+          ) : (
+            <Button type="button" variant="outline" className="min-h-11 rounded-full px-5" onClick={onCanHelp} disabled={pending}>
+              {pending ? "Envoi..." : "Je peux"}
+            </Button>
+          )}
+        </div>
       </div>
     </li>
   );
