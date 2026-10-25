@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { reportError } from "@/lib/errorLogger";
 import PageMeta from "@/components/PageMeta";
+import { SECTION_OG_IMAGES } from "@/data/siteConstants";
 import { projetsHubSeo } from "@/lib/projetSeo";
 import { isIndexableProjetMission } from "../../supabase/functions/_shared/entraideMissionIndexability.js";
 import { faqPageJsonLd } from "@/lib/associationFaq";
@@ -185,6 +186,8 @@ const ProjetsListing = () => {
         title="Chantiers participatifs et projets à réaliser ensemble | Guardiens"
         description="Planter une haie, construire un abri : rejoignez un chantier participatif près de chez vous ou publiez votre projet. Guardiens est gratuit."
         jsonLd={[faqPageJsonLd(PROJETS_FAQ)]}
+        image={SECTION_OG_IMAGES.projets.url}
+        imageAlt={SECTION_OG_IMAGES.projets.alt}
         noindex={hubSeo.noindex}
         ready={hubSeo.ready}
         statusCode={hubSeo.statusCode}
