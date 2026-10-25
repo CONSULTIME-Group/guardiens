@@ -41,7 +41,7 @@ interface AuthContextType {
   switchRole: (role: ActiveRole) => void;
   setActiveRole: (role: ActiveRole) => void;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, role: Role, nextPath?: string) => Promise<any>;
+  register: (email: string, password: string, role: Role, nextPath?: string, arrivalIntent?: string | null) => Promise<any>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
 }
@@ -404,14 +404,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [clearInvalidSession, fetchProfile]);
 
-  const register = useCallback(async (email: string, password: string, role: Role, nextPath?: string) => {
+  const register = useCallback(async (email: string, password: string, role: Role, nextPath?: string, arrivalIntent?: string | null) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: getSignupRedirectUrl(nextPath),
         // Lot J1 : la case cochée à l'inscription, écrite côté serveur.
-        data: { role, legal_accepted: LEGAL_ACCEPTED_SIGNUP },
+        // Lot E17 : l'intention d'inscription, écrite sur le profil par
+        // handle_new_user (profiles.arrival_intent).
+        data: { role, legal_accepted: LEGAL_ACCEPTED_SIGNUP, ...(arrivalIntent ? { arrival_intent: arrivalIntent } : {}) },
       },
     });
     if (error) throw error;

@@ -52,7 +52,8 @@ describe("lot J1, source d'acceptation en attente", () => {
 
 describe("lot J1, câblage", () => {
   it("l'inscription par email transmet la case cochée en métadonnées", () => {
-    expect(authSrc).toMatch(/data:\s*\{\s*role,\s*legal_accepted:\s*LEGAL_ACCEPTED_SIGNUP\s*\}/);
+    // Lot E17 : l'intention d'inscription suit dans les mêmes métadonnées.
+    expect(authSrc).toMatch(/data:\s*\{\s*role,\s*legal_accepted:\s*LEGAL_ACCEPTED_SIGNUP\s*(\}|,)/);
   });
   it("la session transmet la source Google sans bloquer la lecture du profil", () => {
     expect(authSrc).toContain("void applyPendingLegalAcceptance()");

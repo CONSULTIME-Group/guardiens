@@ -1,6 +1,6 @@
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Heading, Html, Preview, Text, Button, Section, Hr, Link,
+  Body, Container, Heading, Html, Preview, Text, Button, Section, Hr,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
@@ -21,13 +21,18 @@ interface Props {
   distanceKm?: number | null
 }
 
-/** Au-delà de ce seuil, l'email dit la distance réelle et propose de régler son rayon. */
-export const FAR_DISTANCE_KM = 30
-export const ALERT_SETTINGS_URL = `${SITE_URL}/settings?section=alerts`
+/**
+ * Lot E20 : la vague ne part jamais au-delà de 30 km, la distance reste écrite
+ * dans l'accroche (headline). Lot E17 : src=vague sur les liens, pour la mesure.
+ */
+export const WAVE_LINK_SOURCE = 'vague'
 
-export function farDistanceLine(distanceKm?: number | null): string | null {
-  if (typeof distanceKm !== 'number' || !Number.isFinite(distanceKm) || distanceKm <= FAR_DISTANCE_KM) return null
-  return `À ${Math.round(distanceKm)} km de chez vous. Personne de plus proche pour le moment.`
+export function canHelpUrl(token: string): string {
+  return `${SITE_URL}/entraide/je-peux?t=${token}&src=${WAVE_LINK_SOURCE}`
+}
+
+export function missionDetailUrl(missionId: string): string {
+  return `${SITE_URL}/petites-missions/${missionId}?src=${WAVE_LINK_SOURCE}`
 }
 
 const MissionHelpNeededEmail = ({
@@ -39,9 +44,7 @@ const MissionHelpNeededEmail = ({
   canHelpToken,
   proofLine,
   sitModeLine,
-  distanceKm,
 }: Props) => {
-  const farLine = farDistanceLine(distanceKm)
   return (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
@@ -50,15 +53,6 @@ const MissionHelpNeededEmail = ({
       <Container style={container}>
         <BrandHeader />
         <Heading style={h1}>Un besoin près de chez vous</Heading>
-
-        {farLine && (
-          <>
-            <Text style={far}>{farLine}</Text>
-            <Text style={farLink}>
-              <Link href={ALERT_SETTINGS_URL} style={link}>Choisir la distance qui me convient</Link>
-            </Text>
-          </>
-        )}
 
         <Text style={text}>Bonjour{helperFirstName ? ` ${helperFirstName}` : ''},</Text>
 
@@ -76,7 +70,7 @@ const MissionHelpNeededEmail = ({
 
         {canHelpToken && (
           <Section style={ctaSection}>
-            <Button style={button} href={`${SITE_URL}/entraide/je-peux?t=${canHelpToken}`}>
+            <Button style={button} href={canHelpUrl(canHelpToken)}>
               Je peux
             </Button>
           </Section>
@@ -84,7 +78,7 @@ const MissionHelpNeededEmail = ({
 
         {missionId && (
           <Section style={ctaSection}>
-            <Button style={buttonGhost} href={`${SITE_URL}/petites-missions/${missionId}`}>
+            <Button style={buttonGhost} href={missionDetailUrl(missionId)}>
               Voir le détail
             </Button>
           </Section>
@@ -133,9 +127,6 @@ const buttonGhost = {
 }
 const proof = { color: '#2C6D50', fontSize: '13px', lineHeight: '20px', margin: '0 0 16px', fontStyle: 'italic' as const }
 const muted = { color: '#888277', fontSize: '13px', lineHeight: '20px', marginTop: '20px' }
-const far = { fontSize: '14px', color: '#524E47', lineHeight: '1.6', margin: '0 0 4px', fontWeight: 600 as const }
-const farLink = { fontSize: '13px', lineHeight: '20px', margin: '0 0 16px' }
-const link = { color: '#2C6D50', textDecoration: 'underline' }
 const hr = { borderColor: '#E9E4DD', margin: '20px 0' }
 
 export const template: TemplateEntry = {

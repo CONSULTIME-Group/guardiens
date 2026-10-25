@@ -14,13 +14,25 @@ const REASON_TEXT: Record<string, string> = {
   mission_closed: "Ce besoin est déjà en cours ou clos.",
 };
 
-/** Arrivée du lien « Choisir {prénom} » : lecture du jeton, puis choix sur confirmation. */
+/** Lot E17 : le choix écarte les autres réponses, qui reçoivent « Merci, c'est pourvu ». */
+export const CHOSEN_TEXT =
+  "Votre besoin passe en cours et la conversation est ouverte, avec un premier message. Les autres personnes reçoivent un merci.";
+
+export function confirmText(helper: string): string {
+  return `En confirmant, votre besoin passe en cours et la conversation s'ouvre avec ${helper}. Les autres personnes reçoivent un merci.`;
+}
+
+export function chooseConversationPath(conversationId: string | null | undefined): string {
+  return conversationId ? `/messages/${conversationId}` : "/messages";
+}
+
+/** Arrivée du lien « Choisir {prénom} » : lecture du jeton, puis choix sur confirmation, sans connexion. */
 export default function MissionChooseHelper() {
   const [params] = useSearchParams();
   const token = params.get("t") || "";
   const [peek, setPeek] = useState<Peek | null>(null);
   const [sending, setSending] = useState(false);
-  const [done, setDone] = useState<{ ok: boolean; reason?: string; helper?: string; slug?: string } | null>(null);
+  const [done, setDone] = useState<{ ok: boolean; reason?: string; helper?: string; slug?: string; conversationId?: string | null } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -35,8 +47,8 @@ export default function MissionChooseHelper() {
     setSending(true);
     const { data, error } = await supabase.functions.invoke("mission-choose-action", { body: { token, mode: "confirm" } });
     setSending(false);
-    const result = (error ? { ok: false, reason: "invalid" } : data) as { ok: boolean; reason?: string; helper_first_name?: string; mission_slug?: string };
-    setDone({ ok: result.ok, reason: result.reason, helper: result.helper_first_name, slug: result.mission_slug });
+    const result = (error ? { ok: false, reason: "invalid" } : data) as { ok: boolean; reason?: string; helper_first_name?: string; mission_slug?: string; conversation_id?: string | null };
+    setDone({ ok: result.ok, reason: result.reason, helper: result.helper_first_name, slug: result.mission_slug, conversationId: result.conversation_id ?? null });
   };
 
   const helper = capitalizeFirstName(done?.helper || peek?.helper_first_name) || "cette personne";
@@ -50,8 +62,8 @@ export default function MissionChooseHelper() {
       ) : done?.ok ? (
         <section className="flex flex-col gap-4" aria-live="polite">
           <h1 className="font-heading text-3xl font-semibold text-foreground">C'est noté, {helper} vous aide.</h1>
-          <p className="text-muted-foreground">Votre besoin passe en cours. Les autres réponses restent visibles sur la page du besoin : vous pouvez leur répondre depuis cette page.</p>
-          <Button asChild className="self-start"><Link to="/messages">Écrire à {helper}</Link></Button>
+          <p className="text-muted-foreground">{CHOSEN_TEXT}</p>
+          <Button asChild className="self-start"><Link to={chooseConversationPath(done.conversationId)}>Écrire à {helper}</Link></Button>
         </section>
       ) : done && !done.ok ? (
         <section className="flex flex-col gap-4" aria-live="polite">
@@ -63,7 +75,7 @@ export default function MissionChooseHelper() {
         <section className="flex flex-col gap-4">
           <h1 className="font-heading text-3xl font-semibold text-foreground">C'est {helper} qui vous aide ?</h1>
           {peek.mission_title && <p className="rounded-lg border border-border bg-card p-4 font-semibold text-foreground">{peek.mission_title}</p>}
-          <p className="text-muted-foreground">En confirmant, votre besoin passe en cours. Les autres réponses restent visibles sur la page du besoin.</p>
+          <p className="text-muted-foreground">{confirmText(helper)}</p>
           <Button onClick={confirm} disabled={sending} className="self-start">{sending ? "Enregistrement en cours..." : `Choisir ${helper}`}</Button>
           {slug && <Link to={`/petites-missions/${slug}`} className="text-sm font-semibold text-primary underline underline-offset-4">Voir le besoin</Link>}
         </section>

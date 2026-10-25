@@ -40,6 +40,21 @@ export function roleForSignupIntent(intent: SignupIntent | null): SignupRole | n
 }
 
 /**
+ * Lot E17 : intention écrite sur le compte à l'inscription
+ * (profiles.arrival_intent, par handle_new_user). `entraideChosen` vaut
+ * l'intention entraide en cours sur la page d'inscription (détectée depuis le
+ * redirect, ou choisie sur l'écran C1, et retirée quand la personne choisit
+ * un autre rôle). Sinon, l'intention détectée owner ou sitter ; sinon rien.
+ */
+export function arrivalIntentForSignup(
+  entraideChosen: boolean,
+  detected: SignupIntent | null,
+): SignupIntent | null {
+  if (entraideChosen) return "entraide";
+  return detected === "owner" || detected === "sitter" ? detected : null;
+}
+
+/**
  * Clé i18n du bandeau de contexte, sous register_page.intent_banner.
  * L'intention entraide se décline selon la destination exacte.
  */

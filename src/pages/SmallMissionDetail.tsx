@@ -61,6 +61,7 @@ import { haversineDistance } from "@/utils/geo";
 import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHint";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { MAX_MISSION_MESSAGE_LEN, MIN_MISSION_MESSAGE_LEN, respondToMission } from "@/lib/missionRespond";
+import { CLOSURE_DECLINE_TEXT, CLOSURE_DECLINE_TITLE, isClosureDecline } from "@/lib/missionResponseClosure";
 
 
 /** Rayon max (km) pour considérer une mission « près de chez vous ». */
@@ -1010,6 +1011,22 @@ const SmallMissionDetail = () => {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+          </div>
+        );
+      }
+      // Lot E17 : un besoin clos sans choix (decline_reason « mission_closed »,
+      // posé par la clôture) se distingue d'une autre personne choisie.
+      if (myResponse.status === "declined" && isClosureDecline(myResponse)) {
+        return (
+          <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-primary" />
+              <p className="font-heading text-lg font-semibold text-foreground">{CLOSURE_DECLINE_TITLE}</p>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">{CLOSURE_DECLINE_TEXT}</p>
+            <Link to="/petites-missions" className="block">
+              <Button variant="outline" className="w-full rounded-full">Voir d'autres coups de main</Button>
+            </Link>
           </div>
         );
       }
