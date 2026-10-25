@@ -4,7 +4,7 @@ import { useTranslation } from "@/i18n/react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
-import { Share2, CheckCircle2, ShieldCheck, Eye, Users, Dog, Flower2, Home as HomeIcon, Sparkles } from "lucide-react";
+import { Share2, CheckCircle2, ShieldCheck, Eye, Users } from "lucide-react";
 import { formatProjetPeriod, formatProjetMonths, formatProjetDay, projetParagraphs, projetDurationLabel, hebergementLabel, projetNatureLabel, savoirFaireLabel, offreLabel, externalRegistrationUrl, projetAccueilHours, projetSections } from "@/lib/projets";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -15,10 +15,13 @@ import { avatarImageUrl } from "@/lib/storageImage";
 import { missionEntraideCity, useAnimalCareLink } from "@/lib/entraideMissionLinks";
 import { resolveExchangeLine } from "@/lib/entraideExchange";
 import { ENTRAIDE_COPY } from "@/lib/entraideCopy";
+import NeedPaperPanel from "@/components/entraide/NeedPaperPanel";
+import { needTitleSizeClass, needWhenLabel } from "@/lib/needVisual";
+import { notifiedLine, responsesLine } from "@/lib/missionNotifiedCount";
 
-// (Pas de bannière de fallback : une annonce sans photo ne doit PAS
-// afficher une image générique qui rendrait toutes les annonces
-// identiques ou pire, trompeuse au partage social.)
+// Lot E21 (25/10/2026) : un besoin sans photo montre le panneau gouache de
+// sa catégorie (NeedPaperPanel), décision de Jérémie qui remplace la règle du
+// 14/10/2026 « aucune image sans photo réelle sur la fiche ».
 
 interface CatMeta {
   label: string;
@@ -104,14 +107,10 @@ interface Props {
   canHelpToken?: string | null;
   /** Lot E18 : ligne « ce que je propose volontiers » de l'auteur (repli de « En retour »). */
   helpsWith?: string | null;
+  /** Lot E21 : personnes prévenues par les vagues (mission_notified_count). */
+  notifiedCount?: number | null;
 }
 
-const CATEGORY_ICON: Record<string, typeof Dog> = {
-  animals: Dog,
-  garden: Flower2,
-  house: HomeIcon,
-  skills: Sparkles,
-};
 
 const PublicMissionView = ({
   mission,
@@ -137,6 +136,7 @@ const PublicMissionView = ({
   ownerPanelAnchor = "candidatures",
   canHelpToken = null,
   helpsWith = null,
+  notifiedCount = null,
 }: Props) => {
   const { t } = useTranslation();
   const heroImage = mission.photos?.[0] || null;
@@ -148,7 +148,6 @@ const PublicMissionView = ({
   // Rétro-sanitize : les annonces créées avant la sanitize à la source
   // conservent des titres en minuscules ou avec fautes ("chez soit").
   const displayTitle = sanitizeUserTitle(mission.title) || mission.title;
-  const CategoryIcon = CATEGORY_ICON[mission.category] || Sparkles;
   const authorFirstName = author?.first_name
     ? author.first_name.charAt(0).toUpperCase() + author.first_name.slice(1).toLowerCase()
     : null;
@@ -177,13 +176,9 @@ const PublicMissionView = ({
     return parts.join(". ").slice(0, 155);
   })();
 
-  // Titre court (< 20 mots dans la description) → typo hero plus mesurée
-  // pour éviter l'effet « cathédrale sur un tabouret ».
-  const descLen = (mission.description || "").trim().split(/\s+/).filter(Boolean).length;
-  const isShortMission = descLen < 20;
-  const h1Class = isShortMission
-    ? "font-heading text-3xl md:text-4xl font-bold leading-[1.15] mb-6 text-foreground"
-    : "font-heading text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6 text-foreground";
+  // Lot E21 (avis 17) : la taille du titre suit la longueur du titre, jamais
+  // celle de la description.
+  const h1Class = `font-heading ${needTitleSizeClass(displayTitle)} font-bold leading-[1.2] mb-6 text-foreground break-words [text-wrap:balance]`;
 
   // ─── Projet participatif ───
   // Même ossature (grille 12, article 8, aside 4 collant, rayons 2rem, JSON-LD
@@ -657,10 +652,11 @@ const PublicMissionView = ({
           <article className="lg:col-span-8 min-w-0">
             <header className="mb-10">
               <div className="flex items-center gap-3 mb-6 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
-                  <CategoryIcon className="h-3 w-3" />
-                  {catMeta.label}
-                </span>
+                {/* Lot E21 : eyebrow de la charte à la place de la pastille catégorie. */}
+                <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-terra" data-testid="need-eyebrow">
+                  <span className="inline-block h-px w-5 bg-terra" aria-hidden />
+                  {mission.mission_type === "offre" ? catMeta.label : `Coup de main · ${cityLabel}`}
+                </p>
                 <Button
                   variant="outline"
                   size="sm"
@@ -707,12 +703,18 @@ const PublicMissionView = ({
               )}
             </header>
 
-            {/* Image principale : uniquement si photo réelle fournie.
-                Sinon on ne montre AUCUNE image (pas de fallback trompeur
-                type « alpinistes coucher de soleil » ou bannière générique
-                qui rendait toutes les annonces identiques). */}
+            {/* Image principale : la photo réelle, sinon le panneau gouache. */}
+            {!heroImage && (
+              <NeedPaperPanel
+                className="mb-12"
+                category={mission.category}
+                title={mission.title}
+                description={mission.description}
+                city={cityLabel}
+              />
+            )}
             {heroImage && (
-              <div className="mb-12 rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
+              <div className="mb-12 rounded-card overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
                 <img
                   src={heroImage}
                   alt={t("mission_detail.photo_alt", { title: displayTitle })}
@@ -786,6 +788,20 @@ const PublicMissionView = ({
                 );
               })()}
 
+              {/* Lot E21 : blocs « Quand » et « Durée ». */}
+              {mission.mission_type !== "offre" && (
+                <dl className="grid grid-cols-2 gap-2.5" data-testid="need-facts">
+                  <div className="rounded-field border border-border bg-card px-3 py-2.5">
+                    <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Quand</dt>
+                    <dd className="mt-0.5 text-[15px] font-medium text-foreground">{needWhenLabel(mission.date_needed, mission.end_date)}</dd>
+                  </div>
+                  <div className="rounded-field border border-border bg-card px-3 py-2.5">
+                    <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Durée</dt>
+                    <dd className="mt-0.5 text-[15px] font-medium text-foreground">{durationLabel || "À convenir ensemble"}</dd>
+                  </div>
+                </dl>
+              )}
+
               {/* Description */}
               <section>
                 <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">
@@ -813,9 +829,9 @@ const PublicMissionView = ({
               {mission.mission_type !== "offre" && (exchangeLine.kind === "fixed" ? (
                 <p className="text-base leading-relaxed text-foreground/85" data-testid="mission-exchange-line">{exchangeLine.text}</p>
               ) : (
-                <aside className="border-l-2 border-primary/40 bg-muted/40 pl-4 py-3 rounded-r-lg" data-testid="mission-exchange-line">
-                  <p className="text-sm font-semibold text-muted-foreground mb-1">{exchangeLine.label}</p>
-                  <p className="text-base leading-snug text-foreground/85">{exchangeLine.text}</p>
+                <aside className="rounded-card bg-terra-soft px-4 py-3.5 space-y-1" data-testid="mission-exchange-line">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-terra">{exchangeLine.label}</p>
+                  <p className="font-heading text-lg leading-snug text-foreground">{exchangeLine.text}</p>
                 </aside>
               ))}
 
@@ -825,10 +841,10 @@ const PublicMissionView = ({
           {/* ── SIDEBAR ── */}
           <aside className="lg:col-span-4 lg:sticky lg:top-8 space-y-6">
             {/* CTA conversion */}
-            <div className="bg-card p-8 rounded-[2rem] shadow-xl shadow-foreground/5 border border-border">
+            <div className="bg-card p-8 rounded-card shadow-xl shadow-foreground/5 border border-border">
               <div className="mb-8 space-y-4">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                     {t("mission_detail.status")}
                   </p>
                   <span className="inline-flex items-center gap-2 text-sm font-medium text-success">
@@ -838,7 +854,7 @@ const PublicMissionView = ({
                 </div>
                 {durationLabel && (
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                       {t("mission_detail.availability")}
                     </p>
                     <p className="text-base font-semibold text-foreground">{durationLabel}</p>
@@ -846,7 +862,7 @@ const PublicMissionView = ({
                 )}
                 {(mission.date_needed || mission.end_date) && (
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                       {t("mission_detail.period")}
                     </p>
                     <p className="text-base font-semibold text-foreground">
@@ -861,7 +877,7 @@ const PublicMissionView = ({
                 )}
                 {mission.category === "animals" && (mission.pet_species || mission.pet_size) && (
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                       {t("mission_detail.animal")}
                     </p>
                     <p className="text-base font-semibold text-foreground capitalize">
@@ -871,7 +887,8 @@ const PublicMissionView = ({
                 )}
               </div>
 
-              <Link to={canHelpHref} className="block">
+              {/* Sur téléphone, la barre basse porte le seul bouton plein (lot E21). */}
+              <Link to={canHelpHref} className="hidden lg:block">
                 <Button className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20">
                   {mission.mission_type === "offre" ? t("mission_detail.cta_help") : ENTRAIDE_COPY.canHelp}
                 </Button>
@@ -892,7 +909,7 @@ const PublicMissionView = ({
             </div>
 
             {/* Localisation approximative */}
-            <div className="bg-card rounded-[2rem] overflow-hidden shadow-sm border border-border">
+            <div className="bg-card rounded-card overflow-hidden shadow-sm border border-border">
               <ApproximateLocationMap
                 city={mission.city}
                 postalCode={mission.postal_code}
@@ -933,7 +950,7 @@ const PublicMissionView = ({
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {relatedMissions.slice(0, 3).map((rm: any) => (
                 <RelatedMissionCard
                   key={rm.id}
@@ -941,6 +958,7 @@ const PublicMissionView = ({
                   photo={Array.isArray(rm.photos) ? rm.photos[0] : null}
                   category={rm.category}
                   title={sanitizeUserTitle(rm.title) || rm.title}
+                  description={rm.description ?? null}
                   city={titlecaseCity(rm.city)}
                   timeAgo={timeAgoFr(rm.created_at)}
                 />
@@ -950,31 +968,28 @@ const PublicMissionView = ({
         )}
 
         {/* Pourquoi rejoindre, réassurance bas de page */}
-        <section className="mt-24 md:mt-28 bg-primary text-primary-foreground rounded-[2.5rem] p-10 md:p-14 shadow-2xl shadow-primary/20">
+        {/* Lot E21 : bloc final sur papier clair, boutons en contour (un seul bouton plein par écran). */}
+        <section className="mt-24 md:mt-28 bg-hero-paper text-foreground rounded-card border border-border p-8 md:p-14">
           <div className="max-w-3xl mx-auto text-center space-y-6">
             <h2 className="font-heading text-3xl md:text-4xl font-bold">
               {t("mission_detail.cta_title")}
             </h2>
-            <p className="text-lg opacity-90 leading-relaxed">
+            <p className="text-lg text-foreground/85 leading-relaxed">
               {t("mission_detail.cta_body")}
             </p>
             <div className="flex flex-wrap gap-3 justify-center pt-2">
               <Link to={`/inscription?redirect=${encodeURIComponent(redirect)}`}>
-                <Button size="lg" variant="secondary" className="rounded-full font-bold">
+                <Button size="lg" variant="outline" className="rounded-full font-bold border-primary text-primary">
                   {t("mission_detail.cta_signup")}
                 </Button>
               </Link>
               <Link to={`/login?redirect=${encodeURIComponent(redirect)}`}>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="rounded-full font-bold bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
-                >
+                <Button size="lg" variant="ghost" className="rounded-full font-bold">
                   {t("mission_detail.login")}
                 </Button>
               </Link>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-5 pt-4 text-sm opacity-80">
+            <div className="flex flex-wrap items-center justify-center gap-5 pt-4 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4" /> {t("mission_detail.no_card")}
               </span>
@@ -991,11 +1006,19 @@ const PublicMissionView = ({
       {/* CTA sticky mobile : facilite la conversion sur téléphone où la
           sidebar n'est plus visible en scrollant. Caché en lg+. */}
       <div className="lg:hidden fixed bottom-[var(--bottom-nav-h,0px)] inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur px-4 py-3 shadow-[0_-8px_20px_-12px_hsl(var(--foreground)/0.15)]">
-        <Link to={canHelpHref} className="block">
-          <Button className="w-full py-5 rounded-full font-bold text-base shadow-lg shadow-primary/20">
-            {mission.mission_type === "offre" ? t("mission_detail.sticky_cta") : ENTRAIDE_COPY.canHelp}
-          </Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          {notifiedLine(notifiedCount) && (
+            <div className="flex min-w-0 flex-1 flex-col" data-testid="mission-notified-line">
+              <span className="text-sm font-semibold text-foreground">{notifiedLine(notifiedCount)}</span>
+              <span className="text-sm text-muted-foreground">{responsesLine(responsesCount)}</span>
+            </div>
+          )}
+          <Link to={canHelpHref} className={notifiedLine(notifiedCount) ? "shrink-0" : "block w-full"}>
+            <Button className={`${notifiedLine(notifiedCount) ? "px-7" : "w-full"} min-h-12 rounded-full font-bold text-base`}>
+              {mission.mission_type === "offre" ? t("mission_detail.sticky_cta") : ENTRAIDE_COPY.canHelp}
+            </Button>
+          </Link>
+        </div>
       </div>
       {/* Réserve d'espace pour éviter que la sticky masque le footer sur mobile. */}
     </>

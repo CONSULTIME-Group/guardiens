@@ -819,8 +819,8 @@ const CreateSmallMission = () => {
                           aria-pressed={pressed}
                           onClick={() => toggleExchangeChip(label)}
                           className={cn(
-                            "min-h-11 rounded-md border px-3 text-sm font-medium transition-colors",
-                            pressed ? "border-primary bg-primary/10 text-foreground" : "border-input bg-card text-foreground hover:border-primary/60",
+                            "min-h-11 rounded-field border px-3 text-sm font-medium transition-colors",
+                            pressed ? "border-primary bg-primary/10 text-foreground" : "border-field bg-card text-foreground hover:border-primary/60",
                           )}
                         >
                           {label}
@@ -836,7 +836,7 @@ const CreateSmallMission = () => {
                       maxLength={EXCHANGE_OFFER_MAX}
                       onChange={(e) => setExchangeFree(e.target.value)}
                       placeholder="Par exemple : une part de tarte aux pommes"
-                      className="h-11 text-base"
+                      className="h-11 rounded-field border-field text-base"
                     />
                   </div>
                   {exchangeOffer && (

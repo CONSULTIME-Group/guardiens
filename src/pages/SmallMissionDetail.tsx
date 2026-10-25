@@ -66,6 +66,9 @@ import CanHelpDialog from "@/components/entraide/CanHelpDialog";
 import { ENTRAIDE_COPY, ENTRAIDE_DURATION_LABELS } from "@/lib/entraideCopy";
 import { resolveExchangeLine } from "@/lib/entraideExchange";
 import { needExcerpt } from "@/lib/needExcerpt";
+import NeedPaperPanel from "@/components/entraide/NeedPaperPanel";
+import { needTitleSizeClass, needWhenLabel } from "@/lib/needVisual";
+import { notifiedLine, responsesLine, useMissionNotifiedCount } from "@/lib/missionNotifiedCount";
 
 
 /** Rayon max (km) pour considérer une mission « près de chez vous ». */
@@ -169,16 +172,16 @@ const InlineFeedbackForm = ({
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border p-5 space-y-4">
+    <div className="bg-card rounded-card border border-border p-5 space-y-4">
       <p className="text-sm font-medium">Votre avis sur {receiverName}</p>
 
       {/* Thumbs */}
       <div className="flex gap-3">
-        <button onClick={() => setPositive(true)} className={`flex-1 flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${positive === true ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
+        <button onClick={() => setPositive(true)} className={`flex-1 flex flex-col items-center gap-1.5 p-3 rounded-field border-2 transition-all ${positive === true ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
           <ThumbsUp className={`h-6 w-6 ${positive === true ? "text-primary" : "text-muted-foreground"}`} />
           <span className="text-xs font-medium">Oui</span>
         </button>
-        <button onClick={() => setPositive(false)} className={`flex-1 flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${positive === false ? "border-destructive bg-destructive/5" : "border-border hover:border-destructive/30"}`}>
+        <button onClick={() => setPositive(false)} className={`flex-1 flex flex-col items-center gap-1.5 p-3 rounded-field border-2 transition-all ${positive === false ? "border-destructive bg-destructive/5" : "border-border hover:border-destructive/30"}`}>
           <ThumbsDown className={`h-6 w-6 ${positive === false ? "text-destructive" : "text-muted-foreground"}`} />
           <span className="text-xs font-medium">Non</span>
         </button>
@@ -192,7 +195,7 @@ const InlineFeedbackForm = ({
           const sel = selectedBadge === b.key;
           return (
             <button key={b.key} onClick={() => setSelectedBadge(sel ? null : b.key)}
-              className={`w-full flex items-center gap-3 p-2.5 rounded-lg border-2 text-left transition-all ${sel ? `${b.selectedBg} ${b.borderColor}` : `${b.bgColor} border-transparent`}`}>
+              className={`w-full flex items-center gap-3 p-2.5 rounded-field border-2 text-left transition-all ${sel ? `${b.selectedBg} ${b.borderColor}` : `${b.bgColor} border-transparent`}`}>
               <Icon className={`h-4 w-4 ${b.iconColor}`} />
               <span className="text-sm font-medium">{b.label}</span>
               {sel && <CheckCircle2 className="h-4 w-4 text-primary ml-auto" />}
@@ -401,6 +404,8 @@ const SmallMissionDetail = () => {
 
   // Compteur de vues : 1 fois par mission par session (sessionStorage)
   const missionUuid: string | undefined = mission?.id;
+  // Lot E21 : « {N} personnes prévenues » dans la barre basse.
+  const notifiedCount = useMissionNotifiedCount(missionUuid);
   useEffect(() => {
     if (!missionUuid) return;
     try {
@@ -806,7 +811,7 @@ const SmallMissionDetail = () => {
           <div className="h-4 w-48 bg-muted rounded mb-6" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
             <div className="lg:col-span-8 space-y-6">
-              <div className="h-64 md:h-80 bg-muted rounded-2xl" />
+              <div className="h-64 md:h-80 bg-muted rounded-card" />
               <div className="h-8 w-3/4 bg-muted rounded" />
               <div className="h-4 w-1/2 bg-muted rounded" />
               <div className="space-y-2">
@@ -816,8 +821,8 @@ const SmallMissionDetail = () => {
               </div>
             </div>
             <div className="lg:col-span-4 space-y-6">
-              <div className="h-72 bg-muted rounded-2xl" />
-              <div className="h-48 bg-muted rounded-2xl" />
+              <div className="h-72 bg-muted rounded-card" />
+              <div className="h-48 bg-muted rounded-card" />
             </div>
           </div>
         </div>
@@ -895,6 +900,7 @@ const SmallMissionDetail = () => {
           noindex={shouldNoindex}
           canHelpToken={actionToken}
           helpsWith={author?.helps_with ?? null}
+          notifiedCount={notifiedCount}
         />
         <PublicFooter />
       </>
@@ -931,21 +937,21 @@ const SmallMissionDetail = () => {
     // Author : récap propositions
     if (isAuthor) {
       return (
-        <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-5">
+        <div className="bg-card p-5 rounded-card shadow-sm border border-border space-y-5">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Votre besoin</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Votre besoin</p>
             <span className={`inline-flex items-center gap-2 text-sm font-medium ${mission.status === "open" ? "text-success" : "text-muted-foreground"}`}>
               <span className={`w-2 h-2 rounded-full ${mission.status === "open" ? "bg-success" : "bg-muted-foreground/50"}`} />
               {statusMeta.label}
             </span>
           </div>
           <div className="grid grid-cols-2 gap-3 pt-1">
-            <div className="bg-muted/50 rounded-2xl p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Réponses</p>
+            <div className="bg-muted/50 rounded-card p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Réponses</p>
               <p className="font-heading text-3xl font-bold text-foreground leading-none">{responses.length}</p>
             </div>
-            <div className="bg-muted/50 rounded-2xl p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">En attente</p>
+            <div className="bg-muted/50 rounded-card p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">En attente</p>
               <p className="font-heading text-3xl font-bold text-foreground leading-none">{pendingResponses.length}</p>
             </div>
           </div>
@@ -978,7 +984,7 @@ const SmallMissionDetail = () => {
     if (myResponse) {
       if (myResponse.status === "accepted" && mission.status === "in_progress") {
         return (
-          <div className="bg-card p-5 rounded-2xl shadow-sm border border-success-border space-y-4">
+          <div className="bg-card p-5 rounded-card shadow-sm border border-success-border space-y-4">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-success" />
               <p className="font-heading text-lg font-semibold text-success">C'est vous qui aidez</p>
@@ -994,7 +1000,7 @@ const SmallMissionDetail = () => {
       }
       if (myResponse.status === "pending") {
         return (
-          <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-3">
+          <div className="bg-card p-5 rounded-card shadow-sm border border-border space-y-3">
             <div className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-info" />
               <p className="font-heading text-lg font-semibold">Votre « Je peux » est parti</p>
@@ -1078,7 +1084,7 @@ const SmallMissionDetail = () => {
       }
       if (myResponse.status === "declined") {
         return (
-          <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-3">
+          <div className="bg-card p-5 rounded-card shadow-sm border border-border space-y-3">
             <div className="flex items-center gap-2">
               <XCircle className="h-5 w-5 text-muted-foreground" />
               <p className="font-heading text-lg font-semibold text-muted-foreground">Non retenu(e)</p>
@@ -1094,7 +1100,7 @@ const SmallMissionDetail = () => {
       }
       if (myResponse.status === "withdrawn") {
         return (
-          <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-3">
+          <div className="bg-card p-5 rounded-card shadow-sm border border-border space-y-3">
             <p className="font-heading text-lg font-semibold text-muted-foreground">Réponse retirée</p>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Vous avez retiré votre proposition sur ce besoin.
@@ -1112,7 +1118,7 @@ const SmallMissionDetail = () => {
     // l'email aux aidants avec son jeton, il répond comme depuis l'email.
     if (mission.status === "open" && accessLevel === 1) {
       return (
-        <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-4">
+        <div className="bg-card p-5 rounded-card shadow-sm border border-border space-y-4">
           {actionToken && (mission as any).mission_type !== "offre" && (
             <Link to={`/entraide/je-peux?t=${actionToken}`} className="block">
               <Button className="w-full rounded-full font-bold text-base" size="lg">{ENTRAIDE_COPY.canHelp}</Button>
@@ -1129,7 +1135,7 @@ const SmallMissionDetail = () => {
       const isOffer = (mission as any).mission_type === "offre";
       const authorName = author?.first_name || "l'auteur du besoin";
       return (
-        <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-4">
+        <div className="bg-card p-5 rounded-card shadow-sm border border-border space-y-4">
           <div>
             <p className="font-heading text-lg font-bold text-foreground leading-snug">
               {isOffer ? "Solliciter cette aide" : `Un coup de main pour ${author?.first_name || "ce besoin"} ?`}
@@ -1139,13 +1145,13 @@ const SmallMissionDetail = () => {
             </p>
           </div>
           {responsesCapReached ? (
-            <div className="rounded-2xl border border-warning/40 bg-warning-soft/40 p-4 text-sm text-foreground/85">
+            <div className="rounded-card border border-warning/40 bg-warning-soft/40 p-4 text-sm text-foreground/85">
               <p className="font-medium">Besoin complet pour l'instant.</p>
               <p className="mt-1 text-muted-foreground">{responsesCapMessage}</p>
             </div>
           ) : (
             <Button
-              className="w-full rounded-full font-bold text-base"
+              className="hidden lg:inline-flex w-full rounded-full font-bold text-base"
               size="lg"
               disabled={submitting}
               onClick={() => (isOffer ? openOfferModal() : openCanHelp("page"))}
@@ -1162,7 +1168,7 @@ const SmallMissionDetail = () => {
 
     // Mission fermée / autres cas, état neutre
     return (
-      <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-3">
+      <div className="bg-card p-5 rounded-card shadow-sm border border-border space-y-3">
         <p className="font-heading text-lg font-semibold">{statusMeta.label}</p>
         <p className="text-sm text-muted-foreground leading-relaxed">
           {mission.status === "in_progress" && "Ce coup de main est en cours d'organisation."}
@@ -1233,7 +1239,7 @@ const SmallMissionDetail = () => {
 
         {/* Bannière d'invitation côté gardien */}
         {showInvitedBanner && (
-          <div className="mb-6 bg-info-soft border border-info-border rounded-2xl p-4 flex items-start gap-3">
+          <div className="mb-6 bg-info-soft border border-info-border rounded-card p-4 flex items-start gap-3">
             <Sparkles className="h-5 w-5 text-info shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="font-medium text-info">{author?.first_name ? `${author.first_name} vous invite à donner un coup de main` : "Vous êtes invité(e) à donner un coup de main"}</p>
@@ -1258,7 +1264,7 @@ const SmallMissionDetail = () => {
 
         {/* Banners statut */}
         {mission.status === "in_progress" && acceptedResponses.length > 0 && (
-          <div className="bg-success-soft border border-success-border rounded-2xl p-4 mb-6 flex items-center gap-2">
+          <div className="bg-success-soft border border-success-border rounded-card p-4 mb-6 flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
             <p className="text-sm font-medium text-success">
               Coup de main organisé avec {acceptedResponses.map(r => r.responder?.first_name).filter(Boolean).join(", ")}
@@ -1266,13 +1272,13 @@ const SmallMissionDetail = () => {
           </div>
         )}
         {mission.status === "completed" && (
-          <div className="bg-muted border border-border rounded-2xl p-4 mb-6 flex items-center gap-2">
+          <div className="bg-muted border border-border rounded-card p-4 mb-6 flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
             <p className="text-sm font-medium text-muted-foreground">Le coup de main a eu lieu</p>
           </div>
         )}
         {mission.status === "cancelled" && (
-          <div className="bg-muted border border-border rounded-2xl p-4 mb-6 flex items-center gap-2">
+          <div className="bg-muted border border-border rounded-card p-4 mb-6 flex items-center gap-2">
             <XCircle className="h-5 w-5 text-muted-foreground" />
             <p className="text-sm font-medium text-muted-foreground">{ENTRAIDE_COPY.needClosed}</p>
           </div>
@@ -1327,13 +1333,17 @@ const SmallMissionDetail = () => {
                   </span>
                 </Link>
               )}
+              {/* Lot E21 : eyebrow de la charte à la place de la pastille catégorie. */}
               <div className="flex items-center gap-2 mb-3 md:mb-4 flex-wrap">
-                <span className="inline-block px-2.5 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-widest uppercase">
-                  {catMeta.label}
-                </span>
-                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase ${statusMeta.className}`}>
-                  {statusMeta.label}
-                </span>
+                <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-terra" data-testid="need-eyebrow">
+                  <span className="inline-block h-px w-5 bg-terra" aria-hidden />
+                  Coup de main · {cityLabel}
+                </p>
+                {mission.status !== "open" && (
+                  <span className={`px-2.5 py-1 rounded-field text-sm font-semibold ${statusMeta.className}`}>
+                    {statusMeta.label}
+                  </span>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
@@ -1345,7 +1355,7 @@ const SmallMissionDetail = () => {
                   <span className="hidden sm:inline">Partager</span>
                 </Button>
               </div>
-              <h1 className="font-heading text-[1.6rem] leading-[1.15] sm:text-3xl md:text-4xl lg:text-[2.75rem] font-bold mb-3 text-foreground break-words">
+              <h1 className={`font-heading ${needTitleSizeClass(displayTitle)} leading-[1.2] font-bold mb-3 text-foreground break-words [text-wrap:balance]`}>
                 {displayTitle}
               </h1>
               {isMissionSitMode(mission.sit_mode) && (
@@ -1353,7 +1363,7 @@ const SmallMissionDetail = () => {
                   {sitModeLine(mission.sit_mode, author?.first_name)}
                 </p>
               )}
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs sm:text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-muted-foreground">
                 <span className="inline-flex items-center gap-1.5 min-w-0">
                   <MapPin className="h-3.5 w-3.5 shrink-0" />
                   <span className="truncate">{cityLabel}{mission.postal_code ? ` (${mission.postal_code.slice(0, 2)})` : ""}</span>
@@ -1377,9 +1387,19 @@ const SmallMissionDetail = () => {
               </div>
             </header>
 
-            {/* Image principale : uniquement si photo réelle. */}
+            {/* Image principale : la photo réelle, sinon le panneau gouache
+                (lot E21, décision de Jérémie du 25/10/2026). */}
+            {!heroImage && (
+              <NeedPaperPanel
+                className="mb-5 md:mb-8"
+                category={mission.category}
+                title={mission.title}
+                description={mission.description}
+                city={cityLabel}
+              />
+            )}
             {heroImage && (
-              <div className="mb-5 md:mb-8 rounded-xl md:rounded-2xl overflow-hidden border border-border bg-muted">
+              <div className="mb-5 md:mb-8 rounded-card  overflow-hidden border border-border bg-muted">
                 <img
                   src={heroImage}
                   alt={displayTitle}
@@ -1453,6 +1473,20 @@ const SmallMissionDetail = () => {
                 );
               })()}
 
+              {/* Lot E21 : blocs « Quand » et « Durée », 14 px au moins. */}
+              {(mission as any).mission_type !== "offre" && (
+                <dl className="grid grid-cols-2 gap-2.5" data-testid="need-facts">
+                  <div className="rounded-field border border-border bg-card px-3 py-2.5">
+                    <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Quand</dt>
+                    <dd className="mt-0.5 text-[15px] font-medium text-foreground">{needWhenLabel(mission.date_needed, mission.end_date)}</dd>
+                  </div>
+                  <div className="rounded-field border border-border bg-card px-3 py-2.5">
+                    <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Durée</dt>
+                    <dd className="mt-0.5 text-[15px] font-medium text-foreground">{durationLabel || "À convenir ensemble"}</dd>
+                  </div>
+                </dl>
+              )}
+
               {/* Description */}
               <section>
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
@@ -1476,9 +1510,9 @@ const SmallMissionDetail = () => {
               {exchangeLine.kind === "fixed" ? (
                 <p className="text-base text-foreground/85 leading-relaxed" data-testid="mission-exchange-line">{exchangeLine.text}</p>
               ) : (
-                <aside className="border-l-2 border-primary/40 bg-muted/40 pl-4 py-3 rounded-r-lg" data-testid="mission-exchange-line">
-                  <p className="text-sm font-semibold text-muted-foreground mb-1">{exchangeLine.label}</p>
-                  <p className="text-base text-foreground/85 leading-snug">{exchangeLine.text}</p>
+                <aside className="rounded-card bg-terra-soft px-4 py-3.5 space-y-1" data-testid="mission-exchange-line">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-terra">{exchangeLine.label}</p>
+                  <p className="font-heading text-lg leading-snug text-foreground">{exchangeLine.text}</p>
                 </aside>
               )}
             </div>
@@ -1489,11 +1523,11 @@ const SmallMissionDetail = () => {
             {renderSidebarCard()}
 
             {/* ── Fiche récap : auteur, période, animal, preuve sociale ── */}
-            <div className="bg-card rounded-2xl border border-border shadow-sm divide-y divide-border">
+            <div className="bg-card rounded-card border border-border shadow-sm divide-y divide-border">
               {/* Auteur */}
               {author && (
                 <div className="p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2.5">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2.5">
                     {(mission as any).mission_type === "offre" ? "Proposé par" : "Demandé par"}
                   </p>
                   {(() => {
@@ -1537,43 +1571,15 @@ const SmallMissionDetail = () => {
                 </div>
               )}
 
-              {/* Faits : période, durée, animal */}
-              {(mission.date_needed || mission.end_date || durationLabel || (mission.category === "animals" && (mission.pet_species || mission.pet_size))) && (
-                <dl className="p-4 grid grid-cols-2 gap-x-3 gap-y-3">
-                  {(mission.date_needed || mission.end_date) && (
-                    <div className="col-span-2">
-                      <dt className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5 inline-flex items-center gap-1.5">
-                        <Calendar className="h-3 w-3" /> Période
-                      </dt>
-                      <dd className="text-sm font-semibold text-foreground">
-                        {mission.date_needed && mission.end_date
-                          ? `du ${format(new Date(mission.date_needed), "d MMM", { locale: fr })} au ${format(new Date(mission.end_date), "d MMM", { locale: fr })}`
-                          : mission.date_needed
-                            ? format(new Date(mission.date_needed), "d MMM", { locale: fr })
-                            : mission.end_date
-                              ? `jusqu'au ${format(new Date(mission.end_date), "d MMM", { locale: fr })}`
-                              : "Dès que possible"}
-                      </dd>
-                    </div>
-                  )}
-                  {durationLabel && (
-                    <div className={mission.category === "animals" && (mission.pet_species || mission.pet_size) ? "" : "col-span-2"}>
-                      <dt className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5 inline-flex items-center gap-1.5">
-                        <Clock className="h-3 w-3" /> Durée
-                      </dt>
-                      <dd className="text-sm font-semibold text-foreground">{durationLabel}</dd>
-                    </div>
-                  )}
-                  {mission.category === "animals" && (mission.pet_species || mission.pet_size) && (
-                    <div className={durationLabel ? "" : "col-span-2"}>
-                      <dt className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5 inline-flex items-center gap-1.5">
-                        <Dog className="h-3 w-3" /> Animal
-                      </dt>
-                      <dd className="text-sm font-semibold text-foreground capitalize truncate">
-                        {[mission.pet_species, mission.pet_size].filter(Boolean).join(" · ")}
-                      </dd>
-                    </div>
-                  )}
+              {/* Faits : l'animal (période et durée passent dans la colonne principale, lot E21) */}
+              {mission.category === "animals" && (mission.pet_species || mission.pet_size) && (
+                <dl className="p-4">
+                  <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-0.5 inline-flex items-center gap-1.5">
+                    <Dog className="h-3 w-3" /> Animal
+                  </dt>
+                  <dd className="text-sm font-semibold text-foreground capitalize truncate">
+                    {[mission.pet_species, mission.pet_size].filter(Boolean).join(" · ")}
+                  </dd>
                 </dl>
               )}
 
@@ -1581,13 +1587,13 @@ const SmallMissionDetail = () => {
               {(((mission as any).view_count ?? 0) > 0 || responses.length > 0) && (
                 <div className="p-4 grid grid-cols-2 gap-3">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Vues</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Vues</p>
                     <p className="font-heading text-lg font-bold text-foreground leading-none">
                       {(mission as any).view_count ?? 0}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Réponses</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Réponses</p>
                     <p className="font-heading text-lg font-bold text-foreground leading-none">
                       {responses.length}
                     </p>
@@ -1597,7 +1603,7 @@ const SmallMissionDetail = () => {
             </div>
 
             {/* Localisation approximative */}
-            <div className="bg-card rounded-2xl overflow-hidden shadow-sm border border-border">
+            <div className="bg-card rounded-card overflow-hidden shadow-sm border border-border">
               <ApproximateLocationMap
                 city={mission.city}
                 postalCode={mission.postal_code}
@@ -1629,7 +1635,7 @@ const SmallMissionDetail = () => {
               </div>
 
               {/* Explainer : quoi faire + rôle de la personne retenue */}
-              <div className="bg-muted/40 border border-border rounded-2xl p-4 mb-5 text-sm text-foreground/80 leading-relaxed">
+              <div className="bg-muted/40 border border-border rounded-card p-4 mb-5 text-sm text-foreground/80 leading-relaxed">
                 {isAuthor ? (
                   <>
                     <span className="font-semibold text-foreground">Vous êtes l'auteur.</span>{" "}
@@ -1648,7 +1654,7 @@ const SmallMissionDetail = () => {
               </div>
 
               {responses.length === 0 ? (
-                <div className="bg-muted/40 rounded-2xl p-6 text-center mb-5">
+                <div className="bg-muted/40 rounded-card p-6 text-center mb-5">
                   <p className="text-muted-foreground">
                     {isAuthor ? "Les réponses arrivent ici." : "Vous seriez la première réponse."}
                   </p>
@@ -1692,7 +1698,7 @@ const SmallMissionDetail = () => {
                     </p>
                   )}
                   {responsesCapReached && (
-                    <div className="rounded-2xl border border-warning/40 bg-warning-soft/40 p-4 text-sm text-foreground/85">
+                    <div className="rounded-card border border-warning/40 bg-warning-soft/40 p-4 text-sm text-foreground/85">
                       <p className="font-medium">Besoin complet pour l'instant.</p>
                       <p className="mt-1 text-muted-foreground">{responsesCapMessage}</p>
                     </div>
@@ -1710,13 +1716,13 @@ const SmallMissionDetail = () => {
 
               {/* États composer : déjà répondu / non éligible */}
               {!isAuthor && hasResponded && (
-                <div className="bg-success-soft/40 border border-success/30 rounded-2xl p-4 text-sm text-foreground/80 flex items-center gap-2">
+                <div className="bg-success-soft/40 border border-success/30 rounded-card p-4 text-sm text-foreground/80 flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
                   Votre « Je peux » est parti. {author?.first_name || "L'auteur"} vous répond dans la messagerie, une notification vous prévient.
                 </div>
               )}
               {!isAuthor && mission.status === "open" && !canApplyMissions && accessLevel === 1 && (
-                <div className="rounded-2xl border border-border p-4">
+                <div className="rounded-card border border-border p-4">
                   <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
                 </div>
               )}
@@ -1734,7 +1740,7 @@ const SmallMissionDetail = () => {
               {acceptedResponses.map(r => (
                 <div key={r.id}>
                   {feedbackSent[r.responder_id] ? (
-                    <div className="bg-muted/50 rounded-2xl p-4 flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="bg-muted/50 rounded-card p-4 flex items-center gap-2 text-sm text-muted-foreground">
                       <CheckCircle2 className="h-4 w-4 text-success" />
                       Avis envoyé pour {r.responder?.first_name}
                     </div>
@@ -1760,7 +1766,7 @@ const SmallMissionDetail = () => {
           <section className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border max-w-3xl">
             <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Votre retour sur ce coup de main</h2>
             {feedbackSent[mission.user_id] ? (
-              <div className="bg-muted/50 rounded-2xl p-4 flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="bg-muted/50 rounded-card p-4 flex items-center gap-2 text-sm text-muted-foreground">
                 <CheckCircle2 className="h-4 w-4 text-success" />
                 Vous avez donné votre avis, merci !
               </div>
@@ -1782,7 +1788,7 @@ const SmallMissionDetail = () => {
             <h3 className="font-heading text-xl font-bold mb-4">Avis reçus</h3>
             <div className="space-y-3">
               {receivedFeedbacks.map((fb: any) => (
-                <div key={fb.id} className="bg-card rounded-2xl border border-border p-4 flex items-start gap-3">
+                <div key={fb.id} className="bg-card rounded-card border border-border p-4 flex items-start gap-3">
                   {fb.giver?.avatar_url ? (
                     <img src={avatarImageUrl(fb.giver.avatar_url, 36)} className="w-9 h-9 rounded-full object-cover" />
                   ) : (
@@ -1832,7 +1838,7 @@ const SmallMissionDetail = () => {
                 </Link>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {relatedMissions.slice(0, 3).map((rm) => (
                   <RelatedMissionCard
                     key={rm.id}
@@ -1840,6 +1846,7 @@ const SmallMissionDetail = () => {
                     photo={Array.isArray(rm.photos) ? rm.photos[0] : null}
                     category={rm.category}
                     title={sanitizeUserTitle(rm.title) || rm.title}
+                    description={rm.description ?? null}
                     city={titlecaseCity(rm.city)}
                     timeAgo={timeAgoFr(rm.created_at)}
                   />
@@ -1937,13 +1944,21 @@ const SmallMissionDetail = () => {
               Besoin complet pour l'instant. {responsesCapMessage}
             </p>
           ) : (
-            <Button
-              size="lg"
-              className="w-full rounded-full font-bold text-base"
-              onClick={() => ((mission as any).mission_type === "offre" ? openOfferModal() : openCanHelp("sticky"))}
-            >
-              {(mission as any).mission_type === "offre" ? "Solliciter cette aide" : ENTRAIDE_COPY.canHelp}
-            </Button>
+            <div className="flex items-center gap-3">
+              {notifiedLine(notifiedCount) && (
+                <div className="flex min-w-0 flex-1 flex-col" data-testid="mission-notified-line">
+                  <span className="text-sm font-semibold text-foreground">{notifiedLine(notifiedCount)}</span>
+                  <span className="text-sm text-muted-foreground">{responsesLine(responses.length)}</span>
+                </div>
+              )}
+              <Button
+                size="lg"
+                className={`${notifiedLine(notifiedCount) ? "shrink-0 px-7" : "w-full"} min-h-12 rounded-full font-bold text-base`}
+                onClick={() => ((mission as any).mission_type === "offre" ? openOfferModal() : openCanHelp("sticky"))}
+              >
+                {(mission as any).mission_type === "offre" ? "Solliciter cette aide" : ENTRAIDE_COPY.canHelp}
+              </Button>
+            </div>
           )}
         </div>
       )}
@@ -1982,7 +1997,7 @@ const ExpiredMissionBanner = ({
     try { return format(parseISO(refDate), "d MMMM yyyy", { locale: fr }); } catch { return refDate; }
   })();
   return (
-    <div className="bg-warning/10 border border-warning/40 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
+    <div className="bg-warning/10 border border-warning/40 rounded-card p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
       <div className="flex-1 min-w-0">
         <p className="font-medium text-warning-foreground">
           {isAuthor

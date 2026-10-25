@@ -54,12 +54,12 @@ export const CanHelpDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={(next) => { if (!next) onCancel(); }}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto rounded-card sm:rounded-card">
         <DialogHeader>
           <DialogTitle>Vous proposez votre aide à {name}</DialogTitle>
           <DialogDescription className="text-[15px] font-semibold leading-snug text-foreground">{needTitle}</DialogDescription>
         </DialogHeader>
-        <section aria-label="Le besoin" className="space-y-2 rounded-lg border border-border bg-muted/30 p-3" data-testid="can-help-need">
+        <section aria-label="Le besoin" className="space-y-2 rounded-card border border-border bg-muted/30 p-3" data-testid="can-help-need">
           {needMeta && <p className="text-sm text-foreground">{needMeta}</p>}
           {needDescription && (
             <p className="max-h-48 overflow-y-auto whitespace-pre-line text-sm leading-relaxed text-foreground" data-testid="can-help-description">
@@ -84,7 +84,7 @@ export const CanHelpDialog = ({
                 type="button"
                 aria-pressed={day === option.value}
                 onClick={() => setDay(day === option.value ? null : option.value)}
-                className={`min-h-11 rounded-md border px-3 text-sm font-medium transition-colors ${day === option.value ? "border-primary bg-primary/10 text-foreground" : "border-input bg-card text-foreground hover:border-primary/60"}`}
+                className={`min-h-11 rounded-field border px-3 text-sm font-medium transition-colors ${day === option.value ? "border-primary bg-primary/10 text-foreground" : "border-field bg-card text-foreground hover:border-primary/60"}`}
               >
                 {option.label}
               </button>
@@ -93,7 +93,7 @@ export const CanHelpDialog = ({
               type="button"
               aria-pressed={day === "other"}
               onClick={() => setDay(day === "other" ? null : "other")}
-              className={`min-h-11 rounded-md border px-3 text-sm font-medium transition-colors ${day === "other" ? "border-primary bg-primary/10 text-foreground" : "border-input bg-card text-foreground hover:border-primary/60"}`}
+              className={`min-h-11 rounded-field border px-3 text-sm font-medium transition-colors ${day === "other" ? "border-primary bg-primary/10 text-foreground" : "border-field bg-card text-foreground hover:border-primary/60"}`}
             >
               Un autre jour
             </button>
@@ -107,7 +107,7 @@ export const CanHelpDialog = ({
                 value={otherDay}
                 min={new Date().toISOString().slice(0, 10)}
                 onChange={(event) => setOtherDay(event.target.value)}
-                className="block min-h-11 w-full rounded-md border border-input bg-card px-3 text-base text-foreground"
+                className="block min-h-11 w-full rounded-field border border-field bg-card px-3 text-base text-foreground"
               />
             </div>
           )}
@@ -123,7 +123,7 @@ export const CanHelpDialog = ({
           onChange={(event) => setMessage(event.target.value)}
           placeholder="Par exemple : je passe samedi matin, j'ai l'habitude de ce genre de coup de main."
           rows={3}
-          className="rounded-md border-input"
+          className="rounded-field border-field"
         />
         <p className="text-sm text-muted-foreground">
           {name} voit votre prénom et vous répond dans la messagerie. La rencontre reste libre.
