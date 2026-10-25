@@ -31,3 +31,31 @@ export function useMissionNotifiedCount(missionId: string | null | undefined): n
   }, [missionId]);
   return count;
 }
+
+/**
+ * Nombre de « Je peux » actifs d'un besoin, lu dans la vue publique
+ * public_mission_response_counts (comme la liste de /petites-missions).
+ * Un visiteur ou un membre qui n'est pas l'auteur lit seulement sa propre
+ * réponse dans small_mission_responses : la fiche prend le plus grand des deux.
+ */
+export function useMissionResponseCount(missionId: string | null | undefined): number | null {
+  const [count, setCount] = useState<number | null>(null);
+  useEffect(() => {
+    if (!missionId) return;
+    let cancelled = false;
+    (supabase as any)
+      .from("public_mission_response_counts")
+      .select("response_count")
+      .eq("mission_id", missionId)
+      .maybeSingle()
+      .then(({ data, error }: { data: { response_count?: number } | null; error: unknown }) => {
+        if (!cancelled) setCount(!error && typeof data?.response_count === "number" ? data.response_count : null);
+      }, () => { if (!cancelled) setCount(null); });
+    return () => { cancelled = true; };
+  }, [missionId]);
+  return count;
+}
+
+export function visibleResponseCount(readable: number, publicCount: number | null | undefined): number {
+  return Math.max(readable, typeof publicCount === "number" && Number.isFinite(publicCount) ? publicCount : 0);
+}

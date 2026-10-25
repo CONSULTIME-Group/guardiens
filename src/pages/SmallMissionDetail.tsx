@@ -68,7 +68,7 @@ import { resolveExchangeLine } from "@/lib/entraideExchange";
 import { needExcerpt } from "@/lib/needExcerpt";
 import NeedPaperPanel from "@/components/entraide/NeedPaperPanel";
 import { needTitleSizeClass, needWhenLabel } from "@/lib/needVisual";
-import { notifiedLine, responsesLine, useMissionNotifiedCount } from "@/lib/missionNotifiedCount";
+import { notifiedLine, responsesLine, useMissionNotifiedCount, useMissionResponseCount, visibleResponseCount } from "@/lib/missionNotifiedCount";
 
 
 /** Rayon max (km) pour considérer une mission « près de chez vous ». */
@@ -406,6 +406,7 @@ const SmallMissionDetail = () => {
   const missionUuid: string | undefined = mission?.id;
   // Lot E21 : « {N} personnes prévenues » dans la barre basse.
   const notifiedCount = useMissionNotifiedCount(missionUuid);
+  const publicResponseCount = useMissionResponseCount(missionUuid);
   useEffect(() => {
     if (!missionUuid) return;
     try {
@@ -896,7 +897,7 @@ const SmallMissionDetail = () => {
           memberSinceLong={memberSince}
           onShare={handleSharePublishedLink}
           viewCount={(mission as any).view_count ?? 0}
-          responsesCount={responses.length}
+          responsesCount={visibleResponseCount(responses.length, publicResponseCount)}
           noindex={shouldNoindex}
           canHelpToken={actionToken}
           helpsWith={author?.helps_with ?? null}
@@ -1948,7 +1949,7 @@ const SmallMissionDetail = () => {
               {notifiedLine(notifiedCount) && (
                 <div className="flex min-w-0 flex-1 flex-col" data-testid="mission-notified-line">
                   <span className="text-sm font-semibold text-foreground">{notifiedLine(notifiedCount)}</span>
-                  <span className="text-sm text-muted-foreground">{responsesLine(responses.length)}</span>
+                  <span className="text-sm text-muted-foreground">{responsesLine(visibleResponseCount(responses.length, publicResponseCount))}</span>
                 </div>
               )}
               <Button
