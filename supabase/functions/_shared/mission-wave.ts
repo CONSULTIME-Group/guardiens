@@ -35,6 +35,46 @@ export function countFreezingResponses(rows: WaveResponseRow[], now: Date): numb
 /** En deçà de ce rayon, personne de disponible signifie vraiment personne. */
 export const WAVE_MIN_RADIUS_KM = 30;
 
+/**
+ * Lot E20 « Vague proche » (décision de Jérémie du 25/10/2026) : 30 km au
+ * plus, 15 km de préférence, les plus proches d'abord, par groupes de 10.
+ * Même règle que enqueue_mission_wave (migration 0098).
+ */
+export const WAVE_MAX_RADIUS_KM = 30;
+export const WAVE_PREFERRED_RADIUS_KM = 15;
+
+/**
+ * Rayon effectif d'un aidant : son rayon déclaré peut seulement réduire le
+ * plafond de 30 km, jamais l'étendre. Sans préférence, 30 km.
+ */
+export function effectiveHelperRadiusKm(declaredKm: number | null | undefined): number {
+  if (declaredKm == null || !Number.isFinite(declaredKm) || declaredKm <= 0) return WAVE_MAX_RADIUS_KM;
+  return Math.min(declaredKm, WAVE_MAX_RADIUS_KM);
+}
+
+/** Palier atteint par une vague : 15 km quand toutes les personnes y sont, 30 sinon. */
+export function waveTierKm(picked: Array<{ distance_km: number | null }>): number {
+  return picked.every((c) => c.distance_km != null && c.distance_km <= WAVE_PREFERRED_RADIUS_KM)
+    ? WAVE_PREFERRED_RADIUS_KM
+    : WAVE_MAX_RADIUS_KM;
+}
+
+/**
+ * Message affirmatif au demandeur, une seule fois, quand toutes les personnes
+ * disponibles à 30 km au plus ont reçu son besoin.
+ */
+export function waveExhaustedMessage(count: number): string {
+  return `Toutes les personnes disponibles à moins de ${WAVE_MAX_RADIUS_KM} km ont reçu votre besoin (${count}). Partagez-le autour de vous :`;
+}
+
+/**
+ * Vivier épuisé après cette vague ? Seulement quand plus personne ne reste à
+ * prévenir et qu'aucun envoi n'attend encore (report sur limite de débit).
+ */
+export function waveExhaustedAfterRun(remaining: number | null | undefined, deferred: number): boolean {
+  return remaining === 0 && deferred === 0;
+}
+
 export interface WaveCandidate {
   helper_id: string;
   distance_km: number | null;
@@ -59,6 +99,8 @@ export function pickNextWave(
   const seen = new Set(alreadyNotified);
   return candidates
     .filter((c) => !seen.has(c.helper_id))
+    // Lot E20 : rien au-delà de 30 km.
+    .filter((c) => c.distance_km == null || c.distance_km <= WAVE_MAX_RADIUS_KM)
     .slice()
     .sort((a, b) => {
       const da = a.distance_km ?? Number.POSITIVE_INFINITY;
@@ -66,7 +108,7 @@ export function pickNextWave(
       if (da !== db) return da - db;
       return a.helper_id.localeCompare(b.helper_id);
     })
-    .slice(0, Math.max(0, size));
+    .slice(0, Math.max(0, Math.min(size, WAVE_SIZE)));
 }
 
 export interface WaveMissionState {
@@ -75,14 +117,18 @@ export interface WaveMissionState {
   last_wave_at: string | null;
   /** Nombre de réponses « je peux » déjà reçues. */
   response_count: number;
+  /** Lot E20 : toutes les personnes disponibles à 30 km au plus ont été prévenues. */
+  wave_exhausted_at?: string | null;
 }
 
 /**
  * Vague suivante due ? Seulement pour un besoin encore ouvert, sans aucune
- * réponse, dont la dernière vague date de plus de 48 heures.
+ * réponse, dont la dernière vague date de plus de 48 heures, et dont le
+ * vivier à 30 km n'est pas encore épuisé (lot E20).
  */
 export function shouldSendNextWave(m: WaveMissionState, now: Date): boolean {
   if (m.status !== "open") return false;
+  if (m.wave_exhausted_at) return false;
   if (m.response_count > 0) return false;
   if ((m.wave_count ?? 0) >= WAVE_MAX_COUNT) return false;
   if (!m.last_wave_at) return true;

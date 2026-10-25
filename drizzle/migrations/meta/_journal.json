@@ -687,6 +687,20 @@
       "when": 1792649048629,
       "tag": "0097_err2_correction_confiee",
       "breakpoints": true
+    },
+    {
+      "idx": 98,
+      "version": "7",
+      "when": 1792649049629,
+      "tag": "0098_e20_vague_proche",
+      "breakpoints": true
+    },
+    {
+      "idx": 99,
+      "version": "7",
+      "when": 1792649050629,
+      "tag": "0099_e17_boucle_tenue",
+      "breakpoints": true
     }
   ]
 }

@@ -24,7 +24,7 @@ import { AuthIllustrationPanel } from "@/components/auth/AuthIllustrationPanel";
 import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 import { lovable } from "@/integrations/lovable";
 import { startOAuthFlow, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
-import { detectSignupIntent, roleForSignupIntent, signupIntentBannerKey } from "@/lib/signupIntent";
+import { arrivalIntentForSignup, detectSignupIntent, roleForSignupIntent, signupIntentBannerKey } from "@/lib/signupIntent";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { ARRIVAL_FLAG, arrivalAppliesToNewSignup } from "@/lib/arrivalFlag";
 import { Suspense } from "react";
@@ -288,7 +288,8 @@ const Register = () => {
 
  try {
  const result = await Promise.race([
- register(cleanEmail, password, selectedRole, postAuthTarget),
+ // Lot E17 : l'intention d'inscription est écrite sur le compte.
+ register(cleanEmail, password, selectedRole, postAuthTarget, arrivalIntentForSignup(entraideIntent, detectedIntent)),
  timeoutPromise,
  ]) as any;
 

@@ -1,5 +1,6 @@
 import { fetchMyProfile } from "@/lib/myProfile";
 import { useState, useEffect } from "react";
+import { alertRadiusOptions, clampAlertRadius, MUTUAL_AID_RADIUS_LINE, showMutualAidRadiusLine } from "@/lib/alertRadius";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +53,11 @@ const AlertsSection = ({ user }: { user: any }) => {
   const [formHeure, setFormHeure] = useState("08:00");
   const [formFrequence, setFormFrequence] = useState<"quotidien" | "hebdo">("quotidien");
   const [saving, setSaving] = useState(false);
+
+  // Lot E20 : une alerte « Entraide » seule redescend à 30 km au plus.
+  useEffect(() => {
+    setFormRadiusKm((r) => clampAlertRadius(r, formAlertTypes));
+  }, [formAlertTypes]);
 
   useEffect(() => {
     if (!user) return;
@@ -165,7 +171,10 @@ const AlertsSection = ({ user }: { user: any }) => {
   };
 
   const firstActiveAlert = alertes.find((a) => a.active);
-  const radiusOptions = [5, 15, 30, 50, 100];
+  // Lot E20 : une alerte « Entraide » seule propose au plus 30 km ; avec les
+  // gardes, 50 et 100 km restent pour les gardes et une phrase dit la règle.
+  const radiusOptions = alertRadiusOptions(formAlertTypes);
+  const mutualAidLine = showMutualAidRadiusLine(formAlertTypes, formZoneType, formRadiusKm);
 
   return (
     <>
@@ -316,6 +325,9 @@ const AlertsSection = ({ user }: { user: any }) => {
                   <Label htmlFor="alert-missions" className="text-sm font-normal">Entraide</Label>
                 </div>
               </div>
+              {mutualAidLine && (
+                <p className="text-sm text-muted-foreground">{MUTUAL_AID_RADIUS_LINE}</p>
+              )}
             </div>
 
             <div className="space-y-2">

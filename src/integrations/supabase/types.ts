@@ -17081,6 +17081,7 @@ export type Database = {
           accepted_at: string | null
           choose_prompt_sent_at: string | null
           conversation_id: string | null
+          decline_reason: string | null
           created_at: string
           exchange_date: string | null
           exchange_offer: string | null
@@ -17097,6 +17098,7 @@ export type Database = {
           accepted_at?: string | null
           choose_prompt_sent_at?: string | null
           conversation_id?: string | null
+          decline_reason?: string | null
           created_at?: string
           exchange_date?: string | null
           exchange_offer?: string | null
@@ -17113,6 +17115,7 @@ export type Database = {
           accepted_at?: string | null
           choose_prompt_sent_at?: string | null
           conversation_id?: string | null
+          decline_reason?: string | null
           created_at?: string
           exchange_date?: string | null
           exchange_offer?: string | null
@@ -17238,6 +17241,7 @@ export type Database = {
           user_id: string
           view_count: number
           wave_count: number
+          wave_exhausted_at: string | null
           wave_radius_floor: number
         }
         Insert: {
@@ -17286,6 +17290,7 @@ export type Database = {
           user_id: string
           view_count?: number
           wave_count?: number
+          wave_exhausted_at?: string | null
           wave_radius_floor?: number
         }
         Update: {
@@ -17334,6 +17339,7 @@ export type Database = {
           user_id?: string
           view_count?: number
           wave_count?: number
+          wave_exhausted_at?: string | null
           wave_radius_floor?: number
         }
         Relationships: [
