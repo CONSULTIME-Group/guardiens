@@ -8,8 +8,20 @@
  *
  * Aucune action sur lecture : le mode « peek » décrit seulement ce qui sera
  * fait, l'exécution exige un POST explicite depuis la page de confirmation.
+ *
+ * Lot E19 : la fin d'échange accepte une troisième issue (« cancelled », le
+ * coup de main a été annulé, sans rencontre ni avis), et le mot passe par
+ * moderate-content avant enregistrement (_shared/meetup-word.ts).
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import {
+  MEETUP_WORD_MAX_LENGTH,
+  moderateMeetupWord,
+  wordModerationParam,
+} from "../_shared/meetup-word.ts";
+
+const MEETUP_OUTCOMES = ["happened", "not_happened", "cancelled"] as const;
+type MeetupOutcome = typeof MEETUP_OUTCOMES[number];
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -51,12 +63,50 @@ Deno.serve(async (req) => {
         return json(data ?? { valid: false, reason: "invalid" });
       }
 
-      const word = typeof body?.word === "string" ? body.word.trim().slice(0, 140) : null;
-      const publicOk = body?.public_ok === false ? false : true;
+      // Lot E19 : issue explicite (« happened », « not_happened », « cancelled »),
+      // sinon celle du jeton. Publication seulement sur accord explicite.
+      const outcome = MEETUP_OUTCOMES.includes(body?.outcome) ? body.outcome as MeetupOutcome : null;
+      const rawWord = typeof body?.word === "string" ? body.word.trim().slice(0, MEETUP_WORD_MAX_LENGTH) : "";
+      const publicOk = body?.public_ok === true && outcome !== "cancelled";
+
+      // Lot E19 : le mot passe par moderate-content (type « sit ») avant
+      // enregistrement, seulement pour un jeton encore valable. Un mot retenu
+      // n'est pas enregistré, la réponse l'est.
+      let word: string | null = rawWord && outcome !== "cancelled" ? rawWord : null;
+      let wordModeration: "ok" | "warning" | "unchecked" | null = null;
+      let wordRefused = false;
+      let wordRule: string | null = null;
+      if (word) {
+        const { data: tok } = await service
+          .from("mission_action_tokens")
+          .select("helper_id, used_at, expires_at")
+          .eq("token", token)
+          .maybeSingle();
+        const usable = !!tok && !tok.used_at && new Date(tok.expires_at).getTime() > Date.now();
+        if (!usable) {
+          word = null;
+        } else {
+          const verdict = await moderateMeetupWord(word, {
+            supabaseUrl: SUPABASE_URL,
+            serviceKey: SERVICE_KEY,
+            actingUserId: tok.helper_id,
+          });
+          if (verdict.verdict === "refused") {
+            word = null;
+            wordRefused = true;
+            wordRule = verdict.rule;
+          } else {
+            wordModeration = wordModerationParam(verdict.verdict);
+          }
+        }
+      }
+
       const { data, error } = await service.rpc("confirm_mission_meetup", {
         p_token: token,
-        p_word: word && word.length > 0 ? word : null,
+        p_word: word,
         p_public_ok: publicOk,
+        p_word_moderation: wordModeration,
+        p_outcome: outcome,
       });
       if (error) {
         console.error("[mission-quick-action] meetup confirm failed", error.message);
@@ -80,7 +130,8 @@ Deno.serve(async (req) => {
         });
       }
 
-      return json(data ?? { ok: false, reason: "error" });
+      if (!data) return json({ ok: false, reason: "error" });
+      return json({ ...(data as Record<string, unknown>), word_refused: wordRefused, word_rule: wordRule });
     }
 
     if (mode === "peek") {

@@ -15,6 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import MissionBadgesReceived from "@/components/missions/MissionBadgesReceived";
 import { avatarImageUrl } from "@/lib/storageImage";
+import VerifiedBadge from "@/components/profile/VerifiedBadge";
+import { responderTrust } from "@/lib/responderTrust";
 
 interface Props {
   response: any;
@@ -134,6 +136,9 @@ const MissionResponseCard = ({
   const distanceKm =
     typeof r.distance_km === "number" ? Math.round(r.distance_km) : null;
 
+  // Lot E19 : identité vérifiée et ancienneté, ce qui rassure avant d'ouvrir sa porte.
+  const trust = responderTrust(r.responder);
+
   return (
     <article
       className={cn(
@@ -174,6 +179,18 @@ const MissionResponseCard = ({
           {isProjet && isAuthor && r.status !== "accepted" && !isWithdrawn && PROJET_RESPONSE_STATUS_LABELS[r.status || "pending"] && (
             <p className="text-xs font-semibold text-muted-foreground mb-1" data-testid="projet-response-status">
               {PROJET_RESPONSE_STATUS_LABELS[r.status || "pending"]}
+            </p>
+          )}
+          {(trust.verified || trust.memberSince) && (
+            <p className="text-xs text-muted-foreground mb-1 flex flex-wrap items-center gap-1.5" data-testid="response-trust">
+              {trust.verified && (
+                <span className="inline-flex items-center gap-1 font-medium text-primary" data-testid="response-verified">
+                  <VerifiedBadge size="sm" />
+                  Identité vérifiée
+                </span>
+              )}
+              {trust.verified && trust.memberSince && <span aria-hidden="true">·</span>}
+              {trust.memberSince && <span data-testid="response-member-since">{trust.memberSince}</span>}
             </p>
           )}
           {distanceKm !== null && (
