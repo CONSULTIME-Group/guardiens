@@ -13,6 +13,26 @@ import { haversineDistance } from "@/lib/geocode";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { MISSIONS_CITIES } from "@/data/missionsCityContent";
 import { sortHelpers } from "@/lib/helperDisplay";
+import { ENTRAIDE_ACTIVITY_VIEW, isEntraideCityIndexable } from "@/lib/entraideCityIndexability";
+
+/**
+ * Lot SEO-E : douze personnes au plus dans le HTML servi (Lyon en servait 80),
+ * la suite s'affiche au clic sur « Voir plus », côté client.
+ */
+export const CITY_HELPERS_PAGE_SIZE = 12;
+
+/**
+ * Lot SEO-E : règle partagée avec le sitemap et llms.txt. Vue d'activité
+ * illisible (migration 0101 pas encore appliquée) : la page reste indexable,
+ * comme avant le lot.
+ */
+const fetchCityIndexable = async (citySlug: string): Promise<boolean> => {
+  const { data, error } = await (supabase as any)
+    .from(ENTRAIDE_ACTIVITY_VIEW)
+    .select("latitude, longitude, created_on");
+  if (error || !Array.isArray(data)) return true;
+  return isEntraideCityIndexable(citySlug, data);
+};
 
 const EntraideMap = lazy(() => import("@/components/entraide/EntraideMap"), "EntraideMap");
 
@@ -62,6 +82,8 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
   const [helpers, setHelpers] = useState<PublicHelper[]>([]);
   const [availableCount, setAvailableCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [indexable, setIndexable] = useState(true);
+  const [helpersShown, setHelpersShown] = useState(CITY_HELPERS_PAGE_SIZE);
   const [view, setView] = useState<"needs" | "helpers">("needs");
   // Carte par défaut sur ordinateur, liste par défaut sur mobile.
   const [mapOpen, setMapOpen] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches);
@@ -70,7 +92,8 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
     if (!c) return;
     let active = true;
     const load = async () => {
-      const [profiles, needsResult, helpersResult, countsResult] = await Promise.all([
+      const [cityIndexable, profiles, needsResult, helpersResult, countsResult] = await Promise.all([
+        fetchCityIndexable(c.slug).catch(() => true),
         fetchAvailableProfiles(),
         supabase.from("public_small_missions").select("id, slug, title, city, date_needed, end_date, latitude, longitude, photos, sit_mode").eq("status", "open").eq("mission_type", "besoin").order("created_at", { ascending: false }),
         supabase.from("public_helpers").select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, helps_with, competences, last_active_on"),
@@ -103,6 +126,7 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
       setAvailableCount(profiles.filter((profile) => isInsideRadius(c.coordinates, c.radiusKm, profile.latitude_approx, profile.longitude_approx)).length);
       setNeeds(localNeeds);
       setHelpers(sortedLocalHelpers);
+      setIndexable(cityIndexable);
       setLoading(false);
     };
     void load();
@@ -117,6 +141,18 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
   const distanceFromCity = (latitude: number | null, longitude: number | null) => latitude !== null && longitude !== null
     ? haversineDistance(c.coordinates.lat, c.coordinates.lng, latitude, longitude)
     : null;
+  const helpersList = (
+    <>
+      <div className="mt-5 grid gap-4 md:grid-cols-2">
+        {helpers.slice(0, helpersShown).map((helper) => <HelperCard key={helper.id} helper={helper} distance={distanceFromCity(helper.latitude_approx, helper.longitude_approx)} showDistance />)}
+      </div>
+      {helpers.length > helpersShown && (
+        <Button type="button" variant="outline" className="mt-5" onClick={() => setHelpersShown((n) => n + CITY_HELPERS_PAGE_SIZE)}>
+          Voir plus
+        </Button>
+      )}
+    </>
+  );
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -130,7 +166,7 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
 
   return (
     <>
-      <PageMeta title={c.metaTitle} description={c.metaDescription} path={path} jsonLd={[faqSchema]} />
+      <PageMeta title={c.metaTitle} description={c.metaDescription} path={path} jsonLd={[faqSchema]} noindex={!indexable} ready={!loading} />
       <div className="min-h-screen bg-background font-body">
         <PublicHeader />
         <PageBreadcrumb items={[{ label: "Entraide", href: "/petites-missions" }, { label: c.cityName }]} />
@@ -176,7 +212,7 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
                   ? <div className="mt-5 grid gap-4 md:grid-cols-2">{needs.map((need) => <NeedCard key={need.id} need={need} distance={distanceFromCity(need.latitude, need.longitude)} showDistance />)}</div>
                   : <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Le prochain besoin apparaîtra ici. Vous pouvez décrire le vôtre dès maintenant.</p>)
                 : (helpers.length > 0
-                  ? <div className="mt-5 grid gap-4 md:grid-cols-2">{helpers.map((helper) => <HelperCard key={helper.id} helper={helper} distance={distanceFromCity(helper.latitude_approx, helper.longitude_approx)} showDistance />)}</div>
+                  ? helpersList
                   : <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Les premières personnes qui décrivent leurs coups de main apparaîtront ici.</p>))}
             </section>
 
@@ -195,7 +231,7 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
               <section aria-labelledby="city-helpers-title">
                 <h2 id="city-helpers-title" className="font-heading text-2xl font-semibold text-foreground">Autour de vous</h2>
                 {loading ? <div className="mt-5 grid gap-4 md:grid-cols-2" aria-busy="true"><div className="h-40 animate-pulse rounded-lg bg-muted" /><div className="h-40 animate-pulse rounded-lg bg-muted" /></div>
-                  : helpers.length > 0 ? <div className="mt-5 grid gap-4 md:grid-cols-2">{helpers.map((helper) => <HelperCard key={helper.id} helper={helper} distance={distanceFromCity(helper.latitude_approx, helper.longitude_approx)} showDistance />)}</div>
+                  : helpers.length > 0 ? helpersList
                     : <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Les premières personnes qui décrivent leurs coups de main apparaîtront ici.</p>}
               </section>
             )}

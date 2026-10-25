@@ -12,6 +12,7 @@ import ApproximateLocationMap from "@/components/shared/LazyApproximateLocationM
 import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
 import Head from "@/components/seo/Head";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { missionEntraideCity, useAnimalCareLink } from "@/lib/entraideMissionLinks";
 
 // (Pas de bannière de fallback : une annonce sans photo ne doit PAS
 // afficher une image générique qui rendrait toutes les annonces
@@ -140,6 +141,9 @@ const PublicMissionView = ({
   const authorFirstName = author?.first_name
     ? author.first_name.charAt(0).toUpperCase() + author.first_name.slice(1).toLowerCase()
     : null;
+  // Lot SEO-E : page ville d'entraide du rayon et lien garde des fiches animaux.
+  const entraideCity = missionEntraideCity(mission);
+  const animalCare = useAnimalCareLink(mission, cityLabel);
 
   // Meta description contextuelle : on privilégie la vraie description,
   // sinon on fabrique une phrase spécifique (ville + catégorie + contrepartie)
@@ -596,6 +600,7 @@ const PublicMissionView = ({
         description={metaDescription}
         image={ogImage}
         noindex={noindex}
+        ready={animalCare.ready}
       />
       <Head>
         {/* Balisage non marchand : une annonce d'entraide n'est ni un service
@@ -619,9 +624,11 @@ const PublicMissionView = ({
           <PageBreadcrumb
             items={[
               { label: t("mission_detail.breadcrumb"), href: "/petites-missions" },
-              ...(mission.city
-                ? [{ label: cityLabel, href: `/petites-missions?city=${encodeURIComponent(mission.city)}` }]
-                : []),
+              ...(entraideCity
+                ? [{ label: entraideCity.name, href: `/petites-missions/${entraideCity.slug}` }]
+                : mission.city
+                  ? [{ label: cityLabel, href: `/petites-missions?city=${encodeURIComponent(mission.city)}` }]
+                  : []),
               { label: displayTitle },
             ]}
           />
@@ -768,6 +775,18 @@ const PublicMissionView = ({
                   {mission.description}
                 </div>
               </section>
+
+              {animalCare.link && (
+                <p className="text-base">
+                  <Link
+                    to={animalCare.link.href}
+                    data-testid="animal-care-link"
+                    className="font-semibold text-primary underline underline-offset-4"
+                  >
+                    {animalCare.link.label}
+                  </Link>
+                </p>
+              )}
 
             </div>
           </article>

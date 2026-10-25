@@ -43,6 +43,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import { isEntraideCityPath } from "../supabase/functions/_shared/entraideCityIndexability.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
@@ -658,6 +659,9 @@ async function validateSitemap(origin, routes, siteUrl) {
 
   const diffs = [];
   for (const r of routes) {
+    // Lot SEO-E : présence au sitemap décidée par la règle des 90 jours
+    // (entraideCityIndexability.js), contrôlée par ses propres tests.
+    if (isEntraideCityPath(r.path)) continue;
     // F1/F5 : routes index:false → on vérifie l'ABSENCE du sitemap.
     if (r.indexable === false) {
       const expectedLoc = `${siteUrl}${r.path === "/" ? "" : r.path}`;

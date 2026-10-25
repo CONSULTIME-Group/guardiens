@@ -6,7 +6,7 @@ import { readRobotsConfig } from "../../../scripts/robots-lib.mjs";
 import { readStaticCitySlugs } from "../../../scripts/lib/sitemapCore.mjs";
 
 const config = { version: 1, siteUrl: "https://guardiens.fr", staticPages: [{ loc: "/", indexable: true, changefreq: "daily", priority: "1.0" }], cityLandingPages: ["lyon"] };
-const empty = () => Object.fromEntries(["articles", "seoCity", "guides", "depts", "breeds", "profiles", "sits", "entraideMissions", "projetMissions", "associations"].map(k => [k, []]));
+const empty = () => Object.fromEntries(["articles", "seoCity", "guides", "depts", "breeds", "profiles", "sits", "entraideMissions", "projetMissions", "associations", "entraideCities"].map(k => [k, []]));
 const xml = () => createSitemapDocument(config, empty()).xml;
 const req = (method = "GET") => new Request("https://example.test/sitemap", { method });
 

@@ -5,6 +5,25 @@ import { mergedBreedTarget } from "./breeds/breedFicheMerges.js";
 import { isIndexableEntraideMission, isIndexableProjetMission } from "./entraideMissionIndexability.js";
 import { normalizeLastmod } from "./sitemap-core.js";
 import { departmentsWithPublishedCity } from "./departmentIndexability.js";
+import { ENTRAIDE_ACTIVITY_VIEW, ENTRAIDE_CITY_CENTERS, entraideCitiesWithRecentNeed, entraideCityPath } from "./entraideCityIndexability.js";
+
+/**
+ * Lot SEO-E (25/10/2026) : pages villes d'entraide indexables, règle partagée
+ * entraideCityIndexability.js (même règle que le meta robots de
+ * MissionsCityPage). Vue absente (migration 0101 pas encore appliquée) :
+ * les 14 villes restent comme avant le lot, avec un avertissement.
+ */
+export async function readEntraideCitySlugs(readAll, today = new Date()) {
+  try {
+    const rows = await readAll(ENTRAIDE_ACTIVITY_VIEW, ENTRAIDE_ACTIVITY_VIEW, "activity_key, latitude, longitude, created_on", "activity_key");
+    const kept = entraideCitiesWithRecentNeed(rows, today);
+    console.log(`[sitemap] villes d'entraide : ${kept.size} avec un besoin sur 90 jours sur ${ENTRAIDE_CITY_CENTERS.length}`);
+    return ENTRAIDE_CITY_CENTERS.filter((c) => kept.has(c.slug)).map((c) => c.slug);
+  } catch (e) {
+    console.warn(`[sitemap] villes d'entraide : activité illisible (${e?.message ?? e}), les ${ENTRAIDE_CITY_CENTERS.length} villes restent listées`);
+    return ENTRAIDE_CITY_CENTERS.map((c) => c.slug);
+  }
+}
 
 const PRIORITY_MAP = {
   guide_central: "0.9",
@@ -302,9 +321,13 @@ export async function collectSitemapData({ readAll, fetchOrCache, maxUpdatedAtWi
     ),
   ]);
 
+  // Lot SEO-E : relue à chaque build (la fenêtre de 90 jours dépend du jour).
+  const entraideCities = (await readEntraideCitySlugs(readAll, today)).map((slug) => ({
+    loc: entraideCityPath(slug),
+    lastmod: null,
+    changefreq: "weekly",
+    priority: "0.7",
+  }));
 
-
-
-
-  return { articles, seoCity, guides, depts, breeds, profiles, sits, associations, entraideMissions, projetMissions };
+  return { articles, seoCity, guides, depts, breeds, profiles, sits, associations, entraideMissions, projetMissions, entraideCities };
 }
