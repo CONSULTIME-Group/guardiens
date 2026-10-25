@@ -219,7 +219,7 @@ const MesCoupsDeMain = () => {
 
             {row.status === "in_progress" && !row.answered && (
               <div className="mt-3 space-y-3">
-                <p className="text-sm text-muted-foreground">Vous vous êtes rencontrés ?</p>
+                <p className="text-sm text-muted-foreground">Le coup de main a eu lieu ?</p>
                 <MeetupAnswer
                   otherFirstName={row.other_first_name}
                   busy={busy === row.id}

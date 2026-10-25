@@ -6,6 +6,9 @@
 // part. Aucune donnée personnelle ne sort d'ici : prénom, ville et distance
 // arrondie, rien d'autre.
 
+import { entraideDurationLabel, needHeadline } from "./entraideCopy.ts";
+import { NEED_EXCERPT_EMAIL_MAX, needExcerpt } from "./needExcerpt.ts";
+
 export const WAVE_SIZE = 10;
 export const WAVE_INTERVAL_HOURS = 48;
 /** Au plus cinq vagues par besoin, soit cinquante personnes prévenues. */
@@ -136,18 +139,39 @@ export function shouldSendNextWave(m: WaveMissionState, now: Date): boolean {
   return elapsed >= WAVE_INTERVAL_HOURS * 3600 * 1000;
 }
 
-/** Ligne d'annonce envoyée à chaque personne prévenue. */
+/**
+ * Ligne d'annonce envoyée à chaque personne prévenue.
+ * Lot E18 (25/10/2026) : accroche partagée avec le site (needHeadline,
+ * _shared/entraideCopy.ts), le titre cité entre guillemets ; l'ancienne
+ * phrase « a besoin de quelqu'un pour {titre} » était bancale pour 18 titres
+ * sur 22 (n° 50 du registre de l'arène).
+ */
 export function waveHeadline(
   ownerFirstName: string | null | undefined,
   distanceKm: number | null,
   title: string,
   dateLabel: string | null,
 ): string {
-  const who = ownerFirstName?.trim() || "Un membre du coin";
-  const d = roundDistanceKm(distanceKm);
-  const where = d == null ? "" : `, à ${d} km,`;
-  const when = dateLabel ? `, ${dateLabel}` : "";
-  return `${who}${where} a besoin de quelqu'un pour ${title}${when}.`;
+  return needHeadline(ownerFirstName, distanceKm, title, dateLabel);
+}
+
+/**
+ * Lot E18 : détails du besoin pour l'email aux aidants (deux lignes
+ * d'extrait, date, durée). À passer dans templateData de mission-help-needed
+ * avec la distance déjà transmise.
+ */
+export function waveEmailDetails(mission: {
+  title?: string | null;
+  description?: string | null;
+  duration_estimate?: string | null;
+  date_needed?: string | null;
+  end_date?: string | null;
+}): { missionExcerpt: string | null; durationLabel: string | null; dateLabel: string | null } {
+  return {
+    missionExcerpt: needExcerpt(mission.description, mission.title, NEED_EXCERPT_EMAIL_MAX),
+    durationLabel: entraideDurationLabel(mission.duration_estimate),
+    dateLabel: frenchDateLabel(mission.date_needed ?? mission.end_date),
+  };
 }
 
 /** Message au demandeur quand une nouvelle vague part, au nombre réel d'emails partis. */

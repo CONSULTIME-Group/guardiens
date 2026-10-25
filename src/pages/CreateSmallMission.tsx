@@ -73,7 +73,8 @@ import { waveAudienceMessage } from "@/lib/missionAudienceMessage";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { stripEmojis } from "@/lib/stripEmojis";
-import { FIXED_EXCHANGE_OFFER } from "@/lib/entraideExchange";
+import { EXCHANGE_OFFER_MAX, EXCHANGE_SUGGESTIONS, FIXED_EXCHANGE_OFFER, composeExchangeOffer } from "@/lib/entraideExchange";
+import { publishedReachLine } from "@/lib/entraideCopy";
 import { avatarImageUrl } from "@/lib/storageImage";
 
 import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHint";
@@ -91,7 +92,7 @@ const MAX_TITLE_LEN = 100;
 const MAX_DESCRIPTION_PREFILL = 1000;
 
 /* ── Stepper progress bar ── */
-const STEP_LABELS = ["Votre annonce", "Le détail", "Où et quand"];
+const STEP_LABELS = ["Votre besoin", "Le détail", "Où et quand"];
 
 const StepperBar = ({ current, total }: { current: number; total: number }) => (
   <div className="sticky top-12 md:top-0 z-30 bg-background/95 backdrop-blur border-b border-border px-4 py-3">
@@ -168,8 +169,16 @@ const CreateSmallMission = () => {
   const [description, setDescription] = useState(() => prefill.description);
   const category = useMemo(() => inferMissionCategory(title, description), [title, description]);
   const [descTouched, setDescTouched] = useState(false);
-  // Contrepartie : phrase unique, la même pour tout le monde. Plus rien à saisir.
-  const exchangeOffer = FIXED_EXCHANGE_OFFER;
+  // Lot E18 (décision de Jérémie du 25/10/2026) : ligne facultative
+  // « En retour, je propose », suggestions à toucher et texte libre, stockée
+  // dans small_missions.exchange_offer. Vide : la fiche affiche la ligne
+  // « ce que je propose volontiers » de l'auteur, sinon la phrase fixe.
+  const [exchangeChips, setExchangeChips] = useState<string[]>([]);
+  const [exchangeFree, setExchangeFree] = useState("");
+  const toggleExchangeChip = (label: string) =>
+    setExchangeChips((prev) => (prev.includes(label) ? prev.filter((c) => c !== label) : [...prev, label]));
+  const exchangeOffer = useMemo(() => composeExchangeOffer(exchangeChips, exchangeFree), [exchangeChips, exchangeFree]);
+  const exchangeMoney = useMemo(() => hasMoneyMention(null, null, exchangeFree), [exchangeFree]);
   const [placeTouched, setPlaceTouched] = useState(false);
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
@@ -432,7 +441,11 @@ const CreateSmallMission = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (hasMoneyMention(exchangeOffer)) return;
+    if (hasMoneyMention(null, null, exchangeOffer)) {
+      toast({ title: "Ici, on s'échange des services", description: MONEY_RETENTION, variant: "destructive" });
+      setStep(2);
+      return;
+    }
     if (submitting) return;
     if (askSitMode && !isMissionSitMode(sitMode)) {
       toast({
@@ -461,7 +474,7 @@ const CreateSmallMission = () => {
 
     // L'entraide s'échange service contre service : aucune mention d'argent,
     // sur aucun des trois champs libres. Miroir du trigger base.
-    if (hasMoneyMention(title, description)) {
+    if (hasMoneyMention(title, description, exchangeOffer)) {
       toast({
         title: "Ici, on s'échange des services",
         description: MONEY_RETENTION,
@@ -526,7 +539,7 @@ const CreateSmallMission = () => {
 
     const cleanTitle = stripEmojis(sanitizeUserTitle(title) || title.trim());
     const cleanDescription = stripEmojis(description);
-    const cleanExchange = FIXED_EXCHANGE_OFFER;
+    const cleanExchange = stripEmojis(exchangeOffer).trim();
 
     const { data: inserted, error } = await supabase.from("small_missions").insert({
       user_id: user.id,
@@ -580,7 +593,7 @@ const CreateSmallMission = () => {
       }
       if (hint === "duplicate_small_mission" || msg.includes("duplicate_small_mission")) {
         toast({
-          title: "Vous avez déjà cette annonce en ligne",
+          title: "Ce besoin est déjà en ligne",
           description: error.message,
           variant: "destructive",
         });
@@ -625,7 +638,7 @@ const CreateSmallMission = () => {
           _metadata: { ...metaBase, reason: rehoming.matched.join(" + ") },
         }).then(({ error }: any) => { if (error) console.warn("signal animal_rehoming_listing", error); });
         toast({
-          title: "Mission transmise pour relecture",
+          title: "Besoin transmis pour relecture",
           description: "Notre équipe va relire votre besoin : la cession et l'adoption d'animaux passent par les associations.",
         });
       }
@@ -633,10 +646,14 @@ const CreateSmallMission = () => {
     await queryClient.invalidateQueries({ queryKey: ["small-missions-all"] });
     submittedRef.current = true;
     try { trackEvent("mission_composer_submitted", { metadata: { mission_id: inserted?.id, category, mission_type: missionType, via: publishVia } }); } catch {}
-    toast({ title: tp("toast_published_title"), description: tp("toast_published_desc"), duration: 3000 });
+    // Lot E18 (n° 28) : texte vrai, la première vague part tout de suite.
+    toast({ title: tp("toast_published_title"), description: publishedReachLine(audienceCount), duration: 4000 });
     const insertedAny = inserted as any;
     clearPublishIntent();
-    navigate(insertedAny?.id ? `/petites-missions/${insertedAny.slug || insertedAny.id}?published=1` : "/petites-missions");
+    navigate(
+      insertedAny?.id ? `/petites-missions/${insertedAny.slug || insertedAny.id}?published=1` : "/petites-missions",
+      { state: { waveAudience: audienceCount } },
+    );
   };
 
   return (
@@ -786,13 +803,56 @@ const CreateSmallMission = () => {
                   </div>
                 </div>
 
-                {/* Contrepartie : phrase unique, identique pour tout le monde. */}
-                <div className="rounded-xl border border-border bg-muted/30 p-4">
-                  <p className="text-sm text-foreground">{FIXED_EXCHANGE_OFFER}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    L'entraide s'échange en services et en attentions. L'argent reste en dehors.
+                {/* Lot E18 : « En retour, je propose », facultatif. Les suggestions
+                    se touchent, la personne compose sa ligne. */}
+                <fieldset id="mission-field-exchange" className="space-y-3" data-testid="exchange-offer-field">
+                  <legend className="text-sm font-medium text-foreground">
+                    En retour, je propose <span className="font-normal text-muted-foreground">(facultatif)</span>
+                  </legend>
+                  <div className="flex flex-wrap gap-2">
+                    {EXCHANGE_SUGGESTIONS.map((label) => {
+                      const pressed = exchangeChips.includes(label);
+                      return (
+                        <button
+                          key={label}
+                          type="button"
+                          aria-pressed={pressed}
+                          onClick={() => toggleExchangeChip(label)}
+                          className={cn(
+                            "min-h-11 rounded-field border px-3 text-sm font-medium transition-colors",
+                            pressed ? "border-primary bg-primary/10 text-foreground" : "border-field bg-card text-foreground hover:border-primary/60",
+                          )}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="mission-exchange-free" className="text-sm font-normal text-foreground">Ou en vos mots</Label>
+                    <Input
+                      id="mission-exchange-free"
+                      value={exchangeFree}
+                      maxLength={EXCHANGE_OFFER_MAX}
+                      onChange={(e) => setExchangeFree(e.target.value)}
+                      placeholder="Par exemple : une part de tarte aux pommes"
+                      className="h-11 rounded-field border-field text-base"
+                    />
+                  </div>
+                  {exchangeOffer && (
+                    <p className="text-sm text-foreground" data-testid="exchange-offer-preview">
+                      Sur votre besoin : En retour, {exchangeOffer.charAt(0).toLowerCase() + exchangeOffer.slice(1)}.
+                    </p>
+                  )}
+                  {exchangeMoney && (
+                    <p className="text-sm text-foreground" role="note">
+                      Ici, on s'échange des services et des attentions : proposez plutôt un coup de main, un repas ou des légumes.
+                    </p>
+                  )}
+                  <p className="text-sm text-muted-foreground">
+                    L'entraide se vit en temps, en savoir-faire et en petites attentions. Ligne vide : votre besoin reprend ce que vous proposez volontiers sur votre profil, ou la phrase « {FIXED_EXCHANGE_OFFER.replace(/^En retour : /, "").replace(/\.$/, "")} ».
                   </p>
-                </div>
+                </fieldset>
 
               </>
             )}
@@ -1100,14 +1160,6 @@ const CreateSmallMission = () => {
                 >
                   {photoUploading ? tp("photo_uploading") : "Continuer"}
                 </Button>
-                {step === 1 && (
-                  <p className="text-xs text-muted-foreground text-center">
-                    Une simple question à poser ?{" "}
-                    <Link to="/questions/nouvelle" className="hover:underline font-medium">
-                      Posez-la à la communauté
-                    </Link>
-                  </p>
-                )}
               </>
             ) : (
 

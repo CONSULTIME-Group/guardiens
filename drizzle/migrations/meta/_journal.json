@@ -715,6 +715,20 @@
       "when": 1792908000000,
       "tag": "0101_seoe_activite_entraide_villes",
       "breakpoints": true
+    },
+    {
+      "idx": 102,
+      "version": "7",
+      "when": 1792649052629,
+      "tag": "0102_e18_prenom_jeton_je_peux",
+      "breakpoints": true
+    },
+    {
+      "idx": 103,
+      "version": "7",
+      "when": 1792649053629,
+      "tag": "0103_e21_personnes_prevenues",
+      "breakpoints": true
     }
   ]
 }

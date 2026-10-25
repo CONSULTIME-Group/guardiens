@@ -15,7 +15,8 @@ import {
 describe("E4, idées", () => {
   it("six idées, titres assez longs pour le formulaire (10 caractères)", () => {
     expect(ENTRAIDE_IDEAS).toHaveLength(6);
-    for (const idea of ENTRAIDE_IDEAS) expect(idea.label.length).toBeGreaterThanOrEqual(10);
+    // Lot E18 : « Un trajet » écrit « Un trajet en voiture » dans le formulaire.
+    for (const idea of ENTRAIDE_IDEAS) expect(idea.title.length).toBeGreaterThanOrEqual(10);
   });
   it("formulaire prérempli, inscription d'abord pour un visiteur", () => {
     expect(needFormPath(true, "Faire les courses")).toBe("/petites-missions/creer?titre=Faire%20les%20courses");
@@ -64,7 +65,8 @@ describe("E4, branchements", () => {
   });
   it("un seul bouton plein par carte : Je peux et Écrire à en contour", () => {
     const cards = readFileSync("src/components/entraide/EntraideCards.tsx", "utf8");
-    expect(cards).toContain('<Button type="button" size="sm" variant="outline" onClick={onCanHelp}');
+    // Lot E13 : « Je peux » reste en contour, cible tactile de 44 px.
+    expect(cards).toContain('<Button type="button" variant="outline" className="min-h-11 rounded-full px-5" onClick={onCanHelp}');
     expect(cards).toContain('<Button type="button" size="sm" variant="outline" className="mt-4" onClick={contact}');
   });
   it("lien vers les savoir-faire gardé pour une personne disponible (lot E1)", () => {

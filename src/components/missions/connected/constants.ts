@@ -42,7 +42,7 @@ export const DURATION_LABELS: Record<string, string> = {
   "1-2h": "1-2 heures",
   half_day: "Demi-journée",
   full_day: "Journée",
-  several: "Plusieurs jours",
+  several: "Plusieurs passages",
   weekend: "Week-end",
   week: "Semaine",
 };

@@ -35,7 +35,7 @@ import {
   shouldSendNextWave,
   countFreezingResponses,
   waveHeadline,
-  frenchDateLabel,
+  waveEmailDetails,
   waveRelaunchMessage,
   waveRelaunchTitle,
   WAVE_EMPTY_MESSAGE,
@@ -143,7 +143,7 @@ async function catchUpQueued(supabase: any, missionId: string, now = new Date())
 
   const { data: mission } = await supabase
     .from("small_missions")
-    .select("id, title, city, user_id, status, date_needed, end_date, sit_mode")
+    .select("id, title, city, user_id, status, date_needed, end_date, sit_mode, description, duration_estimate")
     .eq("id", missionId)
     .maybeSingle();
   if (!mission) return out;
@@ -152,7 +152,6 @@ async function catchUpQueued(supabase: any, missionId: string, now = new Date())
     .select("first_name")
     .eq("id", mission.user_id)
     .maybeSingle();
-  const dateLabel = frenchDateLabel(mission.date_needed ?? mission.end_date);
   const sitLine = isMissionSitMode(mission.sit_mode)
     ? sitModeEmailLine(mission.sit_mode, owner?.first_name ?? null)
     : "";
@@ -183,7 +182,8 @@ async function catchUpQueued(supabase: any, missionId: string, now = new Date())
       out.skipped++;
       continue;
     }
-    const headline = waveHeadline(owner?.first_name ?? null, r.distance_km, mission.title ?? "un coup de main", dateLabel);
+    // Lot E18 : la date part dans la ligne de détails de la carte, pas dans l'accroche.
+    const headline = waveHeadline(owner?.first_name ?? null, r.distance_km, mission.title ?? "un coup de main", null);
     const result = await deliver({
       templateName: "mission-help-needed",
       recipientEmail: helper.email,
@@ -198,6 +198,7 @@ async function catchUpQueued(supabase: any, missionId: string, now = new Date())
         proofLine: "",
         sitModeLine: sitLine,
         distanceKm: r.distance_km,
+        ...waveEmailDetails(mission),
       },
       logMetadata: { mission_id: missionId, wave: r.wave, source: "mission_wave_catchup" },
     });
@@ -274,7 +275,7 @@ async function runWave(supabase: any, missionId: string): Promise<WaveResult> {
 
   const { data: mission } = await supabase
     .from("small_missions")
-    .select("id, title, city, user_id, status, date_needed, end_date, wave_count, sit_mode, latitude, longitude, wave_exhausted_at")
+    .select("id, title, city, user_id, status, date_needed, end_date, wave_count, sit_mode, latitude, longitude, wave_exhausted_at, description, duration_estimate")
     .eq("id", missionId)
     .maybeSingle();
 
@@ -353,7 +354,6 @@ async function runWave(supabase: any, missionId: string): Promise<WaveResult> {
     return { sent: 0, wave, empty: true, radiusFloor, ...cu };
   }
 
-  const dateLabel = frenchDateLabel(mission.date_needed ?? mission.end_date);
 
   // Une seule ligne de preuve, quand une rencontre confirmée existe à moins de
   // cinquante kilomètres du besoin.
@@ -384,11 +384,12 @@ async function runWave(supabase: any, missionId: string): Promise<WaveResult> {
       .maybeSingle();
     if (!helper?.email) continue;
 
+    // Lot E18 : la date part dans la ligne de détails de la carte, pas dans l'accroche.
     const headline = waveHeadline(
       owner?.first_name ?? null,
       h.distance_km,
       mission.title ?? "un coup de main",
-      dateLabel,
+      null,
     );
 
     const sitLine = isMissionSitMode(mission.sit_mode)
@@ -409,6 +410,7 @@ async function runWave(supabase: any, missionId: string): Promise<WaveResult> {
         proofLine,
         sitModeLine: sitLine,
         distanceKm: h.distance_km,
+        ...waveEmailDetails(mission),
       },
       logMetadata: { mission_id: missionId, wave, source: "mission_wave" },
     });

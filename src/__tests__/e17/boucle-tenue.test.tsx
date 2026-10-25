@@ -185,13 +185,10 @@ describe("mesure", () => {
     expect(read("drizzle/migrations/0099_e17_boucle_tenue.sql")).toContain("_intent := NEW.raw_user_meta_data ->> 'arrival_intent';");
   });
 
-  it("src=vague sur les liens de mission-help-needed, texte principal inchangé", () => {
+  it("src=vague sur les deux liens de mission-help-needed (texte réécrit par le lot E18)", () => {
     const tpl = read(`${TPL}/mission-help-needed.tsx`);
-    expect(tpl).toContain("export const WAVE_LINK_SOURCE = 'vague'");
-    expect(tpl).toContain("/entraide/je-peux?t=${token}&src=${WAVE_LINK_SOURCE}");
-    expect(tpl).toContain("/petites-missions/${missionId}?src=${WAVE_LINK_SOURCE}");
-    expect(tpl).toContain("<Heading style={h1}>Un besoin près de chez vous</Heading>");
-    expect(tpl).toContain("En retour : un merci, un café, ou un coup de main quand ce sera votre tour.");
+    expect(tpl).toContain("/entraide/je-peux?t=${encodeURIComponent(canHelpToken)}&src=vague");
+    expect(tpl).toMatch(/\/petites-missions\/\$\{missionId\}\?\$\{token\}src=vague/);
   });
 
   it("entrée de journal 0099", () => {

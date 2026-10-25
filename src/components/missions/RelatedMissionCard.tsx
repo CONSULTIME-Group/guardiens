@@ -1,128 +1,58 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { storageImageUrl } from "@/lib/storageImage";
-import { missionCategoryLabel } from "@/lib/missionCategories";
+import NeedPaperPanel from "@/components/entraide/NeedPaperPanel";
 
 /**
- * Carte "Près de chez vous" utilisée dans PublicMissionView & SmallMissionDetail.
+ * Carte « Près de chez vous » utilisée dans PublicMissionView et SmallMissionDetail.
  *
- * Objectif : éviter le pavé gris générique "ANIMAUX" quand aucune photo n'est fournie,
- * et harmoniser l'aspect des cartes photo vs. sans-photo dans la même grille.
- *
- * - Avec photo : cover 4:3 + zoom hover, chip catégorie discrète en overlay.
- * - Sans photo : pas de gros bloc vide, poster typographique 4:3 (gradient teinté
- *   catégorie, glyphe SVG large en filigrane, titre repris en gros au centre,
- *   contrepartie évoquée en bas). La carte reste dense et lisible sans image.
+ * Lot E18 (25/10/2026, n° 35) : la phrase d'échange quitte les cartes liées,
+ * elle s'affiche une seule fois, sur la fiche du besoin.
+ * Lot E21 (25/10/2026, maquette validée par Jérémie) : une seule forme de
+ * carte, en ligne (vignette 56 px, titre, lieu et date). La vignette est la
+ * photo du besoin, sinon la gouache de sa catégorie sur papier. Le cœur, qui
+ * se lisait comme un favori absent (n° 36), et la pastille catégorie sont retirés.
  */
-
-
-const CATEGORY_GRADIENT: Record<string, string> = {
-  animals: "from-primary/25 via-primary/10 to-transparent",
-  garden: "from-success/25 via-success/10 to-transparent",
-  house: "from-info/25 via-info/10 to-transparent",
-  skills: "from-warning/25 via-warning/10 to-transparent",
-};
-
-const CategoryGlyph = ({ category, className }: { category: string; className?: string }) => {
-  const c = className || "w-24 h-24 text-primary/25";
-  if (category === "garden") {
-    return (
-      <svg className={c} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-      </svg>
-    );
-  }
-  if (category === "house") {
-    return (
-      <svg className={c} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M3 12l2-2m0 0l7-7 7 7m-9 2v8a2 2 0 002 2h4a2 2 0 002-2v-8"/>
-      </svg>
-    );
-  }
-  if (category === "skills") {
-    return (
-      <svg className={c} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
-      </svg>
-    );
-  }
-  return (
-    <svg className={c} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-    </svg>
-  );
-};
 
 interface Props {
   to: string;
   photo?: string | null;
   category?: string | null;
   title: string;
+  description?: string | null;
   city?: string | null;
   timeAgo?: string | null;
-  exchangeOffer?: string | null;
 }
 
-const RelatedMissionCard = ({ to, photo, category, title, city, timeAgo, exchangeOffer }: Props) => {
+const RelatedMissionCard = ({ to, photo, category, title, description, city, timeAgo }: Props) => {
   const [imgError, setImgError] = useState(false);
-  // Libellé lu dans la source unique : une catégorie hors des quatre
-  // illustrées (courses, transport, autre...) ne doit jamais devenir « Animaux ».
-  const cat = (category || "other") as string;
-  const label = missionCategoryLabel(cat);
-  const gradient = CATEGORY_GRADIENT[cat] || "from-muted-foreground/15 via-muted to-transparent";
   const showImage = !!photo && !imgError;
 
-  // Sans photo : on abandonne le grand pavé 4:3 vide au profit d'une carte
-  // compacte, éditoriale, qui met en avant le titre et la contrepartie
-  // (l'info utile) plutôt qu'un placeholder décoratif.
-  if (!showImage) {
-    return (
-      <Link to={to} className="group block h-full">
-        <div className={`relative h-full rounded-2xl border border-border bg-gradient-to-br ${gradient} p-5 shadow-sm transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-0.5 flex flex-col`}>
-          <div className="flex items-center justify-between mb-3">
-            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-background/85 backdrop-blur text-primary">
-              {label}
-            </span>
-            <CategoryGlyph category={cat} className="w-8 h-8 text-primary/40" />
-          </div>
-          <h3 className="font-heading text-lg font-bold mb-1 group-hover:text-primary transition-colors line-clamp-2">
+  return (
+    <Link to={to} className="group block h-full" data-testid="related-need-card">
+      <div className="flex h-full items-center gap-3 rounded-card border border-border bg-card p-3 transition-colors group-hover:border-primary/50">
+        {showImage ? (
+          <img
+            src={storageImageUrl(photo, { width: 112, height: 112 }) || photo!}
+            alt=""
+            width={56}
+            height={56}
+            loading="lazy"
+            decoding="async"
+            onError={() => setImgError(true)}
+            className="h-14 w-14 shrink-0 rounded-field object-cover"
+          />
+        ) : (
+          <NeedPaperPanel variant="thumb" category={category} title={title} description={description} />
+        )}
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <h3 className="line-clamp-2 text-[15px] font-semibold leading-snug text-foreground group-hover:text-primary">
             {title}
           </h3>
-          <p className="text-sm text-muted-foreground font-medium">
+          <p className="text-sm text-muted-foreground">
             {city || "France"}{timeAgo ? ` · ${timeAgo}` : ""}
           </p>
-          {exchangeOffer && (
-            <p className="mt-3 pt-3 border-t border-border/50 text-xs text-muted-foreground italic line-clamp-2">
-              « {exchangeOffer} »
-            </p>
-          )}
         </div>
-      </Link>
-    );
-  }
-
-  return (
-    <Link to={to} className="group block h-full">
-      <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-card border border-border shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-0.5">
-        <img
-          src={storageImageUrl(photo, { width: 800, height: 600 }) || photo!}
-          alt={title}
-          loading="lazy"
-          decoding="async"
-          onError={() => setImgError(true)}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-        />
-        <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-background/95 backdrop-blur text-primary">
-          {label}
-        </span>
-      </div>
-      <div className="mt-4">
-        <h3 className="font-heading text-xl font-bold mb-1 group-hover:text-primary transition-colors line-clamp-2">
-          {title}
-        </h3>
-        <p className="text-sm text-muted-foreground font-medium">
-          {city || "France"}{timeAgo ? ` · ${timeAgo}` : ""}
-        </p>
       </div>
     </Link>
   );

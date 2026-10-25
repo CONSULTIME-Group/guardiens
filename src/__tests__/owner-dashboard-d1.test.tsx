@@ -111,7 +111,7 @@ describe("Bandeau entraide", () => {
   it("échange en cours : affiché en ligne avec son action", () => {
     wrap(<OwnerEntraideBandView helpersCount={7} helpersRadiusKm={30} exchanges={[row({})]} />);
     expect(screen.getByTestId("entraide-ongoing").textContent).toContain("Arroser le potager");
-    expect(screen.getByText("Vous vous êtes rencontrés ?")).toBeTruthy();
+    expect(screen.getByText("Le coup de main a eu lieu ?")).toBeTruthy();
     expect(screen.queryByTestId("entraide-last-done")).toBeNull();
     expect(screen.getByText("7 personnes sont prêtes à aider à moins de 30 km.")).toBeTruthy();
   });
