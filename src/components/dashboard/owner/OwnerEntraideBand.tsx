@@ -30,7 +30,8 @@ export interface OwnerEntraideBandViewProps {
   mission?: EntraideMission | null;
   exchanges: HelpRow[];
   busyId?: string | null;
-  onAnswer?: (missionId: string, happened: boolean, word: string, publicOk: boolean) => void;
+  /** Lot E19 : cancelled vrai pour l'issue « Le coup de main a été annulé ». */
+  onAnswer?: (missionId: string, happened: boolean, word: string, publicOk: boolean, cancelled?: boolean) => void;
   mutualRadiusKm?: number | null;
   association?: { slug: string; name: string } | null;
   /** Lot D2 : phrase d'accroche (variante gardien). Absente : rendu propriétaire. */
@@ -163,12 +164,14 @@ export function OwnerEntraideBandView({
               <p className="text-muted-foreground text-[13px] mt-[6px]">Votre réponse est enregistrée, merci.</p>
             ) : (
               <div className="mt-[8px]">
-                <p className="text-muted-foreground text-[13px] mb-[8px]">Vous vous êtes rencontrés ?</p>
+                <p className="text-muted-foreground text-[13px] mb-[8px]">Le coup de main a eu lieu ?</p>
                 <MeetupAnswer
                   otherFirstName={ongoing.other_first_name}
                   busy={busyId === ongoing.id}
                   onYes={(word, publicOk) => onAnswer?.(ongoing.id, true, word, publicOk)}
                   onNo={() => onAnswer?.(ongoing.id, false, "", false)}
+                  onCancelled={() => onAnswer?.(ongoing.id, false, "", false, true)}
+                  missionId={ongoing.id}
                 />
               </div>
             )}
@@ -223,7 +226,7 @@ export default function OwnerEntraideBand(props: {
       exchanges={rows}
       proposals={proposals}
       busyId={busy}
-      onAnswer={(id, h, w, p) => void answer(id, h, w, p)}
+      onAnswer={(id, h, w, p, c) => void answer(id, h, w, p, c)}
       mutualRadiusKm={mutualRadiusKm}
       />
       <LocalUsefulActions />

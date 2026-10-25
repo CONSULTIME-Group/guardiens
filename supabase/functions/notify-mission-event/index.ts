@@ -83,6 +83,7 @@ function buildCopy(
   mission: { id: string; title: string; user_id: string; slug?: string | null; category?: string | null },
   actorName: string,
   metadata: Record<string, unknown>,
+  filled = true,
 ): EventCopy {
   // Lot X2 : un projet participatif renvoie vers /projets/{slug}, où son porteur lit les candidatures.
   const missionLink = missionLinkFor(mission)
@@ -116,12 +117,20 @@ function buildCopy(
           emailTemplate: 'mission-proposal-declined',
         }
       }
-      return {
-        title: 'Votre proposition n\'a pas été retenue',
-        body: `${actorName} a retenu une autre proposition pour "${missionTitle}".`,
-        link: missionLink,
-        emailTemplate: 'mission-proposal-declined',
-      }
+      // Lot E17 : « Merci, c'est pourvu », texte affirmatif.
+      return filled
+        ? {
+            title: 'Merci, c\'est pourvu',
+            body: `« ${missionTitle} » a trouvé son coup de main. Merci pour votre proposition.`,
+            link: missionLink,
+            emailTemplate: 'mission-proposal-declined',
+          }
+        : {
+            title: 'Merci pour votre proposition',
+            body: `${actorName} s'organise autrement pour « ${missionTitle} ». D'autres besoins près de chez vous attendent un coup de main.`,
+            link: missionLink,
+            emailTemplate: 'mission-proposal-declined',
+          }
     case 'mission_cancelled':
       return {
         title: 'Une mission a été annulée',
@@ -248,13 +257,16 @@ Deno.serve(async (req) => {
   // utilisateur en dehors de cet ensemble.
   const { data: responseRows } = await admin
     .from('small_mission_responses')
-    .select('responder_id')
+    .select('responder_id, status')
     .eq('mission_id', payload.mission_id)
   const participants = new Set<string>([mission.user_id])
   for (const r of responseRows ?? []) {
     const rid = (r as { responder_id?: string }).responder_id
     if (rid) participants.add(rid)
   }
+  // Lot E17 : une autre personne a été choisie (« Merci, c'est pourvu »), ou
+  // la personne qui a publié s'organise autrement.
+  const filled = (responseRows ?? []).some((r) => (r as { status?: string }).status === 'accepted')
 
   // L'acteur doit être un participant réel (les appels service role internes
   // et les admins restent autorisés pour les événements systèmes).
@@ -275,7 +287,7 @@ Deno.serve(async (req) => {
 
 
 
-  const copy = buildCopy(payload.event_type, mission, actorName, payload.metadata ?? {})
+  const copy = buildCopy(payload.event_type, mission, actorName, payload.metadata ?? {}, filled)
   const results: ResultRow[] = []
   const rateLimitApplies = !RATE_LIMIT_BYPASS.has(payload.event_type)
   const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_HOURS * 3600 * 1000).toISOString()
@@ -334,6 +346,7 @@ Deno.serve(async (req) => {
         missionId: mission.id,
         link: copy.link,
         metadata: payload.metadata ?? {},
+        filled,
       }, `${payload.event_type}-${mission.id}-${targetId}`)
     }
 

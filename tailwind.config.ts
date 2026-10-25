@@ -20,6 +20,10 @@ export default {
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
+        /* Lot E21 : bordure de champ de l'entraide, contraste 3:1 au moins sur le fond. */
+        field: "hsl(var(--field-border))",
+        /* Lot E21 : papier du panneau gouache d'un besoin sans photo. */
+        "hero-paper": "hsl(var(--hero-paper))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -116,6 +120,9 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
         pill: "50px",
+        /* Lot E21 : trois rayons de l'entraide (champs et puces, cartes, boutons en pleine). */
+        field: "8px",
+        card: "14px",
       },
       keyframes: {
         "accordion-down": {

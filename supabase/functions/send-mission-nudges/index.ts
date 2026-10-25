@@ -3,8 +3,8 @@
 // Envoie 3 types de nudges au propriétaire d'une mission :
 //  - `feedback`         : mission completed depuis 48h à 72h, sans feedback de l'auteur
 //  - `no_response`      : mission open depuis 7j sans aucune small_mission_responses
-//  - `response_waiting` : réponse `pending` depuis plus de 48h, poster jamais relancé pour
-//                         cette réponse (dédup par response_id dans metadata)
+//  - `response_waiting` : réponse `pending` depuis 24 h (lot E17), une seule relance par
+//                         réponse (choose_prompt_sent_at), boutons « Choisir {prénom} »
 //  - `close_reminder`   : mission `in_progress` dont la date prévue est passée depuis 3 à 10 jours,
 //                         invitation discrète à l'auteur pour clôturer
 //  - `feedback_helper`  : mission completed depuis 48h à 72h, relance de l'aidant retenu
@@ -15,6 +15,8 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { requireCronCaller } from '../_shared/require-cron-caller.ts'
 import { startCronRun } from '../_shared/cron-run-log.ts'
+import { fetchPendingResponders } from '../_shared/mission-responders.ts'
+import { RESPONSE_WAITING_HOURS, groupDueResponses } from '../_shared/mission-response-waiting.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -110,47 +112,53 @@ Deno.serve(async (req) => {
       }
     }
 
-    // === Nudge 3 : réponse en attente depuis >48h ===
+    // === Nudge 3 : réponse en attente depuis 24 h (lot E17) ===
+    // Une seule relance par réponse (choose_prompt_sent_at, marqueur partagé
+    // avec l'ancienne relance mission-choose-helper, fondue ici). Les réponses
+    // dues d'un même besoin partent dans un seul email, avec un bouton
+    // « Choisir {prénom} » par répondant en attente.
     if (!body.kind || body.kind === 'response_waiting') {
-      const cutoff = new Date(now - 48 * 3600 * 1000).toISOString()
+      const cutoff = new Date(now - RESPONSE_WAITING_HOURS * 3600 * 1000).toISOString()
       let q = admin
         .from('small_mission_responses')
-        .select('id, mission_id, responder_id, status, created_at, message, mission:small_missions(id, user_id, title, status)')
+        .select('id, mission_id, responder_id, status, created_at, choose_prompt_sent_at, mission:small_missions(id, user_id, title, status)')
         .eq('status', 'pending')
+        .is('choose_prompt_sent_at', null)
         .lte('created_at', cutoff)
+        .order('created_at', { ascending: true })
         .limit(200)
       if (body.mission_id) q = q.eq('mission_id', body.mission_id)
       const { data: rows, error } = await q
       if (error) throw error
 
-      for (const r of (rows as any[]) ?? []) {
-        const mission = r.mission
+      for (const group of groupDueResponses((rows as any[]) ?? [])) {
+        const mission = group.mission
         if (!mission || mission.status !== 'open') {
-          results.push({ mission_id: r.mission_id, nudge_type: 'response_waiting', status: 'skipped', reason: 'mission_not_open' })
+          results.push({ mission_id: group.missionId, nudge_type: 'response_waiting', status: 'skipped', reason: 'mission_not_open' })
           continue
         }
         // La mission a-t-elle déjà une réponse acceptée ? Si oui, plus la peine.
         const { count: acceptedCount } = await admin
           .from('small_mission_responses')
           .select('id', { count: 'exact', head: true })
-          .eq('mission_id', r.mission_id)
+          .eq('mission_id', group.missionId)
           .eq('status', 'accepted')
         if ((acceptedCount ?? 0) > 0) {
-          results.push({ mission_id: r.mission_id, nudge_type: 'response_waiting', status: 'skipped', reason: 'already_accepted' })
+          results.push({ mission_id: group.missionId, nudge_type: 'response_waiting', status: 'skipped', reason: 'already_accepted' })
           continue
         }
 
-        // Prénom du répondant
+        // Prénom du premier répondant dû (repli quand la liste est vide : projet, offre)
         const { data: responderProf } = await admin
           .from('profiles')
           .select('first_name')
-          .eq('id', r.responder_id)
+          .eq('id', group.responderIds[0])
           .maybeSingle()
         const responderFirstName = (responderProf?.first_name as string | undefined)?.trim() || 'Un membre'
 
         await sendResponseWaitingNudge(admin, {
           mission: { id: mission.id, user_id: mission.user_id, title: mission.title, status: mission.status, created_at: '', updated_at: '' },
-          responseId: r.id,
+          responseIds: group.responseIds,
           responderFirstName,
         }, results, body.dry_run)
       }
@@ -368,11 +376,12 @@ async function sendNudge(
 
 async function sendResponseWaitingNudge(
   admin: any,
-  ctx: { mission: Mission; responseId: string; responderFirstName: string },
+  ctx: { mission: Mission; responseIds: string[]; responderFirstName: string },
   results: Array<{ mission_id: string; nudge_type: string; status: string; reason?: string }>,
   dryRun?: boolean,
 ) {
-  const { mission, responseId, responderFirstName } = ctx
+  const { mission, responseIds, responderFirstName } = ctx
+  const responseId = responseIds[0]
   const templateName = 'mission-response-waiting'
   const idempotencyKey = `${templateName}-${responseId}`
 
@@ -415,7 +424,7 @@ async function sendResponseWaitingNudge(
     return
   }
 
-  // Dédup strict par response_id
+  // Dédup strict par response_id (relances parties avant le lot E17)
   const { data: prev } = await admin
     .from('email_send_log')
     .select('id')
@@ -425,6 +434,7 @@ async function sendResponseWaitingNudge(
     .contains('metadata', { response_id: responseId })
     .limit(1)
   if (prev && prev.length > 0) {
+    await markWaitingSent(admin, responseIds)
     results.push({ mission_id: mission.id, nudge_type: 'response_waiting', status: 'skipped', reason: 'already_sent' })
     return
   }
@@ -433,6 +443,9 @@ async function sendResponseWaitingNudge(
     results.push({ mission_id: mission.id, nudge_type: 'response_waiting', status: 'would_send' })
     return
   }
+
+  // Lot E17 : chaque répondant en attente, avec son bouton « Choisir {prénom} ».
+  const responders = await fetchPendingResponders(admin, mission.id)
 
   const _steRes2 = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
     method: 'POST',
@@ -445,8 +458,9 @@ async function sendResponseWaitingNudge(
         responderFirstName,
         missionTitle: mission.title,
         missionId: mission.id,
+        responders,
       },
-      logMetadata: { mission_id: mission.id, response_id: responseId, nudge_type: 'response_waiting' },
+      logMetadata: { mission_id: mission.id, response_id: responseId, response_ids: responseIds, nudge_type: 'response_waiting' },
     }),
   });
   const _steTxt2 = _steRes2.ok ? '' : await _steRes2.text().catch(() => '');
@@ -456,7 +470,16 @@ async function sendResponseWaitingNudge(
     results.push({ mission_id: mission.id, nudge_type: 'response_waiting', status: 'error', reason: String(sendErr) })
     return
   }
+  await markWaitingSent(admin, responseIds)
   results.push({ mission_id: mission.id, nudge_type: 'response_waiting', status: 'sent' })
+}
+
+/** Lot E17 : marqueur unique par réponse, posé après la relance à 24 h. */
+async function markWaitingSent(admin: any, responseIds: string[]) {
+  for (const id of responseIds) {
+    const { error } = await admin.rpc('mark_mission_choose_prompt_sent', { p_response_id: id })
+    if (error) console.error('[send-mission-nudges] marqueur', id, error.message)
+  }
 }
 
 // Envoi générique d'une relance mission à un destinataire donné (auteur ou aidant).

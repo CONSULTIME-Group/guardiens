@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchMySmallMissionsIndex } from "@/lib/dashboardShared";
 import { getAppQueryClient } from "@/lib/appQueryClient";
 import { buildHelpProposals, type HelpProposal, type MyResponseRow } from "@/lib/myHelpProposals";
+import { meetupSavedToast, meetupWordRetainedNotice, type MeetupOutcome } from "@/lib/meetupOutcome";
 
 const invalidateMine = (uid?: string) => {
   if (uid) void getAppQueryClient()?.invalidateQueries({ queryKey: ["my-small-missions-index", uid] });
@@ -126,7 +127,9 @@ export function useMyHelpExchanges() {
 
   useEffect(() => { void load(); }, [load]);
 
-  const answer = async (missionId: string, happened: boolean, word: string, publicOk: boolean) => {
+  const answer = async (missionId: string, happened: boolean, word: string, publicOk: boolean, cancelled = false) => {
+    // Lot E19 : troisième issue « annulé », envoyée explicitement.
+    const outcome: MeetupOutcome = cancelled ? "cancelled" : happened ? "happened" : "not_happened";
     setBusy(missionId);
     const { data: tokens, error } = await supabase.rpc("my_mission_meetup_tokens", { p_mission_id: missionId });
     const parsed = tokens as { ok?: boolean; yes_token?: string; no_token?: string } | null;
@@ -137,12 +140,14 @@ export function useMyHelpExchanges() {
     }
     const token = happened ? parsed.yes_token : parsed.no_token;
     const { data } = await supabase.functions.invoke("mission-quick-action", {
-      body: { token, kind: "meetup", mode: "confirm", word, public_ok: publicOk },
+      body: { token, kind: "meetup", mode: "confirm", outcome, word: outcome === "happened" ? word : "", public_ok: outcome === "happened" && publicOk },
     });
     setBusy(null);
-    if ((data as { ok?: boolean })?.ok) {
+    const result = data as { ok?: boolean; word_refused?: boolean; word_rule?: string | null } | null;
+    if (result?.ok) {
       invalidateMine(user?.id);
-      toast.success(happened ? "C'est noté, merci." : "C'est noté. Votre besoin reste suivi.");
+      toast.success(meetupSavedToast(outcome));
+      if (result.word_refused) toast.info(meetupWordRetainedNotice(result.word_rule));
       await load();
     } else {
       toast.error("Cette réponse sera enregistrée dans un instant. Réessayez.");
@@ -214,12 +219,14 @@ const MesCoupsDeMain = () => {
 
             {row.status === "in_progress" && !row.answered && (
               <div className="mt-3 space-y-3">
-                <p className="text-sm text-muted-foreground">Vous vous êtes rencontrés ?</p>
+                <p className="text-sm text-muted-foreground">Le coup de main a eu lieu ?</p>
                 <MeetupAnswer
                   otherFirstName={row.other_first_name}
                   busy={busy === row.id}
                   onYes={(word, publicOk) => void answer(row.id, true, word, publicOk)}
                   onNo={() => void answer(row.id, false, "", false)}
+                  onCancelled={() => void answer(row.id, false, "", false, true)}
+                  missionId={row.id}
                 />
               </div>
             )}

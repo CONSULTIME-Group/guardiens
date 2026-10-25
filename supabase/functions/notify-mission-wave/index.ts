@@ -12,6 +12,11 @@
  *    vague, puis les besoins sans réponse dont la dernière vague date de plus
  *    de 48 heures.
  *
+ * Lot E20 « Vague proche » : 30 km au plus, les plus proches d'abord (15 km
+ * en premier), 10 personnes par vague. Quand toutes les personnes disponibles
+ * à 30 km ont reçu le besoin, plus aucune vague et un message unique au
+ * demandeur (mission-wave-status, variante exhaustedCount).
+ *
  * Le journal cron_run_log n'est écrit que si le passage a réellement envoyé
  * ou relancé quelque chose.
  *
@@ -30,14 +35,17 @@ import {
   shouldSendNextWave,
   countFreezingResponses,
   waveHeadline,
-  frenchDateLabel,
+  waveEmailDetails,
   waveRelaunchMessage,
   waveRelaunchTitle,
   WAVE_EMPTY_MESSAGE,
   waveEmptyNotificationDue,
   isMissionSitMode,
   sitModeEmailLine,
+  waveExhaustedMessage,
+  waveExhaustedAfterRun,
 } from "../_shared/mission-wave.ts";
+import { fetchPendingResponders } from "../_shared/mission-responders.ts";
 import {
   WAVE_SEND_SPACING_MS,
   parseRetryAfterMs,
@@ -135,7 +143,7 @@ async function catchUpQueued(supabase: any, missionId: string, now = new Date())
 
   const { data: mission } = await supabase
     .from("small_missions")
-    .select("id, title, city, user_id, status, date_needed, end_date, sit_mode")
+    .select("id, title, city, user_id, status, date_needed, end_date, sit_mode, description, duration_estimate")
     .eq("id", missionId)
     .maybeSingle();
   if (!mission) return out;
@@ -144,7 +152,6 @@ async function catchUpQueued(supabase: any, missionId: string, now = new Date())
     .select("first_name")
     .eq("id", mission.user_id)
     .maybeSingle();
-  const dateLabel = frenchDateLabel(mission.date_needed ?? mission.end_date);
   const sitLine = isMissionSitMode(mission.sit_mode)
     ? sitModeEmailLine(mission.sit_mode, owner?.first_name ?? null)
     : "";
@@ -175,7 +182,8 @@ async function catchUpQueued(supabase: any, missionId: string, now = new Date())
       out.skipped++;
       continue;
     }
-    const headline = waveHeadline(owner?.first_name ?? null, r.distance_km, mission.title ?? "un coup de main", dateLabel);
+    // Lot E18 : la date part dans la ligne de détails de la carte, pas dans l'accroche.
+    const headline = waveHeadline(owner?.first_name ?? null, r.distance_km, mission.title ?? "un coup de main", null);
     const result = await deliver({
       templateName: "mission-help-needed",
       recipientEmail: helper.email,
@@ -190,6 +198,7 @@ async function catchUpQueued(supabase: any, missionId: string, now = new Date())
         proofLine: "",
         sitModeLine: sitLine,
         distanceKm: r.distance_km,
+        ...waveEmailDetails(mission),
       },
       logMetadata: { mission_id: missionId, wave: r.wave, source: "mission_wave_catchup" },
     });
@@ -213,6 +222,52 @@ async function catchUpQueued(supabase: any, missionId: string, now = new Date())
   return out;
 }
 
+/**
+ * Lot E20 : toutes les personnes disponibles à 30 km au plus ont été
+ * prévenues. Le marqueur wave_exhausted_at est posé une seule fois
+ * (mark_mission_wave_exhausted), plus aucune vague ne part, et le demandeur
+ * reçoit un seul message affirmatif avec le lien de son besoin à partager.
+ */
+async function notifyWaveExhausted(
+  supabase: any,
+  mission: { id: string; title: string | null; user_id: string },
+  owner: { first_name?: string | null; email?: string | null } | null,
+): Promise<boolean> {
+  const { data: n, error } = await supabase.rpc("mark_mission_wave_exhausted", { p_mission_id: mission.id });
+  if (error) {
+    console.error("[notify-mission-wave] épuisement", error.message);
+    return false;
+  }
+  if (n == null || Number(n) <= 0) return false;
+  const count = Number(n);
+  const message = waveExhaustedMessage(count);
+  if (owner?.email) {
+    const responders = await fetchPendingResponders(supabase, mission.id);
+    await sendEmail({
+      templateName: "mission-wave-status",
+      recipientEmail: owner.email,
+      idempotencyKey: `mission-wave-exhausted-${mission.id}`,
+      templateData: {
+        ownerFirstName: owner.first_name ?? "",
+        missionTitle: mission.title ?? "",
+        missionId: mission.id,
+        message,
+        exhaustedCount: count,
+        responders,
+      },
+      logMetadata: { mission_id: mission.id, source: "mission_wave_exhausted" },
+    });
+  }
+  await supabase.from("notifications").insert({
+    user_id: mission.user_id,
+    type: "mission_wave_relaunch",
+    title: "Votre besoin a fait le tour du coin",
+    body: message.replace(/ :$/, "."),
+    link: `/petites-missions/${mission.id}`,
+  });
+  return true;
+}
+
 /** Envoie une vague pour un besoin. Retourne le nombre de messages partis. */
 async function runWave(supabase: any, missionId: string): Promise<WaveResult> {
   // Rattrapage d'abord, sans toucher à wave_count.
@@ -220,12 +275,14 @@ async function runWave(supabase: any, missionId: string): Promise<WaveResult> {
 
   const { data: mission } = await supabase
     .from("small_missions")
-    .select("id, title, city, user_id, status, date_needed, end_date, wave_count, sit_mode, latitude, longitude")
+    .select("id, title, city, user_id, status, date_needed, end_date, wave_count, sit_mode, latitude, longitude, wave_exhausted_at, description, duration_estimate")
     .eq("id", missionId)
     .maybeSingle();
 
   const cu = { caughtUp: catchup.sent, catchupDeferred: catchup.deferred };
   if (!mission || mission.status !== "open") return { sent: 0, wave: 0, empty: false, ...cu };
+  // Lot E20 : vivier à 30 km épuisé, plus aucune vague.
+  if (mission.wave_exhausted_at) return { sent: 0, wave: Number(mission.wave_count ?? 0), empty: false, ...cu };
 
   // Plafond de diffusion : au plus trois vagues, soit trente personnes.
   // Au-delà, le besoin reste visible sur la page Entraide.
@@ -248,6 +305,14 @@ async function runWave(supabase: any, missionId: string): Promise<WaveResult> {
   const helpers: WaveHelper[] = (waveData?.helpers ?? []) as WaveHelper[];
   const wave = Number(waveData?.wave ?? 0);
   const radiusFloor = Number(waveData?.radius_floor ?? 30);
+  const remaining = typeof waveData?.remaining === "number" ? waveData.remaining : null;
+
+  if (helpers.length === 0 && wave >= 2 && remaining === 0) {
+    // Lot E20 : des personnes ont déjà été prévenues et il n'en reste plus
+    // à 30 km (cas d'un report rattrapé depuis) : message d'épuisement, une fois.
+    await notifyWaveExhausted(supabase, mission, owner);
+    return { sent: 0, wave, empty: false, radiusFloor, ...cu };
+  }
 
   if (helpers.length === 0) {
     // Personne à prévenir. Au premier tour seulement, on le dit au demandeur,
@@ -289,7 +354,6 @@ async function runWave(supabase: any, missionId: string): Promise<WaveResult> {
     return { sent: 0, wave, empty: true, radiusFloor, ...cu };
   }
 
-  const dateLabel = frenchDateLabel(mission.date_needed ?? mission.end_date);
 
   // Une seule ligne de preuve, quand une rencontre confirmée existe à moins de
   // cinquante kilomètres du besoin.
@@ -320,11 +384,12 @@ async function runWave(supabase: any, missionId: string): Promise<WaveResult> {
       .maybeSingle();
     if (!helper?.email) continue;
 
+    // Lot E18 : la date part dans la ligne de détails de la carte, pas dans l'accroche.
     const headline = waveHeadline(
       owner?.first_name ?? null,
       h.distance_km,
       mission.title ?? "un coup de main",
-      dateLabel,
+      null,
     );
 
     const sitLine = isMissionSitMode(mission.sit_mode)
@@ -345,6 +410,7 @@ async function runWave(supabase: any, missionId: string): Promise<WaveResult> {
         proofLine,
         sitModeLine: sitLine,
         distanceKm: h.distance_km,
+        ...waveEmailDetails(mission),
       },
       logMetadata: { mission_id: missionId, wave, source: "mission_wave" },
     });
@@ -370,8 +436,17 @@ async function runWave(supabase: any, missionId: string): Promise<WaveResult> {
     if (result === "sent") sent++;
   }
 
+  // Lot E20 : toutes les personnes disponibles à 30 km au plus viennent de
+  // recevoir le besoin. Le message d'épuisement remplace la relance.
+  if (sent > 0 && waveExhaustedAfterRun(remaining, deferred)) {
+    await notifyWaveExhausted(supabase, mission, owner);
+    return { sent, wave, empty: false, radiusFloor, deferred, caughtUp: catchup.sent, catchupDeferred: catchup.deferred };
+  }
+
   // Relance du demandeur à partir de la deuxième vague.
   if (wave >= 2 && sent > 0 && owner?.email) {
+    // Lot E17 : chaque répondant en attente est nommé, avec un bouton « Choisir ».
+    const responders = await fetchPendingResponders(supabase, missionId);
     await sendEmail({
       templateName: "mission-wave-status",
       recipientEmail: owner.email,
@@ -381,6 +456,7 @@ async function runWave(supabase: any, missionId: string): Promise<WaveResult> {
         missionTitle: mission.title ?? "",
         missionId,
         message: waveRelaunchMessage(sent),
+        responders,
       },
     });
     await supabase.from("notifications").insert({
@@ -457,7 +533,7 @@ Deno.serve(async (req) => {
 
     const { data: missions, error } = await supabase
       .from("small_missions")
-      .select("id, status, wave_count, last_wave_at")
+      .select("id, status, wave_count, last_wave_at, wave_exhausted_at")
       .eq("status", "open")
       .eq("mission_type", "besoin")
       .order("created_at", { ascending: true })
@@ -488,6 +564,7 @@ Deno.serve(async (req) => {
           wave_count: m.wave_count as number | null,
           last_wave_at: m.last_wave_at as string | null,
           response_count: freezing,
+          wave_exhausted_at: (m.wave_exhausted_at as string | null) ?? null,
         },
         now,
       );
@@ -520,7 +597,7 @@ Deno.serve(async (req) => {
      }
     }
 
-    // Signal admin : besoin ouvert depuis plus de 72 h, personne joignable même à 100 km.
+    // Signal admin : besoin ouvert depuis plus de 72 h, personne joignable à 30 km (lot E20).
     const { error: signalErr } = await supabase.rpc("detect_missions_without_audience");
     if (signalErr) console.error("[notify-mission-wave] signal sans audience", signalErr.message);
 

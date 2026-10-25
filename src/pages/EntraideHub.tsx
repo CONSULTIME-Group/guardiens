@@ -4,8 +4,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageMeta from "@/components/PageMeta";
+import { SECTION_OG_IMAGES } from "@/data/siteConstants";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
-import { HelperCard, NeedRow, openHelperConversation, type EntraideNeed, type NeedRowState, type PublicHelper } from "@/components/entraide/EntraideCards";
+import { HelperCard, NeedRow, needMetaLine, openHelperConversation, type EntraideNeed, type NeedRowState, type PublicHelper } from "@/components/entraide/EntraideCards";
+import { needExcerpt } from "@/lib/needExcerpt";
 import type { MissionBadgeRow } from "@/components/missions/MissionBadgesReceived";
 import EntraideProofs from "@/components/entraide/EntraideProofs";
 import { useAuth } from "@/contexts/AuthContext";
@@ -159,7 +161,7 @@ const EntraideHub = () => {
   useEffect(() => {
     const load = async () => {
       const [needsResult, helpersResult, countsResult] = await Promise.all([
-        supabase.from("public_small_missions").select("id, user_id, slug, title, city, category, date_needed, end_date, latitude, longitude, photos, sit_mode").eq("status", "open").eq("mission_type", "besoin").order("created_at", { ascending: false }),
+        supabase.from("public_small_missions").select("id, user_id, slug, title, description, city, category, date_needed, end_date, latitude, longitude, photos, sit_mode").eq("status", "open").eq("mission_type", "besoin").order("created_at", { ascending: false }),
         supabase.from("public_helpers").select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, helps_with, competences, last_active_on"),
         supabase.from("public_mission_response_counts").select("mission_id, response_count"),
       ]);
@@ -366,11 +368,11 @@ const EntraideHub = () => {
     }
   };
 
-  const sendCanHelp = async (need: EntraideNeed, message: string) => {
+  const sendCanHelp = async (need: EntraideNeed, message: string, exchangeDate: string | null = null) => {
     if (!user?.id || responding) return;
     setResponding(need.id);
     void trackEvent("mission_can_help", { metadata: { mission_id: need.id, source: "hub_list" } });
-    const outcome = await respondToMission({ missionId: need.id, userId: user.id, message });
+    const outcome = await respondToMission({ missionId: need.id, userId: user.id, message, exchangeDate });
     setResponding(null);
     setConfirmNeed(null);
     switch (outcome.kind) {
@@ -424,7 +426,10 @@ const EntraideHub = () => {
         title="Entraide entre particuliers : coups de main près de chez vous | Guardiens"
         description="Jardinage, courses, trajets, une partie de belote : demandez ou proposez un coup de main près de chez vous. Guardiens est gratuit."
         path="/petites-missions"
+        ready={!pageLoading}
         jsonLd={[faqSchema]}
+        image={SECTION_OG_IMAGES.entraide.url}
+        imageAlt={SECTION_OG_IMAGES.entraide.alt}
       />
       <PageBreadcrumb items={[{ label: "Entraide" }]} />
       <div className="min-w-0 bg-background pb-24">
@@ -586,9 +591,14 @@ const EntraideHub = () => {
             open={confirmNeed !== null}
             firstName={confirmFirstName}
             needTitle={confirmNeed?.title || ""}
+            needMeta={confirmNeed ? needMetaLine(confirmNeed, needDistance(confirmNeed)) : null}
+            needDescription={confirmNeed ? needExcerpt(confirmNeed.description, confirmNeed.title) : null}
+            detailPath={confirmNeed ? detailPath(confirmNeed) : null}
             sending={responding !== null}
             onCancel={() => setConfirmNeed(null)}
-            onSend={(message) => { if (confirmNeed) void sendCanHelp(confirmNeed, message); }}
+            needDateNeeded={confirmNeed?.date_needed ?? null}
+            needEndDate={confirmNeed?.end_date ?? null}
+            onSend={(message, exchangeDate) => { if (confirmNeed) void sendCanHelp(confirmNeed, message, exchangeDate); }}
           />
         </div>
       </div>

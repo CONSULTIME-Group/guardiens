@@ -13,7 +13,7 @@ describe("cohérence période / durée déclarée", () => {
     const r = durationMismatch("1-2h", "2026-07-01", "2026-08-10");
     expect(r?.suggested).toBe("several");
     expect(r?.days).toBe(41);
-    expect(r?.message).toContain("Plusieurs jours");
+    expect(r?.message).toContain("Plusieurs passages");
   });
 
   it("signale un week-end annoncé sur 82 jours", () => {

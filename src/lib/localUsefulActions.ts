@@ -168,7 +168,7 @@ const TECHNICAL_TERMS: Record<string, RegExp> = {
 
 const DURATION_LABELS: Record<string, string> = {
   "1-2h": "1 à 2 heures", half_day: "Demi-journée", full_day: "Journée",
-  weekend: "Week-end", week: "Semaine", several: "Plusieurs jours",
+  weekend: "Week-end", week: "Semaine", several: "Plusieurs passages",
 };
 const durationLabel = (raw: unknown) => {
   const d = typeof raw === "string" ? raw.trim() : "";

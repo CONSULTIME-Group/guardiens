@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import PageMeta from "@/components/PageMeta";
+import { SECTION_OG_IMAGES } from "@/data/siteConstants";
 import { SITE_URL } from "@/lib/seo";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -212,6 +213,8 @@ export default function AssociationsListing() {
         description={META_DESCRIPTION}
         path="/associations"
         canonical={`${SITE_URL}/associations`}
+        image={SECTION_OG_IMAGES.associations.url}
+        imageAlt={SECTION_OG_IMAGES.associations.alt}
         jsonLd={jsonLd}
         ready={!isLoading}
       />

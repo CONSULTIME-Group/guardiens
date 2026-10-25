@@ -13610,6 +13610,7 @@ export type Database = {
         Row: {
           badge_key: string | null
           comment: string | null
+          comment_moderation: string | null
           created_at: string
           giver_id: string
           id: string
@@ -13621,6 +13622,7 @@ export type Database = {
         Insert: {
           badge_key?: string | null
           comment?: string | null
+          comment_moderation?: string | null
           created_at?: string
           giver_id: string
           id?: string
@@ -13632,6 +13634,7 @@ export type Database = {
         Update: {
           badge_key?: string | null
           comment?: string | null
+          comment_moderation?: string | null
           created_at?: string
           giver_id?: string
           id?: string
@@ -17082,6 +17085,7 @@ export type Database = {
           choose_prompt_sent_at: string | null
           conversation_id: string | null
           created_at: string
+          decline_reason: string | null
           exchange_date: string | null
           exchange_offer: string | null
           helpful_count: number
@@ -17098,6 +17102,7 @@ export type Database = {
           choose_prompt_sent_at?: string | null
           conversation_id?: string | null
           created_at?: string
+          decline_reason?: string | null
           exchange_date?: string | null
           exchange_offer?: string | null
           helpful_count?: number
@@ -17114,6 +17119,7 @@ export type Database = {
           choose_prompt_sent_at?: string | null
           conversation_id?: string | null
           created_at?: string
+          decline_reason?: string | null
           exchange_date?: string | null
           exchange_offer?: string | null
           helpful_count?: number
@@ -17238,6 +17244,7 @@ export type Database = {
           user_id: string
           view_count: number
           wave_count: number
+          wave_exhausted_at: string | null
           wave_radius_floor: number
         }
         Insert: {
@@ -17286,6 +17293,7 @@ export type Database = {
           user_id: string
           view_count?: number
           wave_count?: number
+          wave_exhausted_at?: string | null
           wave_radius_floor?: number
         }
         Update: {
@@ -17334,6 +17342,7 @@ export type Database = {
           user_id?: string
           view_count?: number
           wave_count?: number
+          wave_exhausted_at?: string | null
           wave_radius_floor?: number
         }
         Relationships: [
@@ -18387,6 +18396,15 @@ export type Database = {
           },
         ]
       }
+      public_entraide_need_activity: {
+        Row: {
+          activity_key: string | null
+          created_on: string | null
+          latitude: number | null
+          longitude: number | null
+        }
+        Relationships: []
+      }
       public_entraide_proofs: {
         Row: {
           city: string | null
@@ -18433,7 +18451,7 @@ export type Database = {
         }
         Insert: {
           badge_key?: string | null
-          comment?: string | null
+          comment?: never
           created_at?: string | null
           id?: string | null
           positive?: boolean | null
@@ -18441,7 +18459,7 @@ export type Database = {
         }
         Update: {
           badge_key?: string | null
-          comment?: string | null
+          comment?: never
           created_at?: string | null
           id?: string | null
           positive?: boolean | null
@@ -19703,7 +19721,13 @@ export type Database = {
         Returns: boolean
       }
       confirm_mission_meetup: {
-        Args: { p_public_ok?: boolean; p_token: string; p_word?: string }
+        Args: {
+          p_outcome?: string
+          p_public_ok?: boolean
+          p_token: string
+          p_word?: string
+          p_word_moderation?: string
+        }
         Returns: Json
       }
       consume_application_action_token: {
@@ -20475,6 +20499,10 @@ export type Database = {
         Returns: boolean
       }
       mark_mission_done: { Args: { p_mission_id: string }; Returns: Json }
+      mark_mission_wave_exhausted: {
+        Args: { p_mission_id: string }
+        Returns: number
+      }
       mark_sit_applications_viewed: {
         Args: { p_sit_id: string }
         Returns: number
@@ -20507,6 +20535,14 @@ export type Database = {
       mission_link_for: {
         Args: { p_category: string; p_id: string; p_slug: string }
         Returns: string
+      }
+      mission_notified_count: {
+        Args: { p_mission_id: string }
+        Returns: number
+      }
+      mission_pending_responders: {
+        Args: { p_mission_id: string }
+        Returns: Json
       }
       mission_wave_audience: {
         Args: { p_limit?: number; p_mission_id: string; p_offset?: number }

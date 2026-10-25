@@ -185,6 +185,7 @@ export const staticRoutes: SiteRoute[] = [
  h1: "Entraide et coups de main près de chez vous",
  sitemapPriority: "0.8",
  changeFreq: "weekly",
+ ogImage: "https://guardiens.fr/og/og-entraide.jpg",
  },
  {
  path: "/projets",
@@ -193,6 +194,7 @@ export const staticRoutes: SiteRoute[] = [
  h1: "Des chantiers et projets à réaliser ensemble",
  sitemapPriority: "0.7",
  changeFreq: "weekly",
+ ogImage: "https://guardiens.fr/og/og-projets.jpg",
  },
  {
  path: "/petites-missions/lyon",
@@ -321,6 +323,7 @@ export const staticRoutes: SiteRoute[] = [
  h1: "Associations et refuges de protection animale",
  sitemapPriority: "0.8",
  changeFreq: "weekly",
+ ogImage: "https://guardiens.fr/og/og-associations.jpg",
  },
  {
  path: "/guides",

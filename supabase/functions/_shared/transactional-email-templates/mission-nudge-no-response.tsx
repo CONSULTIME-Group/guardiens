@@ -16,7 +16,7 @@ interface Props {
   missionId?: string
 }
 
-const Email = ({ firstName, missionTitle = 'Votre mission', missionId }: Props) => {
+const Email = ({ firstName, missionTitle = 'Votre besoin', missionId }: Props) => {
   const editUrl = missionId
     ? `${SITE_URL}/petites-missions/${missionId}?edit=1&utm_source=email&utm_campaign=mission_nudge_no_response`
     : `${SITE_URL}/petites-missions`
@@ -27,29 +27,29 @@ const Email = ({ firstName, missionTitle = 'Votre mission', missionId }: Props) 
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>Votre mission n'a pas encore trouvé preneur</Preview>
+      <Preview>Votre besoin, une semaine après</Preview>
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
           <AlmaSignature />
           <AlmaIntro firstName={firstName} />
-          <Heading style={h1}>Votre mission attend toujours une réponse</Heading>
+          {/* Lot E18 (n° 64) : sans « mission », « preneur », « contrepartie ». */}
+          <Heading style={h1}>Votre besoin, une semaine après</Heading>
           <Text style={p}>
-            Votre mission « {missionTitle} » est en ligne depuis une semaine et n'a reçu aucune proposition pour l'instant.
+            Votre besoin « {missionTitle} » est en ligne depuis une semaine. Une date précise et une photo aident souvent les personnes du coin à dire « Je peux ».
           </Text>
           <Text style={p}>
-            Deux options utiles : ajuster le titre, la date ou la contrepartie pour élargir la portée,
-            ou clôturer si le besoin n'est plus d'actualité.
+            Vous pouvez aussi préciser ce que vous proposez en retour, ou clore le besoin s'il est réglé.
           </Text>
           <Section style={{ textAlign: 'center', margin: '24px 0' }}>
-            <Button href={editUrl} style={btn}>Ajuster ma mission</Button>
+            <Button href={editUrl} style={btn}>Préciser mon besoin</Button>
           </Section>
           <Text style={pSmall}>
-            Ou <a href={detailUrl} style={link}>voir ma mission et la clôturer</a>.
+            Ou <a href={detailUrl} style={link}>voir mon besoin et le clore</a>.
           </Text>
           <Hr style={hr} />
           <AlmaSignoff />
-          <LegalFooter purpose="la relance d'une mission sans réponse" basis="6.1.b" />
+          <LegalFooter purpose="la relance d'un besoin d'entraide en ligne depuis une semaine" basis="6.1.b" />
         </Container>
       </Body>
     </Html>
@@ -58,8 +58,8 @@ const Email = ({ firstName, missionTitle = 'Votre mission', missionId }: Props) 
 
 export const template = {
   component: Email,
-  subject: 'Votre mission attend toujours une réponse',
-  displayName: 'Nudge mission sans réponse',
+  subject: 'Votre besoin, une semaine après',
+  displayName: 'Entraide, relance d\'un besoin à une semaine',
   previewData: { firstName: 'Marie', missionTitle: 'Sortir mon chien mardi soir', missionId: 'demo' },
 } satisfies TemplateEntry
 

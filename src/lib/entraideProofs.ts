@@ -68,10 +68,21 @@ export function weekLabel(value: string | null, now: Date = new Date()): string 
   return months === 1 ? "Il y a un mois" : `Il y a ${months} mois`;
 }
 
-/** Phrase de preuve, une ligne, prénoms et ville seulement. */
+/**
+ * Phrase de preuve, une ligne, prénoms et ville seulement.
+ *
+ * Lot E19 : la vue ne livre les prénoms qu'avec l'accord des deux personnes ;
+ * sans les deux prénoms, la phrase dit seulement « près de {ville} ».
+ */
 export function proofSentence(proof: EntraideProof): string {
-  const owner = proof.owner_first_name?.trim() || "Une personne du coin";
-  const helper = proof.helper_first_name?.trim() || "quelqu'un du coin";
-  const city = proof.city?.trim() ? ` à ${proof.city.trim()}` : "";
-  return `${owner} a reçu un coup de main de ${helper}${city}.`;
+  const owner = proof.owner_first_name?.trim();
+  const helper = proof.helper_first_name?.trim();
+  const cityName = proof.city?.trim();
+  if (owner && helper) {
+    const city = cityName ? ` à ${cityName}` : "";
+    return `${owner} a reçu un coup de main de ${helper}${city}.`;
+  }
+  if (!cityName) return "Un coup de main a eu lieu près de chez vous.";
+  const near = /^[aeiouyàâäéèêëîïôöùûü]/i.test(cityName) ? "près d'" : "près de ";
+  return `Un coup de main a eu lieu ${near}${cityName}.`;
 }

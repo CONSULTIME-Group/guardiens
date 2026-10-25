@@ -18,7 +18,7 @@ import PageMeta from "@/components/PageMeta";
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 import { Slider } from "@/components/ui/slider";
 import { declarableRadius, effectiveSearchRadius } from "@/lib/searchRadius";
-import { snapToAllowedRadius } from "@/lib/alertRadius";
+import { snapToAllowedRadius, MUTUAL_AID_MAX_RADIUS_KM, MUTUAL_AID_RADIUS_LINE } from "@/lib/alertRadius";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
@@ -305,6 +305,9 @@ const MonSecteur = () => {
                 max={200}
                 step={5}
               />
+              {radius > MUTUAL_AID_MAX_RADIUS_KM && (
+                <p className="text-sm text-muted-foreground">{MUTUAL_AID_RADIUS_LINE}</p>
+              )}
             </div>
 
             <Button onClick={handleSave} disabled={saving} className="w-full h-12">

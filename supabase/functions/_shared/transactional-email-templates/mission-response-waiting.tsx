@@ -1,10 +1,12 @@
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Head, Heading, Html, Preview, Text, Button,
+  Body, Container, Heading, Html, Preview, Text, Button,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
+import { ResponderList } from './_responder-list.tsx'
+import { normalizeResponders } from '../mission-responders.ts'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_URL = 'https://guardiens.fr'
@@ -13,46 +15,71 @@ interface Props {
   responderFirstName?: string
   missionTitle?: string
   missionId?: string
+  /** Lot E17 : répondants en attente, chacun avec un bouton « Choisir {prénom} ». */
+  responders?: unknown
 }
 
-const Email = ({ responderFirstName, missionTitle, missionId }: Props) => (
-  <Html lang="fr" dir="ltr">
-    <BrandedHead />
-    <Preview>Une proposition attend votre réponse</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <BrandHeader />
-        <Heading style={h1}>Une proposition attend votre réponse</Heading>
-        <Text style={text}>
-          <strong>{responderFirstName || 'Un membre'}</strong> vous a proposé son aide
-          {missionTitle ? ` pour « ${missionTitle} »` : ''} il y a plus de deux jours,
-          et vous n'avez pas encore donné suite.
-        </Text>
-        <Text style={text}>
-          Un simple retour, positif ou non, respecte le temps de la personne qui s'est manifestée
-          et fait vivre l'entraide dans votre coin.
-        </Text>
-        <Button
-          style={button}
-          href={missionId ? `${SITE_URL}/petites-missions/${missionId}` : `${SITE_URL}/petites-missions`}
-        >
-          Voir la proposition
-        </Button>
-        <LegalFooter purpose="la bonne marche du service d'entraide" basis="6.1.f" />
-      </Container>
-    </Body>
-  </Html>
-)
+/**
+ * Lot E17 : relance du demandeur, 24 h après une réponse restée en attente,
+ * une seule fois par réponse (choose_prompt_sent_at).
+ */
+const Email = ({ responderFirstName, missionTitle, missionId, responders }: Props) => {
+  const list = normalizeResponders(responders)
+  const who = list.length > 1 ? null : (list[0]?.firstName || responderFirstName || 'Un membre')
+  const pageUrl = missionId ? `${SITE_URL}/petites-missions/${missionId}` : `${SITE_URL}/petites-missions`
+  return (
+    <Html lang="fr" dir="ltr">
+      <BrandedHead />
+      <Preview>{who ? `${who} attend votre choix` : 'Des personnes attendent votre choix'}</Preview>
+      <Body style={main}>
+        <Container style={container}>
+          <BrandHeader />
+          <Heading style={h1}>{who ? `${who} attend votre choix` : 'Des personnes attendent votre choix'}</Heading>
+          <Text style={text}>
+            {who
+              ? <><strong>{who}</strong> vous a proposé son aide{missionTitle ? ` pour « ${missionTitle} »` : ''}.</>
+              : <>Plusieurs personnes vous ont proposé leur aide{missionTitle ? ` pour « ${missionTitle} »` : ''}.</>}
+          </Text>
+          {list.length > 0 ? (
+            <>
+              <ResponderList responders={list} intro={list.length > 1 ? 'Choisissez la personne qui vous convient :' : undefined} />
+              <Button style={buttonGhost} href={pageUrl}>
+                Voir mon besoin
+              </Button>
+            </>
+          ) : (
+            <>
+              <Text style={text}>
+                Un retour, quel qu'il soit, respecte le temps de la personne qui s'est manifestée
+                et fait vivre l'entraide dans votre coin.
+              </Text>
+              <Button style={button} href={pageUrl}>
+                Voir la proposition
+              </Button>
+            </>
+          )}
+          <LegalFooter purpose="la bonne marche du service d'entraide" basis="6.1.f" />
+        </Container>
+      </Body>
+    </Html>
+  )
+}
 
 export const template = {
   component: Email,
-  subject: (d: Record<string, any>) =>
-    `Une proposition de ${d.responderFirstName || 'un membre'} attend votre réponse`,
-  displayName: 'Petite mission, rappel réponse en attente 48h',
+  subject: (d: Record<string, any>) => {
+    const list = normalizeResponders(d.responders)
+    if (list.length > 1) return 'Des personnes attendent votre choix'
+    return `${list[0]?.firstName || d.responderFirstName || 'Un membre'} attend votre choix`
+  },
+  displayName: 'Entraide, relance du demandeur à 24 h (choisir)',
   previewData: {
     responderFirstName: 'Camille',
     missionTitle: 'Promenade du chien dimanche',
     missionId: 'demo',
+    responders: [
+      { responseId: 'r1', firstName: 'Camille', distanceKm: 3, helpsWith: 'Promener les chiens', verified: true, exchangeDate: '2026-11-02', chooseToken: 'demo-camille' },
+    ],
   },
 } satisfies TemplateEntry
 
@@ -61,3 +88,4 @@ const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
 const h1 = { fontSize: '24px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 20px' }
 const text = { fontSize: '14px', color: '#524E47', lineHeight: '1.6', margin: '0 0 16px' }
 const button = { backgroundColor: '#2C6D50', color: '#ffffff', padding: '12px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block' }
+const buttonGhost = { ...button, backgroundColor: '#F8F6F1', color: '#2C6D50' }

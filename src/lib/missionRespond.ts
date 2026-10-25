@@ -10,8 +10,20 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const MIN_MISSION_MESSAGE_LEN = 10;
 export const MAX_MISSION_MESSAGE_LEN = 500;
-/** Message posé par le bouton « Je peux », identique sur toutes les surfaces. */
+/** Message posé par le « Je peux » en un clic de l'email (consume_mission_action_token). */
 export const QUICK_CAN_HELP_MESSAGE = "Je peux vous aider.";
+
+/**
+ * Lot E18 : message d'un « Je peux » envoyé depuis la fenêtre. Le mot tapé
+ * par la personne passe tel quel ; sans mot, la réponse dit le geste et le
+ * jour choisi, comme le « Je peux » de l'email.
+ */
+export function canHelpMessage(typed: string | null | undefined, dayLabel?: string | null): string {
+  const text = (typed ?? "").trim();
+  if (text) return text;
+  const day = (dayLabel ?? "").trim().replace(/\.+$/, "").toLowerCase();
+  return day ? `${QUICK_CAN_HELP_MESSAGE} Je suis libre le ${day}.` : QUICK_CAN_HELP_MESSAGE;
+}
 
 export type MissionRespondOutcome =
   | { kind: "empty" }
@@ -25,11 +37,14 @@ export type MissionRespondOutcome =
   | { kind: "failed"; message: string }
   | { kind: "sent"; inserted: Record<string, unknown> | null };
 
-export const respondToMission = async ({ missionId, userId, message }: {
+export const respondToMission = async ({ missionId, userId, message, exchangeDate }: {
   missionId: string;
   userId: string;
   message: string;
+  /** Lot E18 : jour proposé (AAAA-MM-JJ), small_mission_responses.exchange_date. */
+  exchangeDate?: string | null;
 }): Promise<MissionRespondOutcome> => {
+  const day = typeof exchangeDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(exchangeDate) ? exchangeDate : null;
   const msg = (message ?? "").trim();
   if (!msg) return { kind: "empty" };
   if (msg.length < MIN_MISSION_MESSAGE_LEN) return { kind: "too_short", min: MIN_MISSION_MESSAGE_LEN };
@@ -46,7 +61,7 @@ export const respondToMission = async ({ missionId, userId, message }: {
 
     const { data: inserted, error } = await supabase
       .from("small_mission_responses")
-      .insert({ mission_id: missionId, responder_id: userId, message: msg })
+      .insert({ mission_id: missionId, responder_id: userId, message: msg, ...(day ? { exchange_date: day } : {}) })
       .select("*")
       .single();
 
@@ -57,6 +72,9 @@ export const respondToMission = async ({ missionId, userId, message }: {
         // Une réponse retirée est réactivée (même ligne, historique conservé).
         const { data: reactivatedId } = await supabase.rpc("reactivate_my_mission_response", { p_mission_id: missionId, p_message: msg });
         if (reactivatedId) {
+          if (day) {
+            await supabase.from("small_mission_responses").update({ exchange_date: day }).eq("id", reactivatedId as string);
+          }
           const { data: row } = await supabase.from("small_mission_responses").select("*").eq("id", reactivatedId as string).maybeSingle();
           return { kind: "sent", inserted: (row as Record<string, unknown>) ?? null };
         }

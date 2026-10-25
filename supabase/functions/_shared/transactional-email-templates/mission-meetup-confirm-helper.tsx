@@ -28,11 +28,11 @@ const MissionMeetupConfirmHelperEmail = ({
 }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>Vous vous êtes rencontrés ?</Preview>
+    <Preview>Le coup de main a eu lieu ?</Preview>
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
-        <Heading style={h1}>Vous vous êtes rencontrés ?</Heading>
+        <Heading style={h1}>Le coup de main a eu lieu ?</Heading>
 
         <Text style={text}>Bonjour{helperFirstName ? ` ${helperFirstName}` : ''},</Text>
 
@@ -105,7 +105,7 @@ const hr = { borderColor: '#E9E4DD', margin: '20px 0' }
 
 export const template: TemplateEntry = {
   component: MissionMeetupConfirmHelperEmail,
-  subject: 'Vous vous êtes rencontrés ?',
+  subject: 'Le coup de main a eu lieu ?',
   displayName: 'Entraide, fin d\u2019échange (personne qui aide)',
   previewData: {
     helperFirstName: 'Karim',

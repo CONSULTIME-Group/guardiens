@@ -21,3 +21,35 @@ export function snapToAllowedRadius(r: number): AllowedAlertRadius {
 export function isAllowedRadius(r: number): r is AllowedAlertRadius {
   return (ALLOWED_ALERT_RADII as readonly number[]).includes(r);
 }
+
+/**
+ * Lot E20 « Vague proche » : l'entraide sollicite au plus à 30 km
+ * (enqueue_mission_wave, migration 0098). Une alerte « Entraide » seule
+ * propose donc 5, 15 ou 30 km ; une alerte qui sert aussi aux gardes garde
+ * 50 et 100 km pour les gardes, avec une phrase pour l'entraide.
+ */
+export const MUTUAL_AID_MAX_RADIUS_KM = 30;
+export const MUTUAL_AID_RADIUS_LINE = "Pour l'entraide, vous recevez les besoins à moins de 30 km.";
+
+export function alertRadiusOptions(alertTypes: readonly string[]): readonly number[] {
+  const mutualAidOnly = alertTypes.includes("missions") && !alertTypes.includes("gardes");
+  return mutualAidOnly
+    ? ALLOWED_ALERT_RADII.filter((r) => r <= MUTUAL_AID_MAX_RADIUS_KM)
+    : ALLOWED_ALERT_RADII;
+}
+
+/** Rayon gardé dans les options proposées (une alerte « Entraide » seule redescend à 30 km). */
+export function clampAlertRadius(radiusKm: number, alertTypes: readonly string[]): number {
+  const options = alertRadiusOptions(alertTypes);
+  return options.includes(radiusKm) ? radiusKm : Math.min(radiusKm, options[options.length - 1]);
+}
+
+/** La phrase entraide s'affiche quand l'alerte couvre l'entraide au-delà de 30 km. */
+export function showMutualAidRadiusLine(
+  alertTypes: readonly string[],
+  zoneType: string,
+  radiusKm: number | null | undefined,
+): boolean {
+  if (!alertTypes.includes("missions")) return false;
+  return !(zoneType === "rayon" && typeof radiusKm === "number" && radiusKm <= MUTUAL_AID_MAX_RADIUS_KM);
+}
