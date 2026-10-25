@@ -17081,8 +17081,8 @@ export type Database = {
           accepted_at: string | null
           choose_prompt_sent_at: string | null
           conversation_id: string | null
-          decline_reason: string | null
           created_at: string
+          decline_reason: string | null
           exchange_date: string | null
           exchange_offer: string | null
           helpful_count: number
@@ -17098,8 +17098,8 @@ export type Database = {
           accepted_at?: string | null
           choose_prompt_sent_at?: string | null
           conversation_id?: string | null
-          decline_reason?: string | null
           created_at?: string
+          decline_reason?: string | null
           exchange_date?: string | null
           exchange_offer?: string | null
           helpful_count?: number
@@ -17115,8 +17115,8 @@ export type Database = {
           accepted_at?: string | null
           choose_prompt_sent_at?: string | null
           conversation_id?: string | null
-          decline_reason?: string | null
           created_at?: string
+          decline_reason?: string | null
           exchange_date?: string | null
           exchange_offer?: string | null
           helpful_count?: number
@@ -20481,6 +20481,10 @@ export type Database = {
         Returns: boolean
       }
       mark_mission_done: { Args: { p_mission_id: string }; Returns: Json }
+      mark_mission_wave_exhausted: {
+        Args: { p_mission_id: string }
+        Returns: number
+      }
       mark_sit_applications_viewed: {
         Args: { p_sit_id: string }
         Returns: number
@@ -20513,6 +20517,10 @@ export type Database = {
       mission_link_for: {
         Args: { p_category: string; p_id: string; p_slug: string }
         Returns: string
+      }
+      mission_pending_responders: {
+        Args: { p_mission_id: string }
+        Returns: Json
       }
       mission_wave_audience: {
         Args: { p_limit?: number; p_mission_id: string; p_offset?: number }
