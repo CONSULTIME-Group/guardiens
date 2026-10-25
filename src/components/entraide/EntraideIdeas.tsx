@@ -5,21 +5,21 @@
  * mesuré (entraide_idea_tile_clicked).
  */
 import spotJardin from "@/assets/missions/spot-jardin-160.webp";
-import spotVerger from "@/assets/missions/spot-verger-160.webp";
 import spotBricolage from "@/assets/missions/spot-bricolage-160.webp";
 import spotChien from "@/assets/missions/spot-chien-160.webp";
-import spotBienetre from "@/assets/missions/spot-bienetre-160.webp";
+import spotCourses from "@/assets/missions/spot-courses-160.webp";
+import spotJeux from "@/assets/missions/spot-jeux-160.webp";
+import spotTrajet from "@/assets/missions/spot-trajet-160.webp";
 import { ENTRAIDE_IDEAS, type EntraideIdeaKey } from "@/lib/entraideIdeas";
 
 const IMAGES: Record<EntraideIdeaKey, string> = {
   potager: spotJardin,
-  courses: spotVerger,
+  courses: spotCourses,
   meuble: spotBricolage,
   chien: spotChien,
-  // Lot E18 : aucune gouache trajet pour l'instant (courses, jeux et trajet
-  // seront peintes) ; la nature morte « bien-être », la plus neutre, en attendant.
-  trajet: spotBienetre,
-  jeux: spotBienetre,
+  // Lot E22 (25/10/2026) : gouaches courses, jeux et trajet peintes.
+  trajet: spotTrajet,
+  jeux: spotJeux,
 };
 
 const EntraideIdeas = ({ onPick }: { onPick: (key: EntraideIdeaKey, label: string) => void }) => (

@@ -11,9 +11,9 @@ describe("lot P3, gouache d'un besoin sans photo", () => {
     ["garden", "Tondre la pelouse", "jardin"],
     ["garden", "Récolter les pommes du verger", "verger"],
     ["house", "Monter une étagère", "bricolage"],
-    ["errand", "Courses au marché samedi", "verger"],
-    ["transport", "Trajet jusqu'à la gare", "bienetre"],
-    ["company", "Partie de Scrabble", "bienetre"],
+    ["errand", "Courses au marché samedi", "courses"],
+    ["transport", "Trajet jusqu'à la gare", "trajet"],
+    ["company", "Partie de Scrabble", "jeux"],
   ])("%s, « %s » : %s", (category, title, key) => {
     expect(missionSpotKey(category, title)).toBe(key);
   });
