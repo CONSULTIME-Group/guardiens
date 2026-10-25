@@ -13610,6 +13610,7 @@ export type Database = {
         Row: {
           badge_key: string | null
           comment: string | null
+          comment_moderation: string | null
           created_at: string
           giver_id: string
           id: string
@@ -13621,6 +13622,7 @@ export type Database = {
         Insert: {
           badge_key?: string | null
           comment?: string | null
+          comment_moderation?: string | null
           created_at?: string
           giver_id: string
           id?: string
@@ -13632,6 +13634,7 @@ export type Database = {
         Update: {
           badge_key?: string | null
           comment?: string | null
+          comment_moderation?: string | null
           created_at?: string
           giver_id?: string
           id?: string
@@ -18393,6 +18396,15 @@ export type Database = {
           },
         ]
       }
+      public_entraide_need_activity: {
+        Row: {
+          activity_key: string | null
+          created_on: string | null
+          latitude: number | null
+          longitude: number | null
+        }
+        Relationships: []
+      }
       public_entraide_proofs: {
         Row: {
           city: string | null
@@ -18439,7 +18451,7 @@ export type Database = {
         }
         Insert: {
           badge_key?: string | null
-          comment?: string | null
+          comment?: never
           created_at?: string | null
           id?: string | null
           positive?: boolean | null
@@ -18447,7 +18459,7 @@ export type Database = {
         }
         Update: {
           badge_key?: string | null
-          comment?: string | null
+          comment?: never
           created_at?: string | null
           id?: string | null
           positive?: boolean | null
@@ -19709,7 +19721,13 @@ export type Database = {
         Returns: boolean
       }
       confirm_mission_meetup: {
-        Args: { p_public_ok?: boolean; p_token: string; p_word?: string }
+        Args: {
+          p_outcome?: string
+          p_public_ok?: boolean
+          p_token: string
+          p_word?: string
+          p_word_moderation?: string
+        }
         Returns: Json
       }
       consume_application_action_token: {
@@ -20517,6 +20535,10 @@ export type Database = {
       mission_link_for: {
         Args: { p_category: string; p_id: string; p_slug: string }
         Returns: string
+      }
+      mission_notified_count: {
+        Args: { p_mission_id: string }
+        Returns: number
       }
       mission_pending_responders: {
         Args: { p_mission_id: string }
