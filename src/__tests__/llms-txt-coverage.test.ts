@@ -7,6 +7,7 @@ import { resolve } from "node:path";
 // 17/08/2026). Au niveau module, le coût tombe dans la phase de collecte,
 // hors testTimeout. Sémantique du test inchangée.
 import { BADGE_DEFINITIONS } from "@/components/badges/badge-definitions";
+import { isEntraideCityPath } from "@/lib/entraideCityIndexability";
 
 /**
  * Garantit que public/llms.txt liste toutes les routes statiques publiques
@@ -39,7 +40,9 @@ describe("llms.txt coverage", () => {
 
     expect(indexable.length).toBeGreaterThan(0);
 
-    const missing = indexable.filter((p) => !llmsTxt.includes(`(${p})`));
+    // Lot SEO-E : les pages villes d'entraide suivent la règle des 90 jours
+    // (entraideCityIndexability.js), le bloc entraide-villes est réécrit au build.
+    const missing = indexable.filter((p) => !isEntraideCityPath(p)).filter((p) => !llmsTxt.includes(`(${p})`));
     expect(
       missing,
       `Routes publiques indexables absentes de public/llms.txt : ${missing.join(", ")}`,

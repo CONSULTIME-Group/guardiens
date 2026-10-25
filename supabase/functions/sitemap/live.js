@@ -1,4 +1,5 @@
 import { dedupeEntries, normalizeLastmod, renderSitemapXml, validateSitemapXml } from "../_shared/sitemap-core.js";
+import { isEntraideCityPath } from "../_shared/entraideCityIndexability.js";
 
 export const ROUTES_ORIGIN = "https://guardiens.lovable.app/sitemap-routes.json";
 const SITE = "https://guardiens.fr";
@@ -19,9 +20,13 @@ export function validateRoutesConfig(config) {
 
 export function createSitemapDocument(config, collections, today = new Date()) {
   validateRoutesConfig(config);
-  const raw = config.staticPages.map(page => ({ loc: page.loc, lastmod: null, changefreq: page.changefreq, priority: page.priority }));
+  // Lot SEO-E : les pages villes d'entraide viennent seulement de la source
+  // entraideCities (règle des 90 jours), jamais de l'inventaire statique.
+  const raw = config.staticPages
+    .filter(page => !isEntraideCityPath(page.loc))
+    .map(page => ({ loc: page.loc, lastmod: null, changefreq: page.changefreq, priority: page.priority }));
   for (const slug of config.cityLandingPages) raw.push({ loc: `/house-sitting/${slug}`, lastmod: null, changefreq: "weekly", priority: "0.9" });
-  for (const key of ["articles", "seoCity", "guides", "depts", "breeds", "profiles", "sits", "entraideMissions", "projetMissions", "associations"]) {
+  for (const key of ["articles", "seoCity", "guides", "depts", "breeds", "profiles", "sits", "entraideMissions", "projetMissions", "associations", "entraideCities"]) {
     if (!Array.isArray(collections[key])) throw new Error(`Missing sitemap source: ${key}`);
     for (const entry of collections[key]) {
       if (!/^\/(?:[a-zA-Z0-9_-]+\/?)*$/.test(entry.loc)) throw new Error(`Invalid sitemap path: ${key}`);

@@ -278,7 +278,7 @@ export const HelperCard = ({ helper, distance, showDistance, compact = false, co
           <AvatarFallback>{firstName.charAt(0).toUpperCase()}</AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
-          <h3 className="font-heading text-lg font-semibold text-foreground">{firstName}</h3>
+          <p className="font-heading text-lg font-semibold text-foreground" data-testid="helper-name">{firstName}</p>
           <p className="text-xs text-muted-foreground">
             {locationLabel(helper.city, distance, showDistance)}
             {activity && <>{" · "}<span className="text-primary">{activity}</span></>}

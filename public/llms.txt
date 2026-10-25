@@ -1,8 +1,8 @@
 # Guardiens
 
-> Plateforme de garde d'animaux à domicile, de maison et de jardin en France. Guardiens est gratuit : mise en relation entre propriétaires d'animaux et gardiens de confiance habitant près de chez vous, et entraide entre membres sous forme d'échange de services.
+> Plateforme de garde d'animaux à domicile, de maison et de jardin en France. Guardiens est gratuit : mise en relation entre propriétaires d'animaux et gardiens de confiance habitant près de chez vous, et entraide entre particuliers : des coups de main près de chez soi.
 
-Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. L'entraide entre membres (petites missions du quotidien : promenade, visite, dépannage) repose sur un service rendu en échange d'un autre service, et n'inclut jamais de nuitée.
+Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. L'entraide, ce sont des coups de main près de chez soi : jardinage, potager, courses, trajets, jeux de société. Une personne décrit son besoin, les gens du coin répondent « Je peux », et elle choisit avec qui échanger. En retour : un merci, un café, ou un coup de main quand ce sera votre tour. Vous voyez ça ensemble. La rencontre reste facultative, et les séjours de plusieurs jours relèvent de la garde de maison.
 
 ## Pages principales
 
@@ -10,24 +10,19 @@ Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vou
 - [Nos engagements](/tarifs): notre modèle économique, nos engagements de transparence et l'état actuel de l'accès.
 - [À propos](/a-propos): Notre mission, nos valeurs, l'équipe derrière Guardiens.
 - [Observatoire](/observatoire-garde-animaux): Chiffres-clés sur la garde d'animaux à domicile en France, datapoints sourcés.
-- [FAQ](/faq): Réponses aux questions fréquentes, fonctionnement, sécurité, missions.
+- [FAQ](/faq): Réponses aux questions fréquentes, fonctionnement, sécurité, entraide.
 - [Actualités](/actualites): Articles de fond sur la garde d'animaux, le house-sitting et la vie de la plateforme.
-- [Petites missions](/petites-missions): Coups de main entre membres (promenade, visite, dépannage), un service contre un service, sans nuitée.
+- [Entraide](/petites-missions): Coups de main près de chez soi entre particuliers (jardinage, potager, courses, trajets, jeux de société) : une personne décrit son besoin, les gens du coin répondent « Je peux ». En retour : un merci, un café, ou un coup de main quand ce sera votre tour. Vous voyez ça ensemble. Guardiens est gratuit.
+<!-- entraide-villes:start -->
+- [Entraide à Lyon](/petites-missions/lyon): coups de main près de chez soi autour de Lyon, besoins déposés et personnes qui disent « Je peux ».
+- [Entraide à Marseille](/petites-missions/marseille): coups de main près de chez soi autour de Marseille, besoins déposés et personnes qui disent « Je peux ».
+- [Entraide à Paris](/petites-missions/paris): coups de main près de chez soi autour de Paris, besoins déposés et personnes qui disent « Je peux ».
+- [Entraide à Annecy](/petites-missions/annecy): coups de main près de chez soi autour d'Annecy, besoins déposés et personnes qui disent « Je peux ».
+- [Entraide à Montpellier](/petites-missions/montpellier): coups de main près de chez soi autour de Montpellier, besoins déposés et personnes qui disent « Je peux ».
+- [Entraide à Grenoble](/petites-missions/grenoble): coups de main près de chez soi autour de Grenoble, besoins déposés et personnes qui disent « Je peux ».
+- [Entraide à Bordeaux](/petites-missions/bordeaux): coups de main près de chez soi autour de Bordeaux, besoins déposés et personnes qui disent « Je peux ».
+<!-- entraide-villes:end -->
 - [Projets participatifs](/projets): Projets à réaliser ensemble (plantation, construction, remise en état), participation selon ses envies et ses disponibilités.
-- [Petites missions à Lyon](/petites-missions/lyon): Hub local des coups de main entre membres à Lyon.
-- [Petites missions à Marseille](/petites-missions/marseille): Hub local des coups de main entre membres à Marseille.
-- [Petites missions à Strasbourg](/petites-missions/strasbourg): Hub local des coups de main entre membres à Strasbourg.
-- [Petites missions à Paris](/petites-missions/paris): Hub local des coups de main entre membres à Paris.
-- [Petites missions à Toulouse](/petites-missions/toulouse): Hub local des coups de main entre membres à Toulouse.
-- [Petites missions à Lille](/petites-missions/lille): Hub local des coups de main entre membres à Lille.
-- [Petites missions à Annecy](/petites-missions/annecy): Hub local des coups de main entre membres à Annecy.
-- [Petites missions à Nice](/petites-missions/nice): Hub local des coups de main entre membres à Nice.
-- [Petites missions à Nantes](/petites-missions/nantes): Hub local des coups de main entre membres à Nantes.
-- [Petites missions à Saint-Étienne](/petites-missions/saint-etienne): Hub local des coups de main entre membres à Saint-Étienne.
-- [Petites missions à Rennes](/petites-missions/rennes): Hub local des coups de main entre membres à Rennes.
-- [Petites missions à Montpellier](/petites-missions/montpellier): Hub local des coups de main entre membres à Montpellier.
-- [Petites missions à Grenoble](/petites-missions/grenoble): Hub local des coups de main entre membres à Grenoble.
-- [Petites missions à Bordeaux](/petites-missions/bordeaux): Hub local des coups de main entre membres à Bordeaux.
 - [Gardien d'urgence](/gardien-urgence): Le réseau de gardiens d'urgence, ouvert dès que chaque secteur compte assez de gardiens expérimentés.
 - [Devenir home-sitter](/devenir-home-sitter): Guide pour devenir gardien à domicile sur Guardiens.
 - [Gardiennage de maison au Québec](/gardiennage-maison-quebec): Faire garder sa maison et ses animaux au Québec, devenir gardien au Québec, garder une maison au Québec depuis la France (autorisation de voyage électronique, hiver, pratique).
@@ -62,7 +57,7 @@ Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vou
 - Éditeur : Jérémie Martinot, SIRET 894 864 040 00015.
 - Modèle : Guardiens est gratuit pour tous les membres, aucune commission prélevée sur les gardes.
 - Préavis : chaque membre sera informé par email 30 jours à l'avance si le modèle change.
-- Entraide entre membres (petites missions du quotidien) : un service contre un service, ni tarif ni facture, sans nuitée.
+- Entraide entre particuliers : coups de main près de chez soi (jardinage, potager, courses, trajets, jeux de société), réponse en un geste avec « Je peux ». En retour : un merci, un café, ou un coup de main quand ce sera votre tour. Vous voyez ça ensemble.
 - Vérification d'identité : ouverte à tous les membres, propriétaires comme gardiens. La pièce d'identité envoyée est analysée automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Cette vérification n'est pas un préalable au dépôt d'une annonce ou d'une candidature, et elle ne concerne pas tous les profils.
 - Système de confiance : avis croisés après chaque garde, Trust Score 0-100, 32 badges de reconnaissance.
 - Pas de commission sur les gardes, pas de prélèvement entre membres.

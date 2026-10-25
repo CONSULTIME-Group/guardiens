@@ -13,6 +13,7 @@ import { createClient } from "@supabase/supabase-js";
 import { createSitemapDocument } from "../supabase/functions/sitemap/live.js";
 import { collectSitemapData } from "../supabase/functions/_shared/sitemap-data.js";
 import { communityTotals, llmsTotalsLine, LLMS_TOTALS_LINE_RE } from "../supabase/functions/_shared/community-totals.js";
+import { entraideCitiesLlmsBlock, LLMS_ENTRAIDE_CITIES_RE } from "../supabase/functions/_shared/entraideCityIndexability.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -91,7 +92,7 @@ async function main() {
   const cache = loadCache();
 
   const collections = await collectSitemapData({ readAll, fetchOrCache, maxUpdatedAtWithCount, cache, today });
-  const { associations } = collections;
+  const { associations, entraideCities } = collections;
 
   const routeConfig = { version: 1, siteUrl: SITE_URL, staticPages, cityLandingPages };
   const { xml, entries, locs } = createSitemapDocument(routeConfig, collections, today);
@@ -133,6 +134,12 @@ async function main() {
     llms = /<!-- associations:start -->[\s\S]*?<!-- associations:end -->/.test(llms)
       ? llms.replace(/<!-- associations:start -->[\s\S]*?<!-- associations:end -->/, assocBlock)
       : `${llms.trimEnd()}\n\n${assocBlock}\n`;
+    // Lot SEO-E : seules les pages villes d'entraide indexables (règle
+    // entraideCityIndexability.js, la même que le sitemap) figurent ici.
+    if (LLMS_ENTRAIDE_CITIES_RE.test(llms)) {
+      const citySlugs = new Set(entraideCities.map((e) => e.loc.split("/").pop()));
+      llms = llms.replace(LLMS_ENTRAIDE_CITIES_RE, entraideCitiesLlmsBlock(citySlugs));
+    }
   }
 
   // Écritures seulement ici, toutes les lectures ayant réussi.
@@ -141,7 +148,7 @@ async function main() {
   writeAtomic(path.resolve(__dirname, "../public/sitemap-routes.json"), JSON.stringify(routeConfig));
   if (llms != null) {
     writeAtomic(llmsPath, llms);
-    console.log(`   llms.txt: ${cityCount} villes, ${deptCount} départements, ${associations.length} associations`);
+    console.log(`   llms.txt: ${cityCount} villes, ${deptCount} départements, ${associations.length} associations, ${entraideCities.length} villes d'entraide`);
   }
   saveCache(cache);
 

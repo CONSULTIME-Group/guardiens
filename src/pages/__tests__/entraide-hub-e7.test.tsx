@@ -226,10 +226,10 @@ describe("Entraide, la page vue d'un membre", () => {
     expect(helperCalls.length).toBeLessThanOrEqual(3);
     expect(screen.queryByText("Moi")).toBeNull();
     expect(screen.getByText("Lyon, tout près de chez vous")).toBeInTheDocument();
-    expect(screen.getAllByRole("heading", { level: 3 }).filter((node) => node.textContent === "Gaston" || node.textContent?.startsWith("Membre")).length).toBe(4);
+    expect(screen.getAllByTestId("helper-name").filter((node) => node.textContent === "Gaston" || node.textContent?.startsWith("Membre")).length).toBe(4);
     expect(screen.getByRole("heading", { name: "19 personnes prêtes à aider à moins de 30 km de Lyon" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Voir les 19 personnes" }));
-    expect(screen.getAllByRole("heading", { level: 3 }).filter((node) => node.textContent === "Gaston" || node.textContent?.startsWith("Membre")).length).toBe(19);
+    expect(screen.getAllByTestId("helper-name").filter((node) => node.textContent === "Gaston" || node.textContent?.startsWith("Membre")).length).toBe(19);
   });
 
   it("charge la page d'un membre en huit requêtes au plus", async () => {

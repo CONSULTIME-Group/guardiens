@@ -425,6 +425,7 @@ const EntraideHub = () => {
         title="Entraide entre particuliers : coups de main près de chez vous | Guardiens"
         description="Jardinage, courses, trajets, une partie de belote : demandez ou proposez un coup de main près de chez vous. Guardiens est gratuit."
         path="/petites-missions"
+        ready={!pageLoading}
         jsonLd={[faqSchema]}
         image={SECTION_OG_IMAGES.entraide.url}
         imageAlt={SECTION_OG_IMAGES.entraide.alt}
