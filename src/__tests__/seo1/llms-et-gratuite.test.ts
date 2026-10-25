@@ -47,7 +47,10 @@ describe("/llms.txt", () => {
 
   it("ligne des compteurs CPT1 conservée (décision du 17/10/2026)", () => {
     expect(LLMS_TOTALS_LINE_RE.test(llms)).toBe(true);
-    expect(llms).toMatch(/43 maisons gardées/);
+    // Le build réécrit la ligne avec le cumul du jour (generate-sitemap.mjs,
+    // get_public_stats) : 43 au 17/10/2026, jamais moins ensuite.
+    const houses = Number(llms.match(/(\d+) maisons gardées/)?.[1]);
+    expect(houses).toBeGreaterThanOrEqual(43);
   });
 
   it("départements couverts : comptés sur les pages qui ont une ville publiée", () => {
