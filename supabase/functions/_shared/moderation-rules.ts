@@ -110,7 +110,7 @@ export const AUTOMATED_RULE_IDS: readonly AutomatedRuleId[] = [
 ]
 
 export const AUTOMATED_RULE_STATEMENTS: Record<AutomatedRuleId, string> = {
-  contact_details: 'Article 14.4 des CGU : une annonce publique garde les coordonnées personnelles (téléphone, email) hors de son texte, elles s\'échangent ensuite en messagerie.',
+  contact_details: 'Article 14.4 des CGU : une annonce publique garde les coordonnées personnelles (téléphone, email, adresse postale) hors de son texte, elles s\'échangent ensuite en messagerie.',
   payment: 'Articles 6.3 et 7.2 des CGU : les gardes et les coups de main se font à titre gratuit entre membres.',
   hate: 'Article 10 des CGU : les propos haineux, discriminatoires ou menaçants sont exclus de la Plateforme.',
   sexual: 'Article 10 des CGU : les contenus publiés restent conformes à la loi et respectueux des personnes, ce qui exclut tout contenu sexuel.',

@@ -11,6 +11,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, STYLE_GUARDRAILS_MESSAGING, CORS_HEADERS } from "../_shared/ai-gateway.ts";
 import { AUTOMATED_RULE_IDS, type AutomatedRuleId } from "../_shared/moderation-rules.ts";
+import { detectPostalAddress } from "../_shared/contact-details.ts";
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // Lot ERR1 : l'appel IA est borné. Au-delà, la vérification se limite aux
 // heuristiques (même règle qu'un quota IA) : le 14/10/2026, un appel sans délai
@@ -67,6 +70,8 @@ function heuristics(text: string, contentType: string): { reasons: Reason[]; blo
   if (isPublicListing) {
     if (PHONE_RE.test(text)) { reasons.push("Numéro de téléphone détecté"); block = true; rule = "contact_details"; }
     if (EMAIL_RE.test(text)) { reasons.push("Adresse email détectée"); block = true; rule = "contact_details"; }
+    // Lot E19 : une adresse postale (numéro et type de voie) reste hors d'une page publique.
+    if (detectPostalAddress(text)) { reasons.push("Adresse postale détectée"); block = true; rule = "contact_details"; }
     if (looksLikeTestContent(text)) {
       reasons.push("Annonce de test interne, ne doit pas être publiée");
       block = true;
@@ -89,7 +94,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS_HEADERS });
 
   try {
-    const { content_type, text } = await req.json().catch(() => ({}));
+    const { content_type, text, acting_user_id } = await req.json().catch(() => ({}));
     if (typeof text !== "string" || text.trim().length === 0) {
       return new Response(JSON.stringify({ error: "text requis" }), {
         status: 400, headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
@@ -105,16 +110,25 @@ Deno.serve(async (req) => {
         status: 401, headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
       });
     }
-    const userClient = createClient(SUPABASE_URL, SERVICE_KEY, {
-      global: { headers: { Authorization: authHeader } },
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-    const { data: userData, error: userErr } = await userClient.auth.getUser();
-    const userId = userData?.user?.id ?? null;
-    if (userErr || !userId) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    // Lot E19 : appel interne d'une autre fonction (mission-quick-action, mot
+    // laissé depuis un lien d'email, sans session) avec la clé de service ; le
+    // membre concerné est transmis pour le journal de modération.
+    const isInternalCall = authHeader === `Bearer ${SERVICE_KEY}`;
+    let userId: string | null = null;
+    if (isInternalCall) {
+      userId = typeof acting_user_id === "string" && UUID_RE.test(acting_user_id) ? acting_user_id : null;
+    } else {
+      const userClient = createClient(SUPABASE_URL, SERVICE_KEY, {
+        global: { headers: { Authorization: authHeader } },
+        auth: { persistSession: false, autoRefreshToken: false },
       });
+      const { data: userData, error: userErr } = await userClient.auth.getUser();
+      userId = userData?.user?.id ?? null;
+      if (userErr || !userId) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+        });
+      }
     }
 
     // 1) Heuristiques
@@ -130,7 +144,7 @@ Deno.serve(async (req) => {
       const isPublicListing = ct === "sit";
       const rules = isPublicListing
         ? `- status :
-  * "block" si propos haineux/discriminatoires, contenu sexuel, arnaque évidente, tentative explicite de paiement direct hors plateforme, coordonnées personnelles en clair (téléphone, email), ou contenu de test, fictif ou de recette interne (mentions du type test, recette, ne pas répondre, ignorer cette annonce, texte de remplissage) : cette annonce est une page publique indexée qui déclenche des notifications à des gardiens réels.
+  * "block" si propos haineux/discriminatoires, contenu sexuel, arnaque évidente, tentative explicite de paiement direct hors plateforme, coordonnées personnelles en clair (téléphone, email, adresse postale), ou contenu de test, fictif ou de recette interne (mentions du type test, recette, ne pas répondre, ignorer cette annonce, texte de remplissage) : cette annonce est une page publique indexée qui déclenche des notifications à des gardiens réels.
   * "warning" si ton trop commercial, vocabulaire à éviter, faute grave de ton.
   * "ok" sinon.`
         : `Contexte : il s'agit d'un message privé entre deux membres, qui organisent une garde réelle. Échanger un numéro de téléphone, un email, une adresse ou un rendez-vous fait partie de l'usage normal et ne constitue jamais un motif de signalement.

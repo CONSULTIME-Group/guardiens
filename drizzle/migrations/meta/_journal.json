@@ -701,6 +701,13 @@
       "when": 1792649050629,
       "tag": "0099_e17_boucle_tenue",
       "breakpoints": true
+    },
+    {
+      "idx": 100,
+      "version": "7",
+      "when": 1792908000000,
+      "tag": "0100_e19_confiance_parole_publique",
+      "breakpoints": true
     }
   ]
 }

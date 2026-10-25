@@ -356,10 +356,16 @@ const SmallMissionDetail = () => {
     if (hydrateIds.length > 0) {
       const { data: hProfs } = await supabase
         .from("public_profiles")
-        .select("id, first_name, avatar_url")
+        .select("id, first_name, avatar_url, identity_verified, created_at")
         .in("id", hydrateIds);
       const hMap = new Map<string, any>();
-      (hProfs ?? []).forEach((p: any) => hMap.set(p.id, { first_name: p.first_name, avatar_url: p.avatar_url }));
+      // Lot E19 : identité vérifiée et ancienneté, lues par MissionResponseCard.
+      (hProfs ?? []).forEach((p: any) => hMap.set(p.id, {
+        first_name: p.first_name,
+        avatar_url: p.avatar_url,
+        identity_verified: p.identity_verified === true,
+        created_at: p.created_at ?? null,
+      }));
       respRows.forEach((r: any) => { r.responder = r.responder_id ? hMap.get(r.responder_id) ?? null : null; });
       recFbRows.forEach((f: any) => { f.giver = f.giver_id ? hMap.get(f.giver_id) ?? null : null; });
     }

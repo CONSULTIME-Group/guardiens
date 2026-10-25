@@ -7,6 +7,11 @@ import { Loader2 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import PageMeta from "@/components/PageMeta";
 import MeetupAnswer from "@/components/entraide/MeetupAnswer";
+import {
+  MEETUP_CANCELLED_TEXT,
+  meetupWordRetainedNotice,
+  type MeetupOutcome,
+} from "@/lib/meetupOutcome";
 
 interface PeekResult {
   valid: boolean;
@@ -42,7 +47,10 @@ export default function MissionQuickCanHelp() {
   const [loading, setLoading] = useState(true);
   const [peek, setPeek] = useState<PeekResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState<null | { ok: boolean; reason?: string; happened?: boolean; reopened?: boolean }>(null);
+  const [done, setDone] = useState<null | {
+    ok: boolean; reason?: string; happened?: boolean; reopened?: boolean;
+    cancelled?: boolean; wordRefused?: boolean; wordRule?: string | null;
+  }>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -80,16 +88,24 @@ export default function MissionQuickCanHelp() {
     } catch { /* mesure non bloquante */ }
   };
 
-  const confirmMeetup = async (happened: boolean, word: string, publicOk: boolean) => {
+  // Lot E19 : l'issue choisie à l'écran part explicitement (le lien de
+  // l'email porte un jeton oui ou non, les deux appartiennent à la personne).
+  const confirmMeetup = async (outcome: MeetupOutcome, word: string, publicOk: boolean) => {
     if (!peek?.valid) return;
     setSubmitting(true);
+    const happened = outcome === "happened";
     const { data, error } = await supabase.functions.invoke("mission-quick-action", {
-      body: { token, kind: "meetup", mode: "confirm", word: happened ? word : "", public_ok: happened ? publicOk : false },
+      body: { token, kind: "meetup", mode: "confirm", outcome, word: happened ? word : "", public_ok: happened ? publicOk : false },
     });
     setSubmitting(false);
-    const result = (error ? { ok: false, reason: "error" } : data) as
-      { ok: boolean; reason?: string; happened?: boolean; reopened?: boolean };
-    setDone({ ok: !!result?.ok, reason: result?.reason, happened: result?.happened, reopened: result?.reopened });
+    const result = (error ? { ok: false, reason: "error" } : data) as {
+      ok: boolean; reason?: string; happened?: boolean; reopened?: boolean;
+      cancelled?: boolean; word_refused?: boolean; word_rule?: string | null;
+    };
+    setDone({
+      ok: !!result?.ok, reason: result?.reason, happened: result?.happened, reopened: result?.reopened,
+      cancelled: result?.cancelled, wordRefused: result?.word_refused, wordRule: result?.word_rule ?? null,
+    });
   };
 
   const missionLink = peek?.mission_id ? `/petites-missions/${peek.mission_id}` : "/petites-missions";
@@ -97,7 +113,12 @@ export default function MissionQuickCanHelp() {
 
   const meetupDoneText = () => {
     if (!done?.ok) return INVALID_TEXT[done?.reason ?? "invalid"] ?? INVALID_TEXT.invalid;
-    if (done.happened) return "C'est noté, merci. Votre coup de main compte pour le coin.";
+    if (done.cancelled) return MEETUP_CANCELLED_TEXT;
+    if (done.happened) {
+      return done.wordRefused
+        ? `C'est noté, merci. ${meetupWordRetainedNotice(done.wordRule)}`
+        : "C'est noté, merci. Votre coup de main compte pour le coin.";
+    }
     return done.reopened
       ? `C'est noté. Le besoin reste ouvert : convenez d'un autre moment avec ${otherName} dans la conversation.`
       : "C'est noté. Vous pouvez convenir d'un autre moment directement dans la conversation.";
@@ -151,8 +172,10 @@ export default function MissionQuickCanHelp() {
                   <MeetupAnswer
                     otherFirstName={otherName}
                     busy={submitting}
-                    onYes={(word, publicOk) => void confirmMeetup(true, word, publicOk)}
-                    onNo={() => void confirmMeetup(false, "", false)}
+                    missionId={peek.mission_id}
+                    onYes={(word, publicOk) => void confirmMeetup("happened", word, publicOk)}
+                    onNo={() => void confirmMeetup("not_happened", "", false)}
+                    onCancelled={() => void confirmMeetup("cancelled", "", false)}
                   />
                 </CardContent>
               </>
