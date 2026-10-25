@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { chunkPrerenderUrls } from "@/lib/admin/prerenderBatches";
+import { readFunctionErrorBody } from "@/lib/functionErrorBody";
 
 /**
  * /admin/prerender, Enregistre le rafraichissement de pages SEO precises
@@ -87,16 +89,29 @@ export default function AdminPrerender() {
     }
     setRunning(true);
     setResults([]);
+    const batches = chunkPrerenderUrls(urls);
+    const all: typeof results = [];
     try {
-      const { data, error } = await supabase.functions.invoke("prerender-recache-pending", {
-        body: { urls },
-      });
-      if (error) throw error;
-      const res = (data?.results ?? []) as typeof results;
-      setResults(res);
-      const ok = res.filter((r) => r.ok).length;
-      toast.success(`Rafraîchissement enregistré : ${ok}/${res.length} demandes. Traitement par passages de 15 minutes, selon la file et le budget disponible.`);
+      for (let i = 0; i < batches.length; i += 1) {
+        const { data, error } = await supabase.functions.invoke("prerender-recache-pending", {
+          body: { urls: batches[i] },
+        });
+        if (error) {
+          const body = await readFunctionErrorBody(error);
+          setResults(all);
+          const done = all.filter((r) => r.ok).length;
+          toast.error(
+            `Paquet ${i + 1} sur ${batches.length} refusé${body.error ? ` (${body.error})` : ""}. ${done} demande(s) déjà enregistrée(s).`,
+          );
+          return;
+        }
+        all.push(...((data?.results ?? []) as typeof results));
+      }
+      setResults(all);
+      const ok = all.filter((r) => r.ok).length;
+      toast.success(`Rafraîchissement enregistré : ${ok}/${all.length} demandes. Traitement par passages de 15 minutes, selon la file et le budget disponible.`);
     } catch (e) {
+      setResults(all);
       toast.error(e instanceof Error ? e.message : "Échec de l'appel");
     } finally {
       setRunning(false);

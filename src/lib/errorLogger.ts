@@ -48,6 +48,9 @@ const IGNORED_PATTERNS: RegExp[] = [
   // Lot F4 : portefeuilles crypto (extension ou navigateur) qui injectent un
   // script dans la page ; le site n'utilise jamais window.ethereum.
   /window\.ethereum/i,
+  // Lot ERRFIX du 25/10 : messages standard EIP-1193 (codes 4900 et 4901) d'un
+  // portefeuille crypto installé chez le visiteur, sans pile ni fichier du site.
+  /^The provider is disconnected from (all chains|the specified chain)/i,
 ];
 
 function shouldIgnore(message: string): boolean {
