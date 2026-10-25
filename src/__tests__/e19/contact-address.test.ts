@@ -1,12 +1,14 @@
 /**
  * Lot E19 : détection d'une adresse postale (numéro et type de voie), source
  * unique dans supabase/functions/_shared/contact-details.ts, ré-exportée par
- * src/lib/contactDetails.ts.
+ * src/lib/contactDetails.ts. Réservée au mot laissé après un coup de main
+ * (detectMeetupWordContacts) : detectContactDetails reste inchangé.
  */
 import { describe, expect, it } from "vitest";
 import {
   contactDetailsMessage,
   detectContactDetails,
+  detectMeetupWordContacts,
   detectPostalAddress,
   meetupWordContactMessage,
 } from "@/lib/contactDetails";
@@ -26,7 +28,9 @@ describe("adresse postale détectée", () => {
     "5 Allée des Érables",
   ])("« %s »", (text) => {
     expect(detectPostalAddress(text)).toBe(true);
-    expect(detectContactDetails(text)).toContain("address");
+    expect(detectMeetupWordContacts(text)).toContain("address");
+    // Annonces et besoins : comportement d'avant, téléphone et email seulement.
+    expect(detectContactDetails(text)).not.toContain("address");
   });
 });
 
@@ -43,7 +47,7 @@ describe("textes ordinaires", () => {
     "Les 2 rues sont calmes",
   ])("« %s »", (text) => {
     expect(detectPostalAddress(text)).toBe(false);
-    expect(detectContactDetails(text)).not.toContain("address");
+    expect(detectMeetupWordContacts(text)).not.toContain("address");
   });
 
   it("ignore un texte vide", () => {

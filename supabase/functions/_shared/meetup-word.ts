@@ -1,7 +1,9 @@
 /**
  * Lot E19 « Confiance avant toute parole publique » : le mot laissé après un
  * coup de main passe par moderate-content en type « sit » (celui des pages
- * publiques, qui retient téléphone, email et adresse) avant d'être enregistré.
+ * publiques, qui retient téléphone et email), avec l'option explicite
+ * check_postal_address qui retient aussi une adresse postale pour ce seul mot,
+ * avant d'être enregistré.
  *
  * Module pur, sans dépendance Deno : lu par mission-quick-action et par les
  * tests (vitest et Deno). L'appel réseau est injectable.
@@ -14,7 +16,7 @@
  *  - « unchecked » : moderate-content injoignable, enregistré, réservé à la
  *    personne qui le reçoit (la vue publique exige « ok »).
  */
-import { detectContactDetails } from "./contact-details.ts";
+import { detectMeetupWordContacts } from "./contact-details.ts";
 
 export type MeetupWordVerdict = "ok" | "warning" | "unchecked" | "refused";
 
@@ -53,7 +55,7 @@ export async function moderateMeetupWord(
   if (!text) return { verdict: "unchecked", rule: null };
 
   // Filet déterministe, identique au site : téléphone, email, adresse.
-  if (detectContactDetails(text).length > 0) return { verdict: "refused", rule: "contact_details" };
+  if (detectMeetupWordContacts(text).length > 0) return { verdict: "refused", rule: "contact_details" };
 
   const doFetch = opts.fetchImpl ?? fetch;
   try {
@@ -64,7 +66,7 @@ export async function moderateMeetupWord(
         Authorization: `Bearer ${opts.serviceKey}`,
         apikey: opts.serviceKey,
       },
-      body: JSON.stringify({ content_type: "sit", text, acting_user_id: opts.actingUserId ?? null }),
+      body: JSON.stringify({ content_type: "sit", text, acting_user_id: opts.actingUserId ?? null, check_postal_address: true }),
       signal: timeoutSignal(opts.timeoutMs ?? MEETUP_WORD_MODERATION_TIMEOUT_MS),
     });
     if (!res.ok) return { verdict: "unchecked", rule: null };

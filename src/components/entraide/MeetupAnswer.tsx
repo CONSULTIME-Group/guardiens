@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import ReportButton from "@/components/reports/ReportButton";
 import { useAuth } from "@/contexts/AuthContext";
-import { detectContactDetails, meetupWordContactMessage } from "@/lib/contactDetails";
+import { detectMeetupWordContacts, meetupWordContactMessage } from "@/lib/contactDetails";
 
 export const WORD_MAX_LENGTH = 140;
 
@@ -47,7 +47,7 @@ const MeetupAnswer = ({ otherFirstName, onYes, onNo, onCancelled, missionId, bus
   const [word, setWord] = useState("");
   const [publicOk, setPublicOk] = useState(false);
   const who = otherFirstName.trim() || "cette personne";
-  const contactKinds = detectContactDetails(word);
+  const contactKinds = detectMeetupWordContacts(word);
   const wordBlocked = contactKinds.length > 0;
 
   if (!open) {

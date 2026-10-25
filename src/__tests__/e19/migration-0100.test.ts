@@ -138,9 +138,10 @@ describe("câblage serveur", () => {
     expect(quick.match(/rpc\("confirm_mission_meetup"/g)?.length).toBe(1);
   });
 
-  it("moderate-content retient l'adresse postale en type « sit » et accepte l'appel interne", () => {
-    expect(moderate).toContain('if (detectPostalAddress(text)) { reasons.push("Adresse postale détectée"); block = true; rule = "contact_details"; }');
+  it("moderate-content retient l'adresse postale sur demande explicite d'un appel interne seulement", () => {
+    expect(moderate).toContain("const h = heuristics(text, ct, { checkPostalAddress: isInternalCall && check_postal_address === true });");
     expect(moderate).toContain("const isInternalCall = authHeader === `Bearer ${SERVICE_KEY}`;");
+    expect(moderate).not.toContain("detectPostalAddress");
     // Verrous des lots J2c et ERR1 inchangés.
     expect(moderate).toContain('const rule = status === "block"');
     expect(moderate).toMatch(/signal: AbortSignal\.timeout\(MODERATION_AI_TIMEOUT_MS\)/);

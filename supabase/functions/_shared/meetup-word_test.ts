@@ -2,7 +2,8 @@
 // d'adresse postale partagée avec moderate-content.
 import { assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts'
 import { moderateMeetupWord, wordModerationParam } from './meetup-word.ts'
-import { detectContactDetails, detectPostalAddress } from './contact-details.ts'
+import { detectContactDetails, detectMeetupWordContacts, detectPostalAddress } from './contact-details.ts'
+import { heuristics } from './moderation-heuristics.ts'
 
 const opts = (fetchImpl: typeof fetch) => ({
   supabaseUrl: 'https://projet.supabase.co',
@@ -18,7 +19,15 @@ Deno.test('adresse postale : numéro et type de voie', () => {
   assertEquals(detectPostalAddress('3 bis, avenue Foch'), true)
   assertEquals(detectPostalAddress('1 place de parking disponible'), false)
   assertEquals(detectPostalAddress('à 10h place Bellecour'), false)
-  assertEquals(detectContactDetails('7 allée du Parc'), ['address'])
+  assertEquals(detectMeetupWordContacts('7 allée du Parc'), ['address'])
+  assertEquals(detectContactDetails('7 allée du Parc'), [])
+})
+
+Deno.test('annonce de garde avec une adresse : heuristiques « sit » inchangées', () => {
+  const sit = 'Maison au 12 rue des Lilas, deux chats. Le 14, place de la mairie, marché le samedi.'
+  assertEquals(heuristics(sit, 'sit'), { reasons: [], block: false, rule: null })
+  assertEquals(heuristics(`${sit} 06 12 34 56 78`, 'sit').block, true)
+  assertEquals(heuristics('Passez au 12 rue des Lilas', 'sit', { checkPostalAddress: true }).rule, 'contact_details')
 })
 
 Deno.test('numéro, email, adresse : refusés sans appel réseau', async () => {

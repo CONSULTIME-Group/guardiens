@@ -2,8 +2,8 @@
  * Détection de coordonnées personnelles dans un texte public.
  *
  * Une annonce d'entraide est une page publique indexable : y laisser un
- * numéro de téléphone, une adresse email ou une adresse postale expose le
- * membre et sort l'échange de la plateforme. La détection est bloquante à la
+ * numéro de téléphone ou une adresse email expose le membre et sort
+ * l'échange de la plateforme. La détection est bloquante à la
  * publication, contrairement à la messagerie privée où l'échange de
  * coordonnées est légitime.
  *
@@ -13,7 +13,8 @@
  *
  * Module pur, sans dépendance Deno : source unique lue par le site
  * (src/lib/contactDetails.ts le ré-exporte), par moderate-content et par
- * mission-quick-action (lot E19, mot laissé après un coup de main).
+ * mission-quick-action. Lot E19 : l'adresse postale est détectée seulement
+ * pour le mot laissé après un coup de main (detectMeetupWordContacts).
  */
 
 const PHONE_RE = /(?:(?:\+33|0033|0)\s?[1-9](?:[\s.\-]?\d{2}){4})/;
@@ -98,7 +99,17 @@ export function detectContactDetails(input: string | null | undefined): ContactD
 
   if (candidates.some((c) => PHONE_RE.test(c) || OBFUSCATED_PHONE_RE.test(c))) found.push("phone");
   if (candidates.some((c) => EMAIL_RE.test(c))) found.push("email");
-  if (detectPostalAddress(raw)) found.push("address");
+  return found;
+}
+
+/**
+ * Lot E19 : coordonnées dans le mot laissé après un coup de main, adresse
+ * postale comprise. Réservé à ce mot : les annonces et les besoins gardent
+ * detectContactDetails (téléphone et email), inchangé.
+ */
+export function detectMeetupWordContacts(input: string | null | undefined): ContactDetailKind[] {
+  const found = detectContactDetails(input);
+  if (detectPostalAddress(input)) found.push("address");
   return found;
 }
 

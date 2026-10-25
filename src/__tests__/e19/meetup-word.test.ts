@@ -35,7 +35,7 @@ describe("refus sans appel réseau", () => {
 });
 
 describe("moderate-content en type « sit »", () => {
-  it("envoie le mot comme une page publique, avec la clé de service", async () => {
+  it("envoie le mot comme une page publique, adresse postale comprise, avec la clé de service", async () => {
     const fetchImpl = reply({ status: "ok", reasons: [] });
     const verdict = await moderateMeetupWord("Un après-midi très agréable, merci.", opts(fetchImpl));
     expect(verdict).toEqual({ verdict: "ok", rule: null });
@@ -45,6 +45,7 @@ describe("moderate-content en type « sit »", () => {
       content_type: "sit",
       text: "Un après-midi très agréable, merci.",
       acting_user_id: "00000000-0000-0000-0000-0000000000b1",
+      check_postal_address: true,
     });
     expect((init as RequestInit).headers).toMatchObject({ Authorization: "Bearer cle-service" });
   });

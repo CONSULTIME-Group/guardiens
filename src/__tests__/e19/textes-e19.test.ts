@@ -37,7 +37,7 @@ describe("preuve publique", () => {
 describe("textes de fin d'échange", () => {
   it("issue annulée et mot retenu", () => {
     expect(meetupSavedToast("cancelled")).toBe("C'est noté. Le coup de main est annulé.");
-    expect(meetupWordRetainedNotice("contact_details")).toContain("adresse postale");
+    expect(meetupWordRetainedNotice("contact_details")).toContain("Article 14.4 des CGU");
     expect(meetupWordRetainedNotice(null)).toContain("contact@guardiens.fr");
   });
 

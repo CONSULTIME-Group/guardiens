@@ -3,6 +3,9 @@
 -- scénarios. Toute assertion fausse lève une exception.
 -- Usage : psql -v ON_ERROR_STOP=1 -d <base vide> -f src/__tests__/e19/recette-e19.sql
 -- (depuis la racine du dépôt). Jamais contre la production.
+-- La détection d'adresse postale, réservée au mot de fin d'un coup de main,
+-- se vérifie hors base : contact-address, annonce-garde-adresse et
+-- meetup-word (vitest), _shared/meetup-word_test.ts (Deno).
 
 \set ON_ERROR_STOP 1
 
