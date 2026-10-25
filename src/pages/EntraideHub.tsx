@@ -4,6 +4,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageMeta from "@/components/PageMeta";
+import { SECTION_OG_IMAGES } from "@/data/siteConstants";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { HelperCard, NeedRow, openHelperConversation, type EntraideNeed, type NeedRowState, type PublicHelper } from "@/components/entraide/EntraideCards";
 import type { MissionBadgeRow } from "@/components/missions/MissionBadgesReceived";
@@ -425,6 +426,8 @@ const EntraideHub = () => {
         description="Jardinage, courses, trajets, une partie de belote : demandez ou proposez un coup de main près de chez vous. Guardiens est gratuit."
         path="/petites-missions"
         jsonLd={[faqSchema]}
+        image={SECTION_OG_IMAGES.entraide.url}
+        imageAlt={SECTION_OG_IMAGES.entraide.alt}
       />
       <PageBreadcrumb items={[{ label: "Entraide" }]} />
       <div className="min-w-0 bg-background pb-24">

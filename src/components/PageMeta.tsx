@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { buildAbsoluteUrl, normalizeCanonical, normalizePathname } from "@/lib/seo";
 import { logSeoSnapshot } from "@/lib/seoDebugLog";
-import { DEFAULT_OG_IMAGE } from "@/data/siteConstants";
+import { DEFAULT_OG_IMAGE, DEFAULT_OG_IMAGE_ALT } from "@/data/siteConstants";
 
 
 const DEFAULT_IMAGE = DEFAULT_OG_IMAGE;
@@ -29,6 +29,12 @@ interface PageMetaProps {
   description: string;
   path?: string;
   image?: string;
+  /**
+   * Texte alternatif de l'image de partage (og:image:alt, twitter:image:alt).
+   * Sans valeur : celui de l'image par défaut quand elle est utilisée, sinon
+   * aucune balise (jamais un texte qui décrit une autre image).
+   */
+  imageAlt?: string;
   type?: "website" | "article";
   publishedAt?: string;
   author?: string;
@@ -77,6 +83,7 @@ const PageMeta = ({
   description,
   path,
   image = DEFAULT_IMAGE,
+  imageAlt,
   type = "website",
   publishedAt,
   author,
@@ -99,6 +106,7 @@ const PageMeta = ({
   const canonicalUrl = explicitCanonical ?? currentUrl;
   const metaDescription = description.trim();
   const resolvedImage = image === DEFAULT_IMAGE ? getListingOgImageFromPath(currentPath) ?? image : image;
+  const resolvedImageAlt = imageAlt ?? (resolvedImage === DEFAULT_IMAGE ? DEFAULT_OG_IMAGE_ALT : null);
   const titleWithoutSuffix = title
     .replace(/\s*\|\s*Guardiens\s*$/i, "")
     .replace(/\s*,\s*Guardiens\s*$/i, "")
@@ -219,6 +227,16 @@ const PageMeta = ({
     upsertMetaTag({ attr: "name", key: "twitter:description", content: metaDescription });
     upsertMetaTag({ attr: "name", key: "twitter:image", content: resolvedImage });
 
+    // Texte alternatif toujours réécrit : sinon celui d'index.html, ou celui
+    // d'une page visitée avant, resterait accolé à une autre image.
+    if (resolvedImageAlt) {
+      upsertMetaTag({ attr: "property", key: "og:image:alt", content: resolvedImageAlt });
+      upsertMetaTag({ attr: "name", key: "twitter:image:alt", content: resolvedImageAlt });
+    } else {
+      removeMetaTag({ attr: "property", key: "og:image:alt" });
+      removeMetaTag({ attr: "name", key: "twitter:image:alt" });
+    }
+
     (extraMeta ?? []).forEach((m) => upsertMetaTag(m));
 
     if (type === "article" && publishedAt) {
@@ -256,7 +274,7 @@ const PageMeta = ({
       window.prerenderMetaPending = false;
       (window as any).prerenderReady = true;
     }
-  }, [author, canonical, isPreviewHost, canonicalUrl, currentPath, currentUrl, extraMetaKey, fullTitle, jsonLdKey, metaDescription, noindex, nofollow, noCanonical, statusCode, prerenderHeader, publishedAt, ready, resolvedImage, type]);
+  }, [author, canonical, isPreviewHost, canonicalUrl, currentPath, currentUrl, extraMetaKey, fullTitle, jsonLdKey, metaDescription, noindex, nofollow, noCanonical, statusCode, prerenderHeader, publishedAt, ready, resolvedImage, resolvedImageAlt, type]);
 
   // Toutes les balises sont écrites impérativement dans le useEffect ci-dessus,
   // react-helmet-async n'atteignant pas le DOM sur ce projet.
