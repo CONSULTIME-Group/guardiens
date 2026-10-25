@@ -20,7 +20,8 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, EyeOff, Trash2, Search, Sparkles, Share2, Link2, Mail, BarChart3, MessageSquare, Download, ChevronLeft, ChevronRight, Send, Loader2, Image as ImageIcon, MoreHorizontal, Info } from "lucide-react";
+import { Eye, EyeOff, Trash2, Search, Sparkles, Share2, Link2, Mail, BarChart3, MessageSquare, Download, ChevronLeft, ChevronRight, Send, Loader2, Image as ImageIcon, MoreHorizontal, Info, ExternalLink } from "lucide-react";
+import { listingLiveUrl } from "@/lib/admin/listingRowLinks";
 import { buildCsv, downloadCsv } from "@/lib/admin/csv";
 import { ErrorState } from "@/components/admin/ui";
 import DossierDetailSheet from "@/components/admin/DossierDetailSheet";
@@ -760,6 +761,7 @@ const AdminListings = () => {
               const coverUrl = (listing as any).cover_photo_url as string | null;
               const coverNotPlace = !coverUrl || animalPhotoUrls.has(coverUrl);
               const ownerName = `${listing.owner?.first_name || ""} ${listing.owner?.last_name || ""}`.trim();
+              const liveUrl = listingLiveUrl(listing);
               const contact = () => setWriteTarget({ userId: listing.user_id, userName: ownerName || "ce membre", sitId: listing.id });
               return (
                 <TableRow key={listing.id}>
@@ -828,6 +830,20 @@ const AdminListings = () => {
                       <Button variant="ghost" size="sm" disabled={!listing.user_id} onClick={contact}>
                         <Mail className="h-4 w-4 mr-1" /> Contacter
                       </Button>
+                      <Button variant="ghost" size="icon" onClick={() => setCoverListing(listing)} aria-label="Photo de couverture" title="Photo de couverture" data-testid="row-cover-picker">
+                        <ImageIcon className="h-4 w-4" />
+                      </Button>
+                      {liveUrl ? (
+                        <Button variant="ghost" size="icon" asChild>
+                          <a href={liveUrl} target="_blank" rel="noopener noreferrer" aria-label="Voir la version en ligne" title="Voir la version en ligne" data-testid="row-live-link">
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      ) : (
+                        <Button variant="ghost" size="icon" disabled aria-label="Annonce pas en ligne" title="Annonce pas en ligne" data-testid="row-live-link">
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" aria-label="Autres actions" title="Autres actions">
@@ -835,12 +851,11 @@ const AdminListings = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-60">
-                          <DropdownMenuItem onSelect={() => navigate(`/sits/${listing.id}`)}><Eye className="h-4 w-4 mr-2" /> Voir l'annonce publique</DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => navigate(`/sits/${listing.id}`)}><Eye className="h-4 w-4 mr-2" /> Vue complète (admin)</DropdownMenuItem>
                           <DropdownMenuItem onSelect={() => openTraffic(listing)}><BarChart3 className="h-4 w-4 mr-2" /> Sources de trafic</DropdownMenuItem>
                           {st && st.messages > 0 && (
                             <DropdownMenuItem onSelect={() => openDrill(listing, "conversations")}><MessageSquare className="h-4 w-4 mr-2" /> Conversations ({st.messages} messages)</DropdownMenuItem>
                           )}
-                          <DropdownMenuItem onSelect={() => setCoverListing(listing)}><ImageIcon className="h-4 w-4 mr-2" /> Photo de couverture</DropdownMenuItem>
                           <DropdownMenuItem disabled={!listing.user_id} onSelect={() => setMessageModal({ open: true, listing, content: "" })}><MessageSquare className="h-4 w-4 mr-2" /> Message rapide au propriétaire</DropdownMenuItem>
                           {listing.status === "published" && (
                             <DropdownMenuItem onSelect={() => setProximityListing(listing)}><Send className="h-4 w-4 mr-2" /> Envoyer aux gardiens du coin</DropdownMenuItem>
