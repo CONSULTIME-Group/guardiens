@@ -8,7 +8,6 @@ import spotJardin from "@/assets/missions/spot-jardin-160.webp";
 import spotVerger from "@/assets/missions/spot-verger-160.webp";
 import spotBricolage from "@/assets/missions/spot-bricolage-160.webp";
 import spotChien from "@/assets/missions/spot-chien-160.webp";
-import spotChat from "@/assets/missions/spot-chat-160.webp";
 import spotBienetre from "@/assets/missions/spot-bienetre-160.webp";
 import { ENTRAIDE_IDEAS, type EntraideIdeaKey } from "@/lib/entraideIdeas";
 
@@ -17,7 +16,9 @@ const IMAGES: Record<EntraideIdeaKey, string> = {
   courses: spotVerger,
   meuble: spotBricolage,
   chien: spotChien,
-  chat: spotChat,
+  // Lot E18 : aucune gouache trajet pour l'instant (courses, jeux et trajet
+  // seront peintes) ; la nature morte « bien-être », la plus neutre, en attendant.
+  trajet: spotBienetre,
   jeux: spotBienetre,
 };
 
@@ -29,7 +30,7 @@ const EntraideIdeas = ({ onPick }: { onPick: (key: EntraideIdeaKey, label: strin
         <li key={idea.key} className="shrink-0">
           <button
             type="button"
-            onClick={() => onPick(idea.key, idea.label)}
+            onClick={() => onPick(idea.key, idea.title)}
             className="flex items-center gap-2 whitespace-nowrap rounded-full border border-border bg-card py-1 pl-1 pr-3 text-left text-sm font-medium text-foreground transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-full sm:flex-col sm:items-start sm:whitespace-normal sm:rounded-lg sm:p-3"
           >
             <img

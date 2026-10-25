@@ -85,7 +85,7 @@ const QuestionCreate = () => {
         noindex
       />
       <div className="min-h-screen bg-background">
-        <PageBreadcrumb items={[{ label: "Questions & conseils", href: "/questions" }, { label: "Nouvelle" }]} />
+        <PageBreadcrumb items={[{ label: "Entraide", href: "/petites-missions" }, { label: "Nouvelle" }]} />
         <section className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
           <h1 className="font-heading text-2xl sm:text-3xl font-bold mb-2">Poser une question</h1>
           <p className="text-foreground/70 mb-6">

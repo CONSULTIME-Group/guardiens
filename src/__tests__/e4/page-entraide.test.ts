@@ -15,7 +15,8 @@ import {
 describe("E4, idées", () => {
   it("six idées, titres assez longs pour le formulaire (10 caractères)", () => {
     expect(ENTRAIDE_IDEAS).toHaveLength(6);
-    for (const idea of ENTRAIDE_IDEAS) expect(idea.label.length).toBeGreaterThanOrEqual(10);
+    // Lot E18 : « Un trajet » écrit « Un trajet en voiture » dans le formulaire.
+    for (const idea of ENTRAIDE_IDEAS) expect(idea.title.length).toBeGreaterThanOrEqual(10);
   });
   it("formulaire prérempli, inscription d'abord pour un visiteur", () => {
     expect(needFormPath(true, "Faire les courses")).toBe("/petites-missions/creer?titre=Faire%20les%20courses");

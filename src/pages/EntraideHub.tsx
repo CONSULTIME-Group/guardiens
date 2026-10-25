@@ -368,11 +368,11 @@ const EntraideHub = () => {
     }
   };
 
-  const sendCanHelp = async (need: EntraideNeed, message: string) => {
+  const sendCanHelp = async (need: EntraideNeed, message: string, exchangeDate: string | null = null) => {
     if (!user?.id || responding) return;
     setResponding(need.id);
     void trackEvent("mission_can_help", { metadata: { mission_id: need.id, source: "hub_list" } });
-    const outcome = await respondToMission({ missionId: need.id, userId: user.id, message });
+    const outcome = await respondToMission({ missionId: need.id, userId: user.id, message, exchangeDate });
     setResponding(null);
     setConfirmNeed(null);
     switch (outcome.kind) {
@@ -596,7 +596,9 @@ const EntraideHub = () => {
             detailPath={confirmNeed ? detailPath(confirmNeed) : null}
             sending={responding !== null}
             onCancel={() => setConfirmNeed(null)}
-            onSend={(message) => { if (confirmNeed) void sendCanHelp(confirmNeed, message); }}
+            needDateNeeded={confirmNeed?.date_needed ?? null}
+            needEndDate={confirmNeed?.end_date ?? null}
+            onSend={(message, exchangeDate) => { if (confirmNeed) void sendCanHelp(confirmNeed, message, exchangeDate); }}
           />
         </div>
       </div>

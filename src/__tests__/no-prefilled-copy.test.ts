@@ -54,7 +54,21 @@ describe("entraide, aucun texte prêt à coller", () => {
   });
 
   it("la fiche ne publie plus de réponse en un clic", () => {
+    // Lot E18 (n° 39) : le « Je peux vous aider. » publié en un clic depuis
+    // la fiche a disparu ; « Je peux » ouvre la fenêtre, message vide.
     const src = read("src/pages/SmallMissionDetail.tsx");
     expect(src).not.toContain("handleOneClickInterest");
+    expect(src).not.toContain('handleRespond("Je peux vous aider.")');
+    expect(src).not.toContain("QUICK_CAN_HELP_MESSAGE");
+    expect(src).toContain("<CanHelpDialog");
+    expect(read("src/components/entraide/CanHelpDialog.tsx")).toContain('useState("")');
+  });
+
+  it("la ligne « En retour, je propose » compose avec ce que la personne touche (lot E18)", () => {
+    // Décision de Jérémie du 25/10/2026 : des suggestions à toucher, aucune
+    // phrase écrite à la place du membre ; la ligne reste facultative.
+    const src = read("src/pages/CreateSmallMission.tsx");
+    expect(src).toContain("aria-pressed={pressed}");
+    expect(src).toContain("composeExchangeOffer(exchangeChips, exchangeFree)");
   });
 });

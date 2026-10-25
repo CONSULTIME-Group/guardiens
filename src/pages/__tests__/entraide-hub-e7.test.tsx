@@ -176,7 +176,7 @@ describe("Entraide, la page vue d'un membre", () => {
   it("une tuile d'idée ouvre le formulaire avec le titre écrit", async () => {
     renderHub();
     expect(await screen.findByRole("heading", { name: "Une idée pour commencer" })).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: /Arroser le potager|Faire les courses|Monter un meuble|Promener le chien|Nourrir le chat|Une partie de jeux de société/ }).length).toBe(6);
+    expect(screen.getAllByRole("button", { name: /Arroser le potager|Faire les courses|Monter un meuble|Promener le chien|Un trajet|Une partie de jeux de société/ }).length).toBe(6);
   });
 
   it("un seul bouton plein dans l'en-tête", async () => {
@@ -191,11 +191,12 @@ describe("Entraide, la page vue d'un membre", () => {
     await waitFor(() => expect(screen.getAllByRole("button", { name: "Je peux" }).filter((button) => button.closest("[hidden]") === null).length).toBe(2));
     fireEvent.click(screen.getAllByRole("button", { name: "Je peux" })[0]);
     expect(respondMock).not.toHaveBeenCalled();
-    fireEvent.click(await screen.findByRole("button", { name: "Envoyer ma proposition" }));
+    fireEvent.click(await screen.findByRole("button", { name: /^Envoyer/ }));
     await waitFor(() => expect(respondMock).toHaveBeenCalledWith({
       missionId: "proche",
       userId: "me",
       message: "Je peux vous aider.",
+      exchangeDate: null,
     }));
     expect(await screen.findByText("Vous avez dit je peux")).toBeInTheDocument();
   });

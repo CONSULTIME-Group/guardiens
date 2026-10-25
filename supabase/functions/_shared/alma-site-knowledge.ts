@@ -126,7 +126,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     key: "entraide_creer",
     path: "/petites-missions/creer",
     label: "Demander un coup de main",
-    purpose: "Formulaire d'une demande d'entraide : un titre (100 caractères), une description, le lieu et la date ; publication ouverte à tout profil. Exemples de la page Entraide : arroser le potager, faire les courses, monter un meuble, promener le chien, nourrir le chat, une partie de jeux de société.",
+    purpose: "Formulaire d'une demande d'entraide : un titre (100 caractères), une description, le lieu et la date ; publication ouverte à tout profil. Exemples de la page Entraide : arroser le potager, faire les courses, monter un meuble, promener le chien, un trajet, une partie de jeux de société.",
     audience: "all",
     triggers: ["j'ai besoin", "besoin d'aide", "je cherche de l'aide", "demander", "publier une demande", "quelqu'un pour"],
     opener: "Je vous propose le titre, la demande se publie depuis la page Demander un coup de main.",

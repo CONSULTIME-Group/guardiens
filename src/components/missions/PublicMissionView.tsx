@@ -13,6 +13,8 @@ import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
 import Head from "@/components/seo/Head";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { missionEntraideCity, useAnimalCareLink } from "@/lib/entraideMissionLinks";
+import { resolveExchangeLine } from "@/lib/entraideExchange";
+import { ENTRAIDE_COPY } from "@/lib/entraideCopy";
 
 // (Pas de bannière de fallback : une annonce sans photo ne doit PAS
 // afficher une image générique qui rendrait toutes les annonces
@@ -95,6 +97,13 @@ interface Props {
   ownerPanel?: ReactNode;
   /** Ancre de la liste du porteur, pour le lien de l'encadré latéral. */
   ownerPanelAnchor?: string;
+  /**
+   * Lot E18 : jeton « Je peux » de l'email aux aidants (?t=). Présent, le
+   * bouton « Je peux » mène à la page jeton, sans connexion.
+   */
+  canHelpToken?: string | null;
+  /** Lot E18 : ligne « ce que je propose volontiers » de l'auteur (repli de « En retour »). */
+  helpsWith?: string | null;
 }
 
 const CATEGORY_ICON: Record<string, typeof Dog> = {
@@ -126,6 +135,8 @@ const PublicMissionView = ({
   onApplyMessageChange,
   ownerPanel,
   ownerPanelAnchor = "candidatures",
+  canHelpToken = null,
+  helpsWith = null,
 }: Props) => {
   const { t } = useTranslation();
   const heroImage = mission.photos?.[0] || null;
@@ -145,6 +156,13 @@ const PublicMissionView = ({
   const entraideCity = missionEntraideCity(mission);
   const animalCare = useAnimalCareLink(mission, cityLabel);
 
+  // Lot E18 : « Je peux » mène à la page jeton quand la personne vient de
+  // l'email aux aidants, sinon à l'inscription puis à la fiche.
+  const canHelpHref = canHelpToken
+    ? `/entraide/je-peux?t=${encodeURIComponent(canHelpToken)}`
+    : `/inscription?redirect=${encodeURIComponent(redirect)}`;
+  const exchangeLine = resolveExchangeLine({ exchangeOffer: mission.exchange_offer, helpsWith, firstName: authorFirstName });
+
   // Meta description contextuelle : on privilégie la vraie description,
   // sinon on fabrique une phrase spécifique (ville + catégorie + contrepartie)
   // pour éviter la meta boilerplate de la landing.
@@ -153,7 +171,7 @@ const PublicMissionView = ({
     if (raw && raw.length >= 60) return raw.slice(0, 155);
     const parts = [
       `${catMeta.label} à ${cityLabel}`,
-      mission.exchange_offer ? t("mission_detail.meta_exchange", { offer: mission.exchange_offer }) : null,
+      exchangeLine.kind !== "fixed" ? t("mission_detail.meta_exchange", { offer: exchangeLine.text }) : null,
       t("mission_detail.meta_fallback"),
     ].filter(Boolean);
     return parts.join(". ").slice(0, 155);
@@ -727,7 +745,9 @@ const PublicMissionView = ({
                     </div>
                     <div className="min-w-0">
                       <p className="text-lg font-semibold text-foreground flex items-center gap-2 flex-wrap">
-                        {t("mission_detail.proposed_by", { name: authorFirstName || t("mission_detail.a_member") })}
+                        {mission.mission_type === "offre"
+                          ? t("mission_detail.proposed_by", { name: authorFirstName || t("mission_detail.a_member") })
+                          : t("mission_detail.asked_by", { name: authorFirstName || t("mission_detail.a_member") })}
                         {author.identity_verified && (
                           <span
                             className="inline-flex items-center gap-1 text-xs font-medium text-success bg-success-soft px-2 py-0.5 rounded-full"
@@ -787,6 +807,17 @@ const PublicMissionView = ({
                   </Link>
                 </p>
               )}
+              {/* En retour (lot E18) : une seule fois, la ligne de l'auteur,
+                  sinon sa ligne « ce que je propose volontiers », sinon la
+                  phrase fixe en corps normal, sans guillemets. */}
+              {mission.mission_type !== "offre" && (exchangeLine.kind === "fixed" ? (
+                <p className="text-base leading-relaxed text-foreground/85" data-testid="mission-exchange-line">{exchangeLine.text}</p>
+              ) : (
+                <aside className="border-l-2 border-primary/40 bg-muted/40 pl-4 py-3 rounded-r-lg" data-testid="mission-exchange-line">
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">{exchangeLine.label}</p>
+                  <p className="text-base leading-snug text-foreground/85">{exchangeLine.text}</p>
+                </aside>
+              ))}
 
             </div>
           </article>
@@ -838,21 +869,11 @@ const PublicMissionView = ({
                     </p>
                   </div>
                 )}
-                {/* Pas de rubrique coût : l'entraide n'a pas de prix, on met
-                    en valeur ce qui est proposé en retour. */}
-                {mission.exchange_offer && (
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
-                      {t("mission_detail.exchange_h3")}
-                    </p>
-                    <p className="text-base font-semibold text-foreground">{mission.exchange_offer}</p>
-                  </div>
-                )}
               </div>
 
-              <Link to={`/inscription?redirect=${encodeURIComponent(redirect)}`} className="block">
+              <Link to={canHelpHref} className="block">
                 <Button className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20">
-                  {t("mission_detail.cta_help")}
+                  {mission.mission_type === "offre" ? t("mission_detail.cta_help") : ENTRAIDE_COPY.canHelp}
                 </Button>
               </Link>
 
@@ -922,7 +943,6 @@ const PublicMissionView = ({
                   title={sanitizeUserTitle(rm.title) || rm.title}
                   city={titlecaseCity(rm.city)}
                   timeAgo={timeAgoFr(rm.created_at)}
-                  exchangeOffer={rm.exchange_offer}
                 />
               ))}
             </div>
@@ -971,9 +991,9 @@ const PublicMissionView = ({
       {/* CTA sticky mobile : facilite la conversion sur téléphone où la
           sidebar n'est plus visible en scrollant. Caché en lg+. */}
       <div className="lg:hidden fixed bottom-[var(--bottom-nav-h,0px)] inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur px-4 py-3 shadow-[0_-8px_20px_-12px_hsl(var(--foreground)/0.15)]">
-        <Link to={`/inscription?redirect=${encodeURIComponent(redirect)}`} className="block">
-          <Button className="w-full py-5 rounded-full font-bold text-sm shadow-lg shadow-primary/20">
-            {t("mission_detail.sticky_cta")}
+        <Link to={canHelpHref} className="block">
+          <Button className="w-full py-5 rounded-full font-bold text-base shadow-lg shadow-primary/20">
+            {mission.mission_type === "offre" ? t("mission_detail.sticky_cta") : ENTRAIDE_COPY.canHelp}
           </Button>
         </Link>
       </div>

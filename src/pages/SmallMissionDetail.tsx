@@ -4,7 +4,7 @@ import { useState, useEffect, useLayoutEffect, useCallback, useRef } from "react
 import { trackEvent } from "@/lib/analytics";
 import { captureMissionSource, readMissionSource } from "@/lib/missionResponseSource";
 import { logger } from "@/lib/logger";
-import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -62,6 +62,10 @@ import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHi
 import { avatarImageUrl } from "@/lib/storageImage";
 import { MAX_MISSION_MESSAGE_LEN, MIN_MISSION_MESSAGE_LEN, respondToMission } from "@/lib/missionRespond";
 import { CLOSURE_DECLINE_TEXT, CLOSURE_DECLINE_TITLE, isClosureDecline } from "@/lib/missionResponseClosure";
+import CanHelpDialog from "@/components/entraide/CanHelpDialog";
+import { ENTRAIDE_COPY, ENTRAIDE_DURATION_LABELS } from "@/lib/entraideCopy";
+import { resolveExchangeLine } from "@/lib/entraideExchange";
+import { needExcerpt } from "@/lib/needExcerpt";
 
 
 /** Rayon max (km) pour considérer une mission « près de chez vous ». */
@@ -80,14 +84,8 @@ const CATEGORY_META: Record<string, { label: string; icon: typeof Dog; colorClas
     ]),
   );
 
-const DURATION_LABELS: Record<string, string> = {
-  "1-2h": "1-2 heures",
-  half_day: "Demi-journée",
-  full_day: "Journée",
-  several: "Plusieurs jours",
-  weekend: "Week-end",
-  week: "Semaine",
-};
+/** Lot E18 : durées lues dans le lexique (« Plusieurs passages » pour several, n° 38). */
+const DURATION_LABELS: Record<string, string> = ENTRAIDE_DURATION_LABELS;
 
 /** Titlecase pour ville saisie en MAJUSCULES (ex: VERGONS → Vergons, AIX-EN-PROVENCE → Aix-en-Provence). */
 function titlecaseCity(s?: string | null): string {
@@ -121,10 +119,10 @@ function memberSince(iso?: string | null): string | null {
 }
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
-  open: { label: "Ouverte", className: "bg-success-soft text-success" },
+  open: { label: "Besoin ouvert", className: "bg-success-soft text-success" },
   in_progress: { label: "En cours", className: "bg-info-soft text-info" },
-  completed: { label: "Terminée", className: "bg-muted text-muted-foreground" },
-  cancelled: { label: "Annulée", className: "bg-destructive/10 text-destructive" },
+  completed: { label: "Coup de main terminé", className: "bg-muted text-muted-foreground" },
+  cancelled: { label: "Besoin clos", className: "bg-muted text-muted-foreground" },
 };
 
 const PUBLISHER_BADGES = [
@@ -224,6 +222,7 @@ const SmallMissionDetail = () => {
   const id = rawId?.replace(/[\s\u00A0\u200B-\u200D\uFEFF]+/g, "") || undefined;
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const { user } = useAuth();
   const { hasAccess } = useSubscriptionAccess();
   const { level: accessLevel, profileCompletion, canApplyMissions, identityRecommended } = useAccessLevel();
@@ -245,6 +244,8 @@ const SmallMissionDetail = () => {
   const [processingResponseId, setProcessingResponseId] = useState<string | null>(null);
   const [completing, setCompleting] = useState(false);
   const [responseModalOpen, setResponseModalOpen] = useState(false);
+  // Lot E18 : fenêtre « Je peux », geste unique de réponse à un besoin.
+  const [canHelpOpen, setCanHelpOpen] = useState(false);
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
 
   // Per-person feedback tracking: receiverId → submitted
@@ -322,7 +323,17 @@ const SmallMissionDetail = () => {
 
     if (!current()) return;
     const authorRow: any = Array.isArray(authorRes.data) ? authorRes.data[0] : authorRes.data;
-    commit(() => setAuthor(authorRow ? { ...authorRow, created_at: authorRow.member_since } : null));
+    // Lot E18 : ligne « ce que je propose volontiers » de l'auteur, lue dans la
+    // vue publique des personnes disponibles (repli de « En retour »).
+    let authorHelpsWith: string | null = null;
+    if (authorRow?.user_id) {
+      try {
+        const { data: hw } = await (supabase as any).from("public_helpers").select("helps_with").eq("id", authorRow.user_id).maybeSingle();
+        authorHelpsWith = (hw as { helps_with?: string | null } | null)?.helps_with ?? null;
+      } catch { /* repli : phrase fixe */ }
+    }
+    if (!current()) return;
+    commit(() => setAuthor(authorRow ? { ...authorRow, created_at: authorRow.member_since, helps_with: authorHelpsWith } : null));
 
     // Filtrage par proximité réelle si on connaît les coords de la mission courante.
     const pool = (relatedRes.data || []) as any[];
@@ -439,7 +450,7 @@ const SmallMissionDetail = () => {
 
   // Lot Z2 (C-19) : renvoie true seulement quand la réponse est enregistrée,
   // pour que la mesure ne compte jamais un envoi refusé.
-  const handleRespond = async (overrideMessage?: string): Promise<boolean> => {
+  const handleRespond = async (overrideMessage?: string, exchangeDate: string | null = null): Promise<boolean> => {
     if (!user || !id || submitting) return false;
     setSubmitting(true);
     try {
@@ -447,24 +458,25 @@ const SmallMissionDetail = () => {
         missionId: missionUuid!,
         userId: user.id,
         message: overrideMessage ?? "",
+        exchangeDate,
       });
       switch (outcome.kind) {
         case "empty":
           toast({ variant: "destructive", title: "Message vide", description: "Écrivez un mot avant d'envoyer votre réponse." });
           return false;
         case "too_short":
-          toast({ variant: "destructive", title: "Message trop court", description: `Ajoutez au moins ${outcome.min} caractères pour que l'auteur comprenne votre proposition.` });
+          toast({ variant: "destructive", title: "Message trop court", description: `Ajoutez au moins ${outcome.min} caractères, ou laissez le mot vide.` });
           return false;
         case "missing":
-          throw new Error("Mission introuvable.");
+          throw new Error("Besoin introuvable.");
         case "closed":
-          toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de réponses." });
+          toast({ title: ENTRAIDE_COPY.needClosed, description: "Ce besoin est clos, merci pour votre proposition." });
           return false;
         case "own_mission":
-          toast({ variant: "destructive", title: "Action impossible", description: "Vous ne pouvez pas répondre à votre propre annonce." });
+          toast({ title: "Ce besoin est le vôtre", description: "Les réponses des autres membres arrivent ici." });
           return false;
         case "duplicate":
-          toast({ variant: "destructive", title: "Déjà envoyé", description: "Vous avez déjà proposé votre aide pour cette mission." });
+          toast({ title: "Déjà envoyé", description: "Votre « Je peux » est déjà parti pour ce besoin." });
           setHasResponded(true);
           return false;
         case "account_not_active":
@@ -473,7 +485,7 @@ const SmallMissionDetail = () => {
         case "cap_reached":
           toast({
             variant: "destructive",
-            title: "Mission temporairement fermée",
+            title: "Besoin complet pour l'instant",
             description: "5 personnes ont déjà proposé leur aide. Une place se libérera si l'auteur en décline une.",
           });
           return false;
@@ -511,7 +523,7 @@ const SmallMissionDetail = () => {
           path: "composer",
         },
       });
-      toast({ title: "Réponse envoyée !", description: "La personne qui demande va être prévenue." });
+      toast({ title: "C'est envoyé", description: `${author?.first_name || "La personne qui demande"} est prévenue et vous répond dans la messagerie.` });
       return true;
 
       // Note : le fan-out (notif in-app + email) est déclenché côté serveur
@@ -607,10 +619,10 @@ const SmallMissionDetail = () => {
         }).catch(() => {});
       }
 
-      toast({ title: "Vous avez retenu cette personne !" });
+      toast({ title: resp.responder?.first_name ? `Vous avez choisi ${resp.responder.first_name}` : "C'est noté, la conversation est ouverte" });
     } catch (err: any) {
       logger.error("[handleAcceptResponse]", { err: String(err) });
-      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de retenir cette personne." });
+      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Le choix n'a pas été enregistré, réessayez dans un instant." });
       setResponses(prev => prev.map(r => r.id === responseId ? { ...r, status: "pending" } : r));
     } finally {
       setProcessingResponseId(null);
@@ -703,7 +715,7 @@ const SmallMissionDetail = () => {
       setMission((prev: any) => ({ ...prev, status: "cancelled", close_reason: AUTHOR_CLOSE_NO_SELECT_REASON }));
       setResponses(prev => prev.map(r => r.status === "pending" ? { ...r, status: "declined" } : r));
       setCloseModalOpen(false);
-      toast({ title: "Mission clôturée" });
+      toast({ title: ENTRAIDE_COPY.needClosed });
     } catch (err: any) {
       logger.error("[handleCloseNoSelect]", { err: String(err) });
       toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de clôturer." });
@@ -735,10 +747,10 @@ const SmallMissionDetail = () => {
           },
         }).catch(() => {});
       }
-      toast({ title: "Mission marquée comme terminée !" });
+      toast({ title: "Merci, le coup de main est noté" });
     } catch (err: any) {
       logger.error("[handleMarkCompleted]", { err: String(err) });
-      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de terminer la mission." });
+      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Réessayez dans un instant." });
     } finally {
       setCompleting(false);
     }
@@ -746,6 +758,10 @@ const SmallMissionDetail = () => {
 
   // Valeurs dérivées (calculées à chaque render, pas de mémoïsation prématurée).
   const hasPublishedFlag = searchParams.get("published") === "1";
+  // Lot E18 : jeton « Je peux » de l'email aux aidants (?t=), lu par la fiche
+  // pour activer « Je peux » sans connexion (page /entraide/je-peux).
+  const rawToken = searchParams.get("t");
+  const actionToken = rawToken && /^[a-f0-9]{20,200}$/i.test(rawToken) ? rawToken : null;
   const hasInvitedFlag = searchParams.get("invited") === "1";
   const isAuthor = isAuthorOf(user?.id, mission);
   const showPublishedBanner = Boolean(user?.id) && isAuthor && hasPublishedFlag;
@@ -775,7 +791,7 @@ const SmallMissionDetail = () => {
   };
 
   if (loadFailed) return <PublicLoadError />;
-  if (canonicalRedirect) return <LegacyProjetRedirect target={`${canonicalRedirect}${window.location.search}${window.location.hash}`} title="Mission déplacée" description="Cette mission est disponible à son adresse actuelle." />;
+  if (canonicalRedirect) return <LegacyProjetRedirect target={`${canonicalRedirect}${window.location.search}${window.location.hash}`} title="Besoin déplacé" description="Ce besoin est à son adresse actuelle." />;
 
   if (projetRedirect) {
     return <LegacyProjetRedirect target={projetRedirect} />;
@@ -785,7 +801,7 @@ const SmallMissionDetail = () => {
     return (
       <>
         {!user && <PublicHeader />}
-        <PageMeta title="Chargement de la mission" description="Chargement de la mission Guardiens." noindex noCanonical ready={false} />
+        <PageMeta title="Chargement du besoin" description="Chargement d'un besoin d'entraide Guardiens." noindex noCanonical ready={false} />
         <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 animate-pulse">
           <div className="h-4 w-48 bg-muted rounded mb-6" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
@@ -831,7 +847,7 @@ const SmallMissionDetail = () => {
   // appels à l'action, sinon la personne rédige puis reçoit une erreur serveur.
   const responsesCapReached = pendingResponses.length >= 5;
   const responsesCapMessage =
-    "5 personnes ont déjà proposé leur aide. Une place se libérera si l'auteur en décline une.";
+    "5 personnes ont déjà dit « Je peux ». Une place se libère si l'auteur en remercie une.";
   // Une OFFRE (disponibilité) n'a pas d'échéance : pas de bannière "date dépassée".
   const isOfferMission = (mission as any).mission_type === "offre";
   // Lot X2 : la fin de période prime sur la date souhaitée (même règle que la
@@ -877,6 +893,8 @@ const SmallMissionDetail = () => {
           viewCount={(mission as any).view_count ?? 0}
           responsesCount={responses.length}
           noindex={shouldNoindex}
+          canHelpToken={actionToken}
+          helpsWith={author?.helps_with ?? null}
         />
         <PublicFooter />
       </>
@@ -889,6 +907,25 @@ const SmallMissionDetail = () => {
   const displayTitle = sanitizeUserTitle(mission.title) || mission.title;
   const durationLabel = mission.duration_estimate ? (DURATION_LABELS[mission.duration_estimate] || mission.duration_estimate) : null;
 
+  /** Lot E18 : ouvre la fenêtre « Je peux » (geste unique, mesure mission_can_help). */
+  const openCanHelp = (source: "page" | "sticky") => {
+    try {
+      // Même événement que l'ancienne fenêtre de réponse (n° 41), continuité de la mesure.
+      trackEvent("mission_response_modal_opened", { metadata: { mission_id: mission.id, mission_type: "besoin", source } });
+    } catch { /* mesure non bloquante */ }
+    setCanHelpOpen(true);
+  };
+  /** Ancienne offre d'aide (mission_type offre) : fenêtre de message libre. */
+  const openOfferModal = () => {
+    setResponseModalOpen(true);
+    trackEvent("mission_response_modal_opened", { metadata: { mission_id: mission.id, mission_type: "offre" } });
+  };
+  const exchangeLine = resolveExchangeLine({
+    exchangeOffer: mission.exchange_offer,
+    helpsWith: author?.helps_with ?? null,
+    firstName: author?.first_name ?? null,
+  });
+
   /* ── Sidebar contextuelle ─────────────────────────────────────────── */
   const renderSidebarCard = () => {
     // Author : récap propositions
@@ -896,7 +933,7 @@ const SmallMissionDetail = () => {
       return (
         <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-5">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Votre annonce</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Votre besoin</p>
             <span className={`inline-flex items-center gap-2 text-sm font-medium ${mission.status === "open" ? "text-success" : "text-muted-foreground"}`}>
               <span className={`w-2 h-2 rounded-full ${mission.status === "open" ? "bg-success" : "bg-muted-foreground/50"}`} />
               {statusMeta.label}
@@ -919,12 +956,12 @@ const SmallMissionDetail = () => {
           )}
           {mission.status === "in_progress" && (
             <Button onClick={handleMarkCompleted} disabled={completing} variant="outline" className="w-full rounded-full gap-2">
-              <CheckCircle2 className="h-4 w-4" /> {completing ? "Validation…" : "Marquer terminée"}
+              <CheckCircle2 className="h-4 w-4" /> {completing ? "Validation…" : "Le coup de main a eu lieu"}
             </Button>
           )}
           {mission.status === "open" && (
             <button onClick={() => setCloseModalOpen(true)} className="text-xs text-muted-foreground hover:text-destructive w-full text-center transition-colors">
-              Clôturer sans sélectionner
+              Clore ce besoin
             </button>
           )}
           <button
@@ -944,10 +981,10 @@ const SmallMissionDetail = () => {
           <div className="bg-card p-5 rounded-2xl shadow-sm border border-success-border space-y-4">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-success" />
-              <p className="font-heading text-lg font-semibold text-success">Personne retenue</p>
+              <p className="font-heading text-lg font-semibold text-success">C'est vous qui aidez</p>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {author?.first_name || "L'auteur"} vous a choisi(e). Organisez la suite en direct.
+              {author?.first_name || "L'auteur"} vous a choisi(e). Organisez la suite dans la messagerie.
             </p>
             <Button onClick={() => void openResponseConversation(myResponse)} className="w-full rounded-full gap-2" size="lg">
               <MessageSquare className="h-4 w-4" /> Aller à la messagerie
@@ -960,11 +997,14 @@ const SmallMissionDetail = () => {
           <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-3">
             <div className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-info" />
-              <p className="font-heading text-lg font-semibold">Réponse envoyée</p>
+              <p className="font-heading text-lg font-semibold">Votre « Je peux » est parti</p>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {author?.first_name || "L'auteur"} a reçu votre mot. Vous serez prévenu(e) dès qu'il y a une réponse.
+              {author?.first_name || "L'auteur"} l'a reçu. Une notification vous prévient de sa réponse.
             </p>
+            {myResponse.exchange_date && (
+              <p className="text-sm text-foreground">Vous avez proposé le {format(parseISO(myResponse.exchange_date), "EEEE d MMMM", { locale: fr })}.</p>
+            )}
             <p className="text-xs text-muted-foreground">Envoyée {timeAgoFr(myResponse.created_at)}.</p>
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -1057,7 +1097,7 @@ const SmallMissionDetail = () => {
           <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-3">
             <p className="font-heading text-lg font-semibold text-muted-foreground">Réponse retirée</p>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Vous avez retiré votre proposition sur cette mission.
+              Vous avez retiré votre proposition sur ce besoin.
             </p>
             <Link to="/petites-missions" className="block">
               <Button variant="outline" className="w-full rounded-full">Voir d'autres coups de main</Button>
@@ -1068,77 +1108,54 @@ const SmallMissionDetail = () => {
       return null;
     }
 
-    // Visiteur connecté, gate (profil incomplet)
+    // Visiteur connecté, gate (profil incomplet). Lot E18 : arrivé par
+    // l'email aux aidants avec son jeton, il répond comme depuis l'email.
     if (mission.status === "open" && accessLevel === 1) {
       return (
-        <div className="bg-card p-5 rounded-2xl shadow-sm border border-border">
+        <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-4">
+          {actionToken && (mission as any).mission_type !== "offre" && (
+            <Link to={`/entraide/je-peux?t=${actionToken}`} className="block">
+              <Button className="w-full rounded-full font-bold text-base" size="lg">{ENTRAIDE_COPY.canHelp}</Button>
+            </Link>
+          )}
           <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
         </div>
       );
     }
 
-    // Visiteur connecté, peut répondre, carte compacte, la vraie saisie se fait sous le fil
+    // Visiteur connecté qui peut répondre : un seul geste, « Je peux », qui
+    // ouvre la fenêtre (lot E18, n° 39 et 40 du registre).
     if (mission.status === "open" && canApplyMissions) {
       const isOffer = (mission as any).mission_type === "offre";
-      const ctaLabel = isOffer ? "Solliciter cette aide" : "Répondre à cette annonce";
+      const authorName = author?.first_name || "l'auteur du besoin";
       return (
         <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-4">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Comment ça marche</p>
             <p className="font-heading text-lg font-bold text-foreground leading-snug">
-              Adressez une proposition privée.
+              {isOffer ? "Solliciter cette aide" : `Un coup de main pour ${author?.first_name || "ce besoin"} ?`}
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-              Votre réponse n'est lue que par {author?.first_name || "l'auteur de l'annonce"}. Elle n'apparaît nulle part
-              publiquement. Si cette personne vous
-              <span className="font-semibold text-foreground"> retient pour aider</span>, votre nom apparaîtra alors sur la publication.
+              Votre réponse arrive chez {authorName} seul(e). Vous vous organisez ensemble dans la messagerie, et la rencontre reste libre.
             </p>
           </div>
           {responsesCapReached ? (
             <div className="rounded-2xl border border-warning/40 bg-warning-soft/40 p-4 text-sm text-foreground/85">
-              <p className="font-medium">Publication temporairement fermée aux nouvelles réponses.</p>
+              <p className="font-medium">Besoin complet pour l'instant.</p>
               <p className="mt-1 text-muted-foreground">{responsesCapMessage}</p>
             </div>
           ) : (
-            <>
-              {/* Un besoin, dix personnes du coin, un « je peux ». Un seul
-                  geste suffit, le détail se règle ensuite en conversation. */}
-              {!isOffer && (
-                <Button
-                  className="w-full rounded-full font-bold text-base"
-                  size="lg"
-                  disabled={submitting}
-                  onClick={async () => {
-                    try {
-                      trackEvent("mission_can_help", {
-                        metadata: { mission_id: mission.id, source: "page" },
-                      });
-                    } catch { /* mesure non bloquante */ }
-                    await handleRespond("Je peux vous aider.");
-                  }}
-                >
-                  Je peux
-                </Button>
-              )}
-              <Button
-                className="w-full rounded-full font-bold text-base"
-                size="lg"
-                variant={isOffer ? "default" : "outline"}
-                onClick={() => {
-                  setResponseModalOpen(true);
-                  trackEvent("mission_response_modal_opened", {
-                    metadata: { mission_id: mission.id, mission_type: isOffer ? "offre" : "besoin" },
-                  });
-                }}
-              >
-                {isOffer ? ctaLabel : "Répondre avec un mot"}
-              </Button>
-            </>
+            <Button
+              className="w-full rounded-full font-bold text-base"
+              size="lg"
+              disabled={submitting}
+              onClick={() => (isOffer ? openOfferModal() : openCanHelp("page"))}
+            >
+              {isOffer ? "Solliciter cette aide" : ENTRAIDE_COPY.canHelp}
+            </Button>
           )}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Un service contre un service</span>
-            <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Vous pouvez retirer votre réponse tant que l'auteur n'a pas choisi</span>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Vous pouvez retirer votre réponse tant que {authorName} n'a pas choisi.
+          </p>
         </div>
       );
     }
@@ -1148,9 +1165,9 @@ const SmallMissionDetail = () => {
       <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-3">
         <p className="font-heading text-lg font-semibold">{statusMeta.label}</p>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          {mission.status === "in_progress" && "Cette mission est en cours d'organisation."}
-          {mission.status === "completed" && "Cette mission est terminée. Merci à celles et ceux qui ont aidé."}
-          {mission.status === "cancelled" && "Cette mission a été clôturée sans sélection."}
+          {mission.status === "in_progress" && "Ce coup de main est en cours d'organisation."}
+          {mission.status === "completed" && "Le coup de main a eu lieu. Merci à celles et ceux qui ont aidé."}
+          {mission.status === "cancelled" && "Ce besoin est clos, merci à celles et ceux qui ont proposé leur aide."}
         </p>
         <Link to="/petites-missions" className="block">
           <Button variant="outline" className="w-full rounded-full">Voir d'autres coups de main</Button>
@@ -1169,7 +1186,7 @@ const SmallMissionDetail = () => {
           if (raw && raw.length >= 60) return raw.slice(0, 155);
           const parts = [
             `${catMeta.label} à ${cityLabel}`,
-            mission.exchange_offer ? `En échange : ${mission.exchange_offer}` : null,
+            exchangeLine.kind !== "fixed" ? `En retour : ${exchangeLine.text}` : null,
             "Coup de main entre particuliers : un service contre un service, 0 €.",
           ].filter(Boolean);
           return parts.join(". ").slice(0, 155);
@@ -1209,6 +1226,7 @@ const SmallMissionDetail = () => {
               published
               onClose={handleClosePublishedBanner}
               onToast={(t) => toast(t)}
+              waveAudience={typeof (location.state as { waveAudience?: unknown } | null)?.waveAudience === "number" ? (location.state as { waveAudience: number }).waveAudience : null}
             />
           </div>
         )}
@@ -1218,9 +1236,9 @@ const SmallMissionDetail = () => {
           <div className="mb-6 bg-info-soft border border-info-border rounded-2xl p-4 flex items-start gap-3">
             <Sparkles className="h-5 w-5 text-info shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="font-medium text-info">Vous avez été invité à donner un coup de main</p>
+              <p className="font-medium text-info">{author?.first_name ? `${author.first_name} vous invite à donner un coup de main` : "Vous êtes invité(e) à donner un coup de main"}</p>
               <p className="text-sm text-info/80 mt-1">
-                Vos compétences correspondent à cette demande. Lisez les détails puis proposez votre aide en un clic ci-dessous.
+                Lisez le besoin, puis dites « Je peux » si le moment vous va.
               </p>
             </div>
           </div>
@@ -1243,20 +1261,20 @@ const SmallMissionDetail = () => {
           <div className="bg-success-soft border border-success-border rounded-2xl p-4 mb-6 flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
             <p className="text-sm font-medium text-success">
-              Mission organisée avec {acceptedResponses.map(r => r.responder?.first_name).filter(Boolean).join(", ")}
+              Coup de main organisé avec {acceptedResponses.map(r => r.responder?.first_name).filter(Boolean).join(", ")}
             </p>
           </div>
         )}
         {mission.status === "completed" && (
           <div className="bg-muted border border-border rounded-2xl p-4 mb-6 flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
-            <p className="text-sm font-medium text-muted-foreground">Mission terminée</p>
+            <p className="text-sm font-medium text-muted-foreground">Le coup de main a eu lieu</p>
           </div>
         )}
         {mission.status === "cancelled" && (
           <div className="bg-muted border border-border rounded-2xl p-4 mb-6 flex items-center gap-2">
             <XCircle className="h-5 w-5 text-muted-foreground" />
-            <p className="text-sm font-medium text-muted-foreground">Mission annulée</p>
+            <p className="text-sm font-medium text-muted-foreground">{ENTRAIDE_COPY.needClosed}</p>
           </div>
         )}
 
@@ -1321,7 +1339,7 @@ const SmallMissionDetail = () => {
                   size="sm"
                   onClick={handleSharePublishedLink}
                   className="gap-1.5 rounded-full ml-auto h-8 px-3"
-                  aria-label="Partager cette annonce"
+                  aria-label="Partager ce besoin"
                 >
                   <Share2 className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline">Partager</span>
@@ -1439,7 +1457,7 @@ const SmallMissionDetail = () => {
               <section>
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
                   <h2 className="font-heading text-xl md:text-2xl font-bold text-foreground">
-                    {(mission as any).mission_type === "offre" ? "La proposition" : "La mission"}
+                    {(mission as any).mission_type === "offre" ? "La proposition" : "Le besoin"}
                   </h2>
                   {(mission as any).mission_type === "offre" && (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-success/15 text-success text-[11px] font-body font-semibold tracking-wide">
@@ -1452,15 +1470,15 @@ const SmallMissionDetail = () => {
                 </div>
               </section>
 
-              {/* En échange */}
-              {mission.exchange_offer && (
-                <aside className="border-l-2 border-primary/40 bg-muted/40 pl-4 py-3 rounded-r-lg">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-                    {(mission as any).mission_type === "offre" ? "Souhaité en échange" : "En échange"}
-                  </p>
-                  <p className="text-sm md:text-base text-foreground/85 italic leading-snug">
-                    « {mission.exchange_offer} »
-                  </p>
+              {/* En retour (lot E18) : une seule fois sur la fiche, la ligne de
+                  l'auteur, sinon sa ligne « ce que je propose volontiers »,
+                  sinon la phrase fixe en corps normal, sans guillemets. */}
+              {exchangeLine.kind === "fixed" ? (
+                <p className="text-base text-foreground/85 leading-relaxed" data-testid="mission-exchange-line">{exchangeLine.text}</p>
+              ) : (
+                <aside className="border-l-2 border-primary/40 bg-muted/40 pl-4 py-3 rounded-r-lg" data-testid="mission-exchange-line">
+                  <p className="text-sm font-semibold text-muted-foreground mb-1">{exchangeLine.label}</p>
+                  <p className="text-base text-foreground/85 leading-snug">{exchangeLine.text}</p>
                 </aside>
               )}
             </div>
@@ -1617,30 +1635,28 @@ const SmallMissionDetail = () => {
                     <span className="font-semibold text-foreground">Vous êtes l'auteur.</span>{" "}
                     Chaque proposition ci-dessous n'est visible que par vous et la personne qui l'a écrite.
                     Quand une réponse vous convient, cliquez sur
-                    <span className="font-semibold text-foreground"> « Retenir cette personne »</span> :
-                    elle deviendra la <span className="font-semibold text-success">personne retenue pour vous aider</span>,
-                    visible ici et sur son profil public.
+                    <span className="font-semibold text-foreground"> « Choisir »</span> suivi de son prénom :
+                    la conversation s'ouvre, et cette personne apparaît ici et sur son profil public.
                   </>
                 ) : (
                   <>
-                    <span className="font-semibold text-foreground">Adressez une proposition privée.</span>{" "}
-                    Seul {author?.first_name || "l'auteur"} peut la lire. Si vous êtes
-                    <span className="font-semibold text-foreground"> retenu(e) pour l'aider</span>, vous apparaîtrez alors
-                    comme <span className="font-semibold text-success">« personne retenue »</span> ici et sur votre profil public.
+                    <span className="font-semibold text-foreground">Votre réponse reste privée.</span>{" "}
+                    {author?.first_name || "L'auteur"} seul(e) la lit. Si {author?.first_name || "l'auteur"} vous
+                    <span className="font-semibold text-foreground"> choisit</span>, votre prénom apparaît ici et sur votre profil public.
                   </>
                 )}
               </div>
 
               {responses.length === 0 ? (
                 <div className="bg-muted/40 rounded-2xl p-6 text-center mb-5">
-                  <p className="text-muted-foreground italic">
-                    Pas encore de réponse. Soyez la première personne à réagir.
+                  <p className="text-muted-foreground">
+                    {isAuthor ? "Les réponses arrivent ici." : "Vous seriez la première réponse."}
                   </p>
                 </div>
               ) : (
                 <ul
                   className="space-y-3 mb-6 list-none p-0"
-                  aria-label={`Réponses à la mission (${responses.length})`}
+                  aria-label={`Réponses au besoin (${responses.length})`}
                 >
                   {responses.map((r: any) => (
                     <li key={r.id}>
@@ -1665,46 +1681,30 @@ const SmallMissionDetail = () => {
                 {responses.length > 0 ? `${responses.length} réponse${responses.length > 1 ? "s" : ""} envoyée${responses.length > 1 ? "s" : ""}.` : ""}
               </div>
 
-              {/* Chemin de réponse unique : la modale, qui porte l'aide à la
-                  rédaction et la mention de confidentialité. */}
+              {/* Lot E18 : le geste unique « Je peux » vit dans l'encart et la
+                  barre basse ; ici, le rappel du nombre de réponses. */}
               {!isAuthor && mission.status === "open" && canApplyMissions && !hasResponded && (
-                pendingResponses.length >= 5 ? (
-                  <div className="rounded-2xl border border-warning/40 bg-warning-soft/40 p-4 text-sm text-foreground/85">
-                    <p className="font-medium">Coup de main temporairement fermé aux nouvelles réponses.</p>
-                    <p className="mt-1 text-muted-foreground">
-                      5 personnes ont déjà proposé leur aide. Une place se libérera si l'auteur en décline une.
-                    </p>
-                  </div>
-                ) : (
                 <section id="composer" className="scroll-mt-24 space-y-3" aria-labelledby="composer-heading">
-                  <h3 id="composer-heading" className="sr-only">Envoyer une réponse privée à l'auteur</h3>
-                  {pendingResponses.length > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      {pendingResponses.length} personne{pendingResponses.length > 1 ? "s" : ""} {pendingResponses.length > 1 ? "ont" : "a"} déjà proposé son aide (5 maximum).
+                  <h3 id="composer-heading" className="sr-only">Répondre à ce besoin</h3>
+                  {pendingResponses.length > 0 && !responsesCapReached && (
+                    <p className="text-sm text-muted-foreground">
+                      {pendingResponses.length} personne{pendingResponses.length > 1 ? "s ont" : " a"} déjà dit « Je peux » (5 au plus).
                     </p>
                   )}
+                  {responsesCapReached && (
+                    <div className="rounded-2xl border border-warning/40 bg-warning-soft/40 p-4 text-sm text-foreground/85">
+                      <p className="font-medium">Besoin complet pour l'instant.</p>
+                      <p className="mt-1 text-muted-foreground">{responsesCapMessage}</p>
+                    </div>
+                  )}
                   {identityRecommended && <IdentityRecommendedHint />}
-                  <Button
-                    size="lg"
-                    className="rounded-full gap-1.5"
-                    onClick={() => {
-                      setResponseModalOpen(true);
-                      trackEvent("mission_response_modal_opened", {
-                        metadata: {
-                          mission_id: mission.id,
-                          mission_type: (mission as any).mission_type === "offre" ? "offre" : "besoin",
-                        },
-                      });
-                    }}
-                  >
-                    <Send className="h-3.5 w-3.5" aria-hidden="true" />
-                    Répondre
-                  </Button>
-                  <p className="text-[11px] text-muted-foreground">
-                    Votre réponse n'est lue que par {author?.first_name || "l'auteur de l'annonce"}.
-                  </p>
+                  {(mission as any).mission_type === "offre" && !responsesCapReached && (
+                    <Button size="lg" variant="outline" className="rounded-full gap-1.5" onClick={openOfferModal}>
+                      <Send className="h-3.5 w-3.5" aria-hidden="true" />
+                      Solliciter cette aide
+                    </Button>
+                  )}
                 </section>
-                )
               )}
 
 
@@ -1712,7 +1712,7 @@ const SmallMissionDetail = () => {
               {!isAuthor && hasResponded && (
                 <div className="bg-success-soft/40 border border-success/30 rounded-2xl p-4 text-sm text-foreground/80 flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
-                  Vous avez déjà répondu. {author?.first_name || "L'auteur"} vous répondra dans la messagerie, une notification vous préviendra.
+                  Votre « Je peux » est parti. {author?.first_name || "L'auteur"} vous répond dans la messagerie, une notification vous prévient.
                 </div>
               )}
               {!isAuthor && mission.status === "open" && !canApplyMissions && accessLevel === 1 && (
@@ -1758,7 +1758,7 @@ const SmallMissionDetail = () => {
         {/* ══════════════════════════════════════════════════════ */}
         {!isAuthor && myResponse?.status === "accepted" && mission.status === "completed" && (
           <section className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border max-w-3xl">
-            <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Votre retour sur cette mission</h2>
+            <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">Votre retour sur ce coup de main</h2>
             {feedbackSent[mission.user_id] ? (
               <div className="bg-muted/50 rounded-2xl p-4 flex items-center gap-2 text-sm text-muted-foreground">
                 <CheckCircle2 className="h-4 w-4 text-success" />
@@ -1768,7 +1768,7 @@ const SmallMissionDetail = () => {
               <InlineFeedbackForm
                 missionId={missionUuid!}
                 receiverId={mission.user_id}
-                receiverName={author?.first_name || "le publieur"}
+                receiverName={author?.first_name || "l'auteur du besoin"}
                 badges={CANDIDATE_BADGES}
                 onSubmitted={() => setFeedbackSent(prev => ({ ...prev, [mission.user_id]: true }))}
               />
@@ -1816,7 +1816,7 @@ const SmallMissionDetail = () => {
           const sectionTitle = anyNear ? "Près de chez vous" : "D'autres coups de main";
           const sectionSubtitle = anyNear
             ? `D'autres coups de main à ${cityLabel} et alentours`
-            : "Encore peu d'annonces dans votre secteur, voici des exemples récents à découvrir.";
+            : "Voici des besoins récents ailleurs en France.";
           return (
             <section className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border">
               <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-3">
@@ -1842,7 +1842,6 @@ const SmallMissionDetail = () => {
                     title={sanitizeUserTitle(rm.title) || rm.title}
                     city={titlecaseCity(rm.city)}
                     timeAgo={timeAgoFr(rm.created_at)}
-                    exchangeOffer={(rm as any).exchange_offer}
                   />
                 ))}
               </div>
@@ -1855,17 +1854,17 @@ const SmallMissionDetail = () => {
       <Dialog open={closeModalOpen} onOpenChange={setCloseModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Clôturer cette mission ?</DialogTitle>
+            <DialogTitle>Clore ce besoin ?</DialogTitle>
           </DialogHeader>
           <DialogDescription>
             {pendingResponses.length > 0
-              ? `Voulez-vous clôturer cette mission sans avoir sélectionné quelqu'un ? ${pendingResponses.length} personne${pendingResponses.length > 1 ? "s" : ""} en attente ${pendingResponses.length > 1 ? "seront prévenues" : "sera prévenue"}.`
-              : "Voulez-vous clôturer cette mission ? Personne n'y a répondu, aucune notification ne sera envoyée."}
+              ? `Le besoin se ferme. ${pendingResponses.length} personne${pendingResponses.length > 1 ? "s" : ""} en attente ${pendingResponses.length > 1 ? "reçoivent" : "reçoit"} un merci.`
+              : "Le besoin se ferme et quitte la page Entraide."}
           </DialogDescription>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCloseModalOpen(false)}>Annuler</Button>
             <Button variant="destructive" onClick={handleCloseNoSelect} disabled={closingNoSelect}>
-              {closingNoSelect ? "Clôture..." : "Clôturer"}
+              {closingNoSelect ? "Clôture..." : "Clore"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1889,7 +1888,29 @@ const SmallMissionDetail = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Modale de réponse (déclenchée depuis sidebar) */}
+      {/* Lot E18 : fenêtre « Je peux » (CanHelpDialog, lot E13), geste unique. */}
+      <CanHelpDialog
+        open={canHelpOpen}
+        firstName={author?.first_name ?? null}
+        needTitle={displayTitle}
+        needMeta={[cityLabel, durationLabel].filter(Boolean).join(" · ") || null}
+        needDescription={needExcerpt(mission.description, mission.title)}
+        needDateNeeded={mission.date_needed ?? null}
+        needEndDate={mission.end_date ?? null}
+        sending={submitting}
+        onCancel={() => setCanHelpOpen(false)}
+        onSend={async (message, exchangeDate) => {
+          const sent = await handleRespond(message, exchangeDate);
+          if (sent) {
+            try {
+              trackEvent("mission_can_help", { metadata: { mission_id: mission.id, source: "page", with_date: Boolean(exchangeDate) } });
+            } catch { /* mesure non bloquante */ }
+          }
+          setCanHelpOpen(false);
+        }}
+      />
+
+      {/* Modale de réponse d'une ancienne offre d'aide (mission_type offre) */}
       <MissionResponseModal
         open={responseModalOpen}
         onOpenChange={setResponseModalOpen}
@@ -1908,32 +1929,23 @@ const SmallMissionDetail = () => {
       />
 
     </div>
-      {/* Mobile sticky CTA */}
+      {/* Barre basse mobile (lot E18) : le même geste « Je peux », qui ouvre la fenêtre. */}
       {!isAuthor && mission.status === "open" && canApplyMissions && !hasResponded && (
-        <div className="lg:hidden fixed bottom-[var(--bottom-nav-h,0px)] md:bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]">
+        <div className="lg:hidden fixed bottom-[var(--bottom-nav-h,0px)] md:bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]" data-testid="mission-sticky-bar">
           {responsesCapReached ? (
-            <p className="text-xs text-center text-muted-foreground leading-relaxed">
-              Publication temporairement fermée aux nouvelles réponses. {responsesCapMessage}
+            <p className="text-sm text-center text-muted-foreground leading-relaxed">
+              Besoin complet pour l'instant. {responsesCapMessage}
             </p>
           ) : (
             <Button
               size="lg"
-              className="w-full rounded-full font-bold text-base shadow-lg shadow-primary/20"
-              onClick={() => {
-                setResponseModalOpen(true);
-                trackEvent("mission_response_modal_opened", {
-                  metadata: {
-                    mission_id: mission.id,
-                    mission_type: (mission as any).mission_type === "offre" ? "offre" : "besoin",
-                  },
-                });
-              }}
+              className="w-full rounded-full font-bold text-base"
+              onClick={() => ((mission as any).mission_type === "offre" ? openOfferModal() : openCanHelp("sticky"))}
             >
-              {(mission as any).mission_type === "offre" ? "Solliciter cette aide" : "Répondre à cette annonce"}
+              {(mission as any).mission_type === "offre" ? "Solliciter cette aide" : ENTRAIDE_COPY.canHelp}
             </Button>
           )}
         </div>
-
       )}
     </AppLayout>
   );

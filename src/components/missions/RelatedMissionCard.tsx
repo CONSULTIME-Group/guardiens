@@ -60,10 +60,13 @@ interface Props {
   title: string;
   city?: string | null;
   timeAgo?: string | null;
-  exchangeOffer?: string | null;
 }
 
-const RelatedMissionCard = ({ to, photo, category, title, city, timeAgo, exchangeOffer }: Props) => {
+/**
+ * Lot E18 (25/10/2026, n° 35) : la phrase d'échange quitte les cartes liées.
+ * Elle s'affiche une seule fois, sur la fiche du besoin.
+ */
+const RelatedMissionCard = ({ to, photo, category, title, city, timeAgo }: Props) => {
   const [imgError, setImgError] = useState(false);
   // Libellé lu dans la source unique : une catégorie hors des quatre
   // illustrées (courses, transport, autre...) ne doit jamais devenir « Animaux ».
@@ -91,11 +94,6 @@ const RelatedMissionCard = ({ to, photo, category, title, city, timeAgo, exchang
           <p className="text-sm text-muted-foreground font-medium">
             {city || "France"}{timeAgo ? ` · ${timeAgo}` : ""}
           </p>
-          {exchangeOffer && (
-            <p className="mt-3 pt-3 border-t border-border/50 text-xs text-muted-foreground italic line-clamp-2">
-              « {exchangeOffer} »
-            </p>
-          )}
         </div>
       </Link>
     );

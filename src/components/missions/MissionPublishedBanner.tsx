@@ -17,6 +17,7 @@
 import { Link } from "react-router-dom";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ENTRAIDE_COPY, publishedReachLine } from "@/lib/entraideCopy";
 
 export interface MissionPublishedBannerProps {
   /** Titre de la mission (utilisé pour navigator.share). */
@@ -31,6 +32,11 @@ export interface MissionPublishedBannerProps {
   onToast: (toast: { title: string; description: string; variant?: "destructive" }) => void;
   /** Route du dashboard. Par défaut /dashboard. */
   dashboardHref?: string;
+  /**
+   * Lot E18 : nombre de personnes à moins de 30 km (aperçu de la vague lu au
+   * formulaire), transmis à la navigation. Null : phrase sans nombre.
+   */
+  waveAudience?: number | null;
 }
 
 export function MissionPublishedBanner({
@@ -40,6 +46,7 @@ export function MissionPublishedBanner({
   onClose,
   onToast,
   dashboardHref = "/dashboard",
+  waveAudience = null,
 }: MissionPublishedBannerProps) {
   // Verrou de défense en profondeur : si l'une des deux conditions tombe,
   // on ne rend rien, même si le parent appelle ce composant à tort.
@@ -82,10 +89,11 @@ export function MissionPublishedBanner({
         <X className="h-4 w-4" />
       </button>
       <h2 className="font-heading font-semibold text-foreground pr-8">
-        Votre mission est en ligne.
+        {ENTRAIDE_COPY.needOnline}.
       </h2>
+      {/* Lot E18 (n° 28) : la première vague part à la publication, le texte le dit. */}
       <p className="mt-2 text-sm text-muted-foreground">
-        Elle est visible dès maintenant pour les membres qui consultent l'entraide près de chez eux. Les membres ayant activé une alerte dans votre zone seront prévenus au prochain envoi quotidien.
+        {publishedReachLine(waveAudience)} Vous choisissez qui vous aide.
       </p>
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <Button type="button" size="sm" onClick={handleShare}>

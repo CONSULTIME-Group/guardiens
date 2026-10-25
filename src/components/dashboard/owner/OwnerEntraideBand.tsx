@@ -164,7 +164,7 @@ export function OwnerEntraideBandView({
               <p className="text-muted-foreground text-[13px] mt-[6px]">Votre réponse est enregistrée, merci.</p>
             ) : (
               <div className="mt-[8px]">
-                <p className="text-muted-foreground text-[13px] mb-[8px]">Vous vous êtes rencontrés ?</p>
+                <p className="text-muted-foreground text-[13px] mb-[8px]">Le coup de main a eu lieu ?</p>
                 <MeetupAnswer
                   otherFirstName={ongoing.other_first_name}
                   busy={busyId === ongoing.id}

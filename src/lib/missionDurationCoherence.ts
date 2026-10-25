@@ -24,7 +24,7 @@ export const DURATION_LABEL: Record<string, string> = {
   full_day: "Journée",
   weekend: "Week-end",
   week: "Semaine",
-  several: "Plusieurs jours",
+  several: "Plusieurs passages",
 };
 
 /** Nombre de jours couverts par la période, bornes incluses. */

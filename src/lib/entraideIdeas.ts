@@ -1,15 +1,17 @@
 /**
  * Lot E4 (11/10/2026) : idées de la page Entraide et adresses qu'elles ouvrent.
- * Logique pure, testable sans rendu.
+ * Lot E18 (25/10/2026, décision de Jérémie) : « Un trajet » remplace
+ * « Nourrir le chat ». Logique pure, testable sans rendu.
  */
 
+/** label : texte de la tuile ; title : titre écrit dans le formulaire (10 caractères au moins). */
 export const ENTRAIDE_IDEAS = [
-  { key: "potager", label: "Arroser le potager" },
-  { key: "courses", label: "Faire les courses" },
-  { key: "meuble", label: "Monter un meuble" },
-  { key: "chien", label: "Promener le chien" },
-  { key: "chat", label: "Nourrir le chat" },
-  { key: "jeux", label: "Une partie de jeux de société" },
+  { key: "potager", label: "Arroser le potager", title: "Arroser le potager" },
+  { key: "courses", label: "Faire les courses", title: "Faire les courses" },
+  { key: "meuble", label: "Monter un meuble", title: "Monter un meuble" },
+  { key: "chien", label: "Promener le chien", title: "Promener le chien" },
+  { key: "trajet", label: "Un trajet", title: "Un trajet en voiture" },
+  { key: "jeux", label: "Une partie de jeux de société", title: "Une partie de jeux de société" },
 ] as const;
 
 export type EntraideIdeaKey = (typeof ENTRAIDE_IDEAS)[number]["key"];

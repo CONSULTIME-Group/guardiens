@@ -87,7 +87,7 @@ describe("Fenêtre « Je peux »", () => {
       </MemoryRouter>,
     );
     expect(screen.getByTestId("can-help-description").textContent).toContain("plantes d'intérieur");
-    expect(screen.getByRole("link", { name: "Voir l'annonce en entier" })).toHaveAttribute("href", "/petites-missions/rempoter-monsteras");
+    expect(screen.getByRole("link", { name: "Lire le besoin en entier" })).toHaveAttribute("href", "/petites-missions/rempoter-monsteras");
     expect(screen.getByText("à 3 km, Annecy · À convenir ensemble")).toBeInTheDocument();
   });
 

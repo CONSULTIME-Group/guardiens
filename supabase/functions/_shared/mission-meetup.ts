@@ -1,5 +1,5 @@
 /**
- * Entraide, fin d'échange : logique pure de la relance « Vous vous êtes rencontrés ? ».
+ * Entraide, fin d'échange : logique pure de la relance « Le coup de main a eu lieu ? ».
  *
  * Deux règles de date :
  *  - le besoin porte une date : la relance part le lendemain de cette date ;
@@ -71,7 +71,7 @@ export function isMeetupDue(m: MeetupCandidate, now: Date): boolean {
 }
 
 /** Objet et corps courts de la relance, pour l'email et la notification. */
-export const MEETUP_PROMPT_TITLE = "Vous vous êtes rencontrés ?";
+export const MEETUP_PROMPT_TITLE = "Le coup de main a eu lieu ?";
 
 export function meetupPromptBody(otherFirstName: string | null, missionTitle: string | null): string {
   const who = otherFirstName?.trim() || "la personne du coin";

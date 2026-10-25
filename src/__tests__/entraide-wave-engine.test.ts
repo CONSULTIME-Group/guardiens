@@ -62,13 +62,13 @@ describe("rythme des vagues", () => {
 describe("phrases envoyees", () => {
   it("annonce le prenom, la distance arrondie, le besoin et la date", () => {
     expect(waveHeadline("Jeanne", 3.4, "arroser les plantes", "22 septembre")).toBe(
-      "Jeanne, à 3 km, a besoin de quelqu'un pour arroser les plantes, 22 septembre.",
+      "Jeanne, à 3\u00A0km, cherche un coup de main\u00A0: «\u00A0arroser les plantes\u00A0», le 22 septembre.",
     );
   });
 
   it("reste lisible sans distance ni date connues", () => {
     expect(waveHeadline("Paul", null, "promener un chien", null)).toBe(
-      "Paul a besoin de quelqu'un pour promener un chien.",
+      "Paul cherche un coup de main\u00A0: «\u00A0promener un chien\u00A0».",
     );
   });
 
