@@ -1070,7 +1070,7 @@ const SmallMissionDetail = () => {
       // posé par la clôture) se distingue d'une autre personne choisie.
       if (myResponse.status === "declined" && isClosureDecline(myResponse)) {
         return (
-          <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-3">
+          <div className="bg-card p-5 rounded-card shadow-sm border border-border space-y-3">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-primary" />
               <p className="font-heading text-lg font-semibold text-foreground">{CLOSURE_DECLINE_TITLE}</p>
