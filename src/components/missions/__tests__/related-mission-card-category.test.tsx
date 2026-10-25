@@ -11,8 +11,8 @@ import RelatedMissionCard from "../RelatedMissionCard";
 describe("RelatedMissionCard, catégorie", () => {
   it.each([
     ["house", "bricolage"],
-    ["transport", "bienetre"],
-    ["errand", "verger"],
+    ["transport", "trajet"],
+    ["errand", "courses"],
     ["other", "bricolage"],
   ])("%s n'est jamais présenté comme Animaux", (category, spot) => {
     render(<MemoryRouter><RelatedMissionCard to="/x" category={category} title="Prêt de ponceuse" /></MemoryRouter>);

@@ -50,12 +50,14 @@ describe.runIf(enabled)("public_sitter_profiles, visibilité sans seuil", () => 
     }
   });
 
-  it("Canada : 2 gardiens dans la recherche et dans le compteur", async () => {
+  // Données réelles : le Canada comptait 2 gardiens au lot, 4 le 25/10/2026.
+  // La règle vérifiée est la cohérence recherche et compteur, sans chiffre figé.
+  it("Canada : la recherche et le compteur donnent le même nombre de gardiens", async () => {
     const pool = await anonRpc("search_sitter_pool", { p_country: "CA" });
     const counts = await anonRpc("search_sitter_country_counts", {});
     const ca = counts.find((c: any) => c.country === "CA")?.sitters;
-    expect(pool.length).toBe(2);
-    expect(ca).toBe(2);
+    expect(pool.length).toBeGreaterThanOrEqual(2);
+    expect(ca).toBe(pool.length);
     expect(pool.some((r: any) => r.profile_completion < 40)).toBe(true);
   }, 60000);
 });
