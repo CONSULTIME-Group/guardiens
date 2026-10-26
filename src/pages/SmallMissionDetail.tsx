@@ -1644,6 +1644,7 @@ const SmallMissionDetail = () => {
                     Quand une réponse vous convient, cliquez sur
                     <span className="font-semibold text-foreground"> « Choisir »</span> suivi de son prénom :
                     la conversation s'ouvre, et cette personne apparaît ici et sur son profil public.
+                    Une question avant de choisir ? Écrivez-lui directement.
                   </>
                 ) : (
                   <>

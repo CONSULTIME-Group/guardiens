@@ -151,6 +151,19 @@ const DEEP_LINK_TEMPLATES = new Set<string>([
   'review-reminder',
   'review-received',
   'relance-cp-manquant',
+  // Lot E23 : emails d'entraide reçus par l'auteur du besoin. Le bouton mène
+  // à la fiche du besoin, où se lisent les réponses.
+  'mission-response-received',
+  'mission-response-waiting',
+  'mission-wave-status',
+])
+
+// Lot E23 : gabarits d'entraide dont la cible est la fiche du besoin
+// (/petites-missions/{missionId}), lue dans templateData.missionId.
+const MISSION_DEEP_LINK_TEMPLATES = new Set<string>([
+  'mission-response-received',
+  'mission-response-waiting',
+  'mission-wave-status',
 ])
 
 // Lot Y1 (P4-06) : gabarits immédiats dont le bouton peut ouvrir une session,
@@ -165,6 +178,11 @@ const DEEP_LINK_SESSION_TEMPLATES = new Set<string>([
   'new-application',
   'first-application-received',
   'review-received',
+  // Lot E23 : emails immédiats d'entraide. La relance à 24 h
+  // (mission-response-waiting) garde la règle Y1 : lien direct derrière la
+  // connexion, puis retour sur la fiche.
+  'mission-response-received',
+  'mission-wave-status',
 ])
 const DEEP_LINK_SESSION_NOTICE =
   'Le bouton de cet email vous connecte directement pendant 2 heures : gardez ce message pour vous.'
@@ -1270,14 +1288,21 @@ Deno.serve(async (req) => {
       const sitId = typeof templateData?.sitId === 'string' && templateData.sitId
         ? templateData.sitId
         : null
+      const isUuid = (v: string) =>
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)
+      const missionId = typeof templateData?.missionId === 'string' && isUuid(templateData.missionId)
+        ? templateData.missionId
+        : null
+      const missionPath = MISSION_DEEP_LINK_TEMPLATES.has(templateName)
+        ? (missionId ? `/petites-missions/${missionId}` : '/petites-missions')
+        : null
       const targetPath = DEEP_LINK_TARGET_OVERRIDES[templateName]
+        ?? missionPath
         ?? (conversationId
           ? `/messages/${conversationId}`
           : (REVIEW_DEEP_LINK_TEMPLATES.has(templateName) && sitId
             ? `/review/${sitId}`
             : (sitId ? `/sits/${sitId}#candidatures` : '/messages')))
-      const isUuid = (v: string) =>
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)
       const { data: deepToken, error: deepErr } = await supabase.rpc('create_email_deep_link', {
         p_email: effectiveRecipient,
         p_target_path: targetPath,

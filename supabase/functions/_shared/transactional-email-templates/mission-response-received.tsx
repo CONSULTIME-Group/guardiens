@@ -6,23 +6,22 @@ import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import { ResponderList } from './_responder-list.tsx'
-import { normalizeResponders } from '../mission-responders.ts'
+import { normalizeResponders, authorMissionUrl } from '../mission-responders.ts'
 import type { TemplateEntry } from './registry.ts'
-
-const SITE_URL = 'https://guardiens.fr'
 
 interface Props {
   responderFirstName?: string
   missionTitle?: string
   missionId?: string
+  deepLinkUrl?: string
   messagePreview?: string
   /** Lot E17 : répondants en attente, chacun avec son jeton de choix (mission_pending_responders). */
   responders?: unknown
 }
 
-const Email = ({ responderFirstName, missionTitle, missionId, messagePreview, responders }: Props) => {
+const Email = ({ responderFirstName, missionTitle, missionId, deepLinkUrl, messagePreview, responders }: Props) => {
   const list = normalizeResponders(responders)
-  const pageUrl = missionId ? `${SITE_URL}/petites-missions/${missionId}` : `${SITE_URL}/petites-missions`
+  const authorUrl = authorMissionUrl(missionId, deepLinkUrl)
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
@@ -48,7 +47,7 @@ const Email = ({ responderFirstName, missionTitle, missionId, messagePreview, re
                 responders={list}
                 intro={list.length > 1 ? 'Les personnes prêtes à vous aider :' : undefined}
               />
-              <Button style={buttonGhost} href={pageUrl}>
+              <Button style={buttonGhost} href={authorUrl}>
                 Voir mon besoin
               </Button>
             </>
@@ -67,7 +66,7 @@ const Email = ({ responderFirstName, missionTitle, missionId, messagePreview, re
                 Cette proposition n'est visible que par vous. Prenez le temps de la lire, puis retenez
                 la personne qui vous convient pour organiser les détails par messagerie.
               </Text>
-              <Button style={button} href={pageUrl}>
+              <Button style={button} href={authorUrl}>
                 Voir la proposition
               </Button>
             </>

@@ -56,6 +56,23 @@ export function chooseUrl(token: string): string {
   return `${SITE_URL}/entraide/choisir?t=${encodeURIComponent(token)}`;
 }
 
+/**
+ * Lot E23 : lien de l'auteur vers la fiche de son besoin. Le lien profond
+ * (/acces?t=…) ouvre sa session ou le fait passer par la connexion, puis le
+ * dépose sur la fiche. Sans lien profond, la fiche porte ?vous=auteur : la vue
+ * visiteur affiche alors « C'est votre besoin » et la connexion.
+ */
+export const AUTHOR_PARAM = "vous";
+export const AUTHOR_PARAM_VALUE = "auteur";
+
+export function authorMissionUrl(missionId: unknown, deepLinkUrl?: unknown): string {
+  if (typeof deepLinkUrl === "string" && deepLinkUrl.startsWith(`${SITE_URL}/acces?t=`)) return deepLinkUrl;
+  const id = typeof missionId === "string" && /^[0-9a-f-]{36}$/i.test(missionId) ? missionId : null;
+  return id
+    ? `${SITE_URL}/petites-missions/${id}?${AUTHOR_PARAM}=${AUTHOR_PARAM_VALUE}`
+    : `${SITE_URL}/petites-missions`;
+}
+
 /** Libellé du bouton. */
 export function chooseLabel(r: Pick<PendingResponder, "firstName">): string {
   return r.firstName ? `Choisir ${r.firstName}` : "Choisir cette personne";

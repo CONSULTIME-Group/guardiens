@@ -292,6 +292,19 @@ const MissionResponseCard = ({
             )}
             {!isProjet && isAuthor && r.status === "pending" && (
               <>
+                {/* Lot E23 : écrire avant de choisir, pour répondre à une question. */}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={onOpenMessages}
+                  disabled={processing}
+                  data-write-before-choose
+                  aria-label={`${r.conversation_id ? "Ouvrir la conversation avec" : "Écrire à"} ${r.responder?.first_name || "cette personne"}`}
+                  className="rounded-full gap-2 ml-auto min-h-11"
+                >
+                  <MessageSquare aria-hidden="true" className="h-3.5 w-3.5" />
+                  <span>{r.conversation_id ? "Ouvrir la conversation" : `Écrire à ${r.responder?.first_name || "cette personne"}`}</span>
+                </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button
@@ -300,7 +313,7 @@ const MissionResponseCard = ({
                       aria-disabled={processing}
                       aria-busy={processing}
                       aria-label={`Choisir ${r.responder?.first_name || "cette personne"}`}
-                      className="rounded-full ml-auto min-h-11"
+                      className="rounded-full min-h-11"
                     >
                       <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5 mr-1" />
                       <span>{processing ? "Enregistrement en cours..." : `Choisir ${r.responder?.first_name || "cette personne"}`}</span>

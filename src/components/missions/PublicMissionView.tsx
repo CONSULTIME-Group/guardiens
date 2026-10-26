@@ -16,6 +16,7 @@ import { missionEntraideCity, useAnimalCareLink } from "@/lib/entraideMissionLin
 import { resolveExchangeLine } from "@/lib/entraideExchange";
 import { ENTRAIDE_COPY } from "@/lib/entraideCopy";
 import NeedPaperPanel from "@/components/entraide/NeedPaperPanel";
+import AuthorReturnBanner from "@/components/entraide/AuthorReturnBanner";
 import { needTitleSizeClass, needWhenLabel } from "@/lib/needVisual";
 import { notifiedLine, responsesLine } from "@/lib/missionNotifiedCount";
 
@@ -632,6 +633,8 @@ const PublicMissionView = ({
       </Head>
 
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        {/* Lot E23 : auteur arrivé d'un email sans session. */}
+        <AuthorReturnBanner redirect={redirect} />
         {/* Breadcrumb (avec maillon ville pour le SEO local) */}
         <div className="mb-8">
           <PageBreadcrumb
