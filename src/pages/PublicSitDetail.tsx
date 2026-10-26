@@ -79,6 +79,14 @@ const PublicSitDetail = () => {
 
  const sitViewFired = useRef(false);
 
+  // Lot perf 12 : la vraie fiche remplace son premier affichage (src/boot/bootSitEntry.ts)
+  // dès son premier rendu, avant que le navigateur ne peigne.
+  useLayoutEffect(() => {
+    if (loading) return;
+    const done = (window as unknown as { __guardiensBootSitDone?: () => void }).__guardiensBootSitDone;
+    if (typeof done === "function") done();
+  }, [loading]);
+
   // Lot perf 1 : jalon SIT_HERO (contenu de la fiche affiché), src/lib/perfMarks.ts.
   useEffect(() => {
     if (!loading && sit) markMilestone("SIT_HERO");

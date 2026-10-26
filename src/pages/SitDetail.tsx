@@ -404,7 +404,7 @@ const SitDetail = () => {
 
 
   return (
-    <div className="px-3 pt-4 pb-44 md:p-10 md:pb-40 max-w-4xl mx-auto animate-fade-in">
+    <div className="px-3 pt-4 pb-44 md:p-10 md:pb-40 max-w-4xl mx-auto">
       <Head>
         <title>{sit.title ? `${sit.title} · Mon annonce` : "Mon annonce"}</title>
         <meta name="robots" content="noindex, nofollow" />
