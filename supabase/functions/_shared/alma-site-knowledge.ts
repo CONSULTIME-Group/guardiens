@@ -135,11 +135,12 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
   {
     key: "questions",
     path: "/questions/:id",
+    aliases: ["/questions/nouvelle"],
     label: "Questions de l'entraide",
-    purpose: "Quelques questions de membres en lecture seule (animaux, jardin, maison, garde). L'espace de questions est en attente depuis le 26/10/2026 : Alma répond elle-même aux questions et oriente vers l'Entraide pour un coup de main.",
+    purpose: "Questions posées par les membres (animaux, jardin, maison, garde) ; chacun peut répondre, l'auteur choisit la réponse qui l'aide.",
     audience: "all",
-    triggers: [],
-    opener: "Voici une question déjà posée par un membre.",
+    triggers: ["question", "conseil", "quelqu'un sait", "avis"],
+    opener: "Une question attend une réponse près de chez vous.",
   },
   {
     key: "projets",
