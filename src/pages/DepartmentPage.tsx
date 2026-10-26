@@ -21,6 +21,7 @@ import { departmentIn, departmentInCapitalized, departmentOf, rewriteDepartmentM
 import { countLabel } from "@/lib/pluralizeFr";
 import DepartmentSitterLinks, { useDepartmentPublicSitters } from "@/components/seo/DepartmentSitterLinks";
 import { isDepartmentIndexable } from "@/lib/departmentIndexability";
+import { asciiSlug } from "@/lib/asciiSlug";
 
 const DepartmentPage = () => {
  const { slug } = useParams<{ slug: string }>();
@@ -50,6 +51,19 @@ const DepartmentPage = () => {
     enabled: !!slug && !isLoading && !pageFailed && !page,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
+      // Adresse accentuée (« isère », « rhône ») : la page vit sous son slug
+      // sans accent (constat Search Console du 26/10/2026).
+      const plain = asciiSlug(slug!);
+      if (plain && plain !== slug) {
+        const { data: plainPage, error: plainError } = await supabase
+          .from("seo_department_pages" as any)
+          .select("slug")
+          .eq("slug", plain)
+          .eq("published", true)
+          .maybeSingle();
+        if (plainError) throw plainError;
+        if (plainPage) return plain;
+      }
       let current = slug!;
       const visited = new Set<string>([current]);
       for (let i = 0; i < 5; i++) {

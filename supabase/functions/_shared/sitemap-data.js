@@ -1,7 +1,7 @@
 import { sitRichnessRejectionReason } from "./sitIndexability.js";
 import { isAssociationIndexable } from "./associationIndexability.js";
 import { isSitterProfileIndexable } from "./sitterProfileIndexability.js";
-import { mergedBreedTarget } from "./breeds/breedFicheMerges.js";
+import { liveMergedBreedTarget } from "./breeds/breedFicheMerges.js";
 import { isIndexableEntraideMission, isIndexableProjetMission } from "./entraideMissionIndexability.js";
 import { normalizeLastmod } from "./sitemap-core.js";
 import { departmentsWithPublishedCity } from "./departmentIndexability.js";
@@ -174,7 +174,7 @@ export async function collectSitemapData({ readAll, fetchOrCache, maxUpdatedAtWi
         // Fiches fusionnées (doublons : jack russel, gris du gabon) exclues,
         // leur URL redirige vers la fiche conservée (BreedPage).
         return rows
-          .filter(bp => !mergedBreedTarget(bp.species, bp.breed))
+          .filter(bp => !liveMergedBreedTarget(bp.species, bp.breed, rows))
           .map(bp => ({
             loc: `/races/${bp.species.toLowerCase()}-${slugifyBreed(bp.breed)}`,
             lastmod: normalizeLastmod(bp.generated_at, today),

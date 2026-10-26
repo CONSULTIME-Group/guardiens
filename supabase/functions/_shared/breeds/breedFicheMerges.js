@@ -53,3 +53,20 @@ export function mergedBreedTarget(species, breed) {
   if (!bySpecies) return null;
   return bySpecies[keyOf(breed)] || null;
 }
+
+/**
+ * Comme mergedBreedTarget, mais seulement quand la fiche cible existe bien
+ * parmi `rows` (même espèce). Une cible supprimée de la base ne doit jamais
+ * emporter la fiche source avec elle : la source reste alors affichée,
+ * listée et indexée (constat Search Console du 26/10/2026 : « gris du
+ * gabon » redirigeait vers « perroquet gris du gabon », absente, d'où deux
+ * URL en 404).
+ */
+export function liveMergedBreedTarget(species, breed, rows) {
+  const target = mergedBreedTarget(species, breed);
+  if (!target) return null;
+  const sp = (species || "").toLowerCase();
+  const key = keyOf(target);
+  const exists = (rows || []).some((r) => (r?.species || "").toLowerCase() === sp && keyOf(r?.breed) === key);
+  return exists ? target : null;
+}

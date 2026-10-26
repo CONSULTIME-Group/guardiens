@@ -9,4 +9,5 @@
 export {
   BREED_FICHE_MERGES,
   mergedBreedTarget,
+  liveMergedBreedTarget,
 } from "../../supabase/functions/_shared/breeds/breedFicheMerges.js";
