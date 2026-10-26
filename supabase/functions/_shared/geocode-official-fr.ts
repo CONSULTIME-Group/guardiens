@@ -93,3 +93,53 @@ export async function geocodeOfficialFr(
     return null;
   }
 }
+
+/**
+ * Lot G2 : noms des communes d'un code postal français (geo.api.gouv.fr).
+ * [] = code postal inconnu ; null = service injoignable (aucune décision).
+ */
+export async function communeNamesForPostal(
+  postal: string,
+  fetchImpl: typeof fetch = fetch,
+  timeoutMs = OFFICIAL_FR_TIMEOUT_MS,
+): Promise<string[] | null> {
+  if (!/^\d{5}$/.test((postal ?? "").trim())) return [];
+  try {
+    const params = new URLSearchParams({ codePostal: postal.trim(), fields: "nom", format: "json" });
+    const res = await fetchImpl(`https://geo.api.gouv.fr/communes?${params}`, {
+      headers: { "User-Agent": "Guardiens/1.0 (geocode)" },
+      signal: typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(timeoutMs) : undefined,
+    });
+    if (!res.ok) return null;
+    const rows = await res.json();
+    if (!Array.isArray(rows)) return null;
+    return rows.map((r: { nom?: unknown }) => (typeof r?.nom === "string" ? r.nom : "")).filter(Boolean);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Lot G2 : ce point est-il dans une commune française (geo.api.gouv.fr,
+ * recherche par coordonnées) ? true ou false ; null si le service ne répond pas.
+ */
+export async function pointIsInFrance(
+  lat: number,
+  lng: number,
+  fetchImpl: typeof fetch = fetch,
+  timeoutMs = OFFICIAL_FR_TIMEOUT_MS,
+): Promise<boolean | null> {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  try {
+    const params = new URLSearchParams({ lat: String(lat), lon: String(lng), fields: "nom", format: "json" });
+    const res = await fetchImpl(`https://geo.api.gouv.fr/communes?${params}`, {
+      headers: { "User-Agent": "Guardiens/1.0 (geocode)" },
+      signal: typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(timeoutMs) : undefined,
+    });
+    if (!res.ok) return null;
+    const rows = await res.json();
+    return Array.isArray(rows) ? rows.length > 0 : null;
+  } catch {
+    return null;
+  }
+}

@@ -57,3 +57,72 @@ export function isBackfillCandidate(p: ProfilePlace & { latitude?: number | null
   if (p.latitude != null && p.longitude != null) return false;
   return planProfileGeocode(p).kind !== "none";
 }
+
+/**
+ * Lot G2 : un lieu étranger n'apparaît jamais en France.
+ *
+ * Constat du 26/10/2026 (comptes actifs) : 26 profils au pays étranger avaient
+ * un département français tiré de leur code postal (Tübingen 72076 dans la
+ * Sarthe, Rio de Janeiro 13000 dans les Bouches-du-Rhône), 9 profils au pays
+ * étranger avaient un point en France (centre de commune posé par le formulaire
+ * avant le passage « Je vis à l'étranger »), et des profils au pays France
+ * portaient une ville étrangère (Casablanca 20220, Bruxelles 01180).
+ * Un contrôle strict ville / code postal écartait 57 vrais habitants
+ * (Cherbourg 50100, Évian 74500, Lyon 69100) : il n'est pas appliqué seul.
+ */
+
+export type PlaceStatus = "country_mismatch" | "foreign_city";
+
+/** Pays du périmètre français (outre-mer compris), même liste que les compteurs départementaux. */
+export const FRENCH_SCOPE_COUNTRIES = ["FR", "PF", "NC", "RE", "GP", "MQ", "GF", "YT", "PM", "WF", "BL", "MF", "TF"];
+
+export function isFrenchScopeCountry(country: string | null | undefined): boolean {
+  const c = (country ?? "").trim().toUpperCase();
+  return c === "" || c === "FRANCE" || FRENCH_SCOPE_COUNTRIES.includes(c);
+}
+
+/**
+ * Cadre large autour de la métropole et de la Corse : seul un point dans ce
+ * cadre est soumis à la question « commune française ? » (pointIsInFrance).
+ * Il déborde sur la Belgique, la Suisse, l'Allemagne et l'Espagne : il ne
+ * décide jamais seul.
+ */
+export function isNearMetropolitanFrance(lat: number | null | undefined, lng: number | null | undefined): boolean {
+  if (typeof lat !== "number" || typeof lng !== "number" || !Number.isFinite(lat) || !Number.isFinite(lng)) return false;
+  return lat >= 41.3 && lat <= 51.2 && lng >= -5.3 && lng <= 9.7;
+}
+
+const norm = (v: string) => v
+  .normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
+  .replace(/[^a-z0-9]+/g, " ").trim()
+  .replace(/(^| )st(e?)( |$)/g, " saint$2 ").replace(/\s+/g, " ").trim();
+
+/**
+ * La ville saisie est-elle une commune du code postal ? Accents, casse, tirets
+ * et « St » ignorés ; « Lyon 3e », « Paris 15 », « Marseille 13e arrondissement »
+ * acceptés pour la commune « Lyon », « Paris », « Marseille ».
+ */
+export function cityMatchesCommunes(city: string, communes: string[]): boolean {
+  const c = norm(city);
+  if (!c) return false;
+  return communes.some((nom) => {
+    const n = norm(nom);
+    if (!n) return false;
+    if (n === c) return true;
+    return c.startsWith(n + " ") && /^(\d+( ?(e|er|eme))?( arrondissement)?|cedex.*)$/.test(c.slice(n.length + 1));
+  });
+}
+
+/**
+ * Décision pour un profil dont le pays est hors du périmètre français : un point
+ * situé dans une commune française (inFrance, lu par pointIsInFrance) est
+ * refusé (country_mismatch) ; un point ailleurs est gardé ; sans réponse du
+ * service (inFrance null), rien n'est décidé.
+ */
+export function foreignPointDecision(
+  country: string | null | undefined,
+  inFrance: boolean | null,
+): "keep" | "reject" | "not_applicable" {
+  if (isFrenchScopeCountry(country)) return "not_applicable";
+  return inFrance === true ? "reject" : "keep";
+}

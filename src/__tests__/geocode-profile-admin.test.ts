@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import ts from "typescript";
-import { geocodeOfficialFr } from "../../supabase/functions/_shared/geocode-official-fr";
+import { communeNamesForPostal, geocodeOfficialFr, pointIsInFrance } from "../../supabase/functions/_shared/geocode-official-fr";
 import * as profileRules from "../../supabase/functions/_shared/profile-geocode-rules";
 
 // Lot G1 : toutes les importations sont retirées et injectées ci-dessous
@@ -10,9 +10,9 @@ const source = readFileSync("supabase/functions/geocode-profile/index.ts", "utf8
   .replace(/import\s[\s\S]*?\sfrom\s+"[^"]+";/g, "");
 const compiled = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
 
-function harness({ admin = false, user = true, roleError = null, city = "", country = "FR", postal = "", secret = "trigger-secret", fetchResponse = undefined as undefined | ((url: string) => Promise<any>) } = {}) {
+function harness({ admin = false, user = true, roleError = null, city = "", country = "FR", postal = "", latitude = null as number | null, longitude = null as number | null, secret = "trigger-secret", fetchResponse = undefined as undefined | ((url: string) => Promise<any>) } = {}) {
   let handler: (req: Request) => Promise<Response>;
-  const profileRead = vi.fn().mockResolvedValue({ data: { city, postal_code: postal, country }, error: null });
+  const profileRead = vi.fn().mockResolvedValue({ data: { city, postal_code: postal, country, latitude, longitude }, error: null });
   const update = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) });
   const rpc = vi.fn().mockResolvedValue({ data: admin, error: roleError });
   const client = {
@@ -25,6 +25,8 @@ function harness({ admin = false, user = true, roleError = null, city = "", coun
   const fetch = vi.fn(fetchResponse ?? (async () => ({ ok: true, json: async () => ({ features: [{ geometry: { coordinates: [2, 48] } }] }) })));
   const injected = {
     geocodeOfficialFr: (q: string, isPostal: boolean) => geocodeOfficialFr(q, isPostal, fetch as unknown as typeof globalThis.fetch),
+    communeNamesForPostal: (postal: string) => communeNamesForPostal(postal, fetch as unknown as typeof globalThis.fetch),
+    pointIsInFrance: (lat: number, lng: number) => pointIsInFrance(lat, lng, fetch as unknown as typeof globalThis.fetch),
     ...profileRules,
     startCronRun: async () => ({ id: null, finish: async () => {}, fail: async () => {} }),
   };
@@ -64,13 +66,13 @@ describe("manual profile geocoding authorization", () => {
     const h = harness({ city: "Paris" });
     expect(await (await h.run({ "x-geocode-secret": "trigger-secret" })).json()).toMatchObject({ ok: true, lat: 48, lng: 2 });
     expect(h.rpc).not.toHaveBeenCalled();
-    expect(h.update).toHaveBeenCalledWith({ latitude: 48, longitude: 2 });
+    expect(h.update).toHaveBeenCalledWith({ latitude: 48, longitude: 2, place_status: null, place_status_at: null });
   });
   it("allows an authenticated admin to recalculate coordinates", async () => {
     const h = harness({ admin: true, city: "Paris" });
     expect(await (await h.run({ Authorization: "Bearer admin" })).json()).toMatchObject({ ok: true });
     expect(h.rpc).toHaveBeenCalledWith("has_role", { _user_id: "caller", _role: "admin" });
-    expect(h.update).toHaveBeenCalledWith({ latitude: 48, longitude: 2 });
+    expect(h.update).toHaveBeenCalledWith({ latitude: 48, longitude: 2, place_status: null, place_status_at: null });
   });
   it("lot G1 : sans ville, situe par le code postal français (commune la plus peuplée)", async () => {
     const h = harness({ postal: "69380", fetchResponse: async (url: string) => {
@@ -83,7 +85,7 @@ describe("manual profile geocoding authorization", () => {
     } });
     expect(await (await h.run({ "x-geocode-secret": "trigger-secret" })).json())
       .toMatchObject({ ok: true, lat: 45.87, lng: 4.7, source: "communes_code_postal" });
-    expect(h.update).toHaveBeenCalledWith({ latitude: 45.87, longitude: 4.7 });
+    expect(h.update).toHaveBeenCalledWith({ latitude: 45.87, longitude: 4.7, place_status: null, place_status_at: null });
   });
   it("returns a skipped result without writing when the city is missing", async () => {
     const h = harness({ admin: true });
@@ -105,7 +107,7 @@ describe("international geocoding fallback", () => {
     const h = harness({ ...canada, fetchResponse: async (url) => url.includes("nominatim")
       ? { ok: false, status: 403 } : response({ features: [saintLudger()] }) });
     expect(await (await h.run(adminHeaders)).json()).toMatchObject({ ok: true, source: "photon" });
-    expect(h.update).toHaveBeenCalledWith({ latitude: 45.74213, longitude: -70.69462 });
+    expect(h.update).toHaveBeenCalledWith({ latitude: 45.74213, longitude: -70.69462, place_status: null, place_status_at: null });
     expect(new URL(h.fetch.mock.calls[0][0]).searchParams.get("country")).toBe("Canada");
   });
   it("uses the fallback after a network failure", async () => {
@@ -146,5 +148,72 @@ describe("international geocoding fallback", () => {
     const h = harness({ ...canada, fetchResponse: async () => ({ ok: false, status: 503 }) });
     expect(await (await h.run(adminHeaders)).json()).toMatchObject({ skipped: "no result" });
     expect(h.update).not.toHaveBeenCalled();
+  });
+});
+
+describe("lot G2 : un lieu étranger n'apparaît jamais en France", () => {
+  const secretHeaders = { "x-geocode-secret": "trigger-secret" };
+  const removed = { latitude: null, longitude: null, place_status: expect.any(String), place_status_at: expect.any(String) };
+
+  it("pays étranger : un point trouvé en métropole est refusé (country_mismatch)", async () => {
+    const h = harness({ city: "Rezé", country: "GB", postal: "44400", fetchResponse: async (url: string) => {
+      if (url.includes("nominatim")) return response([{ lat: "47.17", lon: "-1.56" }]);
+      if (url.includes("geo.api.gouv.fr") && url.includes("lat=")) return response([{ nom: "Rezé" }]);
+      return response([]);
+    } });
+    expect(await (await h.run(secretHeaders)).json()).toMatchObject({ skipped: "country_mismatch" });
+    expect(h.update).toHaveBeenCalledWith({ ...removed, place_status: "country_mismatch" });
+  });
+
+  it("pays étranger introuvable avec un ancien point en métropole : point retiré", async () => {
+    const h = harness({ city: "Rocourt", country: "BE", postal: "13320", latitude: 43.44, longitude: 5.41,
+      fetchResponse: async (url: string) => (url.includes("geo.api.gouv.fr") && url.includes("lat=")
+        ? response([{ nom: "Bouc-Bel-Air" }]) : response([])) });
+    expect(await (await h.run(secretHeaders)).json()).toMatchObject({ skipped: "country_mismatch" });
+    expect(h.update).toHaveBeenCalledWith({ ...removed, place_status: "country_mismatch" });
+  });
+
+  it("pays étranger situé chez lui : point gardé", async () => {
+    const h = harness({ city: "Tübingen", country: "DE", postal: "72076", fetchResponse: async (url: string) => {
+      if (url.includes("nominatim")) return response([{ lat: "48.52", lon: "9.05" }]);
+      return response([]);
+    } });
+    expect(await (await h.run(secretHeaders)).json()).toMatchObject({ ok: true });
+    expect(h.update).toHaveBeenCalledWith({ latitude: 48.52, longitude: 9.05, place_status: null, place_status_at: null });
+  });
+
+  it("pays étranger, service des communes injoignable : rien n'est décidé, ancien point gardé", async () => {
+    const h = harness({ city: "Bruxelles", country: "BE", postal: "13001", latitude: 50.85, longitude: 4.35,
+      fetchResponse: async (url: string) => { if (url.includes("geo.api.gouv.fr")) throw new Error("down"); return response([]); } });
+    expect(await (await h.run(secretHeaders)).json()).toMatchObject({ skipped: "no result" });
+    expect(h.update).not.toHaveBeenCalled();
+  });
+
+  it("pays France, ville étrangère hors des communes du code postal : foreign_city", async () => {
+    const h = harness({ city: "Casablanca", country: "FR", postal: "20220", fetchResponse: async (url: string) => {
+      if (url.includes("geo.api.gouv.fr")) return response([{ nom: "L'Île-Rousse" }, { nom: "Algajola" }]);
+      if (url.includes("photon")) return response({ features: [{ properties: { name: "Casablanca", countrycode: "MA" }, geometry: { coordinates: [-7.6, 33.6] } }] });
+      return response({ features: [{ geometry: { coordinates: [8.9, 42.6] } }] });
+    } });
+    expect(await (await h.run(secretHeaders)).json()).toMatchObject({ skipped: "foreign_city", found_country: "MA" });
+    expect(h.update).toHaveBeenCalledWith({ ...removed, place_status: "foreign_city" });
+  });
+
+  it("pays France, ancien nom de commune français : situé comme avant (aucun faux positif)", async () => {
+    const h = harness({ city: "Cherbourg", country: "FR", postal: "50100", fetchResponse: async (url: string) => {
+      if (url.includes("geo.api.gouv.fr")) return response([{ nom: "Cherbourg-en-Cotentin" }]);
+      if (url.includes("photon")) return response({ features: [{ properties: { name: "Cherbourg", countrycode: "FR" } }] });
+      return response({ features: [{ geometry: { coordinates: [-1.62, 49.64] } }] });
+    } });
+    expect(await (await h.run(secretHeaders)).json()).toMatchObject({ ok: true, source: "ban" });
+    expect(h.update).toHaveBeenCalledWith({ latitude: 49.64, longitude: -1.62, place_status: null, place_status_at: null });
+  });
+
+  it("service des communes injoignable : aucune décision, situé comme avant", async () => {
+    const h = harness({ city: "Bruxelles", country: "FR", postal: "01180", fetchResponse: async (url: string) => {
+      if (url.includes("geo.api.gouv.fr")) throw new Error("down");
+      return response({ features: [{ geometry: { coordinates: [5.2, 46.1] } }] });
+    } });
+    expect(await (await h.run(secretHeaders)).json()).toMatchObject({ ok: true });
   });
 });
