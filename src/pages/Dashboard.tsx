@@ -158,6 +158,10 @@ const Dashboard = () => {
     }
   }, [toast]);
 
+  // Lot perf 13 : le fondu ne sert qu'au changement d'espace. Au premier
+  // affichage, une photo peinte à opacité 0 n'est jamais candidate LCP et la
+  // page apparaissait 0,5 s plus tard.
+  const [roleSwitched, setRoleSwitched] = useState(false);
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
@@ -165,6 +169,7 @@ const Dashboard = () => {
       return;
     }
     if (activeRole !== displayedRole) {
+      setRoleSwitched(true);
       setTransitioning(true);
       const timeout = setTimeout(() => {
         setDisplayedRole(activeRole);
@@ -182,7 +187,7 @@ const Dashboard = () => {
 
       <div
         key={displayedRole}
-        className={transitioning ? "animate-fade-out" : "animate-fade-in"}
+        className={transitioning ? "animate-fade-out" : roleSwitched ? "animate-fade-in" : undefined}
       >
         <DashboardErrorBoundary
           section={displayedRole === "owner" ? "OwnerDashboard" : "SitterDashboard"}

@@ -489,7 +489,7 @@ const EditSit = () => {
 
   return (
     <>
-    <div className="px-4 md:px-10 py-6 max-w-3xl mx-auto animate-fade-in pb-36">
+    <div className="px-4 md:px-10 py-6 max-w-3xl mx-auto pb-36">
       <Head>
         <meta name="robots" content="noindex, nofollow" />
         <title>Modifier mon annonce</title>
