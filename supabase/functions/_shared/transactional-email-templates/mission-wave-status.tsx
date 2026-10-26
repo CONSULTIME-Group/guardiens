@@ -7,6 +7,7 @@ import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import { ResponderList } from './_responder-list.tsx'
 import type { TemplateEntry } from './registry.ts'
+import { authorMissionUrl } from '../mission-responders.ts'
 
 const SITE_URL = 'https://guardiens.fr'
 
@@ -14,6 +15,7 @@ interface Props {
   ownerFirstName?: string
   missionTitle?: string
   missionId?: string
+  deepLinkUrl?: string
   message?: string
   /**
    * Lot E20 : variante « vivier épuisé ». Nombre de personnes disponibles à
@@ -25,8 +27,9 @@ interface Props {
   responders?: unknown
 }
 
-const MissionWaveStatusEmail = ({ ownerFirstName, missionTitle, missionId, message, exhaustedCount, responders }: Props) => {
+const MissionWaveStatusEmail = ({ ownerFirstName, missionTitle, missionId, deepLinkUrl, message, exhaustedCount, responders }: Props) => {
   const pageUrl = missionId ? `${SITE_URL}/petites-missions/${missionId}` : null
+  const authorUrl = authorMissionUrl(missionId, deepLinkUrl)
   const exhausted = typeof exhaustedCount === 'number' && exhaustedCount > 0
   return (
     <Html lang="fr" dir="ltr">
@@ -53,7 +56,7 @@ const MissionWaveStatusEmail = ({ ownerFirstName, missionTitle, missionId, messa
 
           {pageUrl && (
             <Section style={ctaSection}>
-              <Button style={button} href={pageUrl}>
+              <Button style={button} href={authorUrl}>
                 Voir ma demande
               </Button>
             </Section>
