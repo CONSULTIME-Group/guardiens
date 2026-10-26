@@ -121,3 +121,14 @@ describe("branchements (lot G2)", () => {
     expect(fields).toMatch(/postal_code: "", country: [^\n]*latitude: null, longitude: null/);
   });
 });
+
+describe("homonymes (correctif G2 du 26/10)", () => {
+  it("une commune française dont le nom commence par la ville saisie suffit", async () => {
+    const { frenchCommuneNameExists } = await import("../../../supabase/functions/_shared/geocode-official-fr");
+    await expect(frenchCommuneNameExists("Evian", ok([{ nom: "Évian-les-Bains" }]))).resolves.toBe(true);
+    await expect(frenchCommuneNameExists("Faverges", ok([{ nom: "Faverges-Seythenex" }]))).resolves.toBe(true);
+    await expect(frenchCommuneNameExists("Casablanca", ok([]))).resolves.toBe(false);
+    await expect(frenchCommuneNameExists("Casa", ok([{ nom: "Casalabriva" }]))).resolves.toBe(false);
+    await expect(frenchCommuneNameExists("Evian", (async () => { throw new Error("down"); }) as unknown as typeof fetch)).resolves.toBeNull();
+  });
+});
