@@ -174,12 +174,12 @@ describe("Y1, P4-06 : lien d'email et session", () => {
     const senderSet = sender.slice(sender.indexOf("const DEEP_LINK_SESSION_TEMPLATES"), sender.indexOf("const DEEP_LINK_SESSION_NOTICE"));
     const names = Array.from(senderSet.matchAll(/'([a-z0-9-]+)'/g), (m) => m[1]).sort();
     // Lot E23 : les deux emails immédiats d'entraide rejoignent la liste ; la
-    // définition en vigueur de la fonction est celle de la migration 0105.
+    // définition en vigueur de la fonction est celle de la migration 0106.
     expect(names).toEqual([
       "first-application-received", "mission-response-received", "mission-wave-status",
       "new-application", "new-message", "review-received",
     ]);
-    const latestConsume = read("drizzle/migrations/0105_e23_lien_auteur_entraide.sql");
+    const latestConsume = read("drizzle/migrations/0106_e23_lien_auteur_entraide.sql");
     for (const n of names) expect(latestConsume).toContain(`'${n}'`);
     expect(names).not.toContain("mission-response-waiting");
     for (const reminder of ["unread-messages-reminder", "owner-pending-application-nudge", "discussion-stalled-nudge", "review-reminder", "relance-cp-manquant"]) {

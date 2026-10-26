@@ -59,8 +59,8 @@ describe("E23.1 : lien de l'auteur vers sa fiche", () => {
       expect(tpl).not.toMatch(/<Button[^>]*href=\{pageUrl\}/);
     }
   });
-  it("migration 0105 inscrite au journal", () => {
-    expect(read("drizzle/migrations/meta/_journal.json")).toContain('"tag": "0105_e23_lien_auteur_entraide"');
+  it("migration 0106 inscrite au journal", () => {
+    expect(read("drizzle/migrations/meta/_journal.json")).toContain('"tag": "0106_e23_lien_auteur_entraide"');
   });
 });
 
