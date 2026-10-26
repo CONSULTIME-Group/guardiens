@@ -41,6 +41,16 @@ const reasonOptions: Record<string, { label: string; reasons: ReasonOption[] }> 
       { value: "other", label: "Autre" },
     ],
   },
+  // Lot E24 : question publique posée sur la fiche d'un besoin.
+  mission_question: {
+    label: "cette question",
+    reasons: [
+      { value: "inappropriate", label: "Contenu inapproprié" },
+      { value: "harassment", label: "Harcèlement" },
+      { value: "scam", label: "Arnaque suspectée" },
+      { value: "other", label: "Autre" },
+    ],
+  },
   small_mission: {
     label: "cette petite mission",
     reasons: [
@@ -57,7 +67,7 @@ const DUPLICATE_WINDOW_HOURS = 24;
 
 interface ReportButtonProps {
   targetId: string;
-  targetType: "profile" | "sit" | "review" | "small_mission";
+  targetType: "profile" | "sit" | "review" | "small_mission" | "mission_question";
   className?: string;
   /**
    * Variante fiche publique : déclencheur en lien discret pleine largeur,

@@ -47,6 +47,7 @@ const targetTypeLabels: Record<string, string> = {
   review: "Avis",
   message: "Message",
   small_mission: "Entraide",
+  mission_question: "Question d'entraide",
 };
 
 type ActionKey = "warn" | "hide" | "suspend" | "delete" | "none";
@@ -68,6 +69,7 @@ export function targetHref(targetType: string, targetId: string, conversationId?
     case "sit":
     case "listing": return `/admin/listings?sit=${targetId}`;
     case "small_mission": return `/admin/small-missions`;
+    case "mission_question": return `/admin/small-missions`;
     case "review": return `/admin/reviews`;
     case "message": return conversationId ? `/admin/messages?conversation=${conversationId}` : `/admin/messages`;
     default: return null;

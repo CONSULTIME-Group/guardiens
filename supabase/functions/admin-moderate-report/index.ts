@@ -25,10 +25,10 @@ const corsHeaders = {
 }
 
 type Action = 'warn' | 'hide' | 'suspend' | 'delete' | 'none'
-type TargetType = 'profile' | 'listing' | 'review' | 'message' | 'small_mission'
+type TargetType = 'profile' | 'listing' | 'review' | 'message' | 'small_mission' | 'mission_question'
 
 const VALID_ACTIONS: Action[] = ['warn', 'hide', 'suspend', 'delete', 'none']
-const VALID_TARGETS: TargetType[] = ['profile', 'listing', 'review', 'message', 'small_mission']
+const VALID_TARGETS: TargetType[] = ['profile', 'listing', 'review', 'message', 'small_mission', 'mission_question']
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -136,6 +136,13 @@ Deno.serve(async (req) => {
       const { data } = await service.from('small_missions')
         .select('id, user_id, title').eq('id', targetId).maybeSingle()
       if (data) { targetExists = true; ownerUserId = data.user_id; targetLabel = data.title ?? 'petite mission' }
+      break
+    }
+    case 'mission_question': {
+      // Lot E24 : question publique sur la fiche d'un besoin.
+      const { data } = await service.from('mission_questions')
+        .select('id, asker_id').eq('id', targetId).maybeSingle()
+      if (data) { targetExists = true; ownerUserId = data.asker_id; targetLabel = 'question' }
       break
     }
     case 'message': {

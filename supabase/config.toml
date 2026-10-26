@@ -178,3 +178,6 @@ project_id = "erhccyqevdyevpyctsjj"
 
   [functions.push-self-test]
     verify_jwt = false
+
+  [functions.mission-question]
+    verify_jwt = true
