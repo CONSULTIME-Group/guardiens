@@ -14910,6 +14910,8 @@ export type Database = {
           onboarding_completed: boolean
           onboarding_dismissed_at: string | null
           onboarding_minimal_completed: boolean
+          place_status: string | null
+          place_status_at: string | null
           postal_code: string | null
           pro_specialty: string | null
           pro_status: Database["public"]["Enums"]["pro_profile_status_enum"]
@@ -14973,6 +14975,8 @@ export type Database = {
           onboarding_completed?: boolean
           onboarding_dismissed_at?: string | null
           onboarding_minimal_completed?: boolean
+          place_status?: string | null
+          place_status_at?: string | null
           postal_code?: string | null
           pro_specialty?: string | null
           pro_status?: Database["public"]["Enums"]["pro_profile_status_enum"]
@@ -15036,6 +15040,8 @@ export type Database = {
           onboarding_completed?: boolean
           onboarding_dismissed_at?: string | null
           onboarding_minimal_completed?: boolean
+          place_status?: string | null
+          place_status_at?: string | null
           postal_code?: string | null
           pro_specialty?: string | null
           pro_status?: Database["public"]["Enums"]["pro_profile_status_enum"]
@@ -20792,6 +20798,10 @@ export type Database = {
           libelle: string
           points: number
         }[]
+      }
+      profile_departement_code: {
+        Args: { p_country: string; p_postal: string }
+        Returns: string
       }
       public_profile_reviews: {
         Args: { p_user_id: string }
