@@ -56,7 +56,7 @@ const DepartmentPage = () => {
       const plain = asciiSlug(slug!);
       if (plain && plain !== slug) {
         const { data: plainPage, error: plainError } = await supabase
-          .from("seo_department_pages" as any)
+          .from("seo_department_pages")
           .select("slug")
           .eq("slug", plain)
           .eq("published", true)
