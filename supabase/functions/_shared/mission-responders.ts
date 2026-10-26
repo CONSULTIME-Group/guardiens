@@ -80,7 +80,7 @@ export function authorMissionUrl(missionId: unknown, deepLinkUrl?: unknown): str
 export function missionQuestionsUrl(missionId: unknown, deepLinkUrl?: unknown): string {
   if (typeof deepLinkUrl === "string" && deepLinkUrl.startsWith(`${SITE_URL}/acces?t=`)) return deepLinkUrl;
   const id = typeof missionId === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(missionId) ? missionId : null;
-  return id ? `${SITE_URL}/petites-missions/${id}#questions` : `${SITE_URL}/petites-missions`;
+  return id ? `${SITE_URL}/petites-missions/${id}?bloc=questions` : `${SITE_URL}/petites-missions`;
 }
 
 /** Libellé du bouton. */

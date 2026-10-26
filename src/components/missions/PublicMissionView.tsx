@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "@/i18n/react";
 import { Button } from "@/components/ui/button";
@@ -146,6 +146,9 @@ const PublicMissionView = ({
   // « alpinistes coucher de soleil » sur les partages.
   const ogImage = mission.photos?.[0] || undefined;
   const cityLabel = titlecaseCity(mission.city) || "France";
+  // Lot E24 : le pré-rendu attend le bloc Questions (chargé après la fiche).
+  const [questionsReady, setQuestionsReady] = useState(mission.mission_type === "offre");
+  const onQuestionsLoaded = useCallback(() => setQuestionsReady(true), []);
   const redirect = `/petites-missions/${(mission as any).slug || mission.id}`;
   // Rétro-sanitize : les annonces créées avant la sanitize à la source
   // conservent des titres en minuscules ou avec fautes ("chez soit").
@@ -615,7 +618,7 @@ const PublicMissionView = ({
         description={metaDescription}
         image={ogImage}
         noindex={noindex}
-        ready={animalCare.ready}
+        ready={animalCare.ready && questionsReady}
       />
       <Head>
         {/* Balisage non marchand : une annonce d'entraide n'est ni un service
@@ -849,6 +852,7 @@ const PublicMissionView = ({
                   isAuthor={false}
                   isOpen={mission.status === "open"}
                   loginRedirect={redirect}
+                  onLoaded={onQuestionsLoaded}
                 />
               )}
             </div>

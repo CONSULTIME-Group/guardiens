@@ -52,6 +52,9 @@ export const NOTIFICATION_KINDS: Readonly<Record<string, NotificationKind>> = {
 
   // Propositions d'aide (entraide) à trier
   mission_response_received: { tone: "info", category: "applications" },
+  // Lot E24 : question publique sur la fiche d'un besoin, et sa réponse.
+  mission_question: { tone: "info", category: "messages" },
+  mission_question_answered: { tone: "info", category: "messages" },
   mission_accepted: { tone: "success", category: "applications" },
   mission_declined: { tone: "muted", category: "applications" },
   mission_invitation: { tone: "info", category: "applications" },

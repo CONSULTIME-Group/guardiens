@@ -170,7 +170,9 @@ const MISSION_DEEP_LINK_TEMPLATES = new Set<string>([
   'mission-question-received',
   'mission-question-answered',
 ])
-// Lot E24 : la cible de ces gabarits est le bloc Questions de la fiche.
+// Lot E24 : la cible de ces gabarits est le bloc Questions de la fiche, par
+// ?bloc=questions (sans dièse : le lien de connexion ajoute ses jetons après
+// « # », et une ancre devant eux empêche la session de s'ouvrir).
 const MISSION_QUESTION_TEMPLATES = new Set<string>([
   'mission-question-received',
   'mission-question-answered',
@@ -1310,7 +1312,7 @@ Deno.serve(async (req) => {
         : null
       const missionPath = MISSION_DEEP_LINK_TEMPLATES.has(templateName)
         ? (missionId
-          ? `/petites-missions/${missionId}${MISSION_QUESTION_TEMPLATES.has(templateName) ? '#questions' : ''}`
+          ? `/petites-missions/${missionId}${MISSION_QUESTION_TEMPLATES.has(templateName) ? '?bloc=questions' : ''}`
           : '/petites-missions')
         : null
       const targetPath = DEEP_LINK_TARGET_OVERRIDES[templateName]

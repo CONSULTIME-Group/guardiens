@@ -23,6 +23,8 @@ export interface MissionQuestion {
   asker_first_name: string;
   is_mine: boolean;
   is_public: boolean;
+  /** Réponse lisible par tous (null tant qu'il n'y a pas de réponse). */
+  answer_is_public?: boolean | null;
 }
 
 type RpcCaller = (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;

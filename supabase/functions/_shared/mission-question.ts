@@ -48,15 +48,31 @@ export function checkAnswer(input: unknown): QuestionCheck {
   return { ok: true, text };
 }
 
-/** Un besoin accueille des questions : ouvert, visible, hors projet participatif. */
-export function missionAcceptsQuestions(m: {
-  status?: string | null;
+/** Un besoin est visible et porte des questions : hors projet participatif et hors offre. */
+export function missionHasQuestions(m: {
   category?: string | null;
+  mission_type?: string | null;
   hidden_at?: string | null;
   moderation_hidden_at?: string | null;
 } | null | undefined): boolean {
   if (!m) return false;
-  return m.status === "open" && !m.hidden_at && !m.moderation_hidden_at && m.category !== "projet";
+  return !m.hidden_at && !m.moderation_hidden_at && m.category !== "projet" && m.mission_type !== "offre";
+}
+
+/** Un besoin accueille de nouvelles questions : visible, porteur de questions, et ouvert. */
+export function missionAcceptsQuestions(m: {
+  status?: string | null;
+  category?: string | null;
+  mission_type?: string | null;
+  hidden_at?: string | null;
+  moderation_hidden_at?: string | null;
+} | null | undefined): boolean {
+  return missionHasQuestions(m) && m?.status === "open";
+}
+
+/** Adresse de la fiche, bloc Questions (sans dièse : le lien de connexion s'ajoute après « # »). */
+export function missionQuestionsPath(missionId: string): string {
+  return `/petites-missions/${missionId}?bloc=questions`;
 }
 
 /** Verdict public d'un texte de question ou de réponse. */

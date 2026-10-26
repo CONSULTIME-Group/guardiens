@@ -10,6 +10,7 @@ vi.mock("@/integrations/supabase/client", () => ({
   supabase: { rpc: vi.fn(async () => ({ data: [], error: null })), functions: { invoke: vi.fn() } },
 }));
 vi.mock("@/hooks/use-toast", () => ({ useToast: () => ({ toast: vi.fn() }) }));
+vi.mock("@/components/reports/ReportButton", () => ({ default: (p: { targetType: string }) => <span data-report={p.targetType}>Signaler</span> }));
 
 import MissionQuestions from "@/components/entraide/MissionQuestions";
 import type { MissionQuestion } from "@/lib/missionQuestions";
@@ -20,6 +21,8 @@ import {
   checkAnswer,
   checkQuestion,
   missionAcceptsQuestions,
+  missionHasQuestions,
+  missionQuestionsPath,
   moderatePublicText,
   questionErrorMessage,
   questionFirstName,
@@ -65,13 +68,24 @@ describe("règles pures", () => {
     expect(missionAcceptsQuestions({ status: "open", category: "jardin", hidden_at: "2026-10-01" })).toBe(false);
     expect(missionAcceptsQuestions({ status: "open", category: "jardin", moderation_hidden_at: "2026-10-01" })).toBe(false);
     expect(missionAcceptsQuestions(null)).toBe(false);
+    expect(missionAcceptsQuestions({ status: "open", category: "jardin", mission_type: "offre" })).toBe(false);
+    expect(missionHasQuestions({ category: "jardin", mission_type: "besoin" })).toBe(true);
+    expect(missionHasQuestions({ category: "jardin", moderation_hidden_at: "2026-10-01" })).toBe(false);
+  });
+  it("adresses sans dièse : le lien de connexion ajoute ses jetons après « # »", () => {
+    expect(missionQuestionsPath(ID)).toBe(`/petites-missions/${ID}?bloc=questions`);
+    expect(missionQuestionsPath(ID)).not.toContain("#");
+    const sender = read("supabase/functions/send-transactional-email/index.ts");
+    expect(sender).toContain("MISSION_QUESTION_TEMPLATES.has(templateName) ? '?bloc=questions' : ''");
+    const fn = read("supabase/functions/mission-question/index.ts");
+    expect(fn).not.toContain("#questions");
   });
   it("prénom", () => {
     expect(questionFirstName("  rachel MARTIN")).toBe("Rachel");
     expect(questionFirstName(null)).toBe("");
   });
   it("lien du bloc Questions", () => {
-    expect(missionQuestionsUrl(ID)).toBe(`https://guardiens.fr/petites-missions/${ID}#questions`);
+    expect(missionQuestionsUrl(ID)).toBe(`https://guardiens.fr/petites-missions/${ID}?bloc=questions`);
     expect(missionQuestionsUrl(ID, "https://guardiens.fr/acces?t=abc")).toBe("https://guardiens.fr/acces?t=abc");
     expect(missionQuestionsUrl("x")).toBe("https://guardiens.fr/petites-missions");
   });
@@ -137,13 +151,14 @@ describe("bloc Questions", () => {
     expect(screen.getByRole("heading", { name: "Questions (1)" })).toBeTruthy();
     expect(screen.getByText("Réponse de Martine")).toBeTruthy();
     const link = screen.getByRole("link");
-    expect(link.getAttribute("href")).toBe(`/login?redirect=${encodeURIComponent(`/petites-missions/${ID}#questions`)}`);
+    expect(link.getAttribute("href")).toBe(`/login?redirect=${encodeURIComponent(`/petites-missions/${ID}?bloc=questions`)}`);
   });
   it("membre, aucune question : l'invitation et « Poser une question »", () => {
     renderBlock({ userId: "u1" });
     expect(screen.getByRole("button", { name: "Poser une question" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Poser une question" }));
     expect(screen.getByText("Visible par tous sur la fiche")).toBeTruthy();
+    expect(screen.getByText("Votre prénom et votre question s'affichent pour tous, sur la fiche et dans les moteurs de recherche.")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Publier ma question" })).toHaveProperty("disabled", true);
   });
   it("auteur : « Publier ma réponse » sous une question sans réponse, aucune invitation à poser", () => {
@@ -157,9 +172,24 @@ describe("bloc Questions", () => {
     expect(screen.getByText("Lisible par vous et Martine.")).toBeTruthy();
     expect(screen.getByText("Vous")).toBeTruthy();
   });
-  it("besoin clos : lecture seule", () => {
+  it("besoin clos : lecture seule, sans promesse de réponse", () => {
     renderBlock({ userId: "u1", isOpen: false, initialQuestions: [q()] });
     expect(screen.queryByRole("button", { name: "Poser une question" })).toBeNull();
+    expect(screen.queryByText("Martine répondra ici.")).toBeNull();
+  });
+  it("signaler une question d'un autre membre", () => {
+    const { container } = renderBlock({ userId: "u1", initialQuestions: [q(), q({ id: "q2", is_mine: true })] });
+    expect(container.querySelectorAll('[data-report="mission_question"]').length).toBe(1);
+  });
+  it("réponse gardée privée : la mention le dit, et « visibles par tous » s'efface quand un texte est privé", () => {
+    renderBlock({ userId: "u1", initialQuestions: [q({ is_mine: true, is_public: false, answer: "Oui.", answered_at: new Date().toISOString(), answer_is_public: false })] });
+    expect(screen.getByText("Réponse lisible par vous et Martine.")).toBeTruthy();
+    expect(screen.queryByText("visibles par tous")).toBeNull();
+  });
+  it("signale son chargement au pré-rendu", () => {
+    const onLoaded = vi.fn();
+    renderBlock({ onLoaded });
+    expect(onLoaded).toHaveBeenCalledTimes(1);
   });
   it("textes visibles positifs, sans tiret ni mot interdit", () => {
     const { container } = renderBlock({ userId: "u1", initialQuestions: [q(), q({ id: "q2", answer: "Oui.", answered_at: new Date().toISOString() })] });
@@ -179,6 +209,17 @@ describe("base, envoi et emails", () => {
     expect(sql).toContain("AND (q.moderation = 'ok' OR auth.uid() IN (q.asker_id, m.user_id))");
     expect(sql).toContain("coalesce(m.category, '') <> 'projet'");
   });
+  it("plafonds sous verrou, pré-rendu remis en file, offre et compte inactif écartés", () => {
+    expect(sql).toContain("pg_advisory_xact_lock(hashtext('mission_question:' || p_asker_id::text))");
+    expect(sql).toContain("GRANT EXECUTE ON FUNCTION public.insert_mission_question(uuid, uuid, text, text, integer, integer) TO service_role;");
+    expect(sql).toContain("PERFORM public.enqueue_seo_url('/petites-missions/' || v_slug);");
+    expect(sql).toContain("coalesce(m.mission_type::text, '') <> 'offre'");
+    expect(sql).toContain("p.account_status = 'active'");
+  });
+  it("une question se signale et se masque depuis l'admin", () => {
+    expect(read("supabase/functions/admin-moderate-report/moderation.ts")).toContain("service.from('mission_questions').update({ hidden_at: now })");
+    expect(read("src/pages/admin/AdminReports.tsx")).toContain('mission_question: "Question d\'entraide"');
+  });
   it("migration inscrite au journal", () => {
     expect(read("drizzle/migrations/meta/_journal.json")).toContain('"tag": "0107_e24_questions_besoin"');
   });
@@ -192,7 +233,7 @@ describe("base, envoi et emails", () => {
       const deep = sender.slice(sender.indexOf("const DEEP_LINK_TEMPLATES"), sender.indexOf("const MISSION_DEEP_LINK_TEMPLATES"));
       expect(deep).toContain(`'${n}'`);
     }
-    expect(sender).toContain("MISSION_QUESTION_TEMPLATES.has(templateName) ? '#questions' : ''");
+    expect(sender).toContain("MISSION_QUESTION_TEMPLATES.has(templateName) ? '?bloc=questions' : ''");
   });
   it("la fonction serveur garde les règles", () => {
     const fn = read("supabase/functions/mission-question/index.ts");
@@ -200,6 +241,9 @@ describe("base, envoi et emails", () => {
     expect(fn).toContain("mission.user_id !== userId");
     expect(fn).toContain('.is("answer", null)');
     expect(fn).toContain("moderatePublicText(check.text");
+    expect(fn).toContain('admin.rpc("insert_mission_question"');
+    expect(fn).toContain('from("blocked_users")');
+    expect(fn).toContain("if (!missionHasQuestions(mission)) return refuse(\"mission_closed\");");
     expect(fn).toContain('if (!token || token === SERVICE_KEY) return json({ ok: false, reason: "unauthorized" }, 401);');
   });
 });

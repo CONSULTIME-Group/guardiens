@@ -14,6 +14,6 @@ it("questions d'un besoin : migration 0107 vérifiée sur Postgres local", () =>
     timeout: 120_000,
   });
   const output = `${run.stdout ?? ""}\n${run.stderr ?? ""}`;
-  expect(output).toContain("recette E24 : 9 contrôles verts");
+  expect(output).toContain("recette E24 : 16 contrôles verts");
   expect(run.status, output).toBe(0);
 }, 130_000);

@@ -2,7 +2,7 @@
 // Module sans dépendance Deno, testé sous Vitest avec un client factice.
 
 export type Action = 'warn' | 'hide' | 'suspend' | 'delete' | 'none'
-export type TargetType = 'profile' | 'listing' | 'review' | 'message' | 'small_mission'
+export type TargetType = 'profile' | 'listing' | 'review' | 'message' | 'small_mission' | 'mission_question'
 
 /** Valeur acceptée par le trigger validate_review_fields pour un avis masqué. */
 export const REVIEW_HIDDEN_STATUS = 'refuse'
@@ -70,6 +70,8 @@ export async function runModerationMutations(service: any, i: MutationInput): Pr
           close_reason: 'moderation',
         }).eq('id', targetId))
       }
+      case 'mission_question':
+        return check('masquage de la question', service.from('mission_questions').update({ hidden_at: now }).eq('id', targetId))
       case 'review':
         return check('masquage de l\'avis', service.from('reviews').update({
           moderation_status: REVIEW_HIDDEN_STATUS,
@@ -103,6 +105,7 @@ export async function runModerationMutations(service: any, i: MutationInput): Pr
     switch (targetType) {
       case 'listing': return check('suppression de l\'annonce', service.from('sits').delete().eq('id', targetId))
       case 'small_mission': return check('suppression de la demande', service.from('small_missions').delete().eq('id', targetId))
+      case 'mission_question': return check('suppression de la question', service.from('mission_questions').delete().eq('id', targetId))
       case 'review': return check('suppression de l\'avis', service.from('reviews').delete().eq('id', targetId))
       case 'message': return check('suppression du message', service.from('messages').delete().eq('id', targetId))
       case 'profile':
