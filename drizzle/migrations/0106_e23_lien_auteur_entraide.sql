@@ -6,13 +6,14 @@
 --
 -- send-transactional-email émet désormais un lien profond vers la fiche pour
 -- mission-response-received, mission-response-waiting et mission-wave-status.
--- Ici, les deux emails immédiats (réponse reçue, état de la vague) rejoignent la
--- liste des gabarits dont le bouton ouvre une session pendant 2 heures (règle
--- Y1). La relance à 24 h passe par la connexion, puis revient sur la fiche.
+-- Ici, l'email immédiat « une réponse à votre besoin » rejoint la liste des
+-- gabarits dont le bouton ouvre une session pendant 2 heures (règle Y1). La
+-- relance à 24 h et l'état de la vague (tâche planifiée, variante qui invite à
+-- partager le besoin) passent par la connexion, puis reviennent sur la fiche.
 --
 -- Seule la liste c_session_templates change. Droits inchangés (CREATE OR
 -- REPLACE conserve les ACL). Rejouable.
--- Retour arrière : rejouer la définition sans les deux noms ajoutés.
+-- Retour arrière : rejouer la définition sans le nom ajouté.
 
 CREATE OR REPLACE FUNCTION public.consume_email_deep_link(p_token text, p_caller uuid DEFAULT NULL::uuid)
  RETURNS jsonb
@@ -26,7 +27,7 @@ DECLARE
   c_session_window constant interval := interval '2 hours';
   c_session_templates constant text[] := ARRAY[
     'new-message', 'new-application', 'first-application-received', 'review-received',
-    'mission-response-received', 'mission-wave-status'
+    'mission-response-received'
   ];
 BEGIN
   IF p_token IS NULL OR p_token !~ '^[a-f0-9]{40,128}$' THEN

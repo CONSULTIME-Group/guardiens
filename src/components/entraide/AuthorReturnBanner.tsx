@@ -13,13 +13,13 @@ export default function AuthorReturnBanner({ redirect }: { redirect: string }) {
   return (
     <section
       data-author-return
-      aria-labelledby="author-return-title"
+      aria-label="C'est votre besoin"
       className="mb-6 rounded-card border border-primary/30 bg-primary/5 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3"
     >
       <div className="flex-1">
-        <h2 id="author-return-title" className="font-heading text-lg font-semibold text-foreground">
+        <p className="font-heading text-lg font-semibold text-foreground">
           C'est votre besoin ?
-        </h2>
+        </p>
         <p className="text-sm text-foreground/80 leading-relaxed">
           Connectez-vous pour lire les réponses et écrire à chaque personne.
         </p>

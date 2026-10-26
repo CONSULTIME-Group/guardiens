@@ -168,8 +168,8 @@ const MISSION_DEEP_LINK_TEMPLATES = new Set<string>([
 
 // Lot Y1 (P4-06) : gabarits immédiats dont le bouton peut ouvrir une session,
 // dans les 2 heures qui suivent l'envoi et sur un navigateur sans autre
-// compte connecté (liste et fenêtre tenues par consume_email_deep_link,
-// supabase/prepared-migrations/20261013200000_y1_plafond_messages.sql). Les
+// compte connecté (liste et fenêtre tenues par consume_email_deep_link, dont
+// la définition en vigueur est drizzle/migrations/0106_e23_lien_auteur_entraide.sql). Les
 // relances (unread-messages-reminder, owner-pending-application-nudge,
 // discussion-stalled-nudge, review-reminder, relance-cp-manquant) gardent le
 // lien direct vers la bonne page, derrière la connexion.
@@ -178,11 +178,12 @@ const DEEP_LINK_SESSION_TEMPLATES = new Set<string>([
   'new-application',
   'first-application-received',
   'review-received',
-  // Lot E23 : emails immédiats d'entraide. La relance à 24 h
-  // (mission-response-waiting) garde la règle Y1 : lien direct derrière la
+  // Lot E23 : l'email immédiat « une réponse à votre besoin ». La relance à
+  // 24 h (mission-response-waiting) et l'état de la vague (mission-wave-status,
+  // envoyé par tâche planifiée, dont la variante « vivier épuisé » invite à
+  // partager le besoin) gardent la règle Y1 : lien direct derrière la
   // connexion, puis retour sur la fiche.
   'mission-response-received',
-  'mission-wave-status',
 ])
 const DEEP_LINK_SESSION_NOTICE =
   'Le bouton de cet email vous connecte directement pendant 2 heures : gardez ce message pour vous.'

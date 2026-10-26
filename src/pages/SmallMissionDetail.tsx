@@ -550,10 +550,15 @@ const SmallMissionDetail = () => {
     if (!r) { navigate("/messages"); return; }
     let convId = r.conversation_id ?? null;
     if (!convId) {
-      const { data } = await supabase.rpc("open_mission_response_conversation", { p_response_id: r.id });
-      convId = (data as string | null) ?? null;
+      const { data, error } = await supabase.rpc("open_mission_response_conversation", { p_response_id: r.id });
+      if (error || !data) {
+        // Lot E23 : un échec se dit, la personne reste sur la fiche.
+        toast({ variant: "destructive", title: "Conversation indisponible", description: "Réessayez dans un instant." });
+        return;
+      }
+      convId = data as string;
     }
-    navigate(convId ? `/messages/${convId}` : "/messages");
+    navigate(`/messages/${convId}`);
   };
 
   const handleAcceptResponse = async (responseId: string, mode: "keep" | "decline_others" = "decline_others") => {
@@ -1644,7 +1649,7 @@ const SmallMissionDetail = () => {
                     Quand une réponse vous convient, cliquez sur
                     <span className="font-semibold text-foreground"> « Choisir »</span> suivi de son prénom :
                     la conversation s'ouvre, et cette personne apparaît ici et sur son profil public.
-                    Une question avant de choisir ? Écrivez-lui directement.
+                    Une question avant de choisir ? Écrivez à la personne depuis sa réponse.
                   </>
                 ) : (
                   <>
@@ -1677,7 +1682,7 @@ const SmallMissionDetail = () => {
                         pendingCount={pendingResponses.length}
                         onSelect={(mode) => handleAcceptResponse(r.id, mode)}
                         onDecline={() => handleDeclineResponse(r.id)}
-                        onOpenMessages={() => void openResponseConversation(r)}
+                        onOpenMessages={() => openResponseConversation(r)}
                       />
                     </li>
                   ))}

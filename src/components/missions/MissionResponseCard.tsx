@@ -27,7 +27,7 @@ interface Props {
   pendingCount?: number;
   onSelect: (mode: "keep" | "decline_others") => void;
   onDecline: () => void;
-  onOpenMessages: () => void;
+  onOpenMessages: () => void | Promise<void>;
   /**
    * Lot X2 : « projet » pour la liste du porteur d'un projet participatif
    * (statut affiché, conversation ouverte pour chaque candidature). Lot X3b
@@ -68,6 +68,13 @@ const MissionResponseCard = ({
   const { toast } = useToast();
   const [count, setCount] = useState<number>(r.helpful_count ?? 0);
   const [thanked, setThanked] = useState(false);
+  // Lot E23 : « Écrire à » occupé pendant l'ouverture de la conversation.
+  const [opening, setOpening] = useState(false);
+  const openMessages = async () => {
+    if (opening) return;
+    setOpening(true);
+    try { await onOpenMessages(); } finally { setOpening(false); }
+  };
   const [busy, setBusy] = useState(false);
   const [acceptMode, setAcceptMode] = useState<"keep" | "decline_others">("decline_others");
 
@@ -296,8 +303,9 @@ const MissionResponseCard = ({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={onOpenMessages}
-                  disabled={processing}
+                  onClick={() => void openMessages()}
+                  disabled={processing || opening}
+                  aria-busy={opening}
                   data-write-before-choose
                   aria-label={`${r.conversation_id ? "Ouvrir la conversation avec" : "Écrire à"} ${r.responder?.first_name || "cette personne"}`}
                   className="rounded-full gap-2 ml-auto min-h-11"

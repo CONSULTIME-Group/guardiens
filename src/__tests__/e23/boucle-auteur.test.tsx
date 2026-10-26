@@ -59,6 +59,17 @@ describe("E23.1 : lien de l'auteur vers sa fiche", () => {
       expect(tpl).not.toMatch(/<Button[^>]*href=\{pageUrl\}/);
     }
   });
+  it("seul l'email immédiat ouvre une session ; la relance et l'état de la vague passent par la connexion", () => {
+    const set = sender.slice(sender.indexOf("const DEEP_LINK_SESSION_TEMPLATES"), sender.indexOf("const DEEP_LINK_SESSION_NOTICE"));
+    expect(set).toContain("'mission-response-received'");
+    expect(set).not.toMatch(/^\s*'mission-response-waiting',/m);
+    expect(set).not.toMatch(/^\s*'mission-wave-status',/m);
+  });
+  it("une proposition d'aide ne s'annonce qu'à l'auteur", () => {
+    const fn = read("supabase/functions/notify-mission-event/index.ts");
+    expect(fn).toContain("if (payload.event_type === 'mission_proposal') {");
+    expect(fn).toContain("targets = targets.filter((t) => t === mission.user_id)");
+  });
   it("migration 0106 inscrite au journal", () => {
     expect(read("drizzle/migrations/meta/_journal.json")).toContain('"tag": "0106_e23_lien_auteur_entraide"');
   });
@@ -81,11 +92,20 @@ describe("E23.1 : bandeau de l'auteur sans session", () => {
     const { container } = renderAt(`/petites-missions/${ID}`);
     expect(container.querySelector("[data-author-return]")).toBeNull();
   });
-  it("textes positifs", () => {
-    for (const t of ["C'est votre besoin ?", "Connectez-vous pour lire les réponses et écrire à chaque personne.", "Me connecter", "Une question avant de choisir ? Écrivez-lui directement."]) {
+  it("textes positifs, lus au rendu et dans la page", () => {
+    const { container } = renderAt(`/petites-missions/${ID}?vous=auteur`);
+    const page = read("src/pages/SmallMissionDetail.tsx");
+    const line = "Une question avant de choisir ? Écrivez à la personne depuis sa réponse.";
+    expect(page).toContain(line);
+    for (const t of [container.textContent ?? "", line]) {
+      expect(t.length).toBeGreaterThan(10);
       expect(t).not.toMatch(NEG);
-      expect(t).not.toMatch(/[–—]/);
+      expect(t).not.toMatch(/[\u2013\u2014]/);
     }
+  });
+  it("aucun titre avant le h1 de la page", () => {
+    const { container } = renderAt(`/petites-missions/${ID}?vous=auteur`);
+    expect(container.querySelector("h1, h2, h3")).toBeNull();
   });
 });
 
