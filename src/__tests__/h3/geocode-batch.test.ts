@@ -87,7 +87,8 @@ describe("liste des annonces sans point de recherche (lot H3)", () => {
   it("SearchSitter ne géocode pas avant d'afficher une recherche sans point", async () => {
     const { readFileSync } = await import("node:fs");
     const src = readFileSync("src/components/search/SearchSitter.tsx", "utf8");
-    expect(src).toMatch(/await locateSitPlaces\(items, !!searchCoords\)/);
+    // Lot perf 9 : même règle, appel non bloquant borné par LOCATE_BUDGET_MS.
+    expect(src).toMatch(/startLocateSitPlaces\(items, !!searchCoords\)/);
     expect(src).toMatch(/deferredMapItemsRef\.current = !searchCoords && /);
   });
 });

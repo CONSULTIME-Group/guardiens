@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { cityQueryVariants, countryQueryVariants } from "../_shared/geocode-variants.ts";
+import { geocodeOfficialFr } from "../_shared/geocode-official-fr.ts";
 
 
 const corsHeaders = {
@@ -192,7 +193,15 @@ async function geocodePlace(supabase: any, city: any, country: any): Promise<Res
     }
   }
 
-  // 2) Nominatim, variante par variante, au plus quatre requêtes.
+  // 2) Lot perf 9 : en France, centre officiel de la commune (geo.api.gouv.fr)
+  // avant Nominatim. Nom exact et unique, ou code postal ; sinon Nominatim.
+  const inFrance = resolvedCountry.code === "fr" || normalize(resolvedCountry.label) === "france";
+  if (inFrance) {
+    const official = await geocodeOfficialFr(cityName.trim(), isFrPostal);
+    if (official) return await cacheAndRespond(official.lat, official.lng, { city: official.nom, country: resolvedCountry });
+  }
+
+  // 3) Nominatim, variante par variante, au plus quatre requêtes.
   let unavailable = false;
   for (const attempt of attempts.slice(0, 4)) {
     const params = new URLSearchParams({
