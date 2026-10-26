@@ -17,6 +17,7 @@ import { resolveExchangeLine } from "@/lib/entraideExchange";
 import { ENTRAIDE_COPY } from "@/lib/entraideCopy";
 import NeedPaperPanel from "@/components/entraide/NeedPaperPanel";
 import AuthorReturnBanner from "@/components/entraide/AuthorReturnBanner";
+import MissionQuestions from "@/components/entraide/MissionQuestions";
 import { needTitleSizeClass, needWhenLabel } from "@/lib/needVisual";
 import { notifiedLine, responsesLine } from "@/lib/missionNotifiedCount";
 
@@ -838,6 +839,18 @@ const PublicMissionView = ({
                 </aside>
               ))}
 
+              {/* Lot E24 : questions publiques, dès la première. */}
+              {mission.mission_type !== "offre" && (
+                <MissionQuestions
+                  missionId={mission.id}
+                  authorFirstName={authorFirstName ?? null}
+                  needTitle={displayTitle}
+                  userId={null}
+                  isAuthor={false}
+                  isOpen={mission.status === "open"}
+                  loginRedirect={redirect}
+                />
+              )}
             </div>
           </article>
 

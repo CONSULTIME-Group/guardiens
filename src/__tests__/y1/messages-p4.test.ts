@@ -175,11 +175,13 @@ describe("Y1, P4-06 : lien d'email et session", () => {
     const names = Array.from(senderSet.matchAll(/'([a-z0-9-]+)'/g), (m) => m[1]).sort();
     // Lot E23 : l'email immédiat d'entraide rejoint la liste ; la définition en
     // vigueur de la fonction est celle de la migration 0106. Égalité stricte.
+    // Lot E24 : les deux emails immédiats des questions rejoignent la liste ;
+    // définition en vigueur : migration 0107.
     expect(names).toEqual([
-      "first-application-received", "mission-response-received",
-      "new-application", "new-message", "review-received",
+      "first-application-received", "mission-question-answered", "mission-question-received",
+      "mission-response-received", "new-application", "new-message", "review-received",
     ]);
-    const latestConsume = read("drizzle/migrations/0106_e23_lien_auteur_entraide.sql");
+    const latestConsume = read("drizzle/migrations/0107_e24_questions_besoin.sql");
     const arr = latestConsume.slice(latestConsume.indexOf("c_session_templates constant text[] := ARRAY["));
     const sqlNames = Array.from(arr.slice(0, arr.indexOf("];")).matchAll(/'([a-z0-9-]+)'/g), (m) => m[1]).sort();
     expect(sqlNames).toEqual(names);

@@ -51,6 +51,9 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   // Mutual aid, interactions directes liées à une action d'un membre identifié
   'mission-response',
   'mission-response-received',
+  // Lot E24 : question posée sur la fiche d'un besoin, et sa réponse.
+  'mission-question-received',
+  'mission-question-answered',
   'mission-response-waiting',
   'mission-response-withdrawn',
   'mission-invitation',

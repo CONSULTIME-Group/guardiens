@@ -50,7 +50,7 @@ describe("E23.1 : lien de l'auteur vers sa fiche", () => {
     for (const n of ["mission-response-received", "mission-response-waiting", "mission-wave-status"]) {
       expect(list).toContain(`'${n}'`);
     }
-    expect(sender).toContain("`/petites-missions/${missionId}`");
+    expect(sender).toContain("`/petites-missions/${missionId}${MISSION_QUESTION_TEMPLATES.has(templateName) ? '#questions' : ''}`");
   });
   it("les boutons des gabarits utilisent le lien de l'auteur", () => {
     for (const f of ["mission-response-received", "mission-response-waiting", "mission-wave-status"]) {
