@@ -207,7 +207,8 @@ describe("base, envoi et emails", () => {
     expect(sql).toContain("REVOKE ALL ON public.mission_questions FROM anon, authenticated;");
     expect(sql).toContain("GRANT EXECUTE ON FUNCTION public.get_mission_questions(uuid) TO anon, authenticated, service_role;");
     expect(sql).toContain("AND (q.moderation = 'ok' OR auth.uid() IN (q.asker_id, m.user_id))");
-    expect(sql).toContain("coalesce(m.category, '') <> 'projet'");
+    // category est une énumération en production : comparaison sur le texte.
+    expect(sql).toContain("coalesce(m.category::text, '') <> 'projet'");
   });
   it("plafonds sous verrou, pré-rendu remis en file, offre et compte inactif écartés", () => {
     expect(sql).toContain("pg_advisory_xact_lock(hashtext('mission_question:' || p_asker_id::text))");

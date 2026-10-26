@@ -86,7 +86,7 @@ AS $function$
     AND q.hidden_at IS NULL
     AND m.hidden_at IS NULL
     AND m.moderation_hidden_at IS NULL
-    AND coalesce(m.category, '') <> 'projet'
+    AND coalesce(m.category::text, '') <> 'projet'
     AND coalesce(m.mission_type::text, '') <> 'offre'
     AND p.account_status = 'active'
     AND (q.moderation = 'ok' OR auth.uid() IN (q.asker_id, m.user_id))
