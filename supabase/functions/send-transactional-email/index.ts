@@ -156,6 +156,9 @@ const DEEP_LINK_TEMPLATES = new Set<string>([
   'mission-response-received',
   'mission-response-waiting',
   'mission-wave-status',
+  // Lot E24 : questions posées sur la fiche d'un besoin, et leur réponse.
+  'mission-question-received',
+  'mission-question-answered',
 ])
 
 // Lot E23 : gabarits d'entraide dont la cible est la fiche du besoin
@@ -164,12 +167,21 @@ const MISSION_DEEP_LINK_TEMPLATES = new Set<string>([
   'mission-response-received',
   'mission-response-waiting',
   'mission-wave-status',
+  'mission-question-received',
+  'mission-question-answered',
+])
+// Lot E24 : la cible de ces gabarits est le bloc Questions de la fiche, par
+// ?bloc=questions (sans dièse : le lien de connexion ajoute ses jetons après
+// « # », et une ancre devant eux empêche la session de s'ouvrir).
+const MISSION_QUESTION_TEMPLATES = new Set<string>([
+  'mission-question-received',
+  'mission-question-answered',
 ])
 
 // Lot Y1 (P4-06) : gabarits immédiats dont le bouton peut ouvrir une session,
 // dans les 2 heures qui suivent l'envoi et sur un navigateur sans autre
 // compte connecté (liste et fenêtre tenues par consume_email_deep_link, dont
-// la définition en vigueur est drizzle/migrations/0106_e23_lien_auteur_entraide.sql). Les
+// la définition en vigueur est drizzle/migrations/0108_e24_questions_besoin.sql). Les
 // relances (unread-messages-reminder, owner-pending-application-nudge,
 // discussion-stalled-nudge, review-reminder, relance-cp-manquant) gardent le
 // lien direct vers la bonne page, derrière la connexion.
@@ -184,6 +196,10 @@ const DEEP_LINK_SESSION_TEMPLATES = new Set<string>([
   // partager le besoin) gardent la règle Y1 : lien direct derrière la
   // connexion, puis retour sur la fiche.
   'mission-response-received',
+  // Lot E24 : question reçue par l'auteur, réponse reçue par la personne qui
+  // a posé la question ; emails immédiats, adressés à une seule personne.
+  'mission-question-received',
+  'mission-question-answered',
 ])
 const DEEP_LINK_SESSION_NOTICE =
   'Le bouton de cet email vous connecte directement pendant 2 heures : gardez ce message pour vous.'
@@ -1295,7 +1311,9 @@ Deno.serve(async (req) => {
         ? templateData.missionId
         : null
       const missionPath = MISSION_DEEP_LINK_TEMPLATES.has(templateName)
-        ? (missionId ? `/petites-missions/${missionId}` : '/petites-missions')
+        ? (missionId
+          ? `/petites-missions/${missionId}${MISSION_QUESTION_TEMPLATES.has(templateName) ? '?bloc=questions' : ''}`
+          : '/petites-missions')
         : null
       const targetPath = DEEP_LINK_TARGET_OVERRIDES[templateName]
         ?? missionPath

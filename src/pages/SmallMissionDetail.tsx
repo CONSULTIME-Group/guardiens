@@ -49,6 +49,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import PublicMissionView from "@/components/missions/PublicMissionView";
 import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
 import MissionResponseCard from "@/components/missions/MissionResponseCard";
+import MissionQuestions from "@/components/entraide/MissionQuestions";
 import MissionResponseModal from "@/components/missions/MissionResponseModal";
 import RescheduleMissionDialog from "@/components/missions/RescheduleMissionDialog";
 import { isMissionDatePassed, missionReferenceDate, localIsoDay, daysBetween } from "@/lib/missionReschedule";
@@ -1520,6 +1521,19 @@ const SmallMissionDetail = () => {
                   <p className="text-xs font-semibold uppercase tracking-wider text-terra">{exchangeLine.label}</p>
                   <p className="font-heading text-lg leading-snug text-foreground">{exchangeLine.text}</p>
                 </aside>
+              )}
+
+              {/* Lot E24 : questions publiques ; l'auteur répond sous chacune. */}
+              {(mission as { category?: string | null }).category !== "projet" && mission.mission_type !== "offre" && (
+                <MissionQuestions
+                  missionId={mission.id}
+                  authorFirstName={author?.first_name ?? null}
+                  needTitle={displayTitle}
+                  userId={user?.id ?? null}
+                  isAuthor={isAuthor}
+                  isOpen={mission.status === "open"}
+                  loginRedirect={`/petites-missions/${(mission as { slug?: string | null }).slug || mission.id}`}
+                />
               )}
             </div>
           </article>

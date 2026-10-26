@@ -95,6 +95,8 @@ const TYPES_FROM_CREATORS = [
   "emergency_alert", "admin_contact", "listing_hidden", "experience_rejected",
   "experience_complement", "identity_remind_complete", "identity_remind_review",
   "identity_resend_request", "subscription_offered",
+  // Lot E24 (fonction mission-question).
+  "mission_question", "mission_question_answered",
 ];
 
 describe("lot Z, aucune notification pour autrui depuis le front", () => {
