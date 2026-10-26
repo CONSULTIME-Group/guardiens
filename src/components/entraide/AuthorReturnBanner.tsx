@@ -5,13 +5,7 @@
  */
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-
-export const AUTHOR_RETURN_PARAM = "vous";
-export const AUTHOR_RETURN_VALUE = "auteur";
-
-export function isAuthorReturn(params: URLSearchParams): boolean {
-  return params.get(AUTHOR_RETURN_PARAM) === AUTHOR_RETURN_VALUE;
-}
+import { isAuthorReturn } from "@/lib/authorReturn";
 
 export default function AuthorReturnBanner({ redirect }: { redirect: string }) {
   const [params] = useSearchParams();

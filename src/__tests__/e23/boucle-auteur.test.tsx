@@ -95,7 +95,7 @@ describe("E23.2 : écrire avant de choisir", () => {
     render(
       <MemoryRouter>
         <MissionResponseCard
-          response={response as any}
+          response={response as unknown as Parameters<typeof MissionResponseCard>[0]["response"]}
           isAuthor={isAuthor}
           currentUserId={isAuthor ? "owner" : "u1"}
           missionOwnerId="owner"
