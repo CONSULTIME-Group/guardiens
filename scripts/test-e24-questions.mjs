@@ -11,7 +11,9 @@ create or replace function auth.uid() returns uuid language sql stable as $$ sel
 create table public.profiles(id uuid primary key, first_name text, account_status text default 'active');
 create table public.seo_queue(path text);
 create function public.enqueue_seo_url(p_path text) returns void language sql as $$ insert into public.seo_queue values (p_path) $$;
-create table public.small_missions(id uuid primary key, user_id uuid, category text, status text, hidden_at timestamptz, moderation_hidden_at timestamptz, mission_type text default 'besoin', slug text);
+create type public.small_mission_category as enum ('animals','garden','house','skills','errand','transport','company','other','projet');
+create type public.mission_type_enum as enum ('besoin','offre');
+create table public.small_missions(id uuid primary key, user_id uuid, category public.small_mission_category, status text, hidden_at timestamptz, moderation_hidden_at timestamptz, mission_type public.mission_type_enum default 'besoin', slug text);
 create table public.conversations(id uuid primary key, owner_id uuid, sitter_id uuid);
 create table public.email_deep_link_tokens(id uuid primary key default gen_random_uuid(), token text, user_id uuid, conversation_id uuid, target_path text, template_name text, message_id uuid, expires_at timestamptz, consumed_at timestamptz, created_at timestamptz default now());
 `);
@@ -20,7 +22,7 @@ const F='00000000-0000-0000-0000-0000000000cc', H='00000000-0000-0000-0000-00000
 const A='00000000-0000-0000-0000-00000000000a', O='00000000-0000-0000-0000-00000000000b', V='00000000-0000-0000-0000-00000000000c', M='00000000-0000-0000-0000-0000000000aa', P='00000000-0000-0000-0000-0000000000bb';
 await db.exec(`insert into profiles values ('${A}','karim dupont'),('${O}','Martine'),('${V}','Sophie');
 insert into profiles values ('${S}','Suspendu','suspended');
-insert into small_missions values ('${M}','${O}','jardin','open',null,null,'besoin','rempoter-annecy'),('${P}','${O}','projet','open',null,null,'besoin',null),('${F}','${O}','jardin','open',null,null,'offre',null),('${H}','${O}','jardin','open',now(),null,'besoin',null);
+insert into small_missions values ('${M}','${O}','garden','open',null,null,'besoin','rempoter-annecy'),('${P}','${O}','projet','open',null,null,'besoin',null),('${F}','${O}','garden','open',null,null,'offre',null),('${H}','${O}','garden','open',now(),null,'besoin',null);
 insert into mission_questions(mission_id, asker_id, body, moderation) values ('${M}','${A}','Question publique ?','ok'),('${M}','${A}','Question privée ?','private'),('${P}','${A}','Sur un projet ?','ok'),('${F}','${A}','Sur une offre ?','ok'),('${H}','${A}','Sur un besoin masqué ?','ok'),('${M}','${S}','Question suspendue ?','ok');
 insert into mission_questions(mission_id, asker_id, body, moderation, hidden_at) values ('${M}','${A}','Question masquée ?','ok', now());
 update mission_questions set answer='Réponse privée', answer_moderation='private', answered_at=now() where body='Question publique ?';`);
