@@ -6,6 +6,9 @@
  * renseigner `latitude` / `longitude`.
  *
  * Stratégie :
+ *   - Lot G1 : ville vide et code postal français valide → centre de la
+ *     commune la plus peuplée du code postal (geo.api.gouv.fr) ; corps
+ *     { mode: "backfill" } → rattrapage quotidien (tâche planifiée).
  *   - Si pays = FR (ou non renseigné) → api-adresse.data.gouv.fr (BAN, précis FR)
  *   - Sinon → Nominatim (OpenStreetMap) avec `country=<pays>` pour
  *     géocoder les profils internationaux (ex : Marrakech / Maroc).
@@ -19,6 +22,15 @@
  *   - Utilise la service_role pour lire/écrire le profil (bypass RLS).
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { geocodeOfficialFr } from "../_shared/geocode-official-fr.ts";
+import {
+  BACKFILL_LIMIT,
+  backfillWindow,
+  isBackfillCandidate,
+  planProfileGeocode,
+  type ProfilePlace,
+} from "../_shared/profile-geocode-rules.ts";
+import { startCronRun } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -134,6 +146,92 @@ async function geocodePhoton(city: string, country: string, postal: string): Pro
   }
 }
 
+type Supa = ReturnType<typeof createClient>;
+
+/**
+ * Situe un profil et écrit latitude, longitude. Lot G1 : un profil sans ville
+ * mais avec un code postal français valide est situé au centre de la commune
+ * la plus peuplée du code postal (base officielle des communes).
+ */
+async function geocodeProfile(supabase: Supa, user_id: string): Promise<Record<string, unknown>> {
+  const { data: profile, error: pErr } = await supabase
+    .from("profiles")
+    .select("city, postal_code, country")
+    .eq("id", user_id)
+    .maybeSingle();
+  if (pErr || !profile) return { error: "profile not found", status: 404 };
+
+  const plan = planProfileGeocode(profile as ProfilePlace);
+  if (plan.kind === "none") return { skipped: plan.reason === "no_place" ? "no city" : "no city, outside France" };
+
+  let coords: { lat: number; lng: number } | null = null;
+  let source = "nominatim";
+  if (plan.kind === "postal") {
+    const official = await geocodeOfficialFr(plan.postal, true);
+    coords = official ? { lat: official.lat, lng: official.lng } : null;
+    source = "communes_code_postal";
+    if (!coords) return { skipped: "no result", postal: plan.postal };
+  } else {
+    const { city, postal, country, isFR } = plan;
+    if (isFR) {
+      coords = await geocodeFR(city, postal);
+      source = "ban";
+      // Fallback Nominatim si BAN ne trouve rien
+      if (!coords) {
+        coords = await geocodeNominatim(city, "France");
+        source = "nominatim";
+      }
+    } else {
+      coords = await geocodeNominatim(city, country);
+    }
+    if (!coords) {
+      coords = await geocodePhoton(city, country, postal);
+      source = "photon";
+    }
+    if (!coords) return { skipped: "no result", city, country, postal };
+  }
+
+  const { error: uErr } = await supabase
+    .from("profiles")
+    .update({ latitude: coords.lat, longitude: coords.lng })
+    .eq("id", user_id);
+  if (uErr) return { error: uErr.message, status: 500 };
+  return { ok: true, lat: coords.lat, lng: coords.lng, source };
+}
+
+/**
+ * Lot G1 : rattrapage quotidien des profils restés sans position, modifiés
+ * depuis plus d'une heure et moins de 7 jours, BACKFILL_LIMIT au plus, un à
+ * un (les services de géocodage limitent le débit).
+ */
+async function backfillProfiles(supabase: Supa): Promise<Record<string, unknown>> {
+  const { updatedAfter, updatedBefore } = backfillWindow(new Date());
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, city, postal_code, country, latitude, longitude")
+    .is("latitude", null)
+    .gte("updated_at", updatedAfter)
+    .lte("updated_at", updatedBefore)
+    .order("updated_at", { ascending: false })
+    .limit(BACKFILL_LIMIT * 3);
+  if (error) return { error: error.message, status: 500 };
+  const candidates = (data ?? []).filter((p: any) => isBackfillCandidate(p)).slice(0, BACKFILL_LIMIT);
+  let situes = 0;
+  let introuvables = 0;
+  let erreurs = 0;
+  for (const p of candidates as { id: string }[]) {
+    try {
+      const r = await geocodeProfile(supabase, p.id);
+      if (r.ok) situes++;
+      else if (r.error) erreurs++;
+      else introuvables++;
+    } catch {
+      erreurs++;
+    }
+  }
+  return { traites: candidates.length, situes, introuvables, erreurs };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -156,57 +254,36 @@ Deno.serve(async (req) => {
       if (roleError || isAdmin !== true) return json({ error: "Accès refusé" }, 403);
     }
 
-    const { user_id } = await req.json();
-    if (!user_id || typeof user_id !== "string") return json({ error: "missing user_id" }, 400);
-
+    const body = await req.json().catch(() => ({}));
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    const { data: profile, error: pErr } = await supabase
-      .from("profiles")
-      .select("city, postal_code, country")
-      .eq("id", user_id)
-      .maybeSingle();
-
-    if (pErr || !profile) return json({ error: "profile not found" }, 404);
-
-    const city = (profile.city ?? "").trim();
-    const postal = (profile.postal_code ?? "").trim();
-    const country = (profile.country ?? "FR").trim() || "FR";
-    if (!city) return json({ skipped: "no city" });
-
-    const isFR = country === "FR" || country.toLowerCase() === "france";
-
-    let coords: { lat: number; lng: number } | null = null;
-    let source = "nominatim";
-    if (isFR) {
-      coords = await geocodeFR(city, postal);
-      source = "ban";
-      // Fallback Nominatim si BAN ne trouve rien
-      if (!coords) {
-        coords = await geocodeNominatim(city, "France");
-        source = "nominatim";
+    // Lot G1 : rattrapage quotidien, appelé par la tâche planifiée
+    // geocode-profiles-backfill avec le secret partagé, journalisé.
+    if (body?.mode === "backfill") {
+      const run = await startCronRun("geocode-profile-backfill");
+      try {
+        const result = await backfillProfiles(supabase);
+        if (result.error) {
+          await run.fail(String(result.error));
+          return json({ error: result.error }, 500);
+        }
+        await run.finish(Number(result.erreurs) > 0 ? "partial" : "success", result);
+        return json(result);
+      } catch (e) {
+        await run.fail(e);
+        throw e;
       }
-    } else {
-      coords = await geocodeNominatim(city, country);
-    }
-    if (!coords) {
-      coords = await geocodePhoton(city, country, postal);
-      source = "photon";
     }
 
-    if (!coords) return json({ skipped: "no result", city, country, postal });
+    const { user_id } = body ?? {};
+    if (!user_id || typeof user_id !== "string") return json({ error: "missing user_id" }, 400);
 
-    const { error: uErr } = await supabase
-      .from("profiles")
-      .update({ latitude: coords.lat, longitude: coords.lng })
-      .eq("id", user_id);
-
-    if (uErr) return json({ error: uErr.message }, 500);
-
-    return json({ ok: true, lat: coords.lat, lng: coords.lng, source });
+    const result = await geocodeProfile(supabase, user_id);
+    const { status, ...rest } = result as Record<string, unknown> & { status?: number };
+    return json(rest, typeof status === "number" ? status : 200);
   } catch (e) {
     return json({ error: String(e) }, 500);
   }

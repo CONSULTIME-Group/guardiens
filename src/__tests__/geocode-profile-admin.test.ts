@@ -1,9 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import ts from "typescript";
+import { geocodeOfficialFr } from "../../supabase/functions/_shared/geocode-official-fr";
+import * as profileRules from "../../supabase/functions/_shared/profile-geocode-rules";
 
+// Lot G1 : toutes les importations sont retirées et injectées ci-dessous
+// (règles et source officielle réelles, journal des tâches simulé).
 const source = readFileSync("supabase/functions/geocode-profile/index.ts", "utf8")
-  .replace(/import \{ createClient \} from [^;]+;/, "");
+  .replace(/import\s[\s\S]*?\sfrom\s+"[^"]+";/g, "");
 const compiled = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
 
 function harness({ admin = false, user = true, roleError = null, city = "", country = "FR", postal = "", secret = "trigger-secret", fetchResponse = undefined as undefined | ((url: string) => Promise<any>) } = {}) {
@@ -19,10 +23,15 @@ function harness({ admin = false, user = true, roleError = null, city = "", coun
     }),
   };
   const fetch = vi.fn(fetchResponse ?? (async () => ({ ok: true, json: async () => ({ features: [{ geometry: { coordinates: [2, 48] } }] }) })));
-  new Function("Deno", "createClient", "fetch", "AbortSignal", compiled)({
+  const injected = {
+    geocodeOfficialFr: (q: string, isPostal: boolean) => geocodeOfficialFr(q, isPostal, fetch as unknown as typeof globalThis.fetch),
+    ...profileRules,
+    startCronRun: async () => ({ id: null, finish: async () => {}, fail: async () => {} }),
+  };
+  new Function("Deno", "createClient", "fetch", "AbortSignal", ...Object.keys(injected), compiled)({
     env: { get: (key: string) => key === "GEOCODE_PROFILE_SECRET" ? secret : "test" },
     serve: (fn: typeof handler) => { handler = fn; },
-  }, () => client, fetch, { timeout: () => new AbortController().signal });
+  }, () => client, fetch, { timeout: () => new AbortController().signal }, ...Object.values(injected));
   const run = (headers = {}) => handler(new Request("https://test.local", {
     method: "POST", headers: { "Content-Type": "application/json", ...headers },
     body: JSON.stringify({ user_id: "target" }),
@@ -62,6 +71,19 @@ describe("manual profile geocoding authorization", () => {
     expect(await (await h.run({ Authorization: "Bearer admin" })).json()).toMatchObject({ ok: true });
     expect(h.rpc).toHaveBeenCalledWith("has_role", { _user_id: "caller", _role: "admin" });
     expect(h.update).toHaveBeenCalledWith({ latitude: 48, longitude: 2 });
+  });
+  it("lot G1 : sans ville, situe par le code postal français (commune la plus peuplée)", async () => {
+    const h = harness({ postal: "69380", fetchResponse: async (url: string) => {
+      expect(url).toContain("geo.api.gouv.fr/communes");
+      expect(url).toContain("codePostal=69380");
+      return { ok: true, json: async () => [
+        { nom: "Petite", population: 300, centre: { coordinates: [4.6, 45.9] } },
+        { nom: "Grande", population: 9000, centre: { coordinates: [4.7, 45.87] } },
+      ] };
+    } });
+    expect(await (await h.run({ "x-geocode-secret": "trigger-secret" })).json())
+      .toMatchObject({ ok: true, lat: 45.87, lng: 4.7, source: "communes_code_postal" });
+    expect(h.update).toHaveBeenCalledWith({ latitude: 45.87, longitude: 4.7 });
   });
   it("returns a skipped result without writing when the city is missing", async () => {
     const h = harness({ admin: true });
