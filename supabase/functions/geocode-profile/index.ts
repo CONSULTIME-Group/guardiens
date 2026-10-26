@@ -146,7 +146,9 @@ async function geocodePhoton(city: string, country: string, postal: string): Pro
   }
 }
 
-type Supa = ReturnType<typeof createClient>;
+// Client service_role : schéma « public » typé librement pour que
+// .from("profiles") ne retombe pas sur never (check Deno, lot G1).
+type Supa = SupabaseClient<any, "public", "public", any, any>;
 
 /**
  * Situe un profil et écrit latitude, longitude. Lot G1 : un profil sans ville
