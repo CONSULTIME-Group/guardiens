@@ -1,4 +1,4 @@
-// Lot E24 : recette SQL de la migration 0107 sur PGlite (visibilité des questions, contraintes).
+// Lot E24 : recette SQL de la migration 0108 sur PGlite (visibilité des questions, contraintes).
 import { PGlite } from "@electric-sql/pglite";
 import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
@@ -15,7 +15,7 @@ create table public.small_missions(id uuid primary key, user_id uuid, category t
 create table public.conversations(id uuid primary key, owner_id uuid, sitter_id uuid);
 create table public.email_deep_link_tokens(id uuid primary key default gen_random_uuid(), token text, user_id uuid, conversation_id uuid, target_path text, template_name text, message_id uuid, expires_at timestamptz, consumed_at timestamptz, created_at timestamptz default now());
 `);
-await db.exec(readFileSync("drizzle/migrations/0107_e24_questions_besoin.sql", "utf8"));
+await db.exec(readFileSync("drizzle/migrations/0108_e24_questions_besoin.sql", "utf8"));
 const F='00000000-0000-0000-0000-0000000000cc', H='00000000-0000-0000-0000-0000000000dd', S='00000000-0000-0000-0000-00000000000d';
 const A='00000000-0000-0000-0000-00000000000a', O='00000000-0000-0000-0000-00000000000b', V='00000000-0000-0000-0000-00000000000c', M='00000000-0000-0000-0000-0000000000aa', P='00000000-0000-0000-0000-0000000000bb';
 await db.exec(`insert into profiles values ('${A}','karim dupont'),('${O}','Martine'),('${V}','Sophie');

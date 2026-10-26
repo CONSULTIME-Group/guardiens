@@ -1,6 +1,6 @@
 /**
  * Lot E24 : questions posées sur la fiche d'un besoin.
- * Lecture par get_mission_questions (drizzle 0107), écriture par la fonction
+ * Lecture par get_mission_questions (drizzle 0108), écriture par la fonction
  * serveur mission-question. Règles et messages partagés avec le serveur dans
  * supabase/functions/_shared/mission-question.ts.
  */

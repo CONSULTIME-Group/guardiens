@@ -201,7 +201,7 @@ describe("bloc Questions", () => {
 });
 
 describe("base, envoi et emails", () => {
-  const sql = read("drizzle/migrations/0107_e24_questions_besoin.sql");
+  const sql = read("drizzle/migrations/0108_e24_questions_besoin.sql");
   it("écriture fermée aux membres, lecture par la fonction", () => {
     expect(sql).toContain("ALTER TABLE public.mission_questions ENABLE ROW LEVEL SECURITY;");
     expect(sql).toContain("REVOKE ALL ON public.mission_questions FROM anon, authenticated;");
@@ -221,7 +221,7 @@ describe("base, envoi et emails", () => {
     expect(read("src/pages/admin/AdminReports.tsx")).toContain('mission_question: "Question d\'entraide"');
   });
   it("migration inscrite au journal", () => {
-    expect(read("drizzle/migrations/meta/_journal.json")).toContain('"tag": "0107_e24_questions_besoin"');
+    expect(read("drizzle/migrations/meta/_journal.json")).toContain('"tag": "0108_e24_questions_besoin"');
   });
   it("gabarits enregistrés, transactionnels, en lien profond vers le bloc Questions", () => {
     const registry = read("supabase/functions/_shared/transactional-email-templates/registry.ts");

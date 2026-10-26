@@ -181,7 +181,7 @@ const MISSION_QUESTION_TEMPLATES = new Set<string>([
 // Lot Y1 (P4-06) : gabarits immédiats dont le bouton peut ouvrir une session,
 // dans les 2 heures qui suivent l'envoi et sur un navigateur sans autre
 // compte connecté (liste et fenêtre tenues par consume_email_deep_link, dont
-// la définition en vigueur est drizzle/migrations/0107_e24_questions_besoin.sql). Les
+// la définition en vigueur est drizzle/migrations/0108_e24_questions_besoin.sql). Les
 // relances (unread-messages-reminder, owner-pending-application-nudge,
 // discussion-stalled-nudge, review-reminder, relance-cp-manquant) gardent le
 // lien direct vers la bonne page, derrière la connexion.
