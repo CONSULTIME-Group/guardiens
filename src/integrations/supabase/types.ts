@@ -13830,6 +13830,102 @@ export type Database = {
           },
         ]
       }
+      mission_questions: {
+        Row: {
+          answer: string | null
+          answer_moderation: string | null
+          answered_at: string | null
+          asker_id: string
+          body: string
+          created_at: string
+          hidden_at: string | null
+          id: string
+          mission_id: string
+          moderation: string
+        }
+        Insert: {
+          answer?: string | null
+          answer_moderation?: string | null
+          answered_at?: string | null
+          asker_id: string
+          body: string
+          created_at?: string
+          hidden_at?: string | null
+          id?: string
+          mission_id: string
+          moderation: string
+        }
+        Update: {
+          answer?: string | null
+          answer_moderation?: string | null
+          answered_at?: string | null
+          asker_id?: string
+          body?: string
+          created_at?: string
+          hidden_at?: string | null
+          id?: string
+          mission_id?: string
+          moderation?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_questions_asker_id_fkey"
+            columns: ["asker_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "mission_questions_asker_id_fkey"
+            columns: ["asker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_questions_asker_id_fkey"
+            columns: ["asker_id"]
+            isOneToOne: false
+            referencedRelation: "public_helpers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_questions_asker_id_fkey"
+            columns: ["asker_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_questions_asker_id_fkey"
+            columns: ["asker_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+          {
+            foreignKeyName: "mission_questions_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "public_entraide_proofs"
+            referencedColumns: ["mission_id"]
+          },
+          {
+            foreignKeyName: "mission_questions_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "public_small_missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_questions_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "small_missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       moderation_logs: {
         Row: {
           content_type: string
@@ -20195,6 +20291,20 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_mission_questions: {
+        Args: { p_mission_id: string }
+        Returns: {
+          answer: string
+          answer_is_public: boolean
+          answered_at: string
+          asker_first_name: string
+          body: string
+          created_at: string
+          id: string
+          is_mine: boolean
+          is_public: boolean
+        }[]
+      }
       get_mutual_aid_funnel_metrics: {
         Args: { p_period_days?: number }
         Returns: Json
@@ -20433,6 +20543,17 @@ export type Database = {
       increment_small_mission_view: {
         Args: { _mission_id: string }
         Returns: undefined
+      }
+      insert_mission_question: {
+        Args: {
+          p_asker_id: string
+          p_body: string
+          p_mission_id: string
+          p_moderation: string
+          p_per_day: number
+          p_per_mission: number
+        }
+        Returns: string
       }
       invite_helper_to_mission: {
         Args: { p_helper_id: string; p_mission_id: string }
