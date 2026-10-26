@@ -21,6 +21,7 @@ import AppTopBar from "./AppTopBar";
 // Lot P1 : chargés après l'affichage, jamais au premier écran.
 const InstallAppWelcome = lazy(() => import("@/components/settings/InstallAppWelcome"));
 import { afterIdle } from "@/lib/alma/weatherCache";
+import { prefetchMemberSearch } from "@/lib/bootSchedule";
 
 /**
  * Zone principale du shell. Quand un ecran plein cadre (fil de messagerie)
@@ -44,7 +45,7 @@ const ShellMain = ({ children }: { children?: ReactNode }) => {
 };
 
 export const AppLayout = ({ children }: { children?: ReactNode }) => {
-  const { user, refreshProfile } = useAuth();
+  const { user, refreshProfile, activeRole } = useAuth();
   usePresenceHeartbeat();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
@@ -57,6 +58,13 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
     void afterIdle(2000).then(() => { if (alive) setIdleReady(true); });
     return () => { alive = false; };
   }, []);
+  // Lot perf 10 : code de la recherche préchargé une fois la page affichée.
+  useEffect(() => {
+    if (!user?.id || !activeRole) return;
+    prefetchMemberSearch(location.pathname, activeRole === "sitter" ? "sitter" : "owner");
+    // Une seule planification par onglet (garde interne) : pas de dépendance au chemin.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, activeRole]);
   const [mobileHeader, setMobileHeader] = useState(() =>
     typeof window !== "undefined" && typeof window.matchMedia === "function"
       ? window.matchMedia("(max-width: 767.98px)").matches
