@@ -173,6 +173,12 @@ export function bootTexts(dict) {
   };
 }
 
+/** Lot perf 12 : textes du haut de la fiche publique (mêmes clés que PublicSitView). */
+export function bootSitTexts(dict) {
+  const d = dict.sit_detail;
+  return { badgeStay: d.badge_stay, share: d.share, shareAria: d.share_aria };
+}
+
 /**
  * Lot perf 4 : premier affichage de /annonces (src/boot/bootListingsEntry.ts)
  * empaqueté seul, fichier haché sous assets/, chargé par le script en ligne.
@@ -192,7 +198,7 @@ export async function buildBootListings(root) {
     target: ["es2019"],
     platform: "browser",
     tsconfig: path.join(root, "tsconfig.app.json"),
-    define: { __BOOT_TEXTS__: JSON.stringify(bootTexts(dict)) },
+    define: { __BOOT_TEXTS__: JSON.stringify(bootTexts(dict)), __BOOT_SIT_TEXTS__: JSON.stringify(bootSitTexts(dict)) },
     legalComments: "none",
   });
   const code = out.outputFiles[0].text;

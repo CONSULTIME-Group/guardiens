@@ -10,6 +10,8 @@
 import { BOOT_CSS, bootListingsHtml, buildBootModel, type BootTexts } from "./bootListingsView";
 import { isListingsPrefetch } from "@/lib/listingsPrefetch";
 import { parisTodayIso } from "@/lib/sitSearchRules";
+// Lot perf 12 : premier affichage de la fiche publique, même fichier.
+import "./bootSitEntry";
 
 declare const __BOOT_TEXTS__: BootTexts;
 
