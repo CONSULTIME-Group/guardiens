@@ -40,6 +40,19 @@ interface SitHeroProps {
   ownerCompletedSitsCount?: number | null;
 }
 
+/**
+ * Lot perf 11 : la mosaïque (ordinateur) et le carrousel (téléphone) sont
+ * tous deux dans la page, l'un masqué par CSS. Une image masquée en chargement
+ * « eager » se télécharge quand même, en priorité haute : sur téléphone, la
+ * grande photo de la mosaïque (704 x 640) disputait le réseau à la photo
+ * visible. La variante masquée passe en « lazy » (jamais chargée tant
+ * qu'elle est masquée), la visible garde « eager » et la priorité haute.
+ */
+function heroIsDesktop(): boolean {
+  return typeof window !== "undefined" && typeof window.matchMedia === "function"
+    && window.matchMedia("(min-width: 768px)").matches;
+}
+
 const fmtDate = (d: string) =>
   format(new Date(d), "d MMM", { locale: fr });
 
@@ -59,6 +72,7 @@ const SitHero = ({
   ownerCompletedSitsCount,
 }: SitHeroProps) => {
   const [index, setIndex] = useState(0);
+  const [desktop] = useState(heroIsDesktop);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
@@ -184,8 +198,8 @@ const SitHero = ({
               <img
                 src={storageImageUrl(current.url, { width: 768, height: 480 })}
                 alt={current.caption}
-                loading="eager"
-                fetchPriority="high"
+                loading={desktop ? "lazy" : "eager"}
+                fetchPriority={desktop ? "auto" : "high"}
                 decoding="async"
                 className="w-full h-full object-cover"
               />
@@ -295,8 +309,8 @@ const SitHero = ({
                 <img
                   src={storageImageUrl(main.url, { width: 704, height: 640 })}
                   alt={main.caption}
-                  loading="eager"
-                  fetchPriority="high"
+                  loading={desktop ? "eager" : "lazy"}
+                  fetchPriority={desktop ? "high" : "auto"}
                   decoding="async"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                 />
