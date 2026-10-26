@@ -99,7 +99,7 @@ describe("bandeau du profil (lot G2)", () => {
 });
 
 describe("branchements (lot G2)", () => {
-  const sql = readFileSync("drizzle/migrations/0108_g2_lieux_etrangers.sql", "utf8");
+  const sql = readFileSync("drizzle/migrations/0109_g2_lieux_etrangers.sql", "utf8");
   const fn = readFileSync("supabase/functions/geocode-profile/index.ts", "utf8");
   const fields = readFileSync("src/components/profile/PostalCodeCityFields.tsx", "utf8");
   it("département seulement pour la France, outre-mer en 97x ou 98x, trigger sur le pays", () => {
