@@ -21,9 +21,11 @@ interface Props {
   answers: AnswerRow[];
   questionId: string;
   onPosted?: () => void;
+  /** Lot C0 (26/10/2026) : fil en lecture seule, sans « Répondre ». */
+  readOnly?: boolean;
 }
 
-const AnswerThread = ({ answers, questionId, onPosted }: Props) => {
+const AnswerThread = ({ answers, questionId, onPosted, readOnly = false }: Props) => {
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
 
   const { roots, repliesByParent } = useMemo(() => {
@@ -70,7 +72,7 @@ const AnswerThread = ({ answers, questionId, onPosted }: Props) => {
         <p className="text-sm text-foreground/85 whitespace-pre-line leading-relaxed">{a.body}</p>
         <div className="flex items-center gap-2 mt-3">
           <HelpfulButton answerId={a.id} initialCount={a.helpful_count} />
-          {depth === 0 && (
+          {depth === 0 && !readOnly && (
             <Button
               variant="ghost"
               size="sm"
@@ -81,7 +83,7 @@ const AnswerThread = ({ answers, questionId, onPosted }: Props) => {
             </Button>
           )}
         </div>
-        {replyingTo === a.id && (
+        {!readOnly && replyingTo === a.id && (
           <div className="mt-3">
             <AnswerComposer
               questionId={questionId}

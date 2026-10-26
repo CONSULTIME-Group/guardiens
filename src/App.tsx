@@ -217,7 +217,6 @@ const MentionsLegales = lazy(() => import("./pages/MentionsLegales"), "MentionsL
 const AdminSmallMissions = lazy(() => import("./pages/admin/AdminSmallMissions"), "AdminSmallMissions");
 const EntraideHub = lazy(() => import("./pages/EntraideHub"), "EntraideHub");
 const QuestionDetail = lazy(() => import("./pages/QuestionDetail"), "QuestionDetail");
-const QuestionCreate = lazy(() => import("./pages/QuestionCreate"), "QuestionCreate");
 const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions"), "AdminSubscriptions");
 const AdminLegal = lazy(() => import("./pages/admin/AdminLegal"), "AdminLegal");
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"), "AdminSettings");
@@ -564,7 +563,8 @@ const AppRoutes = () => {
       <Route path="/petites-missions/bordeaux" element={<MissionsCityPage citySlug="bordeaux" />} />
       <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
       <Route path="/questions" element={<Navigate to="/petites-missions" replace />} />
-      <Route path="/questions/nouvelle" element={<ProtectedRoute><AppLayout><QuestionCreate /></AppLayout></ProtectedRoute>} />
+      {/* Lot C0 (26/10/2026) : écriture de la V0 fermée, La communauté en attente. */}
+      <Route path="/questions/nouvelle" element={<Navigate to="/petites-missions" replace />} />
       <Route path="/questions/:id" element={<PublicShellRoute><QuestionDetail /></PublicShellRoute>} />
       <Route path="/actualites/gardes-longue-duree-guide" element={<Navigate to="/actualites" replace />} />
       <Route path="/profil/:id" element={<RedirectProfil />} />
