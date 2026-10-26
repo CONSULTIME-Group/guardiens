@@ -152,6 +152,26 @@ window.${SIT_PREFETCH_GLOBAL}={at:Date.now(),param:param,p:p};
 }catch(e){}})();</script>`;
 }
 
+/**
+ * Lot perf 14 (26/10/2026) : la page ville /house-sitting/:slug lit sa ligne
+ * seo_city_pages dès le HTML (même filtre que CityPage : slug, publiée, une
+ * ligne au plus), reprise une fois par takeCityPrefetch (src/lib/cityPrefetch.ts).
+ */
+export const CITY_PREFETCH_GLOBAL = "__GUARDIENS_CITY__";
+
+export function cityPrefetchScript(supabaseUrl, anonKey) {
+  if (!supabaseUrl || !anonKey) return "";
+  const cfg = { u: supabaseUrl.replace(/\/+$/, ""), k: anonKey };
+  return `<script data-city-prefetch>(function(){try{
+var C=${JSON.stringify(cfg)};
+var m=location.pathname.match(/^\\/house-sitting\\/([^\\/]+)\\/?$/);
+if(!m||!window.fetch||!window.Promise)return;
+var slug=decodeURIComponent(m[1]);
+var p=fetch(C.u+"/rest/v1/seo_city_pages?select=*&slug=eq."+encodeURIComponent(slug)+"&published=eq.true&limit=1",{headers:{apikey:C.k,Authorization:"Bearer "+C.k,Accept:"application/json"}}).then(function(r){if(!r.ok)throw new Error("http");return r.json();}).then(function(rows){if(!(rows instanceof Array))throw new Error("rows");return {row:rows[0]||null};})["catch"](function(){return null;});
+window.${CITY_PREFETCH_GLOBAL}={at:Date.now(),slug:slug,p:p};
+}catch(e){}})();</script>`;
+}
+
 /** Textes du haut de /annonces, tirés du dictionnaire (mêmes clés que PublicListings). */
 export function bootTexts(dict) {
   const p = dict.public_listings, s = dict.search_results;
@@ -236,7 +256,8 @@ export function listingsPrefetchPlugin() {
         if (at === -1) throw new Error("[perf3-listings-prefetch] script d'entrée introuvable");
         // Avant le script d'entrée : les lectures partent pendant son téléchargement.
         const sit = sitPrefetchScript(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY).replace(/\n/g, "");
-        return html.slice(0, at) + script.replace(/\n/g, "") + "\n    " + sit + "\n    " + bootInlineScript(boot) + "\n    " + html.slice(at);
+        const city = cityPrefetchScript(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY).replace(/\n/g, "");
+        return html.slice(0, at) + script.replace(/\n/g, "") + "\n    " + sit + "\n    " + city + "\n    " + bootInlineScript(boot) + "\n    " + html.slice(at);
       },
     },
   };
