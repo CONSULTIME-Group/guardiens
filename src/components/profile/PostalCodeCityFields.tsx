@@ -71,7 +71,9 @@ const PostalCodeCityFields = ({
     if (next) {
       // Passe à l'étranger : on vide le code postal FR.
       // Le pays n'est jamais "" : soit un code réel déjà choisi, soit NULL (inconnu).
-      onChange({ postal_code: "", country: country && country !== "FR" ? country : null });
+      // Lot G2 : le centre de commune posé par le code postal part avec lui,
+      // sinon un membre à l'étranger gardait un point en France.
+      onChange({ postal_code: "", country: country && country !== "FR" ? country : null, latitude: null, longitude: null });
     } else {
       onChange({ country: "FR" });
     }

@@ -22,12 +22,17 @@
  *   - Utilise la service_role pour lire/écrire le profil (bypass RLS).
  */
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { geocodeOfficialFr } from "../_shared/geocode-official-fr.ts";
+import { communeNamesForPostal, geocodeOfficialFr, pointIsInFrance } from "../_shared/geocode-official-fr.ts";
 import {
   BACKFILL_LIMIT,
   backfillWindow,
+  cityMatchesCommunes,
+  foreignPointDecision,
   isBackfillCandidate,
+  isFrenchScopeCountry,
+  isNearMetropolitanFrance,
   planProfileGeocode,
+  type PlaceStatus,
   type ProfilePlace,
 } from "../_shared/profile-geocode-rules.ts";
 import { startCronRun } from "../_shared/cron-run-log.ts";
@@ -146,25 +151,83 @@ async function geocodePhoton(city: string, country: string, postal: string): Pro
   }
 }
 
+/**
+ * Lot G2 : pays du premier lieu habité (ville ou localité) de ce nom chez
+ * Photon, quand son nom est exactement celui saisi. null si rien de sûr.
+ */
+async function photonTopPlaceCountry(city: string): Promise<string | null> {
+  const params = new URLSearchParams({ q: city, limit: "1", lang: "fr" });
+  params.append("layer", "city");
+  params.append("layer", "locality");
+  try {
+    const r = await fetch(`https://photon.komoot.io/api/?${params}`, { signal: AbortSignal.timeout(6000) });
+    if (!r.ok) return null;
+    const data = await r.json();
+    const f = Array.isArray(data?.features) ? data.features[0] : null;
+    const name = f?.properties?.name;
+    const code = f?.properties?.countrycode;
+    if (typeof name !== "string" || typeof code !== "string") return null;
+    if (normalizePlace(name) !== normalizePlace(city.split(/[,(]/)[0])) return null;
+    return code.toUpperCase();
+  } catch {
+    return null;
+  }
+}
+
 // Client service_role : schéma « public » typé librement pour que
 // .from("profiles") ne retombe pas sur never (check Deno, lot G1).
 type Supa = SupabaseClient<any, "public", "public", any, any>;
+
+async function writePlace(
+  supabase: Supa,
+  user_id: string,
+  coords: { lat: number; lng: number } | null,
+  status: PlaceStatus | null,
+): Promise<string | null> {
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      latitude: coords ? coords.lat : null,
+      longitude: coords ? coords.lng : null,
+      place_status: status,
+      place_status_at: status ? new Date().toISOString() : null,
+    })
+    .eq("id", user_id);
+  return error ? error.message : null;
+}
 
 /**
  * Situe un profil et écrit latitude, longitude. Lot G1 : un profil sans ville
  * mais avec un code postal français valide est situé au centre de la commune
  * la plus peuplée du code postal (base officielle des communes).
+ * Lot G2 : un profil au pays étranger n'a jamais de point en métropole
+ * (country_mismatch) ; un profil au pays France dont la ville n'est pas une
+ * commune de son code postal et désigne un lieu étranger (Photon) n'a pas de
+ * point (foreign_city). Les deux cas posent place_status, lu par le bandeau du
+ * profil, et retirent le membre des listes « près de chez vous ».
  */
 async function geocodeProfile(supabase: Supa, user_id: string): Promise<Record<string, unknown>> {
   const { data: profile, error: pErr } = await supabase
     .from("profiles")
-    .select("city, postal_code, country")
+    .select("city, postal_code, country, latitude, longitude")
     .eq("id", user_id)
     .maybeSingle();
   if (pErr || !profile) return { error: "profile not found", status: 404 };
 
   const plan = planProfileGeocode(profile as ProfilePlace);
-  if (plan.kind === "none") return { skipped: plan.reason === "no_place" ? "no city" : "no city, outside France" };
+  if (plan.kind === "none") {
+    // Pays étranger sans ville, avec un ancien point en métropole : retiré.
+    const inFrance = !isFrenchScopeCountry(profile.country)
+        && isNearMetropolitanFrance(Number(profile.latitude), Number(profile.longitude))
+      ? await pointIsInFrance(Number(profile.latitude), Number(profile.longitude))
+      : null;
+    if (foreignPointDecision(profile.country, inFrance) === "reject") {
+      const err = await writePlace(supabase, user_id, null, "country_mismatch");
+      if (err) return { error: err, status: 500 };
+      return { skipped: "country_mismatch" };
+    }
+    return { skipped: plan.reason === "no_place" ? "no city" : "no city, outside France" };
+  }
 
   let coords: { lat: number; lng: number } | null = null;
   let source = "nominatim";
@@ -175,6 +238,18 @@ async function geocodeProfile(supabase: Supa, user_id: string): Promise<Record<s
     if (!coords) return { skipped: "no result", postal: plan.postal };
   } else {
     const { city, postal, country, isFR } = plan;
+    if (isFR && /^\d{5}$/.test(postal) && !/^9[78]/.test(postal)) {
+      // Lot G2 : ville hors des communes du code postal et lieu étranger connu.
+      const communes = await communeNamesForPostal(postal);
+      if (communes && communes.length > 0 && !cityMatchesCommunes(city, communes)) {
+        const topCountry = await photonTopPlaceCountry(city);
+        if (topCountry && !isFrenchScopeCountry(topCountry)) {
+          const err = await writePlace(supabase, user_id, null, "foreign_city");
+          if (err) return { error: err, status: 500 };
+          return { skipped: "foreign_city", city, found_country: topCountry };
+        }
+      }
+    }
     if (isFR) {
       coords = await geocodeFR(city, postal);
       source = "ban";
@@ -190,14 +265,23 @@ async function geocodeProfile(supabase: Supa, user_id: string): Promise<Record<s
       coords = await geocodePhoton(city, country, postal);
       source = "photon";
     }
+    // Lot G2 : pays étranger, point trouvé ou ancien point en métropole : retiré.
+    const candidate = coords ?? (profile.latitude != null && profile.longitude != null
+      ? { lat: Number(profile.latitude), lng: Number(profile.longitude) } : null);
+    const candidateInFrance = candidate && !isFrenchScopeCountry(country)
+        && isNearMetropolitanFrance(candidate.lat, candidate.lng)
+      ? await pointIsInFrance(candidate.lat, candidate.lng)
+      : null;
+    if (candidate && foreignPointDecision(country, candidateInFrance) === "reject") {
+      const err = await writePlace(supabase, user_id, null, "country_mismatch");
+      if (err) return { error: err, status: 500 };
+      return { skipped: "country_mismatch", city, country };
+    }
     if (!coords) return { skipped: "no result", city, country, postal };
   }
 
-  const { error: uErr } = await supabase
-    .from("profiles")
-    .update({ latitude: coords.lat, longitude: coords.lng })
-    .eq("id", user_id);
-  if (uErr) return { error: uErr.message, status: 500 };
+  const err = await writePlace(supabase, user_id, coords, null);
+  if (err) return { error: err, status: 500 };
   return { ok: true, lat: coords.lat, lng: coords.lng, source };
 }
 
@@ -212,6 +296,7 @@ async function backfillProfiles(supabase: Supa): Promise<Record<string, unknown>
     .from("profiles")
     .select("id, city, postal_code, country, latitude, longitude")
     .is("latitude", null)
+    .is("place_status", null)
     .gte("updated_at", updatedAfter)
     .lte("updated_at", updatedBefore)
     .order("updated_at", { ascending: false })

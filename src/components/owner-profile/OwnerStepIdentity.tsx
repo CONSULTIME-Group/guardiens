@@ -7,6 +7,7 @@ import { Camera } from "lucide-react";
 import HintBubble from "../profile/HintBubble";
 import AiSuggestButton from "../profile/AiSuggestButton";
 import PostalCodeCityFields from "../profile/PostalCodeCityFields";
+import PlaceMismatchNotice from "../profile/PlaceMismatchNotice";
 import ChipSelect from "../profile/ChipSelect";
 import {
   LANGUAGE_OPTIONS,
@@ -120,6 +121,8 @@ const OwnerStepIdentity = ({ data, onChange, onUploadPhoto }: Props) => {
           <Input id="o_last" value={data.last_name} onChange={e => onChange({ last_name: e.target.value })} className="rounded-lg h-12" maxLength={100} />
         </div>
       </div>
+
+      <PlaceMismatchNotice />
 
       <PostalCodeCityFields
         city={data.city}

@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Camera } from "lucide-react";
 import HintBubble from "./HintBubble";
 import PostalCodeCityFields from "./PostalCodeCityFields";
+import PlaceMismatchNotice from "./PlaceMismatchNotice";
 import { cn } from "@/lib/utils";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
 import GenerateBioButton from "@/components/ai/GenerateBioButton";
@@ -82,6 +83,8 @@ const StepIdentity = ({ data, onChange, onUploadAvatar }: Props) => {
       </div>
 
       {/* Location */}
+      <PlaceMismatchNotice />
+
       <PostalCodeCityFields
         city={data.city}
         postalCode={data.postal_code}
