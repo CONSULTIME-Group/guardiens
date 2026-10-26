@@ -121,3 +121,10 @@ describe("branchements (lot G2)", () => {
     expect(fields).toMatch(/postal_code: "", country: [^\n]*latitude: null, longitude: null/);
   });
 });
+
+describe("propagation aux annonces (lot G2 bis)", () => {
+  it("le département recalculé suit sur les annonces au changement de code postal ou de pays", () => {
+    const sql = readFileSync("drizzle/migrations/0110_g2b_propagation_departement.sql", "utf8");
+    expect(sql).toContain("AFTER UPDATE OF postal_code, country, departement_code ON public.profiles");
+  });
+});
