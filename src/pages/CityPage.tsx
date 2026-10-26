@@ -4,6 +4,8 @@ import { MarkdownBody } from "@/components/MarkdownBody";
 import { useParams, Link, Navigate } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
 import { useQuery } from "@tanstack/react-query";
+import { takeCityPrefetch } from "@/lib/cityPrefetch";
+import { wikimediaThumb } from "@/lib/wikimediaThumb";
 import { supabase } from "@/integrations/supabase/client";
 
 import { Button } from "@/components/ui/button";
@@ -71,6 +73,9 @@ const CityPage = () => {
  const { data: dbPage, isLoading: dbLoading, isError: dbFailed } = useQuery({
  queryKey: ["city-page", slug],
  queryFn: async () => {
+ // Lot perf 14 : ligne lue dès le HTML, reprise une fois.
+ const pre = await takeCityPrefetch(slug);
+ if (pre) return pre.row as any;
  const { data, error } = await supabase
 .from("seo_city_pages" as any)
 .select("*")
@@ -839,11 +844,21 @@ const CityPage = () => {
         <section className="max-w-5xl mx-auto px-4 py-12">
           {dbPage.cover_image_url && (
             <img
-              src={dbPage.cover_image_url}
+              src={wikimediaThumb(dbPage.cover_image_url)}
               alt={dbPage.hero_image_alt || `Vue de ${dbPage.city}`}
               loading="eager"
+              fetchPriority="high"
               decoding="async"
-              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+              onError={(e) => {
+                // Lot perf 14 : vignette refusée (original plus petit que 960 px), l'original prend le relais une fois.
+                const img = e.currentTarget as HTMLImageElement;
+                if (img.dataset.fallback !== "1" && img.src !== dbPage.cover_image_url) {
+                  img.dataset.fallback = "1";
+                  img.src = dbPage.cover_image_url;
+                  return;
+                }
+                img.style.display = "none";
+              }}
               className="w-full h-56 md:h-80 object-cover rounded-2xl mb-8 shadow-sm"
             />
           )}

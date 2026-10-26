@@ -115,7 +115,8 @@ describe("chargement et relais (lot perf 4)", () => {
     expect(tag).toBe('<script data-boot-listings>var a="<\\/div>";</script>');
     expect(bootInlineScript(null)).toBe("");
     const plugin = readFileSync("scripts/vite-plugin-listings-prefetch.mjs", "utf8");
-    expect(plugin).toMatch(/script\.replace\(\/\\n\/g, ""\) \+ "\\n    " \+ sit \+ "\\n    " \+ bootInlineScript\(boot\) \+ "\\n    " \+ html\.slice\(at\)/);
+    // Lot perf 14 : la lecture de la page ville s'insère entre la fiche et le premier affichage.
+    expect(plugin).toMatch(/script\.replace\(\/\\n\/g, ""\) \+ "\\n    " \+ sit \+ "\\n    " \+ city \+ "\\n    " \+ bootInlineScript\(boot\) \+ "\\n    " \+ html\.slice\(at\)/);
     expect(plugin).not.toMatch(/emitFile/);
     const cfg = readFileSync("vite.config.ts", "utf8");
     expect(cfg.indexOf("listingsPrefetchPlugin(),")).toBeLessThan(cfg.indexOf("routePreloadPlugin(),"));
