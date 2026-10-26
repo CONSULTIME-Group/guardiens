@@ -21,7 +21,7 @@
  *   - Une relance manuelle accepte aussi un JWT vérifié avec rôle admin.
  *   - Utilise la service_role pour lire/écrire le profil (bypass RLS).
  */
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { geocodeOfficialFr } from "../_shared/geocode-official-fr.ts";
 import {
   BACKFILL_LIMIT,
