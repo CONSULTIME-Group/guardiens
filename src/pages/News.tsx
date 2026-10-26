@@ -358,7 +358,7 @@ export default function News() {
           ready={ready}
         />
       )}
-      <div className="max-w-4xl mx-auto px-4 py-4 md:py-8 animate-fade-in">
+      <div className="max-w-4xl mx-auto px-4 py-4 md:py-8">
         <PageBreadcrumb items={[{ label: t("news.breadcrumb") }]} />
 
         <header className="mb-4 md:mb-8">

@@ -100,6 +100,7 @@ const OwnerCockpit = ({ userId, firstName, line, todos = [], hour, subtitle, gre
             width={210}
             height={260}
             loading="eager"
+            fetchPriority="high"
             decoding="async"
             data-testid="owner-cockpit-gouache"
             className="w-full h-full object-cover"

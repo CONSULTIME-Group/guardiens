@@ -1191,7 +1191,7 @@ const SmallMissionDetail = () => {
 
   return (
     <AppLayout>
-    <div className="text-foreground animate-fade-in">
+    <div className="text-foreground">
       <PageMeta
         title={`${displayTitle} · Coup de main à ${cityLabel}`}
         description={(() => {

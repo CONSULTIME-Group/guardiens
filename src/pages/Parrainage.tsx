@@ -107,7 +107,7 @@ const ParrainagePage = () => {
   ];
 
   return (
-    <div className="animate-fade-in">
+    <div>
       <PageMeta
         title="Parrainage Guardiens, invitez vos proches"
         description="Invitez vos proches à rejoindre Guardiens, gratuit pour tous. Chaque filleul fait grandir la communauté près de chez vous et vous rapproche des paliers Ambassadeur."

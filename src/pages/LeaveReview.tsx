@@ -352,7 +352,7 @@ const LeaveReview = () => {
 
   return (
     <>
-    <div className="p-4 md:p-10 max-w-2xl mx-auto animate-fade-in pb-32">
+    <div className="p-4 md:p-10 max-w-2xl mx-auto pb-32">
       <Head><meta name="robots" content="noindex, nofollow" /></Head>
 
       <Link to={`/sits/${sitId}`} className="hidden md:inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">

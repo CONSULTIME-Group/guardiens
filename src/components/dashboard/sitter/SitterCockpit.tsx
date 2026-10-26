@@ -113,6 +113,7 @@ const SitterCockpit = ({ firstName, isAvailable, greeting, line, todos = [], hou
             width={210}
             height={260}
             loading="eager"
+            fetchPriority="high"
             decoding="async"
             data-testid="sitter-cockpit-gouache"
             className="w-full h-full object-cover"
