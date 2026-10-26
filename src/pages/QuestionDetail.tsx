@@ -1,19 +1,25 @@
 import { useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import Head from "@/components/seo/Head";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { Button } from "@/components/ui/button";
 import AnswerThread from "@/components/community/AnswerThread";
+import AnswerComposer from "@/components/community/AnswerComposer";
 import { useQuestionDetail } from "@/hooks/useQuestionDetail";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { questionCategoryLabel } from "@/lib/communityCategories";
 import { trackEvent } from "@/lib/analytics";
+import { toast } from "sonner";
 
 const SITE_URL = "https://guardiens.fr";
 
 const QuestionDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { question, answers, loading } = useQuestionDetail(id);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { question, answers, loading, reload } = useQuestionDetail(id);
 
   useEffect(() => {
     if (id) trackEvent("question_view", { metadata: { id } });
@@ -69,6 +75,23 @@ const QuestionDetail = () => {
     },
   };
 
+  const markResolved = async () => {
+    if (!user || user.id !== question.author_id) return;
+    const { error } = await supabase
+      .from("community_questions")
+      .update({ status: "resolved" })
+      .eq("id", question.id);
+    if (error) {
+      toast.error("Action impossible.");
+      return;
+    }
+    trackEvent("question_mark_resolved", { metadata: { id: question.id, answers_count: question.answers_count } });
+    toast.success("Question marquée comme résolue.");
+    void reload();
+  };
+
+  const isAuthor = user?.id === question.author_id;
+
   return (
     <>
       <PageMeta
@@ -106,18 +129,38 @@ const QuestionDetail = () => {
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">{question.title}</h1>
           <p className="text-foreground/85 mt-4 whitespace-pre-line leading-relaxed">{question.body}</p>
 
+          {isAuthor && question.status === "open" && (
+            <div className="mt-4">
+              <Button variant="outline" size="sm" onClick={markResolved}>
+                Marquer comme résolue
+              </Button>
+            </div>
+          )}
+
           <div className="mt-10">
             <h2 className="font-heading text-xl font-semibold mb-4">
               {answers.length} réponse{answers.length > 1 ? "s" : ""}
             </h2>
-            <AnswerThread answers={answers} questionId={question.id} readOnly />
+            <AnswerThread answers={answers} questionId={question.id} onPosted={reload} />
           </div>
 
-          {/* Lot C0 (26/10/2026) : écriture fermée, La communauté en attente. */}
-          <p className="mt-8 pt-6 border-t border-border text-sm text-foreground/70">
-            Cette question est en lecture seule. Pour un coup de main près de chez vous, rendez-vous sur{" "}
-            <Link to="/petites-missions" className="text-primary hover:underline">l'Entraide</Link>.
-          </p>
+          <div className="mt-8 pt-6 border-t border-border">
+            <h3 className="font-heading text-lg font-semibold mb-3">Votre réponse</h3>
+            {user ? (
+              <AnswerComposer
+                questionId={question.id}
+                isFirstAnswer={answers.length === 0}
+                onPosted={reload}
+              />
+            ) : (
+              <div className="p-4 rounded-xl bg-accent/40 border border-border">
+                <p className="text-sm text-foreground/80 mb-3">Connectez-vous pour répondre.</p>
+                <Button onClick={() => navigate(`/login?redirect=/questions/${question.id}`)}>
+                  Se connecter
+                </Button>
+              </div>
+            )}
+          </div>
         </section>
       </div>
     </>

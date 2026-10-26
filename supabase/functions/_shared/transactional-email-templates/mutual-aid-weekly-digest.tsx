@@ -53,6 +53,7 @@ const headline = (newCount: number, city?: string | null) =>
 
 const Email = ({ firstName, city, radiusKm, newCount = 0, missions = [], questions = [], topMembers = [] }: Props) => {
   const publishUrl = `${SITE_URL}/petites-missions/creer?${utm('cta_publish')}`
+  const askUrl = `${SITE_URL}/questions/nouvelle?${utm('cta_ask')}`
   const title = headline(newCount, city)
   return (
     <Html lang="fr" dir="ltr">
@@ -138,6 +139,9 @@ const Email = ({ firstName, city, radiusKm, newCount = 0, missions = [], questio
           <Section style={{ textAlign: 'center', margin: '24px 0' }}>
             <Button href={publishUrl} style={btnPrimary}>Publier votre demande ou votre offre</Button>
           </Section>
+          <Text style={pCenter}>
+            Ou <Link href={askUrl} style={link}>posez votre question</Link> à la communauté.
+          </Text>
 
           <Hr style={hr} />
           <AlmaSignoff />
@@ -191,5 +195,6 @@ const badgeNew = { backgroundColor: '#1a7f4b', color: '#ffffff', fontSize: '11px
 const badgeNeed = { backgroundColor: '#eef2ff', color: '#33417a', fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '999px' }
 const badgeOffer = { backgroundColor: '#fff3e0', color: '#8a5300', fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '999px' }
 const link = { color: '#2b6cb0', textDecoration: 'underline', fontWeight: 600 }
+const pCenter = { textAlign: 'center' as const, color: '#666', fontSize: '13px', margin: '6px 0 0 0' }
 const btnPrimary = { backgroundColor: '#1a1a1a', color: '#fff', padding: '12px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, fontSize: '14px' }
 const hr = { borderColor: '#eee', margin: '20px 0' }
