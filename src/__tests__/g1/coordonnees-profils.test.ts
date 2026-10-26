@@ -43,7 +43,7 @@ describe("quand et comment situer un profil (lot G1)", () => {
 
 describe("branchements (lot G1)", () => {
   const fn = readFileSync("supabase/functions/geocode-profile/index.ts", "utf8");
-  const sql = readFileSync("drizzle/migrations/0105_g1_coordonnees_profils.sql", "utf8");
+  const sql = readFileSync("drizzle/migrations/0107_g1_coordonnees_profils.sql", "utf8");
 
   it("geocode-profile situe par code postal et porte le rattrapage journalisé", () => {
     expect(fn).toContain("planProfileGeocode(");
