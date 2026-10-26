@@ -69,3 +69,57 @@ export function prefetchRouteChunk(pathname: string): void {
   if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) files.push(...preloadList(PRELOAD_DASHBOARD));
   addModulePreload([...new Set(files)]);
 }
+
+const PRELOAD_SEARCH_SITTER = "__P2B_PRELOAD_SEARCH_SITTER__";
+const PRELOAD_SEARCH_OWNER = "__P2B_PRELOAD_SEARCH_OWNER__";
+
+/** Délai après le temps libre du navigateur, pour laisser passer la page en cours. */
+export const SEARCH_PRELOAD_DELAY_MS = 3000;
+
+let searchPreloadScheduled = false;
+
+/** La recherche est-elle déjà la page affichée ? (rien à précharger alors) */
+export function isSearchPath(pathname: string): boolean {
+  return pathname === "/search" || pathname === "/recherche";
+}
+
+/**
+ * Lot perf 10 (26/10/2026) : un membre arrive presque toujours sur /search
+ * par une navigation interne (barre basse, tableau de bord). Le code de la
+ * recherche (environ 75 fichiers) se téléchargeait alors seulement au clic,
+ * et chaque mise en ligne change leurs noms : 3,9 s de code avant la
+ * première lecture d'annonces sur la sonde mobile du 26/10/2026, première
+ * carte à 9,7 s en médiane chez les membres Android.
+ * Une fois la page en cours affichée (temps libre du navigateur, puis
+ * SEARCH_PRELOAD_DELAY_MS), les fichiers de la vue qui servira (gardien ou
+ * propriétaire) sont préchargés sans exécution, une seule fois par session
+ * d'onglet. Rien sur /search elle-même, rien sans connexion de données
+ * économe (saveData) ni sur une connexion 2G.
+ */
+export function searchPreloadAllowed(
+  pathname: string,
+  conn: { saveData?: boolean; effectiveType?: string } | undefined,
+): boolean {
+  if (isSearchPath(pathname)) return false;
+  if (conn?.saveData || conn?.effectiveType === "2g" || conn?.effectiveType === "slow-2g") return false;
+  return true;
+}
+
+export function prefetchMemberSearch(pathname: string, role: "sitter" | "owner"): boolean {
+  if (typeof window === "undefined" || typeof document === "undefined") return false;
+  if (searchPreloadScheduled) return false;
+  const conn = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+  if (!searchPreloadAllowed(pathname, conn)) return false;
+  const files = preloadList(role === "owner" ? PRELOAD_SEARCH_OWNER : PRELOAD_SEARCH_SITTER);
+  if (files.length === 0) return false;
+  searchPreloadScheduled = true;
+  runAfterFirstPaint(() => {
+    window.setTimeout(() => addModulePreload(files), SEARCH_PRELOAD_DELAY_MS);
+  }, 4000);
+  return true;
+}
+
+/** Tests seulement. */
+export function __resetSearchPreloadForTests(): void {
+  searchPreloadScheduled = false;
+}

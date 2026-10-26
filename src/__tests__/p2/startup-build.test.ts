@@ -115,6 +115,12 @@ describe("P2b, préchargement membre sans exécution", () => {
     expect(/assets\/AppLayout-[^"\\]+\.js/.test(entryCode)).toBe(true);
     expect(/assets\/Dashboard-[^"\\]+\.js/.test(entryCode)).toBe(true);
   });
+
+  it("lot perf 10 : listes de la recherche gardien et propriétaire dans l'entrée", () => {
+    expect(/assets\/SearchPage-[^"\\]+\.js/.test(entryCode)).toBe(true);
+    expect(/assets\/SearchSitter-[^"\\]+\.js/.test(entryCode)).toBe(true);
+    expect(/assets\/SearchOwner-[^"\\]+\.js/.test(entryCode)).toBe(true);
+  });
 });
 
 describe("P2, index léger des villes entraide", () => {
