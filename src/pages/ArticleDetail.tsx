@@ -602,7 +602,7 @@ export default function ArticleDetail() {
  { label: article.title },
  ]} />
 
- <article className="max-w-3xl mx-auto px-4 py-8 animate-fade-in">
+ <article className="max-w-3xl mx-auto px-4 py-8">
 
 
 

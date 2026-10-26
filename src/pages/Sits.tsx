@@ -838,7 +838,7 @@ const Sits = () => {
   }, [tabCounts, ownerTabCounts, activeSits, isOwnerView]);
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-8">
+    <div className="p-4 md:p-8 max-w-4xl mx-auto pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-8">
       <Head><meta name="robots" content="noindex, nofollow" /></Head>
       {/* Header */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

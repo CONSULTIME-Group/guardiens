@@ -395,7 +395,7 @@ const SitterProfile = () => {
     <div className="min-h-screen bg-background">
       <PageMeta title={tp("sitter_meta_title")} description={tp("sitter_meta_description")} noindex />
 
-      <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto animate-fade-in">
+      <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto">
         <h1 className="sr-only">Mon profil gardien</h1>
         <div className="flex flex-col lg:flex-row gap-4 md:gap-8">
           {/* Left sidebar */}

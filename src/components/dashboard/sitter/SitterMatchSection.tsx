@@ -151,6 +151,7 @@ const StarCard = ({
             alt={sit.title ?? "Annonce"}
             className="w-full h-full object-cover"
             loading="eager"
+            fetchPriority="high"
             decoding="async"
             width={900}
             height={280}

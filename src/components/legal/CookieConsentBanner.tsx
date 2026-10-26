@@ -56,7 +56,7 @@ export function CookieConsentBanner() {
       role="region"
       aria-labelledby="cookie-banner-title"
       data-testid="cookie-banner"
-      className="fixed inset-x-0 bottom-0 z-[60] p-3 sm:p-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]"
+      className="fixed inset-x-0 bottom-0 z-[60] p-3 sm:p-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] animate-fade-in"
     >
       <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-card text-card-foreground shadow-lg p-4 sm:p-5">
         <h2
