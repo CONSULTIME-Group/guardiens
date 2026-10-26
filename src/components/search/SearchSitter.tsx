@@ -22,6 +22,17 @@ const sitCoordsKey = (s: any): string | null => {
  * instant partent groupés (geocodeCity, lot H3).
  */
 async function locateSitPlaces(items: any[], allowNetwork = true): Promise<Map<string, { lat: number; lng: number }>> {
+  const run = startLocateSitPlaces(items, allowNetwork);
+  await run.done;
+  return run.coordsByKey;
+}
+
+/**
+ * Lot perf 9 : même règle que locateSitPlaces, sans attendre le réseau.
+ * coordsByKey se remplit au fil des réponses ; done se résout quand tous les
+ * lieux à chercher ont répondu (jamais de rejet).
+ */
+function startLocateSitPlaces(items: any[], allowNetwork = true): { coordsByKey: Map<string, { lat: number; lng: number }>; done: Promise<void> } {
   const coordsByKey = new Map<string, { lat: number; lng: number }>();
   const keys = new Map<string, { city: string; country: string | null; place: ReturnType<typeof resolveSitPlace> }>();
   items.forEach((s) => {
@@ -35,8 +46,8 @@ async function locateSitPlaces(items: any[], allowNetwork = true): Promise<Map<s
     if (point) { coordsByKey.set(k, point); keys.delete(k); return; }
     keys.set(k, { ...g, place: resolveSitPlace(s) });
   });
-  if (!allowNetwork) return coordsByKey;
-  await Promise.all([...keys.entries()].map(async ([k, g]) => {
+  if (!allowNetwork || keys.size === 0) return { coordsByKey, done: Promise.resolve() };
+  const done = Promise.allSettled([...keys.entries()].map(async ([k, g]) => {
     const c = await geocodeCity(g.city, g.country);
     if (!c) return;
     const check = g.place.country === "FR" && g.place.dept
@@ -44,8 +55,8 @@ async function locateSitPlaces(items: any[], allowNetwork = true): Promise<Map<s
       : "not_applicable";
     // Point discordant ou invérifiable : jamais une coordonnée vérifiée.
     if (pointUsable(check)) coordsByKey.set(k, { lat: c.lat, lng: c.lng });
-  }));
-  return coordsByKey;
+  })).then(() => undefined);
+  return { coordsByKey, done };
 }
 import SearchListingCard from "@/components/search/listing/SearchListingCard";
 import AffinityMissingCTA from "@/components/matching/AffinityMissingCTA";
@@ -70,6 +81,7 @@ import { Search, MapPin, Lock, Sparkles, Globe2, X, AlertCircle, RefreshCw } fro
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
+import { LOCATE_BUDGET_MS, hasNewCoords, settleWithin } from "@/lib/settleWithin";
 import { endBootListings, takeListingsPrefetch } from "@/lib/listingsPrefetch";
 import { fetchIntlOpenSits, intlCountryCounts, carryOverParams, DEST_WORLD, DEST_ABROAD } from "@/lib/intlSitSearch";
 import DestinationCountrySelect from "@/components/search/DestinationCountrySelect";
@@ -900,11 +912,23 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    today: string,
    refDeptPromise: Promise<string | null>,
    gen: number,
+   preLocated?: Map<string, { lat: number; lng: number }>,
   ) => {
    // Lot H3 : sans point de recherche, aucun appel réseau avant la liste ;
    // la carte situe les lieux restants à son ouverture (effet plus bas).
    // Lot H4 : les lieux tirés du profil du propriétaire sont situés sans appel.
-   const coordsByKey = await locateSitPlaces(items, !!searchCoords);
+   // Lot perf 9 : avec un point, la liste attend le géocodage LOCATE_BUDGET_MS
+   // au plus ; un lieu plus lent arrive par une seconde passe (late).
+   let coordsByKey: Map<string, { lat: number; lng: number }>;
+   let late: Promise<Map<string, { lat: number; lng: number }>> | null = null;
+   if (preLocated) {
+     coordsByKey = preLocated;
+   } else {
+     const run = startLocateSitPlaces(items, !!searchCoords);
+     const settled = await settleWithin(run.done, LOCATE_BUDGET_MS);
+     coordsByKey = new Map(run.coordsByKey);
+     if (!settled.done) late = run.done.then(() => new Map(run.coordsByKey));
+   }
    const placeOf = (s: any) => resolveSitPlace(s);
    const coordsOf = (s: any) => {
      const k = sitCoordsKey(s);
@@ -985,7 +1009,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     const pl = placeOf(s);
     return { ...s, locationCity: pl.city, locationCountry: pl.country, locationDept: pl.dept, locationSource: pl.source };
   };
-  return { items: filtered.map(decorate), coordsOf };
+  return { items: filtered.map(decorate), coordsOf, coordsByKey, late };
  };
 
    /**
@@ -1129,6 +1153,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     basePromise: Promise<SitBase>,
     refDeptPromise: Promise<string | null>,
     gen: number,
+    preLocated?: Map<string, { lat: number; lng: number }>,
    ) => {
    const base = await basePromise;
    if (searchGenRef.current !== gen) return;
@@ -1159,9 +1184,19 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
        isPast: !isCompleted && isPastSit(s, todayIso),
      };
    });
-  const located = await filterSitsByLocation(items, searchCoords, todayIso, refDeptPromise, gen);
+  const located = await filterSitsByLocation(items, searchCoords, todayIso, refDeptPromise, gen, preLocated);
   if (!located) return;
   const { items: locFiltered, coordsOf } = located;
+  // Lot perf 9 : seconde passe, sans réseau, quand un lieu plus lent que
+  // LOCATE_BUDGET_MS a été situé après l'affichage. Une recherche remplacée
+  // entre-temps ne l'écrit pas.
+  if (located.late) {
+    const shown = located.coordsByKey;
+    void located.late.then((full) => {
+      if (searchGenRef.current !== gen || !hasNewCoords(full, shown)) return;
+      void searchSits(searchCoords, basePromise, refDeptPromise, gen, full);
+    });
+  }
 
   items = locFiltered;
 
@@ -1224,7 +1259,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   deferredMapItemsRef.current = !searchCoords && enriched.some((sit: any) => !coordsMap.has(sit.id) && sitCoordsKey(sit)) ? enriched : null;
   setRawResults(enriched);
   setRawAvailableMembers([]);
-  setVisibleCount(12);
+  // Seconde passe (lot perf 9) : le « Voir plus » déjà ouvert reste ouvert.
+  if (!preLocated) setVisibleCount(12);
  };
 
 

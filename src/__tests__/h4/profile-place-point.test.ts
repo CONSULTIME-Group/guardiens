@@ -32,7 +32,8 @@ describe("point d'une annonce tiré du profil (lot H4)", () => {
   it("SearchSitter lit les coordonnées du profil et ne géocode qu'avec un point de recherche", () => {
     const src = readFileSync("src/components/search/SearchSitter.tsx", "utf8");
     expect(src).toContain("latitude_approx, longitude_approx");
-    expect(src).toMatch(/await locateSitPlaces\(items, !!searchCoords\)/);
+    // Lot perf 9 : même règle, appel non bloquant borné par LOCATE_BUDGET_MS.
+    expect(src).toMatch(/startLocateSitPlaces\(items, !!searchCoords\)/);
     expect(src).toMatch(/const point = profilePlacePoint\(s\);/);
   });
 });
