@@ -102,10 +102,31 @@ export const SIT_PREFETCH_SPEC = {
   houseGuide: { table: "house_guides", select: "id", by: "property_id", from: "property_id", query: "limit=2" },
 };
 
+/**
+ * Lot perf 11 (26/10/2026) : photo principale de la fiche demandée dès les
+ * lectures du HTML, sans attendre le code. Même choix que PublicSitDetail et
+ * SitHero : photos de la galerie du propriétaire (ordre position), sinon
+ * properties.photos, première chaîne non vide ; même adresse que
+ * storageImageUrl (768 x 480 sur téléphone, 704 x 640 à partir de 768 px,
+ * qualité 75, cover). Adresse hors stockage public ou déjà paramétrée :
+ * aucun préchargement. Parité verrouillée par src/__tests__/perf11/.
+ * Reçoit a = [lignes owner_gallery, lignes properties].
+ */
+export const HERO_PRELOAD_JS = `var g=a[0]instanceof Array?a[0]:[],pr=a[1]instanceof Array?a[1][0]:null,L=[];
+for(var i=0;i<g.length;i++)if(g[i]&&g[i].photo_url)L.push(g[i].photo_url);
+if(!L.length&&pr&&pr.photos instanceof Array)L=pr.photos;
+var u=null;for(var j=0;j<L.length;j++)if(typeof L[j]==="string"&&L[j].trim()){u=L[j];break;}
+if(!u||!/^https?:\\/\\//i.test(u)||!/\\.supabase\\.co\\//i.test(u)||u.indexOf("/storage/v1/object/public/")<0||u.indexOf("?")>=0)return;
+var d=window.matchMedia&&window.matchMedia("(min-width: 768px)").matches;
+var h=u.replace("/storage/v1/object/public/","/storage/v1/render/image/public/")+"?width="+(d?704:768)+"&height="+(d?640:480)+"&quality=75&resize=cover";
+var l=document.createElement("link");l.rel="preload";l.setAttribute("as","image");l.href=h;l.setAttribute("fetchpriority","high");document.head.appendChild(l);
+window.__GUARDIENS_SIT_HERO__=h;`.replace(/\n/g, "");
+
 export function sitPrefetchScript(supabaseUrl, anonKey) {
   if (!supabaseUrl || !anonKey) return "";
   const w = Object.entries(SIT_PREFETCH_SPEC).map(([k, v]) => v.rpc ? [k, 1, v.rpc, v.arg, v.from] : [k, 0, v.table, clean(v.select), v.by, v.from, v.query]);
-  const cfg = { u: supabaseUrl.replace(/\/+$/, ""), k: anonKey, w };
+  const keys = Object.keys(SIT_PREFETCH_SPEC);
+  const cfg = { u: supabaseUrl.replace(/\/+$/, ""), k: anonKey, w, g: keys.indexOf("gallery"), pr: keys.indexOf("property") };
   return `<script data-sit-prefetch>(function(){try{
 var C=${JSON.stringify(cfg)};
 var m=location.pathname.match(/^\\/annonces\\/([^\\/]+)\\/?$/);
@@ -120,9 +141,11 @@ var get=function(p){return fetch(C.u+"/rest/v1/"+p,{headers:H}).then(ok);};
 var p=rpc("get_public_sit",{p_param:param}).then(function(rows){
 if(!(rows instanceof Array))throw new Error("rows");
 var s=rows[0];if(!s)return {sit:rows};
-return Promise.all(C.w.map(function(x){var v=s[x[x[1]?4:5]];
+var ps=C.w.map(function(x){var v=s[x[x[1]?4:5]];
 if(x[1]){var b={};b[x[3]]=v;return v?rpc(x[2],b):[];}
-if(!v)return [];return get(x[2]+"?select="+x[3]+"&"+x[4]+"=eq."+encodeURIComponent(v)+(x[6]?"&"+x[6]:""));})).then(function(r){
+if(!v)return [];return get(x[2]+"?select="+x[3]+"&"+x[4]+"=eq."+encodeURIComponent(v)+(x[6]?"&"+x[6]:""));});
+Promise.all([ps[C.g],ps[C.pr]]).then(function(a){${HERO_PRELOAD_JS}})["catch"](function(){});
+return Promise.all(ps).then(function(r){
 var out={sit:rows};for(var j=0;j<C.w.length;j++)out[C.w[j][0]]=r[j];return out;});
 })["catch"](function(){return null;});
 window.${SIT_PREFETCH_GLOBAL}={at:Date.now(),param:param,p:p};
