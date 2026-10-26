@@ -22,7 +22,7 @@
  *   - Utilise la service_role pour lire/écrire le profil (bypass RLS).
  */
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { communeNamesForPostal, geocodeOfficialFr, pointIsInFrance } from "../_shared/geocode-official-fr.ts";
+import { communeNamesForPostal, frenchCommuneNameExists, geocodeOfficialFr, pointIsInFrance } from "../_shared/geocode-official-fr.ts";
 import {
   BACKFILL_LIMIT,
   backfillWindow,
@@ -243,7 +243,12 @@ async function geocodeProfile(supabase: Supa, user_id: string): Promise<Record<s
       const communes = await communeNamesForPostal(postal);
       if (communes && communes.length > 0 && !cityMatchesCommunes(city, communes)) {
         const topCountry = await photonTopPlaceCountry(city);
-        if (topCountry && !isFrenchScopeCountry(topCountry)) {
+        // Correctif du 26/10 : Photon place d'abord un homonyme étranger
+        // (Évian, Faverges) ; aucune commune française de ce nom n'est exigée.
+        const frenchName = topCountry && !isFrenchScopeCountry(topCountry)
+          ? await frenchCommuneNameExists(city)
+          : null;
+        if (topCountry && !isFrenchScopeCountry(topCountry) && frenchName === false) {
           const err = await writePlace(supabase, user_id, null, "foreign_city");
           if (err) return { error: err, status: 500 };
           return { skipped: "foreign_city", city, found_country: topCountry };

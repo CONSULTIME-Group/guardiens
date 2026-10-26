@@ -143,3 +143,35 @@ export async function pointIsInFrance(
     return null;
   }
 }
+
+/**
+ * Lot G2 (correctif du 26/10) : une commune française porte-t-elle ce nom ou un
+ * nom qui commence par lui (« Évian » pour Évian-les-Bains, « Faverges » pour
+ * Faverges-Seythenex) ? Recherche par nom de geo.api.gouv.fr.
+ * true, false ; null si le service ne répond pas.
+ */
+export async function frenchCommuneNameExists(
+  city: string,
+  fetchImpl: typeof fetch = fetch,
+  timeoutMs = OFFICIAL_FR_TIMEOUT_MS,
+): Promise<boolean | null> {
+  const wanted = normalizeCommuneName(city ?? "");
+  if (wanted.length < 2) return false;
+  try {
+    const params = new URLSearchParams({ nom: city.trim(), fields: "nom", boost: "population", limit: "20", format: "json" });
+    const res = await fetchImpl(`https://geo.api.gouv.fr/communes?${params}`, {
+      headers: { "User-Agent": "Guardiens/1.0 (geocode)" },
+      signal: typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(timeoutMs) : undefined,
+    });
+    if (!res.ok) return null;
+    const rows = await res.json();
+    if (!Array.isArray(rows)) return null;
+    return rows.some((r: { nom?: unknown }) => {
+      if (typeof r?.nom !== "string") return false;
+      const n = normalizeCommuneName(r.nom);
+      return n === wanted || n.startsWith(wanted + " ");
+    });
+  } catch {
+    return null;
+  }
+}

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import ts from "typescript";
-import { communeNamesForPostal, geocodeOfficialFr, pointIsInFrance } from "../../supabase/functions/_shared/geocode-official-fr";
+import { communeNamesForPostal, frenchCommuneNameExists, geocodeOfficialFr, pointIsInFrance } from "../../supabase/functions/_shared/geocode-official-fr";
 import * as profileRules from "../../supabase/functions/_shared/profile-geocode-rules";
 
 // Lot G1 : toutes les importations sont retirées et injectées ci-dessous
@@ -27,6 +27,7 @@ function harness({ admin = false, user = true, roleError = null, city = "", coun
     geocodeOfficialFr: (q: string, isPostal: boolean) => geocodeOfficialFr(q, isPostal, fetch as unknown as typeof globalThis.fetch),
     communeNamesForPostal: (postal: string) => communeNamesForPostal(postal, fetch as unknown as typeof globalThis.fetch),
     pointIsInFrance: (lat: number, lng: number) => pointIsInFrance(lat, lng, fetch as unknown as typeof globalThis.fetch),
+    frenchCommuneNameExists: (city: string) => frenchCommuneNameExists(city, fetch as unknown as typeof globalThis.fetch),
     ...profileRules,
     startCronRun: async () => ({ id: null, finish: async () => {}, fail: async () => {} }),
   };
@@ -191,6 +192,7 @@ describe("lot G2 : un lieu étranger n'apparaît jamais en France", () => {
 
   it("pays France, ville étrangère hors des communes du code postal : foreign_city", async () => {
     const h = harness({ city: "Casablanca", country: "FR", postal: "20220", fetchResponse: async (url: string) => {
+      if (url.includes("geo.api.gouv.fr") && url.includes("nom=")) return response([]);
       if (url.includes("geo.api.gouv.fr")) return response([{ nom: "L'Île-Rousse" }, { nom: "Algajola" }]);
       if (url.includes("photon")) return response({ features: [{ properties: { name: "Casablanca", countrycode: "MA" }, geometry: { coordinates: [-7.6, 33.6] } }] });
       return response({ features: [{ geometry: { coordinates: [8.9, 42.6] } }] });
@@ -207,6 +209,17 @@ describe("lot G2 : un lieu étranger n'apparaît jamais en France", () => {
     } });
     expect(await (await h.run(secretHeaders)).json()).toMatchObject({ ok: true, source: "ban" });
     expect(h.update).toHaveBeenCalledWith({ latitude: 49.64, longitude: -1.62, place_status: null, place_status_at: null });
+  });
+
+  it("homonyme étranger d'une commune française (Évian, 74500) : situé comme avant", async () => {
+    const h = harness({ city: "Evian", country: "FR", postal: "74500", fetchResponse: async (url: string) => {
+      if (url.includes("geo.api.gouv.fr") && url.includes("nom=")) return response([{ nom: "Évian-les-Bains" }]);
+      if (url.includes("geo.api.gouv.fr")) return response([{ nom: "Évian-les-Bains" }, { nom: "Publier" }]);
+      if (url.includes("photon")) return response({ features: [{ properties: { name: "Evian", countrycode: "CH" } }] });
+      return response({ features: [{ geometry: { coordinates: [6.59, 46.4] } }] });
+    } });
+    expect(await (await h.run(secretHeaders)).json()).toMatchObject({ ok: true });
+    expect(h.update).toHaveBeenCalledWith({ latitude: 46.4, longitude: 6.59, place_status: null, place_status_at: null });
   });
 
   it("service des communes injoignable : aucune décision, situé comme avant", async () => {
