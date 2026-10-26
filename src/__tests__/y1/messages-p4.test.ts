@@ -173,8 +173,18 @@ describe("Y1, P4-06 : lien d'email et session", () => {
     const sender = read("supabase/functions/send-transactional-email/index.ts");
     const senderSet = sender.slice(sender.indexOf("const DEEP_LINK_SESSION_TEMPLATES"), sender.indexOf("const DEEP_LINK_SESSION_NOTICE"));
     const names = Array.from(senderSet.matchAll(/'([a-z0-9-]+)'/g), (m) => m[1]).sort();
-    expect(names).toEqual(["first-application-received", "new-application", "new-message", "review-received"]);
-    for (const n of names) expect(consume).toContain(`'${n}'`);
+    // Lot E23 : l'email immédiat d'entraide rejoint la liste ; la définition en
+    // vigueur de la fonction est celle de la migration 0106. Égalité stricte.
+    expect(names).toEqual([
+      "first-application-received", "mission-response-received",
+      "new-application", "new-message", "review-received",
+    ]);
+    const latestConsume = read("drizzle/migrations/0106_e23_lien_auteur_entraide.sql");
+    const arr = latestConsume.slice(latestConsume.indexOf("c_session_templates constant text[] := ARRAY["));
+    const sqlNames = Array.from(arr.slice(0, arr.indexOf("];")).matchAll(/'([a-z0-9-]+)'/g), (m) => m[1]).sort();
+    expect(sqlNames).toEqual(names);
+    expect(names).not.toContain("mission-response-waiting");
+    expect(names).not.toContain("mission-wave-status");
     for (const reminder of ["unread-messages-reminder", "owner-pending-application-nudge", "discussion-stalled-nudge", "review-reminder", "relance-cp-manquant"]) {
       expect(names).not.toContain(reminder);
     }

@@ -151,12 +151,25 @@ const DEEP_LINK_TEMPLATES = new Set<string>([
   'review-reminder',
   'review-received',
   'relance-cp-manquant',
+  // Lot E23 : emails d'entraide reçus par l'auteur du besoin. Le bouton mène
+  // à la fiche du besoin, où se lisent les réponses.
+  'mission-response-received',
+  'mission-response-waiting',
+  'mission-wave-status',
+])
+
+// Lot E23 : gabarits d'entraide dont la cible est la fiche du besoin
+// (/petites-missions/{missionId}), lue dans templateData.missionId.
+const MISSION_DEEP_LINK_TEMPLATES = new Set<string>([
+  'mission-response-received',
+  'mission-response-waiting',
+  'mission-wave-status',
 ])
 
 // Lot Y1 (P4-06) : gabarits immédiats dont le bouton peut ouvrir une session,
 // dans les 2 heures qui suivent l'envoi et sur un navigateur sans autre
-// compte connecté (liste et fenêtre tenues par consume_email_deep_link,
-// supabase/prepared-migrations/20261013200000_y1_plafond_messages.sql). Les
+// compte connecté (liste et fenêtre tenues par consume_email_deep_link, dont
+// la définition en vigueur est drizzle/migrations/0106_e23_lien_auteur_entraide.sql). Les
 // relances (unread-messages-reminder, owner-pending-application-nudge,
 // discussion-stalled-nudge, review-reminder, relance-cp-manquant) gardent le
 // lien direct vers la bonne page, derrière la connexion.
@@ -165,6 +178,12 @@ const DEEP_LINK_SESSION_TEMPLATES = new Set<string>([
   'new-application',
   'first-application-received',
   'review-received',
+  // Lot E23 : l'email immédiat « une réponse à votre besoin ». La relance à
+  // 24 h (mission-response-waiting) et l'état de la vague (mission-wave-status,
+  // envoyé par tâche planifiée, dont la variante « vivier épuisé » invite à
+  // partager le besoin) gardent la règle Y1 : lien direct derrière la
+  // connexion, puis retour sur la fiche.
+  'mission-response-received',
 ])
 const DEEP_LINK_SESSION_NOTICE =
   'Le bouton de cet email vous connecte directement pendant 2 heures : gardez ce message pour vous.'
@@ -1270,14 +1289,21 @@ Deno.serve(async (req) => {
       const sitId = typeof templateData?.sitId === 'string' && templateData.sitId
         ? templateData.sitId
         : null
+      const isUuid = (v: string) =>
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)
+      const missionId = typeof templateData?.missionId === 'string' && isUuid(templateData.missionId)
+        ? templateData.missionId
+        : null
+      const missionPath = MISSION_DEEP_LINK_TEMPLATES.has(templateName)
+        ? (missionId ? `/petites-missions/${missionId}` : '/petites-missions')
+        : null
       const targetPath = DEEP_LINK_TARGET_OVERRIDES[templateName]
+        ?? missionPath
         ?? (conversationId
           ? `/messages/${conversationId}`
           : (REVIEW_DEEP_LINK_TEMPLATES.has(templateName) && sitId
             ? `/review/${sitId}`
             : (sitId ? `/sits/${sitId}#candidatures` : '/messages')))
-      const isUuid = (v: string) =>
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)
       const { data: deepToken, error: deepErr } = await supabase.rpc('create_email_deep_link', {
         p_email: effectiveRecipient,
         p_target_path: targetPath,

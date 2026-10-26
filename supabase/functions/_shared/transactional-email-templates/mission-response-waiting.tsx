@@ -6,15 +6,14 @@ import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import { ResponderList } from './_responder-list.tsx'
-import { normalizeResponders } from '../mission-responders.ts'
+import { normalizeResponders, authorMissionUrl } from '../mission-responders.ts'
 import type { TemplateEntry } from './registry.ts'
-
-const SITE_URL = 'https://guardiens.fr'
 
 interface Props {
   responderFirstName?: string
   missionTitle?: string
   missionId?: string
+  deepLinkUrl?: string
   /** Lot E17 : répondants en attente, chacun avec un bouton « Choisir {prénom} ». */
   responders?: unknown
 }
@@ -23,10 +22,10 @@ interface Props {
  * Lot E17 : relance du demandeur, 24 h après une réponse restée en attente,
  * une seule fois par réponse (choose_prompt_sent_at).
  */
-const Email = ({ responderFirstName, missionTitle, missionId, responders }: Props) => {
+const Email = ({ responderFirstName, missionTitle, missionId, deepLinkUrl, responders }: Props) => {
   const list = normalizeResponders(responders)
   const who = list.length > 1 ? null : (list[0]?.firstName || responderFirstName || 'Un membre')
-  const pageUrl = missionId ? `${SITE_URL}/petites-missions/${missionId}` : `${SITE_URL}/petites-missions`
+  const authorUrl = authorMissionUrl(missionId, deepLinkUrl)
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
@@ -43,7 +42,7 @@ const Email = ({ responderFirstName, missionTitle, missionId, responders }: Prop
           {list.length > 0 ? (
             <>
               <ResponderList responders={list} intro={list.length > 1 ? 'Choisissez la personne qui vous convient :' : undefined} />
-              <Button style={buttonGhost} href={pageUrl}>
+              <Button style={buttonGhost} href={authorUrl}>
                 Voir mon besoin
               </Button>
             </>
@@ -53,7 +52,7 @@ const Email = ({ responderFirstName, missionTitle, missionId, responders }: Prop
                 Un retour, quel qu'il soit, respecte le temps de la personne qui s'est manifestée
                 et fait vivre l'entraide dans votre coin.
               </Text>
-              <Button style={button} href={pageUrl}>
+              <Button style={button} href={authorUrl}>
                 Voir la proposition
               </Button>
             </>

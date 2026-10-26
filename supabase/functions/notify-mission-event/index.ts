@@ -280,6 +280,11 @@ Deno.serve(async (req) => {
     targets = [mission.user_id]
   }
   targets = targets.filter((t) => t && t !== payload.actor_id && participants.has(t))
+  // Lot E23 : une proposition d'aide ne s'annonce qu'à l'auteur du besoin
+  // (mission-response-received ouvre sa session depuis l'email).
+  if (payload.event_type === 'mission_proposal') {
+    targets = targets.filter((t) => t === mission.user_id)
+  }
 
   if (targets.length === 0) {
     return json({ ok: true, event_type: payload.event_type, results: [] }, 200)
