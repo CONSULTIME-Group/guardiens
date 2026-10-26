@@ -34,7 +34,7 @@ interface BreedProfile {
 
 // Libellés d'espèces : module unique src/lib/petLabels.ts (enum pet_species).
 import { petSpeciesLabelLower } from "@/lib/petLabels";
-import { mergedBreedTarget } from "@/lib/breedFicheMerges";
+import { liveMergedBreedTarget } from "@/lib/breedFicheMerges";
 import { TypographicFallback } from "@/components/breeds/BreedCardImage";
 import { LEVEL_BADGE_CLASS, extractDifficultyLevel } from "@/lib/breedsListingModel";
 
@@ -78,7 +78,7 @@ const BreedPage = () => {
         } else {
           // Doublon fusionné (« jack russel », « gris du gabon ») : l'URL
           // historique redirige vers la fiche conservée, jamais de 404.
-          const target = mergedBreedTarget(match.species, match.breed);
+          const target = liveMergedBreedTarget(match.species, match.breed, data as BreedProfile[]);
           if (target) {
             setRedirectTo(`/races/${match.species.toLowerCase()}-${slugify(target)}`);
           } else {

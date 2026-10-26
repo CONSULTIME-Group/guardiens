@@ -104,6 +104,9 @@ const CityPage = () => {
         if (!data?.slug_to || visited.has(data.slug_to)) break;
         current = data.slug_to;
         visited.add(current);
+        // Chemin complet (ville retirée regroupée vers sa page département) :
+        // cible terminale, jamais un maillon de chaîne.
+        if (current.startsWith("/")) break;
       }
       return current !== slug ? current : null;
     },
@@ -710,7 +713,7 @@ const CityPage = () => {
  if (cityRedirect) {
  // Redirection client pour les personnes, 301 declare aux crawlers via
  // Prerender (meme modele que la route guide au singulier).
- const target = `/house-sitting/${cityRedirect}`;
+ const target = cityRedirect.startsWith("/") ? cityRedirect : `/house-sitting/${cityRedirect}`;
  const isPrerender =
    typeof navigator !== "undefined" && /Prerender/i.test(navigator.userAgent);
  return (

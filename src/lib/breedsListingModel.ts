@@ -5,7 +5,7 @@
  * Tout est testé dans src/__tests__/breeds-listing-model.test.ts.
  */
 import { normalizeBreedName } from "./breedFicheMatch";
-import { mergedBreedTarget } from "./breedFicheMerges";
+import { liveMergedBreedTarget, mergedBreedTarget } from "./breedFicheMerges";
 
 export interface BreedListingEntry {
   species: string;
@@ -71,10 +71,11 @@ export const isMergedBreedSource = (
   entry: Pick<BreedListingEntry, "species" | "breed">,
 ): boolean => mergedBreedTarget(entry.species, entry.breed) !== null;
 
-/** Liste publique : les fiches fusionnées en moins. */
+/** Liste publique : les fiches fusionnées en moins, quand leur cible est
+ *  bien présente dans la liste (une cible supprimée laisse la source visible). */
 export const visibleBreeds = <T extends Pick<BreedListingEntry, "species" | "breed">>(
   list: T[],
-): T[] => list.filter((b) => !isMergedBreedSource(b));
+): T[] => list.filter((b) => liveMergedBreedTarget(b.species, b.breed, list) === null);
 
 /** Recherche par nom, tolérante à la casse, aux accents et aux espaces
  *  superflus (normalisation partagée de breedFicheMatch). */
