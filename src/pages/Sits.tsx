@@ -53,6 +53,8 @@ import { trackEvent } from "@/lib/analytics";
 import PublishPhotoPromptDialog from "@/components/sits/owner/PublishPhotoPromptDialog";
 import { readVisiblePets } from "@/lib/visiblePets";
 import { isSitReviewable } from "@/lib/reviewEligibility";
+import RemoveSitDialog from "@/components/sits/owner/RemoveSitDialog";
+import { canShowRemoveSit, isDeletedByOwner } from "@/lib/removeSit";
 import {
   countPropertyPhotos,
   shouldPromptPublishPhotos,
@@ -284,7 +286,8 @@ const Sits = () => {
 
           };
         });
-        setSits(enriched);
+        // Lot SUPPR1 : une annonce supprimée par son propriétaire quitte ses listes.
+        setSits(enriched.filter((s: any) => !isDeletedByOwner(s)));
       } else {
         // Sitter view (inchangee)
         const { data, error } = await supabase
@@ -514,23 +517,6 @@ const Sits = () => {
         variant: "destructive",
         title: "Impossible d'archiver",
         description: "L'archivage a échoué. Réessayez dans un instant.",
-      });
-    }
-  };
-
-  const handleDelete = async (sitId: string) => {
-    try {
-      const { error } = await supabase.from("sits").delete().eq("id", sitId).eq("user_id", user!.id);
-      if (error) throw error;
-      toast({ title: "Annonce supprimée" });
-      setDeleteConfirm(null);
-      loadSits();
-    } catch (err: any) {
-      console.error("[Sits] delete failed", err);
-      toast({
-        variant: "destructive",
-        title: "Suppression impossible",
-        description: "La suppression a échoué. Réessayez dans un instant.",
       });
     }
   };
@@ -1290,22 +1276,20 @@ const Sits = () => {
 
       {/* Confirm dialogs */}
 
-      <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer cette annonce ?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Cette action est irréversible. L'annonce sera définitivement supprimée.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteConfirm && handleDelete(deleteConfirm)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Supprimer
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {(() => {
+        const toRemove = deleteConfirm ? sits.find((x: any) => x.id === deleteConfirm) : null;
+        if (!toRemove || !user) return null;
+        return (
+          <RemoveSitDialog
+            open
+            onOpenChange={(o) => { if (!o) setDeleteConfirm(null); }}
+            sit={{ id: toRemove.id, title: toRemove.title ?? null, status: toRemove.status }}
+            ownerId={user.id}
+            onRemoved={() => { setDeleteConfirm(null); loadSits(); }}
+            onCancelGarde={() => navigate(`/sits/${toRemove.id}`)}
+          />
+        );
+      })()}
 
       <AlertDialog open={!!archiveConfirm} onOpenChange={() => setArchiveConfirm(null)}>
         <AlertDialogContent>
@@ -1981,7 +1965,10 @@ const ActionsMenu = ({
   const canEdit = ["draft", "published", "unpublished"].includes(effectiveStatus);
   const canRepublish = ["expired", "cancelled", "unpublished", "archived"].includes(effectiveStatus);
   const canArchive = ["published", "draft"].includes(effectiveStatus) && sit.applicationCount > 0;
-  const canDelete = ["published", "draft", "expired", "cancelled", "unpublished", "archived"].includes(effectiveStatus) && sit.applicationCount === 0;
+  // Lot SUPPR1 : toujours proposé hors garde en cours, terminée ou archivée ;
+  // l'effet (suppression, retrait avec candidats prévenus, annulation d'abord)
+  // est décidé par src/lib/removeSit.ts.
+  const canDelete = canShowRemoveSit(sit.status) && effectiveStatus !== "archived";
 
   return (
     <DropdownMenu>

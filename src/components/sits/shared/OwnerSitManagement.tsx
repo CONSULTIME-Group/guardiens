@@ -7,7 +7,7 @@
  */
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Pencil, Share2, XCircle, BookOpen, Settings2, Archive, RotateCcw } from "lucide-react";
+import { Pencil, Share2, XCircle, BookOpen, Settings2, Archive, RotateCcw, Trash2 } from "lucide-react";
 
 interface OwnerSitManagementProps {
   sitId: string;
@@ -23,6 +23,9 @@ interface OwnerSitManagementProps {
   /** Indique si l'annonce peut être archivée manuellement (completed/cancelled). */
   canArchive?: boolean;
   onArchiveClick?: () => void;
+  /** Lot SUPPR1 : « Supprimer l'annonce », effet selon l'état (src/lib/removeSit.ts). */
+  canRemove?: boolean;
+  onRemoveClick?: () => void;
 }
 
 const OwnerSitManagement = ({
@@ -36,6 +39,8 @@ const OwnerSitManagement = ({
   onUnpublishClick,
   canArchive,
   onArchiveClick,
+  canRemove,
+  onRemoveClick,
 }: OwnerSitManagementProps) => {
   return (
     <section
@@ -126,6 +131,18 @@ const OwnerSitManagement = ({
           >
             <Archive className="h-3.5 w-3.5" />
             Archiver l'annonce
+          </Button>
+        )}
+
+        {canRemove && onRemoveClick && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRemoveClick}
+            className="justify-start gap-2 text-destructive-text hover:text-destructive-text hover:bg-destructive/10 border-destructive/30 hover:border-destructive/50"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Supprimer l'annonce
           </Button>
         )}
 

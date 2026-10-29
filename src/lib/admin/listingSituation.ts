@@ -63,6 +63,8 @@ export function sitBucket(s: SitLike): SitBucket {
 }
 
 export const ARCHIVED_REASON_LABEL = "Retrait / archivage enregistré";
+/** Lot SUPPR1 : « Supprimer l'annonce » avec candidatures, candidats prévenus. */
+export const DELETED_BY_OWNER_LABEL = "Supprimée par le propriétaire";
 /** Confirmées, en cours, terminées, archivées : HTTP 200, noindex (PublicSitDetail). */
 const CONSULTABLE = { visible: true, visibility: "Fiche consultable publiquement" };
 
@@ -107,6 +109,9 @@ export function sitSituation(s: SitLike): Situation {
       if (reason === "archived") {
         // Code enregistré tel quel : on n'en déduit ni annulation réelle ni rôle.
         return { ...base, label: ARCHIVED_REASON_LABEL, detail: actor, tone: "outline" };
+      }
+      if (reason === "deleted_by_owner") {
+        return { ...base, label: DELETED_BY_OWNER_LABEL, detail: "Candidats prévenus, annonce retirée de ses listes", tone: "outline" };
       }
       return { ...base, label: who ? `Annulée ${who}` : "Annulée", detail: reason ? (who ? `Motif : ${reason}` : `Motif : ${reason}, acteur non enregistré`) : "Motif non renseigné", tone: "outline" };
     }
