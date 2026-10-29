@@ -3,7 +3,7 @@
 // sans événement, le dossier le dit.
 import { SIT_STATUS_SHORT_LABELS, isSitStatus } from "@/lib/sitStatus";
 import { unpublishReasonAdminLabel } from "@/lib/unpublishReason";
-import { ARCHIVED_REASON_LABEL } from "@/lib/admin/listingSituation";
+import { ARCHIVED_REASON_LABEL, DELETED_BY_OWNER_LABEL } from "@/lib/admin/listingSituation";
 
 export type EventSource = "field" | "status_history" | "admin_log";
 
@@ -87,9 +87,9 @@ export function sitFieldEvents(s: SitFields): DossierEvent[] {
   });
   if (s.hidden_at) ev.push({ at: s.hidden_at, kind: "hide", label: "Masquage par l'équipe", source: "field", actor: "Équipe" });
   if (s.cancelled_at) ev.push({
-    at: s.cancelled_at, kind: "cancel", label: s.cancellation_reason === "archived" ? ARCHIVED_REASON_LABEL : "Annulation", source: "field",
-    actor: s.cancelled_by ? (s.cancelled_by === s.user_id ? "Propriétaire" : "Compte autre que le propriétaire") : "Auteur non enregistré",
-    detail: s.cancellation_reason === "archived" ? ARCHIVED_REASON_LABEL : s.cancellation_reason?.trim() || "Motif non renseigné",
+    at: s.cancelled_at, kind: "cancel", label: s.cancellation_reason === "archived" ? ARCHIVED_REASON_LABEL : s.cancellation_reason === "deleted_by_owner" ? DELETED_BY_OWNER_LABEL : "Annulation", source: "field",
+    actor: s.cancellation_reason === "deleted_by_owner" ? "Propriétaire" : s.cancelled_by ? (s.cancelled_by === s.user_id ? "Propriétaire" : "Compte autre que le propriétaire") : "Auteur non enregistré",
+    detail: s.cancellation_reason === "archived" ? ARCHIVED_REASON_LABEL : s.cancellation_reason === "deleted_by_owner" ? "Candidats prévenus" : s.cancellation_reason?.trim() || "Motif non renseigné",
   });
   return ev;
 }

@@ -67,6 +67,8 @@ import AccordDeGarde from "@/components/gardes/LazyAccordDeGarde";
 import { buildAccordDeGardeData, fetchAccordHouseGuide } from "@/lib/accordDeGarde";
 import CancelSitModal from "@/components/sits/CancelSitModal";
 import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
+import RemoveSitDialog from "@/components/sits/owner/RemoveSitDialog";
+import { canShowRemoveSit } from "@/lib/removeSit";
 import SitPhotoManager from "@/components/sits/owner/SitPhotoManager";
 import DraftChecklist from "@/components/sits/owner/DraftChecklist";
 import InviteSittersBlock from "@/components/sits/owner/InviteSittersBlock";
@@ -162,6 +164,7 @@ const OwnerSitView = ({
   // Candidatures ouvertes (pending, viewed) au moment de la dépublication :
   // filet de sécurité, on les nomme et on propose de les décliner d'abord.
   const [openApps, setOpenApps] = useState<OpenApplication[]>([]);
+  const [removeOpen, setRemoveOpen] = useState(false);
   // Personnes avec candidature ou conversation, pour le motif « via la plateforme ».
   const [platformCandidates, setPlatformCandidates] = useState<PlatformCandidate[]>([]);
   const [acceptingSitterId, setAcceptingSitterId] = useState<string | null>(null);
@@ -305,6 +308,8 @@ const OwnerSitView = ({
   // canArchive, propriétaire d'une annonce terminée ou annulée : archive
   // manuelle immédiate (sinon le cron le fait automatiquement après 7 jours).
   const canArchive = sit.status === "completed" || sit.status === "cancelled";
+  // Lot SUPPR1 : « Supprimer l'annonce » sauf garde terminée ou archivée.
+  const canRemove = canShowRemoveSit(sit.status) && !!currentUserId && currentUserId === sit.user_id;
 
   const handleArchive = async () => {
     const { error } = await supabase.rpc("archive_sit" as any, { p_sit_id: sit.id });
@@ -1312,7 +1317,20 @@ const OwnerSitView = ({
         onUnpublishClick={requestUnpublish}
         canArchive={canArchive}
         onArchiveClick={handleArchive}
+        canRemove={canRemove}
+        onRemoveClick={() => setRemoveOpen(true)}
       />
+
+      {canRemove && currentUserId && (
+        <RemoveSitDialog
+          open={removeOpen}
+          onOpenChange={setRemoveOpen}
+          sit={{ id: sit.id, title: sit.title ?? null, status: sit.status }}
+          ownerId={currentUserId}
+          onRemoved={() => navigate("/sits")}
+          onCancelGarde={canCancel ? () => setCancelOpen(true) : undefined}
+        />
+      )}
 
       <SitFooterReassurance />
 
