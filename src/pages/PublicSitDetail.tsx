@@ -46,6 +46,7 @@ import { applicationAvailability } from "@/lib/applicationCap";
 import { STARTED_SIT_NOTICE, isStartedOpenSit } from "@/lib/sitStarted";
 import { markMilestone } from "@/lib/perfMarks";
 import { takeSitPrefetch } from "@/lib/sitPrefetch";
+import { deptCodeFromPostal } from "@/lib/sitLocation";
 
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
 
@@ -810,7 +811,7 @@ const PublicSitDetail = () => {
       />
 
       {/* Rebond : annonces ouvertes à proximité, sous le contenu de la fiche. */}
-      {isClosedSit && <NearbySitsModule city={sitCity} excludeId={sit.id} />}
+      {isClosedSit && <NearbySitsModule city={sitCity} departementCode={ownerCountry === "FR" ? deptCodeFromPostal((owner as any)?.postal_code) : null} excludeId={sit.id} />}
 
       <PublicFooter />
 
