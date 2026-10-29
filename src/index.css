@@ -1332,3 +1332,14 @@
     }
   }
 }
+
+/* Fenêtres et clavier mobile (lot CLAVIER1, 29/10/2026).
+   Clavier sorti : la fenêtre se centre dans la zone visible et ne la dépasse
+   jamais, quel que soit son max-h propre (90vh ignore le clavier). Variables et
+   attribut posés par src/lib/keyboardViewport.ts. */
+html[data-keyboard-open] [data-guardiens-dialog] {
+  top: calc(var(--vv-top, 0px) + var(--vv-height, 100dvh) / 2) !important;
+  max-height: calc(var(--vv-height, 100dvh) - 1rem) !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+}
