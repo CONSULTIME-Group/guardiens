@@ -437,7 +437,9 @@ const PublicSitDetail = () => {
   // Les gardes déjà attribuées ou passées (confirmed, in_progress, completed,
   // archived) restent entièrement consultables (HTTP 200, noindex) : elles
   // montrent la vie de la communauté. Les brouillons et les annulées restent privés.
-  const CLOSED_STATUSES = ["confirmed", "in_progress", "completed", "archived"];
+  // Lot ERR404 : une garde expirée (sans candidat avant sa fin) rejoint ce lot ;
+  // get_public_sit ne la sert qu'une fois sa date de fin dépassée.
+  const CLOSED_STATUSES = ["confirmed", "in_progress", "completed", "archived", "expired"];
   const isClosedSit = CLOSED_STATUSES.includes(String(sit.status));
   // Une garde n'est PASSÉE que si sa date de fin est strictement antérieure à
   // aujourd'hui. Le statut n'est pas fiable (une annonce archivée peut avoir

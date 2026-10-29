@@ -70,3 +70,25 @@ export function liveMergedBreedTarget(species, breed, rows) {
   const exists = (rows || []).some((r) => (r?.species || "").toLowerCase() === sp && keyOf(r?.breed) === key);
   return exists ? target : null;
 }
+
+/**
+ * Sens inverse : `slug` désigne la cible d'une fusion déclarée (« perroquet
+ * gris du gabon ») alors que la fiche cible est absente de `rows`, et la
+ * fiche source (« gris du gabon ») est bien en base. L'ancienne URL de la
+ * cible, déjà indexée avant le correctif du 26/10/2026, doit mener à la
+ * source servie, jamais à un 404. Retourne le nom de la fiche source, ou null.
+ */
+export function liveMergedBreedSource(species, slug, rows) {
+  const sp = (species || "").toLowerCase();
+  const bySpecies = BREED_FICHE_MERGES[sp];
+  if (!bySpecies) return null;
+  const wanted = keyOf(slug);
+  const present = (rows || []).filter((r) => (r?.species || "").toLowerCase() === sp);
+  if (present.some((r) => keyOf(r?.breed) === wanted)) return null;
+  for (const [sourceKey, target] of Object.entries(bySpecies)) {
+    if (keyOf(target) !== wanted) continue;
+    const source = present.find((r) => keyOf(r?.breed) === sourceKey);
+    if (source) return source.breed;
+  }
+  return null;
+}

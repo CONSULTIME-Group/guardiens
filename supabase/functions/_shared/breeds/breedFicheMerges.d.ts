@@ -8,3 +8,8 @@ export declare function liveMergedBreedTarget(
   breed: string | null | undefined,
   rows: ReadonlyArray<{ species?: string | null; breed?: string | null }> | null | undefined,
 ): string | null;
+export declare function liveMergedBreedSource(
+  species: string | null | undefined,
+  slug: string | null | undefined,
+  rows: ReadonlyArray<{ species?: string | null; breed?: string | null }> | null | undefined,
+): string | null;
