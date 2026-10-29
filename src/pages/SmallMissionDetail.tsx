@@ -280,7 +280,17 @@ const SmallMissionDetail = () => {
     catch { commit(() => setLoadFailed(true)); commit(() => setLoading(false)); return; }
     if (!current()) return;
     if (result.error) { commit(() => setLoadFailed(true)); commit(() => setLoading(false)); return; }
-    const m = result.data;
+    let m = result.data;
+    if (!m && !user) {
+      // Lot ERR404 : un besoin terminé ou clos reste lisible par un visiteur
+      // (vue dédiée, status completed ou cancelled), jamais un 404 sur un lien partagé.
+      const closedQuery = (supabase as any).from("public_closed_small_missions").select("*");
+      try {
+        const closed = await (isUuidParam ? closedQuery.eq("id", id) : closedQuery.eq("slug", id)).maybeSingle();
+        if (!current()) return;
+        if (!closed.error) m = closed.data;
+      } catch { /* repli : la fiche reste introuvable */ }
+    }
     if (!m) { commit(() => setLoading(false)); return; }
 
     // Un projet participatif a sa propre page : l'ancien lien y renvoie,

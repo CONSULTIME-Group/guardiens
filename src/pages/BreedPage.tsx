@@ -34,7 +34,7 @@ interface BreedProfile {
 
 // Libellés d'espèces : module unique src/lib/petLabels.ts (enum pet_species).
 import { petSpeciesLabelLower } from "@/lib/petLabels";
-import { liveMergedBreedTarget } from "@/lib/breedFicheMerges";
+import { liveMergedBreedTarget, liveMergedBreedSource } from "@/lib/breedFicheMerges";
 import { TypographicFallback } from "@/components/breeds/BreedCardImage";
 import { LEVEL_BADGE_CLASS, extractDifficultyLevel } from "@/lib/breedsListingModel";
 
@@ -74,7 +74,11 @@ const BreedPage = () => {
           (b) => slugify(b.breed) === breedSlug,
         );
         if (!match) {
-          setNotFound(true);
+          // Ancienne URL de la cible d'une fusion (« perroquet gris du gabon »)
+          // alors que la fiche source est la seule en base : on y renvoie.
+          const source = liveMergedBreedSource(prefix, breedSlug, data as BreedProfile[]);
+          if (source) setRedirectTo(`/races/${prefix}-${slugify(source)}`);
+          else setNotFound(true);
         } else {
           // Doublon fusionné (« jack russel », « gris du gabon ») : l'URL
           // historique redirige vers la fiche conservée, jamais de 404.
