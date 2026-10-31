@@ -29,12 +29,17 @@ const ANALYTICS_COOKIES: Array<{ name: string; issuer: string; purpose: string; 
   { name: "_ga_XXXXX", issuer: "Google Analytics 4", purpose: "État de session", duration: "13 mois" },
 ];
 
+const ADVERTISING_COOKIES: Array<{ name: string; issuer: string; purpose: string; duration: string }> = [
+  { name: "aw.0", issuer: "Google Ads", purpose: "Comptage des conversions, seulement si vous acceptez la mesure des publicités", duration: "13 mois" },
+  { name: "_gcl_aw", issuer: "Google Ads", purpose: "Rattachement d'une inscription au clic sur une publicité", duration: "3 mois" },
+];
+
 const Cookies = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
         title="Politique cookies | Guardiens"
-        description="Politique cookies Guardiens : cookies strictement nécessaires, mesure d'audience sous consentement, absence de cookies publicitaires."
+        description="Politique cookies Guardiens : cookies strictement nécessaires, mesure d'audience et mesure des publicités sous consentement, aucun cookie de retargeting."
         path="/cookies"
       />
       <PublicHeader />
@@ -105,6 +110,36 @@ const Cookies = () => {
             Ces cookies sont déposés seulement après votre accord, donné dans le bandeau affiché à votre première visite. Votre choix est conservé 6 mois, puis nous vous le redemandons. Anonymisation IP activée, signaux publicitaires désactivés.
           </p>
 
+          <h3 className="font-heading text-lg font-semibold text-foreground pt-2">2.3 Cookies de mesure des publicités (avec consentement)</h3>
+          <div className="not-prose overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nom</TableHead>
+                  <TableHead>Émetteur</TableHead>
+                  <TableHead>Finalité</TableHead>
+                  <TableHead>Durée</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {ADVERTISING_COOKIES.map((c) => (
+                  <TableRow key={c.name}>
+                    <TableCell className="font-mono text-xs">{c.name}</TableCell>
+                    <TableCell>{c.issuer}</TableCell>
+                    <TableCell>{c.purpose}</TableCell>
+                    <TableCell>{c.duration}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <p>
+            Ces cookies servent uniquement à savoir si une publicité a mené à une inscription. Ils ne servent ni au retargeting ni à personnaliser les publicités. La mesure s'arrête si vous refusez la mesure des publicités ou si vous retirez votre accord.
+          </p>
+          <p>
+            Les règles de Google pour cette mesure sont décrites sur <a href="https://business.safety.google/privacy/" className="text-primary hover:underline" target="_blank" rel="noreferrer">business.safety.google/privacy</a>.
+          </p>
+
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">3. Gérer votre consentement</h2>
           <p>Vous pouvez à tout moment modifier votre choix par les moyens suivants :</p>
           <ul className="list-disc pl-6 space-y-1">
@@ -115,15 +150,15 @@ const Cookies = () => {
             <Button variant="outline" onClick={openCookiePreferences}>Gérer mes cookies</Button>
           </p>
           <p>
-            Retirer votre accord arrête la mesure d'audience et supprime les cookies _ga et _ga_* de votre navigateur.
+            Retirer votre accord arrête la mesure d'audience et supprime les cookies _ga et _ga_* de votre navigateur. Retirer la mesure des publicités arrête le comptage des conversions.
           </p>
           <p>
-            Que vous acceptiez ou refusiez la mesure d'audience, le site et toutes ses fonctionnalités restent pleinement accessibles.
+            Que vous acceptiez ou refusiez ces mesures, le site et toutes ses fonctionnalités restent pleinement accessibles.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">4. Cookies publicitaires</h2>
           <p>
-            Guardiens n'utilise aucun cookie publicitaire, aucun cookie de retargeting, aucun cookie de profilage commercial. Aucune donnée personnelle n'est vendue ni partagée à des fins publicitaires.
+            Guardiens n'utilise aucun cookie de retargeting, aucun cookie de profilage commercial et aucune personnalisation publicitaire. Le seul cookie publicitaire déposé, avec votre accord, sert à compter les inscriptions issues d'une publicité Google. Aucune donnée personnelle n'est vendue ni partagée à des fins publicitaires.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">5. Contact</h2>
