@@ -17,6 +17,9 @@ const conversionEvents = () =>
     .filter((a: any[]) => a[0] === "event" && a[1] === "conversion" && String(a[2]?.send_to || "").startsWith("AW-18547606637/"));
 
 async function freshModule() {
+  const previousListener = (window as any).__guardiensConsentListener;
+  if (previousListener) window.removeEventListener("consent-changed", previousListener);
+  delete (window as any).__guardiensConsentListener;
   vi.resetModules();
   document.head.querySelectorAll("script").forEach((s) => s.remove());
   delete (window as any).gtag;
