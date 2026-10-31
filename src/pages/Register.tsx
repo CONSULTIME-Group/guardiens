@@ -17,6 +17,7 @@ import { rememberLegalAcceptance } from "@/lib/legalAcceptance";
 import { sanitizeRedirect, buildRedirectQuery } from "@/lib/safeRedirect";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent, trackEventWithUserId, mapSignupError } from "@/lib/analytics";
+import { reportSignupConversion } from "@/lib/cookieConsent";
 import { mapAuthError } from "@/lib/authErrorMessages";
 import { Eye, EyeOff, MailCheck, ArrowLeft } from "lucide-react";
 import { InAppBrowserBanner } from "@/components/auth/InAppBrowserBanner";
@@ -329,6 +330,8 @@ const Register = () => {
  metadata: { role: selectedRole, user_id: newUserId, auto_confirmed: true },
  });
  } catch {}
+ // Campagne propriétaires : conversion Google Ads si la mesure est acceptée.
+ if (selectedRole === "owner" || selectedRole === "both") reportSignupConversion(newUserId);
  navigate(postAuthTarget);
  return;
  }
@@ -345,6 +348,8 @@ const Register = () => {
    });
   }
  } catch {}
+ // Campagne propriétaires : conversion Google Ads si la mesure est acceptée.
+ if (selectedRole === "owner" || selectedRole === "both") reportSignupConversion(newUserId);
  if (v2) trackArrival("completed", "C2");
  setStep("confirmation");
  } catch (error: any) {
