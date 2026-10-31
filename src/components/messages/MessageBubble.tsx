@@ -199,8 +199,8 @@ const MessageBubble = ({
             </span>
             {isMe && isLastInGroup && (
               msg.read_at
-                ? <CheckCheck className="h-3 w-3 text-primary/70" />
-                : <Check className="h-3 w-3 text-muted-foreground/60" />
+                ? <CheckCheck className="h-3 w-3 text-primary/70" aria-label="Message lu" role="img"><title>Message lu</title></CheckCheck>
+                : <Check className="h-3 w-3 text-muted-foreground/60" aria-label="Envoyé, pas encore lu" role="img"><title>Envoyé, pas encore lu</title></Check>
             )}
           </div>
         </div>
@@ -265,8 +265,8 @@ const MessageBubble = ({
               </span>
               {isMe && (
                 msg.read_at
-                  ? <CheckCheck className="h-3 w-3 text-primary/70" />
-                  : <Check className="h-3 w-3 text-muted-foreground/60" />
+                  ? <CheckCheck className="h-3 w-3 text-primary/70" aria-label="Message lu" role="img"><title>Message lu</title></CheckCheck>
+                  : <Check className="h-3 w-3 text-muted-foreground/60" aria-label="Envoyé, pas encore lu" role="img"><title>Envoyé, pas encore lu</title></Check>
               )}
             </div>
           )}
