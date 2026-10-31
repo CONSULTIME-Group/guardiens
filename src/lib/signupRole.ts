@@ -9,6 +9,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
+import { reportSignupConversion } from "@/lib/cookieConsent";
 
 export type PendingSignupRole = "owner" | "sitter" | "both";
 export const SIGNUP_ROLE_KEY = "guardiens_signup_role";
@@ -72,6 +73,14 @@ export async function applyPendingSignupRole(): Promise<boolean> {
   clearPendingSignupRole();
   if (applied) {
     void trackEvent("signup_role_applied", { source: "oauth_return", metadata: { role, method: "google" } });
+    // Campagne propriétaires : conversion Google Ads si la mesure est acceptée.
+    if (role === "owner" || role === "both") {
+      let uid: string | null = null;
+      try {
+        uid = (await supabase.auth.getSession()).data.session?.user?.id ?? null;
+      } catch { /* la conversion part sans clé de dédoublonnage */ }
+      reportSignupConversion(uid);
+    }
   }
   return applied;
 }

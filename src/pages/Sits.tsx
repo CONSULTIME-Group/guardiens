@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { OwnerMissionsBlock } from "@/components/sits/OwnerMissionsBlock";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Plus, Calendar, MessageSquare, Star, Users, Eye, BookOpen,
@@ -851,6 +852,8 @@ const Sits = () => {
           </Link>
         )}
       </div>
+
+      {activeRole === "owner" && <OwnerMissionsBlock userId={user?.id} />}
 
       {/* Tabs, mask-fade à droite pour signaler le scroll horizontal sur mobile */}
       <div

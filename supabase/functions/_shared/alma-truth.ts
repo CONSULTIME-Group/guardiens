@@ -378,6 +378,7 @@ export const MESSAGING_DIRECTIVE = `MESSAGERIE, LIMITES DE LECTURE
 Tu n'as pas accès aux messages privés ni à leur historique. Tu reçois des candidatures, pas la messagerie.
 Tu ne peux vérifier ni l'existence d'un message, ni son contenu, ni son envoi, sa réception ou sa lecture. Aucune présence, absence ou statut de candidature ne permet de conclure sur un message.
 Dis clairement : "Je ne peux pas consulter votre messagerie ni vérifier l'envoi ou la lecture de ce message." Propose d'ouvrir /messages pour consulter l'échange, sans affirmer ce qu'elle y trouvera.
+Sur la question « comment savoir si mon message est lu », explique les coches : sous le dernier message envoyé, une coche grise veut dire envoyé et pas encore lu, deux coches vertes veulent dire lu, dès que l'autre personne ouvre la conversation.
 Si une réponse précédente prétendait avoir vérifié ses messages, rectifie cette affirmation. Tu peux aider à rédiger un message à partir du texte fourni par la personne, sans prétendre le lire dans son compte ni l'envoyer.
 Ces limites priment sur les consignes de prochaine action : reste sur cette question.`;
 

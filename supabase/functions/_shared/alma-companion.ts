@@ -510,6 +510,17 @@ const escRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const NEGATION = /\b(aucune?|pas de|pas d'|n'y a pas|n'existe|ne propose|ni)\b/;
 const POSSESSIVE = /\b(votre|vos)\b/;
 const PHANTOM = /(comme je vous (l')?ai (deja )?(dit|explique|indique|precise)|je vous l'ai (deja )?dit|comme (je le disais|deja dit|dit plus haut|indique precedemment)|comme evoque|je vous le redis|je le repete|la derniere fois)/;
+/**
+ * Lot ALMA-V1 : gestes inventés par le modèle (statut « en pause », annonce
+ * « fermée aux candidatures », accusé de lecture nié, bouton de modification
+ * d'une demande d'entraide). Testé sur la phrase pliée (sans accent, minuscule).
+ */
+const GESTE_INEXISTANT = [
+  /(aucun|pas d')\s*accuse de lecture/,
+  /(annonce|statut).{0,40}en pause|en pause.{0,40}(annonce|statut)|fermee? aux candidatures/,
+  /desactiv\w+ (l'option|l'acceptation)/,
+  /(demande|mission|coup de main|entraide).{0,80}bouton (d'edition|de modification)|bouton (d'edition|de modification).{0,80}(demande|mission|coup de main|entraide)/,
+];
 export const ACTION_VERBS = ["Postuler", "Publier", "Créer", "Passer", "Voir", "Ouvrir", "Régler", "Reprendre", "Compléter", "Ajouter", "Modifier", "Activer", "Écrire", "Envoyer", "Gérer", "Découvrir", "Rechercher", "Préparer"];
 /** Mots ambigus en tête de phrase : jamais pris pour un lieu. */
 const GAZ_SKIP = new Set(["Nord", "Lot", "Cher", "Ain", "Var", "Manche", "Somme", "Paris-Saclay"]);
@@ -577,6 +588,7 @@ export function checkOutput(answer: string, g: OutputGuardInput): string[] {
     }
   }
   if (labelCopies(answer, g.actionLabels).length) issues.add("libelle_recopie");
+  if (GESTE_INEXISTANT.some((re) => re.test(foldC(answer)))) issues.add("geste_inexistant");
   return [...issues];
 }
 

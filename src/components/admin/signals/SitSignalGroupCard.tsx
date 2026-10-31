@@ -8,6 +8,7 @@ import {
   WriteToMemberDialog,
   type WriteToMemberTarget,
 } from "@/pages/admin/_components/users/WriteToMemberDialog";
+import { ownerMessageDraft } from "@/lib/admin/ownerMessageDrafts";
 import { SignalPriorityBadge } from "./PriorityBadge";
 import type { AdminSignalBase } from "./signalGrouping";
 import {
@@ -113,7 +114,17 @@ export const SitSignalGroupCard = ({ sitId, sit, items, severity }: Props) => {
         {owner && (
           <Button
             size="sm"
-            onClick={() => setWriteTarget({ userId: owner.userId, userName: owner.name, sitId })}
+            onClick={() => setWriteTarget({
+              userId: owner.userId,
+              userName: owner.name,
+              sitId,
+              draft: ownerMessageDraft(items.map((s) => s.signal_type), {
+                ownerName: owner.name,
+                city: sit?.city,
+                startDate: sit?.start_date,
+                applications: items.filter((s) => s.signal_type === "pending_application").length,
+              }) ?? undefined,
+            })}
             disabled={busy}
           >
             Écrire au propriétaire

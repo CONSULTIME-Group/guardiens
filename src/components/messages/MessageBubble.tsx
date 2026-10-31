@@ -7,6 +7,19 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Button } from "@/components/ui/button";
 import { PricingRecipientNotice } from "@/components/pricing/PricingNotices";
 
+/** Lot UX-V1 : état de lecture en toutes lettres à côté des coches (« Lu » / « Envoyé »). */
+export const ReadStatus = ({ readAt }: { readAt?: string | null }) =>
+  readAt ? (
+    <span className="inline-flex items-center gap-1 text-[10.5px] text-primary/80" data-testid="read-status">
+      <CheckCheck className="h-3 w-3" aria-hidden="true" />Lu
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1 text-[10.5px] text-muted-foreground" data-testid="read-status">
+      <Check className="h-3 w-3" aria-hidden="true" />Envoyé
+    </span>
+  );
+
+
 interface MessageBubbleProps {
   msg: {
     id: string;
@@ -198,9 +211,7 @@ const MessageBubble = ({
               {format(new Date(msg.created_at), "HH:mm")}
             </span>
             {isMe && isLastInGroup && (
-              msg.read_at
-                ? <CheckCheck className="h-3 w-3 text-primary/70" />
-                : <Check className="h-3 w-3 text-muted-foreground/60" />
+              <ReadStatus readAt={msg.read_at} />
             )}
           </div>
         </div>
@@ -264,9 +275,7 @@ const MessageBubble = ({
                 {format(new Date(msg.created_at), "HH:mm")}
               </span>
               {isMe && (
-                msg.read_at
-                  ? <CheckCheck className="h-3 w-3 text-primary/70" />
-                  : <Check className="h-3 w-3 text-muted-foreground/60" />
+                <ReadStatus readAt={msg.read_at} />
               )}
             </div>
           )}

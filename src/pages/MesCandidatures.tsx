@@ -73,7 +73,7 @@ interface SitterApp {
 
 const appStatusBadge: Record<string, { label: (viewedAt: string | null) => string; className: string }> = {
   pending: {
-    label: () => "En attente",
+    label: () => "En attente de réponse du propriétaire",
     className: "bg-primary/10 text-primary",
   },
   viewed: {
