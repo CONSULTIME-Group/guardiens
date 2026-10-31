@@ -519,6 +519,7 @@ const GESTE_INEXISTANT = [
   /(aucun|pas d')\s*accuse de lecture/,
   /(annonce|statut).{0,40}en pause|en pause.{0,40}(annonce|statut)|fermee? aux candidatures/,
   /desactiv\w+ (l'option|l'acceptation)/,
+  /candidatures?.{0,40}(deja |toutes )?classees?|classees?.{0,40}candidatures?/,
   /(demande|mission|coup de main|entraide).{0,80}bouton (d'edition|de modification)|bouton (d'edition|de modification).{0,80}(demande|mission|coup de main|entraide)/,
 ];
 export const ACTION_VERBS = ["Postuler", "Publier", "Créer", "Passer", "Voir", "Ouvrir", "Régler", "Reprendre", "Compléter", "Ajouter", "Modifier", "Activer", "Écrire", "Envoyer", "Gérer", "Découvrir", "Rechercher", "Préparer"];
