@@ -53,27 +53,33 @@ export function mainSitType(types: string[]): string | null {
 const DRAFTS: Record<string, (c: OwnerDraftContext, when: string | null) => OwnerDraft> = {
   pending_application: (c, when) => {
     const n = c.applications ?? 0;
+    const subject =
+      n > 1 ? `${n} gardiens attendent votre réponse pour votre garde${inCity(c.city)}`
+      : n === 1 ? `Un gardien attend votre réponse pour votre garde${inCity(c.city)}`
+      : `Des gardiens attendent votre réponse pour votre garde${inCity(c.city)}`;
     const who = n > 1 ? `${n} gardiens ont postulé` : n === 1 ? "Un gardien a postulé" : "Des gardiens ont postulé";
-    const wait = n > 1 ? "attendent" : n === 1 ? "attend" : "attendent";
-    const depart = when ? `Votre départ est prévu ${when} : un premier message de votre part suffit pour avancer.` : "Un premier message de votre part suffit pour avancer.";
+    const wait = n === 1 ? "attend" : "attendent";
+    const depart = when
+      ? `Votre départ est prévu ${when} : un premier message de votre part permet d'avancer dès maintenant.`
+      : "Un premier message de votre part permet d'avancer dès maintenant.";
     return {
-      subject: `Des gardiens attendent votre réponse pour votre garde${inCity(c.city)}`,
+      subject,
       body: [
         greeting(c.ownerName),
         `${who} pour votre garde${inCity(c.city)} et ${wait} votre réponse. ${depart}`,
-        "Vous retrouvez chaque profil dans votre messagerie. Dès que l'un d'eux vous inspire confiance, écrivez-lui directement : vous réglez ensemble les derniers détails, et une rencontre avant la garde reste facultative.",
-        "Le lien ci-dessous vous mène à votre annonce.",
+        "Vous consultez chaque profil depuis votre messagerie. Quand l'un d'eux vous inspire confiance, écrivez-lui : vous réglez ensemble les derniers détails, et un échange en visio ou une rencontre avant la garde reste possible si vous le souhaitez (facultatif).",
+        "Le lien ci-dessous ouvre votre annonce. Un point précis à éclaircir ? Répondez à ce message, je vous lis.",
         CLOSING,
       ].join("\n\n"),
     };
   },
   owner_sit_unconfirmed: (c, when) => ({
-    subject: `Confirmer votre gardien pour votre départ${when ? ` ${when}` : ""}`,
+    subject: "Une dernière étape pour confirmer votre gardien",
     body: [
       greeting(c.ownerName),
-      `Votre départ approche${when ? ` (${when})` : ""} et votre garde${inCity(c.city)} attend sa confirmation. Les gardiens qui ont postulé comptent sur votre décision pour s'organiser.`,
+      `${when ? `Votre départ est prévu ${when}` : "Votre départ approche"} et votre garde${inCity(c.city)} attend encore sa confirmation. Les gardiens qui se sont proposés comptent sur votre choix pour s'organiser, et vous partez l'esprit tranquille dès qu'il est fait.`,
       "Pour finaliser : choisissez le profil qui vous convient, confirmez-le depuis votre messagerie, puis transmettez-lui vos consignes (animaux, maison, habitudes du quotidien).",
-      "Une question sur la marche à suivre ? Répondez simplement à ce message, je vous lis.",
+      "Le lien ci-dessous ouvre votre annonce. Une question sur la marche à suivre ? Répondez simplement à ce message, je vous lis.",
       CLOSING,
     ].join("\n\n"),
   }),
@@ -81,9 +87,9 @@ const DRAFTS: Record<string, (c: OwnerDraftContext, when: string | null) => Owne
     subject: "Votre échange avec un gardien attend une suite",
     body: [
       greeting(c.ownerName),
-      `Votre échange avec un gardien pour votre garde${inCity(c.city)} est en pause${when ? ` et votre départ est prévu ${when}` : ""}. Un petit message de votre part relance la conversation.`,
+      `Votre échange avec un gardien pour votre garde${inCity(c.city)} attend une suite${when ? `, et votre départ est prévu ${when}` : ""}. Un message de votre part relance la conversation.`,
       "Quelques idées pour reprendre : confirmer votre intérêt, poser une dernière question, proposer un échange en visio ou un moment pour faire connaissance (facultatif, selon ce qui vous convient).",
-      "Le lien ci-dessous vous mène à votre annonce, d'où vous retrouvez la discussion.",
+      "Le lien ci-dessous ouvre votre annonce, d'où vous retrouvez la discussion. Besoin d'un coup de main ? Répondez à ce message, je vous lis.",
       CLOSING,
     ].join("\n\n"),
   }),

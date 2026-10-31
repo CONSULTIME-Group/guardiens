@@ -27,7 +27,7 @@ describe("ADM11 · gabarits « Écrire au propriétaire »", () => {
 
   it("résout les variables : prénom, ville, échéance, nombre de candidatures", () => {
     const d = ownerMessageDraft(["pending_application"], ctx)!;
-    expect(d.subject).toContain("Marseille");
+    expect(d.subject).toBe("10 gardiens attendent votre réponse pour votre garde à Marseille");
     expect(d.body.startsWith("Bonjour Camille,")).toBe(true);
     expect(d.body).toContain("10 gardiens ont postulé");
     expect(d.body).toContain("aujourd'hui");
@@ -53,6 +53,7 @@ describe("ADM11 · gabarits « Écrire au propriétaire »", () => {
     const d = ownerMessageDraft(["pending_application"], { ...ctx, applications: 1 })!;
     expect(d.body).toContain("Un gardien a postulé");
     expect(d.body).toContain("attend votre réponse");
+    expect(d.subject.startsWith("Un gardien attend")).toBe(true);
   });
 
   const CASES: Array<[string, string[]]> = [
@@ -71,6 +72,7 @@ describe("ADM11 · gabarits « Écrire au propriétaire »", () => {
         expect(all).not.toMatch(/[—–]/);
         expect(all).not.toMatch(/Guardiens vous trouve|nous trouvons un gardien|je vous trouve/i);
         expect(all).not.toMatch(/L'équipe Guardiens/);
+        expect(all).not.toMatch(/\b(pas|ne |aucun|jamais|sans)\b/i);
       });
     }
   }
