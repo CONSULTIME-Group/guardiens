@@ -2,7 +2,7 @@
 
 ## Suivi inscription propriétaire Google Ads (31/10/2026)
 - [x] Déclencher après confirmation du compte et résolution du rôle Propriétaire, pas au formulaire non confirmé.
-- [ ] Vérifier les règles, le parcours et test:guard sans inscription réelle ni email envoyé.
+- [x] 31 tests ciblés et test:guard (7 809 tests) réussis ; choix Propriétaire vers formulaire vérifié. Confirmation réelle et réception Google non testées, aucun compte ni email créé.
 - [ ] Publication et vérification du site public : attend une demande de publication.
 
 ## Gouaches peintes sur les profils (10/10/2026)
