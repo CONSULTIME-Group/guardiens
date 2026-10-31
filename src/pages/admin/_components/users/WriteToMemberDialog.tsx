@@ -13,6 +13,8 @@ export interface WriteToMemberTarget {
   userId: string;
   userName: string;
   sitId?: string;
+  /** Lot ADM11 : objet et texte proposés à l'ouverture, modifiables avant l'envoi. */
+  draft?: { subject: string; body: string };
 }
 
 interface Props {
@@ -38,8 +40,8 @@ export const WriteToMemberDialog = ({ target, onClose, onSent }: Props) => {
 
   useEffect(() => {
     if (target) {
-      setSubject("");
-      setBody("");
+      setSubject(target.draft?.subject ?? "");
+      setBody(target.draft?.body ?? "");
       // Lot ADM9 : adresse de l'annonce préremplie avec son libellé, le lien part entier.
       const link = prefilledLink(target.sitId);
       setLinkLabel(link.linkLabel);
