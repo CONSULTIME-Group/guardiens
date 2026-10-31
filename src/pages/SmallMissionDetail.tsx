@@ -52,6 +52,7 @@ import MissionResponseCard from "@/components/missions/MissionResponseCard";
 import MissionQuestions from "@/components/entraide/MissionQuestions";
 import MissionResponseModal from "@/components/missions/MissionResponseModal";
 import RescheduleMissionDialog from "@/components/missions/RescheduleMissionDialog";
+import EditMissionDescriptionDialog from "@/components/missions/EditMissionDescriptionDialog";
 import { isMissionDatePassed, missionReferenceDate, localIsoDay, daysBetween } from "@/lib/missionReschedule";
 import ApproximateLocationMap from "@/components/shared/LazyApproximateLocationMap";
 import { isAuthorOf } from "@/lib/ownership";
@@ -251,6 +252,7 @@ const SmallMissionDetail = () => {
   // Lot E18 : fenêtre « Je peux », geste unique de réponse à un besoin.
   const [canHelpOpen, setCanHelpOpen] = useState(false);
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
+  const [editDescOpen, setEditDescOpen] = useState(false);
 
   // Per-person feedback tracking: receiverId → submitted
   const [feedbackSent, setFeedbackSent] = useState<Record<string, boolean>>({});
@@ -972,6 +974,11 @@ const SmallMissionDetail = () => {
               <CheckCircle2 className="h-4 w-4" /> {completing ? "Validation…" : "Le coup de main a eu lieu"}
             </Button>
           )}
+          {(mission.status === "open" || mission.status === "in_progress") && (
+            <Button onClick={() => setEditDescOpen(true)} variant="outline" className="w-full rounded-full">
+              Modifier la description
+            </Button>
+          )}
           {mission.status === "open" && (
             <button onClick={() => setCloseModalOpen(true)} className="text-xs text-muted-foreground hover:text-destructive w-full text-center transition-colors">
               Clore ce besoin
@@ -1298,6 +1305,14 @@ const SmallMissionDetail = () => {
             refDate={missionRefDate}
             isAuthor={isAuthor}
             onReschedule={() => setRescheduleOpen(true)}
+          />
+        )}
+        {isAuthor && (
+          <EditMissionDescriptionDialog
+            open={editDescOpen}
+            onOpenChange={setEditDescOpen}
+            mission={mission}
+            onSaved={(patch) => setMission((prev: any) => (prev ? { ...prev, ...patch } : prev))}
           />
         )}
         {isAuthor && (

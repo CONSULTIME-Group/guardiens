@@ -15,7 +15,9 @@ describe("ALMA-V1 · gestes réels dans le prompt", () => {
       expect(ALMA_SYSTEM_PROMPT).toContain(label);
     }
     expect(ALMA_SYSTEM_PROMPT).toContain("prévenu par message et par email");
-    expect(ALMA_SYSTEM_PROMPT).toMatch(/une demande d'entraide se renouvelle, elle ne se modifie pas/);
+    expect(ALMA_SYSTEM_PROMPT).toMatch(/« Modifier la description » corrige le texte/);
+    expect(ALMA_SYSTEM_PROMPT).toMatch(/« Clore ce besoin »/);
+    expect(ALMA_SYSTEM_PROMPT).not.toMatch(/elle ne se modifie pas/);
   });
 
   it("décrit les coches de lecture", () => {
