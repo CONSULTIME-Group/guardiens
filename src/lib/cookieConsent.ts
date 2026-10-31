@@ -157,18 +157,22 @@ export function disableAdsMeasurement() {
  * propriétaire »), seulement si la mesure publicitaire a été acceptée.
  * Une seule fois par compte : la clé locale évite un second envoi.
  */
-export function reportSignupConversion(userId?: string | null): void {
+export function reportSignupConversion(userId: string): void {
   if (typeof window === "undefined") return;
+  if (!userId) return;
   if (getStoredAdsConsent() !== "granted") return;
-  const key = userId ? `${ADS_REPORTED_PREFIX}${userId}` : null;
+  const key = `${ADS_REPORTED_PREFIX}${userId}`;
   try {
     if (key && localStorage.getItem(key)) return;
   } catch {
     // stockage indisponible : l'envoi reste possible
   }
+  // Confirmation can precede the deferred consent loader.
+  if (!adsLoaded) initConsentDefaults();
+  enableAdsMeasurement();
   const gtag = (window as any).gtag;
   if (typeof gtag !== "function") return;
-  gtag("event", "conversion", { send_to: SIGNUP_SEND_TO, value: 1.0, currency: "EUR" });
+  gtag("event", "conversion", { send_to: SIGNUP_SEND_TO });
   try {
     if (key) localStorage.setItem(key, "1");
   } catch {

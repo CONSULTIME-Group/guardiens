@@ -17,6 +17,9 @@ const conversionEvents = () =>
     .filter((a: any[]) => a[0] === "event" && a[1] === "conversion" && String(a[2]?.send_to || "").startsWith("AW-18547606637/"));
 
 async function freshModule() {
+  const previousListener = (window as any).__guardiensConsentListener;
+  if (previousListener) window.removeEventListener("consent-changed", previousListener);
+  delete (window as any).__guardiensConsentListener;
   vi.resetModules();
   document.head.querySelectorAll("script").forEach((s) => s.remove());
   delete (window as any).gtag;
@@ -107,6 +110,29 @@ describe("C1, consentement cookies", () => {
     expect(document.cookie).not.toMatch(/_ga/);
     expect(document.cookie).toMatch(/autre=1/);
     expect((window as any)["ga-disable-G-9JP4VR1RRP"]).toBe(true);
+  });
+
+  it("initialise la destination Ads avant une conversion confirmée, sans valeur de vente inventée", async () => {
+    const m = await freshModule();
+    m.setStoredConsent("denied", "granted");
+    m.reportSignupConversion("owner-confirmed");
+    expect(scripts()).toHaveLength(1);
+    const commands = ((window as any).dataLayer || []).map((a: any) => Array.from(a));
+    const config = commands.findIndex((a: any[]) => a[0] === "config" && a[1] === "AW-18547606637");
+    const conversion = commands.findIndex((a: any[]) => a[0] === "event" && a[1] === "conversion");
+    expect(config).toBeGreaterThanOrEqual(0);
+    expect(conversion).toBeGreaterThan(config);
+    expect(conversionEvents()[0][2]).toEqual({ send_to: "AW-18547606637/ZyrJCOqwr68dEO2ImIxF" });
+    expect(commands.some((a: any[]) => a[0] === "config" && a[1] === "G-9JP4VR1RRP")).toBe(false);
+  });
+
+  it("ne met pas en attente une conversion refusée pour la rejouer après acceptation", async () => {
+    const m = await freshModule();
+    m.initConsent();
+    m.setStoredConsent("denied", "denied");
+    m.reportSignupConversion("blocked-owner");
+    m.setStoredConsent("denied", "granted");
+    expect(conversionEvents()).toHaveLength(0);
   });
 
   it("robot et Prerender : ni bandeau ni mesure", async () => {
