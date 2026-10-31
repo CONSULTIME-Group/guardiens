@@ -2,18 +2,26 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { getStoredConsent, setStoredConsent, shouldShowBanner, isBotUserAgent } from "@/lib/cookieConsent";
+import {
+  getStoredAdsConsent,
+  getStoredConsent,
+  setStoredConsent,
+  shouldShowBanner,
+  isBotUserAgent,
+} from "@/lib/cookieConsent";
 
-/** Textes du bandeau, repris tels quels (lot C1). */
+/** Textes du bandeau (lot C1, volet publicitaire ajouté le 31/10/2026). */
 export const COOKIE_BANNER_TEXT = {
   title: "Un mot sur les cookies",
-  body: "Nous mesurons l'audience du site pour l'améliorer, seulement avec votre accord. Les cookies nécessaires au fonctionnement, comme votre connexion, restent actifs.",
+  body: "Nous mesurons l'audience du site pour l'améliorer, et l'efficacité de nos publicités, seulement avec votre accord. Les cookies nécessaires au fonctionnement, comme votre connexion, restent actifs.",
   accept: "Tout accepter",
   refuse: "Tout refuser",
   customize: "Personnaliser",
   save: "Enregistrer mon choix",
   analyticsLabel: "Mesure d'audience",
   analyticsText: "Google Analytics compte les visites et les pages vues, pour savoir ce qui vous sert et améliorer le site.",
+  adsLabel: "Mesure des publicités",
+  adsText: "Google Ads indique quelles publicités ont amené une inscription. Vos données ne servent pas à personnaliser les publicités.",
   necessaryLabel: "Fonctionnement du site",
   necessaryText: "Connexion, sécurité et mémorisation de ce choix. Toujours actifs.",
   more: "Tout savoir sur les cookies",
@@ -22,11 +30,13 @@ export const COOKIE_BANNER_TEXT = {
 /**
  * Bandeau de consentement : en bas d'écran, sans voile ni blocage.
  * Trois boutons identiques, aucune case pré-cochée, aucune fermeture valant accord.
+ * Deux volets distincts : mesure d'audience et mesure des publicités.
  */
 export function CookieConsentBanner() {
   const [open, setOpen] = useState(false);
   const [customizing, setCustomizing] = useState(false);
   const [analytics, setAnalytics] = useState(false);
+  const [ads, setAds] = useState(false);
   const titleRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
@@ -34,6 +44,7 @@ export function CookieConsentBanner() {
     const reopen = () => {
       if (isBotUserAgent()) return;
       setAnalytics(getStoredConsent() === "granted");
+      setAds(getStoredAdsConsent() === "granted");
       setCustomizing(true);
       setOpen(true);
       setTimeout(() => titleRef.current?.focus(), 0);
@@ -44,8 +55,8 @@ export function CookieConsentBanner() {
 
   if (!open) return null;
 
-  const decide = (granted: boolean) => {
-    setStoredConsent(granted ? "granted" : "denied");
+  const decide = (grantedAnalytics: boolean, grantedAds: boolean) => {
+    setStoredConsent(grantedAnalytics ? "granted" : "denied", grantedAds ? "granted" : "denied");
     setOpen(false);
     setCustomizing(false);
   };
@@ -90,14 +101,21 @@ export function CookieConsentBanner() {
               </div>
               <Switch id="cookie-analytics" checked={analytics} onCheckedChange={setAnalytics} />
             </div>
+            <div className="flex items-start justify-between gap-4 rounded-xl bg-muted/50 p-3">
+              <div>
+                <label htmlFor="cookie-ads" className="text-sm font-medium text-foreground">{t.adsLabel}</label>
+                <p className="text-xs text-muted-foreground">{t.adsText}</p>
+              </div>
+              <Switch id="cookie-ads" checked={ads} onCheckedChange={setAds} />
+            </div>
           </div>
         )}
 
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2" data-testid="cookie-actions">
-          <Button variant="outline" className="w-full" onClick={() => decide(true)}>{t.accept}</Button>
-          <Button variant="outline" className="w-full" onClick={() => decide(false)}>{t.refuse}</Button>
+          <Button variant="outline" className="w-full" onClick={() => decide(true, true)}>{t.accept}</Button>
+          <Button variant="outline" className="w-full" onClick={() => decide(false, false)}>{t.refuse}</Button>
           {customizing ? (
-            <Button variant="outline" className="w-full" onClick={() => decide(analytics)}>{t.save}</Button>
+            <Button variant="outline" className="w-full" onClick={() => decide(analytics, ads)}>{t.save}</Button>
           ) : (
             <Button variant="outline" className="w-full" onClick={() => setCustomizing(true)}>{t.customize}</Button>
           )}
