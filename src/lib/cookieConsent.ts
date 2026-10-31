@@ -168,7 +168,7 @@ export function reportSignupConversion(userId: string): void {
     // stockage indisponible : l'envoi reste possible
   }
   // Confirmation can precede the deferred consent loader.
-  initConsentDefaults();
+  if (!adsLoaded) initConsentDefaults();
   enableAdsMeasurement();
   const gtag = (window as any).gtag;
   if (typeof gtag !== "function") return;

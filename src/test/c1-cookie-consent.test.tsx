@@ -109,6 +109,29 @@ describe("C1, consentement cookies", () => {
     expect((window as any)["ga-disable-G-9JP4VR1RRP"]).toBe(true);
   });
 
+  it("initialise la destination Ads avant une conversion confirmée, sans valeur de vente inventée", async () => {
+    const m = await freshModule();
+    m.setStoredConsent("denied", "granted");
+    m.reportSignupConversion("owner-confirmed");
+    expect(scripts()).toHaveLength(1);
+    const commands = ((window as any).dataLayer || []).map((a: any) => Array.from(a));
+    const config = commands.findIndex((a: any[]) => a[0] === "config" && a[1] === "AW-18547606637");
+    const conversion = commands.findIndex((a: any[]) => a[0] === "event" && a[1] === "conversion");
+    expect(config).toBeGreaterThanOrEqual(0);
+    expect(conversion).toBeGreaterThan(config);
+    expect(conversionEvents()[0][2]).toEqual({ send_to: "AW-18547606637/ZyrJCOqwr68dEO2ImIxF" });
+    expect(commands.some((a: any[]) => a[0] === "config" && a[1] === "G-9JP4VR1RRP")).toBe(false);
+  });
+
+  it("ne met pas en attente une conversion refusée pour la rejouer après acceptation", async () => {
+    const m = await freshModule();
+    m.initConsent();
+    m.setStoredConsent("denied", "denied");
+    m.reportSignupConversion("blocked-owner");
+    m.setStoredConsent("denied", "granted");
+    expect(conversionEvents()).toHaveLength(0);
+  });
+
   it("robot et Prerender : ni bandeau ni mesure", async () => {
     for (const ua of ["Mozilla/5.0 (compatible; Googlebot/2.1)", "Mozilla/5.0 Prerender (+https://github.com/prerender/prerender)"]) {
       setUA(ua);
