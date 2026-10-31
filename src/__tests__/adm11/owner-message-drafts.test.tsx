@@ -27,9 +27,9 @@ describe("ADM11 · gabarits « Écrire au propriétaire »", () => {
 
   it("résout les variables : prénom, ville, échéance, nombre de candidatures", () => {
     const d = ownerMessageDraft(["pending_application"], ctx)!;
-    expect(d.subject).toBe("10 gardiens attendent votre réponse pour votre garde à Marseille");
+    expect(d.subject).toBe("Votre garde à Marseille : 10 gardiens attendent une réponse");
     expect(d.body.startsWith("Bonjour Camille,")).toBe(true);
-    expect(d.body).toContain("10 gardiens ont postulé");
+    expect(d.body).toContain("démarre aujourd'hui et 10 gardiens attendent une réponse de votre part");
     expect(d.body).toContain("aujourd'hui");
     expect(d.body.trimEnd().endsWith("Belle journée à vous,")).toBe(true);
     expect(d.body).not.toMatch(/[{}]/);
@@ -51,9 +51,8 @@ describe("ADM11 · gabarits « Écrire au propriétaire »", () => {
 
   it("une seule candidature : accord au singulier", () => {
     const d = ownerMessageDraft(["pending_application"], { ...ctx, applications: 1 })!;
-    expect(d.body).toContain("Un gardien a postulé");
-    expect(d.body).toContain("attend votre réponse");
-    expect(d.subject.startsWith("Un gardien attend")).toBe(true);
+    expect(d.body).toContain("un gardien attend une réponse");
+    expect(d.subject).toContain("1 gardien attend une réponse");
   });
 
   const CASES: Array<[string, string[]]> = [
@@ -76,6 +75,15 @@ describe("ADM11 · gabarits « Écrire au propriétaire »", () => {
       });
     }
   }
+
+  it("chaque texte propose la sortie : dépublier en prévenant les gardiens", () => {
+    for (const [, types] of CASES) {
+      const d = ownerMessageDraft(types, ctx)!;
+      expect(d.body).toContain("Je vous écris pour savoir où vous en êtes");
+      expect(d.body).toContain("dépubliez votre annonce en déclinant les candidatures");
+      expect(d.body).toContain("prévenu par message et par email");
+    }
+  });
 
   it("la rencontre reste facultative quand elle est évoquée", () => {
     for (const [, types] of CASES) {

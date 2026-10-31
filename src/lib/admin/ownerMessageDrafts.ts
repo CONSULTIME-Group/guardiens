@@ -50,46 +50,55 @@ export function mainSitType(types: string[]): string | null {
   return SIT_ACTION_PRIORITY.find((t) => types.includes(t)) ?? null;
 }
 
+/**
+ * Les trois textes posent la même question au propriétaire : où en est votre
+ * garde ? Il cherche toujours (il répond aux gardiens) ou son projet a changé
+ * (il dépublie en déclinant les candidatures : « Décliner ces candidatures et
+ * dépublier » prévient chaque gardien par message et par email, OwnerSitView).
+ */
+const OPEN_ISSUE =
+  "Si votre projet a changé ou si vous avez trouvé une solution de votre côté, dépubliez votre annonce en déclinant les candidatures : chaque gardien est prévenu par message et par email et peut se tourner vers une autre garde.";
+const REPLY_LINE = "Le lien ci-dessous ouvre votre annonce. Une réponse à ce message me suffit pour vous aider, je vous lis.";
+
+const startsLine = (c: OwnerDraftContext, when: string | null) =>
+  when ? `Votre garde${inCity(c.city)} démarre ${when}` : `Votre garde${inCity(c.city)} attend une suite`;
+
 const DRAFTS: Record<string, (c: OwnerDraftContext, when: string | null) => OwnerDraft> = {
   pending_application: (c, when) => {
     const n = c.applications ?? 0;
-    const subject =
-      n > 1 ? `${n} gardiens attendent votre réponse pour votre garde${inCity(c.city)}`
-      : n === 1 ? `Un gardien attend votre réponse pour votre garde${inCity(c.city)}`
-      : `Des gardiens attendent votre réponse pour votre garde${inCity(c.city)}`;
-    const who = n > 1 ? `${n} gardiens ont postulé` : n === 1 ? "Un gardien a postulé" : "Des gardiens ont postulé";
-    const wait = n === 1 ? "attend" : "attendent";
-    const depart = when
-      ? `Votre départ est prévu ${when} : un premier message de votre part permet d'avancer dès maintenant.`
-      : "Un premier message de votre part permet d'avancer dès maintenant.";
+    const counted = n > 1 ? `${n} gardiens attendent` : n === 1 ? "1 gardien attend" : "des gardiens attendent";
+    const waiting = n > 1 ? `${n} gardiens attendent` : n === 1 ? "un gardien attend" : "des gardiens attendent";
     return {
-      subject,
+      subject: `Votre garde${inCity(c.city)} : ${counted} une réponse`,
       body: [
         greeting(c.ownerName),
-        `${who} pour votre garde${inCity(c.city)} et ${wait} votre réponse. ${depart}`,
-        "Vous consultez chaque profil depuis votre messagerie. Quand l'un d'eux vous inspire confiance, écrivez-lui : vous réglez ensemble les derniers détails, et un échange en visio ou une rencontre avant la garde reste possible si vous le souhaitez (facultatif).",
-        "Le lien ci-dessous ouvre votre annonce. Un point précis à éclaircir ? Répondez à ce message, je vous lis.",
+        `${startsLine(c, when)}${when ? " et " : " : "}${waiting} une réponse de votre part. Je vous écris pour savoir où vous en êtes.`,
+        "Si vous cherchez toujours un gardien, écrivez à celui ou celle qui vous inspire confiance depuis votre messagerie : vous réglez ensemble les derniers détails, et un échange en visio ou une rencontre avant la garde reste possible si vous le souhaitez (facultatif).",
+        OPEN_ISSUE,
+        REPLY_LINE,
         CLOSING,
       ].join("\n\n"),
     };
   },
   owner_sit_unconfirmed: (c, when) => ({
-    subject: "Une dernière étape pour confirmer votre gardien",
+    subject: `Où en est votre garde${inCity(c.city)} ?`,
     body: [
       greeting(c.ownerName),
-      `${when ? `Votre départ est prévu ${when}` : "Votre départ approche"} et votre garde${inCity(c.city)} attend encore sa confirmation. Les gardiens qui se sont proposés comptent sur votre choix pour s'organiser, et vous partez l'esprit tranquille dès qu'il est fait.`,
-      "Pour finaliser : choisissez le profil qui vous convient, confirmez-le depuis votre messagerie, puis transmettez-lui vos consignes (animaux, maison, habitudes du quotidien).",
-      "Le lien ci-dessous ouvre votre annonce. Une question sur la marche à suivre ? Répondez simplement à ce message, je vous lis.",
+      `${startsLine(c, when)} et le gardien reste à confirmer. Je vous écris pour savoir où vous en êtes.`,
+      "Si vous cherchez toujours un gardien, choisissez le profil qui vous convient et confirmez-le depuis votre messagerie, puis transmettez-lui vos consignes (animaux, maison, habitudes du quotidien). Vous partez l'esprit tranquille dès que c'est fait.",
+      OPEN_ISSUE,
+      REPLY_LINE,
       CLOSING,
     ].join("\n\n"),
   }),
   stalled_discussion: (c, when) => ({
-    subject: "Votre échange avec un gardien attend une suite",
+    subject: `Votre échange avec un gardien${inCity(c.city)} : une suite ?`,
     body: [
       greeting(c.ownerName),
-      `Votre échange avec un gardien pour votre garde${inCity(c.city)} attend une suite${when ? `, et votre départ est prévu ${when}` : ""}. Un message de votre part relance la conversation.`,
-      "Quelques idées pour reprendre : confirmer votre intérêt, poser une dernière question, proposer un échange en visio ou un moment pour faire connaissance (facultatif, selon ce qui vous convient).",
-      "Le lien ci-dessous ouvre votre annonce, d'où vous retrouvez la discussion. Besoin d'un coup de main ? Répondez à ce message, je vous lis.",
+      `${when ? `${startsLine(c, when)} et votre échange avec un gardien est en pause` : `Votre échange avec un gardien pour votre garde${inCity(c.city)} est en pause`}. Je vous écris pour savoir où vous en êtes.`,
+      "Si vous cherchez toujours un gardien, un message de votre part relance la conversation : confirmer votre intérêt, poser une dernière question, proposer un échange en visio ou un moment pour faire connaissance (facultatif, selon ce qui vous convient).",
+      OPEN_ISSUE,
+      REPLY_LINE,
       CLOSING,
     ].join("\n\n"),
   }),
