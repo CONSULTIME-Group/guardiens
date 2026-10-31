@@ -230,6 +230,7 @@ export type EventType =
   | "mission_expired_badge_seen"                // Badge "date dépassée" impression (mission_id, days_overdue)
   | "mission_expired_reschedule_clicked"        // Clic "Reporter" sur mission expirée (mission_id)
   | "mission_rescheduled"                       // Lot X2 : nouvelle date enregistrée par l'auteur (mission_id, with_period)
+  | "mission_description_edited"                // Description enregistrée par l'auteur (mission_id)
   // Mesure entraide (parité avec sit_view) ----------------------------------
   | "mission_view"                              // Vue d'une fiche entraide (mission_id, category, mission_type, has_photo, has_exchange_offer, viewer_type)
   | "mission_card_clicked"                      // Clic sur une carte du fil (mission_id, position, category, surface, distance_km?)
