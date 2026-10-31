@@ -6,6 +6,16 @@ import { readFileSync } from "node:fs";
 const scripts = () =>
   Array.from(document.querySelectorAll("script")).map((s) => s.src).filter((s) => /googletagmanager|google-analytics/.test(s));
 
+const consentUpdates = () =>
+  ((window as any).dataLayer || [])
+    .map((a: any) => Array.from(a))
+    .filter((a: any[]) => a[0] === "consent" && a[1] === "update");
+
+const conversionEvents = () =>
+  ((window as any).dataLayer || [])
+    .map((a: any) => Array.from(a))
+    .filter((a: any[]) => a[0] === "event" && a[1] === "conversion" && String(a[2]?.send_to || "").startsWith("AW-18547606637/"));
+
 async function freshModule() {
   vi.resetModules();
   document.head.querySelectorAll("script").forEach((s) => s.remove());
@@ -33,30 +43,58 @@ describe("C1, consentement cookies", () => {
     })]);
   });
 
-  it("aucun chargement après refus, chargement après acceptation", async () => {
+  it("aucun chargement après refus, un seul chargement après double acceptation", async () => {
     const m = await freshModule();
     m.initConsent();
-    m.setStoredConsent("denied");
+    m.setStoredConsent("denied", "denied");
     expect(scripts()).toHaveLength(0);
-    m.setStoredConsent("granted");
+    m.setStoredConsent("granted", "granted");
     expect(scripts()).toHaveLength(1);
   });
 
-  it("un ancien choix granted est respecté, sans bandeau", async () => {
-    localStorage.setItem("guardiens_cookie_consent_v1", JSON.stringify({ value: "granted", timestamp: Date.now() - 10 * 864e5 }));
+  it("un choix complet est respecté, sans bandeau", async () => {
+    localStorage.setItem("guardiens_cookie_consent_v1", JSON.stringify({ value: "granted", ads: "granted", timestamp: Date.now() - 10 * 864e5 }));
     const m = await freshModule();
     expect(m.shouldShowBanner()).toBe(false);
     m.initConsent();
     expect(scripts()).toHaveLength(1);
+  });
+
+  it("une réponse publicitaire absente redemande le bandeau et laisse ce volet bloqué", async () => {
+    localStorage.setItem("guardiens_cookie_consent_v1", JSON.stringify({ value: "granted", timestamp: Date.now() - 10 * 864e5 }));
+    const m = await freshModule();
+    expect(m.shouldShowBanner()).toBe(true);
+    m.initConsent();
+    // la mesure d'audience reprend, la mesure publicitaire reste refusée
+    expect(scripts()).toHaveLength(1);
+    expect(consentUpdates()).toEqual(
+      expect.arrayContaining([
+        ["consent", "update", { analytics_storage: "granted" }],
+        ["consent", "update", { ad_storage: "denied" }],
+      ]),
+    );
   });
 
   it("choix mémorisé, puis redemandé après 182 jours", async () => {
     const m = await freshModule();
     expect(m.CONSENT_TTL_DAYS).toBe(182);
-    m.setStoredConsent("denied");
+    m.setStoredConsent("denied", "denied");
     expect(m.shouldShowBanner()).toBe(false);
-    localStorage.setItem("guardiens_cookie_consent_v1", JSON.stringify({ value: "denied", timestamp: Date.now() - 183 * 864e5 }));
+    localStorage.setItem("guardiens_cookie_consent_v1", JSON.stringify({ value: "denied", ads: "denied", timestamp: Date.now() - 183 * 864e5 }));
     expect(m.shouldShowBanner()).toBe(true);
+  });
+
+  it("la conversion Google Ads part seulement avec l'accord publicitaire, une fois par compte", async () => {
+    const m = await freshModule();
+    m.initConsent();
+    m.setStoredConsent("granted", "denied");
+    m.reportSignupConversion("compte-1");
+    expect(conversionEvents()).toHaveLength(0);
+    m.setStoredConsent("granted", "granted");
+    m.reportSignupConversion("compte-2");
+    expect(conversionEvents()).toHaveLength(1);
+    m.reportSignupConversion("compte-2");
+    expect(conversionEvents()).toHaveLength(1);
   });
 
   it("le retrait supprime _ga et _ga_*", async () => {
@@ -65,7 +103,7 @@ describe("C1, consentement cookies", () => {
     document.cookie = "_ga_9JP4VR1RRP=GS1; path=/";
     document.cookie = "autre=1; path=/";
     m.initConsent();
-    m.setStoredConsent("denied");
+    m.setStoredConsent("denied", "denied");
     expect(document.cookie).not.toMatch(/_ga/);
     expect(document.cookie).toMatch(/autre=1/);
     expect((window as any)["ga-disable-G-9JP4VR1RRP"]).toBe(true);
@@ -92,8 +130,11 @@ describe("C1, consentement cookies", () => {
     expect(classes.size).toBe(1);
     fireEvent.click(screen.getByText("Personnaliser"));
     expect(screen.getByRole("switch", { name: /Mesure d'audience/ }).getAttribute("aria-checked")).toBe("false");
+    expect(screen.getByRole("switch", { name: /Mesure des publicités/ }).getAttribute("aria-checked")).toBe("false");
     await act(async () => { fireEvent.click(screen.getByText("Enregistrer mon choix")); });
-    expect(JSON.parse(localStorage.getItem("guardiens_cookie_consent_v1")!).value).toBe("denied");
+    const saved = JSON.parse(localStorage.getItem("guardiens_cookie_consent_v1")!);
+    expect(saved.value).toBe("denied");
+    expect(saved.ads).toBe("denied");
     for (const v of Object.values(COOKIE_BANNER_TEXT)) expect(v).not.toMatch(/[\u2013\u2014]/);
   });
 

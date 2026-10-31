@@ -61,7 +61,7 @@ const Privacy = () => {
             <li>Messagerie interne : exécution du contrat</li>
             <li>Notifications transactionnelles : exécution du contrat</li>
             <li>Notifications marketing : consentement (art. 6.1.a)</li>
-            <li>Mesure d'audience : consentement</li>
+            <li>Mesure d'audience et mesure des publicités : consentement</li>
             <li>Modération et lutte contre la fraude : intérêt légitime (art. 6.1.f)</li>
             <li>Assistance par Alma, aides à la rédaction, analyse de la qualité des photos : exécution du contrat</li>
             <li>Amélioration du service, statistiques anonymisées : intérêt légitime</li>
@@ -79,7 +79,7 @@ const Privacy = () => {
             <li>Avis publiés : anonymisés après suppression du compte (intérêt légitime)</li>
             <li>Logs de connexion : 12 mois (art. L. 34-1 CPCE)</li>
             <li>Facturation : 10 ans (art. L. 123-22 C. com.)</li>
-            <li>Cookies de mesure d'audience : 13 mois maximum</li>
+            <li>Cookies de mesure d'audience et de mesure des publicités : 13 mois maximum</li>
           </ul>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">6. Sous-traitants et destinataires</h2>
@@ -90,7 +90,7 @@ const Privacy = () => {
             <li><strong className="text-foreground">Lovable Labs Incorporated</strong> : interface de développement et déploiement. Société d'origine suédoise, représentant UE Lovable Labs AB (Stockholm). Clauses contractuelles types (SCC) Module 2, décision UE 2021/914.</li>
             <li><strong className="text-foreground">Resend Inc.</strong> : envoi d'emails transactionnels. États-Unis. SCC UE + EU-US Data Privacy Framework.</li>
             <li><strong className="text-foreground">Prerender LLC</strong> : pré-rendu SEO. États-Unis. SCC UE + EU-US Data Privacy Framework.</li>
-            <li><strong className="text-foreground">Google LLC</strong> (via Google Ireland Ltd.) : mesure d'audience Google Analytics 4, uniquement sous consentement. Union européenne (Dublin), transferts US encadrés SCC UE + EU-US Data Privacy Framework.</li>
+            <li><strong className="text-foreground">Google LLC</strong> (via Google Ireland Ltd.) : mesure d'audience Google Analytics 4 et mesure des publicités Google Ads (compter les inscriptions issues d'une publicité), uniquement sous consentement. Union européenne (Dublin), transferts US encadrés SCC UE + EU-US Data Privacy Framework.</li>
             <li><strong className="text-foreground">Lovable Labs (passerelle d'intelligence artificielle)</strong> : acheminement des requêtes d'intelligence artificielle (vérification d'identité, analyse de photos, aides à la rédaction, Alma, transcription de la voix) vers les fournisseurs de modèles ci-dessous. Clauses contractuelles types (SCC) Module 2.</li>
             <li><strong className="text-foreground">Google LLC (modèles Gemini)</strong> : analyse automatisée des pièces d'identité et des photos, réponses d'Alma, aides à la rédaction. États-Unis, transferts encadrés par l'EU-US Data Privacy Framework ou les SCC.</li>
             <li><strong className="text-foreground">OpenAI (modèles de transcription)</strong> : transcription en texte des messages vocaux adressés à Alma. États-Unis, transferts encadrés par l'EU-US Data Privacy Framework ou les SCC.</li>
@@ -122,7 +122,7 @@ const Privacy = () => {
             <strong className="text-foreground">Cookies de mesure d'audience</strong> (avec consentement) : Google Analytics 4, anonymisation IP activée, refus aussi simple que l'acceptation, retrait possible via "Gérer mes cookies" dans le pied de page.
           </p>
           <p>
-            Aucun cookie publicitaire, aucun cookie de retargeting. Détail complet sur la page <a href="/cookies" className="text-primary hover:underline">/cookies</a>.
+            <strong className="text-foreground">Cookies de mesure des publicités</strong> (avec consentement) : Google Ads compte les inscriptions issues d'une publicité. Aucun cookie de retargeting, aucune personnalisation publicitaire. Les règles de Google pour cette mesure sont décrites sur <a href="https://business.safety.google/privacy/" className="text-primary hover:underline" target="_blank" rel="noreferrer">business.safety.google/privacy</a>. Détail complet sur la page <a href="/cookies" className="text-primary hover:underline">/cookies</a>.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">10. Sécurité</h2>
