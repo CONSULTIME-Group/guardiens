@@ -41,6 +41,7 @@ describe("ALMA-V1 · filet de sortie", () => {
     "Votre annonce peut être fermée aux candidatures.",
     "Vous pouvez désactiver l'option qui accepte de nouvelles candidatures.",
     "Ouvrez la fiche de votre demande d'entraide et utilisez le bouton d'édition.",
+    "Les trois candidatures reçues sont déjà classées, votre annonce peut être fermée.",
   ];
   for (const sentence of BAD) {
     it(`signale : ${sentence.slice(0, 40)}`, () => {
