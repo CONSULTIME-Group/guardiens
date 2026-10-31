@@ -1,5 +1,10 @@
 # Roadmap
 
+## Suivi inscription propriétaire Google Ads (31/10/2026)
+- [x] Déclencher après confirmation du compte et résolution du rôle Propriétaire, pas au formulaire non confirmé.
+- [ ] Vérifier les règles, le parcours et test:guard sans inscription réelle ni email envoyé.
+- [ ] Publication et vérification du site public : attend une demande de publication.
+
 ## Gouaches peintes sur les profils (10/10/2026)
 
 - [x] Conserver les peintures, supprimer le zoom et fondre leurs bords sur le papier du profil.

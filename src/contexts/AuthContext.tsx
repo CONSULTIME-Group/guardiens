@@ -7,6 +7,7 @@ import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { getOAuthTraceId, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
 import { cleanupPushOnLogoutLazy as cleanupPushOnLogout, reconcilePushSessionLazy as reconcilePushSession } from "@/lib/pushSession";
 import { applyPendingSignupRole } from "@/lib/signupRole";
+import { reportConfirmedOwnerSignup } from "@/lib/ownerSignupConversion";
 import { applyPendingLegalAcceptance, LEGAL_ACCEPTED_SIGNUP } from "@/lib/legalAcceptance";
 
 type Role = "owner" | "sitter" | "both";
@@ -198,6 +199,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (data) {
       const profile = mapProfile(data, supabaseUser.email);
+      reportConfirmedOwnerSignup(supabaseUser, profile.role);
       userRef.current = profile;
       setUser(profile);
       setProfileError(false);
