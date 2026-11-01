@@ -51,6 +51,20 @@ export interface SitFieldModerationResult {
 }
 
 /**
+ * Décision de Jérémie du 01/11/2026 (cas de Marie, onze refus le 29/10 pour une
+ * participation aux frais de chauffage) : dans une annonce, une mention
+ * d'argent prévient, elle ne bloque plus la publication. Les autres règles
+ * (coordonnées, haine, contenu sexuel, escroquerie) restent bloquantes.
+ */
+export const PAYMENT_NOTICE =
+  "Sur Guardiens, la garde se fait normalement sans argent entre membres. Votre annonce peut être publiée, et cette phrase reste visible des gardiens.";
+
+export function softenPaymentVerdict(verdict: ModerationVerdict): ModerationVerdict {
+  if (verdict.status !== "block" || verdict.rule !== "payment") return verdict;
+  return { ...verdict, status: "warning", reasons: [PAYMENT_NOTICE] };
+}
+
+/**
  * Évalue en parallèle chaque champ non vide. Un champ vide n'est jamais envoyé
  * à la modération, cela évite un appel inutile et un verdict sans objet.
  */
@@ -68,7 +82,8 @@ export async function moderateSitFields(
   const verdicts: FieldVerdicts = {};
   const blocked: ModeratedFieldKey[] = [];
   const warned: ModeratedFieldKey[] = [];
-  results.forEach(([key, verdict]) => {
+  results.forEach(([key, raw]) => {
+    const verdict = softenPaymentVerdict(raw);
     verdicts[key] = verdict;
     if (verdict.status === "block") blocked.push(key);
     else if (verdict.status === "warning") warned.push(key);
