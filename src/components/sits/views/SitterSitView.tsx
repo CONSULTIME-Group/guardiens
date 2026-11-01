@@ -10,6 +10,7 @@
  * - Bouton "Annuler ma participation" si gardien candidat sur garde confirmée
  */
 import { useState, useEffect } from "react";
+import PushMomentOffer from "@/components/notifications/PushMomentOffer";
 import { useTranslation } from "@/i18n/react";
 import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle2, PawPrint, MapPin, CalendarDays, Users, ArrowLeft } from "lucide-react";
@@ -435,9 +436,13 @@ const SitterSitView = ({
                     </p>
                   </div>
                 ) : hasApplied ? (
-                  <Button className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-6 rounded-full text-base font-semibold" disabled>
-                    <CheckCircle2 className="h-5 w-5 mr-2" aria-hidden="true" /> Candidature envoyée
-                  </Button>
+                  <div className="w-full md:w-auto md:min-w-[16rem] space-y-3">
+                    <Button className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-6 rounded-full text-base font-semibold" disabled>
+                      <CheckCircle2 className="h-5 w-5 mr-2" aria-hidden="true" /> Candidature envoyée
+                    </Button>
+                    {/* Lot NOTIF1 : la réponse du propriétaire arrive sur ce téléphone. */}
+                    <PushMomentOffer moment="application_sent" className="text-left md:max-w-md" />
+                  </div>
                 ) : !canApplyGuards ? (
                   <AccessGateBanner
                     level="3A"
