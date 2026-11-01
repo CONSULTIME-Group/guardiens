@@ -1,4 +1,5 @@
 import { MISSION_CATEGORIES } from "@/lib/missionCategories";
+import PushMomentOffer from "@/components/notifications/PushMomentOffer";
 import { useTranslation } from "@/i18n/react";
 import { useState, useEffect, useLayoutEffect, useCallback, useRef } from "react";
 import { trackEvent } from "@/lib/analytics";
@@ -1022,6 +1023,8 @@ const SmallMissionDetail = () => {
             <p className="text-sm text-muted-foreground leading-relaxed">
               {author?.first_name || "L'auteur"} l'a reçu. Une notification vous prévient de sa réponse.
             </p>
+            {/* Lot NOTIF1 : la réponse arrive aussi sur ce téléphone. */}
+            <PushMomentOffer moment="help_offered" />
             {myResponse.exchange_date && (
               <p className="text-sm text-foreground">Vous avez proposé le {format(parseISO(myResponse.exchange_date), "EEEE d MMMM", { locale: fr })}.</p>
             )}

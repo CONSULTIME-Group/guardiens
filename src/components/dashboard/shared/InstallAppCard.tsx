@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { firstInstallVisitDue, installPlatform, markInstallSuggestion, reminderDue, requestInstall } from "@/lib/pwa-install";
-import { hasLocalPushSubscription, nearbySettingToDiscover, pushSupport } from "@/lib/web-push";
+import { canOfferPush, hasLocalPushSubscription, nearbySettingToDiscover, pushSupport } from "@/lib/web-push";
 import { trackEvent } from "@/lib/analytics";
 
 const TWO_WEEKS = 14 * 24 * 60 * 60 * 1000;
@@ -51,7 +51,10 @@ export default function InstallAppCard() {
   const subscribedHere = !!user?.id && hasLocalPushSubscription(user.id);
   // L'étape suivante (notifications) suit l'installation confirmée, y compris
   // pendant la même visite ; elle n'est pas soumise au rappel d'installation.
-  const mode: Mode | null = !user?.id || !platform.mobile || platform.embedded ? null
+  // Lot NOTIF1 : sur Android, les notifications marchent depuis le site ; la
+  // carte notifications (PushResubscribeCard) passe avant l'installation.
+  const pushOfferFirst = !installed && !!user?.id && pushReady && canOfferPush(user.id);
+  const mode: Mode | null = !user?.id || !platform.mobile || platform.embedded || pushOfferFirst ? null
     : !installed ? (installDue.current ? "install" : null)
     : !pushReady ? null
     : !subscribedHere ? "notifications"

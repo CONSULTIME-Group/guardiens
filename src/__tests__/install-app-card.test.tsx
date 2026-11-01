@@ -5,12 +5,12 @@ import { MemoryRouter } from 'react-router-dom';
 const m = vi.hoisted(() => ({
   state: { standalone: false, knownInstalled: false, canPrompt: false },
   platform: { ios: false, mobile: true, embedded: false },
-  first: false, local: false, due: true, nearby: false, support: 'supported', request: vi.fn(), track: vi.fn(), nav: vi.fn(), mark: vi.fn(),
+  first: false, local: false, due: true, nearby: false, offer: false, support: 'supported', request: vi.fn(), track: vi.fn(), nav: vi.fn(), mark: vi.fn(),
 }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1' } }) }));
 vi.mock('@/hooks/usePwaInstall', () => ({ usePwaInstall: () => m.state }));
 vi.mock('@/lib/pwa-install', () => ({ installPlatform: () => m.platform, requestInstall: m.request, firstInstallVisitDue: () => m.first, reminderDue: () => m.due, markInstallSuggestion: m.mark }));
-vi.mock('@/lib/web-push', () => ({ hasLocalPushSubscription: () => m.local, pushSupport: () => m.support, nearbySettingToDiscover: () => m.nearby }));
+vi.mock('@/lib/web-push', () => ({ canOfferPush: () => m.offer, hasLocalPushSubscription: () => m.local, pushSupport: () => m.support, nearbySettingToDiscover: () => m.nearby }));
 vi.mock('@/lib/analytics', () => ({ trackEvent: m.track }));
 vi.mock('react-router-dom', async (o) => ({ ...(await o<typeof import('react-router-dom')>()), useNavigate: () => m.nav }));
 import InstallAppCard, { cardDue } from '@/components/dashboard/shared/InstallAppCard';
@@ -20,11 +20,15 @@ beforeEach(() => {
   localStorage.clear(); vi.clearAllMocks();
   Object.assign(m.state, { standalone: false, knownInstalled: false, canPrompt: false });
   Object.assign(m.platform, { ios: false, mobile: true, embedded: false });
-  m.first = false; m.local = false; m.due = true; m.nearby = false;
+  m.first = false; m.local = false; m.due = true; m.nearby = false; m.offer = false;
   (globalThis as any).Notification = { permission: 'default', requestPermission: vi.fn() };
 });
 
 describe('Carte installation du tableau de bord', () => {
+  it('NOTIF1 : Android non installé avec notifications proposables, la carte notifications passe avant', () => {
+    m.offer = true; m.state.canPrompt = true; view();
+    expect(screen.queryByRole('button', { name: "Installer l'app" })).toBeNull();
+  });
   it('Android avec fenêtre disponible : déclenche la vraie demande du navigateur', async () => {
     m.state.canPrompt = true; m.request.mockResolvedValue('accepted'); view();
     fireEvent.click(screen.getByRole('button', { name: "Installer l'app" }));

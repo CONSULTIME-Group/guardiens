@@ -15,7 +15,7 @@ type Mode = "resubscribe" | "offer";
 /**
  * Une seule carte notifications sur le tableau de bord, jamais deux :
  * - resubscribe (lot 0) : abonnement arrêté, autorisation retirée ;
- * - offer : propriétaire sur appareil compatible, autorisation jamais
+ * - offer : membre sur appareil compatible (lot NOTIF1 : gardiens compris), autorisation jamais
  *   demandée, aucun abonnement, aucune désactivation ni report en cours.
  * La configuration est lue d'avance : au clic, la demande d'autorisation
  * est le premier appel, dans le geste du membre.
@@ -66,10 +66,12 @@ export default function PushResubscribeCard({ role }: { role?: string | null }) 
         void trackEvent("push_resubscribe_shown", { source: "dashboard" });
         return;
       }
-      if (role === "owner" && canOfferPush(userId)) {
+      // Lot NOTIF1 : proposé aussi aux gardiens, avec les annonces proches
+      // (annoncées dans le texte, trois au plus par jour, réglables ensuite).
+      if (canOfferPush(userId)) {
         try { if (sessionStorage.getItem(OFFER_SESSION_KEY)) return; } catch { /* rien */ }
         flag(OFFER_SESSION_KEY);
-        setPrefs({ messages: true, applications: true, nearbySits: false });
+        setPrefs({ messages: true, applications: true, nearbySits: role !== "owner" });
         setMode("offer");
         void preload();
         void trackEvent("push_offer_shown", { source: "dashboard" });
@@ -104,7 +106,7 @@ export default function PushResubscribeCard({ role }: { role?: string | null }) 
       if (!state.subscribed) throw new Error("push_not_confirmed");
       clearPushOptOut(userId);
       if (mode === "offer") {
-        void trackEvent("push_enabled", { source: "dashboard", metadata: { messages: prefs.messages, applications: prefs.applications, nearby_sits: false } });
+        void trackEvent("push_enabled", { source: "dashboard", metadata: { messages: prefs.messages, applications: prefs.applications, nearby_sits: prefs.nearbySits === true } });
         setDone(true);
       } else {
         setMode(null);
@@ -137,12 +139,12 @@ export default function PushResubscribeCard({ role }: { role?: string | null }) 
   return (
     <div role="status" className="mx-4 mt-4 rounded-lg border border-border bg-card p-4 text-sm text-card-foreground flex flex-col sm:flex-row sm:items-center gap-3">
       <p className="flex-1">
-        {offer
-          ? "Soyez prévenu dès qu'un gardien postule ou vous écrit, directement sur cet appareil."
-          : "Vos notifications se sont arrêtées sur cet appareil."}
+        {!offer ? "Vos notifications se sont arrêtées sur cet appareil."
+          : role === "owner" ? "Soyez prévenu dès qu'un gardien postule ou vous écrit, directement sur cet appareil."
+          : "Soyez prévenu sur cet appareil quand on vous écrit, et des nouvelles annonces près de chez vous (trois au plus par jour)."}
       </p>
       <Button size="sm" variant={offer ? "default" : "outline"} onClick={activate} disabled={busy || !config}>
-        {offer ? "Recevoir mes candidatures sur mon téléphone" : "Les réactiver"}
+        {!offer ? "Les réactiver" : role === "owner" ? "Recevoir mes candidatures sur mon téléphone" : "Activer les notifications"}
       </Button>
       {offer && <Button size="sm" variant="ghost" onClick={later} disabled={busy}>Plus tard</Button>}
       {message && <p className="text-xs text-muted-foreground sm:basis-full">{message}</p>}

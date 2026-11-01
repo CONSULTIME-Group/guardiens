@@ -91,6 +91,7 @@ import { publicFirstName } from "@/lib/displayName";
 import SitDetailHeader from "./SitDetailHeader";
 import SitFooterReassurance from "./SitFooterReassurance";
 import PublishedNextSteps from "@/components/sits/owner/PublishedNextSteps";
+import PushMomentOffer from "@/components/notifications/PushMomentOffer";
 import ReopenApplicationsCard from "./ReopenApplicationsCard";
 import { isCapReached } from "@/lib/applicationCap";
 import SitOverridesEditor from "./SitOverridesEditor";
@@ -1229,7 +1230,8 @@ const OwnerSitView = ({
         // gardiens à proximité passe en tête, puis les candidatures, ce qui va
         // se passer, et l'aperçu de l'annonce.
         if (internalAppCount > 0) return <>{applicationsBlock}{immersiveBlock}{inviteBlock}</>;
-        if (sit.status === "published") return <>{inviteBlock}{applicationsBlock}<PublishedNextSteps key="next" />{immersiveBlock}</>;
+        // Lot NOTIF1 : être prévenu des candidatures sur ce téléphone, juste après « Ce qui va se passer ».
+        if (sit.status === "published") return <>{inviteBlock}{applicationsBlock}<PublishedNextSteps key="next" /><PushMomentOffer key="push" moment="sit_published" className="mb-8" />{immersiveBlock}</>;
         return <>{immersiveBlock}{inviteBlock}{applicationsBlock}</>;
       })()}
 

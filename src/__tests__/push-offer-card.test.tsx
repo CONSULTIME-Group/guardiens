@@ -53,10 +53,15 @@ describe("Proposition push propriétaire", () => {
     expect(enablePushMock).toHaveBeenCalledWith("u1", { enabled: true, publicKey: "k" }, { messages: true, applications: true, nearbySits: false });
   });
 
-  it("gardien : aucune proposition", async () => {
+  it("NOTIF1, gardien : proposition avec les annonces proches annoncées et activées", async () => {
+    enablePushMock.mockResolvedValue({ nearbyRequested: true, nearbySaved: true });
     render(<PushResubscribeCard role="sitter" />);
-    await new Promise((r) => setTimeout(r, 20));
-    expect(screen.queryByRole("button", { name: CTA })).toBeNull();
+    expect(await screen.findByText(/nouvelles annonces près de chez vous \(trois au plus par jour\)/)).toBeInTheDocument();
+    const btn = screen.getByRole("button", { name: "Activer les notifications" });
+    await waitFor(() => expect(btn).not.toBeDisabled());
+    fireEvent.click(btn);
+    await screen.findByText("Notifications activées sur cet appareil.");
+    expect(enablePushMock).toHaveBeenCalledWith("u1", { enabled: true, publicKey: "k" }, { messages: true, applications: true, nearbySits: true });
   });
 
   it.each(["denied", "granted"] as NotificationPermission[])("autorisation %s : aucune proposition", (p) => {
