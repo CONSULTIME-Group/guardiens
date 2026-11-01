@@ -24,7 +24,7 @@ const card = (i: number, chip?: string) => ({
 const COMMON = [
   'NOËL 2026',
   "Partez l'esprit léger, quelqu'un du coin garde la maison.",
-  "les départs de fin d'année se décident maintenant. Votre annonce est en ligne en quelques minutes, et les gardiens à proximité vous écrivent directement.",
+  "les départs de fin d'année se décident maintenant. Publiez votre annonce, et les gardiens à proximité vous écrivent directement.",
   'Je prépare ma garde de Noël',
   'Publier et choisir votre gardien : c\'est gratuit.',
   'CE QUE GUARDIENS FAIT POUR VOUS',

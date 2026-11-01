@@ -41,7 +41,7 @@ const NudgeMissingPhotoEmail = ({ firstName }: NudgeMissingPhotoProps) => {
           </Section>
 
           <Text style={text}>
-            Deux minutes suffisent pour ajouter la vôtre depuis votre profil.
+            Vous ajoutez la vôtre depuis votre profil.
           </Text>
 
           <Section style={ctaSection}>

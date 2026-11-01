@@ -17,7 +17,7 @@ interface Props {
 const DiscoverMutualAidIntroEmail = ({ firstName }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>L'entraide sur Guardiens, en deux minutes</Preview>
+    <Preview>L'entraide sur Guardiens, comment ça marche</Preview>
     <Body style={main}>
       <Container style={container} className="em-container">
         <BrandHeader />
@@ -55,7 +55,7 @@ const DiscoverMutualAidIntroEmail = ({ firstName }: Props) => (
           <Button style={button} className="em-btn" href={CTA_URL}>
             Publier un coup de main
           </Button>
-          <Text style={ctaHint} className="em-hint">Connectez-vous, puis rédigez votre demande en deux minutes.</Text>
+          <Text style={ctaHint} className="em-hint">Connectez-vous, puis rédigez votre demande en quelques lignes.</Text>
         </Section>
 
         <Hr style={hr} />
@@ -96,7 +96,7 @@ const hr = { borderColor: '#E9E4DD', margin: '24px 0 16px' }
 
 export const template: TemplateEntry = {
   component: DiscoverMutualAidIntroEmail,
-  subject: "L'entraide sur Guardiens, en deux minutes",
+  subject: "L'entraide sur Guardiens, comment ça marche",
   displayName: 'Découverte entraide, présentation',
   previewData: { firstName: 'Camille' },
 }

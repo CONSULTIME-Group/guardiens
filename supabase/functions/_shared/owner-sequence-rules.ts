@@ -145,7 +145,7 @@ const COUNT_WORDS = ['', 'un', 'deux', 'trois']
 /** Préentête du J+3 selon le nombre de cartes affichées. */
 export function j3Preheader(cardCount: number): string {
   const n = Math.max(0, Math.min(3, Math.floor(cardCount || 0)))
-  if (n === 0) return 'Votre première annonce se publie en quelques minutes.'
+  if (n === 0) return 'Votre première annonce se prépare depuis votre téléphone.'
   if (n === 1) return 'En voici un, à proximité de chez vous.'
   return `En voici ${COUNT_WORDS[n]}, à proximité de chez vous.`
 }

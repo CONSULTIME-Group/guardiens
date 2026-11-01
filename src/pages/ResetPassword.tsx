@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
 import Head from "@/components/seo/Head";
 import authIllustration from "@/assets/aquarelles/inscription-tablee-1024.webp";
+import { getAuthFieldAttrs } from "@/lib/inAppBrowser";
 
 const ResetPassword = () => {
   const { t } = useTranslation();
@@ -17,17 +18,23 @@ const ResetPassword = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isRecovery, setIsRecovery] = useState(false);
+  // Lot CP1 : l'adresse du compte, donnée au gestionnaire de mots de passe avec le
+  // nouveau mot de passe. Sans elle, le navigateur ne l'enregistre pas pour ce compte
+  // et la personne refait son mot de passe à chaque connexion (contact du 28/09).
+  const [accountEmail, setAccountEmail] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) setIsRecovery(true);
+      if (session?.user?.email) setAccountEmail(session.user.email);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session)) {
         setIsRecovery(true);
+        if (session?.user?.email) setAccountEmail(session.user.email);
       }
     });
     return () => subscription.unsubscribe();
@@ -115,6 +122,8 @@ const ResetPassword = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            <input type="email" name="username" autoComplete="username" value={accountEmail} readOnly
+              tabIndex={-1} aria-hidden="true" className="sr-only" data-testid="reset-username" />
             <div className="space-y-2">
               <Label htmlFor="password">{t("reset_password.new_password")}</Label>
               <div className="relative">
@@ -126,7 +135,9 @@ const ResetPassword = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={8}
+                  name="new-password"
                   className="rounded-lg h-12 pr-12"
+                  {...getAuthFieldAttrs("new-password")}
                 />
                 <button
                   type="button"
@@ -148,7 +159,9 @@ const ResetPassword = () => {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 minLength={8}
+                name="confirm-password"
                 className="rounded-lg h-12"
+                {...getAuthFieldAttrs("new-password")}
               />
             </div>
             <Button type="submit" className="w-full" size="lg" disabled={isLoading}>

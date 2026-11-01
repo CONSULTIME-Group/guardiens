@@ -428,11 +428,11 @@ const OnboardingAffinity = () => {
             </h1>
             {showAffinityFields ? (
               <p className="text-sm text-muted-foreground">
-                Ces informations nous servent uniquement à calculer votre score d'affinité et à vous proposer les meilleures correspondances. Aucune saisie libre, moins d'une minute.
+                Ces informations nous servent uniquement à calculer votre score d'affinité et à vous proposer les meilleures correspondances. Des choix à cocher, tout reste modifiable.
               </p>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Il nous manque une seule information pour vous proposer des gardiens et des annonces près de chez vous. Dix secondes.
+                Il nous manque une seule information pour vous proposer des gardiens et des annonces près de chez vous.
               </p>
             )}
           </CardHeader>

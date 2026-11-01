@@ -223,7 +223,7 @@ export default function SitDraftFromPrompt({ secondary = false, demoted = false,
               Votre brouillon est prêt. Il ne manque que la publication.
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Sans publication, les gardiens de votre secteur ne peuvent pas se proposer. Reprenez votre brouillon, quelques minutes suffisent.
+              Sans publication, les gardiens de votre secteur ne peuvent pas se proposer. Reprenez votre brouillon là où vous l'avez laissé.
             </p>
             <div className="mt-4">
               <Button
@@ -261,7 +261,7 @@ export default function SitDraftFromPrompt({ secondary = false, demoted = false,
           Décrivez votre absence en une phrase.
         </h2>
         <p className="text-muted-foreground mt-[8px] text-[14px]">
-          Alma prépare le brouillon, vous relisez et publiez en 2 minutes.
+          Alma prépare le brouillon, vous relisez, puis vous publiez.
         </p>
         <label htmlFor="sit-draft-prompt" className="block mt-[22px] text-foreground text-[13px] font-semibold">
           Votre absence
@@ -348,7 +348,7 @@ export default function SitDraftFromPrompt({ secondary = false, demoted = false,
               : "Décrivez votre absence en une phrase, Alma prépare le brouillon"}
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Vous relisez et publiez en 2 minutes.
+            Vous relisez, puis vous publiez.
           </p>
           {showCreateFirstAlma && (
             <p className="text-sm text-foreground/90 mt-2 leading-relaxed">

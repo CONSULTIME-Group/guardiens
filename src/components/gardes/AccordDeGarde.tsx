@@ -355,7 +355,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  Si un animal causait un dommage à une tierce personne pendant la garde, c'est l'assurance habitation de {p} qui a vocation à intervenir, pas la responsabilité de {g}. Un point à vérifier avec son assureur avant de partir.
  </p>
  <p className="text-sm mt-3">
- Si {g} se blessait dans le logement, chaque partie reste couverte par sa propre assurance. On recommande à {g} de vérifier sa couverture accidents personnelle avant la garde, ça prend cinq minutes.
+ Si {g} se blessait dans le logement, chaque partie reste couverte par sa propre assurance. On recommande à {g} de vérifier sa couverture accidents personnelle avant la garde.
  </p>
   <p className="italic text-xs text-muted-foreground mt-2">
   Cet accord ne remplace pas vos assurances respectives.

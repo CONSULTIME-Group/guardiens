@@ -545,7 +545,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                   Bienvenue sur Guardiens.
                 </h2>
                 <p className="text-base text-foreground/80 leading-relaxed mt-2">
-                  En 2 minutes, rendez votre profil attractif. Commençons par faire connaissance, 30 secondes.
+                  Rendez votre profil attractif. Commençons par faire connaissance.
                 </p>
                 <p className="text-xs text-muted-foreground italic mt-2">
                   Vous pourrez tout modifier plus tard depuis votre profil.

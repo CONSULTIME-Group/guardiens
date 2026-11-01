@@ -41,7 +41,7 @@ const RelancePieceIdentiteEmail = ({ firstName }: RelancePieceIdentiteProps) => 
             </Section>
 
           <Text style={text}>
-            <strong>2 minutes suffisent</strong> pour finaliser&nbsp;:
+            <strong>Pour finaliser</strong>&nbsp;:
           </Text>
 
           <Text style={listItem}>1. Rendez-vous dans vos paramètres de compte</Text>

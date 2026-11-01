@@ -67,8 +67,8 @@ const SearchHowItWorksAnon = () => (
           Comment ça marche
         </h2>
         <p className="text-sm md:text-base text-muted-foreground mb-8 max-w-2xl">
-          Trouver une garde à domicile prend quelques minutes. Voici les
-          trois étapes côté gardien.
+          Voici les trois étapes côté gardien pour trouver une garde à
+          domicile.
         </p>
         <ol className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {STEPS.map((s) => (

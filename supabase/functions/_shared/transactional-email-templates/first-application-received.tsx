@@ -86,7 +86,7 @@ const FirstApplicationEmail = ({
           ) : null}
 
           <Text style={text}>
-            Prenez quelques minutes pour consulter son profil, lire son message et
+            Prenez le temps de consulter son profil, lire son message et
             répondre. <strong>Une réponse rapide (dans les 24h) augmente fortement
             les chances qu'un échange de confiance s'installe.</strong>
           </Text>
