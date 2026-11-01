@@ -15,8 +15,8 @@ export default function EspaceParamSwitch() {
   useEffect(() => {
     if (!espace || !user) return;
     const role = (user as { role?: string }).role;
-    if (espace === "gardien" && (role === "both" || role === "sitter") && activeRole !== "sitter") switchRole("sitter");
-    if (espace === "proprietaire" && (role === "both" || role === "owner") && activeRole !== "owner") switchRole("owner");
+    if (espace === "gardien" && (role === "both" || role === "sitter") && activeRole !== "sitter") switchRole("sitter", "lien");
+    if (espace === "proprietaire" && (role === "both" || role === "owner") && activeRole !== "owner") switchRole("owner", "lien");
     const next = new URLSearchParams(searchParams);
     next.delete("espace");
     setSearchParams(next, { replace: true });

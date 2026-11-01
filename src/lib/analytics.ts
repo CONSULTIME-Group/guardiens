@@ -73,6 +73,10 @@ export type EventType =
   | "cta_click"
   | "cta_proprio_clicked"
   | "cta_sitter_clicked"
+  | "active_role_switched"              // Lot NAV-V1 : passage d'un espace à l'autre (from, to, source)
+  | "sits_create_location_chosen"       // Lot PREF1 : lieu de la garde choisi à l'étape 1 (location)
+  | "sits_create_next_blocked"          // Lot PREF1 : « Suivant » refusé, champs manquants (step, fields)
+  | "sits_create_setup_sitter_exit"     // Lot NAV-V1 : lien « annonces de garde » depuis l'écran préalable (role)
   | "cta_aid_clicked"
   | "cta_projet_clicked"
   | "login_completed"

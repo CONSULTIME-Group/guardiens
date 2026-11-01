@@ -37,7 +37,7 @@ const OwnerInboxNudge = () => {
       </p>
       <Link
         to={ownerInboxNudgeLink(ownerInboxSitId)}
-        onClick={() => switchRole("owner")}
+        onClick={() => switchRole("owner", "rappel_candidatures")}
         className="text-sm font-semibold text-primary hover:underline underline-offset-4"
       >
         Voir dans l'espace propriétaire

@@ -455,6 +455,9 @@ const CreateSit = () => {
   const expressActiveRef = useRef(false);
 
   const [currentStep, setCurrentStep] = useState(0);
+  // Lot PREF1 : étape affichée, lue par le nettoyage de l'effet d'analytics.
+  const currentStepRef = useRef(0);
+  currentStepRef.current = currentStep;
   const [sitLocation, setSitLocation] = useState<"home" | "away" | null>(null);
   const stepStartedAtRef = useRef<number>(Date.now());
   const publishedRef = useRef(false);
@@ -1955,6 +1958,7 @@ const CreateSit = () => {
         if (typeof document !== "undefined") {
           document.getElementById("sit-location-field")?.scrollIntoView({ behavior: "smooth", block: "center" });
         }
+        void trackEvent("sits_create_next_blocked", { source: "/sits/create", metadata: { step: 0, fields: ["sit_location"] } });
         toast({
           variant: "destructive",
           title: "Commencez par nous dire où se déroulera la garde.",
@@ -1973,6 +1977,10 @@ const CreateSit = () => {
       if (!reasonValid) errors.push({ field: "descriptionReason", anchor: "description-field" });
       if (!expectationsValid) errors.push({ field: "descriptionExpectations", anchor: "description-field" });
       if (errors.length > 0) {
+        void trackEvent("sits_create_next_blocked", {
+          source: "/sits/create",
+          metadata: { step: 0, fields: Array.from(new Set(errors.map((e) => e.field))) },
+        });
         setTouched(prev => {
           const next = { ...prev };
           errors.forEach(e => { next[e.field] = true; });
@@ -2083,6 +2091,10 @@ const CreateSit = () => {
         setupSuspendedRef.current = true;
         return;
       }
+      // Lot PREF1 : « étape terminée » seulement quand la personne passe à
+      // l'étape suivante. Avant, quitter la page comptait comme une étape
+      // terminée et gonflait l'entonnoir (58 débuts, 34 « finies », 19 étapes 2).
+      if (currentStepRef.current <= step) return;
       const duration = Date.now() - stepStartedAtRef.current;
       void trackEvent("sits_create_step_completed", { metadata: { step, duration_ms: duration } });
     };
@@ -2271,6 +2283,11 @@ const CreateSit = () => {
         </div>
         {user && (
           <CreateSitSetupStep
+            memberRole={(user as { role?: string }).role ?? null}
+            onSitterExit={() => {
+              void trackEvent("sits_create_setup_sitter_exit", { source: "/sits/create", metadata: { role: (user as { role?: string }).role ?? null } });
+              navigate("/annonces?espace=gardien");
+            }}
             userId={user.id}
             firstName={profileFirstName}
             postalCode={profilePostalCode}
@@ -2538,7 +2555,7 @@ const CreateSit = () => {
             <div className="grid sm:grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => setSitLocation("home")}
+                onClick={() => { setSitLocation("home"); void trackEvent("sits_create_location_chosen", { source: "/sits/create", metadata: { location: "home" } }); }}
                 className={cn(
                   "text-left rounded-lg border p-3 transition-colors",
                   sitLocation === "home"
@@ -2551,7 +2568,7 @@ const CreateSit = () => {
               </button>
               <button
                 type="button"
-                onClick={() => setSitLocation("away")}
+                onClick={() => { setSitLocation("away"); void trackEvent("sits_create_location_chosen", { source: "/sits/create", metadata: { location: "away" } }); }}
                 className={cn(
                   "text-left rounded-lg border p-3 transition-colors",
                   sitLocation === "away"

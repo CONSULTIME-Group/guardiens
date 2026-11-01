@@ -37,6 +37,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { HOVER_REVEAL } from "@/lib/hoverReveal";
 
 const CATEGORIES = [
   { value: "home_life", label: "La vie à la maison" },
@@ -98,14 +99,14 @@ const SortablePhoto = ({ photo, onDelete, onEditCaption, onSetAsMain }: Sortable
         type="button"
         {...attributes}
         {...listeners}
-        className="absolute top-2 left-2 p-1.5 rounded-md bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing touch-none"
+        className={`absolute top-2 left-2 p-1.5 rounded-md bg-black/60 text-white cursor-grab active:cursor-grabbing touch-none ${HOVER_REVEAL}`}
         aria-label="Déplacer la photo"
       >
         <GripVertical className="h-3.5 w-3.5" />
       </button>
 
       {/* Actions (top-right) */}
-      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className={`absolute top-2 right-2 flex gap-1 ${HOVER_REVEAL}`}>
         <button
           type="button"
           onClick={() => onSetAsMain(photo)}
@@ -162,7 +163,7 @@ const SortablePhoto = ({ photo, onDelete, onEditCaption, onSetAsMain }: Sortable
             <button
               type="button"
               onClick={() => setEditing(true)}
-              className="p-1 rounded bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+              className={`p-1 rounded bg-black/60 text-white ${HOVER_REVEAL}`}
               aria-label="Modifier la légende"
             >
               <Pencil className="h-3 w-3" />

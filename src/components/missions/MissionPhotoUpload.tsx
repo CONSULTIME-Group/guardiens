@@ -7,6 +7,7 @@ import { useTranslation } from "@/i18n/react";
 import { trackEvent } from "@/lib/analytics";
 import { Progress } from "@/components/ui/progress";
 import { safeUUID } from "@/lib/uuid";
+import { HOVER_REVEAL } from "@/lib/hoverReveal";
 
 const ACCEPTED = ".jpg,.jpeg,.png,.webp";
 /** Plafond par défaut. Le formulaire projet le relève explicitement. */
@@ -92,7 +93,8 @@ const MissionPhotoUpload = ({ userId, photos, onChange, onUploadingChange, onUpl
             <button
               type="button"
               onClick={() => handleRemove(i)}
-              className="absolute top-1 right-1 w-6 h-6 rounded-full bg-background/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              className={`absolute top-1 right-1 w-6 h-6 rounded-full bg-background/80 flex items-center justify-center ${HOVER_REVEAL}`}
+              aria-label="Retirer la photo"
             >
               <X className="h-3.5 w-3.5" />
             </button>

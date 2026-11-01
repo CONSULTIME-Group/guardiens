@@ -483,7 +483,7 @@ const SearchOwner = () => {
     setContactingId(sitterId);
     try {
       const { startConversationAndNavigate } = await import("@/lib/conversation");
-      switchRole('owner');
+      switchRole('owner', 'recherche');
       await startConversationAndNavigate(
         { otherUserId: sitterId, context: "sitter_inquiry" },
         navigate,

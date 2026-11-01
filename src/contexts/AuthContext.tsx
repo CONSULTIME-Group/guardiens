@@ -7,6 +7,7 @@ import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { getOAuthTraceId, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
 import { cleanupPushOnLogoutLazy as cleanupPushOnLogout, reconcilePushSessionLazy as reconcilePushSession } from "@/lib/pushSession";
 import { applyPendingSignupRole } from "@/lib/signupRole";
+import type { RoleSwitchSource } from "@/lib/roleSwitchSource";
 import { reportConfirmedOwnerSignup } from "@/lib/ownerSignupConversion";
 import { applyPendingLegalAcceptance, LEGAL_ACCEPTED_SIGNUP } from "@/lib/legalAcceptance";
 
@@ -39,8 +40,9 @@ interface AuthContextType {
   profileError: boolean;
   /** Vrai quand la vérification distante n'a pas répondu dans le délai prévu. */
   authTimeout: boolean;
-  switchRole: (role: ActiveRole) => void;
-  setActiveRole: (role: ActiveRole) => void;
+  /** Lot NAV-V1 : `source` dit d'où vient le changement (menu, réglages, lien…), pour la mesure. */
+  switchRole: (role: ActiveRole, source?: RoleSwitchSource) => void;
+  setActiveRole: (role: ActiveRole, source?: RoleSwitchSource) => void;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, role: Role, nextPath?: string, arrivalIntent?: string | null) => Promise<any>;
   logout: () => void;
@@ -141,11 +143,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     void supabase.auth.signOut({ scope: "local" }).catch(() => {});
   }, []);
 
-  const switchRole = useCallback((role: ActiveRole) => {
+  // Lot NAV-V1 : espace actif lu au moment du changement, pour ne mesurer
+  // que les vrais passages d'un espace à l'autre.
+  const activeRoleRef = useRef<ActiveRole>(activeRole);
+  activeRoleRef.current = activeRole;
+  const switchRole = useCallback((role: ActiveRole, source: RoleSwitchSource = "autre") => {
+    const from = activeRoleRef.current;
+    activeRoleRef.current = role;
     setActiveRoleState(role);
     try {
       localStorage.setItem('guardiens_active_role', role);
     } catch {}
+    if (from !== role) {
+      // Import différé : l'entrée de l'application garde son poids.
+      void import("@/lib/analytics")
+        .then((m) => m.trackEvent("active_role_switched", { metadata: { from, to: role, source } }))
+        .catch(() => {});
+    }
   }, []);
 
   // Keep setActiveRole as alias for backward compat

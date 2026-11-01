@@ -1021,6 +1021,10 @@ Deno.serve(async (req) => {
         latency_ms: Date.now() - startedAt,
         sources_count: sources.length,
         classification,
+        // Lot NAV-V1 (OBS1) : le bouton et les suggestions envoyés au membre
+        // sur une réponse de repli sont journalisés comme sur le chemin normal.
+        proposed_action: fallback && locked?.action ? locked.action : null,
+        chips: fallback && lockedChips.length ? lockedChips : null,
       });
       await raiseSignals(classification, conversationId);
       if (fallback) {

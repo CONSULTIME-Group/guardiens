@@ -29,7 +29,7 @@ interface AuthContextType {
   activeRole: ActiveRole;
   isAuthenticated: boolean;
   loading: boolean;
-  switchRole: (role: ActiveRole) => void;
+  switchRole: (role: ActiveRole, source?: string) => void;
   setActiveRole: (role: ActiveRole) => void;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, role: Role) => Promise<any>;
