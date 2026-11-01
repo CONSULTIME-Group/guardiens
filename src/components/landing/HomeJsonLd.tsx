@@ -146,7 +146,7 @@ export default function HomeJsonLd() {
                   "@type": "HowToStep",
                   position: 1,
                   name: "Décrivez votre garde",
-                  text: "Renseignez vos animaux, vos dates et votre maison. En quelques minutes, votre annonce est publiée et visible des gardiens disponibles partout en France.",
+                  text: "Renseignez vos animaux, vos dates et votre maison. Votre annonce est publiée et visible des gardiens partout en France.",
                   url: "https://guardiens.fr/#how-it-works",
                   image: `https://guardiens.fr${howtoStep1}`,
                 },

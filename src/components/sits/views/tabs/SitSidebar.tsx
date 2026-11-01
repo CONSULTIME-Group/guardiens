@@ -149,8 +149,8 @@ const SitSidebar = ({
               </p>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed line-clamp-2">
                 {sittersScope.mode === "city"
-                  ? `${sittersScope.count}+ profils de gardiens à ${cityName}.`
-                  : `${sittersScope.count}+ profils de gardiens dans le département.`}
+                  ? `${sittersScope.count} gardiens inscrits à ${cityName}.`
+                  : `${sittersScope.count} gardiens inscrits dans le département.`}
               </p>
             </div>
             <ChevronRight
@@ -163,11 +163,11 @@ const SitSidebar = ({
 
       <div className="rounded-2xl bg-muted/50 p-5 text-xs text-muted-foreground space-y-2">
         <p className="font-semibold text-[13px] text-foreground">
-          Sur Guardiens, c'est 0 €, entre gens du coin
+          Guardiens est gratuit, entre gens du coin
         </p>
         <p className="leading-relaxed">
-          Aucun paiement entre membres. Écusson « Identité vérifiée », avis croisés, accord de garde
-          signé. La confiance entre gens du coin.
+          Les gardes se font sans échange d'argent entre membres. Écusson « Identité vérifiée », avis croisés,
+          accord de garde signé. La confiance entre gens du coin.
         </p>
       </div>
     </aside>

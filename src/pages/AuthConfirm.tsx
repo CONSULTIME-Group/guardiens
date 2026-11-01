@@ -2,7 +2,7 @@ import { rememberPublishIntent } from "@/lib/postOnboardingIntent";
 import { useEffect, useRef, useState } from "react";
 import Head from "@/components/seo/Head";
 import { Link, useNavigate } from "react-router-dom";
-import { Loader2, MailCheck, AlertTriangle, RefreshCw } from "lucide-react";
+import { Loader2, MailCheck, RefreshCw } from "lucide-react";
 import { useTranslation } from "@/i18n/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -107,9 +107,17 @@ const AuthConfirm = () => {
     const type = url.searchParams.get("type");
 
     if (tokenHash && (type === "signup" || type === "email" || type === "recovery")) {
-      supabase.auth.verifyOtp({ token_hash: tokenHash, type }).then(({ error }) => {
+      supabase.auth.verifyOtp({ token_hash: tokenHash, type }).then(async ({ error }) => {
         if (error) {
           console.error("OTP verification failed:", error.message);
+          // Lot C1 : un second clic sur un lien déjà utilisé. Session active
+          // dans ce navigateur : on continue sans écran d'erreur.
+          const { data } = await supabase.auth.getSession();
+          if (data.session && type !== "recovery") {
+            subscription.unsubscribe();
+            navigate(next, { replace: true });
+            return;
+          }
           setError(error.message);
         }
       });
@@ -164,16 +172,13 @@ const AuthConfirm = () => {
       <div className="min-h-screen flex items-center justify-center bg-background px-6">
         <Head><meta name="robots" content="noindex, nofollow" /></Head>
         <div className="w-full max-w-md rounded-3xl border border-border bg-card p-8 text-center shadow-sm">
-          <AlertTriangle className="mx-auto mb-4 h-10 w-10 text-destructive" />
-          <h1 className="font-heading text-2xl font-semibold text-foreground">{t("auth_confirm.invalid_title")}</h1>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            {error.includes("expired")
-              ? t("auth_confirm.expired_body")
-              : error}
-          </p>
+          <MailCheck className="mx-auto mb-4 h-10 w-10 text-primary" />
+          <h1 className="font-heading text-2xl font-semibold text-foreground">{t("auth_confirm.used_title")}</h1>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{t("auth_confirm.used_body")}</p>
           <div className="mt-6 flex flex-col gap-3">
+            <Button asChild><Link to="/login">{t("auth_confirm.used_login")}</Link></Button>
             {!resent && (
-              <Button onClick={handleResend} disabled={resending} className="gap-2">
+              <Button variant="outline" onClick={handleResend} disabled={resending} className="gap-2">
                 <RefreshCw className={`h-4 w-4 ${resending ? "animate-spin" : ""}`} />
                 {t("auth_confirm.resend_cta")}
               </Button>
@@ -181,9 +186,6 @@ const AuthConfirm = () => {
             {resent && (
               <p className="text-sm text-primary font-medium">{t("auth_confirm.resend_success_inline")}</p>
             )}
-            <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground">
-              {t("auth_confirm.back_to_login")}
-            </Link>
           </div>
         </div>
       </div>

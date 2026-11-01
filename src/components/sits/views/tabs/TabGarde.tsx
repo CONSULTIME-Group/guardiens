@@ -110,7 +110,7 @@ const TabGarde = ({
 
       {!hasOwnerMessage && !hasRoutine && (
         <p className="text-sm text-muted-foreground italic text-center py-4">
-          {displayOwnerName} n'a pas encore détaillé le déroulé de la garde.
+          Le déroulé de la garde se précise en échangeant avec {displayOwnerName}.
         </p>
       )}
 

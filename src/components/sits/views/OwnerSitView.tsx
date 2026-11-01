@@ -1180,8 +1180,9 @@ const OwnerSitView = ({
             )}
             {sit.accepting_applications && sit.max_applications && !isCapReached(sit.max_applications, internalAppCount) && (
               <p className="text-xs text-muted-foreground mb-3">
-                {internalAppCount}/{sit.max_applications} candidature
-                {sit.max_applications > 1 ? "s" : ""} reçue{internalAppCount > 1 ? "s" : ""}
+                {internalAppCount === 0
+                  ? `Jusqu'à ${sit.max_applications} candidature${sit.max_applications > 1 ? "s" : ""} possible${sit.max_applications > 1 ? "s" : ""}`
+                  : `${internalAppCount} candidature${internalAppCount > 1 ? "s" : ""} reçue${internalAppCount > 1 ? "s" : ""} sur ${sit.max_applications} possible${sit.max_applications > 1 ? "s" : ""}`}
               </p>
             )}
             <ApplicationsList

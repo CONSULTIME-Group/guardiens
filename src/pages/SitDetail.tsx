@@ -9,7 +9,7 @@
  * Le détail des comportements vit dans les sous-vues.
  */
 import { Suspense, useState, useEffect, useCallback, useRef } from "react";
-import { useParams, Navigate, useSearchParams } from "react-router-dom";
+import { useParams, Link, Navigate, useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,23 +32,36 @@ import { backfillOwnerGalleryDimensions } from "@/lib/backfillGalleryDimensions"
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 import { trackEvent } from "@/lib/analytics";
 import type { SitData } from "@/components/sits/views/types";
-import { useToast } from "@/hooks/use-toast";
 import { OWN_SIT_COLUMNS, ownSitLookupColumn } from "@/lib/ownSitAccess";
 import { markMilestone } from "@/lib/perfMarks";
 
 /**
- * Cible de notification disparue : au lieu d'une page introuvable, on renvoie
- * vers la liste des annonces avec un message explicite.
+ * Cible disparue (annonce retirée ou supprimée, souvent ouverte depuis une
+ * notification « Nouvelle annonce près de chez vous »). Lot C1 (01/11/2026) :
+ * on reste sur une page qui dit ce qui s'est passé et propose les annonces
+ * proches, au lieu de renvoyer vers « Mes annonces » de l'espace actif.
  */
 const MissingSitRedirect = () => {
-  const { toast } = useToast();
   useEffect(() => {
-    toast({
-      title: "Cette annonce n'est plus consultable",
-      description: "Elle a été retirée ou annulée. Voici vos annonces.",
-    });
-  }, [toast]);
-  return <Navigate to="/sits" replace />;
+    void trackEvent("sit_missing_viewed", { source: "/sits/:id" });
+  }, []);
+  return (
+    <main className="mx-auto max-w-md px-6 py-16 text-center space-y-4">
+      <Head><meta name="robots" content="noindex, nofollow" /></Head>
+      <h1 className="font-heading text-2xl font-semibold text-foreground">Cette annonce a été retirée</h1>
+      <p className="text-sm leading-relaxed text-muted-foreground">
+        Son propriétaire l'a retirée de Guardiens. D'autres maisons attendent un gardien près de chez vous.
+      </p>
+      <div className="flex flex-col items-center gap-3 pt-2">
+        <Link to="/recherche" className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+          Voir les annonces près de chez vous
+        </Link>
+        <Link to="/sits" className="inline-flex min-h-[44px] items-center text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground">
+          Mes annonces
+        </Link>
+      </div>
+    </main>
+  );
 };
 
 /**

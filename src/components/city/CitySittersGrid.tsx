@@ -262,9 +262,9 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
             <ShieldCheck className="h-6 w-6 text-primary shrink-0" />
             <p className="text-sm text-foreground">
               {hasResidents
-                ? `Échangez avec un gardien de ${city} en quelques minutes.`
+                ? `Échangez avec un gardien de ${city}.`
                 : nearby.length > 0
-                  ? `Échangez avec un gardien qui intervient à ${city} en quelques minutes.`
+                  ? `Échangez avec un gardien qui intervient à ${city}.`
                   : `Devenez gardien à ${city} et accédez aux annonces près de chez vous.`}
             </p>
           </div>

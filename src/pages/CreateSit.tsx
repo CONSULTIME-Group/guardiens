@@ -3,7 +3,7 @@ import { clearPublishIntent } from "@/lib/postOnboardingIntent";
 import { useState, useEffect, useRef, useCallback, type MouseEvent as ReactMouseEvent } from "react";
 import ExpectationSuggestions from "@/components/sits/create/ExpectationSuggestions";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { readFormPrefill, readPublishVia } from "@/lib/formPrefill";
 import { supabase } from "@/integrations/supabase/client";
 import { petSpeciesLabelLower } from "@/lib/petLabels";
@@ -443,6 +443,7 @@ const CreateSit = () => {
   };
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const fromSitId = searchParams.get("from");
   const republishMode = (searchParams.get("mode") as "copy" | "adapt" | null) || null;
@@ -2040,10 +2041,25 @@ const CreateSit = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preflightBlocked, preflightSignature]);
 
+  // Lot C1 (01/11/2026) : un compte arrivée v2 à qui il manque prénom, commune
+  // ou logement reprend « Faisons connaissance » (P1) au lieu de l'ancien écran
+  // de mise en route, puis revient ici. Une seule fois par visite.
+  const arrivalRedirectedRef = useRef(false);
+  const arrivalShouldResumeP1 = arrivalV2Account && preflightBlocked
+    && (setupState.missingIds.includes("identity") || setupState.missingIds.includes("property"));
+  useEffect(() => {
+    if (!arrivalShouldResumeP1 || arrivalRedirectedRef.current) return;
+    arrivalRedirectedRef.current = true;
+    const back = `${location.pathname}${location.search}`;
+    void trackEvent("arrival_p1_resumed_from_create", { source: "/sits/create", metadata: { missing: setupState.missingIds } });
+    navigate(`/arrivee/vous?next=${encodeURIComponent(back)}`, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [arrivalShouldResumeP1]);
+
   // Écran de mise en route : on y entre dès qu'un prérequis manque au chargement.
   useEffect(() => {
-    if (preflightBlocked) setSetupEntered(true);
-  }, [preflightBlocked]);
+    if (preflightBlocked && !arrivalShouldResumeP1) setSetupEntered(true);
+  }, [preflightBlocked, arrivalShouldResumeP1]);
 
   const showSetup = setupState.showSetup;
   // Valeur courante lisible depuis le nettoyage d'effet, pour ne pas émettre

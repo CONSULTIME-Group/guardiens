@@ -35,6 +35,7 @@ export type EventType =
   | "signup_role_applied"
   | "arrival_step_viewed"            // Lot 1 arrivée v2 (step C1..P4)
   | "arrival_step_completed"
+  | "arrival_p1_resumed_from_create" // Lot C1 : compte v2 incomplet renvoyé de /sits/create vers P1
   | "signup_mailbox_opened"          // C3 : bouton messagerie (provider)
   | "arrival_owner_period_selected"  // P2 (periode)
   | "arrival_owner_also_selected"    // P4 (garder, coup_de_main)
@@ -76,6 +77,7 @@ export type EventType =
   | "active_role_switched"              // Lot NAV-V1 : passage d'un espace à l'autre (from, to, source)
   | "sits_create_location_chosen"       // Lot PREF1 : lieu de la garde choisi à l'étape 1 (location)
   | "sits_create_next_blocked"          // Lot PREF1 : « Suivant » refusé, champs manquants (step, fields)
+  | "sit_missing_viewed"               // Lot C1 : annonce retirée ouverte (souvent depuis une notification)
   | "sits_create_setup_sitter_exit"     // Lot NAV-V1 : lien « annonces de garde » depuis l'écran préalable (role)
   | "cta_aid_clicked"
   | "cta_projet_clicked"

@@ -186,7 +186,7 @@ exports[`Owner Dashboard — visual snapshots > MissionsTabsCard > matches snaps
             <p
               class="font-heading text-sm font-semibold text-foreground leading-snug"
             >
-              1. Publiez votre besoin en 1 minute
+              1. Publiez votre besoin en une phrase
             </p>
             <p
               class="text-xs text-foreground/70 leading-relaxed"
@@ -578,7 +578,7 @@ exports[`Owner Dashboard — visual snapshots > MissionsTabsCard > matches snaps
             <p
               class="font-heading text-sm font-semibold text-foreground leading-snug"
             >
-              1. Publiez votre besoin en 1 minute
+              1. Publiez votre besoin en une phrase
             </p>
             <p
               class="text-xs text-foreground/70 leading-relaxed"

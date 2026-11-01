@@ -8,8 +8,8 @@ const SitFooterReassurance = () => (
       Écusson « Identité vérifiée » et avis croisés après chaque garde.
     </p>
     <p className="text-xs text-muted-foreground mt-1">
-      Le réseau de gardiens d'urgence est à venir : il pourra relayer le
-      gardien titulaire en cas d'imprévu.
+      Vous échangez avant de vous engager, et vous vous rencontrez si vous le
+      souhaitez.
     </p>
   </div>
 );

@@ -60,7 +60,9 @@ describe("gardien d'urgence au futur", () => {
     expect(fr.sit_detail.why_3).toMatch(/à venir/);
     expect(read("src/pages/DepartmentPage.tsx")).toMatch(/gardien d'urgence<\/Link> est à venir/);
     expect(read("src/pages/Observatoire.tsx")).toMatch(/<strong>Gardien d'Urgence<\/strong> est à venir/);
-    expect(read("src/components/sits/views/SitFooterReassurance.tsx")).toMatch(/est à venir/);
+    // Lot C1 (01/11/2026) : le pied de fiche ne parle plus du gardien d'urgence
+    // (promesse future retirée) ; la règle « aucun présent » reste vérifiée plus haut.
+    expect(read("src/components/sits/views/SitFooterReassurance.tsx")).not.toMatch(/urgence/i);
   });
 
   it("meta de /gardien-urgence : arrive bientôt", () => {
