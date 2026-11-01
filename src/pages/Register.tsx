@@ -733,7 +733,7 @@ const Register = () => {
   <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
   {v2 && (
    <Suspense fallback={null}><ArrivalC2Header
-    recap={entraideIntent ? t("arrival.c2.entraide_recap") : selectedRole === "owner" ? t("arrival.c1.owner_title") : selectedRole === "sitter" ? t("arrival.c1.sitter_title") : (roles.find((r) => r.value === selectedRole)?.label ?? "")}
+    recap={entraideIntent ? "arrival.c2.entraide_recap" : selectedRole === "owner" ? "arrival.c1.owner_title" : selectedRole === "sitter" ? "arrival.c1.sitter_title" : (roles.find((r) => r.value === selectedRole)?.label ?? "")}
     onModify={() => setStep(1)}
    /></Suspense>
   )}
