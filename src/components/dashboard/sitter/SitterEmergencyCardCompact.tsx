@@ -96,7 +96,7 @@ const SitterEmergencyCardCompact = ({
           Devenez gardien d'urgence
         </p>
         <p className="text-xs text-muted-foreground truncate">
-          Vous remplissez les conditions. Activez votre profil en une minute.
+          Vous remplissez les conditions. Votre profil s'active depuis votre espace.
         </p>
       </div>
       <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />

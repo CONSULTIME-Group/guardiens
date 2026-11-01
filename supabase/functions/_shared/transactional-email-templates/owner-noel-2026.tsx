@@ -309,7 +309,7 @@ const Email = (props: OwnerNoelProps) => {
             <Eyebrow label="NOËL 2026" />
             <Text style={h1}>Partez l'esprit léger, quelqu'un du coin garde la maison.</Text>
             <Text style={text}>
-              {name ? `Bonjour ${name}, ` : 'Bonjour, '}les départs de fin d'année se décident maintenant. Votre annonce est en ligne en quelques minutes, et les gardiens à proximité vous écrivent directement.
+              {name ? `Bonjour ${name}, ` : 'Bonjour, '}les départs de fin d'année se décident maintenant. Publiez votre annonce, et les gardiens à proximité vous écrivent directement.
             </Text>
           </Section>
 

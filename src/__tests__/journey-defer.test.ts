@@ -44,14 +44,14 @@ describe('journeyIsOwner', () => {
 
 describe('onboardingJ1Subject', () => {
   it('objet propriétaire', () => {
-    expect(onboardingJ1Subject({ isOwner: true })).toBe('Votre première annonce en 2 minutes, Guardiens');
+    expect(onboardingJ1Subject({ isOwner: true })).toBe('Votre première annonce, les gardiens à proximité vous écrivent');
   });
   it('objet gardien', () => {
     expect(onboardingJ1Subject({ isOwner: false })).toBe(
-      'Bienvenue sur Guardiens, votre profil de gardien en quelques minutes',
+      'Bienvenue sur Guardiens, votre profil de gardien vous attend',
     );
     expect(onboardingJ1Subject({})).toBe(
-      'Bienvenue sur Guardiens, votre profil de gardien en quelques minutes',
+      'Bienvenue sur Guardiens, votre profil de gardien vous attend',
     );
   });
 });

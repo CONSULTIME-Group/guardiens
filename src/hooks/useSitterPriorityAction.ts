@@ -125,7 +125,7 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
         variant: "identity",
         eyebrow: "Confiance",
         title: "Vérifiez votre identité pour être retenu plus souvent.",
-        description: "L'écusson « Identité vérifiée » rassure les propriétaires au moment de choisir. Une minute suffit.",
+        description: "L'écusson « Identité vérifiée » rassure les propriétaires au moment de choisir.",
         ctaLabel: "Vérifier mon identité",
         ctaTo: "/settings?section=security&src=sitter_priority_action",
         urgency: "medium",

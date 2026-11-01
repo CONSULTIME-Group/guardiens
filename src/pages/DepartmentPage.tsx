@@ -477,7 +477,7 @@ const DepartmentPage = () => {
  </Button>
  </Link>
  <p className="text-xs text-muted-foreground mt-3">
- Inscription en 2 minutes · Une adresse email suffit
+ Inscription par email · Guardiens est gratuit
  </p>
  </section>
 

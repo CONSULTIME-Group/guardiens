@@ -91,7 +91,7 @@ const PhotoJourneyDialog = ({ open, onOpenChange, userId, startPosition = 0, onP
       <DialogContent className="max-w-lg">
         {phase === "intro" && (
           <div className="space-y-5">
-            <DialogTitle className="font-heading text-2xl">Cinq photos, cinq minutes</DialogTitle>
+            <DialogTitle className="font-heading text-2xl">Cinq photos de votre maison</DialogTitle>
             <DialogDescription className="text-base leading-relaxed text-foreground">
               {PHOTO_JOURNEY_INTRO}
             </DialogDescription>

@@ -37,7 +37,7 @@ const SitterEncourageCandidatureEmail = ({ firstName, nearbySits, primarySitUrl 
         <NearbySitsBlock sits={nearbySits} />
 
         <Text style={text}>
-          Une première candidature se prépare en quelques minutes. Trois choses font la différence&nbsp;:
+          Une première candidature se prépare simplement. Trois choses font la différence&nbsp;:
         </Text>
         <Section style={card}>
           <Text style={cardLine}>appeler les animaux par leur nom, tel qu'il figure dans l'annonce&nbsp;;</Text>

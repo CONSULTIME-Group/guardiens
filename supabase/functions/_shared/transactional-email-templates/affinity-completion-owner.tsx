@@ -46,7 +46,7 @@ const AffinityCompletionOwnerEmail = ({ firstName }: Props) => {
           </Text>
 
           <Text style={text}>
-            Une minute suffit depuis la section «&nbsp;Règles &amp; attentes&nbsp;» de votre profil.
+            Tout se complète depuis la section «&nbsp;Règles &amp; attentes&nbsp;» de votre profil.
           </Text>
 
           <Section style={ctaSection}>

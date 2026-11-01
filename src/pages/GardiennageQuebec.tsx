@@ -173,7 +173,7 @@ export default function GardiennageQuebec() {
             <CardContent className="p-6 space-y-4">
               <h2 className="font-heading text-xl font-semibold text-foreground m-0">Votre maison, vos animaux, une personne de confiance</h2>
               <p className="text-muted-foreground m-0">
-                Publiez votre annonce en quelques minutes, ou créez votre profil de gardien. Guardiens est gratuit.
+                Publiez votre annonce, ou créez votre profil de gardien. Guardiens est gratuit.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button asChild>

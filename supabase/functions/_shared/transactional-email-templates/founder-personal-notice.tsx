@@ -116,7 +116,7 @@ const FounderPersonalNoticeEmail = ({
           Guardiens a ouvert il y a trois mois. Vous êtes parmi les premiers inscrits, et c'est pour ça que je vous écris moi-même.
         </Text>
         <Text style={text} className="em-text">
-          Trois choses dans cet email. Les gardes qui cherchent encore quelqu'un, un service que vous pouvez me rendre en deux minutes, et une demande.
+          Trois choses dans cet email. Les gardes qui cherchent encore quelqu'un, un service que vous pouvez me rendre, et une demande.
         </Text>
 
         <SectionHeader label="CE QUI EST OUVERT" />
@@ -143,7 +143,7 @@ const FounderPersonalNoticeEmail = ({
             <tr>
               <td style={darkCell} className="em-card">
                 <Text style={darkKicker}>UN COUP DE MAIN, DANS L'AUTRE SENS</Text>
-                <Text style={darkTitle} className="em-card-title">Deux minutes pour nous faire connaître</Text>
+                <Text style={darkTitle} className="em-card-title">Un coup de pouce pour nous faire connaître</Text>
                 <Text style={darkText} className="em-card-line">
                   Un avis Google, c'est ce qui fait qu'on remonte quand quelqu'un cherche une garde près de chez lui. Plus de gens qui nous trouvent, c'est plus de maisons à garder pour vous. C'est le levier le plus direct que vous ayez pour faire grossir la plateforme.
                 </Text>

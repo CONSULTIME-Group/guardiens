@@ -61,7 +61,7 @@ export function v3Intro(p: NoelV3Props): string {
     return `${greeting(p)}nous l'avons préparée avec ce que vous avez déjà renseigné : ${preparedWith(p)}. Vous relisez, vous ajustez les dates si besoin, et vous publiez.`
   }
   if (v === 'photo') {
-    return `${greeting(p)}votre annonce reprend déjà ${alreadyThere(p)}. Pour Noël, il reste une photo : elle se prend depuis votre téléphone, en une minute.`
+    return `${greeting(p)}votre annonce reprend déjà ${alreadyThere(p)}. Pour Noël, il reste une photo : elle se prend depuis votre téléphone.`
   }
   return `${greeting(p)}dites-nous où vous vivez, qui reste à la maison et quand vous partez. Nous préparons votre annonce, vous ajoutez une photo, et les gardiens à proximité la découvrent.`
 }
@@ -142,7 +142,7 @@ const PlaceChoices = ({ p }: { p: NoelV3Props }) => (
     {V3_PLACE_CHOICES.map((c) => (
       <Button key={c.type} href={pageUrl(p, `&type=${c.type}`)} style={placeBtn}>{c.label}</Button>
     ))}
-    <Text style={{ ...sub, margin: '10px 0 0' }}>Ensuite : qui reste à la maison, vos dates, une photo. Trois minutes depuis votre téléphone.</Text>
+    <Text style={{ ...sub, margin: '10px 0 0' }}>Ensuite : qui reste à la maison, vos dates, une photo. Tout se fait depuis votre téléphone.</Text>
   </Section>
 )
 

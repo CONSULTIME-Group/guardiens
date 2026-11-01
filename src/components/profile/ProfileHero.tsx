@@ -89,9 +89,13 @@ export function heroFactLine(input: {
 }
 
 const ProfileHero = (p: ProfileHeroProps) => {
-  const place = [p.city, p.departmentName].filter(Boolean).join(", ");
+  // Lot CP1 : la commune se lit comme le lieu de vie, la zone de garde vient de
+  // « Peut se déplacer ». Linda (21/10) lisait « Garde de maisons en
+  // Loire-Atlantique » comme une limite à son département.
+  const placeParts = [p.city, p.departmentName].filter(Boolean).join(", ");
+  const place = placeParts ? (p.city ? `Habite à ${placeParts}` : placeParts) : "";
   const eyebrow = p.facet === "sitter"
-    ? (p.departmentName ? `Garde de maisons en ${p.departmentName}` : "Garde de maisons")
+    ? "Garde de maisons et d'animaux"
     : p.facet === "owner" ? "Fait garder sa maison" : "Entraide";
   const facts = heroFactLine(p);
   const mobility = (p.mobilityLabels ?? []).filter(Boolean);

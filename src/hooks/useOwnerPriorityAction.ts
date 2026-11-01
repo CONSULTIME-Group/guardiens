@@ -180,7 +180,7 @@ export function useOwnerPriorityAction(input: Input): OwnerPriorityAction {
         variant: "publish",
         eyebrow: "Première étape",
         title: "Publiez votre première annonce pour trouver un gardien.",
-        description: "Quelques minutes suffisent pour décrire votre maison et vos animaux.",
+        description: "Décrivez votre maison et vos animaux, les gardiens à proximité vous écrivent.",
         ctaLabel: "Publier une annonce",
         ctaTo: "/sits/create",
         urgency: "high",

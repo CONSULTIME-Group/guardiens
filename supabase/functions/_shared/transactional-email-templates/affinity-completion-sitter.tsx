@@ -46,7 +46,7 @@ const AffinityCompletionSitterEmail = ({ firstName }: Props) => {
           </Text>
 
           <Text style={text}>
-            Trois minutes suffisent depuis la section «&nbsp;Profil gardien&nbsp;».
+            Tout se complète depuis la section «&nbsp;Profil gardien&nbsp;».
           </Text>
 
           <Section style={ctaSection}>

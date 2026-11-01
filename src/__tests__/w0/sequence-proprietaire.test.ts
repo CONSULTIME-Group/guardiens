@@ -183,7 +183,7 @@ describe("W0.2 une seule séquence propriétaire", () => {
 // Point 3 ---------------------------------------------------------------------
 describe("W0.3 gabarits J+3, J+21 et textes affirmatifs", () => {
   it("J+3 : préentête et introduction accordées au nombre de cartes", () => {
-    expect(j3Preheader(0)).toBe("Votre première annonce se publie en quelques minutes.");
+    expect(j3Preheader(0)).toBe("Votre première annonce se prépare depuis votre téléphone.");
     expect(j3Preheader(1)).toBe("En voici un, à proximité de chez vous.");
     expect(j3Preheader(2)).toBe("En voici deux, à proximité de chez vous.");
     expect(j3Preheader(3)).toBe("En voici trois, à proximité de chez vous.");

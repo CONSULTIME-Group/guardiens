@@ -52,8 +52,8 @@ const OnboardingJ1Email = ({
       <BrandedHead />
       <Preview>
         {isOwner
-          ? `Votre annonce peut être publiée en 2 minutes${locationLabel}`
-          : `Votre profil ${SITE_NAME} vous attend, 5 minutes suffisent`}
+          ? `Votre annonce est prête à être publiée${locationLabel}`
+          : `Votre profil ${SITE_NAME} vous attend`}
       </Preview>
       <Body style={main}>
         <Container style={container}>
@@ -63,8 +63,8 @@ const OnboardingJ1Email = ({
           {isOwner ? (
             <>
               <Text style={text}>
-                Bienvenue sur {SITE_NAME}. Publier votre première annonce prend
-                deux minutes. Guardiens est gratuit.
+                Bienvenue sur {SITE_NAME}. Vos dates, vos animaux, une photo :
+                votre première annonce est en ligne. Guardiens est gratuit.
               </Text>
 
               {nearbyLabel && (
@@ -112,7 +112,7 @@ const OnboardingJ1Email = ({
 
               <Section style={ctaSection}>
                 <Button style={button} href={`${SITE_URL}/dashboard?intent=draft_from_prompt&${utm}`}>
-                  Publier mon annonce en 2 minutes
+                  Publier mon annonce
                 </Button>
               </Section>
 

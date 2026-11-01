@@ -63,7 +63,7 @@ describe('lot N2, vocabulaire des gabarits réécrits', () => {
 
   it('les phrases clés sont recopiées à l\'identique', () => {
     expect(read('sitter-encourage-candidature')).toContain(
-      'Une première candidature se prépare en quelques minutes',
+      'Une première candidature se prépare simplement',
     );
     expect(read('dormant-sitter-nudge')).toContain('Nous avons pensé à vous.');
     expect(read('availability-nudge')).toContain('Votre profil peut faire la différence.');

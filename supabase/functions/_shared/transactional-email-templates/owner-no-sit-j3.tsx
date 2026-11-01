@@ -91,7 +91,7 @@ const Email = ({
             </Text>
           ) : (
             <Text style={text}>
-              Bienvenue sur Guardiens. Votre première annonce se publie en quelques minutes.
+              Bienvenue sur Guardiens. Votre première annonce se prépare depuis votre téléphone.
             </Text>
           )}
 
@@ -135,7 +135,7 @@ export const template = {
   subject: (d: Record<string, any>) => {
     const n = typeof d?.nearby_sitters_count === 'number' ? d.nearby_sitters_count : 0
     const cityLabel = d?.city || 'chez vous'
-    if (n === 0) return 'Votre première annonce, en quelques minutes'
+    if (n === 0) return 'Votre première annonce, depuis votre téléphone'
     if (n === 1) return `Un gardien à proximité de ${cityLabel}`
     return `${n} gardiens à proximité de ${cityLabel}`
   },

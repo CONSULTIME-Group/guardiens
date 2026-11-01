@@ -45,7 +45,7 @@ const RelanceProfilIncompletEmail = ({ firstName }: RelanceProfilIncompletProps)
           </Section>
 
           <Text style={text}>
-            Comptez trois minutes. Une question&nbsp;? Répondez à cet email, nous lisons chaque
+            Une question&nbsp;? Répondez à cet email, nous lisons chaque
             message.
           </Text>
 
