@@ -90,7 +90,7 @@ describe("sitterNextStep", () => {
 
   it("profil complet mais < 100 : invitation à compléter avec progression", () => {
     const step = sitterNextStep({ ...base, profileCompletion: 60 });
-    expect(step?.title).toBe("Votre profil gardien se complète en quelques minutes.");
+    expect(step?.title).toBe("Votre profil gardien se complète ici, à votre rythme.");
     expect(step?.progressPct).toBe(60);
   });
 
@@ -126,7 +126,7 @@ describe("ownerNextStep", () => {
   it("propose de compléter le profil sous 100 %, avec progression", () => {
     const step = ownerNextStep({ profileCompletion: 40 });
     expect(step?.eyebrow).toBe("Votre prochain pas");
-    expect(step?.title).toBe("Votre profil propriétaire se complète en quelques minutes.");
+    expect(step?.title).toBe("Votre profil propriétaire se complète ici, à votre rythme.");
     expect(step?.ctaLabel).toBe("Compléter mon profil");
     expect(step?.ctaTo).toBe("/owner-profile");
     expect(step?.progressPct).toBe(40);
@@ -150,7 +150,7 @@ describe("ownerNextStep", () => {
 
   it("sous 90 %, l'invitation générique est conservée", () => {
     expect(ownerNextStep({ profileCompletion: 60 })?.title).toBe(
-      "Votre profil propriétaire se complète en quelques minutes.",
+      "Votre profil propriétaire se complète ici, à votre rythme.",
     );
   });
 });

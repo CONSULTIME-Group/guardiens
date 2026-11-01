@@ -111,7 +111,7 @@ export default function SitDraftFromPrompt({ secondary = false, demoted = false,
       } else {
         toast({
           title: "Brouillon prêt",
-          description: "Vous pouvez relire et publier en 2 minutes.",
+          description: "Vous la relisez, puis vous la publiez.",
         });
       }
       navigate(`/sits/create?draftId=${data.draftId}&source=ai_prompt`);

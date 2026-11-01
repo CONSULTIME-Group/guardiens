@@ -372,8 +372,8 @@ const InviteSittersBlock = ({
             )}
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            Ne laissez pas le hasard faire tout le travail. Envoyez votre annonce directement à des gardiens :
-            vos favoris, par prénom/ville, par département, ou via la recherche avancée.
+            Proposez votre annonce directement à des gardiens : vos favoris, par prénom ou ville,
+            par département, ou par la recherche avancée.
           </p>
           {(sentCount > 0 || appliedCount > 0) && (
             <p className="text-xs text-primary/80 mt-2 font-medium">
@@ -390,7 +390,7 @@ const InviteSittersBlock = ({
                 className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 <Crosshair className="h-3.5 w-3.5" />
-                Inviter les {Math.min(20, remainingQuota)} gardiens disponibles les plus proches
+                Inviter les {Math.min(20, remainingQuota)} gardiens à proximité
               </Button>
               <p className="text-[11px] text-muted-foreground mt-1">
                 Envoi groupé en un clic, autour de {sitCity || "votre ville"}.
@@ -415,7 +415,7 @@ const InviteSittersBlock = ({
             <div className="rounded-xl border border-dashed border-border bg-card p-6 text-center">
               <Heart className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">
-                Vous n'avez pas encore de gardiens en favoris.
+                Vos gardiens favoris se rangent ici.
               </p>
               <p className="text-xs text-muted-foreground mt-1 mb-3">
                 En parcourant les profils, cliquez sur le cœur pour sauvegarder les gardiens qui vous plaisent.

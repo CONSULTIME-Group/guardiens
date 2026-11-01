@@ -245,7 +245,7 @@ const BulkInviteNearestDialog = ({
 
   const subtitle = useMemo(() => {
     if (cap === 0) return "Quota atteint (20 invitations / 24 h).";
-    if (loading) return "Recherche des gardiens disponibles les plus proches…";
+    if (loading) return "Recherche des gardiens à proximité…";
     if (candidates.length === 0) return "Aucun gardien disponible trouvé à proximité.";
     const max = candidates.reduce(
       (m, c) => (c.distance_km !== null && c.distance_km > m ? c.distance_km : m),
@@ -263,7 +263,7 @@ const BulkInviteNearestDialog = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Crosshair className="h-5 w-5 text-primary" />
-            Inviter les {cap || targetCount} gardiens disponibles les plus proches
+            Inviter les {cap || targetCount} gardiens à proximité
           </DialogTitle>
           <DialogDescription>{subtitle}</DialogDescription>
         </DialogHeader>

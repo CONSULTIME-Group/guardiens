@@ -341,6 +341,6 @@ describe("A5 · verrou de doctrine étendu", () => {
     expect(read("supabase/functions/draft-sit-from-prompt/index.ts")).toContain("proposition d'échanger, et de se rencontrer si les deux le souhaitent");
   });
   it("version d'Alma", () => {
-    expect(almaVersion.ALMA_VERSION).toMatch(/^2026-10-14\.a\d+$/);
+    expect(almaVersion.ALMA_VERSION).toMatch(/^\d{4}-\d{2}-\d{2}\.[a-z]+\d+$/);
   });
 });

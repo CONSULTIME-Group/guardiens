@@ -228,7 +228,7 @@ export const sitterNextStep = (input: SitterNextStepInput): RailNextStep | null 
     }
     return {
       eyebrow: "Votre prochain pas",
-      title: "Votre profil gardien se complète en quelques minutes.",
+      title: "Votre profil gardien se complète ici, à votre rythme.",
       phrase: "Chaque détail aide une maison à vous choisir.",
       ctaLabel: "Compléter mon profil",
       ctaTo: deepLink,
@@ -265,7 +265,7 @@ export const ownerNextStep = (input: OwnerNextStepInput): RailNextStep | null =>
   }
   return {
     eyebrow: "Votre prochain pas",
-    title: "Votre profil propriétaire se complète en quelques minutes.",
+    title: "Votre profil propriétaire se complète ici, à votre rythme.",
     phrase: "Chaque détail aide un gardien à se projeter chez vous.",
     ctaLabel: "Compléter mon profil",
     ctaTo: deepLink,

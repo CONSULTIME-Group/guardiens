@@ -42,7 +42,7 @@ const ExchangeHowItWorks = ({
       ? [
           {
             icon: HandHeart,
-            title: "1. Publiez votre besoin en 1 minute",
+            title: "1. Publiez votre besoin en une phrase",
             text: "Une visite pour votre chat, un coup de main au jardin, une course urgente : décrivez, ajoutez une photo, publiez.",
           },
           {

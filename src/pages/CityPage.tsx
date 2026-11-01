@@ -651,7 +651,7 @@ const CityPage = () => {
  {revised ? `Organiser votre garde à ${cityData.name}` : "Prêt à partir l'esprit libre ?"}
  </h2>
  <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
- {revised ? "Décrivez votre logement, vos animaux et vos dates, puis échangez avec les gardiens qui postulent." : "Publiez votre annonce en 5 minutes. Guardiens est gratuit."}
+ {revised ? "Décrivez votre logement, vos animaux et vos dates, puis échangez avec les gardiens qui postulent." : "Publiez votre annonce : une photo et vos dates suffisent. Guardiens est gratuit."}
  </p>
  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
  <Link to="/inscription?role=owner">

@@ -55,7 +55,7 @@ const SearchSeoFooter = () => (
           Garde d'animaux à domicile, de maison et de jardin, ville par ville
         </h2>
         <p className="text-sm md:text-base text-muted-foreground mb-6 max-w-3xl">
-          Découvrez les annonces et les gardiens disponibles dans les villes
+          Découvrez les annonces et les gardiens inscrits dans les villes
           les plus actives de la communauté. La plateforme couvre toute la
           France.
         </p>
