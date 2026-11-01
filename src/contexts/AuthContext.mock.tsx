@@ -5,6 +5,7 @@
  */
 import React, { createContext, useContext } from "react";
 import { SCENARIOS, type Scenario, type ScenarioId } from "../../tests/visual/fixtures";
+import type { RoleSwitchSource } from "@/lib/roleSwitchSource";
 
 type Role = "owner" | "sitter" | "both";
 type ActiveRole = "owner" | "sitter";
@@ -29,8 +30,8 @@ interface AuthContextType {
   activeRole: ActiveRole;
   isAuthenticated: boolean;
   loading: boolean;
-  switchRole: (role: ActiveRole, source?: string) => void;
-  setActiveRole: (role: ActiveRole) => void;
+  switchRole: (role: ActiveRole, source?: RoleSwitchSource) => void;
+  setActiveRole: (role: ActiveRole, source?: RoleSwitchSource) => void;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, role: Role) => Promise<any>;
   logout: () => void;

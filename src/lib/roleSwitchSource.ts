@@ -3,6 +3,7 @@ export type RoleSwitchSource =
   | "menu_lateral"
   | "menu_plus"
   | "reglages"
+  | "retrait_espace"
   | "lien"
   | "rappel_candidatures"
   | "fiche_annonce"

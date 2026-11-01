@@ -114,7 +114,7 @@ const ActiveRolesSection = () => {
       }
 
       // Bascule l'activeRole sur le rôle restant pour éviter un état UI incohérent
-      switchRole(newRole as "owner" | "sitter", "reglages");
+      switchRole(newRole as "owner" | "sitter", "retrait_espace");
       await refreshProfile();
 
       toast.success(

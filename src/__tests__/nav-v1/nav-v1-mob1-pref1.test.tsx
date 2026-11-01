@@ -16,8 +16,8 @@ vi.mock("@/components/sits/create/InlinePhotoUpload", () => ({ default: () => nu
 
 describe("MOB1 · actions des photos visibles au toucher", () => {
   it("révélées au survol seulement sur un écran à souris", () => {
-    expect(HOVER_REVEAL).toMatch(/\[@media\(hover:hover\)\]:opacity-0/);
-    expect(HOVER_REVEAL).toMatch(/\[@media\(hover:hover\)\]:group-hover:opacity-100/);
+    expect(HOVER_REVEAL).toMatch(/\[@media\(hover:hover\)_and_\(pointer:fine\)\]:opacity-0/);
+    expect(HOVER_REVEAL).toMatch(/\[@media\(hover:hover\)_and_\(pointer:fine\)\]:group-hover:opacity-100/);
     expect(HOVER_REVEAL).toMatch(/group-focus-within:opacity-100/);
   });
 
@@ -45,6 +45,7 @@ describe("NAV-V1 · Alma lit l'intention exprimée", () => {
     "Je souhaite garder des logements et animaux",
     "Je veux faire du gardiennage",
     "je voudrais garder chez les autres",
+    "je veux faire du gardiennage pendant mes vacances",
   ])("intention gardien : « %s »", (q) => expect(expressedIntent(q)).toBe("sitter"));
 
   it.each([
@@ -53,7 +54,14 @@ describe("NAV-V1 · Alma lit l'intention exprimée", () => {
     "garder mes chats",
     "garde de mon chien en mon absence",
     "je cherche un gardiennage pour mon chien",
+    "je cherche un gardiennage pour notre chat",
+    "je cherche un gardiennage pour deux chats",
+    "je recherche un gardiennage pour la maison de mes parents",
   ])("intention propriétaire : « %s »", (q) => expect(expressedIntent(q)).toBe("owner"));
+
+  it("« pas la mienne » seul ne fait pas un gardien", () => {
+    expect(expressedIntent("mon annonce n'apparaît pas, je vois celles des voisins mais pas la mienne")).toBeNull();
+  });
 
   it("Alma sait où changer d'espace actif, sur téléphone et sur ordinateur", () => {
     const e = ALMA_SITE_KNOWLEDGE.find((x) => x.key === "mes_espaces")!;

@@ -52,7 +52,7 @@ describe("B-12, branchement dans SitterSitView", () => {
 
   it("la bascule passe par switchRole, comme ?espace=gardien", () => {
     expect(VIEW).toContain('{applySurface === "switch_space" && (');
-    expect(VIEW).toContain('switchRole("sitter")');
+    expect(VIEW).toMatch(/switchRole\("sitter"/);
     expect(VIEW).toContain("{SWITCH_TO_SITTER_LABEL}");
   });
 });

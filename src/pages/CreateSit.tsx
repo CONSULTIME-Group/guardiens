@@ -2555,7 +2555,7 @@ const CreateSit = () => {
             <div className="grid sm:grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => { setSitLocation("home"); void trackEvent("sits_create_location_chosen", { source: "/sits/create", metadata: { location: "home" } }); }}
+                onClick={() => { if (sitLocation !== "home") void trackEvent("sits_create_location_chosen", { source: "/sits/create", metadata: { location: "home" } }); setSitLocation("home"); }}
                 className={cn(
                   "text-left rounded-lg border p-3 transition-colors",
                   sitLocation === "home"
@@ -2568,7 +2568,7 @@ const CreateSit = () => {
               </button>
               <button
                 type="button"
-                onClick={() => { setSitLocation("away"); void trackEvent("sits_create_location_chosen", { source: "/sits/create", metadata: { location: "away" } }); }}
+                onClick={() => { if (sitLocation !== "away") void trackEvent("sits_create_location_chosen", { source: "/sits/create", metadata: { location: "away" } }); setSitLocation("away"); }}
                 className={cn(
                   "text-left rounded-lg border p-3 transition-colors",
                   sitLocation === "away"
