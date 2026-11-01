@@ -125,10 +125,10 @@ export async function loadFirstStep(userId: string): Promise<FirstStepData> {
 }
 
 /** Compteur des membres aux savoir-faire à partager dans un rayon (une seule lecture). */
-export async function helpersCounter(userId: string): Promise<{ count: (r: number) => Promise<number>; city: string }> {
+export async function helpersCounter(userId: string): Promise<{ count: (r: number) => Promise<number>; city: string; initials: (r: number) => string[] }> {
   const [{ data: me }, res] = await Promise.all([
     fetchMyProfile(userId),
-    supabase.from("public_profiles").select("id, latitude_approx, longitude_approx").eq("available_for_help", true)
+    supabase.from("public_profiles").select("id, first_name, latitude_approx, longitude_approx").eq("available_for_help", true)
       .not("skill_categories", "eq", "{}").order("id", { ascending: true }).limit(1000),
   ]);
   const p = (me ?? {}) as any;
@@ -138,5 +138,11 @@ export async function helpersCounter(userId: string): Promise<{ count: (r: numbe
     city: p.city || "",
     count: async (r: number) => !center ? 0 : list.filter((h) => h.id !== userId && h.latitude_approx != null && h.longitude_approx != null
       && haversineDistance(center, { lat: h.latitude_approx, lng: h.longitude_approx }) <= r).length,
+    // Lot E1-v2 : initiales des trois plus proches (jamais de photo ni de nom complet).
+    initials: (r: number) => !center ? [] : list
+      .filter((h) => h.id !== userId && h.latitude_approx != null && h.longitude_approx != null && (h.first_name ?? "").trim())
+      .map((h) => ({ h, d: haversineDistance(center, { lat: h.latitude_approx, lng: h.longitude_approx }) }))
+      .filter((x) => x.d <= r).sort((a, b) => a.d - b.d).slice(0, 3)
+      .map((x) => String(x.h.first_name).trim().charAt(0).toUpperCase()),
   };
 }

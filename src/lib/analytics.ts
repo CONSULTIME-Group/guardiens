@@ -38,6 +38,7 @@ export type EventType =
   | "arrival_p1_resumed_from_create" // Lot C1 : compte v2 incomplet renvoyé de /sits/create vers P1
   | "signup_mailbox_opened"          // C3 : bouton messagerie (provider)
   | "arrival_owner_period_selected"  // P2 (periode)
+  | "arrival_e1_idea_clicked"        // Lot E1-v2 : idée de demande touchée
   | "arrival_g5_need_clicked"        // Lot G-ENT2 : « Je peux » sur un besoin proche
   | "arrival_g5_offer_published"     // Lot G-ENT2 : proposition publiée (helps_with)
   | "arrival_g5_owner_mirror_clicked" // Lot G-ENT2 : « Faites garder votre maison »
