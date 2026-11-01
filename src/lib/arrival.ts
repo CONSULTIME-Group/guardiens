@@ -224,3 +224,52 @@ export function stepsToReach(score: number, missingPoints: number[], threshold: 
   }
   return n;
 }
+
+// ── G5, entraide (lot G-ENT2, 01/11/2026) ────────────────────────────────
+/** Rayon des besoins montrés au premier pas : celui des gardes. */
+export const FIRST_STEP_NEEDS_RADIUS_KM = 30;
+export const FIRST_STEP_NEEDS_MAX = 3;
+
+/** Catégories de besoin servies par chaque famille de savoir-faire du profil. */
+const SKILL_TO_MISSION: Record<string, string[]> = {
+  animaux: ["animals"],
+  jardin: ["garden"],
+  coups_de_main: ["house", "errand", "transport"],
+  competences: ["skills", "company"],
+};
+
+export function missionCategoriesFor(skillCategories: string[]): Set<string> {
+  return new Set(skillCategories.flatMap((k) => SKILL_TO_MISSION[k] ?? []));
+}
+
+export interface FirstStepNeed { id: string; distanceKm: number | null; category: string | null }
+
+/**
+ * Besoins ouverts dans le rayon : ceux qui correspondent aux choix de la
+ * personne d'abord, puis les plus proches. On trie, on n'élimine que la distance.
+ */
+export function pickNearbyNeeds<T extends FirstStepNeed>(needs: T[], skillCategories: string[],
+  radiusKm = FIRST_STEP_NEEDS_RADIUS_KM, max = FIRST_STEP_NEEDS_MAX): T[] {
+  const wanted = missionCategoriesFor(skillCategories);
+  const match = (n: T) => (n.category && wanted.has(n.category) ? 0 : 1);
+  return needs
+    .filter((n) => n.distanceKm != null && n.distanceKm <= radiusKm)
+    .sort((a, b) => match(a) - match(b) || (a.distanceKm as number) - (b.distanceKm as number))
+    .slice(0, max);
+}
+
+/** Phrase de proposition écrite d'après les savoir-faire choisis (200 caractères au plus). */
+export function helpOfferPhrase(competences: string[], max = 200): string {
+  const lead = "Je donne volontiers un coup de main près de chez moi";
+  const items: string[] = [];
+  for (const c of competences.map((x) => x.trim()).filter(Boolean)) {
+    const item = c.charAt(0).toLowerCase() + c.slice(1);
+    const next = [...items, item];
+    const text = `${lead} : ${next.length > 1 ? `${next.slice(0, -1).join(", ")} et ${next[next.length - 1]}` : next[0]}.`;
+    if (text.length > max) break;
+    items.push(item);
+  }
+  if (!items.length) return `${lead}.`;
+  const list = items.length > 1 ? `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}` : items[0];
+  return `${lead} : ${list}.`;
+}

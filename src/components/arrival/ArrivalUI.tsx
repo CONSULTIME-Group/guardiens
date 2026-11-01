@@ -73,15 +73,17 @@ function StepBar({ keys, current, ns }: { keys: string[]; current: string; ns: s
 
 export const OwnerStepBar = ({ current }: { current: OwnerStepKey }) => <StepBar keys={OWNER_STEPS} current={current} ns="steps" />;
 
-export function ArrivalShell({ header, children, stepBar, sitterStep }: {
+export function ArrivalShell({ header, children, stepBar, sitterStep, wide = false }: {
   header: string; children: ReactNode; stepBar?: OwnerStepKey; sitterStep?: { current: SitterStepKey; entraide?: boolean };
+  /** Lot G-ENT2 : largeur ordinateur de 1120 px (premier pas en deux colonnes). */
+  wide?: boolean;
 }) {
   return (
     <main className="arrival-root min-h-screen min-w-0">
-      <div className="mx-auto w-full max-w-md px-5 pb-16 pt-6 space-y-6">
+      <div className={`mx-auto w-full max-w-md px-5 pb-16 pt-6 space-y-6${wide ? " lg:max-w-[1120px]" : ""}`}>
         <p className="text-center text-sm text-muted-foreground">{header}</p>
         {stepBar && <OwnerStepBar current={stepBar} />}
-        {sitterStep && <StepBar keys={sitterStep.entraide ? ENTRAIDE_STEPS : SITTER_STEPS} current={sitterStep.current} ns="steps_sitter" />}
+        {sitterStep && <div className={wide ? "lg:max-w-[520px]" : undefined}><StepBar keys={sitterStep.entraide ? ENTRAIDE_STEPS : SITTER_STEPS} current={sitterStep.current} ns="steps_sitter" /></div>}
         {children}
       </div>
     </main>
