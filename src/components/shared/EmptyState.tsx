@@ -4,36 +4,36 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-/* ── Illustrations aquarelle narrative française ──
-   Scènes évocatrices de campagne, palette douce (sage, lavande, terre,
-   crème), peinture délicate qui se fond dans le fond crème de la page.
-   Chaque scène raconte l'intention de la page où elle apparaît.
+/* ── Illustrations des états vides ──
+   01/11/2026 : série d'aquarelles légères (src/assets/aquarelles), un sujet
+   explicite par état, fond papier détouré pour être peintes sur la page.
+   chat endormi (en cours, archives), boîte aux lettres (messages),
+   promenade (favoris gardiens), calendrier (gardes), lettre et bouquet
+   (candidatures), sac prêt à partir (première garde), marche et tasse
+   (historique calme).
 
-   Format unifié : WebP carré, qualité 78, 3 variantes responsive
-   (256/384/640 px) servies via `srcset`. Le navigateur choisit la
-   variante adaptée au DPR et au viewport. La source 1024 px d'origine
-   reste disponible comme fallback ultime via `src=` standard. */
-import waitingBench256 from "@/assets/empty-states/v2/responsive/waiting-bench-256.webp";
-import waitingBench384 from "@/assets/empty-states/v2/responsive/waiting-bench-384.webp";
-import waitingBench640 from "@/assets/empty-states/v2/responsive/waiting-bench-640.webp";
-import ruralMailbox256 from "@/assets/empty-states/v2/responsive/rural-mailbox-256.webp";
-import ruralMailbox384 from "@/assets/empty-states/v2/responsive/rural-mailbox-384.webp";
-import ruralMailbox640 from "@/assets/empty-states/v2/responsive/rural-mailbox-640.webp";
-import countryPath256 from "@/assets/empty-states/v2/responsive/country-path-256.webp";
-import countryPath384 from "@/assets/empty-states/v2/responsive/country-path-384.webp";
-import countryPath640 from "@/assets/empty-states/v2/responsive/country-path-640.webp";
-import openCalendar256 from "@/assets/empty-states/v2/responsive/open-calendar-256.webp";
-import openCalendar384 from "@/assets/empty-states/v2/responsive/open-calendar-384.webp";
-import openCalendar640 from "@/assets/empty-states/v2/responsive/open-calendar-640.webp";
-import bouquetBookmark256 from "@/assets/empty-states/v2/responsive/bouquet-bookmark-256.webp";
-import bouquetBookmark384 from "@/assets/empty-states/v2/responsive/bouquet-bookmark-384.webp";
-import bouquetBookmark640 from "@/assets/empty-states/v2/responsive/bouquet-bookmark-640.webp";
-import sitterReady256 from "@/assets/empty-states/v2/responsive/sitter-ready-256.webp";
-import sitterReady384 from "@/assets/empty-states/v2/responsive/sitter-ready-384.webp";
-import sitterReady640 from "@/assets/empty-states/v2/responsive/sitter-ready-640.webp";
-import quietLeaf256 from "@/assets/empty-states/v2/responsive/quiet-leaf-256.webp";
-import quietLeaf384 from "@/assets/empty-states/v2/responsive/quiet-leaf-384.webp";
-import quietLeaf640 from "@/assets/empty-states/v2/responsive/quiet-leaf-640.webp";
+   Format : WebP, 3 variantes (256/384/640 px) servies via `srcset`. */
+import waitingBench256 from "@/assets/aquarelles/es-vide-chat-256.webp";
+import waitingBench384 from "@/assets/aquarelles/es-vide-chat-384.webp";
+import waitingBench640 from "@/assets/aquarelles/es-vide-chat-640.webp";
+import ruralMailbox256 from "@/assets/aquarelles/es-arrivee-email-256.webp";
+import ruralMailbox384 from "@/assets/aquarelles/es-arrivee-email-384.webp";
+import ruralMailbox640 from "@/assets/aquarelles/es-arrivee-email-640.webp";
+import countryPath256 from "@/assets/aquarelles/es-vide-promenade-256.webp";
+import countryPath384 from "@/assets/aquarelles/es-vide-promenade-384.webp";
+import countryPath640 from "@/assets/aquarelles/es-vide-promenade-640.webp";
+import openCalendar256 from "@/assets/aquarelles/es-vide-calendrier-256.webp";
+import openCalendar384 from "@/assets/aquarelles/es-vide-calendrier-384.webp";
+import openCalendar640 from "@/assets/aquarelles/es-vide-calendrier-640.webp";
+import bouquetBookmark256 from "@/assets/aquarelles/es-vide-lettre-256.webp";
+import bouquetBookmark384 from "@/assets/aquarelles/es-vide-lettre-384.webp";
+import bouquetBookmark640 from "@/assets/aquarelles/es-vide-lettre-640.webp";
+import sitterReady256 from "@/assets/aquarelles/es-vide-depart-gardien-256.webp";
+import sitterReady384 from "@/assets/aquarelles/es-vide-depart-gardien-384.webp";
+import sitterReady640 from "@/assets/aquarelles/es-vide-depart-gardien-640.webp";
+import quietLeaf256 from "@/assets/aquarelles/es-vide-marche-256.webp";
+import quietLeaf384 from "@/assets/aquarelles/es-vide-marche-384.webp";
+import quietLeaf640 from "@/assets/aquarelles/es-vide-marche-640.webp";
 
 /** Trio de variantes responsive d'une illustration. */
 interface IllustrationSet {
