@@ -508,7 +508,7 @@ const MesCandidatures = () => {
         ) : apps.length === 0 ? (
           <EmptyState
             illustration="heartBookmark"
-            title="Aucune candidature pour l'instant"
+            title="Votre première candidature commence ici"
             description="Parcourez les annonces qui correspondent à votre profil et postulez en un clic."
             actionLabel="Rechercher une annonce"
             actionTo="/recherche"

@@ -872,9 +872,9 @@ const Messages = () => {
             {displayConversations.length === 0 ? (
               <div className="p-4">
                 {pill === "archived" ? (
-                  <EmptyState illustration="sleepingCat" title="Aucune conversation archivée" description="Vos conversations archivées apparaîtront ici." />
+                  <EmptyState illustration="sleepingCat" title="Vos conversations archivées" description="Elles se rangent ici quand vous les archivez." />
                 ) : (
-                  <EmptyState illustration="emptyMailbox" title="Aucun message" description="Vos conversations avec les gardiens et propriétaires apparaîtront ici." actionLabel="Découvrir les annonces" actionTo="/search" />
+                  <EmptyState illustration="emptyMailbox" title="Vos conversations commencent ici" description="Vos conversations avec les gardiens et propriétaires apparaîtront ici." actionLabel="Découvrir les annonces" actionTo="/search" />
                 )}
               </div>
             ) : effectiveRole === "sitter" ? (

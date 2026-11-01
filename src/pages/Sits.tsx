@@ -1036,7 +1036,7 @@ const Sits = () => {
             <EmptyState
               illustration="emptyCalendar"
               title="Vos brouillons vous attendent ici"
-              description="Vos annonces non publiées apparaîtront ici. Vous pouvez les compléter à tout moment."
+              description="Vos annonces en préparation se rangent ici. Vous les complétez quand vous voulez."
             />
           )}
           {isOwnerView && activeOwnerTab === "past" && (
@@ -1079,8 +1079,8 @@ const Sits = () => {
           {!isOwnerView && activeTab === "cancelled" && (
             <EmptyState
               illustration="quietLeaf"
-              title="Rien à signaler ici"
-              description="Les annonces et candidatures annulées apparaîtraient à cet endroit."
+              title="Tout est en ordre ici"
+              description="Les annonces et candidatures annulées se rangent à cet endroit."
               actionLabel="Trouver une garde"
               actionTo="/search"
               actionIcon={Eye}
