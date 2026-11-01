@@ -57,8 +57,14 @@ export function ArrivalC1({ selected, onSelect, onEntraide, onContinue, loginHre
   );
 }
 
+/**
+ * `recap` : une clé arrival.* (traduite ici, une fois les textes du parcours
+ * chargés avec ce module) ou un libellé déjà traduit. Recette du 01/11/2026 :
+ * traduite par la page d'inscription, la clé s'affichait brute.
+ */
 export function ArrivalC2Header({ recap, onModify }: { recap: string; onModify: () => void }) {
   const t = useArrivalT();
+  const recapLabel = recap.startsWith("arrival.") ? t(recap) : recap;
   useArrivalViewed("C2");
   return (
     <div className="space-y-4" data-testid="arrival-c2">
@@ -68,7 +74,7 @@ export function ArrivalC2Header({ recap, onModify }: { recap: string; onModify: 
         <h2 className="text-3xl font-semibold">{t("arrival.c2.title")}</h2>
       </div>
       <div className="flex items-center justify-between rounded-xl bg-card px-4 py-3">
-        <span className="font-medium">{recap}</span>
+        <span className="font-medium">{recapLabel}</span>
         <button type="button" onClick={onModify} className="arrival-link text-sm">{t("arrival.c2.modify")}</button>
       </div>
     </div>

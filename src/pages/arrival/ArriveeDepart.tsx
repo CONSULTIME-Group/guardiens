@@ -32,7 +32,9 @@ const ArriveeDepart = () => {
     if (!user) return;
     let cancelled = false;
     (async () => {
-      const { data } = await fetchMyProfile(user.id);
+      // Recette du 01/11/2026 : P1 vient d'écrire la commune ; la copie en cache
+      // (5 min) n'avait pas encore les coordonnées, l'encart de proximité restait vide.
+      const { data } = await fetchMyProfile(user.id, { fresh: true });
       const p = (data ?? {}) as { first_name?: string; city?: string; latitude?: number | null; longitude?: number | null };
       if (cancelled) return;
       setName(p.first_name || user.firstName || "");
