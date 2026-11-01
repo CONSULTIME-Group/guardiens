@@ -9,7 +9,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Send, Check, MailCheck, Heart, Sparkles, ArrowRight, MapPin, SlidersHorizontal, ShieldCheck, ImageIcon, GraduationCap, PawPrint, X, Crosshair, Loader2 } from "lucide-react";
+import { Search, Send, Check, MailCheck, Heart, ArrowRight, MapPin, SlidersHorizontal, ShieldCheck, ImageIcon, GraduationCap, PawPrint, X, Crosshair, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -35,6 +35,8 @@ import InviteSitterDialog from "./InviteSitterDialog";
 import PostPublishRecapDialog from "./PostPublishRecapDialog";
 import BulkInviteNearestDialog from "./BulkInviteNearestDialog";
 import { publicFirstName } from "@/lib/displayName";
+
+const NEARBY_RADIUS_KM = 20;
 
 const ANIMAL_OPTIONS: { label: string; value: string }[] = [
   { label: "Chiens", value: "dog" },
@@ -343,6 +345,19 @@ const InviteSittersBlock = ({
 
   // Envoi groupé aux 20 plus proches
   const [bulkOpen, setBulkOpen] = useState(false);
+  // Lot PUB1 : sélection manuelle repliée tant qu'aucune invitation n'est partie.
+  const [showPicker, setShowPicker] = useState(false);
+  useEffect(() => { if (sentCount > 0) setShowPicker(true); }, [sentCount]);
+  // Lot PUB1 : gardiens inscrits à proximité (même calcul que l'écran de départ).
+  const [nearbyCount, setNearbyCount] = useState<number | null>(null);
+  useEffect(() => {
+    if (!ownerCoords || isInternational) return;
+    let cancelled = false;
+    void supabase
+      .rpc("count_eligible_sitters", { p_lat: ownerCoords.lat, p_lng: ownerCoords.lng, p_radius_km: NEARBY_RADIUS_KM })
+      .then(({ data }) => { if (!cancelled && typeof data === "number") setNearbyCount(data); });
+    return () => { cancelled = true; };
+  }, [ownerCoords, isInternational]);
   const remainingQuota = Math.max(0, 20 - sentCount);
   const alreadyInvitedIds = useMemo(() => Array.from(invitedById.keys()), [invitedById]);
 
@@ -355,51 +370,57 @@ const InviteSittersBlock = ({
           : "border-primary/20"
       }`}
     >
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
-              Proposer votre annonce à des gardiens
-            </h2>
-            <Badge variant="outline" className="text-[11px] font-normal border-primary/30 text-primary">
-              Recommandé
-            </Badge>
-            {highlight && (
-              <Badge className="text-[11px] font-medium bg-primary text-primary-foreground">
-                Annonce publiée, à vous de jouer
-              </Badge>
-            )}
-          </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            Proposez votre annonce directement à des gardiens : vos favoris, par prénom ou ville,
-            par département, ou par la recherche avancée.
+      <div className="mb-4">
+        {sentCount === 0 && (
+          <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#8A5D3B]">
+            <span aria-hidden="true" className="inline-block h-px w-[18px] bg-current" />
+            Première chose à faire
           </p>
-          {(sentCount > 0 || appliedCount > 0) && (
-            <p className="text-xs text-primary/80 mt-2 font-medium">
-              {sentCount} invitation{sentCount > 1 ? "s" : ""} envoyée{sentCount > 1 ? "s" : ""}
-              {appliedCount > 0 && ` · ${appliedCount} candidature${appliedCount > 1 ? "s" : ""} reçue${appliedCount > 1 ? "s" : ""}`}
-              {sentCount >= 20 && ", limite de 20 par 24 h atteinte"}
-            </p>
-          )}
-          {ownerCoords && remainingQuota > 0 && !isInternational && (
-            <div className="mt-3">
-              <Button
-                size="sm"
-                onClick={() => setBulkOpen(true)}
-                className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                <Crosshair className="h-3.5 w-3.5" />
-                Inviter les {Math.min(20, remainingQuota)} gardiens à proximité
-              </Button>
-              <p className="text-[11px] text-muted-foreground mt-1">
-                Envoi groupé en un clic, autour de {sitCity || "votre ville"}.
-              </p>
-            </div>
-          )}
-        </div>
+        )}
+        <h2 className="font-heading text-xl md:text-2xl font-semibold leading-snug">
+          Proposez votre annonce aux gardiens à proximité
+        </h2>
+        {nearbyCount !== null && nearbyCount > 0 && !isInternational ? (
+          <p className="mt-2 text-[15px] leading-relaxed text-foreground/80">
+            <strong className="text-foreground">{nearbyCount} gardien{nearbyCount > 1 ? "s" : ""}</strong>{" "}
+            {nearbyCount > 1 ? "sont inscrits" : "est inscrit"} à moins de {NEARBY_RADIUS_KM} km de {sitCity || "chez vous"}.
+            Ils reçoivent votre annonce avec votre message.
+          </p>
+        ) : (
+          <p className="mt-2 text-[15px] leading-relaxed text-foreground/80">
+            Envoyez votre annonce directement à des gardiens : vos favoris, par prénom ou ville, par département, ou par la recherche avancée.
+          </p>
+        )}
+        {(sentCount > 0 || appliedCount > 0) && (
+          <p className="text-xs text-primary/80 mt-2 font-medium">
+            {sentCount} invitation{sentCount > 1 ? "s" : ""} envoyée{sentCount > 1 ? "s" : ""}
+            {appliedCount > 0 && ` · ${appliedCount} candidature${appliedCount > 1 ? "s" : ""} reçue${appliedCount > 1 ? "s" : ""}`}
+            {sentCount >= 20 && ", limite de 20 par 24 h atteinte"}
+          </p>
+        )}
+        {ownerCoords && remainingQuota > 0 && !isInternational && (
+          <Button
+            onClick={() => setBulkOpen(true)}
+            className="mt-4 h-[52px] w-full gap-2 rounded-full text-base font-semibold sm:w-auto sm:px-8"
+          >
+            <Crosshair className="h-4 w-4" aria-hidden="true" />
+            Inviter les {Math.min(20, remainingQuota, nearbyCount && nearbyCount > 0 ? nearbyCount : 20)} plus proches
+          </Button>
+        )}
+        {!showPicker && (
+          <button
+            type="button"
+            onClick={() => setShowPicker(true)}
+            aria-expanded={false}
+            aria-controls="invite-picker"
+            className="mt-3 block min-h-[44px] text-sm font-semibold text-primary underline underline-offset-4 hover:text-primary/80"
+          >
+            Choisir moi-même parmi les profils
+          </button>
+        )}
       </div>
 
+      <div id="invite-picker" hidden={!showPicker}>
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "favorites" | "search")} className="w-full">
         <TabsList className="bg-background/80">
           <TabsTrigger value="favorites">
@@ -747,6 +768,7 @@ const InviteSittersBlock = ({
           )}
         </TabsContent>
       </Tabs>
+      </div>
 
       <InviteSitterDialog
         open={!!inviteTarget}

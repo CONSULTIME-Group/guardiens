@@ -37,6 +37,7 @@ import { format, differenceInDays, parseISO, formatDistanceToNow } from "date-fn
 import { fr } from "date-fns/locale";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { avatarImageUrl } from "@/lib/storageImage";
+import emptyApplications from "@/assets/aquarelles/accueil-rencontre-440.webp";
 
 interface ApplicationsListProps {
   sitId: string;
@@ -667,7 +668,10 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
 
       {applications.length === 0 ? (
-        <p className="text-sm text-muted-foreground italic">Aucune candidature pour le moment.</p>
+        <div className="flex items-center gap-[14px]">
+          <img src={emptyApplications} alt="" aria-hidden="true" width={84} height={104} loading="lazy" className="h-[104px] w-[84px] shrink-0 object-contain" />
+          <p className="text-[15px] leading-relaxed text-muted-foreground">Chaque candidature s'affiche ici et vous arrive aussi par email.</p>
+        </div>
       ) : (
         <>
           {activeApps.length > 1 && (
