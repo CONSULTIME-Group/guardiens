@@ -19,7 +19,7 @@ import { afterG4, readCarry } from "@/lib/arrival";
 import { hasMoneyMention } from "@/lib/missionContentGuards";
 import { HOMEWORK_SKILL_NOTE, isHomeworkSkill } from "@/lib/missionHomework";
 import { ArrivalShell, Eyebrow, Gouache, MultiChoice, SaveError, trackArrival, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
-const spotJardin = new URL("../../assets/missions/spot-jardin-160.webp", import.meta.url).href;
+const spotJardin = new URL("../../assets/aquarelles/univers-entraide-320.webp", import.meta.url).href;
 
 /** Plafonds en base : max_competences (10) et profiles_helps_with_len (200). */
 export const G4_MAX_COMPETENCES = 10;

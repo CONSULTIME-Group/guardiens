@@ -16,7 +16,7 @@ import { isPostalCodeValidForCountry } from "@/lib/setupState";
 import { canSkipP1, safeNext } from "@/lib/arrival";
 import { ArrivalShell, Eyebrow, Gouache, SaveError, SingleChoice, trackArrival, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
 import ArriveeVousGardien from "./ArriveeVousGardien";
-const maisonSeule = new URL("../../assets/landing/maison-seule-450.webp", import.meta.url).href;
+const maisonSeule = new URL("../../assets/aquarelles/arrivee-bonjour-360.webp", import.meta.url).href;
 
 const TYPES = ["house", "apartment", "farm", "chalet", "other"] as const;
 

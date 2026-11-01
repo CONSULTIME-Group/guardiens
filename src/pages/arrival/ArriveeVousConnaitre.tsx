@@ -13,7 +13,7 @@ import { INTEREST_OPTIONS, LANGUAGE_OPTIONS, LIFE_PACE_OPTIONS } from "@/lib/pro
 import { ARRIVAL_SITTER_LANGUAGES, afterG3, readCarry } from "@/lib/arrival";
 import { ArrivalShell, Eyebrow, Gouache, MultiChoice, SaveError, trackArrival, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
 import { initialLanguages } from "./ArriveeAffinites";
-const spotBienEtre = new URL("../../assets/missions/spot-bienetre-160.webp", import.meta.url).href;
+const spotBienEtre = new URL("../../assets/aquarelles/arrivee-rythme-360.webp", import.meta.url).href;
 
 const VISIBLE_INTERESTS = 8;
 

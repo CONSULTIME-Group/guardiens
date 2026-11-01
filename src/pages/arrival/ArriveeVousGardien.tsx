@@ -16,7 +16,7 @@ import { isPostalCodeValidForCountry } from "@/lib/setupState";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { afterG1, canSkipG1, readCarry } from "@/lib/arrival";
 import { ArrivalShell, Eyebrow, Gouache, SaveError, trackArrival, uploadAvatar, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
-const maisonSeule = new URL("../../assets/landing/maison-seule-450.webp", import.meta.url).href;
+const maisonSeule = new URL("../../assets/aquarelles/arrivee-bonjour-360.webp", import.meta.url).href;
 
 /** Écritures de G1, pures et testables. */
 export function buildG1Writes(i: { firstName: string; postalCode: string; city: string; country: string }) {

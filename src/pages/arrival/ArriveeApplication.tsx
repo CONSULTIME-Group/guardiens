@@ -14,7 +14,7 @@ import { requestInstall } from "@/lib/pwa-install";
 import { enablePush, getPushConfig, hasLocalPushSubscription, postponePushOffer, pushSupport, type PushConfig } from "@/lib/web-push";
 import { N1_PENDING_KEY, afterN1, arrivalUrl, n1Mode, readCarry } from "@/lib/arrival";
 import { ArrivalShell, Eyebrow, Gouache, trackArrival, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
-const sitterReady = new URL("../../assets/empty-states/v2/responsive/sitter-ready-384.webp", import.meta.url).href;
+const sitterReady = new URL("../../assets/aquarelles/arrivee-email-360.webp", import.meta.url).href;
 
 const clearPending = () => { try { localStorage.removeItem(N1_PENDING_KEY); } catch { /* rien */ } };
 
