@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
 import Head from "@/components/seo/Head";
-import authIllustration from "@/assets/auth-illustration.webp";
+import authIllustration from "@/assets/aquarelles/inscription-tablee-1024.webp";
 
 const ResetPassword = () => {
   const { t } = useTranslation();

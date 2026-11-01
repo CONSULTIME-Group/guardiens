@@ -1,7 +1,7 @@
 import { useTranslation } from "@/i18n/react";
 import { RevealSection } from "@/components/ui/RevealSection";
-import cle720 from "@/assets/landing/cle-ancienne-720.webp";
-import cle360 from "@/assets/landing/cle-ancienne-360.webp";
+import cle720 from "@/assets/aquarelles/histoire-cles-720.webp";
+import cle360 from "@/assets/aquarelles/histoire-cles-360.webp";
 import notreHistoirePanoramaAvif from "@/assets/story-photo-1104.avif";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
 import notreHistoireSmallAvif from "@/assets/story-photo-368.avif";
@@ -24,9 +24,9 @@ export function NotreHistoireSection() {
             src={cle720}
             srcSet={`${cle360} 360w, ${cle720} 720w`}
             sizes="(max-width: 767px) 96px, 128px"
-            alt="Illustration à la gouache d'une clé ancienne en bronze patiné, posée légèrement de biais."
+            alt="Aquarelle d'un trousseau de clés anciennes posé sur un carnet de voyage ouvert."
             width={720}
-            height={580}
+            height={537}
             loading="lazy"
             decoding="async"
             className="mb-[22px] block w-24 md:w-32 h-auto"
