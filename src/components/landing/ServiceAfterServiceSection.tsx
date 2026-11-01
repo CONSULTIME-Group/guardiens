@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { GrainOverlay } from "@/components/ui/GrainOverlay";
 import { useAuth } from "@/contexts/AuthContext";
 import { homeCtaTarget } from "@/components/landing/homeCta";
-import rooftops1600 from "@/assets/landing/village-rooftops-1600.webp";
+import rooftops1600 from "@/assets/aquarelles/village-frise-creme-1600.webp";
 
 const STEPS = [
   { month: "Juillet", text: "Claire, trois rues plus loin, arrose vos tomates pendant un week-end." },
@@ -41,7 +41,7 @@ export function ServiceAfterServiceSection() {
         </div>
         <Link to="/actualites/technologie-recreer-lien-pres-de-chez-soi" className="mx-auto mt-5 block w-fit text-sm underline underline-offset-4">Lire l'article</Link>
       </div>
-      <img src={rooftops1600} alt="" width={1600} height={415} loading="lazy" className="mx-auto mt-8 block w-full max-w-[820px] opacity-50" />
+      <img src={rooftops1600} alt="" width={1600} height={374} loading="lazy" className="mx-auto mt-8 block w-full max-w-[820px] opacity-80" />
     </section>
   );
 }

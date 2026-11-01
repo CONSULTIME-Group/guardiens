@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { RevealSection } from "@/components/ui/RevealSection";
 import { GrainOverlay } from "@/components/ui/GrainOverlay";
-import rooftops1600 from "@/assets/landing/village-rooftops-1600.webp";
-import rooftops800 from "@/assets/landing/village-rooftops-800.webp";
+import rooftops1600 from "@/assets/aquarelles/village-frise-creme-1600.webp";
+import rooftops800 from "@/assets/aquarelles/village-frise-creme-800.webp";
 import { trackEvent } from "@/lib/analytics";
 import { AssociationsTeaser } from "@/components/associations/AssociationsTeaser";
 
@@ -99,12 +99,12 @@ export function PretexteSection() {
           src={rooftops1600}
           srcSet={`${rooftops800} 800w, ${rooftops1600} 1600w`}
           sizes="(max-width: 819px) 100vw, 820px"
-          alt="Illustration à la gouache d'une rangée de maisons de village aux toits de tuiles, quelques fenêtres allumées et un arbre."
+          alt="Aquarelle d'une rue de village aux toits de tuiles, deux personnes y marchent avec un chien."
           width={1600}
-          height={415}
+          height={374}
           loading="lazy"
           decoding="async"
-          className="block w-full h-auto opacity-55 [mask-image:linear-gradient(to_right,transparent_0%,black_14%,black_86%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,transparent_0%,black_14%,black_86%,transparent_100%)]"
+          className="block w-full h-auto opacity-80 [mask-image:linear-gradient(to_right,transparent_0%,black_14%,black_86%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,transparent_0%,black_14%,black_86%,transparent_100%)]"
         />
       </div>
     </section>

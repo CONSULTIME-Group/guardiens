@@ -5,11 +5,11 @@ import { QUICK_HELP_EXAMPLES, quickHelpTarget } from "@/components/landing/Quick
 import { HOME_BTN_PRIMARY, homeCtaTarget } from "@/components/landing/homeCta";
 import { trackEvent } from "@/lib/analytics";
 import howtoStep1Webp448 from "@/assets/illustrations/howto-step-1-annonce-448.webp";
-import howtoStep2Webp448 from "@/assets/illustrations/howto-step-2-rencontre-448.webp";
+import coupDeMain448 from "@/assets/aquarelles/coup-de-main-448.webp";
 
 const COLUMNS = [
   { title: "Garde de maison", image: howtoStep1Webp448, alt: "Maison confiée à un gardien", steps: ["Vous publiez vos dates et vos animaux.", "Des gardiens postulent. Vous échangez, et vous pouvez les rencontrer avant de choisir.", "Vous partez l'esprit léger."], cta: "Publier mon annonce de garde", path: "/sits/create", event: "cta_proprio_clicked" as const },
-  { title: "Coup de main", image: howtoStep2Webp448, alt: "Deux personnes se rencontrent autour d'un service", steps: ["Vous décrivez votre besoin en une phrase.", "Les dix personnes disponibles les plus proches le reçoivent.", "Quelqu'un vous répond «\u00a0Je peux\u00a0», vous vous retrouvez."], cta: "Demander un coup de main", path: "/petites-missions/creer", event: "cta_aid_clicked" as const },
+  { title: "Coup de main", image: coupDeMain448, alt: "Une personne tend un panier de légumes à une autre, dans un potager", steps: ["Vous décrivez votre besoin en une phrase.", "Les dix personnes disponibles les plus proches le reçoivent.", "Quelqu'un vous répond «\u00a0Je peux\u00a0», vous vous retrouvez."], cta: "Demander un coup de main", path: "/petites-missions/creer", event: "cta_aid_clicked" as const },
 ];
 
 export function HowItWorksSection() {

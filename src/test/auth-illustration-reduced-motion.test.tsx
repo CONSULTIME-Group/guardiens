@@ -49,18 +49,12 @@ describe("AuthIllustrationPanel — prefers-reduced-motion", () => {
     expect(img!.className).toContain("object-bottom");
   });
 
-  it("monte une <video> unique (lecture unique + freeze) hors reduced-motion", () => {
-    vi.useFakeTimers();
+  it("n'a plus aucune vidéo, même hors reduced-motion (aquarelle fixe, 01/11/2026)", () => {
     mockMatchMedia(false);
     const { container } = render(
       <AuthIllustrationPanel title="Bienvenue" description="Test" />
     );
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
-    // v3 : <video> unique (loop=false + freeze sur dernière frame).
-    // Le crossfade A/B a été supprimé pour économiser CPU/batterie.
-    expect(container.querySelectorAll("video").length).toBe(1);
-    vi.useRealTimers();
+    expect(container.querySelectorAll("video").length).toBe(0);
+    expect(container.querySelector("img")?.getAttribute("src")).toContain("inscription-tablee");
   });
 });
