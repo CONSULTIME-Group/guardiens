@@ -17,6 +17,7 @@ import { trackEvent } from "@/lib/analytics";
 import { useTranslation } from "@/i18n/react";
 import { uploadGalleryBatch, GALLERY_MAX_PHOTOS, type GalleryUploadResult } from "@/lib/galleryBatchUpload";
 import { inferPhotoDate } from "@/lib/galleryPhotoDate";
+import { HOVER_REVEAL } from "@/lib/hoverReveal";
 
 const NO_SIT_VALUE = "__none__";
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -415,8 +416,8 @@ const SitterGallery = () => {
                   <p className="text-white/70 text-xs mt-0.5">{[photo.city, photo.photo_date].filter(Boolean).join(" · ")}</p>
                 )}
               </div>
-              {/* Actions */}
-              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              {/* Actions : visibles au toucher (lot MOB1) */}
+              <div className={`absolute top-2 right-2 flex gap-1 ${HOVER_REVEAL}`}>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleSetAsMain(photo); }}
                   className="p-1.5 rounded-full bg-background/90 text-foreground hover:bg-background"

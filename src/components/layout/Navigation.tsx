@@ -155,7 +155,7 @@ export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean 
               tabIndex={navScrolled ? -1 : undefined}
               onClick={() => {
                 if (user?.role === "both" || user?.role === "owner") {
-                  setActiveRole("owner");
+                  setActiveRole("owner", "menu_lateral");
                 } else {
                   setRoleDialogTarget("proprio");
                   setRoleDialogOpen(true);
@@ -178,7 +178,7 @@ export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean 
               tabIndex={navScrolled ? -1 : undefined}
               onClick={() => {
                 if (user?.role === "both" || user?.role === "sitter") {
-                  setActiveRole("sitter");
+                  setActiveRole("sitter", "menu_lateral");
                 } else {
                   setRoleDialogTarget("gardien");
                   setRoleDialogOpen(true);
@@ -517,7 +517,7 @@ export const BottomNav = () => {
                   <button
                     onClick={() => {
                       if (user?.role === "both" || user?.role === "owner") {
-                        setActiveRole("owner");
+                        setActiveRole("owner", "menu_plus");
                       } else {
                         setSheetOpen(false);
                         setRoleDialogTarget("proprio");
@@ -539,7 +539,7 @@ export const BottomNav = () => {
                   <button
                     onClick={() => {
                       if (user?.role === "both" || user?.role === "sitter") {
-                        setActiveRole("sitter");
+                        setActiveRole("sitter", "menu_plus");
                       } else {
                         setSheetOpen(false);
                         setRoleDialogTarget("gardien");

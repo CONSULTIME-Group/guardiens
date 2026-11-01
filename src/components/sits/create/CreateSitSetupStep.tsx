@@ -36,6 +36,12 @@ export interface SetupStepProps {
    * personne ne doit rester enfermé dans cet écran.
    */
   onQuit?: () => void;
+  /**
+   * Lot NAV-V1 : rôle du compte. Un compte gardien (ou double rôle) arrivé ici
+   * peut chercher une garde à faire : un lien mène aux annonces de garde.
+   */
+  memberRole?: string | null;
+  onSitterExit?: () => void;
 }
 
 const Block = ({
@@ -72,7 +78,10 @@ const Block = ({
 const CreateSitSetupStep = ({
   userId, firstName, postalCode, country, propertyId, petCount, photos, photoDone, missingLabels,
   onIdentitySaved, onPropertySaved, onPetsChanged, onPhotoUploaded, onContinue, onBack, onQuit,
+  memberRole, onSitterExit,
 }: SetupStepProps) => {
+  const sitterOnly = memberRole === "sitter";
+  const dualRole = memberRole === "both";
   const identityDone = isIdentityComplete(firstName, postalCode, country);
   const housingDone = !!propertyId;
   const petsDone = petCount > 0;
@@ -101,6 +110,17 @@ const CreateSitSetupStep = ({
           Tout se remplit ici, vous enchaînez ensuite sur votre annonce sans rien perdre.
         </p>
       </div>
+
+      {sitterOnly && onSitterExit && (
+        <div className="rounded-2xl border border-border bg-card p-4 flex flex-wrap items-center justify-between gap-3" data-testid="setup-sitter-exit">
+          <p className="text-sm text-foreground">
+            Vous souhaitez garder chez les autres ? Les annonces des propriétaires vous attendent.
+          </p>
+          <Button type="button" variant="outline" size="sm" onClick={onSitterExit}>
+            Voir les annonces de garde
+          </Button>
+        </div>
+      )}
 
       <Block title="Votre identité" done={identityDone}>
         {identityDone ? (
@@ -209,6 +229,16 @@ const CreateSitSetupStep = ({
           >
             Je préfère faire ça plus tard
           </Button>
+        )}
+        {dualRole && onSitterExit && (
+          <button
+            type="button"
+            onClick={onSitterExit}
+            className="block w-full text-center text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+            data-testid="setup-sitter-exit-link"
+          >
+            Vous cherchez une garde à faire ? Voir les annonces de garde
+          </button>
         )}
       </div>
 

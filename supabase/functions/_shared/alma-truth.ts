@@ -14,10 +14,13 @@ export const fold = (s: string): string =>
 
 // ---------------------------------------------------------------------------
 // 1. Intention exprimée : garder chez les autres, ou faire garder chez soi.
+// Lot NAV-V1 (01/11/2026) : « trouver un gardiennage » était lu comme « trouver
+// un gardien » (propriétaire) faute de limite de mot ; une gardienne s'est vu
+// proposer l'espace propriétaire le 22/10.
 // ---------------------------------------------------------------------------
 
-const OWNER_INTENT = /(faire garder|garder (mes|ma|mon|nos)\b|garde (pour|de) (mes|mon|ma|nos)\b|une garde pour (mes|mon|ma|nos)\b|trouver un gardien|cherche (un|une) gardien|je pars\b|partir en vacances|pendant mon absence|publier (une|mon) annonce)/;
-const SITTER_INTENT = /(je (re)?cherche (une |des )?gardes?\b|cherche a garder|(je )?(voudrais|veux|souhaite|aimerais) garder|garder (un|une|des) (chien|chat|animal|animaux|maison|chevaux)|devenir gardien|ou sont les annonces|voir les annonces|annonces des autres|gardes (disponibles|proposees)|ne trouve que (la mienne|mon annonce|mes annonces)|que la mienne|postuler a une garde)/;
+const OWNER_INTENT = /(faire garder|garder (mes|ma|mon|nos)\b|garde (pour|de) (mes|mon|ma|nos)\b|une garde pour (mes|mon|ma|nos)\b|trouver (un|une) gardien(ne)?\b|cherche (un|une) gardien(ne)?\b|gardiennages?\b(?!.*\b(vacances|conges|retraite|region|ville|secteur|departement|coin|commune|quartier)\b).*\b(mon|ma|mes|notre|nos)\b|gardiennages? a domicile|gardiennages? pour (le|la|les|l'|deux|trois|\d+) ?(chats?|chiens?|animal|animaux|maison|appartement|logement|poules?|lapins?|cheva)|je pars\b|partir en vacances|pendant mon absence|publier (une|mon) annonce)/;
+const SITTER_INTENT = /(je (re)?cherche (une |des )?gardes?\b|cherche a garder|(je )?(voudrais|veux|souhaite|aimerais) garder|garder (un|une|des) (chien|chat|animal|animaux|maison|chevaux)|devenir gardien|(trouver|faire|chercher|cherche) (un |du |des )?gardiennages?\b|garder (des|les) (logements|maisons)|garder chez (les autres|d'autres)|ou sont les annonces|voir les annonces|annonces des autres|gardes (disponibles|proposees)|ne trouve que (la mienne|mon annonce|mes annonces)|que la mienne|postuler a une garde)/;
 const FOLLOW_UP = /^(ou (est|se trouve) (cette|la) page|ou ca|c'est ou|ou (est|sont)[- ]?(elle|elles|ils|il)|laquelle|quelle page)\b/;
 
 export type ExpressedIntent = "sitter" | "owner" | null;

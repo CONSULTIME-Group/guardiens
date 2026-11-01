@@ -79,7 +79,7 @@ const SitDetail = () => {
   // les autres voient l'invitation d'activation habituelle sur la fiche.
   useEffect(() => {
     if (searchParams.get("espace") !== "gardien" || !user) return;
-    if ((user.role === "both" || user.role === "sitter") && activeRole !== "sitter") switchRole("sitter");
+    if ((user.role === "both" || user.role === "sitter") && activeRole !== "sitter") switchRole("sitter", "fiche_annonce");
     const next = new URLSearchParams(searchParams);
     next.delete("espace");
     setSearchParams(next, { replace: true });

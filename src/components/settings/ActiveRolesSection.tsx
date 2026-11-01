@@ -64,7 +64,7 @@ const ActiveRolesSection = () => {
 
   const handleSetDefault = (next: "owner" | "sitter") => {
     if (next === activeRole) return;
-    switchRole(next);
+    switchRole(next, "reglages");
     toast.success(
       next === "sitter"
         ? "Espace gardien défini par défaut."
@@ -114,7 +114,7 @@ const ActiveRolesSection = () => {
       }
 
       // Bascule l'activeRole sur le rôle restant pour éviter un état UI incohérent
-      switchRole(newRole as "owner" | "sitter");
+      switchRole(newRole as "owner" | "sitter", "retrait_espace");
       await refreshProfile();
 
       toast.success(
@@ -196,8 +196,9 @@ const ActiveRolesSection = () => {
             <div className="border-t border-border pt-4 mt-2">
               <p className="text-sm font-medium mb-1">Espace affiché par défaut</p>
               <p className="text-xs text-muted-foreground mb-3">
-                Choisissez l'espace ouvert au prochain démarrage. Vous pouvez basculer
-                à tout moment depuis la barre latérale.
+                Choisissez l'espace ouvert au prochain démarrage. Vous passez de l'un à l'autre
+                à tout moment avec le choix Propriétaire ou Gardien : en haut du menu sur ordinateur,
+                dans le menu Plus sur téléphone.
               </p>
               <div
                 role="radiogroup"

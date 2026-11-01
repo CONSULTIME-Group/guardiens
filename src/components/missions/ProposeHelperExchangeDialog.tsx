@@ -91,7 +91,7 @@ const ProposeHelperExchangeDialog = ({
       // refusée par la RLS (auth.uid() = user_id).
 
       onClose();
-      switchRole("owner");
+      switchRole("owner", "entraide");
       navigate(`/messages?c=${convId}`);
     } catch (err: any) {
       logger.error("[ProposeHelperExchangeDialog]", { err: String(err) });

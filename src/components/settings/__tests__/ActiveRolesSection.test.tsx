@@ -109,7 +109,7 @@ describe("ActiveRolesSection — bascule symétrique", () => {
     fireEvent.click(await screen.findByText(/Confirmer la désactivation/i));
     await waitFor(() => {
       expect(mockRpc).toHaveBeenCalledWith("deactivate_my_space", { p_keep: "owner" });
-      expect(mockSwitchRole).toHaveBeenCalledWith("owner");
+      expect(mockSwitchRole).toHaveBeenCalledWith("owner", "retrait_espace");
       expect(mockRefreshProfile).toHaveBeenCalled();
       expect(toastSuccess).toHaveBeenCalledWith(expect.stringMatching(/gardien.*désactivé/i));
     });
@@ -121,7 +121,7 @@ describe("ActiveRolesSection — bascule symétrique", () => {
     fireEvent.click(await screen.findByText(/Confirmer la désactivation/i));
     await waitFor(() => {
       expect(mockRpc).toHaveBeenCalledWith("deactivate_my_space", { p_keep: "sitter" });
-      expect(mockSwitchRole).toHaveBeenCalledWith("sitter");
+      expect(mockSwitchRole).toHaveBeenCalledWith("sitter", "retrait_espace");
       expect(toastSuccess).toHaveBeenCalledWith(expect.stringMatching(/propriétaire.*désactivé/i));
     });
   });
@@ -131,7 +131,7 @@ describe("ActiveRolesSection — bascule symétrique", () => {
     renderSection();
     const sitterRadio = screen.getByRole("radio", { name: /Gardien/i });
     fireEvent.click(sitterRadio);
-    expect(mockSwitchRole).toHaveBeenCalledWith("sitter");
+    expect(mockSwitchRole).toHaveBeenCalledWith("sitter", "reglages");
     expect(toastSuccess).toHaveBeenCalledWith(expect.stringMatching(/gardien.*par défaut/i));
   });
 

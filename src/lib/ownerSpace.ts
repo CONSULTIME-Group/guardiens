@@ -19,14 +19,14 @@ export async function ensureOwnerSpace(opts: {
   userId: string;
   role: Role;
   refreshProfile: () => Promise<void>;
-  switchRole: (role: "owner" | "sitter") => void;
+  switchRole: (role: "owner" | "sitter", source?: import("@/lib/roleSwitchSource").RoleSwitchSource) => void;
 }): Promise<boolean> {
   if (!needsOwnerSpace(opts.role)) return false;
   try {
     const { error } = await supabase.rpc("change_user_role", { p_user_id: opts.userId, p_new_role: "both" as any });
     if (error) throw error;
     await opts.refreshProfile();
-    opts.switchRole("owner");
+    opts.switchRole("owner", "publication");
     return true;
   } catch (e) {
     // L'annonce est enregistrée : l'espace se rattrape par « Propriétaire + ».

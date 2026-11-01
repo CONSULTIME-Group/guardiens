@@ -300,10 +300,10 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     key: "mes_espaces",
     path: "/settings?section=spaces",
     label: "Mes espaces",
-    purpose: "Dans les réglages, rubrique Mes espaces : chaque membre ajoute ou retire son espace gardien ou son espace propriétaire, et garde son compte et son historique. Un espace se retire une fois terminées ou retirées ses annonces, gardes et candidatures en cours ; au moins un espace reste actif.",
+    purpose: "Dans les réglages, rubrique Mes espaces : chaque membre ajoute ou retire son espace gardien ou son espace propriétaire, et garde son compte et son historique. Un espace se retire une fois terminées ou retirées ses annonces, gardes et candidatures en cours ; au moins un espace reste actif. Un compte aux deux espaces passe de l'un à l'autre avec le choix Propriétaire ou Gardien : sur téléphone dans le menu Plus en bas de l'écran (Profil actif), sur ordinateur en haut du menu de gauche. La rubrique Mes espaces fixe aussi l'espace affiché par défaut.",
     audience: "all",
-    triggers: ["mes espaces", "espace gardien", "espace proprietaire", "retirer mon espace", "retirer l'espace", "desactiver mon espace", "desactiver l'espace", "ajouter un espace", "ajouter l'espace", "activer l'espace", "double role", "deux espaces", "deux roles"],
-    opener: "Vos espaces s'ajoutent et se retirent dans vos Réglages, rubrique Mes espaces.",
+    triggers: ["mes espaces", "espace gardien", "espace proprietaire", "retirer mon espace", "retirer l'espace", "desactiver mon espace", "desactiver l'espace", "ajouter un espace", "ajouter l'espace", "activer l'espace", "double role", "deux espaces", "deux roles", "changer d'espace", "changer d espace", "passer en gardien", "passer en proprietaire", "profil actif"],
+    opener: "Vos espaces s'ajoutent et se retirent dans vos Réglages, rubrique Mes espaces, et le choix Propriétaire ou Gardien du menu vous fait passer de l'un à l'autre.",
   },
   {
     key: "emails_alertes",

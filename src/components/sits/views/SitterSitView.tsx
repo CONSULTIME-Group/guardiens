@@ -331,7 +331,7 @@ const SitterSitView = ({
                 source: "sit_detail_switch_space",
                 metadata: { sit_id: sit.id },
               });
-              switchRole("sitter");
+              switchRole("sitter", "garde");
             }}
           >
             {SWITCH_TO_SITTER_LABEL}

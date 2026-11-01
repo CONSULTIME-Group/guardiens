@@ -61,7 +61,7 @@ describe("X2, espace propriétaire pour un gardien qui enregistre une annonce", 
     expect(await ensureOwnerSpace({ userId: "u1", role: "sitter", refreshProfile, switchRole })).toBe(true);
     expect(rpc).toHaveBeenCalledWith("change_user_role", { p_user_id: "u1", p_new_role: "both" });
     expect(refreshProfile).toHaveBeenCalled();
-    expect(switchRole).toHaveBeenCalledWith("owner");
+    expect(switchRole).toHaveBeenCalledWith("owner", "publication");
   });
 
   it("un refus laisse l'annonce enregistrée, sans bascule", async () => {

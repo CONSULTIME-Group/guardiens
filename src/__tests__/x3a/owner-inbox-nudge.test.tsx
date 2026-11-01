@@ -49,7 +49,7 @@ describe("X3a, A-07 : repère des candidatures reçues en espace gardien", () =>
     const link = screen.getByRole("link", { name: "Voir dans l'espace propriétaire" });
     expect(link.getAttribute("href")).toBe("/sits/sit-9#candidatures");
     fireEvent.click(link);
-    expect(h.switchRole).toHaveBeenCalledWith("owner");
+    expect(h.switchRole).toHaveBeenCalledWith("owner", "rappel_candidatures");
   });
 
   it("aucune candidature en attente : rien", () => {
