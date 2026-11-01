@@ -11,7 +11,7 @@ import { loadFirstStep, type FirstStepCard, type FirstStepData } from "@/lib/arr
 import { arrivalUrl, stepsToReach } from "@/lib/arrival";
 import AlmaAvatar from "@/components/ai/alma/AlmaAvatar";
 import { ArrivalShell, Eyebrow, Gouache, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
-const waitingBench = new URL("../../assets/empty-states/v2/responsive/waiting-bench-384.webp", import.meta.url).href;
+const waitingBench = new URL("../../assets/aquarelles/arrivee-banc-360.webp", import.meta.url).href;
 
 const fmt = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
 export const sitDates = (s: { start_date: string | null; end_date: string | null }) =>

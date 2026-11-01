@@ -35,9 +35,9 @@ import { compressAvatarFile } from "@/lib/compressImage";
 import { trackEvent } from "@/lib/analytics";
 import { COUNTRIES } from "@/lib/countries";
 import { hasMoneyMention } from "@/lib/missionContentGuards";
-import gouacheEntraide from "@/assets/onboarding/gouache-entraide.png";
-import gouacheGarde from "@/assets/onboarding/gouache-garde.png";
-import gouacheWelcome from "@/assets/onboarding/gouache-welcome.png";
+import gouacheEntraide from "@/assets/aquarelles/univers-entraide-320.webp";
+import gouacheGarde from "@/assets/aquarelles/final-arrivee-240.webp";
+import gouacheWelcome from "@/assets/aquarelles/accueil-rencontre-440.webp";
 
 type ActiveTab = "gardien" | "proprio";
 

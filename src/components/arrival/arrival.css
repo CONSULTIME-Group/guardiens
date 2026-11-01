@@ -63,3 +63,29 @@
 .arrival-stepbar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .arrival-stepbar span { height: 4px; border-radius: 9999px; background: hsl(var(--border)); }
 .arrival-stepbar span[data-done="true"] { background: var(--arrival-green); }
+
+/* C4 Bienvenue v4 (01/11/2026) : confirmation, pastille de départ, bouton
+   collé en bas de l'écran sur téléphone. */
+.arrival-welcome-confirm {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: #E6EFE9; color: #235741;
+  font-size: 0.875rem; font-weight: 600;
+  padding: 7px 14px; border-radius: 9999px;
+}
+.arrival-start-tag {
+  background: #E6EFE9; color: #235741;
+  font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.75rem; font-weight: 600; white-space: nowrap;
+  padding: 3px 8px; border-radius: 9999px;
+}
+@media (max-width: 1023.98px) {
+  .arrival-welcome-cta {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    padding: 14px 22px calc(22px + env(safe-area-inset-bottom));
+    background: var(--arrival-bg);
+    border-top: 1px solid hsl(var(--border));
+    box-shadow: 0 -8px 20px rgba(29, 27, 22, .05);
+  }
+  .arrival-welcome-cta .arrival-primary { min-height: 54px; }
+}
+.arrival-welcome-cta .arrival-primary { box-shadow: 0 6px 14px rgba(44, 109, 80, .24); }

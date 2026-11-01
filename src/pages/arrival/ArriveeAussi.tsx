@@ -13,8 +13,8 @@ import { trackEvent } from "@/lib/analytics";
 import { sanitizeRedirect } from "@/lib/safeRedirect";
 import { alsoNextSteps } from "@/lib/arrival";
 import { ArrivalShell, Eyebrow, SaveError, trackArrival, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
-const gouacheGarde = new URL("../../assets/onboarding/gouache-garde.png", import.meta.url).href;
-const gouacheEntraide = new URL("../../assets/onboarding/gouache-entraide.png", import.meta.url).href;
+const gouacheGarde = new URL("../../assets/aquarelles/final-arrivee-240.webp", import.meta.url).href;
+const gouacheEntraide = new URL("../../assets/aquarelles/univers-entraide-320.webp", import.meta.url).href;
 
 const ArriveeAussi = () => {
   const t = useArrivalT();
