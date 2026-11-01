@@ -1,6 +1,9 @@
 /**
  * G5 / G5b, Premier pas (lot 2). Une garde à 30 km ou moins : la meilleure
  * proche. Sinon : les deux plus proches, quelle que soit la distance.
+ * Lot G-ENT2 (01/11/2026) : l'entraide au premier pas (besoins proches avec
+ * « Je peux », sinon proposition écrite d'après les savoir-faire) et la carte
+ * miroir « Faites garder votre maison ». Deux colonnes sur ordinateur.
  */
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -8,9 +11,10 @@ import Head from "@/components/seo/Head";
 import { useAuth } from "@/contexts/AuthContext";
 import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 import { loadFirstStep, type FirstStepCard, type FirstStepData } from "@/lib/arrivalFirstStep";
-import { arrivalUrl, stepsToReach } from "@/lib/arrival";
+import { stepsToReach } from "@/lib/arrival";
 import AlmaAvatar from "@/components/ai/alma/AlmaAvatar";
 import { ArrivalShell, Eyebrow, Gouache, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
+import { G5Needs, G5OwnerMirror } from "@/components/arrival/G5Entraide";
 const waitingBench = new URL("../../assets/aquarelles/arrivee-banc-360.webp", import.meta.url).href;
 
 const fmt = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
@@ -63,15 +67,19 @@ const ArriveePremierPas = () => {
     </div>
   ) : null;
 
+  const mirror = data.role === "owner" || data.role === "both" ? null : <G5OwnerMirror role={data.role} />;
+
   if (data.hasNear && data.best) {
     const b = data.best;
     return (
-      <ArrivalShell header={t("arrival.steps_sitter.first")} sitterStep={{ current: "first" }}>
+      <ArrivalShell header={t("arrival.steps_sitter.first")} sitterStep={{ current: "first" }} wide>
         <Head><meta name="robots" content="noindex, nofollow" /></Head>
         <div className="space-y-3">
           <Eyebrow>{t("arrival.g5.eyebrow")}</Eyebrow>
-          <h1 className="text-3xl font-semibold">{name ? t("arrival.g5.title", { city, name }) : t("arrival.g5.title_noname", { city })}</h1>
+          <h1 className="text-3xl font-semibold lg:text-[44px] lg:leading-[1.1]">{name ? t("arrival.g5.title", { city, name }) : t("arrival.g5.title_noname", { city })}</h1>
         </div>
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[520px_minmax(0,1fr)] lg:items-start lg:gap-x-[60px]">
+        <div className="space-y-6 lg:col-start-1">
         {score < MIN_COMPLETION_TO_APPLY && profileCard}
         <article className="arrival-card overflow-hidden" data-testid="g5-best">
           {b.cover && <img src={b.cover} alt="" className="h-40 w-full object-cover" />}
@@ -92,8 +100,16 @@ const ArriveePremierPas = () => {
         </article>
         <p className="text-sm">{t("arrival.g5.count_line", { n: data.nearCount, total: data.total })} <Link to="/search" className="arrival-link">{t("arrival.g5.all")}</Link></p>
         {almaLine}
-        {score >= MIN_COMPLETION_TO_APPLY && profileCard}
-        <p className="text-center"><Link to="/dashboard" className="arrival-link text-sm">{t("arrival.g5.dashboard")}</Link></p>
+        </div>
+        <div className="space-y-6 pt-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:pt-0">
+          <G5Needs data={data} />
+        </div>
+        <div className="space-y-6 lg:col-start-1">
+          {mirror}
+          {score >= MIN_COMPLETION_TO_APPLY && profileCard}
+          <p className="text-center lg:text-left"><Link to="/dashboard" className="arrival-link text-sm">{t("arrival.g5.dashboard")}</Link></p>
+        </div>
+        </div>
       </ArrivalShell>
     );
   }
@@ -131,12 +147,8 @@ const ArriveePremierPas = () => {
           <Link to="/settings?section=alerts" className="arrival-link text-sm">{t("arrival.g5b.alert_link")}</Link>
         </div>
       )}
-      <div className="arrival-card p-4 space-y-3">
-        <p className="font-semibold">{t("arrival.g5b.help_title")}</p>
-        <p className="text-sm text-muted-foreground">{t("arrival.g5b.help_text", { city })}</p>
-        <Link to={data.hasSkills ? "/petites-missions" : arrivalUrl("/arrivee/savoir-faire", { flow: "sitter", next: "/arrivee/premier-pas" })}
-          className="arrival-primary inline-flex items-center justify-center">{t("arrival.g5b.help_cta")}</Link>
-      </div>
+      <G5Needs data={data} className="pt-4" />
+      {mirror}
       {score >= MIN_COMPLETION_TO_APPLY && profileCard}
       <p className="text-center"><Link to="/dashboard" className="arrival-link text-sm">{t("arrival.g5.dashboard")}</Link></p>
     </ArrivalShell>

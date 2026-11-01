@@ -9,7 +9,8 @@ import { fetchOpenPublishedSits } from "@/lib/dashboardShared";
 import { publicProfilesLoader } from "@/lib/batchedReads";
 import { computeAffinityResultFull, type AffinityResult } from "@/lib/affinityScore";
 import { haversineDistance } from "@/utils/geo";
-import { pickFirstSteps } from "@/lib/arrival";
+import { pickFirstSteps, pickNearbyNeeds, FIRST_STEP_NEEDS_RADIUS_KM } from "@/lib/arrival";
+import { deriveCategoriesFromCompetences } from "@/lib/skills/categories";
 import { computeSitterCompletion, type CompletionItem } from "@/lib/profileCompletion";
 
 export interface FirstStepCard {
@@ -17,9 +18,36 @@ export interface FirstStepCard {
   cover: string | null; distanceKm: number | null; affinity: AffinityResult | null;
 }
 
+export interface FirstStepNeedCard {
+  id: string; path: string; title: string; city: string; category: string | null; description: string | null; distanceKm: number | null;
+}
+
 export interface FirstStepData {
   city: string; hasNear: boolean; best: FirstStepCard | null; nearCount: number; total: number; closest: FirstStepCard[];
   completion: number; missing: CompletionItem[]; hasAvatar: boolean; hasSkills: boolean; alertActive: boolean;
+  /** Lot G-ENT2 : besoins d'entraide ouverts près de chez la personne, triés par correspondance puis distance. */
+  needs: FirstStepNeedCard[];
+  competences: string[]; helpsWith: string; availableForHelp: boolean; role: string | null;
+}
+
+/** Besoins ouverts autour d'un point (lecture autorisée aux membres connectés : statut open). */
+export async function loadNearbyNeeds(userId: string, me: { lat: number; lng: number } | null, competences: string[]): Promise<FirstStepNeedCard[]> {
+  if (!me) return [];
+  const today = new Date().toISOString().slice(0, 10);
+  const { data, error } = await supabase.from("small_missions")
+    .select("id, slug, title, description, city, category, latitude, longitude, date_needed, accepting_applications, mission_type, moderation_hidden_at, user_id")
+    .eq("status", "open").neq("user_id", userId).is("moderation_hidden_at", null)
+    .order("created_at", { ascending: false }).limit(200);
+  if (error || !data) return [];
+  const cards = (data as any[])
+    .filter((m) => (m.mission_type ?? "besoin") === "besoin" && m.category !== "projet" && m.accepting_applications !== false
+      && (!m.date_needed || m.date_needed >= today) && m.latitude != null && m.longitude != null)
+    .map((m) => ({
+      id: m.id, path: `/petites-missions/${m.slug || m.id}`, title: m.title, city: m.city || "", category: m.category ?? null,
+      description: m.description ?? null,
+      distanceKm: Math.round(haversineDistance(me, { lat: Number(m.latitude), lng: Number(m.longitude) })),
+    }));
+  return pickNearbyNeeds(cards, deriveCategoriesFromCompetences(competences), FIRST_STEP_NEEDS_RADIUS_KM);
 }
 
 async function scoreCards(cards: FirstStepCard[], raws: Map<string, any>, sitter: any) {
@@ -75,6 +103,8 @@ export async function loadFirstStep(userId: string): Promise<FirstStepData> {
       cover: r.cover_photo_url ?? null, distanceKm: d, affinity: null };
   });
   const pick = pickFirstSteps(cards);
+  const competences = Array.isArray((sitter as any)?.competences) ? ((sitter as any).competences as string[]) : [];
+  const needsPromise = loadNearbyNeeds(userId, me, competences).catch(() => [] as FirstStepNeedCard[]);
   const shown = Array.from(new Set([pick.best, ...pick.closest].filter(Boolean))) as FirstStepCard[];
   await scoreCards(shown, raws, sitter).catch(() => {});
   return {
@@ -89,6 +119,8 @@ export async function loadFirstStep(userId: string): Promise<FirstStepData> {
     })(),
     hasAvatar: !!p.avatar_url, hasSkills: Array.isArray((sitter as any)?.competences) && (sitter as any).competences.length > 0,
     alertActive: !!(alertRes as any)?.data,
+    needs: await needsPromise,
+    competences, helpsWith: (p.helps_with ?? "").trim(), availableForHelp: p.available_for_help === true, role: p.role ?? null,
   };
 }
 

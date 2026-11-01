@@ -5,6 +5,9 @@
  * disponibilité dans profiles, la phrase libre dans profiles.helps_with
  * (200 caractères au plus). Un savoir-faire ou une phrase rend disponible
  * pour l'entraide.
+ * Lot G-ENT1 (01/11/2026) : interrupteur visible « Je veux bien qu'on me
+ * demande un coup de main », activé par défaut. C'est lui qui écrit
+ * available_for_help au clic sur Continuer, savoir-faire choisis ou non.
  */
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -14,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchMyOwnerProfile, fetchMyProfile, fetchMySitterProfile, invalidateMyProfile } from "@/lib/myProfile";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { SKILL_CATEGORIES, deriveCategoriesFromCompetences } from "@/lib/skills/categories";
 import { afterG4, readCarry } from "@/lib/arrival";
 import { hasMoneyMention } from "@/lib/missionContentGuards";
@@ -29,17 +33,19 @@ type Row = Record<string, unknown>;
 export type G4Writes = { profile: Row; sitter: Row | null; owner: Row | null };
 
 /** Écritures de G4, pures : rien n'est écrit si rien n'est renseigné. */
-export function buildG4Writes(i: { userId: string; role: string | null; competences: string[]; helpsWith: string }): G4Writes | null {
+export function buildG4Writes(i: { userId: string; role: string | null; competences: string[]; helpsWith: string; available?: boolean }): G4Writes | null {
   const competences = Array.from(new Set(i.competences.map((c) => c.trim()).filter(Boolean))).slice(0, G4_MAX_COMPETENCES);
   const phrase = i.helpsWith.trim().slice(0, G4_MAX_HELPS_WITH);
-  if (!competences.length && !phrase) return null;
-  const profile: Row = { available_for_help: true };
+  const explicit = typeof i.available === "boolean";
+  if (!explicit && !competences.length && !phrase) return null;
+  const available = explicit ? (i.available as boolean) : true;
+  const profile: Row = { available_for_help: available };
   let sitter: Row | null = null;
   let owner: Row | null = null;
   if (competences.length) {
     profile.skill_categories = deriveCategoriesFromCompetences(competences);
     if (i.role !== "owner") sitter = { user_id: i.userId, competences };
-    if (i.role === "owner" || i.role === "both") owner = { user_id: i.userId, competences, competences_disponible: true };
+    if (i.role === "owner" || i.role === "both") owner = { user_id: i.userId, competences, competences_disponible: available };
   }
   if (phrase) profile.helps_with = phrase;
   return { profile, sitter, owner };
@@ -55,6 +61,7 @@ const ArriveeSavoirFaire = () => {
   const [loading, setLoading] = useState(true);
   const [competences, setCompetences] = useState<string[]>([]);
   const [helpsWith, setHelpsWith] = useState("");
+  const [available, setAvailable] = useState(true);
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
   const [moneyError, setMoneyError] = useState(false);
@@ -76,7 +83,7 @@ const ArriveeSavoirFaire = () => {
       role === "sitter" ? none : fetchMyOwnerProfile(user.id, { fresh: true }),
     ]).then(([me, sitter, owner]) => {
       if (cancelled) return;
-      const p = (me.data ?? {}) as { helps_with?: string | null };
+      const p = (me.data ?? {}) as { helps_with?: string | null; available_for_help?: boolean | null };
       const list = (row: unknown) => {
         const c = (row as { competences?: string[] | null } | null)?.competences;
         return Array.isArray(c) ? c : [];
@@ -84,6 +91,8 @@ const ArriveeSavoirFaire = () => {
       // Double rôle : réunion des deux listes, rien n'est perdu à l'enregistrement.
       setCompetences(Array.from(new Set([...list(sitter.data), ...list(owner.data)])).slice(0, G4_MAX_COMPETENCES));
       setHelpsWith(p.helps_with || "");
+      // Activé par défaut ; un « non » déjà enregistré par la personne est respecté.
+      if (p.available_for_help === false && (p.helps_with || list(sitter.data).length || list(owner.data).length)) setAvailable(false);
       setLoading(false);
     }).catch(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
@@ -96,7 +105,7 @@ const ArriveeSavoirFaire = () => {
     setFailed(false);
     setMoneyError(false);
     if (helpsWith.trim() && hasMoneyMention(helpsWith)) { setSaving(false); setMoneyError(true); return; }
-    const writes = buildG4Writes({ userId: user.id, role, competences, helpsWith });
+    const writes = buildG4Writes({ userId: user.id, role, competences, helpsWith, available });
     if (writes) {
       // Profil du rôle d'abord : la disponibilité n'est posée qu'une fois les savoir-faire enregistrés.
       if (writes.sitter) {
@@ -148,6 +157,13 @@ const ArriveeSavoirFaire = () => {
         <Textarea id="g4-free" className="arrival-field" rows={3} maxLength={G4_MAX_HELPS_WITH} value={helpsWith} onChange={(e) => setHelpsWith(e.target.value)} />
         <p className="text-sm text-muted-foreground">{t("arrival.g4.free_help")}</p>
       </div>
+      <label htmlFor="g4-available" className="flex cursor-pointer items-start gap-[14px] rounded-2xl bg-[#E6EFE9] p-[14px]" data-testid="g4-available">
+        <Switch id="g4-available" checked={available} onCheckedChange={setAvailable} className="mt-0.5 shrink-0" />
+        <span className="text-sm leading-snug text-[#235741]">
+          <strong className="block font-semibold">{t("arrival.g4.available_title")}</strong>
+          {t("arrival.g4.available_text")}
+        </span>
+      </label>
       {atMax && <p role="status" className="text-sm text-muted-foreground">{t("arrival.g4.max")}</p>}
       {moneyError && <p role="alert" className="text-sm text-destructive">{t("arrival.g4.money")}</p>}
       <SaveError show={failed} />

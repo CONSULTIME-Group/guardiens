@@ -59,6 +59,14 @@
   min-height: 48px; border-radius: 9999px; font-weight: 600; width: 100%;
 }
 .arrival-primary:disabled { opacity: .5; }
+/* Lot G-ENT2 : bouton secondaire au trait vert (« Je peux », « Publier ma proposition »). */
+.arrival-outline, .arrival-secondary {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 0 1rem; border-radius: 9999px;
+  border: 1px solid var(--arrival-green); color: var(--arrival-green); font-weight: 600; background: transparent;
+}
+.arrival-secondary { min-height: 50px; border-width: 1.5px; font-weight: 700; }
+.arrival-secondary:disabled { opacity: .5; }
 .arrival-link { color: var(--arrival-green); text-decoration: underline; text-underline-offset: 4px; min-height: 44px; }
 .arrival-stepbar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .arrival-stepbar span { height: 4px; border-radius: 9999px; background: hsl(var(--border)); }

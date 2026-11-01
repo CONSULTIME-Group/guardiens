@@ -98,7 +98,7 @@
     "dashboard": "Aller à mon espace"
   },
   "p3": {
-    "header": "Une minute",
+    "header": "Vos affinités",
     "published": "Votre annonce est en ligne.",
     "see": "Voir l'annonce",
     "eyebrow": "Vos affinités",
@@ -129,19 +129,19 @@
   "steps_sitter": {
     "you": "Vous",
     "affinities": "Affinités",
-    "skills": "Savoir-faire",
+    "skills": "Ce que vous aimez faire",
     "first": "Premier pas"
   },
   "back": "Revenir",
   "g1": {
-    "header_sitter": "Deux minutes",
-    "header_entraide": "Une minute",
+    "header_sitter": "Faisons connaissance",
+    "header_entraide": "Faisons connaissance",
     "text": "Votre commune sert à vous montrer les gardes et les coups de main près de chez vous. Votre adresse exacte reste privée.",
     "where_label": "Où vivez-vous ?",
     "abroad": "Je vis hors de France",
     "in_france": "Je vis en France",
     "photo_label": "Une photo de vous (facultatif)",
-    "photo_help": "Un visage met en confiance les propriétaires qui vous lisent.",
+    "photo_help": "Un visage met en confiance les gens qui vous lisent.",
     "photo_add": "Ajouter une photo",
     "photo_change": "Changer la photo",
     "photo_sending": "Envoi en cours"
@@ -187,9 +187,11 @@
   },
   "g4": {
     "header": "Facultatif",
-    "eyebrow": "Vos savoir-faire",
-    "title": "Ce que vous aimez faire pour les autres",
-    "text": "Ces choix s'affichent sur votre fiche. Ils aident les propriétaires à vous choisir, et les gens du coin à vous demander un coup de main.",
+    "eyebrow": "Ce que vous aimez faire",
+    "title": "Qu'aimez-vous faire pour les gens du coin ?",
+    "text": "Vos choix s'affichent sur votre fiche. Les gens du coin y voient ce que vous aimez faire, et les propriétaires aussi.",
+    "available_title": "Je veux bien qu'on me demande un coup de main",
+    "available_text": "Les besoins publiés près de chez vous peuvent vous arriver par email. Vous répondez si vous le souhaitez.",
     "groups": {
       "animaux": "Animaux",
       "jardin": "Jardin",
@@ -241,6 +243,25 @@
     "profile_ok": "Votre fiche peut candidater. Une photo aide les propriétaires à vous choisir.",
     "add": "Ajouter",
     "alma_line": "Je garde un œil sur les nouvelles gardes près de chez vous, et je vous écris dès qu'une s'ouvre dans votre rayon."
+  },
+  "g5e": {
+    "needs_title": "Et cette semaine, un coup de main près de chez vous",
+    "needs_text": "Des besoins publiés par des gens du coin. Ceux qui ressemblent à ce que vous aimez faire passent en premier.",
+    "need_meta": "{{city}} · à {{d}} km",
+    "can": "Je peux",
+    "offer_title": "Proposez votre premier coup de main autour de {{city}}",
+    "offer_title_nocity": "Proposez votre premier coup de main près de chez vous",
+    "offer_text": "Votre proposition s'affiche dans les coups de main proposés près de chez vous. Les gens du coin vous écrivent quand ils en ont besoin.",
+    "offer_live_title": "Votre proposition est en ligne autour de {{city}}",
+    "offer_live_text": "Les gens du coin la voient dans les coups de main proposés et vous écrivent quand ils en ont besoin.",
+    "offer_label": "Votre proposition, écrite d'après vos choix",
+    "offer_yours": "Votre proposition",
+    "offer_edit": "Modifier la phrase",
+    "offer_publish": "Publier ma proposition",
+    "offer_save": "Enregistrer la phrase",
+    "offer_see": "Voir les coups de main autour de vous",
+    "mirror_title": "Vous partez aussi, parfois ?",
+    "mirror_text": "Faites garder votre maison par des gardiens à proximité. Votre compte sert pour les deux."
   },
   "g5b": {
     "title": "Le réseau se construit commune par commune, {{name}}, et vous en faites partie.",
