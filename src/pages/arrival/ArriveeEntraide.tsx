@@ -78,7 +78,7 @@ const ArriveeEntraide = () => {
         <p className="pt-1 text-[13px] text-muted-foreground">{t("arrival.e1.ideas")}</p>
         <div className="flex flex-wrap gap-2">
           {IDEAS.map((k) => (
-            <button key={k} type="button" className="arrival-choice inline-flex items-center text-sm" aria-pressed={need === t(`arrival.e1.${k}`)}
+            <button key={k} type="button" className="arrival-choice inline-flex items-center !min-h-[40px] !px-3 !py-1 !text-[13px]" aria-pressed={need === t(`arrival.e1.${k}`)}
               onClick={() => { setNeed(t(`arrival.e1.${k}`)); void trackEvent("arrival_e1_idea_clicked", { source: "arrival", metadata: { idea: k } }); }}>
               {t(`arrival.e1.${k}`)}
             </button>
