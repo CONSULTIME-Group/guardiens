@@ -8175,6 +8175,45 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_notifications_orphelines_20261101: {
+        Row: {
+          actor_avatar_url: string | null
+          actor_name: string | null
+          body: string
+          created_at: string
+          id: string
+          link: string | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_avatar_url?: string | null
+          actor_name?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          actor_avatar_url?: string | null
+          actor_name?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       _backup_owner_help_e2a_20261011: {
         Row: {
           available_for_help: boolean | null
@@ -20903,6 +20942,7 @@ export type Database = {
         Args: { p_reason: string; p_subscription_id: string }
         Returns: boolean
       }
+      push_job_conversation: { Args: { p_job_id: string }; Returns: string }
       push_job_eligible: { Args: { p_job_id: string }; Returns: boolean }
       push_member_active: { Args: { p_user_id: string }; Returns: boolean }
       push_my_subscriptions: {
