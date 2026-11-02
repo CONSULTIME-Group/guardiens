@@ -77,10 +77,10 @@ Deno.serve(async (req) => {
 
   const counters = { claimed: 0, accepted: 0, failed: 0, retry: 0, skipped: 0, disabled: 0, persistence_errors: 0, nearby_claimed: 0, nearby_unavailable: 0 };
 
-  type Queue = { eligible: string; close: string; payload: (job: Record<string, unknown>, badge?: number) => string | null; ttl: number; badge: boolean };
+  type Queue = { eligible: string; close: string; payload: (job: Record<string, unknown>, badge?: number, conversationId?: string) => string | null; ttl: number; badge: boolean };
   const MAIN: Queue = {
     eligible: 'push_job_eligible', close: 'push_close_job', ttl: 3600, badge: true,
-    payload: (job, badge) => isPushEventKind(job.event_kind) ? JSON.stringify(buildPushPayload(job.event_kind, String(job.job_id), badge)) : null,
+    payload: (job, badge, conversationId) => isPushEventKind(job.event_kind) ? JSON.stringify(buildPushPayload(job.event_kind, String(job.job_id), badge, conversationId)) : null,
   };
   // Lot N2 : nombre de messages non lus du membre, pour la pastille de l'icone.
   // Absent en cas d'erreur : la notification part quand meme, sans pastille.
@@ -88,6 +88,14 @@ Deno.serve(async (req) => {
     try {
       const result = await admin.rpc('push_unread_badge', { p_subscription_id: subscriptionId });
       return result?.error ? undefined : sanitizeBadge(result?.data);
+    } catch { return undefined; }
+  };
+  // Lot MSG2 : conversation du message, pour ouvrir le fil au clic. Absente en
+  // cas d'erreur : la notification part quand meme et mene a la liste.
+  const messageConversation = async (jobId: unknown): Promise<string | undefined> => {
+    try {
+      const result = await admin.rpc('push_job_conversation', { p_job_id: jobId });
+      return !result?.error && typeof result?.data === 'string' ? result.data : undefined;
     } catch { return undefined; }
   };
   const NEARBY: Queue = {
@@ -109,7 +117,8 @@ Deno.serve(async (req) => {
         counters.skipped += 1;
         continue;
       }
-      const payload = queue.payload(job, queue.badge ? await unreadBadge(job.subscription_id) : undefined);
+      const conversationId = queue === MAIN && job.event_kind === 'message' ? await messageConversation(job.job_id) : undefined;
+      const payload = queue.payload(job, queue.badge ? await unreadBadge(job.subscription_id) : undefined, conversationId);
       if (!payload) {
         await finalize(job.job_id, 'skipped', 'bad_kind');
         counters.skipped += 1;

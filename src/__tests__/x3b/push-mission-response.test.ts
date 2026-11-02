@@ -57,7 +57,7 @@ describe("charge utile d'une proposition d'aide", () => {
   });
 });
 
-describe("worker push-5", () => {
+describe("worker push-6", () => {
   it("affiche le texte d'entraide et ouvre les notifications", async () => {
     const w = worker();
     await w.emit("push", { data: { json: () => buildPushPayload("mission_response", JOB) } });
@@ -77,8 +77,8 @@ describe("worker push-5", () => {
   it("version alignée entre le worker et la page", () => {
     const sw = readFileSync("public/push-sw.js", "utf8");
     const page = readFileSync("src/lib/web-push.ts", "utf8");
-    expect(sw).toContain("var PUSH_SW_VERSION = 'push-5';");
-    expect(page).toContain("export const PUSH_SW_VERSION = 'push-5';");
+    expect(sw).toContain("var PUSH_SW_VERSION = 'push-6';");
+    expect(page).toContain("export const PUSH_SW_VERSION = 'push-6';");
   });
 
   it("texte positif, sans tiret long", () => {

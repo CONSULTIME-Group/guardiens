@@ -1,7 +1,7 @@
 /* Push only: no fetch handler and no cache of pages or private data. */
 /* Version read by the page before a test or nearby alerts: an older worker
    would show those payloads as "new message". Bump on every payload change. */
-var PUSH_SW_VERSION = 'push-5';
+var PUSH_SW_VERSION = 'push-6';
 var UUID = '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}';
 var NEARBY_BODY = 'Une nouvelle annonce de garde près de chez vous.';
 var TEST_BODY = 'Notification de test Guardiens : cet appareil peut recevoir vos alertes.';
@@ -24,6 +24,11 @@ function describe(payload) {
     var testTag = new RegExp('^guardiens-test-' + UUID + '$').test(payload.tag) ? payload.tag : 'guardiens-test';
     return { body: TEST_BODY, url: TEST_URL, tag: testTag };
   }
+  /* Lot MSG2 (push-6) : un message ouvre sa conversation. */
+  if (kind === 'message' && typeof payload.url === 'string' && new RegExp('^/messages/' + UUID + '$').test(payload.url)) {
+    var messageTag = new RegExp('^guardiens-message-' + UUID + '$').test(payload.tag) ? payload.tag : 'guardiens-activity';
+    return { body: 'Vous avez un nouveau message.', url: payload.url, tag: messageTag };
+  }
   var application = payload && payload.body === 'Vous avez reçu une nouvelle candidature.';
   var legacyTag = typeof (payload && payload.tag) === 'string' && new RegExp('^guardiens-(message|application)-[a-f0-9-]{36}$').test(payload.tag)
     ? payload.tag : 'guardiens-activity';
@@ -36,7 +41,7 @@ function describe(payload) {
 
 function safePath(url) {
   if (url === '/notifications' || url === TEST_URL) return url;
-  if (typeof url === 'string' && new RegExp('^/sits/' + UUID + '$').test(url)) return url;
+  if (typeof url === 'string' && new RegExp('^/(sits|messages)/' + UUID + '$').test(url)) return url;
   return '/messages';
 }
 

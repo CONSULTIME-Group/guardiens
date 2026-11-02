@@ -1,5 +1,6 @@
 // Contenu de notification strictement constant : aucun nom, aucun extrait,
-// aucune adresse, aucun identifiant de membre.
+// aucune adresse, aucun identifiant de membre. Le lien d'un message porte
+// l'identifiant technique de sa conversation, dans le contenu chiffré.
 
 export type PushEventKind = 'message' | 'application' | 'mission_response';
 
@@ -48,15 +49,18 @@ export function isPushEventKind(value: unknown): value is PushEventKind {
   return value === 'message' || value === 'application' || value === 'mission_response';
 }
 
-export function buildPushPayload(kind: PushEventKind, jobId: string, badge?: unknown): PushPayload {
+export function buildPushPayload(kind: PushEventKind, jobId: string, badge?: unknown, conversationId?: unknown): PushPayload {
   const count = sanitizeBadge(badge);
+  // Lot MSG2 : sans conversation valide, repli sur la liste des messages.
+  const conversation = kind === 'message' && typeof conversationId === 'string' && UUID_RE.test(conversationId)
+    ? conversationId.toLowerCase() : null;
   return {
     title: 'Guardiens',
     body: BODIES[kind],
-    url: URLS[kind],
+    url: conversation ? `/messages/${conversation}` : URLS[kind],
     // Le tag derive du seul identifiant de job, donnee technique non personnelle.
     tag: `guardiens-${kind}-${jobId}`,
-    ...(kind === 'mission_response' ? { kind } : {}),
+    ...(kind === 'mission_response' || conversation ? { kind } : {}),
     ...(count === undefined ? {} : { badge: count }),
   };
 }
