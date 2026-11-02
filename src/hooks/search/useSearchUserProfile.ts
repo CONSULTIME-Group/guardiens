@@ -19,6 +19,8 @@ interface Params {
    * pré-remplit la ville que si le champ n'a pas encore été touché.
    */
   canPrefillCity?: () => boolean;
+  /** Lot perf 15 : profil lu (ville et point posés, ou lecture en échec). */
+  onSettled?: () => void;
 }
 
 
@@ -47,6 +49,7 @@ export function useSearchUserProfile({
   setCity,
   setCityInput,
   canPrefillCity,
+  onSettled,
 }: Params) {
   useEffect(() => {
     if (!userId) return;
@@ -62,7 +65,11 @@ export function useSearchUserProfile({
         supabase.from("applications").select("id, sit:sits!inner(status)").eq("sitter_id", userId).eq("status", "accepted"),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", userId).eq("published", true),
       ]);
-      const profileRes = await profileP;
+      // Lot perf 15 : une lecture en échec libère aussi la recherche.
+      const profileRes = await profileP.catch((): { data: null } => {
+        if (!cancelled) onSettled?.();
+        return { data: null };
+      });
       if (cancelled) return;
       const uc = profileRes.data?.city || "";
       setUserCity(uc);
@@ -74,9 +81,10 @@ export function useSearchUserProfile({
           setCityInput(uc);
         }
         const own = profilePoint(profileRes.data);
-        const coords = own ?? (await geocodeCity(uc));
+        const coords = own ?? (await geocodeCity(uc).catch(() => null));
         if (!cancelled && coords) setUserCoords(coords);
       }
+      if (!cancelled) onSettled?.();
 
       const [spRes, eligRes, reviewsRes] = await restP;
       if (cancelled) return;

@@ -120,6 +120,12 @@ function syncWithUrl() {
   if (cur !== view.path && urlChangedAt.has(cur)) markNavigation(cur);
 }
 
+/** Lot perf 15 : temps écoulé depuis le début de la vue, en ms entières. */
+export function perfViewElapsed(): number {
+  syncWithUrl();
+  return Math.max(0, Math.round(now() - view.start));
+}
+
 /** Jalon atteint dans la vue courante ; le premier de chaque nom compte seul. */
 export function markMilestone(
   name: MilestoneName,

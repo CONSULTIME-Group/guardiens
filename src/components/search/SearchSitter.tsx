@@ -32,7 +32,7 @@ async function locateSitPlaces(items: any[], allowNetwork = true): Promise<Map<s
  * coordsByKey se remplit au fil des réponses ; done se résout quand tous les
  * lieux à chercher ont répondu (jamais de rejet).
  */
-function startLocateSitPlaces(items: any[], allowNetwork = true): { coordsByKey: Map<string, { lat: number; lng: number }>; done: Promise<void> } {
+function startLocateSitPlaces(items: any[], allowNetwork = true): { coordsByKey: Map<string, { lat: number; lng: number }>; done: Promise<void>; frenchDone: Promise<void> } {
   const coordsByKey = new Map<string, { lat: number; lng: number }>();
   const keys = new Map<string, { city: string; country: string | null; place: ReturnType<typeof resolveSitPlace> }>();
   items.forEach((s) => {
@@ -46,8 +46,10 @@ function startLocateSitPlaces(items: any[], allowNetwork = true): { coordsByKey:
     if (point) { coordsByKey.set(k, point); keys.delete(k); return; }
     keys.set(k, { ...g, place: resolveSitPlace(s) });
   });
-  if (!allowNetwork || keys.size === 0) return { coordsByKey, done: Promise.resolve() };
-  const done = Promise.allSettled([...keys.entries()].map(async ([k, g]) => {
+  if (!allowNetwork || keys.size === 0) return { coordsByKey, done: Promise.resolve(), frenchDone: Promise.resolve() };
+  const french: Promise<void>[] = [];
+  const all = [...keys.entries()].map(([k, g]) => {
+    const job = (async () => {
     const c = await geocodeCity(g.city, g.country);
     if (!c) return;
     const check = g.place.country === "FR" && g.place.dept
@@ -55,8 +57,14 @@ function startLocateSitPlaces(items: any[], allowNetwork = true): { coordsByKey:
       : "not_applicable";
     // Point discordant ou invérifiable : jamais une coordonnée vérifiée.
     if (pointUsable(check)) coordsByKey.set(k, { lat: c.lat, lng: c.lng });
-  })).then(() => undefined);
-  return { coordsByKey, done };
+    })();
+    // Lot perf 15 : un lieu hors de France n'entre dans aucune zone française,
+    // la liste ne l'attend pas (il arrive par la seconde passe).
+    if (!g.place.country || g.place.country === "FR") french.push(job);
+    return job;
+  });
+  const settle = (jobs: Promise<void>[]) => Promise.allSettled(jobs).then(() => undefined);
+  return { coordsByKey, done: settle(all), frenchDone: settle(french) };
 }
 import SearchListingCard from "@/components/search/listing/SearchListingCard";
 import AffinityMissingCTA from "@/components/matching/AffinityMissingCTA";
@@ -86,7 +94,7 @@ import { endBootListings, takeListingsPrefetch } from "@/lib/listingsPrefetch";
 import { fetchIntlOpenSits, intlCountryCounts, carryOverParams, DEST_WORLD, DEST_ABROAD } from "@/lib/intlSitSearch";
 import DestinationCountrySelect from "@/components/search/DestinationCountrySelect";
 import { profilePlacePoint } from "@/lib/sitPlacePoint";
-import { markMilestone, skipMilestones } from "@/lib/perfMarks";
+import { markMilestone, perfViewElapsed, skipMilestones } from "@/lib/perfMarks";
 import { applyOpenSitFilter, checkGeocodedPoint, communeDeptFromCoords, pointUsable, fetchAllPages, fetchInChunks, isEndedSit, isFrancePlace, isOpenSit, isPastSit, isWithinRadius, parisTodayIso, resolveSitPlace, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -252,6 +260,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  // Vrai quand la requête serveur a atteint le plafond (jeu potentiellement tronqué → tri distance/affinité partiel).
  const [resultsTruncated, setResultsTruncated] = useState(false);
  const [userCity, setUserCity] = useState("");
+ const [profileSettled, setProfileSettled] = useState(false);
  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
  const [sitterEligible, setSitterEligible] = useState(false);
  const [userCompletedSits, setUserCompletedSits] = useState(0);
@@ -507,6 +516,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   setCity,
   setCityInput,
   canPrefillCity: () => !cityTouchedRef.current,
+  onSettled: () => setProfileSettled(true),
  });
 
  // À chaque ouverture du sélecteur de lieu, la saisie repart de la valeur
@@ -670,7 +680,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    if (tab !== "sits") { skipMilestones("other_tab"); return; }
    const realCount = results.filter((r: any) => !r.is_demo).length;
    if (realCount === 0) { skipMilestones("empty"); return; }
-   markMilestone("FIRST_CARD", { with_point: !!(city || userCoords), sits_loaded: rawResults.length });
+   markMilestone("FIRST_CARD", { with_point: !!(city || userCoords), sits_loaded: rawResults.length, searches: searchGenRef.current, ...searchPhasesRef.current });
  }, [tab, firstSearchSettled, loading, searchError, results, rawResults.length, city, userCoords]);
 
  const availableMembers = useMemo(() => {
@@ -706,6 +716,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   // 20 premières secondes aux mêmes dates les reprennent (la recherche avec le
   // point du membre suit souvent de peu la première).
   const earlyBaseRef = useRef<{ key: string; at: number; p: Promise<SitBase> } | null>(null);
+  // Lot perf 15 : phases de la première carte, envoyées avec FIRST_CARD.
+  const searchPhasesRef = useRef<Record<string, number>>({});
   const sitBaseKey = () => `${isPublic}|${startDate}|${endDate}`;
   const takeOrLoadSitBase = (): Promise<SitBase> => {
    const early = earlyBaseRef.current;
@@ -715,7 +727,9 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   };
   useEffect(() => {
    if (tab !== "sits" || initialLoadDone.current) return;
+   searchPhasesRef.current.mount_ms = perfViewElapsed();
    const p = loadSitBase();
+   void p.then(() => { searchPhasesRef.current.base_ms = perfViewElapsed(); });
    earlyBaseRef.current = { key: sitBaseKey(), at: Date.now(), p };
    // Une lecture en échec n'est jamais reprise : « Réessayer » relit.
    void p.then((b) => { if (b.error && earlyBaseRef.current?.p === p) earlyBaseRef.current = null; });
@@ -725,11 +739,15 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   useEffect(() => {
   if (initialLoadDone.current) return;
   // Anon visitors: fire search immediately (no profile coords to wait for), SEO + signup conversion (Nomador model)
-  if (!user || userCoords || (user && userCity === "")) {
+  // Lot perf 15 : un membre attend la lecture de son profil, une seule recherche
+  // part avec son point (les annonces, elles, sont déjà en lecture, lot perf 5).
+  if (authLoading) return;
+  if (!user || userCoords || profileSettled) {
   initialLoadDone.current = true;
+  searchPhasesRef.current.search_start_ms = perfViewElapsed();
   doSearch();
   }
-   }, [userCoords, user, userCity]);
+   }, [userCoords, user, profileSettled, authLoading]);
 
 
 
@@ -925,9 +943,10 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
      coordsByKey = preLocated;
    } else {
      const run = startLocateSitPlaces(items, !!searchCoords);
-     const settled = await settleWithin(run.done, LOCATE_BUDGET_MS);
+     await settleWithin(run.frenchDone, LOCATE_BUDGET_MS);
      coordsByKey = new Map(run.coordsByKey);
-     if (!settled.done) late = run.done.then(() => new Map(run.coordsByKey));
+     // Seconde passe sans réseau : hasNewCoords l'écarte si rien n'est arrivé.
+     late = run.done.then(() => new Map(run.coordsByKey));
    }
    const placeOf = (s: any) => resolveSitPlace(s);
    const coordsOf = (s: any) => {

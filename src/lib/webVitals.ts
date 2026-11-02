@@ -312,8 +312,17 @@ export function vitalAttribution(m: MetricWithAttribution): VitalEntry["attr"] |
     return target ? { target } : undefined;
   }
   if (m.name === "INP") {
+    // Lot perf 15 : phases de l'interaction, pour savoir si le temps se perd
+    // avant le geste (fil occupé), dans le code du geste ou au rendu.
+    const out: Record<string, string | number> = {};
     const target = shortSelector(a.interactionTarget);
-    return target ? { target } : undefined;
+    if (target) out.target = target;
+    for (const [k, key] of [["inputDelay", "input_delay"], ["processingDuration", "processing"], ["presentationDelay", "presentation"]] as const) {
+      const v = a[k];
+      if (typeof v === "number" && Number.isFinite(v)) out[key] = Math.round(v);
+    }
+    if (typeof a.loadState === "string") out.load_state = a.loadState;
+    return Object.keys(out).length ? out : undefined;
   }
   return undefined;
 }
