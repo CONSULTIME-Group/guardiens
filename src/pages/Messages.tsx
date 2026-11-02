@@ -11,6 +11,7 @@ import { Archive, Home, HeartHandshake, Loader2, MessageCircle, ChevronDown } fr
 import EmptyState from "@/components/shared/EmptyState";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import HouseGuideBlock from "@/components/messages/HouseGuideBlock";
@@ -93,6 +94,7 @@ const Messages = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { hasAccess, loading: subLoading } = useSubscriptionAccess();
   const effectiveRole = user?.role === "both" ? activeRole : user?.role;
   const [searchParams, setSearchParams] = useSearchParams();
@@ -391,6 +393,13 @@ const Messages = () => {
     };
   }, [user, loadConversations]);
 
+  // Lot MSG3 : un fil ouvert est lu partout, pastilles comprises, sans attendre
+  // le prochain rafraîchissement de la navigation.
+  const markConversationSeen = useCallback((convId: string) => {
+    setConversations((prev) => prev.map((c) => (c.id === convId ? { ...c, unread_count: 0 } : c)));
+    queryClient.invalidateQueries({ queryKey: ["nav-badge-counts"] });
+  }, [queryClient]);
+
   // ── Chargement messages avec pagination (50 derniers d'abord) ──
   const loadMessages = useCallback(async (convId: string) => {
     isInitialMessagesLoad.current = true;
@@ -419,8 +428,9 @@ const Messages = () => {
         .eq("conversation_id", convId)
         .neq("sender_id", user.id)
         .is("read_at", null);
+      markConversationSeen(convId);
     }
-  }, [user]);
+  }, [user, markConversationSeen]);
 
   // ── Galerie du gardien : peut-on rattacher les photos de cette conversation ? ──
   const canSaveToGallery = !!(
@@ -527,6 +537,8 @@ const Messages = () => {
               .eq("id", newMsg.id);
             if (error) {
               logger.error("[Messages] update read_at a échoué", { error: error.message, messageId: newMsg.id });
+            } else {
+              markConversationSeen(newMsg.conversation_id);
             }
           })();
         }
