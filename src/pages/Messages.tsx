@@ -36,6 +36,7 @@ import { useHideBottomNav, useHideTopBar } from "@/components/layout/ChromeVisib
 import { avatarImageUrl } from "@/lib/storageImage";
 import { compressMessagePhotoFile } from "@/lib/compressImage";
 import { shouldPrefillDraft } from "@/lib/conversation";
+import { isConversationVisibleInRole } from "@/lib/conversationVisibility";
 
 
 const MESSAGES_PAGE_SIZE = 50;
@@ -621,12 +622,17 @@ const Messages = () => {
     if (pill === "archived") return isArchived;
     if (isArchived) return false;
 
-    // Role-based filtering: missions visible in both roles
     const isMission = !!conv.small_mission_id;
-    if (!isMission && user) {
-      if (effectiveRole === "owner" && conv.owner_id !== user.id) return false;
-      if (effectiveRole === "sitter" && conv.sitter_id !== user.id) return false;
-    }
+    if (user && !isConversationVisibleInRole({
+      userId: user.id,
+      userRole: user.role,
+      activeRole: effectiveRole,
+      ownerId: conv.owner_id,
+      sitterId: conv.sitter_id,
+      sitId: conv.sit_id,
+      smallMissionId: conv.small_mission_id,
+      unreadCount: conv.unread_count,
+    })) return false;
 
     if (pill === "garde") return !!conv.sit_id;
     if (pill === "mission") return isMission;
@@ -885,7 +891,7 @@ const Messages = () => {
                   renderGroup(sitId, g.title, g.convs, g.unreadCount, <Home className="h-3.5 w-3.5 text-muted-foreground shrink-0" />)
                 )}
                 {noSitGroup.length > 0 &&
-                  renderGroup("no-sit", "Entraide", noSitGroup, noSitGroup.reduce((s, c) => s + c.unread_count, 0), <HeartHandshake className="h-3.5 w-3.5 text-muted-foreground shrink-0" />)
+                  renderGroup("no-sit", "Autres échanges", noSitGroup, noSitGroup.reduce((s, c) => s + c.unread_count, 0), <HeartHandshake className="h-3.5 w-3.5 text-muted-foreground shrink-0" />)
                 }
               </>
             )}
