@@ -62,6 +62,11 @@ describe("modèle du premier affichage (lot perf 4)", () => {
 
 describe("parité avec la vraie carte (lot perf 4)", () => {
   it("mêmes classes, même texte, même lien, même photo", () => {
+    // La vraie carte lit l'horloge (annonce « déjà commencée ») : horloge figée
+    // sur TODAY, sinon la fixture du 03/11/2026 casse dès le lendemain (04/11/2026).
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(`${TODAY}T12:00:00`));
+    try {
     const m = buildBootModel(data(), TODAY);
     const item = m.active[0];
     const pl = resolveSitPlace(item);
@@ -75,6 +80,9 @@ describe("parité avec la vraie carte (lot perf 4)", () => {
     expect(boot.querySelector("a")!.getAttribute("href")).toBe(container.querySelector("a")!.getAttribute("href"));
     expect(boot.querySelector("img")!.getAttribute("src")).toBe(container.querySelector("img")!.getAttribute("src"));
     expect(boot.querySelector("article")!.getAttribute("data-testid")).toBe("search-card-boot");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("haut de page : mêmes classes que PublicListings", () => {
