@@ -50,6 +50,16 @@ import { Button } from "@/components/ui/button";
 
 
 
+// Colonnes de la bande de chiffres : deux sur téléphone, autant que de
+// compteurs affichés au-delà. Classes littérales pour que Tailwind les voie.
+const KPI_BAND_COLS = [
+  "grid-cols-2",
+  "grid-cols-1 sm:grid-cols-1",
+  "grid-cols-2 sm:grid-cols-2",
+  "grid-cols-2 sm:grid-cols-3",
+  "grid-cols-2 sm:grid-cols-4",
+];
+
 const Landing = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
