@@ -22,8 +22,10 @@ describe("perf 16, squelette de la vitrine de l'accueil", () => {
     expect(skeleton).toContain("h-[162px]");
   });
 
-  it("titre et lien de bas de bande réservés", () => {
-    expect(skeleton).toContain("md:h-12");
-    expect(skeleton).toContain("mt-8 h-5");
+  it("titre, surtitre et liens réels dans le squelette (hauteur exacte, titre sur deux lignes sur téléphone)", () => {
+    expect(skeleton).toContain("{liveListingsTitle(origin)}</h2>");
+    expect(skeleton).toContain('className="mt-2 font-heading text-3xl font-semibold text-foreground md:text-5xl"');
+    expect(skeleton).toContain('to="/annonces"');
+    expect(skeleton).toContain('to="/petites-missions"');
   });
 });

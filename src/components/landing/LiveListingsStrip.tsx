@@ -201,10 +201,11 @@ export default function LiveListingsStrip({ origin = null, profileOrigin = null 
     // un bandeau réduit à une barre poussait tout le reste de l'accueil (sommaire,
     // « Comment ça marche », pied de page) au moment de l'arrivée des annonces.
     return (
-      <section id="en-ce-moment" className="border-b border-border/40 bg-background py-[52px] scroll-mt-24 md:py-16" aria-busy="true" data-testid="live-listings-skeleton">
+      <section id="en-ce-moment" className="border-b border-border/40 bg-background py-[52px] scroll-mt-24 md:py-16" aria-busy="true" aria-labelledby="live-listings-title" data-testid="live-listings-skeleton">
         <div className="lp-wide">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-transparent select-none" aria-hidden="true">En direct</p>
-          <div className="mt-2 h-9 w-72 max-w-full animate-pulse rounded bg-muted md:h-12" />
+          {/* Titre et surtitre réels (ils ne dépendent pas des annonces) : hauteur exacte à toute largeur. */}
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">En direct</p>
+          <h2 id="live-listings-title" className="mt-2 font-heading text-3xl font-semibold text-foreground md:text-5xl">{liveListingsTitle(origin)}</h2>
           <div className="-mx-4 mt-8 flex gap-4 overflow-hidden px-4 pb-2 md:mx-0 md:grid md:grid-cols-2 md:gap-5 md:px-0 md:pb-0 lg:grid-cols-3" aria-hidden="true">
             {[0, 1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="w-[80%] shrink-0 overflow-hidden rounded-lg border border-border bg-card md:w-auto md:shrink">
@@ -213,7 +214,10 @@ export default function LiveListingsStrip({ origin = null, profileOrigin = null 
               </div>
             ))}
           </div>
-          <div className="mt-8 h-5" />
+          <div className="mt-8 flex flex-wrap gap-5 text-sm font-semibold text-primary">
+            <Link to="/annonces" className="hover:underline">Voir les gardes</Link>
+            <Link to="/petites-missions" className="hover:underline">Voir les besoins</Link>
+          </div>
         </div>
       </section>
     );
