@@ -50,6 +50,16 @@ import { Button } from "@/components/ui/button";
 
 
 
+// Colonnes de la bande de chiffres : deux sur téléphone, autant que de
+// compteurs affichés au-delà. Classes littérales pour que Tailwind les voie.
+const KPI_BAND_COLS = [
+  "grid-cols-2",
+  "grid-cols-1 sm:grid-cols-1",
+  "grid-cols-2 sm:grid-cols-2",
+  "grid-cols-2 sm:grid-cols-3",
+  "grid-cols-2 sm:grid-cols-4",
+];
+
 const Landing = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -115,6 +125,16 @@ const Landing = () => {
   const { houses: kpiMaisons, animals: kpiAnimaux } = communityTotals(publicStats);
   const kpiInscrits = publicStats?.total_inscrits ?? 0;
   const kpiMissions = publicStats?.missions_entraide ?? 0;
+  // Les quatre compteurs de la bande, dans l'ordre d'origine, avec leurs
+  // conditions d'affichage d'origine : ils remplissent une grille de colonnes
+  // égales, et le nombre de colonnes suit le nombre de compteurs réellement
+  // affichés pour que la bande reste symétrique.
+  const kpiBand = [
+    { key: "houses", value: kpiMaisons, label: t("landing.hero.kpi_houses"), shown: kpiMaisons > 0 },
+    { key: "animals", value: kpiAnimaux, label: t("landing.hero.kpi_animals"), shown: kpiAnimaux >= 10 },
+    { key: "members", value: kpiInscrits, label: t("landing.hero.kpi_members"), shown: kpiInscrits > 0 },
+    { key: "missions", value: kpiMissions, label: t("landing.hero.kpi_missions"), shown: kpiMissions > 0 },
+  ].filter((kpi) => kpi.shown);
   const isPressHighlighted = new Date() < PRESS_HIGHLIGHT_UNTIL;
 
 
@@ -252,48 +272,32 @@ const Landing = () => {
            Quatre compteurs dynamiques dans l'ordre d'origine : maisons
            gardées, animaux accompagnés (socle fondateurs inclus dans les
            deux), inscrits, missions d'entraide. Le lien entraide, sorti du
-           hero, vit à droite de cette bande. */}
+           hero, passe sous la bande, centré. */}
         {(kpiMaisons > 0 || kpiAnimaux >= 10 || kpiInscrits > 0 || kpiMissions > 0) && (
            <section className="relative overflow-hidden bg-accent border-b border-border/60">
              {/* Grain de papier à 4 % sur le grand aplat crème. */}
              <GrainOverlay />
-             <div className="relative lp-wide py-4 md:py-5 flex flex-wrap items-center justify-between gap-x-10 gap-y-3">
-              <dl className="flex flex-wrap items-center gap-x-8 md:gap-x-14 gap-y-2">
-                {kpiMaisons > 0 && (
-                  <div>
-                    <dd className="font-heading text-2xl md:text-3xl font-bold text-foreground tabular-nums leading-none">{kpiMaisons}</dd>
-                    <dt className="font-body text-[11px] uppercase tracking-[0.16em] text-muted-foreground mt-1">{t("landing.hero.kpi_houses")}</dt>
+             <div className="relative lp-wide py-4 md:py-5">
+              <dl className={`grid gap-x-6 gap-y-4 text-center md:gap-x-8 ${KPI_BAND_COLS[kpiBand.length] ?? KPI_BAND_COLS[4]}`}>
+                {kpiBand.map((kpi) => (
+                  <div key={kpi.key} className="flex flex-col items-center">
+                    <dd className="font-heading text-2xl md:text-3xl font-bold text-foreground lining-nums tabular-nums leading-none">{kpi.value}</dd>
+                    <dt className="font-body text-[11px] uppercase tracking-[0.16em] text-muted-foreground mt-1">{kpi.label}</dt>
                   </div>
-                )}
-                {kpiAnimaux >= 10 && (
-                  <div>
-                    <dd className="font-heading text-2xl md:text-3xl font-bold text-foreground tabular-nums leading-none">{kpiAnimaux}</dd>
-                    <dt className="font-body text-[11px] uppercase tracking-[0.16em] text-muted-foreground mt-1">{t("landing.hero.kpi_animals")}</dt>
-                  </div>
-                )}
-                {kpiInscrits > 0 && (
-                  <div>
-                    <dd className="font-heading text-2xl md:text-3xl font-bold text-foreground tabular-nums leading-none">{kpiInscrits}</dd>
-                    <dt className="font-body text-[11px] uppercase tracking-[0.16em] text-muted-foreground mt-1">{t("landing.hero.kpi_members")}</dt>
-                  </div>
-                )}
-                {kpiMissions > 0 && (
-                  <div>
-                    <dd className="font-heading text-2xl md:text-3xl font-bold text-foreground tabular-nums leading-none">{kpiMissions}</dd>
-                    <dt className="font-body text-[11px] uppercase tracking-[0.16em] text-muted-foreground mt-1">{t("landing.hero.kpi_missions")}</dt>
-                  </div>
-                )}
+                ))}
               </dl>
-             <Link
-               to="/petites-missions"
-               onClick={() => {
-                 trackEvent("cta_aid_clicked", { metadata: { location: "kpi_band" } });
-               }}
-               className="inline-flex items-center min-h-[44px] font-body text-sm font-medium text-muted-foreground underline underline-offset-4 decoration-border hover:text-foreground hover:decoration-foreground/50 transition-colors"
-             >
-               {t("landing.hero.cta_aid")}
-             </Link>
-           </div>
+              <div className="mt-4 md:mt-5 flex justify-center">
+                <Link
+                  to="/petites-missions"
+                  onClick={() => {
+                    trackEvent("cta_aid_clicked", { metadata: { location: "kpi_band" } });
+                  }}
+                  className="inline-flex items-center justify-center min-h-[44px] font-body text-sm font-medium text-muted-foreground underline underline-offset-4 decoration-border hover:text-foreground hover:decoration-foreground/50 transition-colors"
+                >
+                  {t("landing.hero.cta_aid")}
+                </Link>
+              </div>
+            </div>
          </section>
        )}
 
