@@ -458,6 +458,21 @@ const GuideDetail = () => {
           <p className="text-sm italic text-secondary font-medium">{guide.ideal_for}</p>
           </div>
         </header>
+        {/* Lot perf 17 (04/11/2026) : tout ce qui dépend des lieux (l'essentiel, barre de
+            recherche, carte, catégories) arrive d'un seul bloc. Avant leur arrivée, une
+            réserve de hauteur tient la place : l'essentiel, inséré au-dessus de la barre
+            de recherche, poussait auparavant tout le contenu (CLS mobile 0,10 à 0,33). */}
+        {!placesLoaded ? (
+          <div className="max-w-5xl mx-auto px-4 pt-8 min-h-[120vh]" aria-busy="true" data-testid="guide-places-placeholder">
+            <div className="h-6 w-64 max-w-full animate-pulse rounded bg-muted" />
+            <div className="mt-4 space-y-3">
+              <div className="h-4 w-full animate-pulse rounded bg-muted" />
+              <div className="h-4 w-5/6 animate-pulse rounded bg-muted" />
+              <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
+            </div>
+          </div>
+        ) : (
+        <>
         {/* L'essentiel : questions et reponses construites uniquement depuis les donnees en base.
             Chaque entree disparait si ses donnees manquent, le bloc entier aussi. */}
         {essentials.length > 0 && (
@@ -680,6 +695,8 @@ const GuideDetail = () => {
             </div>
           )}
         </div>
+        </>
+        )}
 
         {/* Schema.org : ItemList des lieux et FAQPage uniquement */}
 
