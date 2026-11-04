@@ -115,6 +115,16 @@ const Landing = () => {
   const { houses: kpiMaisons, animals: kpiAnimaux } = communityTotals(publicStats);
   const kpiInscrits = publicStats?.total_inscrits ?? 0;
   const kpiMissions = publicStats?.missions_entraide ?? 0;
+  // Les quatre compteurs de la bande, dans l'ordre d'origine, avec leurs
+  // conditions d'affichage d'origine : ils remplissent une grille de colonnes
+  // égales, et le nombre de colonnes suit le nombre de compteurs réellement
+  // affichés pour que la bande reste symétrique.
+  const kpiBand = [
+    { key: "houses", value: kpiMaisons, label: t("landing.hero.kpi_houses"), shown: kpiMaisons > 0 },
+    { key: "animals", value: kpiAnimaux, label: t("landing.hero.kpi_animals"), shown: kpiAnimaux >= 10 },
+    { key: "members", value: kpiInscrits, label: t("landing.hero.kpi_members"), shown: kpiInscrits > 0 },
+    { key: "missions", value: kpiMissions, label: t("landing.hero.kpi_missions"), shown: kpiMissions > 0 },
+  ].filter((kpi) => kpi.shown);
   const isPressHighlighted = new Date() < PRESS_HIGHLIGHT_UNTIL;
 
 
