@@ -30,6 +30,11 @@
  * FIRST_CARD, FIRST_CARD_PHOTO et SIT_HERO (perfMarks.ts), mesurés aussi en
  * navigation interne, avec « abandoned » quand la vue se termine avant le
  * jalon ; robots, navigateurs pilotés et ?perf_lab=1 exclus (labTraffic.ts).
+ *
+ * Lot perf 18 (04/11/2026) : attribution du CLS enrichie (valeur, moment,
+ * état de chargement, déplacement vertical, élément juste au-dessus de la
+ * cible, trois plus grands décalages), sous le plafond de 2 048 octets de
+ * l'insertion anonyme (fitVitalPayload).
  */
 import { onCLS, onINP, onFCP, onLCP, onTTFB, type MetricWithAttribution } from "web-vitals/attribution";
 import { currentPerfView, subscribePerfMarks, type Milestone, type PerfView } from "@/lib/perfMarks";
@@ -137,7 +142,7 @@ export function createVitalsCollector(env: CollectorEnv) {
     && (env.random ?? Math.random)() < WEB_VITAL_SAMPLE_RATE[device];
   const pending = new Map<VitalName, VitalEntry>();
   const sent = new Set<VitalName>();
-  const send = env.send ?? ((metadata) => { trackEventBeacon("web_vital", { source: "web_vitals", metadata, anonymous: true }); });
+  const send = env.send ?? ((metadata) => { trackEventBeacon("web_vital", { source: "web_vitals", metadata: fitVitalPayload(metadata), anonymous: true }); });
   const base = {
     host: WEB_VITAL_HOST,
     path: normalizeVitalPath(env.pathname),
@@ -293,6 +298,53 @@ function randomPv(): string {
 
 const shortSelector = (s: unknown) => (typeof s === "string" ? s.slice(0, 120) : undefined);
 
+/**
+ * Lot perf 18 : l'insertion anonyme refuse une ligne dont metadata dépasse
+ * 2 048 octets (politique « Anonymous can insert anonymous events »). Le JSON
+ * compact est gardé sous VITAL_PAYLOAD_BUDGET caractères : on retire d'abord
+ * le détail des décalages, puis l'élément au-dessus, jamais les mesures.
+ */
+export const VITAL_PAYLOAD_BUDGET = 1400;
+export function fitVitalPayload<T extends Record<string, unknown>>(metadata: T): T {
+  const size = (x: unknown) => { try { return JSON.stringify(x).length; } catch { return 0; } };
+  if (size(metadata) <= VITAL_PAYLOAD_BUDGET) return metadata;
+  const metrics = (metadata as { metrics?: Record<string, VitalEntry> }).metrics;
+  const cls = metrics?.CLS?.attr;
+  if (!metrics || !cls) return metadata;
+  const copy = { ...metadata, metrics: { ...metrics, CLS: { ...metrics.CLS, attr: { ...cls } } } } as T & { metrics: Record<string, VitalEntry> };
+  const attr = copy.metrics.CLS.attr as Record<string, string | number>;
+  for (const k of ["shifts", "above", "top", "n", "load_state"]) {
+    delete attr[k];
+    if (size(copy) <= VITAL_PAYLOAD_BUDGET) break;
+  }
+  return copy;
+}
+
+/** Sélecteur court d'un nœud : balise, id, trois classes au plus, et son parent. Sans texte ni attribut de contenu. */
+export function compactSelector(node: Node | null): string | undefined {
+  const el = node && node.nodeType === 1 ? (node as Element) : node?.parentElement ?? null;
+  if (!el) return undefined;
+  const one = (e: Element) => {
+    const id = e.id ? `#${e.id}` : "";
+    const cls = typeof e.className === "string" ? e.className.trim().split(/\s+/).filter(Boolean).slice(0, 3).map((c) => `.${c}`).join("") : "";
+    return `${e.tagName.toLowerCase()}${id}${cls}`;
+  };
+  const parent = el.parentElement;
+  return (parent && parent !== document.body ? `${one(parent)}>${one(el)}` : one(el)).slice(0, 120);
+}
+
+/** Élément juste au-dessus de la cible (frère précédent, sinon celui d'un ancêtre) : candidat pousseur. */
+export function pusherCandidate(node: Node | null): string | undefined {
+  let el: Element | null = node && node.nodeType === 1 ? (node as Element) : node?.parentElement ?? null;
+  for (let depth = 0; el && depth < 6; depth++) {
+    const prev = el.previousElementSibling;
+    if (prev && prev.tagName !== "SCRIPT" && prev.tagName !== "STYLE") return compactSelector(prev);
+    el = el.parentElement;
+    if (!el || el === document.body) return undefined;
+  }
+  return undefined;
+}
+
 /** Attribution réduite : élément et phases du LCP, cible du plus grand décalage. Sans URL ni jeton. */
 export function vitalAttribution(m: MetricWithAttribution): VitalEntry["attr"] | undefined {
   const a = (m as unknown as { attribution?: Record<string, unknown> }).attribution;
@@ -308,8 +360,34 @@ export function vitalAttribution(m: MetricWithAttribution): VitalEntry["attr"] |
     return out;
   }
   if (m.name === "CLS") {
+    // Lot perf 18 (04/11/2026) : la seule cible du plus grand décalage nomme
+    // l'élément déplacé, jamais celui qui l'a poussé. On ajoute le moment, le
+    // déplacement vertical, l'élément juste au-dessus de la cible (candidat
+    // pousseur) et les trois plus grands décalages de la fenêtre.
+    const out: Record<string, string | number> = {};
     const target = shortSelector(a.largestShiftTarget);
-    return target ? { target } : undefined;
+    if (target) out.target = target;
+    if (typeof a.largestShiftValue === "number") out.value = Math.round(a.largestShiftValue * 1000) / 1000;
+    if (typeof a.largestShiftTime === "number") out.t = Math.round(a.largestShiftTime);
+    if (typeof a.loadState === "string") out.load_state = a.loadState;
+    const src = a.largestShiftSource as { node?: Node | null; previousRect?: DOMRectReadOnly; currentRect?: DOMRectReadOnly } | undefined;
+    if (src?.previousRect && src?.currentRect) {
+      out.dy = Math.round(src.currentRect.y - src.previousRect.y);
+      out.top = Math.round(src.previousRect.y);
+    }
+    const above = pusherCandidate(src?.node ?? null);
+    if (above) out.above = above;
+    const entries = (m as unknown as { entries?: Array<{ value: number; startTime: number; sources?: Array<{ node?: Node | null }> }> }).entries ?? [];
+    if (entries.length) {
+      out.n = entries.length;
+      out.shifts = [...entries]
+        .sort((x, y) => y.value - x.value)
+        .slice(0, 3)
+        .map((e) => `${Math.round(e.startTime)}:${Math.round(e.value * 1000) / 1000}:${(compactSelector(e.sources?.find((x) => x.node)?.node ?? null) ?? "?").slice(-70)}`)
+        .join("|")
+        .slice(0, 240);
+    }
+    return Object.keys(out).length ? out : undefined;
   }
   if (m.name === "INP") {
     // Lot perf 15 : phases de l'interaction, pour savoir si le temps se perd
@@ -418,7 +496,7 @@ const reportWebVitals = (onPerfEntry?: (metric: MetricWithAttribution) => void) 
     sampled: collector.sampled,
     base: milestoneBase,
     hardPv,
-    send: (metadata) => { trackEventBeacon("web_vital", { source: "web_vitals", metadata, anonymous: true }); },
+    send: (metadata) => { trackEventBeacon("web_vital", { source: "web_vitals", metadata: fitVitalPayload(metadata), anonymous: true }); },
   });
   subscribePerfMarks({
     onMilestone: (m) => milestones.onMilestone(m),
