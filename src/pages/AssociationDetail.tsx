@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import PageMeta from "@/components/PageMeta";
 import NotFound from "@/pages/NotFound";
 import { SITE_URL } from "@/lib/seo";
-import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
+import { buildOgImageUrl } from "@/lib/ogImage";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -152,7 +152,10 @@ export default function AssociationDetail() {
   const typeLabel = associationTypeLabel(data.association_type);
   const canonical = `${SITE_URL}/associations/${data.slug}`;
   const indexable = isAssociationIndexable(data);
-  const ogImage = allStored ? photos[0].url : DEFAULT_OG_IMAGE;
+  // Photo seulement avec l'accord de l'association (allStored) ; sinon visuel généré avec son nom et sa ville.
+  const ogImage = allStored
+    ? photos[0].url
+    : buildOgImageUrl({ title: data.name, subtitle: `${data.city}${data.departement_name ? ` (${data.departement_name})` : ""}`, kind: "association" });
   const sameAs = [data.facebook_url, data.instagram_url].filter(Boolean) as string[];
   const storedImages = photos.filter((p) => p.hosting === "storage").map((p) => p.url);
 

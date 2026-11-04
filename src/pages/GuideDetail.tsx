@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCityPageExists } from "@/hooks/useCityPageExists";
 import { useDepartmentPageExists } from "@/hooks/useDepartmentPageExists";
 import PageMeta from "@/components/PageMeta";
+import { buildOgImageUrl } from "@/lib/ogImage";
 import { MapPin, TreePine, Stethoscope, Coffee, Store, Footprints, Droplets, Trees, ArrowRight, ArrowLeft, Search, Navigation, ExternalLink } from "lucide-react";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 const guideHeaderImg = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/guide-header.webp";
@@ -418,6 +419,7 @@ const GuideDetail = () => {
         title={metaTitle}
         description={metaDescription}
         path={`/guides/${guide.slug}`}
+        image={buildOgImageUrl({ title: guide.city, subtitle: "Parcs, vétérinaires et adresses utiles pour les gardiens", kind: "guide" })}
         ready={contentReady}
       />
 
