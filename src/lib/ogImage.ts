@@ -5,7 +5,7 @@
 const PROJECT_REF = import.meta.env.VITE_SUPABASE_PROJECT_ID || "erhccyqevdyevpyctsjj";
 const OG_BASE = `https://${PROJECT_REF}.supabase.co/functions/v1/og-page`;
 
-export type OgKind = "ville" | "departement" | "race" | "article" | "guide" | "faq" | "generic";
+export type OgKind = "ville" | "departement" | "race" | "article" | "guide" | "association" | "mission" | "faq" | "generic";
 
 export function buildOgImageUrl(opts: {
   title: string;

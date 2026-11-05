@@ -2,7 +2,7 @@
 // Génère une image Open Graph PNG (1200x630) à la volée pour n'importe quelle page éditoriale
 // (ville, département, race, article, guide, FAQ…).
 //
-// GET /og-page?title=...&subtitle=...&kind=ville|departement|race|article|guide|generic
+// GET /og-page?title=...&subtitle=...&kind=ville|departement|race|article|guide|association|mission|generic
 // Tous les paramètres sont optionnels (valeurs par défaut neutres).
 
 import satori from "https://esm.sh/satori@0.10.13";
@@ -19,6 +19,8 @@ const KIND_LABELS: Record<string, string> = {
   race: "Fiche de race",
   article: "Guide pratique",
   guide: "Bons plans",
+  association: "Association",
+  mission: "Coup de main",
   faq: "Questions fréquentes",
   generic: "Guardiens",
 };
@@ -29,6 +31,8 @@ const KIND_GRADIENTS: Record<string, string> = {
   race: "linear-gradient(135deg, #5B3A29 0%, #8A5A3B 100%)",
   article: "linear-gradient(135deg, #2F4F2F 0%, #5C7A29 100%)",
   guide: "linear-gradient(135deg, #6B2C5F 0%, #9B3D7F 100%)",
+  association: "linear-gradient(135deg, #1F4D4A 0%, #2F7A70 100%)",
+  mission: "linear-gradient(135deg, #7A4B1E 0%, #B8742F 100%)",
   faq: "linear-gradient(135deg, #3D3D5B 0%, #5B5B82 100%)",
   generic: "linear-gradient(135deg, #0F2A3D 0%, #1A365D 100%)",
 };

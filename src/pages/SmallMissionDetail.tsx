@@ -31,6 +31,7 @@ import ReportButton from "@/components/reports/ReportButton";
 import PublicLoadError from "@/components/seo/ErrorPage";
 import { isIndexableEntraideMission } from "../../supabase/functions/_shared/entraideMissionIndexability.js";
 import PageMeta from "@/components/PageMeta";
+import { buildOgImageUrl } from "@/lib/ogImage";
 import LegacyProjetRedirect from "@/components/seo/LegacyProjetRedirect";
 import { legacyProjetRedirectTarget } from "@/lib/projetSeo";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -1214,7 +1215,7 @@ const SmallMissionDetail = () => {
           ].filter(Boolean);
           return parts.join(". ").slice(0, 155);
         })()}
-        image={mission.photos?.[0]}
+        image={mission.photos?.[0] || buildOgImageUrl({ title: displayTitle, subtitle: `Coup de main à ${cityLabel}`, kind: "mission" })}
         type="article"
         publishedAt={mission.created_at}
         noindex={shouldNoindex}

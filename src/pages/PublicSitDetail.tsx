@@ -47,6 +47,7 @@ import { STARTED_SIT_NOTICE, isStartedOpenSit } from "@/lib/sitStarted";
 import { markMilestone } from "@/lib/perfMarks";
 import { takeSitPrefetch } from "@/lib/sitPrefetch";
 import { deptCodeFromPostal } from "@/lib/sitLocation";
+import { buildSitTitle } from "@/lib/seoTitle";
 
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
 
@@ -543,13 +544,11 @@ const PublicSitDetail = () => {
  ? pets.map((p: any) => `${p.name} (${petSpeciesLabelLower(p.species) ?? "animal"})`).join(", ")
  : "animaux à confier";
 
- // og:title, titre de l'annonce + ville (si dispo) + suffixe Guardiens
+ // Titre de l'annonce + ville (si dispo), sans suffixe : PageMeta ajoute " | Guardiens".
+ // Lot SEO-META1 : seule la partie titre est raccourcie, jamais la ville, au dernier
+ // mot entier, pour un titre final de 60 caractères au plus (src/lib/seoTitle.ts).
  const ownerCity = sitCity;
- const baseTitle = sit.title || "Garde de maison et animaux";
- const ogTitle = ownerCity
- ? `${baseTitle} à ${ownerCity}, Guardiens`
- : `${baseTitle}, Guardiens`;
- const truncatedTitle = ogTitle.length > 60 ? ogTitle.slice(0, 57) + "…" : ogTitle;
+ const truncatedTitle = buildSitTitle(sit.title, ownerCity);
 
  // og:description, ville (si dispo) + dates en français + description courte du logement
  const propertyDescShort = property?.description

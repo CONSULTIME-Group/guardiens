@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { slugify } from "@/lib/normalize";
 import { CITIES } from "@/data/cities";
 import { buildOgImageUrl } from "@/lib/ogImage";
+import { buildBreedTitle } from "@/lib/seoTitle";
 import ShareLink from "@/components/share/ShareLink";
 import PageMeta from "@/components/PageMeta";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
@@ -123,7 +124,7 @@ const BreedPage = () => {
   // Valeur inconnue : terme générique français, jamais la valeur brute DB.
   const speciesLabel = petSpeciesLabelLower(breed.species) ?? "animal";
   const breedCap = breed.breed.charAt(0).toUpperCase() + breed.breed.slice(1);
-  const title = `Garde de ${breedCap} à domicile : conseils gardien | Guardiens`;
+  const title = buildBreedTitle(breedCap);
   const description =
     (breed.sitter_tips || breed.temperament || "")
       .slice(0, 155)
