@@ -51,6 +51,9 @@ const IGNORED_PATTERNS: RegExp[] = [
   // Lot ERRFIX du 25/10 : messages standard EIP-1193 (codes 4900 et 4901) d'un
   // portefeuille crypto installé chez le visiteur, sans pile ni fichier du site.
   /^The provider is disconnected from (all chains|the specified chain)/i,
+  // Lot ERRFIX du 05/11 : script de mode lecture injecté par Brave et les
+  // navigateurs iOS dérivés de Firefox (window.__firefox__), absent du code du site.
+  /__firefox__/i,
 ];
 
 function shouldIgnore(message: string): boolean {

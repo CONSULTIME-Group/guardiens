@@ -36,3 +36,20 @@ describe("errfix 25/10 : rejet EIP-1193 d'un portefeuille du visiteur ignoré", 
     expect(rpc).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("errfix 05/11 : script __firefox__ injecté par le navigateur ignoré", () => {
+  beforeAll(() => installGlobalErrorLogger());
+  beforeEach(() => rpc.mockClear());
+
+  it("« Can't find variable: __firefox__ » n'est pas enregistré", async () => {
+    reject(new ReferenceError("Can't find variable: __firefox__"));
+    await tick();
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("« window.__firefox__.reader » non plus", async () => {
+    reject(new TypeError("undefined is not an object (evaluating 'window.__firefox__.reader')"));
+    await tick();
+    expect(rpc).not.toHaveBeenCalled();
+  });
+});
