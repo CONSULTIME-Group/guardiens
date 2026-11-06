@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import Head from "@/components/seo/Head";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useTranslation, Trans } from "@/i18n/react";
+import i18n from "@/i18n";
+import arrivalFr from "@/i18n/locales/fr/arrival.json";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
@@ -44,6 +46,9 @@ import {
 } from "@/components/ui/dialog";
 
 type Role = "owner" | "sitter" | "both";
+
+// Les textes du formulaire sont prêts avant les blocs chargés à la demande.
+i18n.addResourceBundle("fr", "common", { arrival: arrivalFr }, true, true);
 
 const STRENGTH_KEYS = ["", "weak", "medium", "good", "strong"] as const;
 
@@ -899,7 +904,7 @@ const Register = () => {
   </div>
 
            <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-             {isLoading ? t("register_page.submitting") : v2 ? t("arrival.c2.submit") : t("register_page.submit")}
+             {isLoading ? t("register_page.submitting") : t("register_page.submit")}
            </Button>
   </form>
   )}
