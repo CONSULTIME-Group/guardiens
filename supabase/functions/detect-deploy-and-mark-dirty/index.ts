@@ -68,7 +68,7 @@ const MIN_MARK_INTERVAL_HOURS = 72;
 /**
  * Plafond de renders Prerender inities par nous, toutes sources confondues
  * (vagues de deploiement, triggers de contenu, fiches gardien), lu sur une
- * fenetre glissante de RENDER_BUDGET_WINDOW_DAYS jours.
+ * fenetre qui part du debut du cycle Prerender (voir renderCycleStart).
  *
  * 13/10/2026 (lot PR1) : 18 000 par mois calendaire -> 10 000 sur 30 jours
  * glissants. Le cycle de facturation Prerender ne commence pas le 1er, et au
@@ -85,8 +85,33 @@ const MIN_MARK_INTERVAL_HOURS = 72;
  */
 const MONTHLY_RENDER_BUDGET = 10_000;
 export const RENDER_BUDGET_WINDOW_DAYS = 30;
+
+/**
+ * 06/11/2026 (lot PR3) : le plafond se lit depuis le debut du cycle de
+ * facturation Prerender (le 4 de chaque mois, 00 h heure de Paris), plus sur
+ * 30 jours glissants. Le quota Prerender est reparti a zero le 4 novembre,
+ * alors que la fenetre glissante gardait les 14 458 rendus d'octobre et
+ * refusait toute vague (308 pages) jusqu'au 12 novembre environ. Meme regle
+ * que public.seo_reserve_render. Le debut de cycle est pris a 22 h UTC la
+ * veille : en hiver (UTC+1) cela compte une heure de rendus en trop, ce qui
+ * penche du cote de la prudence.
+ */
+export const PRERENDER_CYCLE_DAY = 4;
+export function renderCycleStart(now: Date = new Date()): Date {
+  const paris = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit",
+  }).formatToParts(now);
+  const part = (type: string) => Number(paris.find((p) => p.type === type)!.value);
+  let year = part("year");
+  let month = part("month") - 1;
+  if (part("day") < PRERENDER_CYCLE_DAY) {
+    month -= 1;
+    if (month < 0) { month = 11; year -= 1; }
+  }
+  return new Date(Date.UTC(year, month, PRERENDER_CYCLE_DAY - 1, 22, 0, 0));
+}
 function budgetWindowStart(): Date {
-  return new Date(Date.now() - RENDER_BUDGET_WINDOW_DAYS * 86_400_000);
+  return renderCycleStart();
 }
 
 /** Identifiant d'entite fixe du signal admin "plafond mensuel atteint". */

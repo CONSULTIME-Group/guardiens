@@ -4,7 +4,8 @@ import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.t
 let handler: (req: Request) => Promise<Response>;
 const serve = Deno.serve;
 Object.defineProperty(Deno, "serve", { value: (h: typeof handler) => { handler = h; }, configurable: true });
-try { await import("./index.ts"); } finally { Object.defineProperty(Deno, "serve", { value: serve, configurable: true }); }
+let renderCycleStart: (d?: Date) => Date;
+try { ({ renderCycleStart } = await import("./index.ts")); } finally { Object.defineProperty(Deno, "serve", { value: serve, configurable: true }); }
 
 const families = ["cities", "departments", "guides", "articles"];
 type Row = Record<string, any>;
@@ -222,15 +223,20 @@ Deno.test("vague refusée avant 72 h, acceptée après", async () => {
   assertEquals(f.marked, []);
 });
 
-Deno.test("plafond lu sur 30 jours glissants, plus sur le mois calendaire", async () => {
+Deno.test("plafond lu depuis le début du cycle Prerender (le 4, heure de Paris), plus sur 30 jours glissants", async () => {
   const f = fixture();
   for (const st of f.state.values()) st.last_marked_at = hoursAgo(73);
   f.fingerprints[0].marked_at = hoursAgo(73);
   await run(f);
-  const since = f.since;
-  const start = Date.parse(since.replace(/^gte\./, ""));
-  const days = (Date.now() - start) / 86_400_000;
-  assert(days > 29.9 && days < 30.1, `fenetre de ${days} jours`);
+  const start = Date.parse(f.since.replace(/^gte\./, ""));
+  assertEquals(start, renderCycleStart().getTime());
+  assert(start <= Date.now() && Date.now() - start <= 31 * 86_400_000);
+});
+Deno.test("début de cycle : le 4 du mois courant, ou le 4 du mois précédent avant le 4", () => {
+  assertEquals(renderCycleStart(new Date("2026-11-06T08:00:00Z")).toISOString(), "2026-11-03T22:00:00.000Z");
+  assertEquals(renderCycleStart(new Date("2026-11-04T00:30:00Z")).toISOString(), "2026-11-03T22:00:00.000Z");
+  assertEquals(renderCycleStart(new Date("2026-11-03T12:00:00Z")).toISOString(), "2026-10-03T22:00:00.000Z");
+  assertEquals(renderCycleStart(new Date("2027-01-02T12:00:00Z")).toISOString(), "2026-12-03T22:00:00.000Z");
 });
 Deno.test("ancienne publication sans les nouvelles empreintes : ne pas adopter un hash absent", async () => {
   const f = fixture();
