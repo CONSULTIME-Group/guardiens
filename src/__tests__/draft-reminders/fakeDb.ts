@@ -9,6 +9,8 @@ export interface FakeDbData {
   preferences?: Row[];
   departures?: Row[];
   logs?: Row[];
+  properties?: Row[];
+  galleryCount?: number;
   /** Tables ou requêtes en échec : "profiles", "suppressed_emails", "email_preferences", "history", "journey", "daily", "published", "departures". */
   failing?: string[];
 }
@@ -55,6 +57,8 @@ export function fakeDb(data: FakeDbData) {
         // plafond quotidien
         return { data: null, count: logs.filter(l => live(l) && l.template_name === "sit-draft-reminder").length, error: err("daily") };
       }
+      case "properties": return { data: (data.properties ?? []).find(p => p.user_id === eq("user_id")) ?? null, error: null };
+      case "owner_gallery": return { data: null, count: (data.galleryCount ?? 0), error: null };
       default: throw new Error(`Unexpected table ${t.table}`);
     }
   }
@@ -94,6 +98,7 @@ export function baseData(over: FakeDbData = {}): FakeDbData {
     profiles: [{ id: OWNER, email: "Camille@Fixture.test", first_name: "Camille", city: "Lyon", latitude: 45.76, longitude: 4.83, last_seen_at: ago(1) }],
     preferences: [{ user_id: OWNER, product_emails: true }],
     logs: [],
+    properties: [{ id: "prop", user_id: OWNER, photos: ["https://fixture.invalid/maison.jpg"], cover_photo_url: null }],
     ...over,
   };
 }
