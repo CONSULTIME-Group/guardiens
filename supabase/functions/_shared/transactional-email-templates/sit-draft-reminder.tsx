@@ -1,10 +1,10 @@
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Button, Container, Head, Heading, Html, Preview, Text, Section,
+  Body, Button, Container, Heading, Html, Preview, Text, Section,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
-import { AlmaSignature, AlmaIntro } from './_alma-signature.tsx'
+import { AlmaSignature } from './_alma-signature.tsx'
 import { AlmaSignoff } from './_alma-signoff.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
@@ -16,6 +16,7 @@ interface MissingItem {
 }
 
 interface Props {
+  title?: string
   firstName?: string
   sitId?: string
   fieldsRemaining?: number
@@ -29,93 +30,44 @@ interface Props {
   profileUrl?: string
 }
 
-// Amorce adaptée à l'âge réel du brouillon. Sans valeur exploitable,
-// on retombe sur la formulation neutre, jamais sur "Hier".
-function openingSentence(days?: number): string {
-  if (typeof days !== 'number' || !Number.isFinite(days)) {
-    return 'Vous avez commencé à rédiger une annonce il y a un moment'
-  }
-  if (days <= 1) return 'Hier, vous avez commencé à rédiger une annonce'
-  if (days <= 6) return 'Il y a quelques jours, vous avez commencé à rédiger une annonce'
-  if (days <= 29) return 'Il y a quelques semaines, vous avez commencé à rédiger une annonce'
-  return 'Vous avez commencé à rédiger une annonce il y a un moment'
-}
-
 const SitDraftReminderEmail = ({
-  firstName = '',
-  fieldsRemaining = 3,
-  missingItems = [],
-  nearbySittersLabel,
-  daysSinceCreated,
+  firstName = '', title = '', missingItems,
   resumeUrl = 'https://guardiens.fr/dashboard',
-  profileUrl = 'https://guardiens.fr/owner-profile',
 }: Props) => {
-  const items = Array.isArray(missingItems) ? missingItems : []
-  const count = items.length > 0 ? items.length : fieldsRemaining
-  const formItems = items.filter((i) => !i.inProfile)
-  const profileItems = items.filter((i) => i.inProfile)
-  const label = typeof nearbySittersLabel === 'string' && nearbySittersLabel.trim() ? nearbySittersLabel.trim() : null
+  // Une liste absente ne prouve pas que l'annonce est complète.
+  const known = Array.isArray(missingItems)
+  const items = known ? missingItems! : []
+  const ready = known && items.length === 0
+  const listingTitle = typeof title === "string" ? title.trim() : ""
+  const heading = ready ? 'Votre annonce est prête à être publiée' : 'Reprenons votre annonce'
   return (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>Votre annonce vous attend en brouillon</Preview>
+    <Preview>{ready ? 'Il reste à vérifier votre annonce et à la publier.' : 'Votre saisie est conservée. Voici ce qu’il reste à compléter.'}</Preview>
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
         <AlmaSignature />
-        <Heading style={h1}>Vous avez commencé une annonce chez Guardiens</Heading>
-        <AlmaIntro
-          firstName={firstName}
-          seen="Voici où en est votre annonce en brouillon."
-        />
+        <Heading style={h1}>{heading}</Heading>
+        <Text style={text}>Bonjour{firstName ? ` ${firstName}` : ''},</Text>
         <Text style={text}>
-          {openingSentence(daysSinceCreated)} pour faire garder vos
-          animaux et votre maison. Elle vous attend en brouillon dans votre espace.
+          {listingTitle ? <>Votre annonce « {listingTitle} » est enregistrée en brouillon.</> : 'Votre annonce est enregistrée en brouillon.'}
+          {' '}Publiez-la pour la rendre visible et permettre aux gardiens de vous proposer leur aide.
         </Text>
         <Text style={text}>
-          {count === 0
-            ? 'Votre annonce est complète\u00a0: il reste à la publier.'
-            : items.length > 0
-              ? `Voici précisément ce qu'il reste à renseigner, ${count} point${count > 1 ? 's' : ''} :`
-              : `Il vous reste environ ${count} champ${count > 1 ? 's' : ''} à remplir pour la publier.`}
+          {ready
+            ? 'Les informations nécessaires sont renseignées. Vérifiez-les, puis cliquez sur « Publier » dans votre annonce.'
+            : known
+              ? 'Pour la publier, il reste à compléter :'
+              : 'Reprenez votre annonce pour vérifier les informations et terminer sa publication.'}
         </Text>
-        {formItems.length > 0 ? (
-          <ul style={list}>
-            {formItems.map((item) => (
-              <li key={item.label} style={listItem}>{item.label}</li>
-            ))}
-          </ul>
-        ) : null}
-        {profileItems.length > 0 ? (
-          <>
-            <Text style={text}>
-              {profileItems.length > 1
-                ? 'Ces points se remplissent sur votre profil propriétaire :'
-                : 'Ce point se remplit sur votre profil propriétaire :'}
-            </Text>
-            <ul style={list}>
-              {profileItems.map((item) => (
-                <li key={item.label} style={listItem}>{item.label}</li>
-              ))}
-            </ul>
-            <Text style={textSmall}>
-              À compléter ici&nbsp;: <a href={profileUrl} style={link}>votre profil propriétaire</a>.
-            </Text>
-          </>
-        ) : null}
-        {label ? (
-          <Text style={text}>
-            Autour de vous&nbsp;: {label}.
-          </Text>
-        ) : null}
+        {items.length > 0 && <ul style={list}>
+          {items.map(item => <li key={item.label} style={listItem}>{item.label}</li>)}
+        </ul>}
         <Section style={{ textAlign: 'center', margin: '24px 0' }}>
-          <Button href={resumeUrl} style={btn}>
-            {count === 0 ? 'Publier mon annonce' : 'Reprendre mon annonce'}
-          </Button>
+          <Button href={resumeUrl} style={btn}>{ready ? 'Vérifier et publier mon annonce' : 'Compléter mon annonce'}</Button>
         </Section>
-        <Text style={textSmall}>
-          Ce brouillon se supprime aussi depuis votre tableau de bord, si vous le souhaitez.
-        </Text>
+        <Text style={textSmall}>Votre saisie est conservée. Si votre projet a changé, vous pouvez modifier vos dates ou supprimer ce brouillon depuis votre espace.</Text>
         <AlmaSignoff />
         <LegalFooter purpose="l'accompagnement de votre brouillon d'annonce" basis="6.1.f" />
 
@@ -127,15 +79,18 @@ const SitDraftReminderEmail = ({
 
 export const template = {
   component: SitDraftReminderEmail,
-  subject: 'Vous avez commencé une annonce chez Guardiens',
+  subject: (data: Props) => Array.isArray(data.missingItems) && data.missingItems.length === 0
+    ? 'Votre annonce est prête : il reste à la publier'
+    : 'Votre brouillon vous attend : terminez votre annonce',
   displayName: 'Rappel brouillon annonce',
   previewData: {
     firstName: 'Camille',
+    title: 'Garde de notre maison à Lyon',
     sitId: 'demo-sit-id',
     fieldsRemaining: 2,
     missingItems: [
       { label: "Pourquoi avez-vous besoin d'un gardien pour cette période ?" },
-      { label: 'Au moins un animal déclaré sur votre logement', inProfile: true },
+      { label: 'Une photo de votre logement ou de votre galerie' },
     ],
     nearbySittersCount: 12,
     nearbySittersLabel: '12 gardiens à moins de 50 km de Lyon',
@@ -162,4 +117,3 @@ const btn = {
 }
 const list = { margin: '0 0 14px', padding: '0 0 0 20px' }
 const listItem = { fontSize: '14px', color: '#44413B', lineHeight: '1.6', marginBottom: '6px' }
-const link = { color: '#2C6D50', textDecoration: 'underline' }

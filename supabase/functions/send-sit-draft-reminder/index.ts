@@ -3,12 +3,13 @@
 // et jamais publié. Anti-doublon par annonce via email_send_log (template_name +
 // metadata.sit_id, repli sur la clé d'idempotence historique), plus un plafond
 // d'une relance de brouillon par personne et par jour (UTC).
-// Déclenchement : cron quotidien 10h Europe/Paris (à planifier via pg_cron).
+// Déclenchement : cron quotidien existant, 08h UTC.
 // Plafond : 25 envois max par run, les plus anciens d'abord.
 
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
 import { NOEL_V3_ALL_TEMPLATES } from "../_shared/owner-noel-v3.ts";
-import { loadMissingDraftItems } from "../_shared/sit-draft-missing.ts";
+import { nextDraftReminderStage } from "../_shared/draft-reminder-policy.ts";
+import { loadMissingDraftItems, draftReminderUrl } from "../_shared/sit-draft-missing.ts";
 import { ownerHasPublished } from "../_shared/published-sit.ts";
 import { loadOwnerSitterPool, ownerNearbyContext, type SitterRow } from "../_shared/owner-nearby.ts";
 import { departureHoldsPublishAsk, loadLastDepartureAnswer } from "../_shared/owner-sequence-rules.ts";
@@ -59,8 +60,10 @@ Deno.serve(withCronRunLog("send-sit-draft-reminder", async (req) => {
     .from("sits")
     .select("id, user_id, title, start_date, end_date, specific_expectations, environments, city, owner_message, daily_routine, created_at, absence_reason, sitter_expectations, cover_photo_url")
     .eq("status", "draft")
+    .is("published_at", null)
+    .is("unpublished_at", null)
     .lt("created_at", cutoffDate)
-    .or(`start_date.is.null,start_date.gt.${today}`)
+    .or(`start_date.is.null,start_date.gte.${today}`)
     .order("created_at", { ascending: true })
     .limit(100);
 
@@ -81,6 +84,8 @@ Deno.serve(withCronRunLog("send-sit-draft-reminder", async (req) => {
 
   let sent = 0;
   let skipped = 0;
+  let deferred = 0;
+  let attempted = 0;
   const errors: Array<{ sit_id: string; reason: string }> = [];
   const sentToday = new Set<string>();
   let sitterPool: SitterRow[] | null = null;
@@ -106,7 +111,7 @@ Deno.serve(withCronRunLog("send-sit-draft-reminder", async (req) => {
       // Charger le profil
       const { data: profile } = await supabase
         .from("profiles")
-        .select("email, first_name, city, latitude, longitude")
+        .select("email, first_name, city, latitude, longitude, last_seen_at")
         .eq("id", draft.user_id)
         .maybeSingle();
       if (!profile?.email) {
@@ -139,25 +144,22 @@ Deno.serve(withCronRunLog("send-sit-draft-reminder", async (req) => {
         .ilike("recipient_email", emailPattern)
         .in("status", ["sent", "pending", "deferred"])
         .gte("created_at", journeySince)
-        .in("template_name", NOEL_V3_ALL_TEMPLATES)
+        .in("template_name", [...NOEL_V3_ALL_TEMPLATES, "onboarding-j1", "owner-no-sit-j3", "owner-no-sit-j10", "owner-no-sit-j21"])
         .limit(1);
       if (recentNoelErr || (recentNoel ?? []).length > 0) {
         skipped++;
         continue;
       }
 
-      // Anti-doublon par annonce : une seule relance par brouillon (sit_id).
-      // Les envois antérieurs au 27/09/2026 n'ont pas de metadata.sit_id, on
-      // les retrouve par leur clé d'idempotence, qui porte l'identifiant.
-      const { count: alreadySentForSit } = await supabase
+      // Historique par annonce, y compris les anciennes clés sans sit_id.
+      const { data: reminderHistory, error: historyError } = await supabase
         .from("email_send_log")
-        .select("id", { count: "exact", head: true })
+        .select("status, created_at, metadata")
         .eq("template_name", TEMPLATE)
         .or(`metadata->>sit_id.eq.${draft.id},metadata->>idempotency_key.eq.sit-draft-reminder-${draft.id}`);
-      if ((alreadySentForSit ?? 0) > 0) {
-        skipped++;
-        continue;
-      }
+      if (historyError) throw historyError;
+      const stage = nextDraftReminderStage(reminderHistory ?? [], profile.last_seen_at, now);
+      if (!stage) { skipped++; continue; }
 
       // Plafond par personne : jamais deux relances de brouillon le même jour.
       const emailKey = String(profile.email).toLowerCase();
@@ -165,12 +167,14 @@ Deno.serve(withCronRunLog("send-sit-draft-reminder", async (req) => {
         skipped++;
         continue;
       }
-      const { count: sentTodayCount } = await supabase
+      const { count: sentTodayCount, error: dailyError } = await supabase
         .from("email_send_log")
         .select("id", { count: "exact", head: true })
         .eq("template_name", TEMPLATE)
         .ilike("recipient_email", emailPattern)
-        .gte("created_at", startOfUtcDay);
+        .gte("created_at", startOfUtcDay)
+        .in("status", ["sent", "pending", "deferred"]);
+      if (dailyError) throw dailyError;
       if ((sentTodayCount ?? 0) > 0) {
         skipped++;
         continue;
@@ -178,11 +182,12 @@ Deno.serve(withCronRunLog("send-sit-draft-reminder", async (req) => {
 
       // Respect des préférences email. Le template sit-draft-reminder est
       // classé "product" dans _shared/email-categories.ts, on lit donc product_emails.
-      const { data: prefs } = await supabase
+      const { data: prefs, error: prefsError } = await supabase
         .from("email_preferences")
         .select("product_emails")
         .eq("user_id", draft.user_id)
         .maybeSingle();
+      if (prefsError) throw prefsError;
       if (prefs && (prefs as any).product_emails === false) {
         skipped++;
         continue;
@@ -191,7 +196,7 @@ Deno.serve(withCronRunLog("send-sit-draft-reminder", async (req) => {
       // Liste nommée de ce qui manque, avec les mots exacts du formulaire.
       const missingItems = await loadMissingDraftItems(supabase, draft as Record<string, any>);
       const fieldsRemaining = missingItems.length;
-      const resumeUrl = `https://guardiens.fr/sits/create?resume=${draft.id}`;
+      const resumeUrl = draftReminderUrl(draft.id, missingItems);
 
       // Âge réel du brouillon, pour éviter le "Hier" en dur dans le template.
       const daysSinceCreated = draft.created_at
@@ -222,11 +227,12 @@ Deno.serve(withCronRunLog("send-sit-draft-reminder", async (req) => {
         body: JSON.stringify({
           templateName: TEMPLATE,
           recipientEmail: profile.email,
-          idempotencyKey: `sit-draft-reminder-${draft.id}`,
-          logMetadata: { sit_id: draft.id, owner_id: draft.user_id },
+          idempotencyKey: `sit-draft-reminder-${draft.id}${stage === 2 ? "-2" : ""}`,
+          logMetadata: { sit_id: draft.id, owner_id: draft.user_id, reminder_stage: stage },
           templateData: {
             firstName: profile.first_name || "",
             sitId: draft.id,
+            title: draft.title,
             fieldsRemaining,
             missingItems,
             profileUrl: "https://guardiens.fr/owner-profile",
@@ -244,16 +250,21 @@ Deno.serve(withCronRunLog("send-sit-draft-reminder", async (req) => {
         errors.push({ sit_id: draft.id, reason: sendErr.message });
         continue;
       }
-      sent++;
+      const outcome = await _steRes.json();
+      attempted++;
+      if (outcome.skipped || outcome.abandoned) skipped++;
+      else if (outcome.deferred) deferred++;
+      else if (outcome.success) sent++;
+      else throw new Error("unexpected_send_response");
       sentToday.add(emailKey);
-      if (sent >= MAX_PER_RUN) break;
+      if (attempted >= MAX_PER_RUN) break;
     } catch (e: any) {
       errors.push({ sit_id: draft.id, reason: e?.message ?? "unknown" });
     }
   }
 
   return new Response(
-    JSON.stringify({ ok: true, sent, skipped, held: held.length, total: drafts.length, errors }),
+    JSON.stringify({ ok: true, sent, deferred, skipped, held: held.length, total: drafts.length, errors }),
     { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
   );
 }));

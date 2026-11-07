@@ -36,7 +36,7 @@ describe("draftReadiness", () => {
     expect(short.ready).toBe(false);
     expect(short.missing.map((m) => m.id)).toEqual(["desc-reason"]);
     expect(draftReadiness(brassac, undefined, TODAY).ready).toBe(false);
-    expect(draftReadiness(brassac, { ...ctx, hasPets: false }, TODAY).missing.map((m) => m.id)).toEqual(["pets"]);
+    expect(draftReadiness(brassac, { ...ctx, hasPets: false }, TODAY).ready).toBe(true);
     expect(draftReadiness(brassac, { ...ctx, hasPhoto: false }, TODAY).missing.map((m) => m.id)).toEqual(["photo"]);
   });
 

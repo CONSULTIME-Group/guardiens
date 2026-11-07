@@ -1,3 +1,6 @@
+import * as draftPolicy from "../../supabase/functions/_shared/draft-reminder-policy";
+import * as draftMissing from "../../supabase/functions/_shared/sit-draft-missing";
+import * as publishedSit from "../../supabase/functions/_shared/published-sit";
 import { webcrypto } from "node:crypto";
 import * as memberClaim from "../../supabase/functions/_shared/member-email-send-claim";
 import * as senderAddress from "../../supabase/functions/_shared/sender-address";
@@ -26,6 +29,8 @@ const boundary = new Error("authorized business boundary");
 const forgedJwt = `eyJhbGciOiJIUzI1NiJ9.${Buffer.from('{"role":"service_role"}').toString("base64url")}.invalid`;
 
 type Options = {
+  draftRow?: Record<string, unknown> | null;
+  ownerPublished?: boolean;
   address?: string | null;
   resolutionError?: boolean;
   admin?: boolean;
@@ -84,7 +89,7 @@ function harness(options: Options = {}) {
     const chain: Record<string, any> = {};
     const filters: Array<[string, unknown]> = [];
     let keyFilter: string[] = [];
-    for (const method of ["select", "eq", "neq", "gte", "ilike", "like", "order", "or", "filter", "in", "insert", "update"]) {
+    for (const method of ["select", "eq", "not", "neq", "gte", "ilike", "like", "order", "or", "filter", "in", "insert", "update"]) {
       chain[method] = (...args: unknown[]) => {
         if (method === "eq") filters.push([String(args[0]), args[1]]);
         if (method === "in" && args[0] === "metadata->>idempotency_key") keyFilter = args[1] as string[];
@@ -111,9 +116,11 @@ function harness(options: Options = {}) {
       messages: options.missingEvent ? [] : [{ id: eventId, conversation_id: convId, sender_id: callerId, is_system: false, content: "[URGENCE] Message en base" }],
       pets: [{ property_id: "fixture-property", name: "Animal en base" }],
     };
+    if (options.draftRow !== undefined) eventRows.sits = options.draftRow ? [options.draftRow] : [];
     const eventResult = () => ({ data: (eventRows[table] ?? []).filter((row) => filters.every(([key, value]) => row[key] === value)), error: options.eventReadError ? { message: "private DB error" } : null });
     chain.maybeSingle = async () => {
       if (table in eventRows) { const result = eventResult(); return { ...result, data: result.data[0] ?? null }; }
+      if (table === "properties") return { data: { id: "fixture-property", photos: ["https://fixture.invalid/home.jpg"] }, error: null };
       if (table === "profiles") {
         const id = filters.find(([key]) => key === "id")?.[1] ?? targetId;
         return { data: options.member === false ? null : { id, email: options.profileEmail ?? (id === callerId ? ownAddress : privateAddress), first_name: "Prénom en base" }, error: options.recipientError ? { message: "private recipient error" } : null };
@@ -131,7 +138,7 @@ function harness(options: Options = {}) {
       throw new Error(`Unexpected table read ${table}`);
     };
     chain.single = async () => ({ data: options.pendingError ? null : { id: "fixture-log" }, error: options.pendingError ? { message: "pending log unavailable" } : null });
-    chain.then = (callback: (value: unknown) => unknown) => Promise.resolve(table in eventRows ? eventResult() : { data: null, error: null }).then(callback);
+    chain.then = (callback: (value: unknown) => unknown) => Promise.resolve(table in eventRows ? { ...eventResult(), count: options.ownerPublished ? 1 : 0 } : { data: null, count: 0, error: null }).then(callback);
     return chain;
   });
   const createClient = vi.fn(() => ({ auth: { getUser }, rpc, from }));
@@ -161,6 +168,9 @@ function harness(options: Options = {}) {
     fetch: () => { throw new Error("Unexpected network call"); },
     Deno: { env: { get: (key: keyof typeof env) => env[key] }, serve: (cb: typeof handler) => { handler = cb; } },
     require: (specifier: string) => {
+      if (specifier.includes("draft-reminder-policy")) return draftPolicy;
+      if (specifier.includes("sit-draft-missing")) return draftMissing;
+      if (specifier.includes("published-sit")) return publishedSit;
       if (specifier.includes("member-email-send-claim")) return memberClaim;
       if (specifier.includes("deferred-member-email-authorization")) return deferredAuthorization;
       if (specifier.includes("sit-event-email-authorization")) return sitEventAuthorization;
@@ -170,7 +180,7 @@ function harness(options: Options = {}) {
       if (specifier.includes("email-categories")) return { getEmailCategory: () => "transactional" };
       if (specifier.includes("email-suppression")) return { bypassesSuppression: () => false };
       if (specifier.includes("sit-alert-guard")) return { isSitStatusGuardedTemplate: () => false };
-      if (specifier.includes("email-cap")) return { BYPASS_TEMPLATES: new Set(options.defer ? [] : memberTemplates), NEARBY_SIT_ALERT_TEMPLATES: new Set(),
+      if (specifier.includes("email-cap")) return { BYPASS_TEMPLATES: new Set(options.defer ? [] : [...memberTemplates, "sit-draft-reminder"]), NEARBY_SIT_ALERT_TEMPLATES: new Set(),
         decideDeferral: () => ({ action: "defer", reason: "daily_cap", scheduledFor: new Date(Date.now() + 3600000) }),
         resolveDeferral: () => ({ action: "defer" }),
       };
@@ -675,5 +685,39 @@ describe("authorization refusal trace", () => {
     const row = (h.writes.filter((w: any) => w.table === "error_logs")[0] as any).values;
     expect(row.fingerprint).toBe("send-transactional-email/authorization:review-received:authorization_read_unavailable");
     expect(row.context.status).toBe(503);
+  });
+});
+
+
+describe("draft reminder verification at actual send time", () => {
+  const draft = { id: sitId, user_id: callerId, status: "draft", published_at: null, unpublished_at: null,
+    title: "Titre actuel", city: "Paris", start_date: "2099-12-24", end_date: "2100-01-03",
+    absence_reason: "Vacances en famille", sitter_expectations: "Arroser nos plantes" };
+  const extra = { idempotencyKey: `sit-draft-reminder-${sitId}`, templateData: { sitId, title: "Ancien titre", missingItems: [{ label: "Des animaux" }] } };
+  it.each([null, { ...draft, status: "published" }, { ...draft, start_date: "2000-01-01" }])("cancels stale or deleted drafts without calling the provider", async draftRow => {
+    const h = harness({ provider: "success", draftRow });
+    const response = await h.invoke(serviceKey, ownAddress, "sit-draft-reminder", extra);
+    expect(await response.json()).toMatchObject({ abandoned: true, reason: "draft_no_longer_relevant" });
+    expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+  it("cancels when the owner has since published another listing", async () => {
+    const h = harness({ provider: "success", draftRow: draft, ownerPublished: true });
+    const response = await h.invoke(serviceKey, ownAddress, "sit-draft-reminder", extra);
+    expect(await response.json()).toMatchObject({ abandoned: true });
+    expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+  it("does not send if the database read fails or recipient differs", async () => {
+    for (const options of [{ eventReadError: true }, { profileEmail: privateAddress }]) {
+      const h = harness({ provider: "success", draftRow: draft, ...options });
+      expect((await h.invoke(serviceKey, ownAddress, "sit-draft-reminder", extra)).status).toBe(503);
+      expect(h.resendFetch).not.toHaveBeenCalled();
+    }
+  });
+  it("recalculates content from the current draft and accepts a house without animals", async () => {
+    const h = harness({ provider: "success", draftRow: draft });
+    const response = await h.invoke(serviceKey, ownAddress, "sit-draft-reminder", extra);
+    expect(response.status).toBe(200);
+    expect((h.createElement.mock.calls as unknown[][])[0][1]).toMatchObject({ title: "Titre actuel", missingItems: [], fieldsRemaining: 0 });
+    expect(h.resendFetch).toHaveBeenCalledTimes(1);
   });
 });

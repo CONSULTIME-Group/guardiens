@@ -54,7 +54,7 @@ describe("I1, photo demandée avant la publication, plus à l'entrée", () => {
   });
 
   it("la photo reste exigée à la publication, avec envoi sur place à l'étape 3", () => {
-    const rules = readFileSync("src/lib/sitPublishRules.ts", "utf8");
+    const rules = readFileSync("supabase/functions/_shared/sit-publish-rules.ts", "utf8");
     expect(rules).toContain('id: "photo"');
     const src = readFileSync("src/pages/CreateSit.tsx", "utf8");
     expect(src).toContain("<InlinePhotoUpload");

@@ -60,6 +60,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import PetsEditor from "@/components/pets/PetsEditor";
 import { pickSmartCover } from "@/lib/pickSmartCover";
 import { sortForCover, withoutAnimalPhotos } from "@/lib/coverPriority";
@@ -89,7 +90,6 @@ import {
   countPropertyPhotos,
   shouldPromptPublishPhotos,
   shouldShowSurroundingsParagraph,
-  PUBLISH_PHOTO_PROMPT_HREF,
 } from "@/lib/publishPhotoPrompt";
 
 import { shouldPromptAnimalMention } from "@/lib/sitAnimalMention";
@@ -476,6 +476,7 @@ const CreateSit = () => {
   const pendingExitRef = useRef<(() => void) | null>(null);
   const [animalMentionOpen, setAnimalMentionOpen] = useState(false);
   const animalMentionConfirmedRef = useRef(false);
+  const [completionPanel, setCompletionPanel] = useState<"pets" | "photo" | null>(null);
   const [photoPromptOpen, setPhotoPromptOpen] = useState(false);
   const photoPromptConfirmedRef = useRef(false);
 
@@ -1490,7 +1491,8 @@ const CreateSit = () => {
       source: "create_sit_page",
       metadata: { sit_id: draftId },
     });
-    navigate("/owner-profile?section=animals");
+    setPreviewOpen(false);
+    setCompletionPanel("pets");
   };
 
   const handleAnimalMentionPublishAnyway = () => {
@@ -1513,7 +1515,8 @@ const CreateSit = () => {
       source: "create_sit_page",
       metadata: { sit_id: draftId, photo_count: propertyPhotoCount, decision: "add_photos" },
     });
-    navigate(PUBLISH_PHOTO_PROMPT_HREF);
+    setPreviewOpen(false);
+    setCompletionPanel("photo");
   };
 
   const handlePhotoPromptPublishAnyway = () => {
@@ -1568,6 +1571,15 @@ const CreateSit = () => {
   // anneau visuel temporaire. Aucun clic ne peut rester sans effet : si l'ancre
   // reste introuvable, un message nomme l'étape concernée.
   const goToBlocker = (b: { id?: string; anchor?: string; action?: string; label?: string }) => {
+    if (b.id === "photo" || b.id === "pets") {
+      setPreviewOpen(false);
+      setCompletionPanel(b.id);
+      return;
+    }
+    if (b.id === "property") {
+      setSetupVoluntary(true); setSetupEntered(true); setSetupDismissed(false);
+      return;
+    }
     if (b.action) {
       navigate(b.action);
       return;
@@ -1618,7 +1630,7 @@ const CreateSit = () => {
 
   const onPublishClick = () => {
     if (canPublish) return handlePublish();
-    const blockerIds = publishBlockers.map((b) => b.id);
+    const blockerIds = getBlockingBlockers(publishBlockers).map((b) => b.id);
     void trackEvent("sit_publish_attempted", {
       source: "create_sit_page",
       metadata: { sit_id: draftId, step: currentStep, blockers: blockerIds },
@@ -1680,7 +1692,7 @@ const CreateSit = () => {
       metadata: {
         sit_id: draftId,
         step: currentStep,
-        blockers: publishBlockers.map((b) => b.id),
+        blockers: getBlockingBlockers(publishBlockers).map((b) => b.id),
       },
     });
     const failPublish = (blockers: string[]) => {
@@ -1706,7 +1718,7 @@ const CreateSit = () => {
         title: "Impossible de publier l'annonce",
         description: "Votre logement n'est pas encore décrit sur votre profil.",
       });
-      navigate("/owner-profile?section=housing");
+      setSetupVoluntary(true); setSetupEntered(true); setSetupDismissed(false);
       return;
     }
     const blocking = getBlockingBlockers(publishBlockers);
@@ -2236,6 +2248,41 @@ const CreateSit = () => {
     }
   };
 
+  const reminderFocusHandled = useRef<string | null>(null);
+  useEffect(() => {
+    const focus = searchParams.get("focus");
+    if (!focus || !draftIdParam || loading || showSetup || draftId !== draftIdParam || reminderFocusHandled.current === draftIdParam) return;
+    reminderFocusHandled.current = draftIdParam;
+    const blocker = publishBlockers.find(b => b.id === focus && !b.advisory);
+    if (blocker) goToBlocker(blocker);
+    // La reprise applique le focus une seule fois, sans déplacer la saisie ensuite.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, showSetup, draftId, draftIdParam, searchParams]);
+
+  const completionDialog = (
+    <Dialog open={completionPanel !== null} onOpenChange={open => { if (!open) setCompletionPanel(null); }}>
+      <DialogContent className="sm:max-w-xl max-h-[85dvh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{completionPanel === "pets" ? "Ajouter mes animaux" : "Ajouter des photos"}</DialogTitle>
+          <DialogDescription>Votre annonce reste ouverte. Vous pourrez reprendre sa publication juste après.</DialogDescription>
+        </DialogHeader>
+        {completionPanel === "pets" && property && <PetsEditor propertyId={property.id} onChange={list => {
+          setPets(list.map(a => ({ ...a, walk_duration: (a as any).walk_duration ?? null, alone_duration: (a as any).alone_duration ?? null, medication: (a as any).medication ?? null, activity_level: (a as any).activity_level ?? null })));
+          hasUserEditedRef.current = true;
+        }} />}
+        {completionPanel === "photo" && user && <>
+          <InlinePhotoUpload userId={user.id} nextPosition={ownerPhotos.length} onUploaded={url => {
+            registerUploadedPhoto(url);
+            if (!coverPhotoUrl) setCoverPhotoUrl(url);
+            photoPromptConfirmedRef.current = true;
+          }} />
+          {ownerPhotos.length > 0 && <div className="grid grid-cols-3 gap-2">{ownerPhotos.map(url => <img key={url} src={url} alt="Photo de votre galerie" className="aspect-[4/3] w-full rounded-lg object-cover" />)}</div>}
+        </>}
+        <Button type="button" onClick={() => setCompletionPanel(null)}>Revenir à mon annonce</Button>
+      </DialogContent>
+    </Dialog>
+  );
+
   if (loading || liveChoice === "checking") {
     return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
   }
@@ -2400,6 +2447,7 @@ const CreateSit = () => {
           moderationNotice={(key) => <FieldModerationNotice fieldKey={key} />}
           publishedSitId={upcomingPublishedSitId}
         />
+        {completionDialog}
         <AnimalMentionDialog
           open={animalMentionOpen}
           onOpenChange={setAnimalMentionOpen}
@@ -3484,6 +3532,7 @@ const CreateSit = () => {
         onKeepDraft={handleExitKeepDraft}
       />
 
+      {completionDialog}
       <AnimalMentionDialog
         open={animalMentionOpen}
         onOpenChange={setAnimalMentionOpen}

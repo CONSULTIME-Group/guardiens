@@ -1,3 +1,6 @@
+import { draftReminderStillRelevant } from '../_shared/draft-reminder-policy.ts'
+import { loadMissingDraftItems, draftReminderUrl } from '../_shared/sit-draft-missing.ts'
+import { ownerHasPublished } from '../_shared/published-sit.ts'
 import * as React from 'npm:react@18.3.1'
 // render synchrone, jamais renderAsync : la version en flux découpe la
 // sortie en morceaux et corrompt tout caractère accentué à cheval sur deux
@@ -571,6 +574,46 @@ Deno.serve(async (req) => {
         JSON.stringify({ success: true, skipped: true, reason: 'duplicate_idempotency_key' }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
+    }
+  }
+
+  // Relire le brouillon au moment réel de l'envoi, y compris après un report.
+  // Une lecture impossible reporte l'envoi ; elle ne signifie jamais « complet ».
+  if (templateName === 'sit-draft-reminder') {
+    try {
+      const sitId = templateData.sitId
+      if (typeof sitId !== 'string' || !/^[0-9a-f-]{36}$/i.test(sitId)) throw new Error('draft_id_required')
+      const { data: draft, error: draftError } = await supabase.from('sits')
+        .select('id, user_id, status, published_at, unpublished_at, title, city, start_date, end_date, absence_reason, sitter_expectations, cover_photo_url')
+        .eq('id', sitId).maybeSingle()
+      if (draftError) throw draftError
+      const relevant = draftReminderStillRelevant(draft, new Date().toISOString().slice(0, 10))
+        && !(await ownerHasPublished(supabase, draft.user_id))
+      if (!relevant) {
+        if (sourceQueueId) {
+          const { error } = await supabase.from('email_deferred_queue')
+            .update({ status: 'abandoned', last_error: 'draft_no_longer_relevant' }).eq('id', sourceQueueId)
+          if (error) throw error
+        }
+        await supabase.from('email_send_log').insert({
+          message_id: messageId, template_name: templateName, recipient_email: effectiveRecipient,
+          status: 'abandoned', metadata: { ...logMetadata, idempotency_key: idempotencyKey, sit_id: sitId, abandon_reason: 'draft_no_longer_relevant' },
+        })
+        return new Response(JSON.stringify({ success: true, skipped: true, abandoned: true, reason: 'draft_no_longer_relevant' }), {
+          status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      const { data: owner, error: ownerError } = await supabase.from('profiles').select('email').eq('id', draft.user_id).maybeSingle()
+      if (ownerError) throw ownerError
+      if (!owner?.email || owner.email.trim().toLowerCase() !== effectiveRecipient.toLowerCase()) throw new Error('draft_recipient_mismatch')
+      const missingItems = await loadMissingDraftItems(supabase, draft)
+      templateData = { ...templateData, title: draft.title, missingItems, fieldsRemaining: missingItems.length, resumeUrl: draftReminderUrl(sitId, missingItems) }
+      logMetadata = { ...logMetadata, sit_id: sitId, owner_id: draft.user_id, reminder_stage: idempotencyKey.endsWith('-2') ? 2 : 1 }
+    } catch (error) {
+      console.error('Draft reminder verification failed', error)
+      return new Response(JSON.stringify({ error: 'draft_verification_unavailable' }), {
+        status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
   }
 
