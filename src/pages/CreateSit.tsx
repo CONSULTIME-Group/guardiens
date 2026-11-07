@@ -100,7 +100,7 @@ import { reportError } from "@/lib/errorLogger";
 import { isBareCreateEntry, periodsOverlap, resumeRedirectFor, type LiveSitLike } from "@/lib/ownerLiveSit";
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import { localTodayIso } from "@/lib/localDate";
-import { localResumeDateFlags, resumeDraftDates } from "@/lib/sitDraftResume";
+import { chooseDraftSource, localResumeDateFlags, resumeDraftDates } from "@/lib/sitDraftResume";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import type { ExitIntent } from "@/lib/sitCreateAbandon";
 
@@ -808,7 +808,12 @@ const CreateSit = () => {
     currentStep?: number;
     /** Identifiant du brouillon auquel appartient cette copie locale. */
     draftId?: string | null;
+    /** Lot PUB2 : updated_at serveur du brouillon au moment de l'écriture. */
+    baseUpdatedAt?: string | null;
   };
+  // Lot PUB2 : dernier updated_at connu du brouillon en base (lecture ou
+  // enregistrement), recopié dans chaque copie locale.
+  const remoteBaseRef = useRef<string | null>(null);
   const localDraftKey = user ? `sit-create:${user.id}:${draftIdParam ?? fromSitId ?? "current"}` : null;
   // Clé historique posée lors d'une première visite sans paramètre d'URL. Au
   // retour via le dashboard, l'identifiant du brouillon change la clé, la copie
@@ -905,8 +910,18 @@ const CreateSit = () => {
     // Une copie locale sans aucun contenu n'a rien à restaurer : l'appliquer
     // reviendrait à vider le formulaire tout en annonçant une restauration.
     if (!localDraftHasContent(stored)) return;
-    const remote = remoteUpdatedAt ? new Date(remoteUpdatedAt).getTime() : 0;
-    if (remote && savedAt <= remote) {
+    const choice = chooseDraftSource({
+      remoteUpdatedAt,
+      localSavedAt: savedAt,
+      localBaseUpdatedAt: stored.baseUpdatedAt ?? null,
+    });
+    if (choice.source === "remote") {
+      if (choice.reason === "remote_changed_since_copy") {
+        void trackEvent("sit_draft_local_copy_discarded", {
+          source: "create_sit_page",
+          metadata: { sit_id: remoteDraftId ?? null, reason: choice.reason },
+        });
+      }
       // Le distant est plus frais, mais l'étape atteinte n'y est pas stockée.
       if (typeof stored.currentStep === "number" && stored.currentStep > 0) {
         setCurrentStep(prev => Math.max(prev, Math.min(stored!.currentStep as number, STEPS.length - 1)));
@@ -1082,6 +1097,7 @@ const CreateSit = () => {
           const d = draftRes.data;
           remoteDraftUpdatedAt = (d as any).updated_at || (d as any).created_at || null;
           remoteDraftId = d.id;
+          remoteBaseRef.current = remoteDraftUpdatedAt;
           // Dates comparées au calendrier de l'appareil (lot PUB1) : une date
           // du jour reste valable au Chili ou en Polynésie en soirée.
           const resumed = resumeDraftDates(d.start_date, d.end_date, localTodayIso());
@@ -1267,6 +1283,7 @@ const CreateSit = () => {
       coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren,
       sitLocation, currentStep,
       draftId: draftIdParam ?? fromSitId ?? draftId ?? null,
+      baseUpdatedAt: remoteBaseRef.current,
     };
     // Aucune copie locale sur un formulaire vide : rien à sauvegarder, donc pas
     // de badge d'enregistrement local trompeur.
@@ -1369,13 +1386,17 @@ const CreateSit = () => {
         setLastSavedAt(new Date());
       };
       if (draftId) {
-        const { error } = await supabase.from("sits").update(payload).eq("id", draftId).eq("status", "draft");
+        const { data: savedRows, error } = await supabase
+          .from("sits").update(payload).eq("id", draftId).eq("status", "draft").select("updated_at");
         if (error) throw error;
+        const savedAt = (savedRows as Array<{ updated_at?: string | null }> | null)?.[0]?.updated_at;
+        if (savedAt) remoteBaseRef.current = savedAt;
         markSaved();
         return draftId;
       } else {
-        const { data, error } = await supabase.from("sits").insert({ ...payload, status: "draft" as any }).select("id").single();
+        const { data, error } = await supabase.from("sits").insert({ ...payload, status: "draft" as any }).select("id, updated_at").single();
         if (error) throw error;
+        if ((data as { updated_at?: string | null }).updated_at) remoteBaseRef.current = (data as { updated_at?: string | null }).updated_at ?? null;
         setDraftId(data.id);
         markSaved();
         grantOwnerSpace();
