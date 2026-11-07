@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { uploadOwnerGalleryPhoto } from "@/lib/uploadOwnerGalleryPhoto";
+import { photoUploadErrorMessage, uploadOwnerGalleryPhoto } from "@/lib/uploadOwnerGalleryPhoto";
 import { Button } from "@/components/ui/button";
 import { UploadCloud } from "lucide-react";
 import { toast } from "sonner";
@@ -28,7 +28,7 @@ const InlinePhotoUpload = ({ userId, nextPosition = 0, label = "Ajouter une phot
       toast.success("Photo ajoutée à votre galerie");
     } catch (e: any) {
       console.error("[InlinePhotoUpload] upload failed", e);
-      toast.error("Envoi de la photo interrompu. Réessayez.");
+      toast.error(photoUploadErrorMessage(e));
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";

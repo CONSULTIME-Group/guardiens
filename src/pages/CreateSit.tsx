@@ -39,7 +39,7 @@ import CreateSitSetupStep from "@/components/sits/create/CreateSitSetupStep";
 import CreateSitExpress from "@/components/sits/create/CreateSitExpress";
 import { readExpressParams, isExpressActive, proposeExpressTexts, mergeExpressTexts, firstValidPreset } from "@/lib/sitExpress";
 import { computeReadiness } from "@/lib/ownerDeparture";
-import { uploadOwnerGalleryPhoto } from "@/lib/uploadOwnerGalleryPhoto";
+import { photoUploadErrorMessage, uploadOwnerGalleryPhoto } from "@/lib/uploadOwnerGalleryPhoto";
 import type { InlineHousingResult } from "@/components/sits/create/InlineHousingBlock";
 import AnnouncementPreviewDialog from "@/components/sits/owner/AnnouncementPreviewDialog";
 import { AlmaBubble } from "@/components/ai/alma/AlmaBubble";
@@ -2314,7 +2314,7 @@ const CreateSit = () => {
       void trackEvent("sits_express_photo_added", { source: "/sits/create", metadata: { period: expressParams.period } });
     } catch (e) {
       console.error("[CreateSit] express photo upload failed", e);
-      toast({ variant: "destructive", title: "Envoi de la photo interrompu. Réessayez." });
+      toast({ variant: "destructive", title: photoUploadErrorMessage(e) });
     } finally {
       setExpressUploading(false);
     }
