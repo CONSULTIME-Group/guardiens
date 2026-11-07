@@ -3,6 +3,7 @@ import { Check, Clock, X, Plus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchValidatedCompetenceLabels } from "@/lib/validatedCompetences";
 import { SKILL_CATEGORIES } from "@/lib/skills/categories";
 import { HOMEWORK_SKILL_NOTE, isHomeworkSkill } from "@/lib/missionHomework";
 
@@ -88,20 +89,15 @@ const CompetenceAutocomplete = ({
 
   // Fetch top suggestions on focus (no query)
   const fetchTopSuggestions = useCallback(async () => {
-    let q = supabase
-      .from("competences_validees")
-      .select("label")
-      .order("usage_count", { ascending: false })
-      .limit(5);
-
-    if (activeCategory) {
-      q = q.eq("categorie", activeCategory === "competences" ? "competences_savoirs" : activeCategory);
-    }
-
-    const { data } = await q;
-    const results: Suggestion[] = (data || [])
-      .filter((d: any) => !competences.includes(d.label))
-      .map((d: any) => ({ label: d.label, source: "validated" as const }));
+    const labels = await fetchValidatedCompetenceLabels({
+      limit: 5,
+      categorie: activeCategory
+        ? activeCategory === "competences" ? "competences_savoirs" : activeCategory
+        : null,
+    });
+    const results: Suggestion[] = labels
+      .filter((label) => !competences.includes(label))
+      .map((label) => ({ label, source: "validated" as const }));
 
     setSuggestions(results);
     setShowDropdown(results.length > 0);
@@ -115,12 +111,7 @@ const CompetenceAutocomplete = ({
     }
 
     const [validatedRes, communityRes] = await Promise.all([
-      supabase
-        .from("competences_validees")
-        .select("label")
-        .ilike("label", `%${search}%`)
-        .order("usage_count", { ascending: false })
-        .limit(5),
+      fetchValidatedCompetenceLabels({ search, limit: 5 }),
       supabase
         .from("sitter_profiles")
         .select("competences")
@@ -128,9 +119,9 @@ const CompetenceAutocomplete = ({
         .limit(50),
     ]);
 
-    const validated: Suggestion[] = (validatedRes.data || [])
-      .filter((d: any) => !competences.includes(d.label))
-      .map((d: any) => ({ label: d.label, source: "validated" as const }));
+    const validated: Suggestion[] = validatedRes
+      .filter((label) => !competences.includes(label))
+      .map((label) => ({ label, source: "validated" as const }));
 
     const communityLabels = new Set<string>();
     (communityRes.data || []).forEach((p: any) => {

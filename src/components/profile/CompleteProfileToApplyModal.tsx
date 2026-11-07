@@ -52,6 +52,7 @@ import SitterGallery from "@/components/profile/SitterGallery";
 import GenerateBioButton from "@/components/ai/GenerateBioButton";
 
 import { supabase } from "@/integrations/supabase/client";
+import { fetchValidatedCompetenceLabels } from "@/lib/validatedCompetences";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSitterProfile } from "@/hooks/useSitterProfile";
 import { useToast } from "@/hooks/use-toast";
@@ -331,10 +332,7 @@ const CompleteProfileToApplyModal = ({
 
   useEffect(() => {
     if (!open || validatedLabels.length > 0) return;
-    supabase
-      .from("competences_validees")
-      .select("label")
-      .then(({ data }) => setValidatedLabels((data || []).map((d: any) => d.label)));
+    void fetchValidatedCompetenceLabels().then(setValidatedLabels);
   }, [open, validatedLabels.length]);
 
   /* ------------------------------------------------------------------ */

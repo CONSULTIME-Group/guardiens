@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchValidatedCompetenceLabels } from "@/lib/validatedCompetences";
 import CompetenceAutocomplete from "./CompetenceAutocomplete";
 import {
   SKILL_CATEGORIES,
@@ -80,12 +81,7 @@ const StepSkills = ({
   }, []);
 
   useEffect(() => {
-    supabase
-      .from("competences_validees")
-      .select("label")
-      .then(({ data }) => {
-        setValidatedLabels((data || []).map((d: any) => d.label));
-      });
+    void fetchValidatedCompetenceLabels().then(setValidatedLabels);
   }, []);
 
   const pushUpdate = useCallback(
