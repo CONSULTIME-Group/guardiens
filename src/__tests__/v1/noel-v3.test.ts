@@ -201,7 +201,8 @@ describe("V1.3 Jeton et photo par la page", () => {
     expect(src).toContain("ownText ? `${ownText}\\n\\n${text}` : text");
     expect(src).toContain("const createdByPage = (ctx.token.answers ?? {}).created_draft_id === draft.id");
     expect(src).toContain("PHOTO_MIME.has(mime)");
-    expect(read(`${FN}/send-sit-draft-reminder/index.ts`)).toContain('.in("template_name", [...NOEL_V3_ALL_TEMPLATES');
+    expect(read(`${FN}/_shared/draft-reminder-eligibility.ts`)).toContain("OWNER_PUBLISH_ASK_TEMPLATES = [...NOEL_V3_ALL_TEMPLATES");
+    expect(read(`${FN}/_shared/draft-reminder-eligibility.ts`)).toContain(".in('template_name', OWNER_PUBLISH_ASK_TEMPLATES)");
     expect(read(`${FN}/send-mass-email/index.ts`)).toContain("loadSeasonalNoelReceived(serviceClient, emails)");
   });
 

@@ -114,14 +114,16 @@ describe("B. expiration des gardes longues", () => {
 
 describe("C. relance de brouillon : anti-doublon par annonce", () => {
   const src = read("supabase/functions/send-sit-draft-reminder/index.ts");
+  const policy = read("supabase/functions/_shared/draft-reminder-policy.ts");
+  const eligibility = read("supabase/functions/_shared/draft-reminder-eligibility.ts");
   it("dédoublonne par sit_id, plus par destinataire seul", () => {
-    expect(src).toContain("metadata->>sit_id.eq.${draft.id}");
+    expect(policy).toContain("metadata->>sit_id.eq.${sitId}");
     expect(src).toContain("logMetadata: { sit_id: draft.id");
   });
   it("garde un plafond d'une relance par personne et par jour", () => {
     // Lot W0 : adresse comparée sans tenir compte de la casse.
-    expect(src).toMatch(/\.ilike\("recipient_email", emailPattern\)\s*\.gte\("created_at", startOfUtcDay\)/);
-    expect(src).toContain("sentToday.has(emailKey)");
+    expect(eligibility).toMatch(/\.ilike\('recipient_email', pattern\)\s*\.gte\('created_at', `\$\{today\}T00:00:00\.000Z`\)/);
+    expect(src).toContain("sentToday.has(decision.owner.email)");
   });
 });
 

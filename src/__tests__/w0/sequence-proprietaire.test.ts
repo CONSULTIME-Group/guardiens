@@ -102,7 +102,7 @@ describe("W0.1 une seule définition de « jamais publié »", () => {
   it("les cinq lecteurs passent par published-sit.ts, plus aucune autre règle", () => {
     for (const f of [
       `${FN}/evaluate-journeys/index.ts`,
-      `${FN}/send-sit-draft-reminder/index.ts`,
+      `${FN}/_shared/draft-reminder-eligibility.ts`,
       `${FN}/ma-periode/index.ts`,
       `${FN}/_shared/owner-noel-audience.ts`,
     ]) {
@@ -173,7 +173,8 @@ describe("W0.2 une seule séquence propriétaire", () => {
     expect(src).toContain("if (steps.length === 0) continue");
     // Une relance de brouillon de moins de 48 h fait attendre owner-no-sit.
     expect(src).toContain("template.startsWith('owner-no-sit-') && recentDraftReminder.has(profile.email.toLowerCase())");
-    expect(read(`${FN}/send-sit-draft-reminder/index.ts`)).toContain('.filter("metadata->>source", "like", "journey:%")');
+    expect(read(`${FN}/_shared/draft-reminder-eligibility.ts`)).toContain(".filter('metadata->>source', 'like', 'journey:%')");
+    expect(read(`${FN}/send-sit-draft-reminder/index.ts`)).toContain("evaluateDraftReminder(supabase");
     // Égalité de priorité : onboarding-owner passe avant onboarding-sitter.
     expect(src).toContain("|| a.key.localeCompare(b.key))");
     expect("onboarding-owner".localeCompare("onboarding-sitter")).toBeLessThan(0);
@@ -330,8 +331,8 @@ describe("W0.6 réponse à la question de départ respectée", () => {
     expect([...PUBLISH_ASK_TEMPLATES].sort()).toEqual(["owner-no-sit-j10", "owner-no-sit-j21", "owner-no-sit-j3", "sit-draft-reminder"]);
     expect(decideStep(facts({ template: "owner-no-sit-j10", departureHold: true }))).toEqual({ kind: "hold", reason: "departure_hold" });
     expect(decideStep(facts({ template: "onboarding-j1", departureHold: true }))).toEqual({ kind: "send" });
-    const draft = read(`${FN}/send-sit-draft-reminder/index.ts`);
-    expect(draft).toContain("departureHoldsPublishAsk(await loadLastDepartureAnswer(supabase, draft.user_id))");
+    const draft = read(`${FN}/_shared/draft-reminder-eligibility.ts`);
+    expect(draft).toContain("departureHoldsPublishAsk(await loadLastDepartureAnswer(client, draft.user_id), new Date(now))");
     const ev = read(`${FN}/evaluate-journeys/index.ts`);
     expect(ev).toMatch(/verdict\.kind === 'hold'[\s\S]{0,400}continue/);
   });
