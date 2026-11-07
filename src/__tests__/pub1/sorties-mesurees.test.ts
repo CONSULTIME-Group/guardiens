@@ -6,8 +6,10 @@ import { buildAbandonMetadata, classifyAbandonExit, normalizeExitPath } from "@/
 const base = { step: 0, hasDraftParam: false, formShown: true, lastField: "title", draftSaved: true };
 
 describe("nature d'une sortie", () => {
-  it("fermer la page est un abandon", () => {
-    expect(classifyAbandonExit({ exit: "page_close", intent: "save_and_exit" })).toBe("abandon");
+  // Lot PUB2 : une fermeture n'est plus un abandon d'office (un rechargement
+  // envoie le même signal), voir src/__tests__/pub2/fermeture-reouverture.test.ts.
+  it("fermer la page est une fermeture à l'issue inconnue", () => {
+    expect(classifyAbandonExit({ exit: "page_close", intent: "save_and_exit" })).toBe("closed");
   });
 
   it("enregistrer et quitter est un départ choisi", () => {

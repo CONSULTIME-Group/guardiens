@@ -21,7 +21,7 @@ describe("métadonnées d'abandon à l'étape 0", () => {
     });
     expect(m).toEqual({
       step: 0, has_draft: false, exit: "page_close",
-      exit_kind: "abandon", exit_reason: null, next_path: null, draft_exists: false,
+      exit_kind: "closed", exit_reason: null, next_path: null, draft_exists: false,
       step0_form_shown: true, step0_last_field: "title", step0_draft_saved: true,
     });
   });
@@ -36,7 +36,7 @@ describe("métadonnées d'abandon à l'étape 0", () => {
     expect(serialized).not.toContain("Lilas");
     for (const v of Object.values(m)) {
       expect(["string", "number", "boolean"].includes(typeof v) || v === null).toBe(true);
-      if (typeof v === "string") expect(["route_change", "page_close", "abandon", ...STEP0_FIELDS]).toContain(v);
+      if (typeof v === "string") expect(["route_change", "page_close", "abandon", "closed", ...STEP0_FIELDS]).toContain(v);
     }
   });
 

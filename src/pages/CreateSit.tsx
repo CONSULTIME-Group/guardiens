@@ -39,7 +39,7 @@ import CreateSitSetupStep from "@/components/sits/create/CreateSitSetupStep";
 import CreateSitExpress from "@/components/sits/create/CreateSitExpress";
 import { readExpressParams, isExpressActive, proposeExpressTexts, mergeExpressTexts, firstValidPreset } from "@/lib/sitExpress";
 import { computeReadiness } from "@/lib/ownerDeparture";
-import { uploadOwnerGalleryPhoto } from "@/lib/uploadOwnerGalleryPhoto";
+import { photoUploadErrorMessage, uploadOwnerGalleryPhoto } from "@/lib/uploadOwnerGalleryPhoto";
 import type { InlineHousingResult } from "@/components/sits/create/InlineHousingBlock";
 import AnnouncementPreviewDialog from "@/components/sits/owner/AnnouncementPreviewDialog";
 import { AlmaBubble } from "@/components/ai/alma/AlmaBubble";
@@ -90,16 +90,17 @@ import {
   countPropertyPhotos,
   shouldPromptPublishPhotos,
   shouldShowSurroundingsParagraph,
+  withUploadedPhoto,
 } from "@/lib/publishPhotoPrompt";
 
 import { shouldPromptAnimalMention } from "@/lib/sitAnimalMention";
 import { shouldOfferPublishExitChoice, type DraftHoldReason } from "@/lib/draftHoldReasons";
-import { buildAbandonMetadata, resolveStep0Field, type AbandonExit, type Step0Field } from "@/lib/sitCreateAbandon";
+import { buildAbandonMetadata, buildCloseMarker, buildReopenMetadata, CLOSE_MARKER_KEY, resolveStep0Field, type AbandonExit, type Step0Field } from "@/lib/sitCreateAbandon";
 import { reportError } from "@/lib/errorLogger";
 import { isBareCreateEntry, periodsOverlap, resumeRedirectFor, type LiveSitLike } from "@/lib/ownerLiveSit";
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import { localTodayIso } from "@/lib/localDate";
-import { localResumeDateFlags, resumeDraftDates } from "@/lib/sitDraftResume";
+import { chooseDraftSource, localResumeDateFlags, resumeDraftDates } from "@/lib/sitDraftResume";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import type { ExitIntent } from "@/lib/sitCreateAbandon";
 
@@ -537,8 +538,24 @@ const CreateSit = () => {
         }),
       });
     };
+    // Lot PUB2 : retour dans le même onglet après une fermeture ou un
+    // rechargement, pour distinguer un rechargement d'un vrai départ.
+    try {
+      const marker = sessionStorage.getItem(CLOSE_MARKER_KEY);
+      if (marker) {
+        sessionStorage.removeItem(CLOSE_MARKER_KEY);
+        const nav = (performance.getEntriesByType?.("navigation")?.[0] as PerformanceNavigationTiming | undefined)?.type;
+        const reopen = buildReopenMetadata(marker, Date.now(), nav);
+        if (reopen) void trackEvent("sits_create_reopened", { source: "create_sit_page", metadata: reopen });
+      }
+    } catch { /* stockage indisponible : aucune mesure */ }
     const onPageHide = (event: PageTransitionEvent) => {
       if (event.persisted) return;
+      if (!publishedRef.current && !abandonEmittedRef.current) {
+        try {
+          sessionStorage.setItem(CLOSE_MARKER_KEY, JSON.stringify(buildCloseMarker(lastStepRef.current, Date.now())));
+        } catch { /* stockage indisponible */ }
+      }
       emit("page_close");
     };
     window.addEventListener("pagehide", onPageHide);
@@ -807,7 +824,12 @@ const CreateSit = () => {
     currentStep?: number;
     /** Identifiant du brouillon auquel appartient cette copie locale. */
     draftId?: string | null;
+    /** Lot PUB2 : updated_at serveur du brouillon au moment de l'écriture. */
+    baseUpdatedAt?: string | null;
   };
+  // Lot PUB2 : dernier updated_at connu du brouillon en base (lecture ou
+  // enregistrement), recopié dans chaque copie locale.
+  const remoteBaseRef = useRef<string | null>(null);
   const localDraftKey = user ? `sit-create:${user.id}:${draftIdParam ?? fromSitId ?? "current"}` : null;
   // Clé historique posée lors d'une première visite sans paramètre d'URL. Au
   // retour via le dashboard, l'identifiant du brouillon change la clé, la copie
@@ -904,8 +926,18 @@ const CreateSit = () => {
     // Une copie locale sans aucun contenu n'a rien à restaurer : l'appliquer
     // reviendrait à vider le formulaire tout en annonçant une restauration.
     if (!localDraftHasContent(stored)) return;
-    const remote = remoteUpdatedAt ? new Date(remoteUpdatedAt).getTime() : 0;
-    if (remote && savedAt <= remote) {
+    const choice = chooseDraftSource({
+      remoteUpdatedAt,
+      localSavedAt: savedAt,
+      localBaseUpdatedAt: stored.baseUpdatedAt ?? null,
+    });
+    if (choice.source === "remote") {
+      if (choice.reason === "remote_changed_since_copy") {
+        void trackEvent("sit_draft_local_copy_discarded", {
+          source: "create_sit_page",
+          metadata: { sit_id: remoteDraftId ?? null, reason: choice.reason },
+        });
+      }
       // Le distant est plus frais, mais l'étape atteinte n'y est pas stockée.
       if (typeof stored.currentStep === "number" && stored.currentStep > 0) {
         setCurrentStep(prev => Math.max(prev, Math.min(stored!.currentStep as number, STEPS.length - 1)));
@@ -1081,6 +1113,7 @@ const CreateSit = () => {
           const d = draftRes.data;
           remoteDraftUpdatedAt = (d as any).updated_at || (d as any).created_at || null;
           remoteDraftId = d.id;
+          remoteBaseRef.current = remoteDraftUpdatedAt;
           // Dates comparées au calendrier de l'appareil (lot PUB1) : une date
           // du jour reste valable au Chili ou en Polynésie en soirée.
           const resumed = resumeDraftDates(d.start_date, d.end_date, localTodayIso());
@@ -1251,6 +1284,16 @@ const CreateSit = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, startDate, endDate, flexibleDates, flexibleNotes, specificExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren]);
 
+  // Lot PUB2 : une copie locale reprise est plus récente que la base. Elle
+  // part en base sans attendre une frappe, sinon l'autre appareil (ou une
+  // reprise après effacement du téléphone) retrouvait l'ancienne version.
+  useEffect(() => {
+    if (!localDraftRestored || loading || !user || !property) return;
+    const t = setTimeout(() => { void saveDraft({ silent: true }); }, 1500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localDraftRestored, loading, property]);
+
   // Copie locale immédiate (300 ms), indépendante du réseau et du brouillon distant.
   const [localDraftSavedAt, setLocalDraftSavedAt] = useState<number | null>(null);
   useEffect(() => {
@@ -1266,12 +1309,15 @@ const CreateSit = () => {
       coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren,
       sitLocation, currentStep,
       draftId: draftIdParam ?? fromSitId ?? draftId ?? null,
+      baseUpdatedAt: remoteBaseRef.current,
     };
     // Aucune copie locale sur un formulaire vide : rien à sauvegarder, donc pas
     // de badge d'enregistrement local trompeur.
     if (!localDraftHasContent(snapshot)) return;
     const t = setTimeout(() => {
-      writeFormDraft<SitLocalDraft>(localDraftKey, snapshot);
+      // Horodatage serveur lu à l'écriture : un enregistrement terminé pendant
+      // les 300 ms ne laisse pas une base périmée dans la copie.
+      writeFormDraft<SitLocalDraft>(localDraftKey, { ...snapshot, baseUpdatedAt: remoteBaseRef.current });
       setLocalDraftSavedAt(Date.now());
     }, 300);
     return () => clearTimeout(t);
@@ -1359,6 +1405,15 @@ const CreateSit = () => {
         accepts_sitter_pets: acceptsSitterPets,
         accepts_sitter_children: acceptsSitterChildren,
       };
+      // Lot PUB2 : la copie locale contient au moins ce qui vient d'être
+      // enregistré, elle dérive donc de cette version serveur. Sans cela, le
+      // rechargement suivant la croyait dépassée par son propre enregistrement
+      // et écartait les frappes faites pendant l'envoi.
+      const rebaseLocalCopy = (base: string) => {
+        if (!localDraftKey) return;
+        const stored = readFormDraft<SitLocalDraft>(localDraftKey);
+        if (stored) writeFormDraft<SitLocalDraft>(localDraftKey, { ...stored, baseUpdatedAt: base });
+      };
       const markSaved = () => {
         draftSavedRef.current = true;
         saveFailCountRef.current = 0;
@@ -1368,13 +1423,24 @@ const CreateSit = () => {
         setLastSavedAt(new Date());
       };
       if (draftId) {
-        const { error } = await supabase.from("sits").update(payload).eq("id", draftId).eq("status", "draft");
+        const { data: savedRows, error } = await supabase
+          .from("sits").update(payload).eq("id", draftId).eq("status", "draft").select("updated_at");
         if (error) throw error;
+        const savedAt = (savedRows as Array<{ updated_at?: string | null }> | null)?.[0]?.updated_at;
+        if (savedAt) {
+          remoteBaseRef.current = savedAt;
+          rebaseLocalCopy(savedAt);
+        }
         markSaved();
         return draftId;
       } else {
-        const { data, error } = await supabase.from("sits").insert({ ...payload, status: "draft" as any }).select("id").single();
+        const { data, error } = await supabase.from("sits").insert({ ...payload, status: "draft" as any }).select("id, updated_at").single();
         if (error) throw error;
+        const insertedAt = (data as { updated_at?: string | null }).updated_at ?? null;
+        if (insertedAt) {
+          remoteBaseRef.current = insertedAt;
+          rebaseLocalCopy(insertedAt);
+        }
         setDraftId(data.id);
         markSaved();
         grantOwnerSpace();
@@ -1560,9 +1626,13 @@ const CreateSit = () => {
 
   // Une photo ajoutée depuis le parcours rejoint immédiatement la galerie
   // locale, sans rechargement, pour que les bloqueurs se lèvent tout de suite.
+  // Lot PUB2 : la photo rejoint aussi les photos du logement à l'écran
+  // (uploadOwnerGalleryPhoto les écrit en base), sinon la recommandation de
+  // publication annonçait « Votre annonce part sans photo » juste après l'ajout.
   const registerUploadedPhoto = (url: string) => {
     setOwnerPhotos((prev) => (prev.includes(url) ? prev : [...prev, url]));
     setOwnerPlacePhotos((prev) => (prev.includes(url) ? prev : [...prev, url]));
+    setProperty((prev) => (prev ? { ...prev, photos: withUploadedPhoto(prev.photos, url) } : prev));
   };
 
   const clearFieldVerdict = (key: ModeratedFieldKey) => {
@@ -2269,11 +2339,10 @@ const CreateSit = () => {
       const url = await uploadOwnerGalleryPhoto(user.id, file, ownerPhotos.length);
       registerUploadedPhoto(url);
       setCoverPhotoUrl(url);
-      setProperty((prev) => (prev ? { ...prev, photos: [...(prev.photos || []).filter((x: string) => x !== url), url] } : prev));
       void trackEvent("sits_express_photo_added", { source: "/sits/create", metadata: { period: expressParams.period } });
     } catch (e) {
       console.error("[CreateSit] express photo upload failed", e);
-      toast({ variant: "destructive", title: "Envoi de la photo interrompu. Réessayez." });
+      toast({ variant: "destructive", title: photoUploadErrorMessage(e) });
     } finally {
       setExpressUploading(false);
     }

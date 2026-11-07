@@ -19,6 +19,7 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation, useNavigate } from "react-router-dom";
+import { isAlmaPillHiddenOn } from "@/lib/alma/dockPillVisibility";
 
 import { ChevronDown, X, MoreHorizontal, Check, EyeOff, Lightbulb, Route, MessageCircle, Mail } from "lucide-react";
 import { openAlmaHumanContact } from "@/lib/alma/conversation-store";
@@ -253,8 +254,7 @@ function AlmaDockInner() {
   const [expanded, setExpanded] = useState(false);
   // Lot A7 : le lien avec Alma (en-tête et bulle de moment). Lu hors du
   // tableau de bord ou panneau ouvert, pour garder le budget de /dashboard.
-  const pillHiddenHere = location.pathname === "/dashboard"
-    || (location.pathname === "/sits/create" && new URLSearchParams(location.search).get("express") === "1");
+  const pillHiddenHere = isAlmaPillHiddenOn(location.pathname);
   const compactHere = /^\/(recherche-gardiens|search|annonces(\/international)?)\/?$/.test(location.pathname);
   const { bond } = useAlmaBond(expanded || !pillHiddenHere);
   const bondLine = bondHeaderLine(bond, todayParis());
@@ -803,8 +803,8 @@ function AlmaDockInner() {
   // les deux rôles (Alma vit dans la colonne de droite). « Parler à Alma »
   // ouvre le même panneau, qui reste rendu ici.
   // Lot N7 : parcours express, la pastille recouvrirait le pied « Publier ».
-  const hideCollapsedPill = location.pathname === "/dashboard"
-    || (location.pathname === "/sits/create" && new URLSearchParams(location.search).get("express") === "1");
+  // Lot PUB2 : formulaire d'annonce, tous parcours (src/lib/alma/dockPillVisibility.ts).
+  const hideCollapsedPill = isAlmaPillHiddenOn(location.pathname);
   if (hideCollapsedPill && !expanded) return null;
   // L5 : sur les grilles de résultats, la bulle repliée se réduit (avatar,
   // nom et mention IA, menu) pour ne plus recouvrir les cartes ; la

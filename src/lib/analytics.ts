@@ -375,6 +375,8 @@ export type EventType =
   | "sits_create_step_started"                  // Étape du wizard CreateSit entamée (step)
   | "sits_create_step_completed"                // Étape terminée (step, duration_ms)
   | "sits_create_abandoned"                     // Wizard quitté sans publication (step, has_draft, exit ; étape 0 : step0_last_field, step0_draft_saved, step0_form_shown)
+  | "sits_create_reopened"                      // Lot PUB2 : formulaire rouvert dans le même onglet sous 30 min après une fermeture ou un rechargement (closed_step, gap_s, navigation)
+  | "sit_draft_local_copy_discarded"            // Lot PUB2 : copie locale écartée car le brouillon a changé en base depuis (reason)
   | "sits_create_preflight_blocked"             // Écran de prérequis affiché avant l'étape 0 (missing, profile_completion)
   | "sits_create_setup_shown"                   // Écran de mise en route affiché (missing)
   | "sits_create_setup_completed"               // Mise en route terminée (duration_ms, filled)

@@ -47,3 +47,12 @@ export function shouldShowSurroundingsParagraph(regionHighlights: unknown): bool
   if (typeof regionHighlights !== "string") return true;
   return regionHighlights.trim().length < REGION_HIGHLIGHTS_MIN_LENGTH;
 }
+
+/**
+ * Photos du logement après un ajout depuis le formulaire : l'adresse rejoint
+ * la fin de la liste, une seule fois (lot PUB2).
+ */
+export function withUploadedPhoto(photos: unknown, url: string): string[] {
+  const list = Array.isArray(photos) ? photos.filter((p): p is string => typeof p === "string" && p.trim() !== "") : [];
+  return [...list.filter((p) => p !== url), url];
+}
