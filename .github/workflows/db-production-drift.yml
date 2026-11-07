@@ -1,0 +1,52 @@
+name: db-production-drift
+
+# Lecture seule : la fusion GitHub ou la publication Lovable n'applique PAS les migrations.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "drizzle/migrations/**"
+      - "scripts/db/**"
+      - ".github/workflows/db-production-drift.yml"
+  pull_request:
+    paths:
+      - "drizzle/migrations/**"
+      - "scripts/db/**"
+      - ".github/workflows/db-production-drift.yml"
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Vérifier que toute nouvelle migration possède un contrat de production
+        run: node scripts/db/check-production-drift.mjs --local
+
+  production:
+    if: github.event_name != 'pull_request'
+    needs: coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - name: Vérifier les contrats sur la base réelle en lecture seule
+        env:
+          GUARDIENS_PROD_DATABASE_URL: ${{ secrets.GUARDIENS_PROD_DATABASE_URL }}
+        run: node scripts/db/check-production-drift.mjs
