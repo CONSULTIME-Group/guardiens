@@ -3,7 +3,6 @@ import { compressImageFile } from "@/lib/compressImage";
 import { getImageDimensions } from "@/lib/imageDimensions";
 import { appendPropertyPhoto } from "@/lib/uploadOwnerPhoto";
 
-
 /**
  * Lot PUB2 (07/11/2026) : photo que le navigateur ne sait pas lire (fichier
  * abîmé, format non pris en charge). Réessayer le même fichier n'y change
