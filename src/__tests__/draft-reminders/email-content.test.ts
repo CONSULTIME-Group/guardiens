@@ -85,7 +85,7 @@ describe("email de relance de brouillon", () => {
   it("désinscription et anti-spam : catégorie produit (lien et en-tête de désinscription ajoutés à l'envoi), aucun script, objet sobre", () => {
     expect(getEmailCategory("sit-draft-reminder")).toBe("product");
     const sender = readFileSync(resolve("supabase/functions/send-transactional-email/index.ts"), "utf8");
-    expect(sender).toMatch(/if \(category !== 'transactional'\) \{[\s\S]{0,400}List-Unsubscribe-Post/);
+    expect(sender).toMatch(/const headers: Record<string, string> = \{\}\s*if \(category !== 'transactional'\) \{[\s\S]{0,500}headers\['List-Unsubscribe-Post'\] = 'List-Unsubscribe=One-Click'/);
     const html = render({ firstName: "Camille", missingItems: [], resumeUrl: draftReminderUrl(SIT, []) });
     expect(html).not.toMatch(/<script|javascript:/i);
     expect(html).not.toContain("—");
