@@ -21,6 +21,7 @@ describe("métadonnées d'abandon à l'étape 0", () => {
     });
     expect(m).toEqual({
       step: 0, has_draft: false, exit: "page_close",
+      exit_kind: "abandon", exit_reason: null, next_path: null, draft_exists: false,
       step0_form_shown: true, step0_last_field: "title", step0_draft_saved: true,
     });
   });
@@ -35,15 +36,18 @@ describe("métadonnées d'abandon à l'étape 0", () => {
     expect(serialized).not.toContain("Lilas");
     for (const v of Object.values(m)) {
       expect(["string", "number", "boolean"].includes(typeof v) || v === null).toBe(true);
-      if (typeof v === "string") expect(["route_change", "page_close", ...STEP0_FIELDS]).toContain(v);
+      if (typeof v === "string") expect(["route_change", "page_close", "abandon", ...STEP0_FIELDS]).toContain(v);
     }
   });
 
-  it("restent identiques à l'existant hors étape 0", () => {
+  it("hors étape 0, gardent les clés communes sans les clés d'étape 0", () => {
     const m = buildAbandonMetadata({
       step: 2, hasDraftParam: false, exit: "route_change", formShown: true, lastField: "title", draftSaved: true,
     });
-    expect(m).toEqual({ step: 2, has_draft: false, exit: "route_change" });
+    expect(m).toEqual({
+      step: 2, has_draft: false, exit: "route_change",
+      exit_kind: "abandon", exit_reason: null, next_path: null, draft_exists: false,
+    });
   });
 
   it("résout le champ depuis l'élément touché, sans lire sa valeur", () => {
