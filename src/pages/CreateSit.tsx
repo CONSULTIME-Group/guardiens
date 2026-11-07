@@ -1,6 +1,6 @@
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { clearPublishIntent } from "@/lib/postOnboardingIntent";
-import { useState, useEffect, useRef, useCallback, type MouseEvent as ReactMouseEvent } from "react";
+import { Suspense, useState, useEffect, useRef, useCallback, type MouseEvent as ReactMouseEvent } from "react";
 import ExpectationSuggestions from "@/components/sits/create/ExpectationSuggestions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
@@ -101,7 +101,6 @@ import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import { localTodayIso } from "@/lib/localDate";
 import { localResumeDateFlags, resumeDraftDates } from "@/lib/sitDraftResume";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
-import { Suspense } from "react";
 import type { ExitIntent } from "@/lib/sitCreateAbandon";
 
 /**
@@ -683,6 +682,9 @@ const CreateSit = () => {
   const [isRepublish, setIsRepublish] = useState(false);
   const [sourceSitTitle, setSourceSitTitle] = useState<string | null>(null);
   const [draftId, setDraftId] = useState<string | null>(null);
+  draftIdRef.current = draftId;
+  // Brouillon préparé par Alma : l'adresse change (?draftId=), la fenêtre se ferme.
+  useEffect(() => { setAlmaPromptOpen(false); }, [draftIdParam]);
   const [savingDraft, setSavingDraft] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   // Fiabilité de la sauvegarde distante : un échec silencieux ne doit plus
@@ -3559,6 +3561,20 @@ const CreateSit = () => {
       />
 
       {completionDialog}
+      <Dialog open={almaPromptOpen} onOpenChange={setAlmaPromptOpen}>
+        <DialogContent className="sm:max-w-xl max-h-[85dvh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Décrire votre absence en une phrase</DialogTitle>
+            <DialogDescription>Alma prépare le brouillon ici, vous le relisez dans ce formulaire avant de publier.</DialogDescription>
+          </DialogHeader>
+          {almaPromptOpen && (
+            <Suspense fallback={<p className="text-sm text-muted-foreground">Chargement…</p>}>
+              <SitDraftFromPrompt />
+            </Suspense>
+          )}
+          <Button type="button" variant="outline" onClick={() => setAlmaPromptOpen(false)}>Remplir moi-même le formulaire</Button>
+        </DialogContent>
+      </Dialog>
       <AnimalMentionDialog
         open={animalMentionOpen}
         onOpenChange={setAnimalMentionOpen}
