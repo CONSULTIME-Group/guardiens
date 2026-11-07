@@ -733,7 +733,7 @@ describe("draft reminder verification at actual send time", () => {
       [[sent(2, `stale-draft-manual-${sitId}-1`)], "reminder_spacing"],
     ] as const) {
       const h = harness({ provider: "success", draftRow: draft, draftHistory: [...history] });
-      const response = await h.invoke(serviceKey, ownAddress, "sit-draft-reminder", extra);
+      const response = await h.invoke(serviceKey, ownAddress, "sit-draft-reminder", { ...extra, idempotencyKey: `sit-draft-reminder-${sitId}-2` });
       expect(await response.json()).toMatchObject({ abandoned: true, reason });
       expect(h.resendFetch).not.toHaveBeenCalled();
     }
