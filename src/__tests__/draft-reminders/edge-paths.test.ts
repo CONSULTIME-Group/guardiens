@@ -66,7 +66,7 @@ function load(name: string, db: ReturnType<typeof fakeDb>, send: (body: Row) => 
   return { handler, sends, writes, fetch };
 }
 
-const ok = () => ({ status: 200, body: { success: true, sent: true } });
+const ok = (): { status: number; body: Row } => ({ status: 200, body: { success: true, sent: true } });
 const manual = (data: FakeDbData, send = ok) => {
   const h = load("nudge-stale-draft", fakeDb(data), send);
   return { ...h, call: () => h.handler(new Request("https://fixture.invalid", {

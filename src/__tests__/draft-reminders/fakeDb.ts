@@ -103,7 +103,7 @@ export function baseData(over: FakeDbData = {}): FakeDbData {
   };
 }
 
-export const sentLog = (daysAgo: number, key: string, extra: Row = {}): Row => ({
+export const sentLog = (daysAgo: number, key: string, extra: Row = {}): Row & { status: string; created_at: string } => ({
   template_name: "sit-draft-reminder", status: "sent", recipient_email: EMAIL, created_at: ago(daysAgo),
   metadata: { idempotency_key: key, sit_id: SIT, ...extra },
 });
