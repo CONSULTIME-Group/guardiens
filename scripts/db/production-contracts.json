@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "baselineMigrationNumber": 115,
+  "contracts": [
+    {
+      "migration": "0115_errfix_distance_file_gardiens.sql",
+      "description": "Distance file gardiens : Papeete 16 000 km ne doit pas annuler la publication",
+      "checks": [
+        {
+          "name": "distance_km_precision",
+          "sql": "SELECT (numeric_precision = 8 AND numeric_scale = 2) AS ok FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'sitter_digest_queue' AND column_name = 'distance_km'"
+        },
+        {
+          "name": "publication_trigger_present",
+          "sql": "SELECT EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid = 'public.sits'::regclass AND tgname = 'trg_notify_sitters_on_new_sit' AND NOT tgisinternal) AS ok"
+        }
+      ]
+    }
+  ]
+}
