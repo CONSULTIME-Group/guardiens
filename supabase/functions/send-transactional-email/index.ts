@@ -587,7 +587,7 @@ Deno.serve(async (req) => {
         .select('id, user_id, status, published_at, unpublished_at, title, city, start_date, end_date, absence_reason, sitter_expectations, cover_photo_url')
         .eq('id', sitId).maybeSingle()
       if (draftError) throw draftError
-      const relevant = draftReminderStillRelevant(draft, new Date().toISOString().slice(0, 10))
+      const relevant = !!draft && draftReminderStillRelevant(draft, new Date().toISOString().slice(0, 10))
         && !(await ownerHasPublished(supabase, draft.user_id))
       // Nombre et espacement relus ici, quel que soit le chemin (tâche, admin,
       // drainage d'un report) : deux relances au plus, sept jours entre elles.
@@ -614,6 +614,7 @@ Deno.serve(async (req) => {
           status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
       }
+      if (!draft) throw new Error('draft_missing')
       const { data: owner, error: ownerError } = await supabase.from('profiles').select('email').eq('id', draft.user_id).maybeSingle()
       if (ownerError) throw ownerError
       if (!owner?.email || owner.email.trim().toLowerCase() !== effectiveRecipient.toLowerCase()) throw new Error('draft_recipient_mismatch')
