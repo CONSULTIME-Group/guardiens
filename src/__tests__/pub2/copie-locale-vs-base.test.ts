@@ -41,3 +41,21 @@ describe("copie locale ou brouillon en base", () => {
       .toEqual({ source: "local", reason: "legacy_local_newer" });
   });
 });
+
+import { readFileSync } from "node:fs";
+
+describe("CreateSit tient la copie locale à jour de la base", () => {
+  const src = readFileSync("src/pages/CreateSit.tsx", "utf8");
+
+  it("chaque enregistrement réussi (mise à jour et création) rattache la copie locale à la version serveur", () => {
+    expect(src.match(/rebaseLocalCopy\((savedAt|insertedAt)\)/g)).toEqual(["rebaseLocalCopy(savedAt)", "rebaseLocalCopy(insertedAt)"]);
+  });
+
+  it("la copie locale lit l'horodatage serveur au moment de l'écriture", () => {
+    expect(src).toContain("{ ...snapshot, baseUpdatedAt: remoteBaseRef.current }");
+  });
+
+  it("une copie locale reprise part en base sans attendre une frappe", () => {
+    expect(src).toMatch(/if \(!localDraftRestored \|\| loading \|\| !user \|\| !property\) return;\s*const t = setTimeout\(\(\) => \{ void saveDraft\(\{ silent: true \}\); \}, 1500\);/);
+  });
+});
