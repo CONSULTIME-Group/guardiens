@@ -15,13 +15,18 @@ export interface ValidatedCompetenceQuery {
 export async function fetchValidatedCompetenceLabels(
   query: ValidatedCompetenceQuery = {},
 ): Promise<string[]> {
-  const { data, error } = await supabase.rpc("list_validated_competences", {
-    p_search: query.search ?? undefined,
-    p_categorie: query.categorie ?? undefined,
-    p_limit: query.limit ?? undefined,
-  });
-  if (error || !Array.isArray(data)) return [];
-  return data
-    .map((row: { label?: unknown }) => row.label)
-    .filter((label): label is string => typeof label === "string" && label.length > 0);
+  try {
+    const { data, error } = await supabase.rpc("list_validated_competences", {
+      p_search: query.search ?? undefined,
+      p_categorie: query.categorie ?? undefined,
+      p_limit: query.limit ?? undefined,
+    });
+    if (error || !Array.isArray(data)) return [];
+    return data
+      .map((row: { label?: unknown }) => row.label)
+      .filter((label): label is string => typeof label === "string" && label.length > 0);
+  } catch {
+    // Suggestions accessoires : un échec réseau laisse la saisie libre.
+    return [];
+  }
 }

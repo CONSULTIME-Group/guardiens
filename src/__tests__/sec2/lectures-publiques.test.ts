@@ -65,3 +65,11 @@ describe("SEC2, lectures protégées", () => {
     expect(out).toContain("PASS SEC2");
   }, 60_000);
 });
+
+describe("SEC2, échec réseau", () => {
+  it("une erreur levée par le client donne une liste vide", async () => {
+    rpc.mockRejectedValue(new Error("offline"));
+    const { fetchValidatedCompetenceLabels } = await import("@/lib/validatedCompetences");
+    expect(await fetchValidatedCompetenceLabels()).toEqual([]);
+  });
+});
