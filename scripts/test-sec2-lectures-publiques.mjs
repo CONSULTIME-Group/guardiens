@@ -5,8 +5,8 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { PGlite } from '@electric-sql/pglite';
 
 const dir = new URL('../drizzle/migrations/', import.meta.url);
-const file = process.env.SEC2_SQL
-  ?? new URL(readdirSync(dir).find((f) => /sec2.*\.sql$/.test(f)), dir);
+const file = process.env.SEC2_SQL ||
+  new URL(readdirSync(dir).find((f) => /sec2.*\.sql$/.test(f)), dir);
 const sql = readFileSync(file, 'utf8');
 
 const ADMIN = '11111111-1111-4111-8111-111111111111';
