@@ -40,6 +40,7 @@ import CreateSitExpress from "@/components/sits/create/CreateSitExpress";
 import { readExpressParams, isExpressActive, proposeExpressTexts, mergeExpressTexts, firstValidPreset } from "@/lib/sitExpress";
 import { computeReadiness } from "@/lib/ownerDeparture";
 import { uploadOwnerGalleryPhoto } from "@/lib/uploadOwnerGalleryPhoto";
+import { withUploadedPhoto } from "@/lib/publishPhotoPrompt";
 import type { InlineHousingResult } from "@/components/sits/create/InlineHousingBlock";
 import AnnouncementPreviewDialog from "@/components/sits/owner/AnnouncementPreviewDialog";
 import { AlmaBubble } from "@/components/ai/alma/AlmaBubble";
@@ -1560,9 +1561,13 @@ const CreateSit = () => {
 
   // Une photo ajoutée depuis le parcours rejoint immédiatement la galerie
   // locale, sans rechargement, pour que les bloqueurs se lèvent tout de suite.
+  // Lot PUB2 : la photo rejoint aussi les photos du logement à l'écran
+  // (uploadOwnerGalleryPhoto les écrit en base), sinon la recommandation de
+  // publication annonçait « Votre annonce part sans photo » juste après l'ajout.
   const registerUploadedPhoto = (url: string) => {
     setOwnerPhotos((prev) => (prev.includes(url) ? prev : [...prev, url]));
     setOwnerPlacePhotos((prev) => (prev.includes(url) ? prev : [...prev, url]));
+    setProperty((prev) => (prev ? { ...prev, photos: withUploadedPhoto(prev.photos, url) } : prev));
   };
 
   const clearFieldVerdict = (key: ModeratedFieldKey) => {
