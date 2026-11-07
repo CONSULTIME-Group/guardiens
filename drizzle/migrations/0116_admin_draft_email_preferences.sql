@@ -19,5 +19,5 @@ BEGIN
     AND EXISTS (SELECT 1 FROM public.sits s WHERE s.user_id = p.id AND s.status = 'draft' AND s.published_at IS NULL);
 END;
 $$;
-REVOKE ALL ON FUNCTION public.admin_draft_email_preferences(uuid[]) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.admin_draft_email_preferences(uuid[]) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_draft_email_preferences(uuid[]) TO authenticated;
