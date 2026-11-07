@@ -244,7 +244,7 @@ Deno.serve(async (req) => {
           stage: decision.stage,
           error: result.error ?? null,
         }),
-        { status: result.outcome === "failed" ? 502 : 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
