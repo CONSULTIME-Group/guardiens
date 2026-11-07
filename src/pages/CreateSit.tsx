@@ -1284,6 +1284,16 @@ const CreateSit = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, startDate, endDate, flexibleDates, flexibleNotes, specificExpectations, openTo, isUrgent, sitEnvironments, minGardienSits, maxApplications, ownerMessage, dailyRoutine, coverPhotoUrl, sitCity, sitCountry, acceptsSitterPets, acceptsSitterChildren]);
 
+  // Lot PUB2 : une copie locale reprise est plus récente que la base. Elle
+  // part en base sans attendre une frappe, sinon l'autre appareil (ou une
+  // reprise après effacement du téléphone) retrouvait l'ancienne version.
+  useEffect(() => {
+    if (!localDraftRestored || loading || !user || !property) return;
+    const t = setTimeout(() => { void saveDraft({ silent: true }); }, 1500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localDraftRestored, loading, property]);
+
   // Copie locale immédiate (300 ms), indépendante du réseau et du brouillon distant.
   const [localDraftSavedAt, setLocalDraftSavedAt] = useState<number | null>(null);
   useEffect(() => {
