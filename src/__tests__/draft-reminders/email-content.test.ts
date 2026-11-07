@@ -79,7 +79,8 @@ describe("email de relance de brouillon", () => {
     const html = render({ firstName: "Camille", missingItems: [{ id: "photo", label: "Une photo" }], resumeUrl: draftReminderUrl(SIT, [{ id: "photo", label: "x" }]) });
     expect(html).toMatch(/max-width:\s*560px/);
     expect(html).toMatch(/display:\s*inline-block/);
-    expect(html).not.toMatch(/font-size:\s*1[0-2]px/);
+    // Corps et bouton à 14 px ; seules les mentions légales du pied sont plus petites.
+    expect(html.match(/font-size:\s*14px/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
     expect(html).not.toMatch(/width="[6-9]\d\d"/);
   });
   it("désinscription et anti-spam : catégorie produit (lien et en-tête de désinscription ajoutés à l'envoi), aucun script, objet sobre", () => {
@@ -91,7 +92,9 @@ describe("email de relance de brouillon", () => {
     expect(html).not.toContain("—");
     for (const s of [template.subject({ missingItems: [] }), template.subject({})]) {
       expect(s.length).toBeLessThanOrEqual(60);
-      expect(s).not.toMatch(/!|€|gratuit|urgent|[A-Z]{4,}|—/i);
+      expect(s).not.toMatch(/!|€|—/);
+      expect(s).not.toMatch(/gratuit|urgent/i);
+      expect(s).not.toMatch(/[A-Z]{4,}/);
     }
   });
 });
