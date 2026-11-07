@@ -98,6 +98,19 @@ import { buildAbandonMetadata, resolveStep0Field, type AbandonExit, type Step0Fi
 import { reportError } from "@/lib/errorLogger";
 import { isBareCreateEntry, periodsOverlap, resumeRedirectFor, type LiveSitLike } from "@/lib/ownerLiveSit";
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
+import { localTodayIso } from "@/lib/localDate";
+import { localResumeDateFlags, resumeDraftDates } from "@/lib/sitDraftResume";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
+import { Suspense } from "react";
+import type { ExitIntent } from "@/lib/sitCreateAbandon";
+
+/**
+ * Lot PUB1 (07/11/2026) : « Décrire en une phrase » s'ouvre ici, dans une
+ * fenêtre, au lieu d'envoyer vers le tableau de bord. Ce détour passait par
+ * la porte du questionnaire et ramenait au formulaire vide : 12 personnes,
+ * 0 brouillon généré du 01/10 au 07/11/2026.
+ */
+const SitDraftFromPrompt = lazyWithRetry(() => import("@/components/dashboard/SitDraftFromPrompt"), "SitDraftFromPrompt");
 
 type LiveSitRow = LiveSitLike & { status: string };
 /** Lot P1 : choix « Préparer une autre garde » mémorisé pour la session. */
@@ -492,6 +505,11 @@ const CreateSit = () => {
   const draftSavedRef = useRef(false);
   const formShownRef = useRef(false);
   const abandonEmittedRef = useRef(false);
+  // Lot PUB1 : motif d'une sortie décidée par un geste du formulaire, et
+  // brouillon existant (lien d'URL ou brouillon repris sans paramètre).
+  const exitIntentRef = useRef<ExitIntent | null>(null);
+  const draftIdRef = useRef<string | null>(null);
+  const markExit = (intent: ExitIntent) => { exitIntentRef.current = intent; };
   const noteStep0Field = useCallback((target: EventTarget | null) => {
     const field = resolveStep0Field(target);
     if (field) step0LastFieldRef.current = field;
@@ -513,6 +531,10 @@ const CreateSit = () => {
           formShown: formShownRef.current,
           lastField: step0LastFieldRef.current,
           draftSaved: draftSavedRef.current,
+          intent: exitIntentRef.current,
+          // Au démontage, l'adresse affichée est déjà la destination.
+          nextPath: typeof window !== "undefined" ? window.location.pathname : null,
+          draftExists: !!draftIdRef.current,
         }),
       });
     };
@@ -635,7 +657,7 @@ const CreateSit = () => {
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
-    const todayIso = new Date().toISOString().slice(0, 10);
+    const todayIso = localTodayIso();
     void supabase
       .from("sits")
       .select("id, status, title, start_date, end_date")
@@ -734,12 +756,13 @@ const CreateSit = () => {
     } catch { /* silent */ }
   }, [showAlmaCreateBubble]);
 
+  const [almaPromptOpen, setAlmaPromptOpen] = useState(false);
   const handleAlmaCreateIntent = useCallback(() => {
     try {
-      void trackEvent("sits_create_alma_intent_clicked", { source: "/sits/create" });
+      void trackEvent("sits_create_alma_intent_clicked", { source: "/sits/create", metadata: { inline: true } });
     } catch { /* silent */ }
-    navigate("/dashboard?intent=draft_from_prompt");
-  }, [navigate]);
+    setAlmaPromptOpen(true);
+  }, []);
 
   const handleAlmaCreateDismiss = useCallback(() => {
     try {
@@ -889,14 +912,13 @@ const CreateSit = () => {
     }
     applyLocalDraft(stored);
     setLocalDraftRestored(true);
-    const today = new Date().toISOString().slice(0, 10);
-    const storedStart = (stored.startDate ?? "").trim();
     void trackEvent("sit_draft_resumed", {
       source: "create_sit_page_local",
       metadata: {
         sit_id: stored.draftId ?? remoteDraftId ?? null,
         restored_step: typeof stored.currentStep === "number" ? stored.currentStep : 0,
-        dates_cleared: !storedStart || storedStart < today,
+        // La copie locale est appliquée telle quelle : aucune date n'est retirée.
+        ...localResumeDateFlags(stored.startDate, localTodayIso()),
       },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1044,6 +1066,7 @@ const CreateSit = () => {
               .from("sits").select("id, status").eq("id", draftIdParam).eq("user_id", user.id).maybeSingle();
             const redirect = resumeRedirectFor((current as { id: string; status?: string } | null) ?? null);
             toast({ title: redirect.title, description: redirect.description });
+            markExit("not_a_draft");
             navigate(redirect.to, { replace: true });
             return;
           }
@@ -1056,12 +1079,12 @@ const CreateSit = () => {
           const d = draftRes.data;
           remoteDraftUpdatedAt = (d as any).updated_at || (d as any).created_at || null;
           remoteDraftId = d.id;
-          const today = new Date().toISOString().slice(0, 10);
-          const rawStart: string | null = d.start_date || null;
-          const rawEnd: string | null = d.end_date || null;
-          const cleanStart = rawStart && rawStart >= today ? rawStart : "";
-          const cleanEnd = rawEnd && rawEnd >= today && (!cleanStart || rawEnd >= cleanStart) ? rawEnd : "";
-          const datesWerePast = (!!rawStart && !cleanStart) || (!!rawEnd && !cleanEnd);
+          // Dates comparées au calendrier de l'appareil (lot PUB1) : une date
+          // du jour reste valable au Chili ou en Polynésie en soirée.
+          const resumed = resumeDraftDates(d.start_date, d.end_date, localTodayIso());
+          const cleanStart = resumed.start;
+          const cleanEnd = resumed.end;
+          const datesWerePast = resumed.cleared;
           setDraftId(d.id);
           // Une annonce publiée puis dépubliée est un choix assumé : l'écran
           // de choix à la sortie ne la concerne pas.
@@ -1130,6 +1153,7 @@ const CreateSit = () => {
                 days_since_created: days,
                 restored_step: step0Complete ? 1 : 0,
                 dates_cleared: datesWerePast,
+                had_dates: resumed.hadDates,
               },
             });
           }
@@ -1276,6 +1300,7 @@ const CreateSit = () => {
   const handleSaveAndExit = async () => {
     const id = await saveDraft();
     if (id) {
+      markExit("save_and_exit");
       void trackEvent("sit_draft_saved_manually", {
         source: "create_sit_page",
         metadata: { sit_id: id },
@@ -1293,7 +1318,7 @@ const CreateSit = () => {
     if (!user || !property) return null;
     // Anti-brouillon fantôme : ne pas créer de brouillon vide en base.
     // Si aucun draft existant ET aucun champ utilisateur rempli, on n'écrit rien.
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localTodayIso();
     const safeStart = startDate && startDate >= today ? startDate : null;
     const safeEnd = endDate && endDate >= today && (!safeStart || endDate >= safeStart) ? endDate : null;
     const hasAnyContent = !!(
@@ -1387,7 +1412,7 @@ const CreateSit = () => {
     }
   };
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = localTodayIso();
   const dateError = startDate && endDate && startDate >= endDate
     ? "La date de fin doit être après la date de début."
     : startDate && startDate < today
@@ -1418,6 +1443,7 @@ const CreateSit = () => {
         locationCity: sitCity.trim() || ownerCity.trim() || null,
       },
     }),
+    { today },
   );
 
   // Même filtrage que la fiche annonce : un blocage informatif ne doit jamais
@@ -1581,6 +1607,7 @@ const CreateSit = () => {
       return;
     }
     if (b.action) {
+      markExit("blocker_action");
       navigate(b.action);
       return;
     }
@@ -2064,6 +2091,7 @@ const CreateSit = () => {
     arrivalRedirectedRef.current = true;
     const back = `${location.pathname}${location.search}`;
     void trackEvent("arrival_p1_resumed_from_create", { source: "/sits/create", metadata: { missing: setupState.missingIds } });
+    markExit("arrival_resume");
     navigate(`/arrivee/vous?next=${encodeURIComponent(back)}`, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [arrivalShouldResumeP1]);
@@ -2165,6 +2193,7 @@ const CreateSit = () => {
       source: "/sits/create",
       metadata: { missing: setupState.missingIds },
     });
+    markExit("setup_quit");
     navigate("/dashboard");
   };
 
@@ -2309,7 +2338,7 @@ const CreateSit = () => {
           </p>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <Button asChild variant="outline" className="h-auto min-h-[48px] whitespace-normal">
-              <Link to={`/sits/${live.id}/edit`}>Modifier mon annonce</Link>
+              <Link to={`/sits/${live.id}/edit`} onClick={() => markExit("live_sit")}>Modifier mon annonce</Link>
             </Button>
             <Button
               variant="outline"
@@ -2323,7 +2352,7 @@ const CreateSit = () => {
             </Button>
           </div>
           <p className="mt-4 text-sm">
-            <Link to={`/sits/${live.id}`} className="text-primary hover:underline underline-offset-4 font-medium">
+            <Link to={`/sits/${live.id}`} onClick={() => markExit("live_sit")} className="text-primary hover:underline underline-offset-4 font-medium">
               Voir mon annonce
             </Link>
           </p>
@@ -2349,6 +2378,7 @@ const CreateSit = () => {
             memberRole={(user as { role?: string }).role ?? null}
             onSitterExit={() => {
               void trackEvent("sits_create_setup_sitter_exit", { source: "/sits/create", metadata: { role: (user as { role?: string }).role ?? null } });
+              markExit("sitter_exit");
               navigate("/annonces?espace=gardien");
             }}
             userId={user.id}
@@ -2443,7 +2473,7 @@ const CreateSit = () => {
           blocking={getBlockingBlockers(publishBlockers)}
           publishing={publishing}
           onPublish={() => { void handlePublish(); }}
-          onBack={() => { void saveDraft({ silent: true }).finally(() => navigate("/dashboard")); }}
+          onBack={() => { markExit("save_and_exit"); void saveDraft({ silent: true }).finally(() => navigate("/dashboard")); }}
           moderationNotice={(key) => <FieldModerationNotice fieldKey={key} />}
           publishedSitId={upcomingPublishedSitId}
         />
@@ -2487,6 +2517,7 @@ const CreateSit = () => {
         return;
       }
     }
+    markExit("back_link");
     if (offerExitChoiceIfReady(() => navigate("/sits"), "back_link")) {
       e.preventDefault();
     }
@@ -2654,7 +2685,7 @@ const CreateSit = () => {
                   Les visites, balades et pensions se publient dans notre espace Coup de main. Vous pouvez y aller quand vous le souhaitez.
                 </p>
                 <Button asChild size="sm">
-                  <Link to="/petites-missions/creer">Publier dans Coup de main</Link>
+                  <Link to="/petites-missions/creer" onClick={() => markExit("mutual_aid")}>Publier dans Coup de main</Link>
                 </Button>
               </div>
             )}
@@ -3111,8 +3142,11 @@ const CreateSit = () => {
                   <h2 id="cover-picker-title" className="text-base font-semibold flex items-center gap-2">
                     <ImageIcon className="h-5 w-5 text-primary" /> Photo de couverture
                   </h2>
+                  <p className="text-sm text-foreground mt-1">
+                    Une photo de votre logement est nécessaire pour publier : les gardiens veulent voir où ils vont vivre. Une seule suffit, prise avec votre téléphone.
+                  </p>
                   <p className="text-sm text-muted-foreground mt-1 mb-3">
-                    Ajoutez une photo ici, elle deviendra la couverture de votre annonce et rejoindra la galerie de votre profil. Les photos de votre lieu de vie rassurent les gardiens autant que celles de vos animaux : une annonce qui en montre remonte dans leur classement.
+                    Elle devient la couverture de votre annonce et rejoint la galerie de votre profil, sans quitter cette page.
                   </p>
                   {user && (
                     <InlinePhotoUpload
@@ -3121,9 +3155,6 @@ const CreateSit = () => {
                       onUploaded={registerUploadedPhoto}
                     />
                   )}
-                  <Link to="/owner-profile#galerie" className="text-sm text-primary hover:underline mt-3 inline-block">
-                    Gérer toutes mes photos dans mon profil
-                  </Link>
                 </section>
               );
             }
@@ -3171,9 +3202,6 @@ const CreateSit = () => {
                       onUploaded={registerUploadedPhoto}
                     />
                   )}
-                  <Link to="/owner-profile#galerie" className="text-xs text-primary hover:underline">
-                    Gérer mes photos dans mon profil
-                  </Link>
                 </div>
               </section>
             );
@@ -3307,9 +3335,6 @@ const CreateSit = () => {
                       <p className="text-xs text-muted-foreground">
                         Photo de couverture, à choisir dans le bloc en haut de cette étape.
                       </p>
-                      <Link to="/owner-profile#galerie" className="text-xs text-primary hover:underline mt-1 inline-block">
-                        Gérer mes photos dans mon profil →
-                      </Link>
                     </div>
 
                   </div>
@@ -3400,7 +3425,7 @@ const CreateSit = () => {
                 onClick={handleSaveAndExit}
                 disabled={savingDraft || !property}
               >
-                {savingDraft ? "Sauvegarde…" : <><span className="hidden sm:inline">Enregistrer & quitter</span><span className="sm:hidden">Brouillon</span></>}
+                {savingDraft ? "Sauvegarde…" : <><span className="hidden sm:inline">Enregistrer & quitter</span><span className="sm:hidden">Enregistrer</span></>}
               </Button>
             ) : (
               <>
@@ -3499,6 +3524,7 @@ const CreateSit = () => {
             <AlertDialogCancel
               onClick={() => {
                 setIncompleteNudgeOpen(false);
+                markExit("profile");
                 navigate("/profile");
               }}
             >
