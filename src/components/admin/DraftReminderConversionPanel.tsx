@@ -19,6 +19,10 @@ const PERIODS = [
   { value: "all", label: "Depuis la première relance", days: null },
 ] as const;
 const DETAIL_PAGE = 20;
+const STATUS_LABELS: Record<string, string> = {
+  deferred: "reportées", abandoned: "annulées avant envoi", unsubscribed_category: "refusées, relances désactivées",
+  suppressed: "refusées, adresse en suppression", failed: "en échec", pending: "en cours", dlq: "en échec définitif",
+};
 
 const day = (iso: string | null) => (iso ? format(new Date(iso), "d MMM yyyy", { locale: fr }) : "–");
 const pct = (v: number | null) => (v === null ? "–" : `${Math.round(v * 100)} %`);
@@ -110,7 +114,7 @@ export function DraftReminderConversionPanel() {
               {Object.keys(campaign.otherStatuses).length > 0 && (
                 <p className="text-xs text-muted-foreground">
                   Autres traces sur la période :{" "}
-                  {Object.entries(campaign.otherStatuses).map(([status, n]) => `${status} ${n}`).join(", ")} (reports, annulations ou refus, jamais comptés comme envois).
+                  {Object.entries(campaign.otherStatuses).map(([status, n]) => `${n} ${STATUS_LABELS[status] ?? "à vérifier"}`).join(", ")}. Jamais comptées comme envois.
                 </p>
               )}
               {warnings.length > 0 && (
