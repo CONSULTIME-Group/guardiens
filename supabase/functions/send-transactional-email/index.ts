@@ -1,4 +1,4 @@
-import { draftReminderStillRelevant } from '../_shared/draft-reminder-policy.ts'
+import { draftReminderStillRelevant, draftReminderHistoryFilter, draftReminderSendTimeBlock } from '../_shared/draft-reminder-policy.ts'
 import { loadMissingDraftItems, draftReminderUrl } from '../_shared/sit-draft-missing.ts'
 import { ownerHasPublished } from '../_shared/published-sit.ts'
 import * as React from 'npm:react@18.3.1'
@@ -587,22 +587,34 @@ Deno.serve(async (req) => {
         .select('id, user_id, status, published_at, unpublished_at, title, city, start_date, end_date, absence_reason, sitter_expectations, cover_photo_url')
         .eq('id', sitId).maybeSingle()
       if (draftError) throw draftError
-      const relevant = draftReminderStillRelevant(draft, new Date().toISOString().slice(0, 10))
+      const relevant = !!draft && draftReminderStillRelevant(draft, new Date().toISOString().slice(0, 10))
         && !(await ownerHasPublished(supabase, draft.user_id))
-      if (!relevant) {
+      // Nombre et espacement relus ici, quel que soit le chemin (tâche, admin,
+      // drainage d'un report) : deux relances au plus, sept jours entre elles.
+      let abandonReason: string | null = relevant ? null : 'draft_no_longer_relevant'
+      if (!abandonReason) {
+        const { data: history, error: historyError } = await supabase.from('email_send_log')
+          .select('status, created_at, metadata').eq('template_name', templateName)
+          .or(draftReminderHistoryFilter(sitId))
+        if (historyError) throw historyError
+        abandonReason = draftReminderSendTimeBlock(history ?? [], idempotencyKey)
+      }
+      if (abandonReason) {
         if (sourceQueueId) {
           const { error } = await supabase.from('email_deferred_queue')
-            .update({ status: 'abandoned', last_error: 'draft_no_longer_relevant' }).eq('id', sourceQueueId)
+            .update({ status: 'abandoned', last_error: abandonReason }).eq('id', sourceQueueId)
           if (error) throw error
         }
-        await supabase.from('email_send_log').insert({
+        const { error: abandonLogError } = await supabase.from('email_send_log').insert({
           message_id: messageId, template_name: templateName, recipient_email: effectiveRecipient,
-          status: 'abandoned', metadata: { ...logMetadata, idempotency_key: idempotencyKey, sit_id: sitId, abandon_reason: 'draft_no_longer_relevant' },
+          status: 'abandoned', metadata: { ...logMetadata, idempotency_key: idempotencyKey, sit_id: sitId, abandon_reason: abandonReason },
         })
-        return new Response(JSON.stringify({ success: true, skipped: true, abandoned: true, reason: 'draft_no_longer_relevant' }), {
+        if (abandonLogError) console.error('email_send_log insert failed (draft abandoned)', { code: abandonLogError.code })
+        return new Response(JSON.stringify({ success: true, skipped: true, abandoned: true, reason: abandonReason }), {
           status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
       }
+      if (!draft) throw new Error('draft_missing')
       const { data: owner, error: ownerError } = await supabase.from('profiles').select('email').eq('id', draft.user_id).maybeSingle()
       if (ownerError) throw ownerError
       if (!owner?.email || owner.email.trim().toLowerCase() !== effectiveRecipient.toLowerCase()) throw new Error('draft_recipient_mismatch')

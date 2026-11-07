@@ -40,6 +40,7 @@ import {
 import { WriteToMemberDialog, type WriteToMemberTarget } from "./_components/users/WriteToMemberDialog";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import DraftStatsPanel from "@/components/admin/DraftStatsPanel";
+import DraftReminderConversionPanel from "@/components/admin/DraftReminderConversionPanel";
 import ListingDrilldownDialog from "@/components/admin/ListingDrilldownDialog";
 import ListingProximityCard from "@/components/admin/ListingProximityCard";
 import { OwnerAbsenceBadge } from "@/components/admin/OwnerAbsenceBadge";
@@ -676,6 +677,7 @@ const AdminListings = () => {
       )}
 
       <DraftStatsPanel />
+      <DraftReminderConversionPanel />
       <ListingExitsSection />
 
       {(focusSitId || focusOwnerId) && (
@@ -694,7 +696,7 @@ const AdminListings = () => {
 
       {filterStatus === "preparing" && !focusSitId && !focusOwnerId && <div className="flex items-center gap-3 text-sm">
         <label htmlFor="draft-followup-filter">Brouillons</label>
-        <Select disabled={!draftFollowups || draftFollowupError} value={draftFocus} onValueChange={value => { setDraftFocus(value); setPage(1); }}>
+        <Select disabled={!draftFollowups || draftFollowupError} value={draftFocus} onValueChange={value => { setDraftFocus(value); setPage(0); }}>
           <SelectTrigger id="draft-followup-filter" className="w-[280px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous</SelectItem>

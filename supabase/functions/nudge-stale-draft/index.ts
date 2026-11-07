@@ -7,25 +7,31 @@
  *    un signal admin_signals de type 'stale_draft' (insertion idempotente).
  *    Aucun email n'est envoyé en mode cron : la relance email est déjà assurée
  *    par send-sit-draft-reminder, ce job ne fait que rendre le sujet visible.
- *  - manual (body { sit_id, signal_id }) : appelé depuis l'admin, envoie le
- *    template existant sit-draft-reminder via send-transactional-email, puis
- *    marque le signal comme résolu avec action_taken 'email_sent'.
+ *  - manual (body { sit_id, signal_id }) : appelé depuis l'admin, passe par la
+ *    même politique que la relance automatique (_shared/draft-reminder-eligibility.ts :
+ *    deux relances au plus, 7 jours entre elles, 48 heures après un email de la
+ *    séquence, une par jour, préférences product_emails, suppression, date
+ *    passée, propriétaire déjà publié), avec la même clé d'envoi par annonce et
+ *    par rang. send-transactional-email refait ces contrôles au moment réel de
+ *    l'envoi. Le signal n'est résolu qu'après un envoi réel. La réponse ne
+ *    contient jamais l'adresse du propriétaire.
  *
- * Respecte : feature flag admin_signals_active et suppressed_emails.
- * Le filtrage par catégorie est centralisé dans send-transactional-email.
+ * Toute lecture en échec : aucun envoi, réponse 503 (fail closed).
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun, type CronRun } from "../_shared/cron-run-log.ts";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 import { loadMissingDraftItems, draftReminderUrl } from "../_shared/sit-draft-missing.ts";
+import {
+  classifyTransactionalResponse, DRAFT_REMINDER_SELECT, DRAFT_REMINDER_TEMPLATE, evaluateDraftReminder,
+  type DraftReminderDecision,
+} from "../_shared/draft-reminder-eligibility.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
-
-const TEMPLATE = "sit-draft-reminder";
 
 interface StaleDraft {
   sit_id: string;
@@ -48,27 +54,12 @@ function daysUntil(startDate: string | null): number | null {
 
 async function sendDraftReminder(params: {
   serviceClient: any;
-  draft: StaleDraft;
-  messageId: string;
+  decision: Extract<DraftReminderDecision, { send: true }>;
 }): Promise<{ ok: boolean; outcome: "sent" | "deferred" | "skipped" | "failed"; error?: string }> {
-  const { serviceClient, draft, messageId } = params;
-  const email = draft.owner_email.trim().toLowerCase();
-
-  // Liste nommée de ce qui manque, calculée sur l'annonce réelle.
-  const { data: sitRow, error: sitError } = await serviceClient
-    .from("sits")
-    .select("id, user_id, title, city, start_date, end_date, absence_reason, sitter_expectations, cover_photo_url")
-    .eq("id", draft.sit_id)
-    .maybeSingle();
-  if (sitError || !sitRow) return { ok: false, outcome: "failed", error: "draft_unavailable" };
-  const missingItems = await loadMissingDraftItems(serviceClient, sitRow as Record<string, any>);
-
-  const { data: sup } = await serviceClient
-    .from("suppressed_emails")
-    .select("email")
-    .eq("email", email)
-    .maybeSingle();
-  if (sup) return { ok: false, outcome: "skipped", error: "suppressed" };
+  const { serviceClient, decision } = params;
+  const { draft, owner } = decision;
+  const missingItems = await loadMissingDraftItems(serviceClient, draft as Record<string, any>);
+  const daysSinceCreated = Math.max(0, Math.floor((Date.now() - Date.parse(String(draft.created_at))) / 86400000));
 
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
   const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -80,43 +71,33 @@ async function sendDraftReminder(params: {
       apikey: SERVICE_KEY,
     },
     body: JSON.stringify({
-      templateName: TEMPLATE,
-      recipientEmail: email,
-      idempotencyKey: messageId,
+      templateName: DRAFT_REMINDER_TEMPLATE,
+      recipientEmail: owner.email,
+      idempotencyKey: decision.idempotencyKey,
       templateData: {
-        firstName: draft.owner_first_name || "",
-        sitId: draft.sit_id,
-        title: sitRow.title,
+        firstName: owner.first_name || "",
+        sitId: draft.id,
+        title: draft.title,
         fieldsRemaining: missingItems.length,
         missingItems,
         profileUrl: "https://guardiens.fr/owner-profile",
         nearbySittersCount: 0,
-        daysSinceCreated: draft.days_since_created,
-        resumeUrl: draftReminderUrl(draft.sit_id, missingItems),
+        daysSinceCreated,
+        resumeUrl: draftReminderUrl(draft.id, missingItems),
       },
       logMetadata: {
-        sit_id: draft.sit_id,
-        owner_id: draft.owner_id,
-        days_since_created: draft.days_since_created,
+        sit_id: draft.id,
+        owner_id: draft.user_id,
+        reminder_stage: decision.stage,
+        days_since_created: daysSinceCreated,
         source: "nudge-stale-draft",
       },
     }),
   });
-
-  if (!resp.ok) {
-    const body = await resp.text();
-    console.error("[nudge-stale-draft] send failed", resp.status, body);
-    return { ok: false, outcome: "failed", error: `send_failed_${resp.status}` };
-  }
-
-  const payload = (await resp.json().catch(() => null)) as Record<string, unknown> | null;
-  if (payload?.deferred) {
-    return { ok: false, outcome: "deferred", error: String(payload?.reason ?? "deferred") };
-  }
-  if (payload?.skipped) {
-    return { ok: false, outcome: "skipped", error: String(payload?.reason ?? "skipped") };
-  }
-  return { ok: true, outcome: "sent" };
+  const body = (await resp.json().catch(() => null)) as Record<string, unknown> | null;
+  const { outcome, reason } = classifyTransactionalResponse(resp.ok, body);
+  if (outcome === "failed") console.error("[nudge-stale-draft] send failed", resp.status, reason);
+  return outcome === "sent" ? { ok: true, outcome } : { ok: false, outcome, error: reason ?? outcome };
 }
 
 Deno.serve(async (req) => {
@@ -199,20 +180,47 @@ Deno.serve(async (req) => {
         });
       }
 
-      const { data: rows } = await serviceClient.rpc("detect_stale_drafts");
-      const draft = ((rows as StaleDraft[]) ?? []).find((d) => d.sit_id === payload.sit_id);
-      if (!draft) {
+      const { data: rows, error: detectError } = await serviceClient.rpc("detect_stale_drafts");
+      if (detectError) {
+        return new Response(JSON.stringify({ mode, sent: false, outcome: "failed", error: "verification_unavailable" }), {
+          status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const listed = ((rows as StaleDraft[]) ?? []).find((d) => d.sit_id === payload.sit_id);
+      if (!listed) {
         return new Response(
           JSON.stringify({ error: "Brouillon introuvable ou déjà publié" }),
           { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
 
-      const result = await sendDraftReminder({
-        serviceClient,
-        draft,
-        messageId: `stale-draft-manual-${draft.sit_id}-${Date.now()}`,
-      });
+      // Même politique que la tâche quotidienne, relue sur l'annonce réelle.
+      let decision: DraftReminderDecision;
+      try {
+        const { data: sitRow, error: sitError } = await serviceClient
+          .from("sits").select(DRAFT_REMINDER_SELECT).eq("id", listed.sit_id).maybeSingle();
+        if (sitError) throw sitError;
+        decision = await evaluateDraftReminder(serviceClient, sitRow);
+      } catch (e) {
+        console.error("[nudge-stale-draft] eligibility unavailable", (e as Error)?.message);
+        return new Response(JSON.stringify({ mode, sent: false, outcome: "failed", error: "verification_unavailable" }), {
+          status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (!decision.send) {
+        return new Response(
+          JSON.stringify({ mode, sent: false, outcome: "skipped", error: decision.reason }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      let result: Awaited<ReturnType<typeof sendDraftReminder>>;
+      try {
+        result = await sendDraftReminder({ serviceClient, decision });
+      } catch (e) {
+        console.error("[nudge-stale-draft] send unavailable", (e as Error)?.message);
+        result = { ok: false, outcome: "failed", error: "send_unavailable" };
+      }
 
       if (result.ok && payload.signal_id) {
         await serviceClient
@@ -222,7 +230,10 @@ Deno.serve(async (req) => {
             action_taken: "email_sent",
             admin_id: user.id,
           })
-          .eq("id", payload.signal_id);
+          .eq("id", payload.signal_id)
+          .eq("signal_type", "stale_draft")
+          .eq("entity_id", listed.sit_id)
+          .is("resolved_at", null);
       }
 
       return new Response(
@@ -230,8 +241,8 @@ Deno.serve(async (req) => {
           mode,
           sent: result.ok,
           outcome: result.outcome,
+          stage: decision.stage,
           error: result.error ?? null,
-          recipient: draft.owner_email,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );

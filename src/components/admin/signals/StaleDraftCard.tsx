@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SignalPriorityBadge } from "./PriorityBadge";
 import { supabase } from "@/integrations/supabase/client";
+import { manualDraftReminderMessage } from "@/lib/admin/draftReminderConversion";
 
 export interface StaleDraftSignal {
   id: string;
@@ -58,21 +59,10 @@ export const StaleDraftCard = ({ signal }: Props) => {
         body: { mode: "manual", sit_id: sitId, signal_id: signal.id },
       });
       if (error) throw error;
-      const payload = data as { sent?: boolean; error?: string | null; recipient?: string };
-      if (payload?.sent) {
-        toast.success(`Relance envoyée à ${payload.recipient ?? ownerEmail}.`);
-      } else {
-        const reason = payload?.error === "opted_out"
-          ? "Ce propriétaire s'est désinscrit des emails produit."
-          : payload?.error === "suppressed"
-            ? "Cet email est en liste de suppression."
-            : payload?.error === "deferred"
-              ? "Envoi différé, le plafond de fréquence est atteint."
-              : payload?.error === "already_sent"
-                ? "Une relance a déjà été envoyée récemment."
-                : "Envoi impossible pour le moment.";
-        toast.error(reason);
-      }
+      const payload = data as { sent?: boolean; outcome?: string; error?: string | null; stage?: number };
+      const message = manualDraftReminderMessage(payload);
+      if (payload?.sent) toast.success(message);
+      else toast.error(message);
       invalidate();
     } catch (e) {
       toast.error(`Impossible d'envoyer la relance : ${(e as Error).message}`);
