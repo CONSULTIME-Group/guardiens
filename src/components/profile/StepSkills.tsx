@@ -6,7 +6,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
 import { fetchValidatedCompetenceLabels } from "@/lib/validatedCompetences";
 import CompetenceAutocomplete from "./CompetenceAutocomplete";
 import {
