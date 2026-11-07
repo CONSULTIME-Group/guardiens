@@ -7,7 +7,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchMySitterProfile } from "@/lib/myProfile";
+import { fetchMySitterProfile, invalidateMyOnboardingStatus } from "@/lib/myProfile";
 import { buildAffinityWrites } from "@/lib/affinityOnboardingWrites";
 import {
   ARRIVAL_ANIMALS, ARRIVAL_SITTER_TYPE_OPTIONS, ARRIVAL_WORK_OPTIONS, arrivalUrl, readCarry, toggleAnimals,
@@ -69,6 +69,7 @@ const ArriveeGarder = () => {
       const { error } = await supabase.from("sitter_profiles").upsert(row as any, { onConflict: "user_id" });
       if (error) { setSaving(false); setFailed(true); return; }
     }
+    await invalidateMyOnboardingStatus(user.id);
     trackArrival("completed", "G2");
     navigate(arrivalUrl("/arrivee/vous-connaitre", carry));
   };

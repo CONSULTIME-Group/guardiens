@@ -14,7 +14,7 @@
  * Réutilise les listes d'options centralisées dans profileMatchingOptions.
  */
 import { resolvePostOnboardingTarget } from "@/lib/postOnboardingIntent";
-import { fetchMyProfile, fetchMySitterProfile, fetchMyOwnerProfile } from "@/lib/myProfile";
+import { fetchMyProfile, fetchMySitterProfile, fetchMyOwnerProfile, invalidateMyOnboardingStatus } from "@/lib/myProfile";
 import { buildAffinityWrites } from "@/lib/affinityOnboardingWrites";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -375,6 +375,7 @@ const OnboardingAffinity = () => {
         if (error) throw error;
       }
       completedRef.current = true;
+      await invalidateMyOnboardingStatus(user.id);
       const duration = startedAtRef.current
         ? Math.round((Date.now() - startedAtRef.current) / 1000)
         : 0;

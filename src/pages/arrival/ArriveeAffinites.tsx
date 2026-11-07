@@ -8,7 +8,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchMyOwnerProfile } from "@/lib/myProfile";
+import { fetchMyOwnerProfile, invalidateMyOnboardingStatus } from "@/lib/myProfile";
 import { buildAffinityWrites } from "@/lib/affinityOnboardingWrites";
 import { sanitizeRedirect } from "@/lib/safeRedirect";
 import { trackEvent } from "@/lib/analytics";
@@ -100,6 +100,7 @@ const ArriveeAffinites = () => {
       const { error } = await supabase.from("owner_profiles").upsert(writes.owner as any, { onConflict: "user_id" });
       if (error) { setSaving(false); setFailed(true); return; }
     }
+    await invalidateMyOnboardingStatus(user.id);
     void trackEvent("affinity_onboarding_completed", { source: "/arrivee/affinites", metadata: { role: user.role, via: "arrival_v2" } });
     trackArrival("completed", "P3");
     const qs = new URLSearchParams();

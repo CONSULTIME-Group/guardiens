@@ -78,6 +78,23 @@ export function invalidateMyProfile(userId: string, kind: Kind = "my-profile") {
   void qc()?.invalidateQueries({ queryKey: [kind, userId] });
 }
 
+/**
+ * Lot PUB1 (07/11/2026) : après l'enregistrement du questionnaire (affinité,
+ * arrivée), les trois lectures du statut d'onboarding sont relues. Sans cela,
+ * la porte relisait le cache de 5 minutes et renvoyait au questionnaire juste
+ * rempli : 52 personnes sur 193 du 01/10 au 07/11/2026, dont Christophe deux
+ * fois en sept secondes le 26/10.
+ */
+export async function invalidateMyOnboardingStatus(userId: string): Promise<void> {
+  const client = qc();
+  if (!client) return;
+  await Promise.all(
+    (["my-profile", "my-sitter-profile", "my-owner-profile"] as const).map((kind) =>
+      client.invalidateQueries({ queryKey: [kind, userId] }),
+    ),
+  );
+}
+
 export function useMyProfile(userId: string | null | undefined) {
   return useQuery({
     queryKey: ["my-profile", userId],

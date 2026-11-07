@@ -7,7 +7,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchMySitterProfile } from "@/lib/myProfile";
+import { fetchMySitterProfile, invalidateMyOnboardingStatus } from "@/lib/myProfile";
 import { buildAffinityWrites } from "@/lib/affinityOnboardingWrites";
 import { INTEREST_OPTIONS, LANGUAGE_OPTIONS, LIFE_PACE_OPTIONS } from "@/lib/profileMatchingOptions";
 import { ARRIVAL_SITTER_LANGUAGES, afterG3, readCarry } from "@/lib/arrival";
@@ -74,6 +74,7 @@ const ArriveeVousConnaitre = () => {
       const { error } = await supabase.from("sitter_profiles").upsert(row as any, { onConflict: "user_id" });
       if (error) { setSaving(false); setFailed(true); return; }
     }
+    await invalidateMyOnboardingStatus(user.id);
     trackArrival("completed", "G3");
     navigate(afterG3(carry));
   };
