@@ -35,7 +35,7 @@ const mount = () => render(<QueryClientProvider client={new QueryClient({ defaul
 afterEach(() => { cleanup(); failLogs = false; });
 
 describe("panneau de suivi des relances", () => {
-  it("fermé, il ne lit rien ; ouvert, il montre stock, envois et publication sous 7 jours, sans adresse", async () => {
+  it("ouvert, il montre stock, envois et publication sous 7 jours, sans adresse", async () => {
     mount();
     fireEvent.click(screen.getByRole("button", { name: /Relances des brouillons/ }));
     expect(await screen.findByText("Admissibles à une relance")).toBeTruthy();
