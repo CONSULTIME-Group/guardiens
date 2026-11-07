@@ -5,9 +5,9 @@
 // la séquence des 48 dernières heures, réponse de départ) est dit à l'écran.
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import {
-  draftReminderStageDecision, draftReminderStillRelevant, DRAFT_REMINDER_SPACING_MS, type DraftReminderLog,
+  draftReminderStageDecision, draftReminderStillRelevant, DRAFT_REMINDER_SKIP_LABELS,
+  type DraftReminderLog, type DraftReminderSkipReason,
 } from "../../../supabase/functions/_shared/draft-reminder-policy";
-import { DRAFT_REMINDER_SKIP_LABELS, type DraftReminderSkipReason } from "../../../supabase/functions/_shared/draft-reminder-eligibility";
 
 export const ATTRIBUTION_WINDOW_MS = 7 * 86400000;
 const MIN_AGE_MS = 24 * 3600_000;
@@ -145,7 +145,7 @@ export function summarizeDraftConversion(input: ConversionInput): DraftConversio
   return {
     stock: {
       active, eligible,
-      reasons: [...reasons.entries()].sort((a, b) => b[1] - a[1]).map(([reason, count]) => ({ reason, label: DRAFT_REMINDER_SKIP_LABELS[reason], count })),
+      reasons: [...reasons.entries()].sort((a, b) => b[1] - a[1]).map(([reason, count]) => ({ reason, label: reason === "draft_no_longer_relevant" ? "Date de début dépassée" : DRAFT_REMINDER_SKIP_LABELS[reason], count })),
     },
     campaign: {
       sent: details.length, delivered, clicked, bounced: details.filter(d => d.bounced).length, unattributed, sitDeleted,

@@ -8,8 +8,9 @@
 // Module sans dépendance Deno : importé aussi par Vitest.
 import {
   draftReminderHistoryFilter, draftReminderKey, draftReminderStageDecision, draftReminderStillRelevant,
-  type DraftReminderStageReason,
+  type DraftReminderSkipReason,
 } from './draft-reminder-policy.ts'
+export { DRAFT_REMINDER_SKIP_LABELS, type DraftReminderSkipReason } from './draft-reminder-policy.ts'
 import { ownerHasPublished } from './published-sit.ts'
 import { departureHoldsPublishAsk, loadLastDepartureAnswer } from './owner-sequence-rules.ts'
 import { NOEL_V3_ALL_TEMPLATES } from './owner-noel-v3.ts'
@@ -23,10 +24,6 @@ export const DRAFT_REMINDER_MIN_AGE_MS = 24 * 3600_000
 export const DRAFT_REMINDER_JOURNEY_SPACING_MS = 48 * 3600_000
 export const OWNER_PUBLISH_ASK_TEMPLATES = [...NOEL_V3_ALL_TEMPLATES, 'onboarding-j1', 'owner-no-sit-j3', 'owner-no-sit-j10', 'owner-no-sit-j21']
 
-export type DraftReminderSkipReason =
-  | 'draft_no_longer_relevant' | 'too_recent' | 'owner_already_published' | 'no_email' | 'suppressed'
-  | 'product_emails_off' | 'departure_hold' | 'journey_spacing' | 'already_sent_today' | DraftReminderStageReason
-
 export interface DraftReminderDraft {
   id: string; user_id: string; status?: string | null; published_at?: string | null; unpublished_at?: string | null
   title?: string | null; city?: string | null; start_date?: string | null; end_date?: string | null
@@ -38,23 +35,6 @@ export interface DraftReminderOwner {
 export type DraftReminderDecision =
   | { send: true; stage: 1 | 2; idempotencyKey: string; draft: DraftReminderDraft; owner: DraftReminderOwner }
   | { send: false; reason: DraftReminderSkipReason }
-
-/** Libellés lisibles, partagés par la réponse admin et le tableau de bord. */
-export const DRAFT_REMINDER_SKIP_LABELS: Record<DraftReminderSkipReason, string> = {
-  draft_no_longer_relevant: 'Annonce publiée, retirée, supprimée ou date de début dépassée',
-  too_recent: 'Brouillon de moins de 24 heures',
-  owner_already_published: 'Le propriétaire a déjà publié une annonce',
-  no_email: 'Aucune adresse email sur le compte',
-  suppressed: 'Adresse en liste de suppression',
-  product_emails_off: 'Relances désactivées par le propriétaire',
-  departure_hold: 'Départ annoncé plus tard, relance en attente',
-  journey_spacing: 'Un autre email propriétaire est parti il y a moins de 48 heures',
-  already_sent_today: 'Une relance de brouillon est déjà partie aujourd’hui',
-  send_in_progress: 'Une relance est déjà en file d’envoi',
-  reminder_cap: 'Deux relances déjà envoyées',
-  reminder_spacing: 'Dernière relance il y a moins de 7 jours',
-  owner_inactive: 'Propriétaire sans visite depuis 30 jours',
-}
 
 export function escapeIlike(value: string): string {
   return value.trim().toLowerCase().replace(/[\\%_]/g, (c) => `\\${c}`)
