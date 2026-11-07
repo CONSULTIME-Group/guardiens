@@ -90,6 +90,7 @@ import {
   countPropertyPhotos,
   shouldPromptPublishPhotos,
   shouldShowSurroundingsParagraph,
+  withUploadedPhoto,
 } from "@/lib/publishPhotoPrompt";
 
 import { shouldPromptAnimalMention } from "@/lib/sitAnimalMention";
