@@ -683,8 +683,6 @@ const CreateSit = () => {
   const [sourceSitTitle, setSourceSitTitle] = useState<string | null>(null);
   const [draftId, setDraftId] = useState<string | null>(null);
   draftIdRef.current = draftId;
-  // Brouillon préparé par Alma : l'adresse change (?draftId=), la fenêtre se ferme.
-  useEffect(() => { setAlmaPromptOpen(false); }, [draftIdParam]);
   const [savingDraft, setSavingDraft] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   // Fiabilité de la sauvegarde distante : un échec silencieux ne doit plus
@@ -759,6 +757,8 @@ const CreateSit = () => {
   }, [showAlmaCreateBubble]);
 
   const [almaPromptOpen, setAlmaPromptOpen] = useState(false);
+  // Brouillon préparé par Alma : l'adresse change (?draftId=), la fenêtre se ferme.
+  useEffect(() => { setAlmaPromptOpen(false); }, [draftIdParam]);
   const handleAlmaCreateIntent = useCallback(() => {
     try {
       void trackEvent("sits_create_alma_intent_clicked", { source: "/sits/create", metadata: { inline: true } });
