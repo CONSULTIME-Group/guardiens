@@ -27,6 +27,7 @@ export interface OwnerDraftContext {
   hasProperty: boolean;
   hasPhoto: boolean;
   hasPets: boolean;
+  city?: string | null;
 }
 
 export interface DraftReadiness {
@@ -45,9 +46,11 @@ export function parisToday(now: Date = new Date()): string {
 export function draftReadiness(sit: DraftLike, ctx: OwnerDraftContext | undefined, today: string = parisToday()): DraftReadiness {
   if (sit.status !== "draft") return { ready: false, missing: [], blocked: "not_draft" };
   if (sit.published_at || sit.unpublished_at || sit.last_unpublished_reason) return { ready: false, missing: [], blocked: "withdrawn" };
-  if (!sit.start_date || sit.start_date.slice(0, 10) < today) return { ready: false, missing: [], blocked: "past" };
+  if (sit.start_date && sit.start_date.slice(0, 10) < today) return { ready: false, missing: [], blocked: "past" };
+  if (!(sit.city?.trim() || ctx?.city?.trim())) return { ready: false, missing: [], blocked: "no_city" };
   const missing = missingDraftItems({
     title: sit.title,
+    city: sit.city?.trim() || ctx?.city,
     start_date: sit.start_date,
     end_date: sit.end_date,
     absence_reason: sit.absence_reason,
@@ -57,9 +60,8 @@ export function draftReadiness(sit: DraftLike, ctx: OwnerDraftContext | undefine
     hasProperty: ctx ? ctx.hasProperty : false,
     hasPhoto: ctx ? ctx.hasPhoto : false,
     hasPets: ctx ? ctx.hasPets : false,
-  });
+  }, today);
   if (missing.length) return { ready: false, missing, blocked: null };
-  if (!sit.city || !sit.city.trim()) return { ready: false, missing: [], blocked: "no_city" };
   return { ready: true, missing: [], blocked: null };
 }
 
@@ -83,6 +85,14 @@ export async function loadOwnerDraftContexts(
     .select("id, user_id, photos, cover_photo_url")
     .in("user_id", ids);
   if (error) throw error;
+  const [gallery, profiles] = await Promise.all([
+    supabase.from("owner_gallery").select("user_id").in("user_id", ids),
+    supabase.from("profiles").select("id, city").in("id", ids),
+  ]);
+  if (gallery.error) throw gallery.error;
+  if (profiles.error) throw profiles.error;
+  const galleryOwners = new Set((gallery.data ?? []).map((g: any) => g.user_id));
+  const cityBy = new Map((profiles.data ?? []).map((p: any) => [p.id, p.city]));
   const propIds = (props ?? []).map((p: any) => p.id);
   const petsBy = new Map<string, number>();
   if (propIds.length) {
@@ -92,11 +102,12 @@ export async function loadOwnerDraftContexts(
   }
   for (const id of ids) {
     const prop = (props ?? []).find((p: any) => p.user_id === id);
-    if (!prop) { out.set(id, { hasProperty: false, hasPhoto: false, hasPets: true }); continue; }
+    if (!prop) { out.set(id, { hasProperty: false, hasPhoto: galleryOwners.has(id), hasPets: false, city: cityBy.get(id) as string | null }); continue; }
     const photos = Array.isArray(prop.photos) ? prop.photos : [];
     out.set(id, {
       hasProperty: true,
-      hasPhoto: photos.length > 0 || Boolean(prop.cover_photo_url),
+      hasPhoto: photos.length > 0 || Boolean(prop.cover_photo_url) || galleryOwners.has(id),
+      city: cityBy.get(id) as string | null,
       hasPets: (petsBy.get(prop.id) ?? 0) > 0,
     });
   }

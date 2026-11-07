@@ -25,6 +25,7 @@ import { listingLiveUrl } from "@/lib/admin/listingRowLinks";
 import { buildCsv, downloadCsv } from "@/lib/admin/csv";
 import { ErrorState } from "@/components/admin/ui";
 import DossierDetailSheet from "@/components/admin/DossierDetailSheet";
+import { loadDraftFollowups, draftReminderLabel, type DraftFollowup } from "@/lib/admin/draftFollowup";
 import { draftReadiness, loadOwnerDraftContexts, parisToday, type OwnerDraftContext } from "@/lib/admin/draftReadiness";
 import { LISTING_FILTERS, LISTING_FILTER_LABELS, listingCity, listingFilterScope, sitDistribution, sitSituation, SIT_BUCKETS_PRIMARY, SIT_BUCKETS_SECONDARY, type ListingFilter, type SitBucket } from "@/lib/admin/listingSituation";
 import { useMessageAiAssistant, type MessageAiAction } from "@/hooks/useMessageAiAssistant";
@@ -204,6 +205,9 @@ const AdminListings = () => {
 
   // Lot ADM3 : contexte propriétaire (logement, photos, animaux) des brouillons
   // affichés, pour juger « prêt à publier » avec la règle du formulaire.
+  const [draftFocus, setDraftFocus] = useState("all");
+  const [draftFollowups, setDraftFollowups] = useState<Map<string, DraftFollowup> | null>(null);
+  const [draftFollowupError, setDraftFollowupError] = useState(false);
   const [draftCtx, setDraftCtx] = useState<Map<string, OwnerDraftContext> | null>(null);
   const [draftCtxError, setDraftCtxError] = useState<string | null>(null);
   useEffect(() => {
@@ -214,6 +218,14 @@ const AdminListings = () => {
     loadOwnerDraftContexts(supabase, owners)
       .then((m) => { if (!cancelled) { setDraftCtx(m); setDraftCtxError(null); } })
       .catch((e) => { if (!cancelled) { setDraftCtx(new Map()); setDraftCtxError(e?.message || "lecture refusée"); } });
+    return () => { cancelled = true; };
+  }, [listings]);
+  useEffect(() => {
+    let cancelled = false;
+    setDraftFollowups(null); setDraftFollowupError(false);
+    loadDraftFollowups(supabase, listings.filter(l => l.status === "draft" && !l.published_at))
+      .then(rows => { if (!cancelled) setDraftFollowups(rows); })
+      .catch(() => { if (!cancelled) setDraftFollowupError(true); });
     return () => { cancelled = true; };
   }, [listings]);
   const today = parisToday();
@@ -466,6 +478,12 @@ const AdminListings = () => {
   };
 
   const filtered = listings.filter((l) => {
+    if (filterStatus === "preparing" && draftFocus !== "all" && !focusSitId && !focusOwnerId) {
+      const past = !!l.start_date && l.start_date < today;
+      if (draftFocus === "past" && !past) return false;
+      if (draftFocus === "published" && !draftFollowups?.get(l.id)?.ownerHasPublished) return false;
+      if (draftFocus === "resume" && (past || !draftFollowups?.has(l.id) || draftFollowups.get(l.id)!.ownerHasPublished)) return false;
+    }
     if (search && !l.title?.toLowerCase().includes(search.toLowerCase()) && !l.owner?.first_name?.toLowerCase().includes(search.toLowerCase())) return false;
     if (filterCity && filterCity !== "all_cities" && listingCity(l).city !== filterCity) return false;
     if (filterStatus === "ready" && !focusSitId && !focusOwnerId && !isReady(l)) return false;
@@ -674,6 +692,19 @@ const AdminListings = () => {
         <p role="status" className="text-sm text-muted-foreground">Chargement des candidatures…</p>
       )}
 
+      {filterStatus === "preparing" && !focusSitId && !focusOwnerId && <div className="flex items-center gap-3 text-sm">
+        <label htmlFor="draft-followup-filter">Brouillons</label>
+        <Select disabled={!draftFollowups || draftFollowupError} value={draftFocus} onValueChange={value => { setDraftFocus(value); setPage(1); }}>
+          <SelectTrigger id="draft-followup-filter" className="w-[280px]"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous</SelectItem>
+            <SelectItem value="resume">À reprendre, sans publication antérieure</SelectItem>
+            <SelectItem value="past">Dates de début dépassées</SelectItem>
+            <SelectItem value="published">Propriétaire ayant déjà publié</SelectItem>
+          </SelectContent>
+        </Select>
+        {draftFollowupError && <span className="text-muted-foreground">Suivi des relances indisponible</span>}
+      </div>}
       <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -750,7 +781,7 @@ const AdminListings = () => {
             ) : countUnknown ? (
               <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{statsError ? "Indisponible, candidatures non lues" : "Chargement des candidatures…"}</TableCell></TableRow>
             ) : filterStatus === "ready" && !focusSitId && !focusOwnerId && (draftCtxError || !draftCtx) ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{draftCtxError ? "Indisponible, logements et animaux non lus" : "Lecture des logements et des animaux…"}</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{draftCtxError ? "Indisponible, contexte du brouillon non lu" : "Lecture des informations du brouillon…"}</TableCell></TableRow>
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
             ) : paginated.map((listing) => {
@@ -806,6 +837,20 @@ const AdminListings = () => {
                   <TableCell>
                     <Badge variant={sit.tone}>{sit.label}</Badge>
                     {sit.detail && <p className="text-[11px] text-muted-foreground mt-0.5">{sit.detail}</p>}
+                    {listing.status === "draft" && !listing.published_at && (() => {
+                      const readiness = draftCtx && !draftCtxError ? draftReadiness(listing, draftCtx.get(listing.user_id), today) : null;
+                      const followup = draftFollowups?.get(listing.id);
+                      const missing = readiness?.missing.map(m => m.label).join(" · ");
+                      return <div className="text-xs text-muted-foreground mt-1 max-w-sm space-y-1">
+                        <p>{!readiness ? "Complétude à vérifier" : readiness.blocked === "past" ? "Date de début dépassée : dates à revoir" : readiness.blocked === "no_city" ? "Commune à renseigner" : readiness.ready ? "Informations complètes : publication à confirmer" : missing || "Brouillon à vérifier"}</p>
+                        {followup?.ownerHasPublished && <p>Ce propriétaire a déjà publié une autre annonce.</p>}
+                        {followup?.productEmailsAllowed === false && <p>Relances désactivées par le propriétaire.</p>}
+                        <p>{followup ? draftReminderLabel(followup.lastReminder) : draftFollowupError ? "Historique des relances indisponible" : "Lecture des relances…"}
+                          {followup?.lastReminder && ` · ${format(new Date(followup.lastReminder.created_at), "d MMM yyyy", { locale: fr })}`}
+                        </p>
+                      </div>;
+                    })()}
+
                   </TableCell>
                   <TableCell className="text-right text-sm tabular-nums">
                     {st && st.applications > 0 ? (

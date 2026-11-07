@@ -15,6 +15,24 @@
           "sql": "SELECT EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid = 'public.sits'::regclass AND tgname = 'trg_notify_sitters_on_new_sit' AND NOT tgisinternal) AS ok"
         }
       ]
+    },
+    {
+      "migration": "0116_admin_draft_email_preferences.sql",
+      "description": "Préférences de relance accessibles aux seuls administrateurs pour les propriétaires de brouillons",
+      "checks": [
+        {
+          "name": "draft_preferences_rpc_exists",
+          "sql": "SELECT EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname='admin_draft_email_preferences' AND pg_get_function_identity_arguments(p.oid)='p_owner_ids uuid[]' AND p.prosecdef AND p.provolatile='s' AND p.proconfig @> ARRAY['search_path=public, pg_temp']) AS ok"
+        },
+        {
+          "name": "draft_preferences_rpc_permissions",
+          "sql": "SELECT COALESCE(has_function_privilege('authenticated', to_regprocedure('public.admin_draft_email_preferences(uuid[])'), 'EXECUTE') AND NOT has_function_privilege('anon', to_regprocedure('public.admin_draft_email_preferences(uuid[])'), 'EXECUTE'), false) AS ok"
+        },
+        {
+          "name": "draft_preferences_admin_guard",
+          "sql": "SELECT COALESCE((SELECT position('has_role(auth.uid()' in pg_get_functiondef(p.oid)) > 0 AND position('cardinality(p_owner_ids) > 500' in pg_get_functiondef(p.oid)) > 0 AND position('s.published_at IS NULL' in pg_get_functiondef(p.oid)) > 0 FROM pg_proc p WHERE p.oid=to_regprocedure('public.admin_draft_email_preferences(uuid[])')),false) AS ok"
+        }
+      ]
     }
   ]
 }
