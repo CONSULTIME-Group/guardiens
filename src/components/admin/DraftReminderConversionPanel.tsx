@@ -24,8 +24,8 @@ const STATUS_LABELS: Record<string, string> = {
   suppressed: "refusées, adresse en suppression", failed: "en échec", pending: "en cours", dlq: "en échec définitif",
 };
 
-const day = (iso: string | null) => (iso ? format(new Date(iso), "d MMM yyyy", { locale: fr }) : "–");
-const pct = (v: number | null) => (v === null ? "–" : `${Math.round(v * 100)} %`);
+const day = (iso: string | null) => (iso ? format(new Date(iso), "d MMM yyyy", { locale: fr }) : "·");
+const pct = (v: number | null) => (v === null ? "·" : `${Math.round(v * 100)} %`);
 
 function Stat({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
   return (
@@ -151,7 +151,7 @@ export function DraftReminderConversionPanel() {
                           <TableCell className="max-w-[220px] truncate">
                             {d.sitId && !d.sitDeleted
                               ? <a className="underline hover:text-primary" href={`/admin/listings?sit=${d.sitId}`}>{d.title?.trim() || "Sans titre"}</a>
-                              : "–"}
+                              : "·"}
                           </TableCell>
                         </TableRow>
                       ))}

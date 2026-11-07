@@ -89,10 +89,10 @@ describe("email de relance de brouillon", () => {
     expect(sender).toMatch(/const headers: Record<string, string> = \{\}\s*if \(category !== 'transactional'\) \{[\s\S]{0,500}headers\['List-Unsubscribe-Post'\] = 'List-Unsubscribe=One-Click'/);
     const html = render({ firstName: "Camille", missingItems: [], resumeUrl: draftReminderUrl(SIT, []) });
     expect(html).not.toMatch(/<script|javascript:/i);
-    expect(html).not.toContain("—");
+    expect(html).not.toContain("\u2014");
     for (const s of [template.subject({ missingItems: [] }), template.subject({})]) {
       expect(s.length).toBeLessThanOrEqual(60);
-      expect(s).not.toMatch(/!|€|—/);
+      expect(s).not.toMatch(/!|€|\u2014/);
       expect(s).not.toMatch(/gratuit|urgent/i);
       expect(s).not.toMatch(/[A-Z]{4,}/);
     }
