@@ -7,7 +7,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchMyProfile } from "@/lib/myProfile";
+import { fetchMyProfile, invalidateMyOnboardingStatus } from "@/lib/myProfile";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
@@ -89,6 +89,7 @@ const ArriveeVousGardien = () => {
     setFailed(false);
     const { error } = await supabase.from("profiles").update(buildG1Writes({ firstName, postalCode, city, country }) as any).eq("id", user.id);
     if (error) { setSaving(false); setFailed(true); return; }
+    await invalidateMyOnboardingStatus(user.id);
     trackArrival("completed", "G1");
     void Promise.resolve(refreshProfile?.()).catch(() => {});
     navigate(nextUrl);
