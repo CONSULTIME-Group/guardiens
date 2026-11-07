@@ -1426,7 +1426,11 @@ const CreateSit = () => {
       } else {
         const { data, error } = await supabase.from("sits").insert({ ...payload, status: "draft" as any }).select("id, updated_at").single();
         if (error) throw error;
-        if ((data as { updated_at?: string | null }).updated_at) remoteBaseRef.current = (data as { updated_at?: string | null }).updated_at ?? null;
+        const insertedAt = (data as { updated_at?: string | null }).updated_at ?? null;
+        if (insertedAt) {
+          remoteBaseRef.current = insertedAt;
+          rebaseLocalCopy(insertedAt);
+        }
         setDraftId(data.id);
         markSaved();
         grantOwnerSpace();
