@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
+import { fetchValidatedCompetenceLabels } from "@/lib/validatedCompetences";
 import CompetenceAutocomplete from "@/components/profile/CompetenceAutocomplete";
 import {
   SKILL_CATEGORIES,
@@ -33,12 +33,7 @@ const OwnerStepSkills = ({
   const [validatedLabels, setValidatedLabels] = useState<string[]>([]);
 
   useEffect(() => {
-    supabase
-      .from("competences_validees")
-      .select("label")
-      .then(({ data }) => {
-        setValidatedLabels((data || []).map((d: any) => d.label));
-      });
+    void fetchValidatedCompetenceLabels().then(setValidatedLabels);
   }, []);
 
   const pushUpdate = useCallback(

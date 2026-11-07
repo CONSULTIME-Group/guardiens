@@ -20321,6 +20321,16 @@ export type Database = {
         Args: { p_garde_id: string }
         Returns: string[]
       }
+      get_hero_weights: {
+        Args: never
+        Returns: {
+          updated_at: string
+          weight_animals: number
+          weight_home: number
+          weight_mutual_aid: number
+          weight_village: number
+        }[]
+      }
       get_inventaire_counts: { Args: never; Returns: Json }
       get_member_display: {
         Args: { _ids: string[] }
@@ -20647,6 +20657,13 @@ export type Database = {
           sit_id: string
           start_date: string
           title: string
+        }[]
+      }
+      list_validated_competences: {
+        Args: { p_categorie?: string; p_limit?: number; p_search?: string }
+        Returns: {
+          categorie: string
+          label: string
         }[]
       }
       local_useful_action_sources: { Args: never; Returns: Json }

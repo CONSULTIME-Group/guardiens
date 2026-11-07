@@ -743,6 +743,13 @@
       "when": 1792649055629,
       "tag": "0108_e24_questions_besoin",
       "breakpoints": true
+    },
+    {
+      "idx": 106,
+      "version": "7",
+      "when": 1794076560224,
+      "tag": "0106_sec2_lectures_publiques",
+      "breakpoints": true
     }
   ]
 }

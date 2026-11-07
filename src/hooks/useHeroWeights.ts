@@ -1,6 +1,7 @@
 /**
  * Hook React qui expose les poids cibles de répartition des hero, lus depuis
- * la table `hero_weights` (singleton, lecture publique).
+ * la fonction `get_hero_weights` (lot SEC2 : la table `hero_weights` est
+ * réservée à l'équipe admin, les visiteurs ne lisent que les quatre poids).
  *
  * - Lecture initiale + souscription realtime → tout changement admin se
  *   propage instantanément sans rechargement.
@@ -49,17 +50,16 @@ function notify(w: HeroWeights) {
 function ensureInitialFetch() {
   if (initialFetchPromise) return initialFetchPromise;
   initialFetchPromise = (async () => {
-    const { data, error } = await supabase
-      .from("hero_weights")
-      .select("weight_animals,weight_home,weight_mutual_aid,weight_village,updated_at")
-      .eq("id", 1)
-      .maybeSingle();
-    if (!error && data) notify(rowToWeights(data as Row));
+    const { data, error } = await supabase.rpc("get_hero_weights");
+    const row = Array.isArray(data) ? data[0] : null;
+    if (!error && row) notify(rowToWeights(row as Row));
   })();
   return initialFetchPromise;
 }
 
-// Une seule subscription realtime partagée par tous les hooks.
+// Une seule subscription realtime partagée par tous les hooks. Depuis le lot
+// SEC2, seule l'équipe admin reçoit ces mises à jour (lecture de la table
+// réservée) ; les visiteurs gardent la lecture initiale.
 let channelStarted = false;
 function ensureRealtimeChannel() {
   if (channelStarted) return;
