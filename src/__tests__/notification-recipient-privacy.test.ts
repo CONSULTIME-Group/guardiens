@@ -56,6 +56,8 @@ type Options = {
   providerThrow?: boolean;
   providerMissingId?: boolean;
   pendingError?: boolean;
+  draftHistory?: Array<Record<string, unknown>>;
+  draftHistoryError?: boolean;
 };
 
 // Execute the actual Edge handler with inert DB, rendering and provider doubles.
@@ -89,9 +91,11 @@ function harness(options: Options = {}) {
     const chain: Record<string, any> = {};
     const filters: Array<[string, unknown]> = [];
     let keyFilter: string[] = [];
+    let orFilter = "";
     for (const method of ["select", "eq", "not", "neq", "gte", "ilike", "like", "order", "or", "filter", "in", "insert", "update"]) {
       chain[method] = (...args: unknown[]) => {
         if (method === "eq") filters.push([String(args[0]), args[1]]);
+        if (method === "or") orFilter = String(args[0]);
         if (method === "in" && args[0] === "metadata->>idempotency_key") keyFilter = args[1] as string[];
         if (method === "filter" && args[0] === "metadata->>idempotency_key") keyFilter = [String(args[2])];
         if (method === "ilike" && args[0] === "email") recipientPatterns.push(String(args[1]));
@@ -138,7 +142,9 @@ function harness(options: Options = {}) {
       throw new Error(`Unexpected table read ${table}`);
     };
     chain.single = async () => ({ data: options.pendingError ? null : { id: "fixture-log" }, error: options.pendingError ? { message: "pending log unavailable" } : null });
-    chain.then = (callback: (value: unknown) => unknown) => Promise.resolve(table in eventRows ? { ...eventResult(), count: options.ownerPublished ? 1 : 0 } : { data: null, count: 0, error: null }).then(callback);
+    chain.then = (callback: (value: unknown) => unknown) => Promise.resolve(table === "email_send_log" && orFilter.includes("sit-draft-reminder-")
+      ? { data: options.draftHistory ?? [], error: options.draftHistoryError ? { message: "private history error" } : null }
+      : table in eventRows ? { ...eventResult(), count: options.ownerPublished ? 1 : 0 } : { data: null, count: 0, error: null }).then(callback);
     return chain;
   });
   const createClient = vi.fn(() => ({ auth: { getUser }, rpc, from }));
@@ -719,5 +725,22 @@ describe("draft reminder verification at actual send time", () => {
     expect(response.status).toBe(200);
     expect((h.createElement.mock.calls as unknown[][])[0][1]).toMatchObject({ title: "Titre actuel", missingItems: [], fieldsRemaining: 0 });
     expect(h.resendFetch).toHaveBeenCalledTimes(1);
+  });
+  it("refuses a third reminder or one less than 7 days after another, whatever the caller", async () => {
+    const sent = (days: number, key: string) => ({ status: "sent", created_at: new Date(Date.now() - days * 86400000).toISOString(), metadata: { idempotency_key: key, sit_id: sitId } });
+    for (const [history, reason] of [
+      [[sent(20, `sit-draft-reminder-${sitId}`), sent(10, `stale-draft-manual-${sitId}-1`)], "reminder_cap"],
+      [[sent(2, `stale-draft-manual-${sitId}-1`)], "reminder_spacing"],
+    ] as const) {
+      const h = harness({ provider: "success", draftRow: draft, draftHistory: [...history] });
+      const response = await h.invoke(serviceKey, ownAddress, "sit-draft-reminder", extra);
+      expect(await response.json()).toMatchObject({ abandoned: true, reason });
+      expect(h.resendFetch).not.toHaveBeenCalled();
+    }
+  });
+  it("does not send when the reminder history cannot be read", async () => {
+    const h = harness({ provider: "success", draftRow: draft, draftHistoryError: true });
+    expect((await h.invoke(serviceKey, ownAddress, "sit-draft-reminder", extra)).status).toBe(503);
+    expect(h.resendFetch).not.toHaveBeenCalled();
   });
 });
