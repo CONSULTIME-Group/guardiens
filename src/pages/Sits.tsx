@@ -40,7 +40,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import Head from "@/components/seo/Head";
-import MobileStickyCTA from "@/components/dashboard/owner/MobileStickyCTA";
 import { RepublishAlmaDialog } from "@/components/ai/alma/RepublishAlmaDialog";
 import AffinitySection from "@/components/matching/AffinitySection";
 import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
@@ -839,12 +838,22 @@ const Sits = () => {
           </p>
         </div>
         {activeRole === "owner" ? (
-          // Sur mobile, le FAB MobileStickyCTA porte le CTA "Publier", on évite le doublon.
-          <Link to="/sits/create" className="hidden sm:inline-flex shrink-0 self-auto">
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" /> Publier
-            </Button>
-          </Link>
+          <>
+            {/* Lot PUB2 : sur téléphone, le bouton « Publier » de la barre basse
+                ouvre une annonce ; un brouillon se reprend ici en un geste
+                (ownerCreateCta). Le bouton collant MobileStickyCTA est
+                désactivé depuis la barre basse, il ne montrait rien. */}
+            {isOwnerView && ownerCreateCta(sits).resumeId && (
+              <Link to={ownerCreateCta(sits).to} className="sm:hidden shrink-0 self-start" data-testid="sits-resume-draft">
+                <Button className="gap-2">{ownerCreateCta(sits).label}</Button>
+              </Link>
+            )}
+            <Link to="/sits/create" className="hidden sm:inline-flex shrink-0 self-auto">
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" /> Publier
+              </Button>
+            </Link>
+          </>
         ) : (
           <Link to="/search" className="shrink-0 self-start sm:self-auto">
             <Button variant="outline" className="gap-2 w-full sm:w-auto">
@@ -1371,10 +1380,6 @@ const Sits = () => {
       </AlertDialog>
 
 
-      {/* Sticky CTA mobile owner, visible dès qu'il y a au moins une annonce */}
-      {isOwnerView && sits.length > 0 && (
-        <MobileStickyCTA label={ownerCreateCta(sits).label} to={ownerCreateCta(sits).to} />
-      )}
     </div>
   );
 };
