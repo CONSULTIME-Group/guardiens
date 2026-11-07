@@ -65,6 +65,59 @@ export function resolveStep0Field(target: unknown): Step0Field | null {
 
 export type AbandonExit = "route_change" | "page_close";
 
+/**
+ * Lot PUB1 (07/11/2026) : motif d'une sortie décidée par un geste du
+ * formulaire, posé juste avant la navigation. Sans motif, la sortie est une
+ * navigation ailleurs (menu, retour du téléphone) ou une fermeture.
+ */
+export const EXIT_INTENTS = [
+  "save_and_exit",
+  "back_link",
+  "mutual_aid",
+  "setup_quit",
+  "sitter_exit",
+  "live_sit",
+  "profile",
+  "blocker_action",
+  "arrival_resume",
+  "not_a_draft",
+] as const;
+export type ExitIntent = (typeof EXIT_INTENTS)[number];
+
+/**
+ * intentional : la personne a choisi de partir (brouillon gardé, entraide…).
+ * redirect : le site l'a envoyée ailleurs (parcours d'arrivée, porte du
+ * questionnaire, lien qui ne désigne plus un brouillon).
+ * abandon : fermeture de page ou navigation ailleurs sans geste du formulaire.
+ */
+export type ExitKind = "intentional" | "redirect" | "abandon";
+
+const INTENT_SET = new Set<string>(EXIT_INTENTS);
+const REDIRECT_INTENTS = new Set<ExitIntent>(["arrival_resume", "not_a_draft"]);
+const REDIRECT_PREFIXES = ["/onboarding", "/arrivee", "/bienvenue", "/login", "/auth"];
+
+const UUID_RE = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
+
+/** Chemin de destination sans paramètres ni identifiant, 80 caractères au plus. */
+export function normalizeExitPath(path: unknown): string | null {
+  if (typeof path !== "string" || !path.startsWith("/")) return null;
+  const bare = path.split(/[?#]/)[0].replace(UUID_RE, ":id");
+  return bare.slice(0, 80) || null;
+}
+
+export function sanitizeExitIntent(value: unknown): ExitIntent | null {
+  return typeof value === "string" && INTENT_SET.has(value) ? (value as ExitIntent) : null;
+}
+
+export function classifyAbandonExit(input: { exit: AbandonExit; intent?: unknown; nextPath?: unknown }): ExitKind {
+  if (input.exit === "page_close") return "abandon";
+  const intent = sanitizeExitIntent(input.intent);
+  if (intent) return REDIRECT_INTENTS.has(intent) ? "redirect" : "intentional";
+  const next = normalizeExitPath(input.nextPath);
+  if (next && REDIRECT_PREFIXES.some((p) => next === p || next.startsWith(p + "/"))) return "redirect";
+  return "abandon";
+}
+
 export interface AbandonInput {
   step: number;
   hasDraftParam: boolean;
@@ -73,6 +126,12 @@ export interface AbandonInput {
   formShown: boolean;
   lastField: unknown;
   draftSaved: boolean;
+  /** Motif posé par un geste du formulaire juste avant de partir. */
+  intent?: unknown;
+  /** Adresse affichée au moment de la sortie (window.location.pathname). */
+  nextPath?: unknown;
+  /** Un brouillon existe en base pour cette saisie, lien d'URL ou non. */
+  draftExists?: boolean;
 }
 
 /**
@@ -85,6 +144,10 @@ export function buildAbandonMetadata(input: AbandonInput): Record<string, string
     step: input.step,
     has_draft: input.hasDraftParam,
     exit: input.exit,
+    exit_kind: classifyAbandonExit(input),
+    exit_reason: sanitizeExitIntent(input.intent),
+    next_path: input.exit === "page_close" ? null : normalizeExitPath(input.nextPath),
+    draft_exists: !!input.draftExists,
   };
   if (input.step !== 0) return base;
   return {

@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { ownerCreateCta } from "@/lib/ownerCreateCta";
 import { OwnerMissionsBlock } from "@/components/sits/OwnerMissionsBlock";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -1372,7 +1373,7 @@ const Sits = () => {
 
       {/* Sticky CTA mobile owner, visible dès qu'il y a au moins une annonce */}
       {isOwnerView && sits.length > 0 && (
-        <MobileStickyCTA label="Publier une annonce" to="/sits/create" />
+        <MobileStickyCTA label={ownerCreateCta(sits).label} to={ownerCreateCta(sits).to} />
       )}
     </div>
   );
