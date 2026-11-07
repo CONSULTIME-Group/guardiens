@@ -13,6 +13,7 @@ import {
   PhotoUnreadableError,
   photoUploadErrorMessage,
   uploadOwnerGalleryPhoto,
+  withImageType,
 } from "@/lib/uploadOwnerGalleryPhoto";
 
 describe("photo ajoutée depuis le formulaire", () => {
@@ -41,6 +42,31 @@ describe("photo illisible", () => {
     expect(photoUploadErrorMessage(new PhotoUnreadableError())).toBe(PHOTO_UNREADABLE_MESSAGE);
     expect(PHOTO_UNREADABLE_MESSAGE).not.toMatch(/Réessayez/);
     expect(photoUploadErrorMessage(new Error("storage down"))).toBe(PHOTO_UPLOAD_INTERRUPTED_MESSAGE);
+  });
+});
+
+describe("photo sans type (sélecteur de Safari, stockage en ligne)", () => {
+  beforeEach(() => vi.mocked(compressImageFile).mockReset());
+
+  it("le type est déduit de l'extension, JPEG par défaut", () => {
+    expect(withImageType(new File(["a"], "maison.jpg", { type: "" })).type).toBe("image/jpeg");
+    expect(withImageType(new File(["a"], "maison.PNG", { type: "application/octet-stream" })).type).toBe("image/png");
+    expect(withImageType(new File(["a"], "IMG_0001.HEIC", { type: "" })).type).toBe("image/heic");
+    expect(withImageType(new File(["a"], "photo", { type: "" })).type).toBe("image/jpeg");
+    const typed = new File(["a"], "x.webp", { type: "image/webp" });
+    expect(withImageType(typed)).toBe(typed);
+  });
+
+  it("la photo sans type passe par la lecture et la réduction, jamais envoyée brute", async () => {
+    vi.mocked(compressImageFile).mockRejectedValueOnce(new Event("error"));
+    const raw = new File([new Uint8Array(10)], "casse.jpg", { type: "" });
+    await expect(uploadOwnerGalleryPhoto("u1", raw)).rejects.toBeInstanceOf(PhotoUnreadableError);
+    expect(vi.mocked(compressImageFile).mock.calls[0][0].type).toBe("image/jpeg");
+  });
+
+  it("un résultat qui n'est pas une image n'est pas envoyé", async () => {
+    vi.mocked(compressImageFile).mockResolvedValueOnce(new File(["x"], "doc.pdf", { type: "application/pdf" }));
+    await expect(uploadOwnerGalleryPhoto("u1", new File(["x"], "doc.pdf", { type: "" }))).rejects.toBeInstanceOf(PhotoUnreadableError);
   });
 });
 
