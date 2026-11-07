@@ -95,7 +95,7 @@ import {
 
 import { shouldPromptAnimalMention } from "@/lib/sitAnimalMention";
 import { shouldOfferPublishExitChoice, type DraftHoldReason } from "@/lib/draftHoldReasons";
-import { buildAbandonMetadata, resolveStep0Field, type AbandonExit, type Step0Field } from "@/lib/sitCreateAbandon";
+import { buildAbandonMetadata, buildCloseMarker, buildReopenMetadata, CLOSE_MARKER_KEY, resolveStep0Field, type AbandonExit, type Step0Field } from "@/lib/sitCreateAbandon";
 import { reportError } from "@/lib/errorLogger";
 import { isBareCreateEntry, periodsOverlap, resumeRedirectFor, type LiveSitLike } from "@/lib/ownerLiveSit";
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
@@ -538,8 +538,24 @@ const CreateSit = () => {
         }),
       });
     };
+    // Lot PUB2 : retour dans le même onglet après une fermeture ou un
+    // rechargement, pour distinguer un rechargement d'un vrai départ.
+    try {
+      const marker = sessionStorage.getItem(CLOSE_MARKER_KEY);
+      if (marker) {
+        sessionStorage.removeItem(CLOSE_MARKER_KEY);
+        const nav = (performance.getEntriesByType?.("navigation")?.[0] as PerformanceNavigationTiming | undefined)?.type;
+        const reopen = buildReopenMetadata(marker, Date.now(), nav);
+        if (reopen) void trackEvent("sits_create_reopened", { source: "create_sit_page", metadata: reopen });
+      }
+    } catch { /* stockage indisponible : aucune mesure */ }
     const onPageHide = (event: PageTransitionEvent) => {
       if (event.persisted) return;
+      if (!publishedRef.current && !abandonEmittedRef.current) {
+        try {
+          sessionStorage.setItem(CLOSE_MARKER_KEY, JSON.stringify(buildCloseMarker(lastStepRef.current, Date.now())));
+        } catch { /* stockage indisponible */ }
+      }
       emit("page_close");
     };
     window.addEventListener("pagehide", onPageHide);

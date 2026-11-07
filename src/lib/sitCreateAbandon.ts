@@ -88,9 +88,16 @@ export type ExitIntent = (typeof EXIT_INTENTS)[number];
  * intentional : la personne a choisi de partir (brouillon gardé, entraide…).
  * redirect : le site l'a envoyée ailleurs (parcours d'arrivée, porte du
  * questionnaire, lien qui ne désigne plus un brouillon).
- * abandon : fermeture de page ou navigation ailleurs sans geste du formulaire.
+ * abandon : navigation ailleurs dans le site sans geste du formulaire.
+ * closed (lot PUB2, 07/11/2026) : fermeture, rechargement ou départ hors du
+ * site (pagehide). L'issue n'est pas connue à cet instant : un rechargement
+ * envoie le même signal qu'une vraie fermeture. Une réouverture du
+ * formulaire dans le même onglet sous 30 minutes émet `sits_create_reopened`.
+ * Abandon réel par fermeture = closed sans sits_create_reopened qui suit.
+ * Mesure du 07/11/2026 : 10 des 14 « page_close » depuis le 01/10 sont suivis
+ * d'un retour sur le formulaire en moins de 10 minutes.
  */
-export type ExitKind = "intentional" | "redirect" | "abandon";
+export type ExitKind = "intentional" | "redirect" | "abandon" | "closed";
 
 const INTENT_SET = new Set<string>(EXIT_INTENTS);
 const REDIRECT_INTENTS = new Set<ExitIntent>(["arrival_resume", "not_a_draft"]);
@@ -110,12 +117,55 @@ export function sanitizeExitIntent(value: unknown): ExitIntent | null {
 }
 
 export function classifyAbandonExit(input: { exit: AbandonExit; intent?: unknown; nextPath?: unknown }): ExitKind {
-  if (input.exit === "page_close") return "abandon";
+  if (input.exit === "page_close") return "closed";
   const intent = sanitizeExitIntent(input.intent);
   if (intent) return REDIRECT_INTENTS.has(intent) ? "redirect" : "intentional";
   const next = normalizeExitPath(input.nextPath);
   if (next && REDIRECT_PREFIXES.some((p) => next === p || next.startsWith(p + "/"))) return "redirect";
   return "abandon";
+}
+
+/* ------------------------------------------------------------------ */
+/* Lot PUB2 : réouverture après une fermeture ou un rechargement.       */
+/* ------------------------------------------------------------------ */
+
+/** Repère posé dans sessionStorage (même onglet, survit au rechargement). */
+export const CLOSE_MARKER_KEY = "guardiens_sit_create_closed_v1";
+export const REOPEN_WINDOW_MS = 30 * 60 * 1000;
+
+export interface CloseMarker {
+  at: number;
+  step: number;
+}
+
+export function buildCloseMarker(step: number, now: number): CloseMarker {
+  return { at: now, step: Number.isFinite(step) ? step : 0 };
+}
+
+const NAV_TYPES = new Set(["reload", "back_forward", "navigate", "prerender"]);
+
+/**
+ * Métadonnées de `sits_create_reopened`, ou null si aucun repère valable
+ * (absent, illisible, futur, ou plus vieux que 30 minutes).
+ */
+export function buildReopenMetadata(
+  raw: unknown,
+  now: number,
+  navigationType: unknown,
+): { closed_step: number; gap_s: number; navigation: string } | null {
+  let marker: unknown = raw;
+  if (typeof raw === "string") {
+    try { marker = JSON.parse(raw); } catch { return null; }
+  }
+  const m = marker as Partial<CloseMarker> | null;
+  if (!m || typeof m.at !== "number" || !Number.isFinite(m.at)) return null;
+  const gap = now - m.at;
+  if (gap < 0 || gap > REOPEN_WINDOW_MS) return null;
+  return {
+    closed_step: typeof m.step === "number" && Number.isFinite(m.step) ? m.step : 0,
+    gap_s: Math.round(gap / 1000),
+    navigation: typeof navigationType === "string" && NAV_TYPES.has(navigationType) ? navigationType : "unknown",
+  };
 }
 
 export interface AbandonInput {
