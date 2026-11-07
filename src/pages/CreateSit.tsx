@@ -1305,7 +1305,9 @@ const CreateSit = () => {
     // de badge d'enregistrement local trompeur.
     if (!localDraftHasContent(snapshot)) return;
     const t = setTimeout(() => {
-      writeFormDraft<SitLocalDraft>(localDraftKey, snapshot);
+      // Horodatage serveur lu à l'écriture : un enregistrement terminé pendant
+      // les 300 ms ne laisse pas une base périmée dans la copie.
+      writeFormDraft<SitLocalDraft>(localDraftKey, { ...snapshot, baseUpdatedAt: remoteBaseRef.current });
       setLocalDraftSavedAt(Date.now());
     }, 300);
     return () => clearTimeout(t);
@@ -1393,6 +1395,15 @@ const CreateSit = () => {
         accepts_sitter_pets: acceptsSitterPets,
         accepts_sitter_children: acceptsSitterChildren,
       };
+      // Lot PUB2 : la copie locale contient au moins ce qui vient d'être
+      // enregistré, elle dérive donc de cette version serveur. Sans cela, le
+      // rechargement suivant la croyait dépassée par son propre enregistrement
+      // et écartait les frappes faites pendant l'envoi.
+      const rebaseLocalCopy = (base: string) => {
+        if (!localDraftKey) return;
+        const stored = readFormDraft<SitLocalDraft>(localDraftKey);
+        if (stored) writeFormDraft<SitLocalDraft>(localDraftKey, { ...stored, baseUpdatedAt: base });
+      };
       const markSaved = () => {
         draftSavedRef.current = true;
         saveFailCountRef.current = 0;
@@ -1406,7 +1417,10 @@ const CreateSit = () => {
           .from("sits").update(payload).eq("id", draftId).eq("status", "draft").select("updated_at");
         if (error) throw error;
         const savedAt = (savedRows as Array<{ updated_at?: string | null }> | null)?.[0]?.updated_at;
-        if (savedAt) remoteBaseRef.current = savedAt;
+        if (savedAt) {
+          remoteBaseRef.current = savedAt;
+          rebaseLocalCopy(savedAt);
+        }
         markSaved();
         return draftId;
       } else {
