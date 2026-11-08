@@ -4,6 +4,7 @@ import { useTranslation } from "@/i18n/react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
+import { buildOgImageUrl } from "@/lib/ogImage";
 import { Share2, CheckCircle2, ShieldCheck, Eye, Users } from "lucide-react";
 import { formatProjetPeriod, formatProjetMonths, formatProjetDay, projetParagraphs, projetDurationLabel, hebergementLabel, projetNatureLabel, savoirFaireLabel, offreLabel, externalRegistrationUrl, projetAccueilHours, projetSections } from "@/lib/projets";
 import PageMeta from "@/components/PageMeta";
@@ -142,9 +143,6 @@ const PublicMissionView = ({
 }: Props) => {
   const { t } = useTranslation();
   const heroImage = mission.photos?.[0] || null;
-  // Pas d'image OG générique : évite qu'une annonce sans photo affiche
-  // « alpinistes coucher de soleil » sur les partages.
-  const ogImage = mission.photos?.[0] || undefined;
   const cityLabel = titlecaseCity(mission.city) || "France";
   // Lot E24 : le pré-rendu attend le bloc Questions (chargé après la fiche).
   const [questionsReady, setQuestionsReady] = useState(mission.mission_type === "offre");
@@ -153,6 +151,14 @@ const PublicMissionView = ({
   // Rétro-sanitize : les annonces créées avant la sanitize à la source
   // conservent des titres en minuscules ou avec fautes ("chez soit").
   const displayTitle = sanitizeUserTitle(mission.title) || mission.title;
+  // Lot SEO-META1b : sans photo, image de partage générée (og-page) au lieu de
+  // l'image par défaut de l'accueil, que PageMeta posait quand `image` était absent.
+  const ogImageCoupDeMain =
+    mission.photos?.[0] ||
+    buildOgImageUrl({ title: displayTitle, subtitle: `Coup de main à ${cityLabel}`, kind: "mission" });
+  const ogImageProjet =
+    mission.photos?.[0] ||
+    buildOgImageUrl({ title: displayTitle, subtitle: `Projet participatif à ${cityLabel}`, kind: "generic" });
   const authorFirstName = author?.first_name
     ? author.first_name.charAt(0).toUpperCase() + author.first_name.slice(1).toLowerCase()
     : null;
@@ -237,7 +243,7 @@ const PublicMissionView = ({
         <PageMeta
           title={`${displayTitle}, projet participatif à ${cityLabel}`}
           description={metaDescription}
-          image={ogImage}
+          image={ogImageProjet}
           noindex={noindex}
           canonical={canonical}
         />
@@ -616,7 +622,7 @@ const PublicMissionView = ({
       <PageMeta
         title={t("mission_detail.meta_title", { title: displayTitle, city: cityLabel })}
         description={metaDescription}
-        image={ogImage}
+        image={ogImageCoupDeMain}
         noindex={noindex}
         ready={animalCare.ready && questionsReady}
       />

@@ -144,3 +144,41 @@ describe("og:image dynamiques", () => {
     expect(g.searchParams.get("title")).toBe("Tassin-la-Demi-Lune");
   });
 });
+
+describe("buildSitTitle : ville perdue à la coupe (SEO-META1b)", () => {
+  it("remet la ville quand la coupe l'a retirée d'un titre qui la contenait", () => {
+    const cases: Array<[string, string]> = [
+      ["Garde de la maison et de mon petit chat cet hiver, à Nice", "Nice"],
+      ["Garde de Alpha, Chouchen, Maika, Mango et Pompon cet hiver à Plechatel", "Plechatel"],
+      ["Garde de Moustik, Lizy, Zina, Flocon, Rouxy et Piwy et Kiwy pendant les fêtes", "Classun"],
+      ["Garde de nosloulous dans notre village d'Ardèche, Vallon-Pont-d'Arc", "Vallon-Pont-d'Arc"],
+    ];
+    for (const [title, city] of cases) {
+      const body = buildSitTitle(title, city);
+      expect(mentionsCity(body, city)).toBe(true);
+      expect(full(body).length).toBeLessThanOrEqual(TITLE_MAX);
+      expect(body).not.toContain("  ");
+    }
+  });
+  it("ne rajoute pas la ville quand elle survit à la coupe", () => {
+    expect(buildSitTitle("Garde 16 animaux à Marlhes", "Marlhes")).toBe("Garde 16 animaux à Marlhes");
+    expect(buildSitTitle("Garde à Nice de mon chat pendant les fêtes de fin d'année prochaine", "Nice").match(/Nice/g)).toHaveLength(1);
+  });
+});
+
+describe("truncateAtWord : parenthèse ouverte (SEO-META1b)", () => {
+  it("retire l'aparté coupé et ne laisse aucune parenthèse ouverte", () => {
+    const out = truncateAtWord("Jolie maison avec jardins (Provence verte ) garde d'animaux", 36);
+    expect(out).toBe("Jolie maison avec jardins…");
+    expect((out.match(/\(/g) ?? []).length).toBe((out.match(/\)/g) ?? []).length);
+  });
+  it("sans suite après l'aparté, pas de « … » (cas Vabres-l'Abbaye)", () => {
+    expect(buildSitTitle("Garde d'animaux (chien,chat, poules, cochons d'Inde)", "Vabres-l'Abbaye")).toBe(
+      "Garde d'animaux à Vabres-l'Abbaye",
+    );
+  });
+  it("garde une parenthèse fermée avant la coupe", () => {
+    const out = truncateAtWord("Garde de chats (Lyon 5e) pendant les vacances de Noël", 32);
+    expect(out).toBe("Garde de chats (Lyon 5e)…");
+  });
+});

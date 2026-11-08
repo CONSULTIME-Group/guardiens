@@ -59,6 +59,24 @@ export function truncateAtWord(value: string, max: number): string {
   } else {
     cut = text.slice(0, room);
   }
+
+  // Parenthèse ouverte et non fermée par la coupe : on retire l'aparté entier.
+  // Sans suite après la parenthèse fermante, rien n'est perdu, donc pas de « … ».
+  let asideDropped = false;
+  let endsAfterAside = false;
+  const open = cut.lastIndexOf("(");
+  if (open >= 0 && open > cut.lastIndexOf(")")) {
+    const before = cut.slice(0, open).trimEnd();
+    if (before.length >= 8) {
+      const close = text.indexOf(")", open);
+      endsAfterAside = close >= 0 && text.slice(close + 1).trim() === "";
+      cut = before;
+      asideDropped = true;
+    } else {
+      cut = cut.slice(0, open) + cut.slice(open + 1);
+    }
+  }
+
   const words = cut.split(" ").filter(Boolean);
   const keepUntilStop = [...words];
   while (
@@ -72,7 +90,7 @@ export function truncateAtWord(value: string, max: number): string {
   // Un résultat trop court n'aide personne : repli sur la coupe au mot sans nettoyage.
   if (out.length < 8) out = words.join(" ");
   out = out.replace(/[\s,;:.\-\u2013\u2014]+$/u, "");
-  return `${out}…`;
+  return asideDropped && endsAfterAside ? out : `${out}…`;
 }
 
 /**
@@ -84,8 +102,12 @@ export function truncateAtWord(value: string, max: number): string {
 export function buildSitTitle(title: string | null | undefined, city: string | null | undefined): string {
   const base = collapseSpaces(title) || "Garde de maison et animaux";
   const place = collapseSpaces(city);
-  if (!place || mentionsCity(base, place)) {
-    return truncateAtWord(base, TITLE_BODY_MAX);
+  if (!place) return truncateAtWord(base, TITLE_BODY_MAX);
+  if (mentionsCity(base, place)) {
+    // La ville est dans le titre : on le garde tel quel tant que la ville survit à la coupe.
+    const whole = truncateAtWord(base, TITLE_BODY_MAX);
+    if (mentionsCity(whole, place)) return whole;
+    // Sinon la coupe a mangé la ville : on la remet en fin de titre.
   }
   const tail = ` à ${place}`;
   const room = Math.max(MIN_TITLE_CHARS, TITLE_BODY_MAX - tail.length);
