@@ -11,6 +11,7 @@
  * - Réouverture des candidatures (compteur ±)
  * - Bloc "Gérer cette garde" (OwnerSitManagement) + modal d'annulation
  */
+import { calendarDate } from "@/lib/calendarDate";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Calendar, MapPin, Send, Star, Home, Users, ChevronDown } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -301,7 +302,7 @@ const OwnerSitView = ({
   //   déjà terminée, le lifecycle l'auto-archive ou l'auto-complète.
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const endDate = sit.end_date ? new Date(sit.end_date) : null;
+  const endDate = sit.end_date ? calendarDate(sit.end_date) : null;
   const isPast = endDate ? endDate < today : false;
   const canCancel = !isPast && sit.status === "confirmed";
   // canUnpublish, propriétaire d'une annonce publiée sans gardien accepté :

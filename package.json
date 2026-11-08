@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test:tz": "node scripts/test-tz.mjs",
     "dev": "vite",
     "generate-sitemap": "node scripts/generate-sitemap.mjs",
     "generate-robots": "node scripts/generate-robots.mjs",

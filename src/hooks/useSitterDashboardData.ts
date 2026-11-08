@@ -1,3 +1,4 @@
+import { daysFromToday } from "@/lib/calendarDate";
 import { publicProfilesLoader } from "@/lib/batchedReads";
 import { fetchMyBadges, fetchMyEmergencyProfileId, fetchMySmallMissionsIndex, fetchMyConversationsIndex, fetchOpenPublishedSits, fetchMyApplicationsIndex } from "@/lib/dashboardShared";
 import { fetchMyProfile, fetchMyPublicProfile, fetchMySitterProfile } from "@/lib/myProfile";
@@ -252,8 +253,8 @@ export function useSitterDashboardData(userId: string | undefined) {
 
       const now = new Date();
       const futureGuards = acceptedApps
-        .filter((a: any) => a.sit?.start_date && new Date(a.sit.start_date) > now)
-        .sort((a: any, b: any) => new Date(a.sit.start_date).getTime() - new Date(b.sit.start_date).getTime());
+        .filter((a: any) => a.sit?.start_date && (daysFromToday(a.sit.start_date, now) ?? -1) > 0)
+        .sort((a: any, b: any) => String(a.sit.start_date).localeCompare(String(b.sit.start_date)));
 
       // Étape B, vague 2 : un seul Promise.all.
       // 1) Coordonnées des propriétaires, en
@@ -374,7 +375,7 @@ export function useSitterDashboardData(userId: string | undefined) {
         nextGuard = {
           ...g.sit,
           ownerName: nextOwnerRes.data?.first_name || "",
-          daysUntil: differenceInDays(new Date(g.sit.start_date), now),
+          daysUntil: daysFromToday(g.sit.start_date, now) ?? 0,
           pets: nextPetsRes.data || [],
         };
       }

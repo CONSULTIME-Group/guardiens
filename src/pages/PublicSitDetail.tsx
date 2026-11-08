@@ -2,6 +2,7 @@
 // Utilisée pour le partage externe (Facebook, LinkedIn, WhatsApp, lien direct).
 // Les meta og:* sont injectées impérativement par PageMeta ; les caches sociaux liront index.html
 // après prerender (Prerender.io / Cloudflare Worker, TODO infra).
+import { calendarDate, daysBetween, daysFromToday, isPastDay } from "@/lib/calendarDate";
 import { Suspense, useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "@/i18n/react";
 import { useParams, Link, useNavigate } from "react-router-dom";
@@ -446,12 +447,7 @@ const PublicSitDetail = () => {
   // le doute profite à la protection du domicile (calendrier d'absence).
   const isPastSit = (() => {
     if (!sit.end_date) return false;
-    const end = new Date(sit.end_date);
-    if (isNaN(end.getTime())) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    end.setHours(0, 0, 0, 0);
-    return end.getTime() < today.getTime();
+    return isPastDay(sit.end_date);
   })();
   if (sit.status !== "published" && !isClosedSit) return <div className="max-w-2xl mx-auto p-6 md:p-10 text-center"><PageMeta title="Annonce indisponible" description="Cette annonce n’est plus disponible sur Guardiens." noindex noCanonical statusCode={404} /><p className="text-muted-foreground">{t("sit_detail.unavailable")}</p></div>;
   // Le masquage des dates est décidé côté serveur (get_public_sit) : les
@@ -461,7 +457,7 @@ const PublicSitDetail = () => {
 
 
  const photos: string[] = property?.photos || [];
- const formatDate = (d: string | null) => d ? format(new Date(d), "d MMMM yyyy", { locale: fr }) : "";
+ const formatDate = (d: string | null) => d ? format(calendarDate(d), "d MMMM yyyy", { locale: fr }) : "";
  const environments = (sit.environments || []).length > 0
  ? sit.environments
  : (property?.environment ? [property.environment] : []);
@@ -469,17 +465,15 @@ const PublicSitDetail = () => {
  // Durée en jours (utilisée dans le pitch + label de date naturel)
  const durationDays = (() => {
  if (!sit.start_date || !sit.end_date) return null;
- const start = new Date(sit.start_date).getTime();
- const end = new Date(sit.end_date).getTime();
- if (Number.isNaN(start) || Number.isNaN(end) || end < start) return null;
- return Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1);
+ const span = daysBetween(sit.start_date, sit.end_date);
+ if (span === null || span < 0) return null;
+ return Math.max(1, span + 1);
  })();
 
  // Jours avant le début (pour le badge d'urgence)
  const daysUntilStart = (() => {
  if (!sit.start_date) return null;
- const diff = Math.ceil((new Date(sit.start_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
- return diff;
+ return daysFromToday(sit.start_date);
  })();
  const urgencyLabel = (() => {
  // Une annonce close ou passée n'a jamais de badge d'urgence, connecté ou non.
@@ -498,8 +492,8 @@ const PublicSitDetail = () => {
  const naturalDateLabel = (() => {
  if (hideDates) return isPastSit ? "Garde passée" : "Dates non communiquées";
  if (!sit.start_date || !sit.end_date) return "Dates flexibles";
- const startDay = format(new Date(sit.start_date), "d MMMM", { locale: fr });
- const endDay = format(new Date(sit.end_date), "d MMMM yyyy", { locale: fr });
+ const startDay = format(calendarDate(sit.start_date), "d MMMM", { locale: fr });
+ const endDay = format(calendarDate(sit.end_date), "d MMMM yyyy", { locale: fr });
  const base = `Du ${startDay} au ${endDay}`;
  return durationDays ? `${base} · ${durationDays} jour${durationDays > 1 ? "s" : ""}` : base;
  })();
@@ -532,8 +526,8 @@ const PublicSitDetail = () => {
   const cityForTitle = (sitCity && ownerCountry && ownerCountry !== "FR")
     ? `${sitCity} (${ownerCountry})`
     : (sitCity || "France");
- const startFmt = hideDates || !sit.start_date ? "" : format(new Date(sit.start_date), "d MMMM", { locale: fr });
- const endFmt = hideDates || !sit.end_date ? "" : format(new Date(sit.end_date), "d MMMM yyyy", { locale: fr });
+ const startFmt = hideDates || !sit.start_date ? "" : format(calendarDate(sit.start_date), "d MMMM", { locale: fr });
+ const endFmt = hideDates || !sit.end_date ? "" : format(calendarDate(sit.end_date), "d MMMM yyyy", { locale: fr });
  const datesShort = startFmt && endFmt
    ? `du ${startFmt} au ${endFmt}`
    : (hideDates ? (isPastSit ? "garde passée" : "annonce close") : "dates flexibles");

@@ -4,6 +4,7 @@
  * Séparé de SitImmersiveHero pour permettre un ordre narratif flexible
  * dans SitterSitView (hero, action, rencontre, puis ce corps).
  */
+import { daysBetween } from "@/lib/calendarDate";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,13 +62,7 @@ const SitImmersiveBody = ({
 
   const durationDays =
     sit?.start_date && sit?.end_date
-      ? Math.max(
-          1,
-          Math.round(
-            (new Date(sit.end_date).getTime() - new Date(sit.start_date).getTime()) /
-              86400000,
-          ),
-        )
+      ? Math.max(1, daysBetween(sit.start_date, sit.end_date) ?? 0)
       : null;
 
   const safePets = Array.isArray(pets) ? pets.filter(Boolean) : [];

@@ -9,6 +9,7 @@
  * - Sticky apply bar + ApplicationModal
  * - Bouton "Annuler ma participation" si gardien candidat sur garde confirmée
  */
+import { calendarDate, daysBetween } from "@/lib/calendarDate";
 import { useState, useEffect } from "react";
 import PushMomentOffer from "@/components/notifications/PushMomentOffer";
 import { useTranslation } from "@/i18n/react";
@@ -343,14 +344,7 @@ const SitterSitView = ({
       {applySurface === "apply" && (() => {
         const days =
           sit.start_date && sit.end_date
-            ? Math.max(
-                1,
-                Math.round(
-                  (new Date(sit.end_date).getTime() -
-                    new Date(sit.start_date).getTime()) /
-                    86_400_000,
-                ) + 1,
-              )
+            ? Math.max(1, (daysBetween(sit.start_date, sit.end_date) ?? 0) + 1)
             : 0;
         const showRecap =
           accessLevel !== 1 &&
@@ -638,7 +632,7 @@ const SitterSitView = ({
       {(() => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const endDate = sit.end_date ? new Date(sit.end_date) : null;
+        const endDate = sit.end_date ? calendarDate(sit.end_date) : null;
         const isPast = endDate ? endDate < today : false;
         // Lot X3a (B-03) : réservé au gardien retenu (candidature acceptée).
         const canSitterCancel =

@@ -1,3 +1,4 @@
+import { calendarDate } from "@/lib/calendarDate";
 import { Link } from "react-router-dom";
 import { format, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -74,7 +75,7 @@ const NearestListingHero = ({ listing }: NearestListingHeroProps) => {
                 {listing.start_date && listing.end_date && (
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
-                    {format(new Date(listing.start_date), "d MMM", { locale: fr })} → {format(new Date(listing.end_date), "d MMM", { locale: fr })}
+                    {format(calendarDate(listing.start_date), "d MMM", { locale: fr })} → {format(calendarDate(listing.end_date), "d MMM", { locale: fr })}
                   </span>
                 )}
                 {listing.properties?.type && (

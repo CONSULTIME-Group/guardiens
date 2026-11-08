@@ -10,6 +10,7 @@ import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { calendarDate, daysBetween, daysFromToday } from "@/lib/calendarDate";
 import { bootDateLabel, bootHeroPhoto, bootSitHtml, bootUrgencyLabel, buildBootSitModel } from "@/boot/bootSitView";
 import { bootSitEligible } from "@/boot/bootSitEntry";
 import { HERO_PRELOAD_JS, bootSitTexts } from "../../../scripts/vite-plugin-listings-prefetch.mjs";
@@ -17,12 +18,11 @@ import { HERO_PRELOAD_JS, bootSitTexts } from "../../../scripts/vite-plugin-list
 const OBJ = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/u1/owner-gallery/a.webp";
 const DAY = 86400000;
 
-// Même règle que PublicSitDetail (naturalDateLabel, durationDays).
+// Même règle que PublicSitDetail (naturalDateLabel, durationDays, lot DATE1).
 function pageDateLabel(start: string, end: string): string {
-  const base = `Du ${format(new Date(start), "d MMMM", { locale: fr })} au ${format(new Date(end), "d MMMM yyyy", { locale: fr })}`;
-  const s = new Date(start).getTime();
-  const e = new Date(end).getTime();
-  const d = e < s ? null : Math.max(1, Math.round((e - s) / DAY) + 1);
+  const base = `Du ${format(calendarDate(start), "d MMMM", { locale: fr })} au ${format(calendarDate(end), "d MMMM yyyy", { locale: fr })}`;
+  const span = daysBetween(start, end);
+  const d = span === null || span < 0 ? null : Math.max(1, span + 1);
   return d ? `${base} · ${d} jour${d > 1 ? "s" : ""}` : base;
 }
 
@@ -45,10 +45,10 @@ describe("perf 12, libellés identiques à la fiche", () => {
   });
 
   it("urgence : même règle que la fiche", () => {
-    // Même calcul que PublicSitDetail (daysUntilStart, urgencyLabel).
+    // Même calcul que PublicSitDetail (daysUntilStart, urgencyLabel, lot DATE1).
     const page = (start: string, now: number) => {
-      const diff = Math.ceil((new Date(start).getTime() - now) / DAY);
-      if (diff < 0) return null;
+      const diff = daysFromToday(start, new Date(now));
+      if (diff === null || diff < 0) return null;
       if (diff === 0) return "Commence aujourd'hui";
       if (diff === 1) return "Commence demain";
       if (diff <= 14) return `Dans ${diff} jours`;
