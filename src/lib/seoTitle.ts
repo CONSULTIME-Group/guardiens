@@ -29,6 +29,50 @@ export function collapseSpaces(value: string | null | undefined): string {
   return (value ?? "").replace(/[\s ]+/g, " ").trim();
 }
 
+/**
+ * Titre saisi par un membre, nettoyé sans le réécrire : espaces doublés,
+ * espace avant une virgule ou un point (« Aïko , mon border collie »),
+ * espaces collés aux parenthèses (« (Provence verte ) »).
+ */
+export function tidyTitle(value: string | null | undefined): string {
+  return collapseSpaces(value)
+    .replace(/\s+([,.])/g, "$1")
+    .replace(/\(\s+/g, "(")
+    .replace(/\s+\)/g, ")");
+}
+
+/** Mots qui restent en minuscule dans un nom de commune, sauf en tête. */
+const CITY_SMALL_WORDS = new Set([
+  "de", "du", "des", "le", "la", "les", "et", "en", "sur", "sous", "lès", "lez", "aux", "au", "à",
+]);
+
+/**
+ * Nom de commune saisi librement, remis en casse usuelle (lot SEO-META2) :
+ * « barjols » → « Barjols », « PLECHATEL » → « Plechatel »,
+ * « Vabres l'abbaye » → « Vabres l'Abbaye », « Vallon pont d’arc » → « Vallon Pont d’Arc ».
+ * Seule la casse change : ni trait d'union ajouté, ni accent, ni mot retiré.
+ */
+export function formatCityName(value: string | null | undefined): string {
+  const text = collapseSpaces(value);
+  if (!text) return "";
+  const cap = (w: string) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : w);
+  let first = true;
+  return text
+    .toLowerCase()
+    .split(/(\s|-|,)/)
+    .map((part) => {
+      if (!part || part === " " || part === "-" || part === ",") return part;
+      const isFirst = first;
+      first = false;
+      // Élision : l', d', qu' devant le nom (« l'abbaye » → « l'Abbaye »).
+      const elided = part.match(/^(l|d|qu)(['’])(.+)$/);
+      if (elided) return `${isFirst ? cap(elided[1]) : elided[1]}${elided[2]}${cap(elided[3])}`;
+      if (!isFirst && CITY_SMALL_WORDS.has(part)) return part;
+      return cap(part);
+    })
+    .join("");
+}
+
 function stripAccents(value: string): string {
   return value.normalize("NFD").replace(/[̀-ͯ]/g, "");
 }
@@ -100,8 +144,8 @@ export function truncateAtWord(value: string, max: number): string {
  *  - seule la partie {titre} est raccourcie, jamais la ville
  */
 export function buildSitTitle(title: string | null | undefined, city: string | null | undefined): string {
-  const base = collapseSpaces(title) || "Garde de maison et animaux";
-  const place = collapseSpaces(city);
+  const base = tidyTitle(title) || "Garde de maison et animaux";
+  const place = formatCityName(city);
   if (!place) return truncateAtWord(base, TITLE_BODY_MAX);
   if (mentionsCity(base, place)) {
     // La ville est dans le titre : on le garde tel quel tant que la ville survit à la coupe.
@@ -127,7 +171,36 @@ export function elideDe(word: string): string {
   return VOWEL_START.test(w) || muteH ? `d'${w}` : `de ${w}`;
 }
 
-/** Titre d'une fiche de race, suffixe « | Guardiens » compris. */
+/**
+ * Titre d'une fiche de race, suffixe « | Guardiens » compris (lot SEO-META2).
+ * Gabarit complet quand il tient en 60 caractères, sinon on retire
+ * « : conseils gardien », puis « à domicile ». Le nom de la race n'est jamais coupé.
+ */
 export function buildBreedTitle(breedName: string): string {
-  return `Garde ${elideDe(breedName)} à domicile : conseils gardien${TITLE_SUFFIX}`;
+  const head = `Garde ${elideDe(breedName)}`;
+  const candidates = [
+    `${head} à domicile : conseils gardien${TITLE_SUFFIX}`,
+    `${head} à domicile${TITLE_SUFFIX}`,
+  ];
+  return candidates.find((c) => c.length <= TITLE_MAX) ?? `${head}${TITLE_SUFFIX}`;
+}
+
+/**
+ * Titre d'une fiche d'entraide (besoin ou projet), sans le suffixe « | Guardiens »
+ * (lot SEO-META2). Forme complète « {titre} · Coup de main à {ville} » quand elle
+ * tient, sinon la forme des annonces « {titre} à {ville} », où seul le titre est coupé.
+ */
+export function buildMissionTitle(
+  title: string | null | undefined,
+  city: string | null | undefined,
+  opts: { label?: string; separator?: string } = {},
+): string {
+  const label = opts.label ?? "Coup de main";
+  const separator = opts.separator ?? " · ";
+  const base = tidyTitle(title);
+  const place = formatCityName(city) || "France";
+  if (!base) return `${label} à ${place}`;
+  const full = `${base}${separator}${label} à ${place}`;
+  if (full.length <= TITLE_BODY_MAX) return full;
+  return buildSitTitle(base, place);
 }

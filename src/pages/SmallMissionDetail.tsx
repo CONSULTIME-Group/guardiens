@@ -31,6 +31,7 @@ import ReportButton from "@/components/reports/ReportButton";
 import PublicLoadError from "@/components/seo/ErrorPage";
 import { isIndexableEntraideMission } from "../../supabase/functions/_shared/entraideMissionIndexability.js";
 import PageMeta from "@/components/PageMeta";
+import { buildMissionTitle, formatCityName } from "@/lib/seoTitle";
 import { buildOgImageUrl } from "@/lib/ogImage";
 import LegacyProjetRedirect from "@/components/seo/LegacyProjetRedirect";
 import { legacyProjetRedirectTarget } from "@/lib/projetSeo";
@@ -96,13 +97,7 @@ const DURATION_LABELS: Record<string, string> = ENTRAIDE_DURATION_LABELS;
 
 /** Titlecase pour ville saisie en MAJUSCULES (ex: VERGONS → Vergons, AIX-EN-PROVENCE → Aix-en-Provence). */
 function titlecaseCity(s?: string | null): string {
-  if (!s) return "";
-  const small = new Set(["de", "du", "des", "le", "la", "les", "et", "en", "sur", "sous", "lès", "aux"]);
-  return s.toLowerCase().split(/(\s|-)/).map((part, i) => {
-    if (part === " " || part === "-") return part;
-    if (i > 0 && small.has(part)) return part;
-    return part.charAt(0).toUpperCase() + part.slice(1);
-  }).join("");
+  return formatCityName(s);
 }
 
 function timeAgoFr(iso: string): string {
@@ -1204,7 +1199,7 @@ const SmallMissionDetail = () => {
     <AppLayout>
     <div className="text-foreground">
       <PageMeta
-        title={`${displayTitle} · Coup de main à ${cityLabel}`}
+        title={buildMissionTitle(displayTitle, mission.city)}
         description={(() => {
           const raw = mission.description?.trim();
           if (raw && raw.length >= 60) return raw.slice(0, 155);
