@@ -1343,3 +1343,23 @@ html[data-keyboard-open] [data-guardiens-dialog] {
   overflow-y: auto !important;
   overscroll-behavior: contain;
 }
+
+/* Feuilles et clavier mobile (lot L1, 08/11/2026). Feuille du bas : posée sur
+   le haut du clavier (bottom en % de la zone de mise en page), hauteur bornée
+   à la zone visible. Panneaux pleine hauteur (Alma, côtés, haut) : ramenés à
+   la zone visible, le champ de saisie du bas reste au-dessus du clavier. */
+html[data-keyboard-open] [data-guardiens-sheet="bottom"] {
+  bottom: calc(100% - var(--vv-top, 0px) - var(--vv-height, 100dvh)) !important;
+  max-height: calc(var(--vv-height, 100dvh) - 1rem) !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+}
+html[data-keyboard-open] [data-guardiens-sheet="alma"],
+html[data-keyboard-open] [data-guardiens-sheet="left"],
+html[data-keyboard-open] [data-guardiens-sheet="right"],
+html[data-keyboard-open] [data-guardiens-sheet="top"] {
+  top: var(--vv-top, 0px) !important;
+  bottom: auto !important;
+  height: var(--vv-height, 100dvh) !important;
+  max-height: var(--vv-height, 100dvh) !important;
+}

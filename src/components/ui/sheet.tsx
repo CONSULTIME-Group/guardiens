@@ -4,6 +4,8 @@ import { X } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { SHEET_ATTR, useKeyboardViewport } from "@/lib/keyboardViewport";
+import { useCloseOnBack } from "@/lib/sheetBackClose";
 
 const Sheet = SheetPrimitive.Root;
 
@@ -54,21 +56,37 @@ interface SheetContentProps
     VariantProps<typeof sheetVariants> {
   /** Masque le voile sombre (panneaux non bloquants ouverts sans action de l'utilisateur). */
   hideOverlay?: boolean;
+  /** Lot L1 : « Retour » du téléphone referme la feuille (par défaut). */
+  closeOnBack?: boolean;
 }
 
+/**
+ * Monté seulement feuille ouverte (lot L1) : clavier mobile (même règle que
+ * les fenêtres, lot CLAVIER1) et geste « Retour » qui referme la feuille.
+ */
+const SheetOpenEffects = ({ closeOnBack, closeRef }: { closeOnBack: boolean; closeRef: React.RefObject<HTMLButtonElement> }) => {
+  useKeyboardViewport();
+  useCloseOnBack(closeOnBack, () => closeRef.current?.click());
+  return null;
+};
+
 const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Content>, SheetContentProps>(
-  ({ side = "right", className, children, hideOverlay = false, ...props }, ref) => (
+  ({ side = "right", className, children, hideOverlay = false, closeOnBack = true, ...props }, ref) => {
+    const closeRef = React.useRef<HTMLButtonElement>(null);
+    return (
     <SheetPortal>
       {!hideOverlay && <SheetOverlay />}
-      <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
+      <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...{ [SHEET_ATTR]: side ?? "right" }} {...props}>
+        <SheetOpenEffects closeOnBack={closeOnBack} closeRef={closeRef} />
         {children}
-        <SheetPrimitive.Close className="absolute right-1.5 top-1.5 flex h-11 w-11 items-center justify-center rounded-full opacity-70 ring-offset-background transition-opacity data-[state=open]:bg-secondary hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+        <SheetPrimitive.Close ref={closeRef} className="absolute right-1.5 top-1.5 flex h-11 w-11 items-center justify-center rounded-full opacity-70 ring-offset-background transition-opacity data-[state=open]:bg-secondary hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
           <X className="h-4 w-4" />
           <span className="sr-only">Fermer</span>
         </SheetPrimitive.Close>
       </SheetPrimitive.Content>
     </SheetPortal>
-  ),
+    );
+  },
 );
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 
