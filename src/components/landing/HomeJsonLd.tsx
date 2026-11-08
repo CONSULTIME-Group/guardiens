@@ -1,4 +1,5 @@
 import { useTranslation } from "@/i18n/react";
+import { SOCIAL_LINKS } from "@/data/socialLinks";
 import { useInternationalSitsCount } from "@/hooks/useInternationalSitsCount";
 // Lot P2b : constante légère, siteRoutes (22 Ko) reste hors de la page d'accueil.
 import { HOME_OG_IMAGE } from "@/data/siteConstants";
@@ -82,7 +83,7 @@ export default function HomeJsonLd() {
               },
               email: "contact@guardiens.fr",
               sameAs: [
-                "https://www.linkedin.com/company/112564191",
+                ...SOCIAL_LINKS.map((s) => s.url),
                 "https://maps.app.goo.gl/wBCoMpnyRu8GbrTV7",
               ],
 
