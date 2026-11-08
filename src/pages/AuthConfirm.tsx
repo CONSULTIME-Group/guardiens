@@ -5,9 +5,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { Loader2, MailCheck, RefreshCw } from "lucide-react";
 import { useTranslation } from "@/i18n/react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Session } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { trackEventWithUserId } from "@/lib/analytics";
+
+/**
+ * Lot PUB3 : une session déjà ouverte au montage suffit pour aboutir, sauf
+ * quand le lien porte un jeton à vérifier (token_hash) : sa vérification
+ * décide, pour ne jamais confirmer avec la session d'un autre compte.
+ */
+export const shouldFinishWithExistingSession = (o: { tokenHash: string | null; hash: string }) =>
+  !o.tokenHash && !/(^|&)error/.test(o.hash);
 
 /** Compte créé il y a moins de 24 h (premier SIGNED_IN d'une inscription). */
 export const isFreshAccount = (createdAt: string | null, now = Date.now()) =>
@@ -32,79 +41,106 @@ const AuthConfirm = () => {
     // Lot J1 : l'intention de publication survit à tout l'onboarding.
     rememberPublishIntent(next);
 
-    const hashParams = new URLSearchParams(window.location.hash.replace("#", ""));
+    const rawHash = window.location.hash.replace("#", "");
+    const hashParams = new URLSearchParams(rawHash);
     const hashError = hashParams.get("error_description") || hashParams.get("error");
     if (hashError) {
       setError(hashError);
       return;
     }
 
+    // Lot PUB3 : un seul aboutissement, que la session arrive par l'événement
+    // ou qu'elle soit déjà ouverte au montage.
+    let finished = false;
+    const finish = async (event: string, session: Session | null) => {
+      if (finished) return;
+      finished = true;
+      subscription.unsubscribe();
+
+      if (event === "PASSWORD_RECOVERY") {
+        toast({
+          title: t("auth_confirm.recovery_validated_title"),
+          description: t("auth_confirm.recovery_validated_body"),
+        });
+        navigate("/reset-password", { replace: true });
+      } else {
+        try {
+          const userId = session?.user?.id ?? null;
+          if (userId) {
+            const flagKey = `email_confirmed_tracked_${userId}`;
+            if (!localStorage.getItem(flagKey)) {
+              localStorage.setItem(flagKey, "1");
+
+              let role: string | null = null;
+              let createdAt: string | null = null;
+              try {
+                const { data: prof } = await supabase
+                  .from("profiles")
+                  .select("role, created_at")
+                  .eq("id", userId)
+                  .maybeSingle();
+                role = (prof?.role as string | undefined) ?? null;
+                createdAt = (prof?.created_at as string | undefined) ?? session?.user?.created_at ?? null;
+              } catch { /* silencieux */ }
+
+              // Lot 1 : mesure de la perte clic/confirmation, comptes de moins de 24 h.
+              if (isFreshAccount(createdAt)) {
+                trackEventWithUserId(userId, "signup_email_confirmed", {
+                  source: "/auth/confirm",
+                  metadata: { user_id: userId, role, via: "email_link" },
+                });
+              }
+              const completedKey = `signup_completed_tracked_${userId}`;
+              if (!localStorage.getItem(completedKey)) {
+                localStorage.setItem(completedKey, "1");
+                trackEventWithUserId(userId, "signup_completed", {
+                  source: "/auth/confirm",
+                  metadata: { user_id: userId, role, auto_confirmed: false, via: "email_link" },
+                });
+              }
+            }
+          }
+        } catch { /* silencieux */ }
+
+        toast({
+          title: t("auth_confirm.confirmed_title"),
+          description: t("auth_confirm.confirmed_body"),
+        });
+        navigate(next, { replace: true });
+      }
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (
           event === "SIGNED_IN" ||
           event === "PASSWORD_RECOVERY" ||
           event === "TOKEN_REFRESHED"
         ) {
-          subscription.unsubscribe();
-
-          if (event === "PASSWORD_RECOVERY") {
-            toast({
-              title: t("auth_confirm.recovery_validated_title"),
-              description: t("auth_confirm.recovery_validated_body"),
-            });
-            navigate("/reset-password", { replace: true });
-          } else {
-            try {
-              const userId = session?.user?.id ?? null;
-              if (userId) {
-                const flagKey = `email_confirmed_tracked_${userId}`;
-                if (!localStorage.getItem(flagKey)) {
-                  localStorage.setItem(flagKey, "1");
-
-                  let role: string | null = null;
-                  let createdAt: string | null = null;
-                  try {
-                    const { data: prof } = await supabase
-                      .from("profiles")
-                      .select("role, created_at")
-                      .eq("id", userId)
-                      .maybeSingle();
-                    role = (prof?.role as string | undefined) ?? null;
-                    createdAt = (prof?.created_at as string | undefined) ?? session?.user?.created_at ?? null;
-                  } catch { /* silencieux */ }
-
-                  // Lot 1 : mesure de la perte clic/confirmation, comptes de moins de 24 h.
-                  if (isFreshAccount(createdAt)) {
-                    trackEventWithUserId(userId, "signup_email_confirmed", {
-                      source: "/auth/confirm",
-                      metadata: { user_id: userId, role, via: "email_link" },
-                    });
-                  }
-                  const completedKey = `signup_completed_tracked_${userId}`;
-                  if (!localStorage.getItem(completedKey)) {
-                    localStorage.setItem(completedKey, "1");
-                    trackEventWithUserId(userId, "signup_completed", {
-                      source: "/auth/confirm",
-                      metadata: { user_id: userId, role, auto_confirmed: false, via: "email_link" },
-                    });
-                  }
-                }
-              }
-            } catch { /* silencieux */ }
-
-            toast({
-              title: t("auth_confirm.confirmed_title"),
-              description: t("auth_confirm.confirmed_body"),
-            });
-            navigate(next, { replace: true });
-          }
+          void finish(event, session);
         }
       }
     );
 
     const tokenHash = url.searchParams.get("token_hash");
     const type = url.searchParams.get("type");
+
+    /**
+     * Lot PUB3 (recette du 08/11/2026) : le client Supabase lit les jetons du
+     * lien de confirmation dès son chargement et émet SIGNED_IN avant que cet
+     * écran ne s'abonne. L'événement perdu laissait « Validation en cours »
+     * jusqu'au repli de 15 secondes. Une session déjà ouverte au montage
+     * aboutit tout de suite ; un lien à jeton (token_hash) attend sa
+     * vérification ci-dessous.
+     */
+    if (shouldFinishWithExistingSession({ tokenHash, hash: rawHash })) {
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session) {
+          const recovery = rawHash.includes("type=recovery") || next === "/reset-password";
+          void finish(recovery ? "PASSWORD_RECOVERY" : "SIGNED_IN", data.session);
+        }
+      });
+    }
 
     if (tokenHash && (type === "signup" || type === "email" || type === "recovery")) {
       supabase.auth.verifyOtp({ token_hash: tokenHash, type }).then(async ({ error }) => {
@@ -114,6 +150,7 @@ const AuthConfirm = () => {
           // dans ce navigateur : on continue sans écran d'erreur.
           const { data } = await supabase.auth.getSession();
           if (data.session && type !== "recovery") {
+            finished = true;
             subscription.unsubscribe();
             navigate(next, { replace: true });
             return;
@@ -124,8 +161,11 @@ const AuthConfirm = () => {
     }
 
     const timeout = setTimeout(async () => {
+      if (finished) return;
       const { data } = await supabase.auth.getSession();
+      if (finished) return;
       if (data.session) {
+        finished = true;
         subscription.unsubscribe();
         navigate(next, { replace: true });
         return;

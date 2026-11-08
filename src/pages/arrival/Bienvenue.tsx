@@ -17,6 +17,7 @@ import { fetchMyProfile, patchMyProfileCache } from "@/lib/myProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { afterWelcome, arrivalIntentFor, safeNext, welcomeUsesOrder, type WelcomeUse } from "@/lib/arrival";
 import { Eyebrow, SaveError, trackArrival, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
+import { useHideBottomNav } from "@/components/layout/ChromeVisibility";
 const accueil880 = new URL("../../assets/aquarelles/accueil-rencontre-880.webp", import.meta.url).href;
 const accueil440 = new URL("../../assets/aquarelles/accueil-rencontre-440.webp", import.meta.url).href;
 const universGardes = new URL("../../assets/aquarelles/univers-gardes-320.webp", import.meta.url).href;
@@ -37,6 +38,10 @@ const Bienvenue = () => {
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
   const [firstName, setFirstName] = useState("");
+  // Lot PUB3 : le bouton « Faisons connaissance » est fixé en bas d'écran sur
+  // téléphone ; la barre de navigation basse le recouvrait entièrement
+  // (360 × 664, 4 clics sur 34 visiteurs mobiles du 01 au 07/11/2026).
+  useHideBottomNav(true);
 
   let entraideIntent = false;
   try { entraideIntent = localStorage.getItem(SIGNUP_INTENT_KEY) === "entraide"; } catch { /* rien */ }

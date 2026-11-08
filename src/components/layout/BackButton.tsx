@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BACK_FALLBACK_PATH, hasInAppHistory } from "@/lib/backNavigation";
 
 interface BackButtonProps {
   /** Variant "inline" : sans wrapper sticky, pour intégration dans une top bar existante. */
@@ -28,7 +29,7 @@ export const BackButton = ({ inline = false }: BackButtonProps) => {
     <Button
       variant="ghost"
       size="sm"
-      onClick={() => navigate(-1)}
+      onClick={() => (hasInAppHistory() ? navigate(-1) : navigate(BACK_FALLBACK_PATH, { replace: true }))}
       className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2 h-8 px-2 min-w-0 shrink"
       aria-label="Revenir à la page précédente"
     >

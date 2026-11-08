@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { ownerActiveEmptyState, type EmptyStateSit } from "@/lib/ownerSitsEmptyState";
 import { ownerCreateCta } from "@/lib/ownerCreateCta";
 import { OwnerMissionsBlock } from "@/components/sits/OwnerMissionsBlock";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -1032,12 +1033,8 @@ const Sits = () => {
             <EmptyState
               illustration="emptyCalendar"
               title="Votre prochaine garde commence ici"
-              description={
-                sits.length > 0
-                  ? `Vous avez ${sits.length} annonce${sits.length > 1 ? "s" : ""} dans votre historique. Republiez une garde pour retrouver un gardien de confiance près de chez vous.`
-                  : "Publiez votre première annonce pour trouver un gardien de confiance près de chez vous."
-              }
-              actionLabel={sits.length > 0 ? "Publier une nouvelle annonce" : "Publier une annonce"}
+              description={ownerActiveEmptyState(sits as EmptyStateSit[]).description}
+              actionLabel={ownerActiveEmptyState(sits as EmptyStateSit[]).actionLabel}
               actionTo="/sits/create"
               actionIcon={Plus}
             />
