@@ -139,6 +139,10 @@ export type EventType =
   // Dashboard new-user (Casse A) ---------------------------------------------
   | "dashboard_cta_clicked"           // Clic CTA dashboard (cta, is_first_time, user_role)
   | "dashboard_first_time_view"       // Premier affichage dashboard nouveau (user_role, view_variant)
+  // Lot L4, récit de l'accueil (arène tableau de bord v2) ----------------------
+  | "dashboard_story_seen"            // Récit affiché (space, chapter, compact, above_fold)
+  | "dashboard_story_cta_clicked"     // Clic du bouton du récit (space, chapter, href)
+  | "dashboard_frieze_step_clicked"   // Réservé : étape de la frise (étapes inertes au lot L4)
   | "checklist_item_completed"        // Item checklist coché (item_name, order)
   | "checklist_all_completed"         // Checklist finalisée (user_role, time_seconds_since_signup)
   | "sitter_no_nearby_sit_shown"      // Empty state annonces (radius_km, alert_subscribed)
