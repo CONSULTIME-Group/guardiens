@@ -99,19 +99,23 @@ describe("écran express", () => {
     rerender(<CreateSitExpress {...props({ photoUrl: "https://x/p.jpg" })} />);
     expect(screen.getByTestId("express-photo-done")).toBeTruthy();
   });
-  it("raccourcis Noël : premier présélectionné, choix d'un autre, Autres dates", () => {
+  it("dates de Noël : une phrase et « Modifier », raccourcis dans la feuille (lot L5)", () => {
     const onDates = vi.fn();
     render(<CreateSitExpress {...props({ onDates })} />);
-    expect(screen.getByText("19 déc. au 3 janv.").getAttribute("aria-pressed")).toBe("true");
-    fireEvent.click(screen.getByText("20 au 27 déc."));
+    expect(screen.getByTestId("express-dates-summary").textContent).toContain("Du 19 décembre au 3 janvier · 15 nuits");
+    expect(screen.queryByTestId("express-date-presets")).toBeNull();
+    fireEvent.click(screen.getByText("Modifier"));
+    const radios = screen.getByTestId("express-date-presets").querySelectorAll("[role='radio']");
+    expect(radios[0].getAttribute("aria-checked")).toBe("true");
+    fireEvent.click(radios[1]);
+    fireEvent.click(screen.getByTestId("express-dates-validate"));
     expect(onDates).toHaveBeenCalledWith("2026-12-20", "2026-12-27", "preset");
-    fireEvent.click(screen.getByText("Autres dates"));
-    expect(screen.getByTestId("express-date-inputs")).toBeTruthy();
   });
-  it("autres périodes : sélecteurs directement", () => {
+  it("autres périodes sans dates : les deux champs dans la carte", () => {
     render(<CreateSitExpress {...props({ period: "ete", startDate: "", endDate: "" })} />);
     expect(screen.queryByTestId("express-date-presets")).toBeNull();
     expect(screen.getByTestId("express-date-inputs")).toBeTruthy();
+    expect(screen.queryByTestId("express-dates-summary")).toBeNull();
   });
   it("bouton désactivé tant qu'un bloquant reste, liste affichée", () => {
     const { rerender } = render(<CreateSitExpress {...props({ blocking: [{ id: "photo", label: "Au moins une photo" } as any] })} />);
