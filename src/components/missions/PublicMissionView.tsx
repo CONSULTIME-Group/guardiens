@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { buildOgImageUrl } from "@/lib/ogImage";
+import { buildMissionTitle } from "@/lib/seoTitle";
 import { Share2, CheckCircle2, ShieldCheck, Eye, Users } from "lucide-react";
 import { formatProjetPeriod, formatProjetMonths, formatProjetDay, projetParagraphs, projetDurationLabel, hebergementLabel, projetNatureLabel, savoirFaireLabel, offreLabel, externalRegistrationUrl, projetAccueilHours, projetSections } from "@/lib/projets";
 import PageMeta from "@/components/PageMeta";
@@ -242,7 +243,7 @@ const PublicMissionView = ({
     return (
       <div className="min-h-screen bg-background text-foreground animate-fade-in">
         <PageMeta
-          title={`${displayTitle}, projet participatif à ${cityLabel}`}
+          title={buildMissionTitle(displayTitle, mission.city, { label: "projet participatif", separator: ", " })}
           description={metaDescription}
           image={ogImageProjet}
           noindex={noindex}
@@ -621,7 +622,7 @@ const PublicMissionView = ({
     <>
     <div className="min-h-screen bg-background text-foreground animate-fade-in">
       <PageMeta
-        title={t("mission_detail.meta_title", { title: displayTitle, city: cityLabel })}
+        title={buildMissionTitle(displayTitle, mission.city)}
         description={metaDescription}
         image={ogImageCoupDeMain}
         noindex={noindex}

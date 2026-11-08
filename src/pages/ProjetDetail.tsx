@@ -10,6 +10,7 @@ import { isAuthorOf } from "@/lib/ownership";
 import { Button } from "@/components/ui/button";
 import { isIndexableProjetMission } from "../../supabase/functions/_shared/entraideMissionIndexability.js";
 import PageMeta from "@/components/PageMeta";
+import { formatCityName } from "@/lib/seoTitle";
 import { classifyProjetLookup, isUuid, projetCanonicalUrl, projetStatusCode, type ProjetLookup } from "@/lib/projetSeo";
 
 /** Même minimum de caractères que l'entraide (SmallMissionDetail). */
@@ -17,13 +18,7 @@ const MIN_MESSAGE_LEN = 10;
 
 /** Titlecase pour une ville saisie en majuscules. */
 function titlecaseCity(s?: string | null): string {
-  if (!s) return "";
-  const small = new Set(["de", "du", "des", "le", "la", "les", "et", "en", "sur", "sous", "lès", "aux"]);
-  return s.toLowerCase().split(/(\s|-)/).map((part, i) => {
-    if (part === " " || part === "-") return part;
-    if (i > 0 && small.has(part)) return part;
-    return part.charAt(0).toUpperCase() + part.slice(1);
-  }).join("");
+  return formatCityName(s);
 }
 
 function timeAgoFr(iso: string): string {
