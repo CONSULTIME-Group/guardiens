@@ -13,6 +13,7 @@
 // jamais dans la fenêtre.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { claimSitNotification, raiseClaimErrorSignal, releaseSitNotification, reportClaimOutcome } from "../_shared/sitNotificationClaim.ts";
+import { OUTBOUND_SEND_SPACING_MS, sendWithinRateLimit } from "../_shared/outbound-rate-limit.ts";
 import { ALERT_DIGEST_TARGET_PARIS_HOURS, parisDateKey, parisHourSlot, parisWindowVerdictForHours } from "../_shared/paris-hour.ts";
 import { publicationWindowOrClause } from "../_shared/sit-publication-window.ts";
 import { geocodeKeyCandidates } from "../_shared/geocode-lookup.ts";
@@ -314,6 +315,9 @@ Deno.serve(async (req) => {
       return null;
     };
 
+    const sendStartedAtMs = Date.now();
+    let lastSendAtMs = 0;
+    let deferredRateLimited = 0;
     for (const pref of prefs) {
       const profile = pref.profiles;
       if (!profile?.email) { skipped++; mark("sans_email", pref); continue; }
@@ -545,25 +549,37 @@ Deno.serve(async (req) => {
       }
       claimGranted++;
 
-      const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
-        body: JSON.stringify({
-          templateName: "alert-digest",
-          recipientEmail: profile.email,
-          idempotencyKey: idem,
-          templateData: {
-            firstName: capitalize(profile.first_name),
-            zoneLabel,
-            sits: sitsPayload,
-            missions: missionsPayload,
-          },
-        }),
+      // Lot NUR1 : envois espacés et limite de débit attendue dans le budget
+      // du passage. Le 08/11/2026 à 7 h 35, une limite levée par fetch faisait
+      // échouer tout le passage et gardait le créneau du membre réservé.
+      const sendBody = JSON.stringify({
+        templateName: "alert-digest",
+        recipientEmail: profile.email,
+        idempotencyKey: idem,
+        templateData: {
+          firstName: capitalize(profile.first_name),
+          zoneLabel,
+          sits: sitsPayload,
+          missions: missionsPayload,
+        },
       });
-      const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
-      if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
-      const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
-      if (sendErr) {
+      const spacing = OUTBOUND_SEND_SPACING_MS - (Date.now() - lastSendAtMs);
+      if (lastSendAtMs > 0 && spacing > 0) await new Promise((r) => setTimeout(r, spacing));
+      const outcome = await sendWithinRateLimit(async () => {
+        lastSendAtMs = Date.now();
+        const res = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+          body: sendBody,
+        });
+        return { ok: res.ok, status: res.status, body: res.ok ? '' : await res.text().catch(() => '') };
+      }, { startedAtMs: sendStartedAtMs });
+      if (outcome.kind === "rate_limited") {
+        await releaseSitNotification(supabase, profile.id, "rate_limited");
+        deferredRateLimited++;
+        break;
+      }
+      if (outcome.kind === "failed") {
         await recordDeliveryFailure(supabase, {
           templateName: "alert-digest",
           recipientEmail: profile.email,
@@ -571,11 +587,10 @@ Deno.serve(async (req) => {
           entityType: "user",
           entityId: profile.id,
           source: "send-alert-digest",
-          errorMessage: `HTTP ${_steRes.status}: ${_steTxt1.slice(0, 500)}`,
-          extra: { http_status: _steRes.status, response_body: _steTxt1.slice(0, 1000) },
+          errorMessage: outcome.detail,
         });
         await releaseSitNotification(supabase, profile.id, "send_failed");
-        errors.push({ user_id: profile.id, reason: String(sendErr) });
+        errors.push({ user_id: profile.id, reason: `send_failed: ${outcome.detail}` });
         continue;
       }
       sent++;
@@ -598,6 +613,7 @@ Deno.serve(async (req) => {
       claim_skipped: claimSkipped,
       claim_skipped_by: claimSkippedBy,
       rayon_fallback_dept: rayonFallbackDept,
+      deferred_rate_limited: deferredRateLimited,
       errors_count: errors.length,
       hour: currentHourStr,
       trace_id: traceId, cron_job_id: cronJobId,

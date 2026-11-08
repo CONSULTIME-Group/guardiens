@@ -19,27 +19,30 @@ const RelanceProfilIncompletEmail = ({ firstName }: RelanceProfilIncompletProps)
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>Une photo, votre code postal, trois lignes sur vous.</Preview>
+      <Preview>Une photo et trois lignes sur vous, et les propriétaires savent à qui ils confient leur maison.</Preview>
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
           <Heading style={h1}>{name ? `Bonjour ${name},` : 'Bonjour,'}</Heading>
 
           <Text style={text}>
-            Bienvenue sur Guardiens. Votre profil est presque prêt.
+            Bienvenue sur Guardiens. Votre profil est déjà visible des propriétaires près de chez vous.
           </Text>
 
           <Text style={text}>
-            Il apparaît dans les recherches des gens du coin dès qu'il est rempli à 60&nbsp;%.
-            Trois informations suffisent&nbsp;:
+            Deux informations les aident à savoir à qui ils confient leur
+            maison&nbsp;:
           </Text>
 
           <Text style={listItem}>une photo de vous&nbsp;;</Text>
-          <Text style={listItem}>votre code postal&nbsp;;</Text>
           <Text style={listItem}>trois lignes pour vous présenter.</Text>
 
+          <Text style={text}>
+            C'est aussi ce qui vous ouvre les candidatures, à partir de 40&nbsp;%.
+          </Text>
+
           <Section style={ctaSection}>
-            <Button style={button} href={`${SITE_URL}/profile`}>
+            <Button style={button} href={`${SITE_URL}/profile?section=identite`}>
               Compléter mon profil
             </Button>
           </Section>
@@ -66,7 +69,7 @@ const RelanceProfilIncompletEmail = ({ firstName }: RelanceProfilIncompletProps)
 
 export const template = {
   component: RelanceProfilIncompletEmail,
-  subject: 'Trois informations, et votre profil apparaît près de chez vous',
+  subject: 'Une photo et trois lignes, et les propriétaires vous reconnaissent',
   displayName: 'Relance profil incomplet (J+2)',
   previewData: { firstName: 'Marie' },
 } satisfies TemplateEntry

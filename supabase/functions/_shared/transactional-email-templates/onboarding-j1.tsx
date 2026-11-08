@@ -52,7 +52,7 @@ const OnboardingJ1Email = ({
       <BrandedHead />
       <Preview>
         {isOwner
-          ? `Votre annonce est prête à être publiée${locationLabel}`
+          ? `Les gardiens à proximité${locationLabel} attendent votre annonce`
           : `Votre profil ${SITE_NAME} vous attend`}
       </Preview>
       <Body style={main}>
@@ -64,7 +64,8 @@ const OnboardingJ1Email = ({
             <>
               <Text style={text}>
                 Bienvenue sur {SITE_NAME}. Vos dates, vos animaux, une photo :
-                votre première annonce est en ligne. Guardiens est gratuit.
+                c'est tout ce qu'il faut pour publier votre première annonce.
+                Guardiens est gratuit.
               </Text>
 
               {nearbyLabel && (
@@ -97,7 +98,7 @@ const OnboardingJ1Email = ({
                         <Column style={cardBodyCol}>
                           <Text style={cardName}>{s.first_name || 'Gardien'}</Text>
                           <Text style={cardMeta}>
-                            {[s.city, s.distance_km != null ? `à ${s.distance_km} km` : null]
+                            {[s.city, s.distance_km != null ? `à ${Math.round(s.distance_km)} km` : null]
                               .filter(Boolean).join(' · ')}
                           </Text>
                           {typeof s.affinity_score === 'number' && s.affinity_score > 0 && (
@@ -111,14 +112,14 @@ const OnboardingJ1Email = ({
               )}
 
               <Section style={ctaSection}>
-                <Button style={button} href={`${SITE_URL}/dashboard?intent=draft_from_prompt&${utm}`}>
+                <Button style={button} href={`${SITE_URL}/sits/create?${utm}`}>
                   Publier mon annonce
                 </Button>
               </Section>
 
               <Text style={textMuted}>
-                Astuce, décrivez votre absence en une phrase, notre assistant
-                pré-remplit le formulaire pour vous.
+                Astuce : sur le formulaire, décrivez votre absence en une phrase,
+                Alma prépare l'annonce pour vous.
               </Text>
 
               <Hr style={hr} />
