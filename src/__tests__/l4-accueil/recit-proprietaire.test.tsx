@@ -57,6 +57,11 @@ describe("L4, entrée du récit propriétaire", () => {
     expect(input.confirmedSit).toMatchObject({ id: "c1", sitterFirstName: "Hugo" });
   });
 
+  it("noms des animaux tels que déclarés, première lettre en majuscule", () => {
+    const story = resolveOwnerStory(buildOwnerStoryInput({ ...base, pets: [{ name: "Rex" }, { name: "resa" }], period: "noel" }));
+    expect(story.title).toBe("Qui veillera sur Rex et Resa pour Noël ?");
+  });
+
   it("avis dû : prénom du gardien seul", () => {
     const input = buildOwnerStoryInput({ ...base, pendingReviews: [{ sitId: "x", sitterName: "Hugo B" }] });
     expect(input.reviewDue).toEqual({ sitId: "x", sitterFirstName: "Hugo" });
