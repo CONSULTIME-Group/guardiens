@@ -76,6 +76,7 @@ import StoryHero from "./story/StoryHero";
 import RoleSwitch from "./story/RoleSwitch";
 import EntraideLine from "./story/EntraideLine";
 import HomePhotoCard from "./story/HomePhotoCard";
+import PublishedNotice from "./story/PublishedNotice";
 import { useCompactStory } from "./story/useCompactStory";
 import type { DeparturePeriod } from "@/lib/ownerDeparture";
 
@@ -500,6 +501,8 @@ const OwnerDashboard = () => {
             ) : (
               /* Lot L4 : accueil téléphone, le récit d'abord (direction B de l'arène v2). */
               <div className="space-y-[14px] pt-3" data-testid="owner-story-home">
+                {/* Lot L5 : retour calme après une publication rapide. */}
+                <PublishedNotice />
                 {/* Texte agrandi : le choix d'espace passe sous le récit, le bouton reste au premier écran. */}
                 {!compactStory && <RoleSwitch />}
                 <StoryHero

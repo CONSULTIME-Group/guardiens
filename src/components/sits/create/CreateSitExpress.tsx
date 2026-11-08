@@ -3,19 +3,20 @@
  * Composant de présentation : tout l'état et la publication restent dans
  * CreateSit, qui passe les mêmes valeurs et le même handlePublish.
  */
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useHideBottomNav } from "@/components/layout/ChromeVisibility";
 import { ArrowLeft, Check, Camera, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { localTodayIso } from "@/lib/localDate";
+import ExpressDatesCard from "./ExpressDatesCard";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { MAX_TITLE_LENGTH, type PublishBlocker } from "@/lib/sitPublishRules";
 import {
-  EXPRESS_PERIOD_HEADER, alreadyFilledPhrase, housingLabel, joinPetNames, matchingPreset, nextDay, validPresets,
+  EXPRESS_PERIOD_HEADER, alreadyFilledPhrase, housingLabel, joinPetNames,
   type ExpressPet,
 } from "@/lib/sitExpress";
 import type { DeparturePeriod } from "@/lib/ownerDeparture";
@@ -67,7 +68,8 @@ export function expressBlockerLabel(b: PublishBlocker): string {
 /** L'erreur de dates s'affiche déjà sous les dates : jamais une seconde fois dans le pied. */
 const DATE_ERROR_IDS = new Set(["date-past", "date-error"]);
 
-const today = () => new Date().toISOString().slice(0, 10);
+// Lot L5 : jour du calendrier de l'appareil, comme le formulaire (PUB1).
+const today = () => localTodayIso();
 
 const Card = ({ children, className }: { children: React.ReactNode; className?: string }) => (
   <section className={cn("rounded-2xl border border-border bg-card p-5", className)}>{children}</section>
@@ -76,11 +78,8 @@ const Card = ({ children, className }: { children: React.ReactNode; className?: 
 const CreateSitExpress = (p: CreateSitExpressProps) => {
   useHideBottomNav(true);
   const cameraRef = useRef<HTMLInputElement>(null);
-  const presets = validPresets(today());
   const footerBlockers = p.blocking.filter((b) => !(p.dateError && DATE_ERROR_IDS.has(b.id)));
   const galleryRef = useRef<HTMLInputElement>(null);
-  const preset = matchingPreset(p.startDate, p.endDate);
-  const [otherDates, setOtherDates] = useState(p.period !== "noel" || presets.length === 0 || (!!p.startDate && !preset));
   const names = joinPetNames(p.pets);
   const pickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -151,61 +150,17 @@ const CreateSitExpress = (p: CreateSitExpressProps) => {
           )}
         </Card>
 
-        {/* Bloc 2 : dates */}
-        <Card>
-          <h2 className="font-heading text-[19px] text-foreground">Vos dates</h2>
-          {p.period === "noel" && presets.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2" data-testid="express-date-presets">
-              {presets.map((d) => {
-                const active = !otherDates && preset?.key === d.key;
-                return (
-                  <button
-                    key={d.key}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => { setOtherDates(false); p.onDates(d.start, d.end, "preset"); }}
-                    className={cn(
-                      "min-h-[44px] rounded-full border-[1.5px] px-4 text-[15px] font-medium",
-                      active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground",
-                    )}
-                  >
-                    {d.label}
-                  </button>
-                );
-              })}
-              <button
-                type="button"
-                aria-pressed={otherDates}
-                onClick={() => setOtherDates(true)}
-                className={cn(
-                  "min-h-[44px] rounded-full border-[1.5px] border-dashed px-4 text-[15px] font-medium",
-                  otherDates ? "border-primary text-primary" : "border-border text-muted-foreground",
-                )}
-              >
-                Autres dates
-              </button>
-            </div>
-          )}
-          {otherDates && (
-            <div className="mt-3 grid grid-cols-2 gap-3" data-testid="express-date-inputs">
-              <div>
-                <Label htmlFor="express-start" className="mb-1 block text-xs text-muted-foreground">Début</Label>
-                <Input id="express-start" type="date" min={today()} value={p.startDate} className="h-12 text-base"
-                  onChange={(e) => p.onDates(e.target.value, p.endDate, "autres")} />
-              </div>
-              <div>
-                <Label htmlFor="express-end" className="mb-1 block text-xs text-muted-foreground">Fin</Label>
-                <Input id="express-end" type="date" min={p.startDate ? nextDay(p.startDate) : today()} value={p.endDate} className="h-12 text-base"
-                  onChange={(e) => p.onDates(p.startDate, e.target.value, "autres")} />
-              </div>
-            </div>
-          )}
-          {p.dateError && <p className="mt-2 text-sm text-destructive">{p.dateError}</p>}
-          <label className="mt-4 flex min-h-[44px] items-center gap-3 text-[15px] text-foreground">
-            <Checkbox checked={p.flexibleDates} onCheckedChange={(v) => p.onFlexibleDates(v === true)} />
-            Mes dates sont flexibles
-          </label>
-        </Card>
+        {/* Bloc 2 : dates (lot L5, carte unique A-02) */}
+        <ExpressDatesCard
+          period={p.period}
+          today={today()}
+          startDate={p.startDate}
+          endDate={p.endDate}
+          onDates={p.onDates}
+          dateError={p.dateError}
+          flexibleDates={p.flexibleDates}
+          onFlexibleDates={p.onFlexibleDates}
+        />
 
         {/* Bloc 3 : texte */}
         <Card>

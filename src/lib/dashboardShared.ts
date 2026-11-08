@@ -48,6 +48,14 @@ export function fetchMySitsFull(userId: string, opts?: { fresh?: boolean }): Pro
   });
 }
 
+/**
+ * Lot L5 : après une publication, l'accueil relit les annonces (sinon le récit
+ * raconterait encore le brouillon pendant la fenêtre de 60 s du cache).
+ */
+export function invalidateMySits(userId: string) {
+  getAppQueryClient()?.removeQueries({ queryKey: ["my-sits-full", userId], exact: true });
+}
+
 const ts = (v: string | null | undefined) => (v ? Date.parse(v) || 0 : 0);
 
 /** Annonces du membre, triées updated_at desc puis created_at desc. */

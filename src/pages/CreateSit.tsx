@@ -1,4 +1,7 @@
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { invalidateMySits } from "@/lib/dashboardShared";
+import { getAppQueryClient } from "@/lib/appQueryClient";
+import { afterPublishTarget, isDesktopViewport } from "@/lib/afterPublish";
 import { clearPublishIntent } from "@/lib/postOnboardingIntent";
 import { Suspense, useState, useEffect, useRef, useCallback, type MouseEvent as ReactMouseEvent } from "react";
 import ExpectationSuggestions from "@/components/sits/create/ExpectationSuggestions";
@@ -2027,14 +2030,20 @@ const CreateSit = () => {
       if (expressActiveRef.current) {
         void trackEvent("sits_express_published", { source: "/sits/create", metadata: { period: expressParams.period, sit_id: sitId } });
       }
-      toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant postuler." });
-      // Lot 1 (arrivée v2) : une première annonce express publiée depuis
-      // l'inscription enchaîne sur les affinités (P3) au lieu de la fiche.
-      navigate(
-        arrivalV2Account && expressActiveRef.current && searchParams.get("source") === "signup"
-          ? `/arrivee/affinites?sit=${sitId}`
-          : `/sits/${sitId}`,
-      );
+      // Lot L5 : l'accueil relit les annonces et la question de départ.
+      invalidateMySits(user.id);
+      void getAppQueryClient()?.invalidateQueries({ queryKey: ["owner-departure", user.id] });
+      const target = afterPublishTarget({
+        sitId,
+        express: expressActiveRef.current,
+        arrivalSignup: arrivalV2Account && expressActiveRef.current && searchParams.get("source") === "signup",
+        phone: !isDesktopViewport(),
+      });
+      // Retour au récit (lot L5) : la confirmation y est dite, sans toast en double.
+      if (!target.startsWith("/dashboard")) {
+        toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant postuler." });
+      }
+      navigate(target);
     } catch (err: any) {
       // Le texte renvoyé par la base est technique et en anglais : il reste en
       // console, l'utilisateur reçoit une phrase compréhensible.

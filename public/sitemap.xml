@@ -3682,11 +3682,6 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/gardiens/c3e3ad31-340f-4875-8c09-08e7c19b5b98</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/gardiens/c576eaa3-0157-4712-8ea7-c64252ed2d62</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3918,11 +3913,6 @@
   </url>
   <url>
     <loc>https://guardiens.fr/annonces/un-noel-magique-au-c-ur-du-magnifique-quebec-entoure-de-natu-saint-ludger-quebec-45219d</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/annonces/nounou-pour-vos-toutous-givors-4acc66</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
