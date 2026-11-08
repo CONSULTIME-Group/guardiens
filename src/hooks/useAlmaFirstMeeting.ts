@@ -2,11 +2,15 @@
  * useAlmaFirstMeeting, état "premier contact" avec Alma.
  *
  * Vérité serveur : colonne `profiles.alma_first_meeting_seen`. Si false,
- * on affiche l'accueil unique. `markSeen()` bascule le flag côté DB (et
- * met à jour l'état local optimiste). Aucune reréapparition possible.
+ * on affiche l'accueil unique.
+ * - `recordSeen()` (lot L0, 08/11/2026) : enregistre la rencontre dès
+ *   l'affichage, la carte reste visible pendant la visite. Avant L0, seul un
+ *   clic l'enregistrait : un membre qui faisait défiler retrouvait la carte en
+ *   haut à chaque visite.
+ * - `markSeen()` : enregistre et masque tout de suite (bouton principal, ×).
  */
 import { fetchMyProfile, patchMyProfileCache } from "@/lib/myProfile";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -36,9 +40,11 @@ export function useAlmaFirstMeeting() {
     };
   }, [user?.id]);
 
-  const markSeen = useCallback(async () => {
-    if (!user?.id) return;
-    setState((s) => ({ ...s, seen: true }));
+  const persistedRef = useRef(false);
+
+  const persistSeen = useCallback(async () => {
+    if (!user?.id || persistedRef.current) return;
+    persistedRef.current = true;
     patchMyProfileCache(user.id, { alma_first_meeting_seen: true });
     try {
       await supabase
@@ -50,9 +56,20 @@ export function useAlmaFirstMeeting() {
     }
   }, [user?.id]);
 
+  const recordSeen = useCallback(() => {
+    void persistSeen();
+  }, [persistSeen]);
+
+  const markSeen = useCallback(async () => {
+    if (!user?.id) return;
+    setState((s) => ({ ...s, seen: true }));
+    await persistSeen();
+  }, [user?.id, persistSeen]);
+
   return {
     loading,
     shouldShow: !loading && seen === false,
+    recordSeen,
     markSeen,
   };
 }

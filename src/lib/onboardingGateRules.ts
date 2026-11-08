@@ -34,6 +34,11 @@ const ALWAYS_OPEN_PREFIXES = [
   "/petites-missions",
   // Lot X2 : les projets participatifs, page et candidatures du porteur (C-13).
   "/projets",
+  // Lot L0 (arène tableau de bord v2, 08/11/2026) : le tableau de bord reste
+  // ouvert. En 30 jours, 232 passages de /dashboard vers le questionnaire pour
+  // 125 membres, délai médian 0,5 s : la page se chargeait puis disparaissait.
+  // Le questionnaire reste demandé depuis les autres pages (recherche, profil).
+  "/dashboard",
 ];
 
 function matchesPrefix(path: string, prefix: string): boolean {

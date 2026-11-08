@@ -73,7 +73,7 @@ const OwnerDashboard = () => {
   const { user } = useAuth();
   // Lot 1 : propriétaire passé par /bienvenue, jamais OnboardingWelcome.
   const arrivalV2 = useArrivalV2Account(user?.id);
-  const { shouldShow: showAlmaFirstMeeting, markSeen: markAlmaFirstMeetingSeen } = useAlmaFirstMeeting();
+  const { shouldShow: showAlmaFirstMeeting, markSeen: markAlmaFirstMeetingSeen, recordSeen: recordAlmaFirstMeetingSeen } = useAlmaFirstMeeting();
 
   /* ── Data fetching ── */
   const { data, loading, error, reload } = useOwnerDashboardData(user?.id);
@@ -408,7 +408,7 @@ const OwnerDashboard = () => {
     <div className="overflow-hidden lg:overflow-visible pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-32">
       {showAlmaFirstMeeting && (
         <div className="px-4 sm:px-5 md:px-8 pt-2">
-          <AlmaFirstMeeting role="owner" onDone={markAlmaFirstMeetingSeen} />
+          <AlmaFirstMeeting role="owner" onDone={markAlmaFirstMeetingSeen} onSeen={recordAlmaFirstMeetingSeen} />
         </div>
       )}
 
