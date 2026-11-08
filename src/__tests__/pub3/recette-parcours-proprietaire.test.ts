@@ -83,3 +83,22 @@ describe("Mes annonces vide : un premier brouillon n'est pas un historique", () 
     expect(ownerActiveEmptyState([]).actionLabel).toBe("Publier une annonce");
   });
 });
+
+describe("étape 3 sur téléphone : le bouton de publication reste à l'écran", () => {
+  const src = readFileSync("src/pages/CreateSit.tsx", "utf8");
+  it("le bouton Aperçu séparé est réservé aux écrans larges", () => {
+    expect(src).toMatch(/className="h-12 px-4 shrink-0 gap-2 hidden sm:inline-flex text-base"\s*onClick=\{\(\) => setPreviewOpen\(true\)\}/);
+  });
+  it("« Enregistrer & quitter » devient « Enregistrer » sur téléphone à toutes les étapes", () => {
+    const n = src.match(/<span className="sm:hidden">Enregistrer<\/span>/g) ?? [];
+    expect(n.length).toBeGreaterThanOrEqual(2);
+  });
+});
+
+describe("aperçu : une date est un jour du calendrier, quel que soit le fuseau", () => {
+  it("20 décembre reste le 20 décembre", async () => {
+    const { formatPreviewDate } = await import("@/components/sits/owner/AnnouncementPreviewDialog");
+    expect(formatPreviewDate("2026-12-20")).toBe("20 décembre 2026");
+    expect(formatPreviewDate("")).toBe("");
+  });
+});
