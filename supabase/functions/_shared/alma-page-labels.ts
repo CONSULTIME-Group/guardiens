@@ -39,6 +39,7 @@ export const ALMA_PAGE_LABELS: Record<string, string> = {
   "/annonces/:id": "Fiche d'une annonce",
   "/annonces/demo/:slug": "Exemple d'annonce",
   "/sits/:id": "Fiche d'une annonce",
+  "/candidatures/:id": "Une candidature reçue",
   "/sits/:id/edit": "Modifier une annonce",
   "/recherche": "Rechercher une garde",
   "/search": "Rechercher une garde",
