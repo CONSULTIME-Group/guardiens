@@ -8,7 +8,7 @@ const AlmaDock = lazy(() =>
 );
 import { AlmaProvider } from "@/contexts/AlmaContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { useArrivalWelcomeSeen } from "@/hooks/useArrivalWelcomeSeen";
+import { useArrivalV2Account } from "@/hooks/useArrivalV2Account";
 const OnboardingModal = lazy(() => import("@/components/onboarding/OnboardingModal"));
 import OnboardingGate from "@/components/onboarding/OnboardingGate";
 // DuplicateAccountGuard est monté globalement dans App.tsx pour s'exécuter
@@ -94,10 +94,12 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
   // est différée au premier retour sur une autre page, tableau de bord compris.
   const isSitCreateTunnel = location.pathname.startsWith("/sits/create");
 
-  // Lots 1 et 2 : un compte passé par /bienvenue (arrivée v2) ne voit jamais la modale.
-  const isArrivalV2Owner = useArrivalWelcomeSeen(user?.id);
+  // Lots 1, 2 et ONB1 : un compte arrivée v2 (créé après la bascule du flag,
+  // ou passé par /bienvenue) ne voit jamais l'ancienne modale. On attend que
+  // le critère soit connu avant de l'afficher à qui que ce soit.
+  const arrivalV2 = useArrivalV2Account(user?.id);
   const isArrivalPath = location.pathname.startsWith("/bienvenue") || location.pathname.startsWith("/arrivee/");
-  const showOnboarding = !dismissed && !isProContext && !isSitCreateTunnel && !isArrivalV2Owner && !isArrivalPath && (isTour || needsMinimal || needsOnboarding);
+  const showOnboarding = !dismissed && !isProContext && !isSitCreateTunnel && arrivalV2.ready && !arrivalV2.isV2 && !isArrivalPath && (isTour || needsMinimal || needsOnboarding);
 
   // La modale reste montée une fois qu'elle a été nécessaire, même après
   // fermeture. Démonter l'arbre du dialogue alors que Radix le croit encore

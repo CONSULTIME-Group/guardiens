@@ -20,7 +20,23 @@ export function countPlacesByGuide(rows: Array<{ city_guide_id: string | null }>
 // ── 2b. Onboarding en personnes distinctes ───────────────────────────
 
 export const ONBOARDING_DEFINITION =
-  "Personnes distinctes parmi les comptes créés sur la période, avec au moins un onboarding terminé (accueil ou questionnaire d'affinité) sur la même période.";
+  "Personnes distinctes parmi les comptes créés sur la période, avec au moins un onboarding terminé sur la même période : accueil, questionnaire d'affinité, ou fin du parcours d'arrivée (étape « Vous connaître » d'un gardien, « Affinités » d'un propriétaire).";
+
+/**
+ * Lot ONB1 (08/11/2026) : événements qui valent « onboarding terminé ». Le
+ * parcours d'arrivée v2 se termine à G3 (gardien) ou P3 (propriétaire) ; G3
+ * n'émettait aucun des deux événements historiques avant ce lot, d'où l'ajout
+ * de arrival_step_completed G3 et P3, qui corrige aussi les semaines passées.
+ */
+export const ONBOARDING_END_EVENT_TYPES = ["onboarding_completed", "affinity_onboarding_completed", "arrival_step_completed"] as const;
+export const ARRIVAL_END_STEPS = ["G3", "P3"] as const;
+
+export function isOnboardingEndEvent(e: { event_type: string; metadata?: { step?: unknown } | null }): boolean {
+  if (e.event_type === "onboarding_completed" || e.event_type === "affinity_onboarding_completed") return true;
+  if (e.event_type !== "arrival_step_completed") return false;
+  const step = e.metadata?.step;
+  return typeof step === "string" && (ARRIVAL_END_STEPS as readonly string[]).includes(step);
+}
 
 /** Personnes distinctes de la cohorte qui portent l'événement. */
 export function distinctCohortPeople(cohortIds: Iterable<string>, eventUserIds: Iterable<string | null>): number {

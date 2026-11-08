@@ -25,17 +25,35 @@ interface CacheEntry {
 }
 const cache = new Map<string, CacheEntry>();
 
-async function fetchFlag(key: string): Promise<FlagValue> {
-  const { data } = await supabase
-    .from("feature_flags")
-    .select("enabled, applies_since")
-    .eq("key", key)
-    .maybeSingle();
-  const row = data as { enabled?: boolean | null; applies_since?: string | null } | null;
-  return {
-    enabled: !!row?.enabled,
-    appliesSince: row?.applies_since ?? null,
-  };
+const OFF: FlagValue = { enabled: false, appliesSince: null };
+
+/**
+ * Lot ONB1 : les drapeaux demandés au même instant (même rendu, plusieurs
+ * composants) partent en une seule lecture `.in("key", …)`. Budget P1b :
+ * la coquille lit arrival_v2 et la porte d'affinité mandatory_affinity_onboarding.
+ */
+let pendingKeys = new Set<string>();
+let pendingBatch: Promise<Map<string, FlagValue>> | null = null;
+
+function fetchFlag(key: string): Promise<FlagValue> {
+  pendingKeys.add(key);
+  if (!pendingBatch) {
+    pendingBatch = Promise.resolve().then(async () => {
+      const keys = [...pendingKeys];
+      pendingKeys = new Set();
+      pendingBatch = null;
+      const { data } = await supabase
+        .from("feature_flags")
+        .select("key, enabled, applies_since")
+        .in("key", keys);
+      const out = new Map<string, FlagValue>();
+      for (const row of (data ?? []) as Array<{ key?: string; enabled?: boolean | null; applies_since?: string | null }>) {
+        if (row?.key) out.set(row.key, { enabled: !!row.enabled, appliesSince: row.applies_since ?? null });
+      }
+      return out;
+    });
+  }
+  return pendingBatch.then((m) => m.get(key) ?? OFF);
 }
 
 export async function getFlag(key: string): Promise<FlagValue> {

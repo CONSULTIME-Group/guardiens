@@ -14,12 +14,13 @@ import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 import { departmentCodeFromPostal } from "@/lib/postalDepartment";
 import { isPostalCodeValidForCountry } from "@/lib/setupState";
 import { avatarImageUrl } from "@/lib/storageImage";
-import { afterG1, canSkipG1, readCarry } from "@/lib/arrival";
+import { afterG1, canSkipG1, readCarry, type ArrivalIntent } from "@/lib/arrival";
+import { markArrivalOnboardingDone } from "@/lib/arrivalOnboardingDone";
 import { ArrivalShell, Eyebrow, Gouache, SaveError, trackArrival, uploadAvatar, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
 const maisonSeule = new URL("../../assets/aquarelles/arrivee-bonjour-360.webp", import.meta.url).href;
 
 /** Écritures de G1, pures et testables. */
-export function buildG1Writes(i: { firstName: string; postalCode: string; city: string; country: string }) {
+export function buildG1Writes(i: { firstName: string; postalCode: string; city: string; country: string; /** Lot ONB1 : posé seulement si le profil n'en a pas. */ arrivalIntent?: ArrivalIntent | null }) {
   const country = i.country || "FR";
   const profile: Record<string, unknown> = {
     first_name: i.firstName.trim(),
@@ -28,6 +29,7 @@ export function buildG1Writes(i: { firstName: string; postalCode: string; city: 
     country,
     onboarding_minimal_completed: true,
   };
+  if (i.arrivalIntent) profile.arrival_intent = i.arrivalIntent;
   if (country === "FR") profile.departement_code = departmentCodeFromPostal(i.postalCode);
   return profile;
 }
@@ -46,6 +48,8 @@ const ArriveeVousGardien = () => {
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("FR");
   const [avatar, setAvatar] = useState("");
+  // Lot ONB1 : intention absente (compte arrivé sans C4) écrite à la première étape.
+  const [intentMissing, setIntentMissing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -57,7 +61,8 @@ const ArriveeVousGardien = () => {
     (async () => {
       const [{ data: p }, { data: auth }] = await Promise.all([fetchMyProfile(user.id, { fresh: true }), supabase.auth.getUser()]);
       if (cancelled) return;
-      const prof = (p ?? {}) as { first_name?: string; postal_code?: string; city?: string; country?: string | null; avatar_url?: string | null };
+      const prof = (p ?? {}) as { first_name?: string; postal_code?: string; city?: string; country?: string | null; avatar_url?: string | null; arrival_intent?: string | null };
+      setIntentMissing(!prof.arrival_intent);
       if (canSkipG1({ firstName: prof.first_name, city: prof.city })) { navigate(nextUrl, { replace: true }); return; }
       const meta = (auth?.user?.user_metadata ?? {}) as Record<string, string | undefined>;
       const metaName = meta.given_name || meta.first_name || (meta.full_name || meta.name || "").split(" ")[0] || "";
@@ -87,8 +92,10 @@ const ArriveeVousGardien = () => {
     if (!user || !valid) return;
     setSaving(true);
     setFailed(false);
-    const { error } = await supabase.from("profiles").update(buildG1Writes({ firstName, postalCode, city, country }) as any).eq("id", user.id);
+    const { error } = await supabase.from("profiles").update(buildG1Writes({ firstName, postalCode, city, country, arrivalIntent: intentMissing ? (entraide ? "entraide" : "sitter") : null }) as any).eq("id", user.id);
     if (error) { setSaving(false); setFailed(true); return; }
+    // Lot ONB1 : pour l'entraide, G1 est tout le parcours exigé.
+    if (entraide) await markArrivalOnboardingDone(user.id, "G1", user.role);
     await invalidateMyOnboardingStatus(user.id);
     trackArrival("completed", "G1");
     void Promise.resolve(refreshProfile?.()).catch(() => {});

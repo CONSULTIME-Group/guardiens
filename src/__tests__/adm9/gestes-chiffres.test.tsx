@@ -158,7 +158,7 @@ describe("ADM9 · 2b. Onboarding en personnes distinctes", () => {
     const src = read("src/pages/admin/AdminAnalytics.tsx");
     expect(src).toContain("activationRate: rateOf(onboardedPeople, realSignups)");
     expect(src).toContain("definition={ONBOARDING_DEFINITION}");
-    expect(src).toContain('.eq("event_type", "onboarding_completed")');
+    expect(src).toContain('.in("event_type", [...ONBOARDING_END_EVENT_TYPES])');
     const { ConversionTile } = await import("@/pages/admin/AdminAnalytics");
     render(<ConversionTile label="Compte créé → Onboarding terminé" value={71} hint="40 / 56 personnes" definition={ONBOARDING_DEFINITION} />);
     expect(screen.getByText("71%")).toBeTruthy();
