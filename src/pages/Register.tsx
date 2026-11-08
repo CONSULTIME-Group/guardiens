@@ -26,7 +26,7 @@ import { AuthIllustrationPanel } from "@/components/auth/AuthIllustrationPanel";
 import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 import { lovable } from "@/integrations/lovable";
 import { startOAuthFlow, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
-import { arrivalIntentForSignup, detectSignupIntent, roleForSignupIntent, signupIntentBannerKey } from "@/lib/signupIntent";
+import { arrivalIntentForSignup, detectSignupIntent, roleForSignupIntent, signupIntentBannerKey, signupIntentMatchesRole } from "@/lib/signupIntent";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { ARRIVAL_FLAG, arrivalAppliesToNewSignup } from "@/lib/arrivalFlag";
 import { Suspense } from "react";
@@ -294,7 +294,7 @@ const Register = () => {
  try {
  const result = await Promise.race([
  // Lot E17 : l'intention d'inscription est écrite sur le compte.
- register(cleanEmail, password, selectedRole, postAuthTarget, arrivalIntentForSignup(entraideIntent, detectedIntent)),
+ register(cleanEmail, password, selectedRole, postAuthTarget, arrivalIntentForSignup(entraideIntent, detectedIntent, selectedRole)),
  timeoutPromise,
  ]) as any;
 
@@ -742,7 +742,7 @@ const Register = () => {
     onModify={() => setStep(1)}
    /></Suspense>
   )}
-  {intentBannerKey && (
+  {intentBannerKey && signupIntentMatchesRole(detectedIntent, selectedRole, entraideIntent) && (
    <div className="rounded-lg border border-terra-border/60 bg-terra-soft/60 px-4 py-3 text-sm text-foreground">
     {t(`register_page.intent_banner.${intentBannerKey}`)}
    </div>

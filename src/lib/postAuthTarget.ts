@@ -27,8 +27,18 @@ export function resolvePostAuthTarget(
   return arrivalV2 ? `/bienvenue?next=${encodeURIComponent(target)}` : target;
 }
 
+/**
+ * Lot INS1 (08/11/2026) : une redirection propre au propriétaire (création
+ * d'annonce) n'a pas de sens pour un compte inscrit « Je veux garder ».
+ * Base du 08/11 : une inscription gardien arrivée par « Publier mon annonce »
+ * est repartie vers /sits/create.
+ */
+export function isOwnerOnlyTarget(target: string): boolean {
+  return target === "/sits/create" || target.startsWith("/sits/create?") || target.startsWith("/sits/create#");
+}
+
 function baseTarget(role: SignupRole | null, redirectTarget: string | null): string {
-  if (redirectTarget) return redirectTarget;
+  if (redirectTarget && !(role === "sitter" && isOwnerOnlyTarget(redirectTarget))) return redirectTarget;
   // Un polyvalent (both) est aussi un propriétaire : 93 comptes concernés
   // en base au 16/08/2026. Le tunnel de création d'annonce s'impose à lui
   // comme au rôle owner explicite.
