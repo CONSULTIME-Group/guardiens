@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
+import { buildOgImageUrl } from "@/lib/ogImage";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
@@ -166,7 +167,7 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
 
   return (
     <>
-      <PageMeta title={c.metaTitle} description={c.metaDescription} path={path} jsonLd={[faqSchema]} noindex={!indexable} ready={!loading} />
+      <PageMeta title={c.metaTitle} description={c.metaDescription} path={path} image={buildOgImageUrl({ title: `Entraide à ${c.cityName}`, subtitle: "Coups de main entre gens du coin", kind: "mission" })} jsonLd={[faqSchema]} noindex={!indexable} ready={!loading} />
       <div className="min-h-screen bg-background font-body">
         <PublicHeader />
         <PageBreadcrumb items={[{ label: "Entraide", href: "/petites-missions" }, { label: c.cityName }]} />

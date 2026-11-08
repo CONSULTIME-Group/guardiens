@@ -4,6 +4,7 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import PageMeta from "@/components/PageMeta";
+import { buildAssociationTitle } from "@/lib/seoTitle";
 import NotFound from "@/pages/NotFound";
 import { SITE_URL } from "@/lib/seo";
 import { buildOgImageUrl } from "@/lib/ogImage";
@@ -236,7 +237,7 @@ export default function AssociationDetail() {
   return (
     <div className="min-h-screen bg-background pb-16">
       <PageMeta
-        title={`${data.name} : ${typeLabel.toLowerCase()} à ${data.city} (${data.departement_name}) | Guardiens`}
+        title={buildAssociationTitle(data.name, typeLabel, data.city, data.departement_name)}
         description={metaDescription}
         path={`/associations/${data.slug}`}
         canonical={canonical}

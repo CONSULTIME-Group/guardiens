@@ -204,3 +204,30 @@ export function buildMissionTitle(
   if (full.length <= TITLE_BODY_MAX) return full;
   return buildSitTitle(base, place);
 }
+
+/**
+ * Titre d'une fiche d'association, suffixe « | Guardiens » compris (lot SEO-META3).
+ * Forme complète « {nom} : {type} à {ville} ({département}) » quand elle tient en
+ * 60 caractères. Sinon, dans l'ordre : sans département, puis le nom et la ville
+ * (recherche locale), puis le nom et le type, puis le nom seul coupé au mot.
+ */
+export function buildAssociationTitle(
+  name: string,
+  typeLabel: string,
+  city: string | null | undefined,
+  departement: string | null | undefined,
+): string {
+  const n = tidyTitle(name);
+  const type = collapseSpaces(typeLabel).toLowerCase();
+  const c = collapseSpaces(city);
+  const d = collapseSpaces(departement);
+  const dept = d && c && d.toLowerCase() !== c.toLowerCase() ? ` (${d})` : "";
+  const candidates: string[] = [];
+  if (c && !mentionsCity(n, c)) {
+    if (type) candidates.push(`${n} : ${type} à ${c}${dept}`, `${n} : ${type} à ${c}`);
+    candidates.push(`${n} à ${c}${dept}`, `${n} à ${c}`);
+  }
+  if (type) candidates.push(`${n} : ${type}`);
+  const body = candidates.find((x) => x.length <= TITLE_BODY_MAX) ?? truncateAtWord(n, TITLE_BODY_MAX);
+  return `${body}${TITLE_SUFFIX}`;
+}

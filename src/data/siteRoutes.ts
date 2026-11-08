@@ -198,7 +198,7 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
  path: "/petites-missions/lyon",
- title: "Recréer du lien à Lyon : coups de main entre gens du coin | Guardiens",
+ title: "Recréer du lien à Lyon : coups de main | Guardiens",
  metaDescription: "À Lyon, découvrez les besoins ouverts et les personnes disponibles pour un coup de main. Une façon concrète de rencontrer les gens du coin.",
  h1: "Recréer du lien à Lyon, un coup de main à la fois",
  sitemapPriority: "0.7",
@@ -206,7 +206,7 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
  path: "/petites-missions/marseille",
- title: "Recréer du lien à Marseille : coups de main entre gens du coin | Guardiens",
+ title: "Recréer du lien à Marseille : coups de main | Guardiens",
  metaDescription: "À Marseille, découvrez les besoins ouverts et les personnes disponibles pour un coup de main. Une façon concrète de rencontrer les gens du coin.",
  h1: "Recréer du lien à Marseille, un coup de main à la fois",
  sitemapPriority: "0.7",
@@ -214,7 +214,7 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
  path: "/petites-missions/strasbourg",
- title: "Recréer du lien à Strasbourg : coups de main entre gens du coin | Guardiens",
+ title: "Recréer du lien à Strasbourg : coups de main | Guardiens",
  metaDescription: "À Strasbourg, découvrez les besoins ouverts et les personnes disponibles pour un coup de main. Une façon concrète de rencontrer les gens du coin.",
  h1: "Recréer du lien à Strasbourg, un coup de main à la fois",
  sitemapPriority: "0.7",
@@ -222,7 +222,7 @@ export const staticRoutes: SiteRoute[] = [
  },
    {
   path: "/petites-missions/paris",
-  title: "Recréer du lien à Paris : coups de main entre gens du coin | Guardiens",
+  title: "Recréer du lien à Paris : coups de main | Guardiens",
   metaDescription: "À Paris, découvrez les besoins ouverts et les personnes disponibles pour un coup de main. Une façon concrète de rencontrer les gens du coin.",
   h1: "Recréer du lien à Paris, un coup de main à la fois",
   sitemapPriority: "0.7",
@@ -230,7 +230,7 @@ export const staticRoutes: SiteRoute[] = [
   },
   {
   path: "/petites-missions/toulouse",
-  title: "Recréer du lien à Toulouse : coups de main entre gens du coin | Guardiens",
+  title: "Recréer du lien à Toulouse : coups de main | Guardiens",
   metaDescription: "À Toulouse, découvrez les besoins ouverts et les personnes disponibles pour un coup de main. Une façon concrète de rencontrer les gens du coin.",
   h1: "Recréer du lien à Toulouse, un coup de main à la fois",
   sitemapPriority: "0.7",
@@ -238,7 +238,7 @@ export const staticRoutes: SiteRoute[] = [
   },
   {
   path: "/petites-missions/lille",
-  title: "Recréer du lien à Lille : coups de main entre gens du coin | Guardiens",
+  title: "Recréer du lien à Lille : coups de main | Guardiens",
   metaDescription: "À Lille, découvrez les besoins ouverts et les personnes disponibles pour un coup de main. Une façon concrète de rencontrer les gens du coin.",
   h1: "Recréer du lien à Lille, un coup de main à la fois",
   sitemapPriority: "0.7",
@@ -246,7 +246,7 @@ export const staticRoutes: SiteRoute[] = [
   },
   {
   path: "/petites-missions/annecy",
-  title: "Recréer du lien à Annecy : coups de main entre gens du coin | Guardiens",
+  title: "Recréer du lien à Annecy : coups de main | Guardiens",
   metaDescription: "À Annecy, découvrez les besoins ouverts et les personnes disponibles pour un coup de main. Une façon concrète de rencontrer les gens du coin.",
   h1: "Recréer du lien à Annecy, un coup de main à la fois",
   sitemapPriority: "0.7",
@@ -254,7 +254,7 @@ export const staticRoutes: SiteRoute[] = [
   },
   {
   path: "/petites-missions/nice",
-  title: "Recréer du lien à Nice : coups de main entre gens du coin | Guardiens",
+  title: "Recréer du lien à Nice : coups de main | Guardiens",
   metaDescription: "À Nice, découvrez les besoins ouverts et les personnes disponibles pour un coup de main. Une façon concrète de rencontrer les gens du coin.",
   h1: "Recréer du lien à Nice, un coup de main à la fois",
   sitemapPriority: "0.7",
@@ -262,7 +262,7 @@ export const staticRoutes: SiteRoute[] = [
   },
   {
   path: "/petites-missions/nantes",
-  title: "Recréer du lien à Nantes : coups de main entre gens du coin | Guardiens",
+  title: "Recréer du lien à Nantes : coups de main | Guardiens",
   metaDescription: "À Nantes, découvrez les besoins ouverts et les personnes disponibles pour un coup de main. Une façon concrète de rencontrer les gens du coin.",
   h1: "Recréer du lien à Nantes, un coup de main à la fois",
   sitemapPriority: "0.7",
@@ -270,7 +270,7 @@ export const staticRoutes: SiteRoute[] = [
   },
   {
   path: "/petites-missions/saint-etienne",
-  title: "Recréer du lien à Saint-Étienne : coups de main entre gens du coin | Guardiens",
+  title: "Recréer du lien à Saint-Étienne : coups de main | Guardiens",
   metaDescription: "À Saint-Étienne, découvrez les besoins ouverts et les personnes disponibles pour un coup de main. Une façon concrète de rencontrer les gens du coin.",
   h1: "Recréer du lien à Saint-Étienne, un coup de main à la fois",
   sitemapPriority: "0.7",
@@ -278,7 +278,7 @@ export const staticRoutes: SiteRoute[] = [
   },
   {
   path: "/petites-missions/rennes",
-  title: "Recréer du lien à Rennes : coups de main entre gens du coin | Guardiens",
+  title: "Recréer du lien à Rennes : coups de main | Guardiens",
   metaDescription: "À Rennes, découvrez les besoins ouverts et les personnes disponibles pour un coup de main. Une façon concrète de rencontrer les gens du coin.",
   h1: "Recréer du lien à Rennes, un coup de main à la fois",
   sitemapPriority: "0.7",
@@ -286,7 +286,7 @@ export const staticRoutes: SiteRoute[] = [
   },
   {
   path: "/petites-missions/montpellier",
-  title: "Recréer du lien à Montpellier : coups de main entre gens du coin | Guardiens",
+  title: "Recréer du lien à Montpellier : coups de main | Guardiens",
   metaDescription: "À Montpellier, découvrez les besoins ouverts et les personnes disponibles pour un coup de main. Une façon concrète de rencontrer les gens du coin.",
   h1: "Recréer du lien à Montpellier, un coup de main à la fois",
   sitemapPriority: "0.7",
@@ -294,7 +294,7 @@ export const staticRoutes: SiteRoute[] = [
   },
   {
   path: "/petites-missions/grenoble",
-  title: "Recréer du lien à Grenoble : coups de main entre gens du coin | Guardiens",
+  title: "Recréer du lien à Grenoble : coups de main | Guardiens",
   metaDescription: "À Grenoble, découvrez les besoins ouverts et les personnes disponibles pour un coup de main. Une façon concrète de rencontrer les gens du coin.",
   h1: "Recréer du lien à Grenoble, un coup de main à la fois",
   sitemapPriority: "0.7",
@@ -302,7 +302,7 @@ export const staticRoutes: SiteRoute[] = [
   },
   {
   path: "/petites-missions/bordeaux",
-  title: "Recréer du lien à Bordeaux : coups de main entre gens du coin | Guardiens",
+  title: "Recréer du lien à Bordeaux : coups de main | Guardiens",
   metaDescription: "À Bordeaux, découvrez les besoins ouverts et les personnes disponibles pour un coup de main. Une façon concrète de rencontrer les gens du coin.",
   h1: "Recréer du lien à Bordeaux, un coup de main à la fois",
   sitemapPriority: "0.7",
