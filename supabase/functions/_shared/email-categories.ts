@@ -104,7 +104,6 @@ const PRODUCT: ReadonlyArray<string> = [
   'onboarding-j1',
   'owner-activation-nudge',
   'owner-no-sit-j3',
-  'owner-no-sit-j10',
   'owner-no-sit-j21',
   'reactivation-d30',
   'sitter-encourage-candidature',

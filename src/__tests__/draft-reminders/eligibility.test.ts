@@ -46,11 +46,11 @@ describe("admissibilité d'une relance de brouillon", () => {
     const data = baseData({ departures: [{ user_id: OWNER, period: "printemps", answered_at: ago(5), source: "email" }] });
     expect(await run(data)).toEqual({ send: false, reason: "departure_hold" });
   });
-  it("email de la séquence propriétaire de moins de 48 heures : attente", async () => {
+  it("email de la séquence propriétaire de moins de 48 heures : la relance de brouillon n'attend plus (NUR1 bloc B)", async () => {
     const journey = { template_name: "owner-no-sit-j3", status: "sent", recipient_email: EMAIL, created_at: ago(1), metadata: { source: "journey:onboarding-owner" } };
-    expect(await run(baseData({ logs: [journey] }))).toEqual({ send: false, reason: "journey_spacing" });
+    expect((await run(baseData({ logs: [journey] }))).send).toBe(true);
     const noel = { ...journey, template_name: "owner-noel-v3-pret", metadata: {} };
-    expect(await run(baseData({ logs: [noel] }))).toEqual({ send: false, reason: "journey_spacing" });
+    expect((await run(baseData({ logs: [noel] }))).send).toBe(true);
   });
   it("deux relances déjà parties, anciennes clés admin comprises : plus rien", async () => {
     const logs = [sentLog(20, `sit-draft-reminder-${SIT}`), sentLog(10, `stale-draft-manual-${SIT}-1793969626462`)];
@@ -72,7 +72,7 @@ describe("admissibilité d'une relance de brouillon", () => {
     const other = { template_name: "sit-draft-reminder", status: "sent", recipient_email: EMAIL, created_at: new Date(NOW - 3600_000).toISOString(), metadata: { idempotency_key: "sit-draft-reminder-other", sit_id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc" } };
     expect(await run(baseData({ logs: [other] }))).toEqual({ send: false, reason: "already_sent_today" });
   });
-  it.each(["published", "profiles", "suppressed_emails", "email_preferences", "departures", "journey", "history", "daily"])(
+  it.each(["published", "profiles", "suppressed_emails", "email_preferences", "departures", "history", "daily"])(
     "lecture %s en échec : erreur, jamais un envoi (fail closed)", async (failing) => {
       await expect(run(baseData({ failing: [failing] }))).rejects.toThrow();
     });

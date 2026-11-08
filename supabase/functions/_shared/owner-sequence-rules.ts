@@ -1,8 +1,8 @@
 // Règles pures de la séquence propriétaire unique (lot W0, 14/10/2026).
 //
 // Un propriétaire jamais publié reçoit une seule séquence, onboarding-owner :
-// J+1 onboarding-j1, J+3 owner-no-sit-j3, J+10 owner-no-sit-j10,
-// J+21 owner-no-sit-j21, sortie à la publication. Module sans dépendance,
+// J+1 onboarding-j1, J+3 owner-no-sit-j3, J+21 owner-no-sit-j21, sortie à la
+// publication (J+10 retiré au lot NUR1 bloc B, 08/11/2026). Module sans dépendance,
 // importé par evaluate-journeys, send-sit-draft-reminder, send-onboarding-j1
 // et par les tests Vitest.
 
@@ -11,7 +11,6 @@
 /** Relances « publier » automatiques, suspendues par une réponse de départ lointaine. */
 export const PUBLISH_ASK_TEMPLATES: ReadonlySet<string> = new Set([
   'owner-no-sit-j3',
-  'owner-no-sit-j10',
   'owner-no-sit-j21',
   'sit-draft-reminder',
 ])
@@ -24,7 +23,6 @@ export const PUBLISH_ASK_TEMPLATES: ReadonlySet<string> = new Set([
 export const ONCE_PER_PERSON_TEMPLATES: ReadonlySet<string> = new Set([
   'onboarding-j1',
   'owner-no-sit-j3',
-  'owner-no-sit-j10',
   'owner-no-sit-j21',
 ])
 

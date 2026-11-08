@@ -24,6 +24,7 @@ import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 import { startCronRun, type CronRun } from '../_shared/cron-run-log.ts'
 import { digestRunStatus, NEARBY_DAILY_DIGEST_CRON_JOB_IDS, readCronJobId, readCronTraceId } from '../_shared/cron-trace.ts'
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
+import { loadPublishAlertedSits } from '../_shared/publish-alerted-sits.ts'
 
 
 const corsHeaders = {
@@ -276,6 +277,11 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Lot NUR1 bloc B : une annonce déjà reçue en alerte immédiate ne repart
+    // pas dans ce récapitulatif. Une lecture par passage, sans filtre si elle échoue.
+    const publishAlerted = await loadPublishAlertedSits(supabase)
+    let alreadyAlertedSits = 0
+
     let usersSent = 0
 
     let usersSkipped = 0
@@ -333,12 +339,15 @@ Deno.serve(async (req) => {
 
         // Filtre + distance
         const items: any[] = []
+        const seenInAlert = publishAlerted.get(p.id)
+        let alertedHere = 0
         for (const s of allSits) {
           if (s.user_id === p.id) continue
           const owner = (s.profiles as any) ?? {}
           const sitDept = deptOf(s.departement_code, owner.departement_code, owner.postal_code)
           const r = match(owner.latitude, owner.longitude, sitDept)
           if (!r.ok) continue
+          if (seenInAlert?.has(s.id)) { alertedHere++; continue }
           const sitCover = (s.cover_photo_url as string | null)
             || (s.property_id ? propertyCoverMap.get(s.property_id) ?? null : null)
           const sitAnimals = s.property_id ? propertyAnimalsMap.get(s.property_id) : undefined
@@ -387,7 +396,8 @@ Deno.serve(async (req) => {
           })
         }
 
-        if (items.length === 0) { skip('aucune_annonce_proche'); continue }
+        alreadyAlertedSits += alertedHere
+        if (items.length === 0) { skip(alertedHere > 0 ? 'deja_recu_en_alerte' : 'aucune_annonce_proche'); continue }
 
         items.sort((a, b) => a._sort - b._sort)
         const top = items.slice(0, MAX_ITEMS).map(({ _sort, ...rest }) => rest)
@@ -515,6 +525,7 @@ Deno.serve(async (req) => {
       users_considered: (profiles ?? []).length,
       budget_reached: budgetReached,
       deferred_rate_limited: deferredRateLimited,
+      already_alerted_sits: alreadyAlertedSits,
       users_sent: usersSent,
       users_skipped: usersSkipped,
       skipped_by_reason: skippedBy,

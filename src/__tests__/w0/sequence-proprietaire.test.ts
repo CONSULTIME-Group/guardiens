@@ -156,7 +156,7 @@ describe("W0.2 une seule séquence propriétaire", () => {
 
   it("saut d'étape : profil à 60 % saute onboarding-j1 sans sortir ; la publication sort", () => {
     expect(decideStep(facts({ template: "onboarding-j1", skipMet: true }))).toEqual({ kind: "skip", reason: "skip_condition_met" });
-    expect(decideStep(facts({ template: "owner-no-sit-j10", exitMet: true }))).toEqual({ kind: "exit", reason: "exit_condition_met" });
+    expect(decideStep(facts({ template: "owner-no-sit-j21", exitMet: true }))).toEqual({ kind: "exit", reason: "exit_condition_met" });
     expect(decideStep(facts({ template: "owner-no-sit-j3" }))).toEqual({ kind: "send" });
   });
 
@@ -173,7 +173,8 @@ describe("W0.2 une seule séquence propriétaire", () => {
     expect(src).toContain("if (steps.length === 0) continue");
     // Une relance de brouillon de moins de 48 h fait attendre owner-no-sit.
     expect(src).toContain("template.startsWith('owner-no-sit-') && recentDraftReminder.has(profile.email.toLowerCase())");
-    expect(read(`${FN}/_shared/draft-reminder-eligibility.ts`)).toContain(".filter('metadata->>source', 'like', 'journey:%')");
+    // Lot NUR1 bloc B : la relance de brouillon n'attend plus la séquence.
+    expect(read(`${FN}/_shared/draft-reminder-eligibility.ts`)).not.toContain(".filter('metadata->>source', 'like', 'journey:%')");
     expect(read(`${FN}/send-sit-draft-reminder/index.ts`)).toContain("evaluateDraftReminder(supabase");
     // Égalité de priorité : onboarding-owner passe avant onboarding-sitter.
     expect(src).toContain("|| a.key.localeCompare(b.key))");
@@ -220,7 +221,7 @@ describe("W0.3 gabarits J+3, J+21 et textes affirmatifs", () => {
     .filter((l) => !/^\s*(fontSize|color|margin|padding|backgroundColor|borderRadius|display|textDecoration|fontWeight|lineHeight|textAlign|width|height|border\w*|fontFamily|maxWidth|verticalAlign|fontStyle|marginBottom):/.test(l))
     .join("\n");
 
-  for (const name of ["onboarding-j1", "owner-no-sit-j3", "owner-no-sit-j10", "owner-no-sit-j21", "sit-draft-reminder"]) {
+  for (const name of ["onboarding-j1", "owner-no-sit-j3", "owner-no-sit-j21", "sit-draft-reminder"]) {
     it(`${name} : aucune construction négative, aucun accord présumé, aucun tiret`, () => {
       const text = visible(read(`${TPL}/${name}.tsx`));
       expect(text).not.toMatch(/\bne\s+(?:\S+\s+){0,2}(pas|plus|jamais|rien)\b/i);
@@ -279,7 +280,7 @@ describe("W0.4 un seul calcul des gardiens à proximité", () => {
       expect(src, f).not.toContain("get_owner_nurturing_context");
       expect(src, f).not.toMatch(/NEARBY_RADIUS_KM = 30/);
     }
-    for (const t of ["onboarding-j1", "owner-no-sit-j3", "owner-no-sit-j10", "owner-no-sit-j21", "sit-draft-reminder"]) {
+    for (const t of ["onboarding-j1", "owner-no-sit-j3", "owner-no-sit-j21", "sit-draft-reminder"]) {
       const src = read(`${TPL}/${t}.tsx`);
       expect(src, t).toContain("nearbySittersLabel");
       expect(src, t).not.toMatch(/gardien\{?[^}]*\}? vérifié/);
@@ -328,8 +329,8 @@ describe("W0.6 réponse à la question de départ respectée", () => {
   });
 
   it("seules les relances « publier » attendent ; onboarding-j1 part", () => {
-    expect([...PUBLISH_ASK_TEMPLATES].sort()).toEqual(["owner-no-sit-j10", "owner-no-sit-j21", "owner-no-sit-j3", "sit-draft-reminder"]);
-    expect(decideStep(facts({ template: "owner-no-sit-j10", departureHold: true }))).toEqual({ kind: "hold", reason: "departure_hold" });
+    expect([...PUBLISH_ASK_TEMPLATES].sort()).toEqual(["owner-no-sit-j21", "owner-no-sit-j3", "sit-draft-reminder"]);
+    expect(decideStep(facts({ template: "owner-no-sit-j21", departureHold: true }))).toEqual({ kind: "hold", reason: "departure_hold" });
     expect(decideStep(facts({ template: "onboarding-j1", departureHold: true }))).toEqual({ kind: "send" });
     const draft = read(`${FN}/_shared/draft-reminder-eligibility.ts`);
     expect(draft).toContain("departureHoldsPublishAsk(await loadLastDepartureAnswer(client, draft.user_id), new Date(now))");

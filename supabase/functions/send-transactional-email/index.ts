@@ -123,7 +123,6 @@ const ALMA_SIGNED_TEMPLATES = new Set<string>([
   'mission-daily-digest',
   'sit-draft-reminder',
   'owner-no-sit-j3',
-  'owner-no-sit-j10',
   'owner-no-sit-j21',
 ])
 export function isAlmaSigned(templateName: string): boolean {

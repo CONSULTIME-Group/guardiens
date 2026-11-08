@@ -64,7 +64,6 @@ const PUBLIC_FILES = [
 const EMAIL_FILES = [
   "_alma-signoff.tsx",
   "owner-no-sit-j3.tsx",
-  "owner-no-sit-j10.tsx",
   "onboarding-j1.tsx",
   "sitter-encourage-candidature.tsx",
   "seasonal-nurture.tsx",
@@ -211,12 +210,6 @@ describe("Y3 · fondateurs, comparaisons, chiffres et fonctions réelles", () =>
     expect(j1).toContain("à partir de 40 %");
     expect(j1).not.toMatch(/60\s*%/);
     expect(read("supabase/functions/_shared/alma-site-knowledge.ts")).not.toMatch(/60\s*%/);
-  });
-
-  it("email j10 : aucune statistique non sourcée", () => {
-    const src = read(T + "owner-no-sit-j10.tsx");
-    expect(src).not.toMatch(/une annonce sur deux/i);
-    expect(src).not.toMatch(/48\s*(&nbsp;)?\s*h/);
   });
 
   it("page Gardien d'urgence : ni SMS, ni téléphone, ni 24/7, ni dashboard", () => {

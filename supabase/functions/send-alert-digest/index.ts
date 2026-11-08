@@ -21,6 +21,7 @@ import { recordDeliveryFailure } from "../_shared/delivery-failure.ts";
 import { startCronRun, type CronRun } from "../_shared/cron-run-log.ts";
 import { ALERT_DIGEST_CRON_JOB_IDS, digestRunStatus, readCronJobId, readCronTraceId } from "../_shared/cron-trace.ts";
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
+import { loadPublishAlertedSits, withoutPublishAlerted } from "../_shared/publish-alerted-sits.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -248,6 +249,11 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Lot NUR1 bloc B : une annonce déjà reçue en alerte immédiate ne repart
+    // pas dans ce récapitulatif. Une lecture par passage, sans filtre si elle échoue.
+    const publishAlerted = await loadPublishAlertedSits(supabase);
+    let alreadyAlertedSits = 0;
+
 
     // Le cache de géocodage tient en mémoire (moins de 2000 lignes) : une
     // seule lecture, puis résolution locale, sinon le nombre de requêtes
@@ -447,7 +453,17 @@ Deno.serve(async (req) => {
         }
       }
 
-      if (sits.length === 0 && missions.length === 0) { skipped++; mark("hors_zone_ou_rien_a_dire", pref); continue; }
+      const matchedSits = sits.length;
+      const unseenSits = withoutPublishAlerted(publishAlerted, profile.id, sits);
+      if (unseenSits.length < matchedSits) {
+        alreadyAlertedSits += matchedSits - unseenSits.length;
+        sits.splice(0, sits.length, ...unseenSits);
+      }
+      if (sits.length === 0 && missions.length === 0) {
+        skipped++;
+        mark(matchedSits > 0 ? "deja_recu_en_alerte" : "hors_zone_ou_rien_a_dire", pref);
+        continue;
+      }
 
       // Suppression et opt-out product
       const emailLower = String(profile.email).trim().toLowerCase();
@@ -614,6 +630,7 @@ Deno.serve(async (req) => {
       claim_skipped_by: claimSkippedBy,
       rayon_fallback_dept: rayonFallbackDept,
       deferred_rate_limited: deferredRateLimited,
+      already_alerted_sits: alreadyAlertedSits,
       errors_count: errors.length,
       hour: currentHourStr,
       trace_id: traceId, cron_job_id: cronJobId,

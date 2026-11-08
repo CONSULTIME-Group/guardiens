@@ -117,7 +117,7 @@ const TEMPLATE_LABELS: Record<string, string> = {
   "reactivation-d30": "Réactivation après inactivité",
   "sitter-encourage-candidature": "Encouragement à candidater",
   "owner-no-sit-j3": "Propriétaire sans annonce (J+3)",
-  "owner-no-sit-j10": "Propriétaire sans annonce (J+10)",
+  "owner-no-sit-j10": "Propriétaire sans annonce (J+10, retiré le 08/11/2026)",
   "owner-no-sit-j21": "Propriétaire sans annonce (J+21)",
   "helper-to-guard": "De l'entraide à la garde",
   "discover-mutual-aid-0": "Découverte de l'entraide, premier email",
