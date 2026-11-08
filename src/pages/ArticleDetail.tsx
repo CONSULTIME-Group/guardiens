@@ -1,4 +1,6 @@
 import PublicLoadError from "@/components/seo/ErrorPage";
+import FoundersLetterActions from "@/components/news/FoundersLetterActions";
+import { FOUNDERS_LETTER_SLUG } from "@/data/foundersLetter";
 import LegacyProjetRedirect from "@/components/seo/LegacyProjetRedirect";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
@@ -712,12 +714,14 @@ export default function ArticleDetail() {
         />
       </div>
     );
-  })() : (
-    /* Article sans couverture (7/120) : repli typographique, jamais de trou. */
+  })() : article.slug === FOUNDERS_LETTER_SLUG ? null : (
+    /* Article sans couverture (7/120) : repli typographique, jamais de trou.
+       La lettre des fondateurs (lot LET1) s'ouvre directement sur son texte. */
     <ArticleCoverFallback title={article.title} className="aspect-[16/9] rounded-xl mb-8" />
   ))}
 
  <ArticleRenderer content={article.content} userRole={isAuthenticated ? user?.role : undefined} slug={article.slug} placeholderValues={contentStats} />
+ {article.slug === FOUNDERS_LETTER_SLUG && <FoundersLetterActions />}
 
  {/* Bloc « À propos de l'auteur », affiché si l'auteur est identifié (Jérémie / Elisa) */}
  {article.slug === "c-est-quoi-le-house-sitting" && <HouseSittingDiagnostic />}

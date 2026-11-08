@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { FOUNDERS_LETTER_SLUG } from "@/data/foundersLetter";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import { Search, TreePine, Users, CheckCircle2, Lightbulb, ArrowRight } from "lucide-react";
@@ -2548,12 +2549,16 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   if (OWNER_GUIDE_ARTICLE_SLUGS.has(slug ?? "")) {
     // Le parcours propriétaire est rendu par l'en-tête et le bloc final.
     html = html.replace(/<p><strong><a href="\/inscription\?role=owner(?:&amp;|&)redirect=%2Fsits%2Fcreate">Publier mon annonce de garde<\/a><\/strong><\/p>\s*/g, "");
+  } else if (slug === FOUNDERS_LETTER_SLUG) {
+    // Lot LET1 : la lettre des fondateurs porte ses propres actions (partage, avis).
   } else if (!SITTER_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && !ENTRAIDE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && !MIXED_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && !RESOURCE_GUIDE_ARTICLE_SLUGS.has(slug ?? "") && !PROJECT_GUIDE_ARTICLE_SLUGS.has(slug ?? "")) {
     html = injectCTA(html, slug);
   }
   html = addBandedSections(html);
-  html = addEndCTA(html, slug);
-  html = adaptEndCTAsForRole(html, userRole, slug);
+  if (slug !== FOUNDERS_LETTER_SLUG) {
+    html = addEndCTA(html, slug);
+    html = adaptEndCTAsForRole(html, userRole, slug);
+  }
   html = wrapTables(html);
   const isGuide = !!slug && GUIDE_ARTICLE_SLUGS.has(slug);
   if (isGuide) {
