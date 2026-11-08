@@ -60,7 +60,7 @@
       "checks": [
         {
           "name": "owner_gallery_insights_rls",
-          "sql": "SELECT COALESCE((SELECT c.relrowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relname = 'owner_gallery_insights'), false) AND EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'owner_gallery_insights' AND policyname = 'owner reads own gallery insights') AND NOT has_table_privilege('authenticated', 'public.owner_gallery_insights', 'INSERT') AS ok"
+          "sql": "SELECT COALESCE((SELECT c.relrowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relname = 'owner_gallery_insights'), false) AND EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'owner_gallery_insights' AND policyname = 'owner reads own gallery insights') AND NOT EXISTS (SELECT 1 FROM information_schema.role_table_grants g WHERE g.table_schema = 'public' AND g.table_name = 'owner_gallery_insights' AND g.grantee IN ('anon', 'authenticated') AND g.privilege_type <> 'SELECT') AS ok"
         },
         {
           "name": "owner_gallery_insight_purge_trigger",
