@@ -532,6 +532,22 @@ async function runEvaluation(
         nearbyData = nearbySitsTemplateData(nearby.sits)
       }
 
+      // Lot NUR1 bloc B : la réactivation d'un gardien montre les annonces
+      // ouvertes réelles, sans report quand il n'y en a aucune (le texte se
+      // passe alors des cartes). Version propriétaire enrichie plus bas.
+      const isOwnerRecipient = journeyIsOwner(seq.audience, role)
+      if (template === 'reactivation-d30' && !isOwnerRecipient) {
+        try {
+          const nearby = selectNearbyOpenSits(await loadOpenSits(), {
+            latitude: (profile as any).latitude ?? null,
+            longitude: (profile as any).longitude ?? null,
+          }, { limit: 3 })
+          nearbyData = nearbySitsTemplateData(nearby.sits)
+        } catch (sitsErr) {
+          console.warn('[reactivation] open sits lookup failed, sending without cards', sitsErr)
+        }
+      }
+
       // Lot W0 : les relances owner-no-sit-* portent le nom du gabarit dans la
       // clé, pas le rang. La séquence propriétaire a été renumérotée et un
       // ancien rang déjà envoyé (conseils, relance profil) ne doit jamais
@@ -544,9 +560,9 @@ async function runEvaluation(
       // Enrichissement propriétaire (lot W0) : gardiens à proximité par le
       // calcul unique (owner-nearby.ts, 50 km), cartes du J+3 et brouillon à
       // reprendre. Fail-open : en cas d'échec, l'email part sans ces champs.
-      const isOwnerRecipient = journeyIsOwner(seq.audience, role)
       let ownerContext: Record<string, unknown> = {}
-      if (template.startsWith('owner-no-sit-') || (template === 'onboarding-j1' && isOwnerRecipient)) {
+      if (template.startsWith('owner-no-sit-')
+        || ((template === 'onboarding-j1' || template === 'reactivation-d30') && isOwnerRecipient)) {
         try {
           const pool = await loadSitterPool()
           const ctx = ownerNearbyContext({

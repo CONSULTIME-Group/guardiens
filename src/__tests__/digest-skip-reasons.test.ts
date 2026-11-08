@@ -11,6 +11,7 @@ import * as publicationWindow from "../../supabase/functions/_shared/sit-publica
 import * as cronTrace from "../../supabase/functions/_shared/cron-trace";
 import * as outboundRateLimit from "../../supabase/functions/_shared/outbound-rate-limit";
 import * as nearbyPreferences from "../../supabase/functions/send-nearby-daily-digest/preferences";
+import * as publishAlertedSits from "../../supabase/functions/_shared/publish-alerted-sits";
 
 type Rows = Record<string, unknown[]>;
 
@@ -65,6 +66,7 @@ function loadHandler(path: string, rows: Rows) {
       // Lot NUR1 : limite de débit et lecture paginée, modules purs réels.
       if (specifier.includes("outbound-rate-limit")) return outboundRateLimit;
       if (specifier.includes("/preferences")) return nearbyPreferences;
+      if (specifier.includes("publish-alerted-sits")) return publishAlertedSits;
       // Lot A1b : appelant autorisé (clé service), le contrôle est testé ailleurs.
       if (specifier.includes("require-cron-caller")) return { requireCronCaller: async () => null };
       throw new Error(`Unexpected import ${specifier}`);

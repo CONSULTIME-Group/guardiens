@@ -59,7 +59,6 @@ import { template as missionProposalAccepted } from './mission-proposal-accepted
 import { template as missionProposalDeclined } from './mission-proposal-declined.tsx'
 import { template as missionResponseWithdrawn } from './mission-response-withdrawn.tsx'
 import { template as ownerNoSitJ3 } from './owner-no-sit-j3.tsx'
-import { template as ownerNoSitJ10 } from './owner-no-sit-j10.tsx'
 import { template as ownerNoSitJ21 } from './owner-no-sit-j21.tsx'
 import { template as referralBoostMonthly } from './referral-boost-monthly.tsx'
 import { template as summerListingReminder } from './summer-listing-reminder.tsx'
@@ -179,7 +178,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'mission-proposal-declined': missionProposalDeclined,
   'mission-response-withdrawn': missionResponseWithdrawn,
   'owner-no-sit-j3': ownerNoSitJ3,
-  'owner-no-sit-j10': ownerNoSitJ10,
   'owner-no-sit-j21': ownerNoSitJ21,
   'referral-boost-monthly': referralBoostMonthly,
   'summer-listing-reminder': summerListingReminder,

@@ -17,7 +17,6 @@ const ALMA_SIGNED = [
   'mission-daily-digest.tsx',
   'sit-draft-reminder.tsx',
   'owner-no-sit-j3.tsx',
-  'owner-no-sit-j10.tsx',
   // owner-no-sit-j21 retiré au lot W0 (14/10/2026) : message personnel de
   // Jérémie, une seule signature, la sienne.
 ]

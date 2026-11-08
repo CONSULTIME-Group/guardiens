@@ -12,7 +12,7 @@ export const DRAFT_REMINDER_ACTIVITY_MS = 30 * 86400000;
 export type DraftReminderStageReason = 'send_in_progress' | 'reminder_cap' | 'reminder_spacing' | 'owner_inactive';
 export type DraftReminderSkipReason =
   | 'draft_no_longer_relevant' | 'too_recent' | 'owner_already_published' | 'no_email' | 'suppressed'
-  | 'product_emails_off' | 'departure_hold' | 'journey_spacing' | 'already_sent_today' | DraftReminderStageReason
+  | 'product_emails_off' | 'departure_hold' | 'already_sent_today' | DraftReminderStageReason
 
 /** Libellés lisibles, partagés par la réponse admin et le tableau de bord. */
 export const DRAFT_REMINDER_SKIP_LABELS: Record<DraftReminderSkipReason, string> = {
@@ -23,7 +23,6 @@ export const DRAFT_REMINDER_SKIP_LABELS: Record<DraftReminderSkipReason, string>
   suppressed: 'Adresse en liste de suppression',
   product_emails_off: 'Relances désactivées par le propriétaire',
   departure_hold: 'Départ annoncé plus tard, relance en attente',
-  journey_spacing: 'Un autre email propriétaire est parti il y a moins de 48 heures',
   already_sent_today: 'Une relance de brouillon est déjà partie aujourd’hui',
   send_in_progress: 'Une relance est déjà en file d’envoi',
   reminder_cap: 'Deux relances déjà envoyées',

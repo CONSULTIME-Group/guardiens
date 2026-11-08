@@ -16,7 +16,6 @@ const TEMPLATES = [
   'relance-profil-incomplet',
   'relance-cp-manquant',
   'owner-no-sit-j3',
-  'owner-no-sit-j10',
   'owner-no-sit-j21',
   'owner-activation-nudge',
       'seasonal-nurture',
@@ -73,10 +72,6 @@ describe('lot N2, vocabulaire des gabarits réécrits', () => {
     );
     expect(read('relance-cp-manquant')).toContain('Indiquer mon code postal');
     expect(read('owner-no-sit-j3')).toContain('Publier mon annonce');
-    // Lot Y3 (P5-09) : la statistique non sourcée est retirée du J+10.
-    expect(read('owner-no-sit-j10')).toContain(
-      'Publier tôt laisse le temps de recevoir des candidatures et d\'échanger',
-    );
     expect(read('owner-no-sit-j21')).toContain('Une question de Jérémie');
     expect(read('owner-activation-nudge')).toContain(
       'Guardiens sert aussi pour un soir, un week-end, un coup de main',
@@ -96,7 +91,6 @@ describe('lot N2, vocabulaire des gabarits réécrits', () => {
       'relance-profil-incomplet',
       'relance-cp-manquant',
       'owner-no-sit-j3',
-      'owner-no-sit-j10',
       'owner-no-sit-j21',
       'owner-activation-nudge',
       'seasonal-nurture',

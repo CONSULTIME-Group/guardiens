@@ -50,7 +50,6 @@ export const FOUNDER_SIGNED_TEMPLATES: readonly string[] = [
   "dormant-sitter-nudge",
   "owner-activation-nudge",
   "owner-no-sit-j3",
-  "owner-no-sit-j10",
   "owner-no-sit-j21",
   "relance-cp-manquant",
   "relance-profil-incomplet",

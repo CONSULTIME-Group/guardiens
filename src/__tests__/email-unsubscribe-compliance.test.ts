@@ -50,7 +50,6 @@ describe("catégorisation des emails, conformité désinscription", () => {
       "sitter-encourage-candidature",
       "referral-boost-monthly",
       "owner-no-sit-j3",
-      "owner-no-sit-j10",
       "owner-no-sit-j21",
       "sitter-daily-digest",
       "mission-daily-digest",

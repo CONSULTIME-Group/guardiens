@@ -13,16 +13,18 @@ import {
 export { DRAFT_REMINDER_SKIP_LABELS, type DraftReminderSkipReason } from './draft-reminder-policy.ts'
 import { ownerHasPublished } from './published-sit.ts'
 import { departureHoldsPublishAsk, loadLastDepartureAnswer } from './owner-sequence-rules.ts'
-import { NOEL_V3_ALL_TEMPLATES } from './owner-noel-v3.ts'
 
 export const DRAFT_REMINDER_TEMPLATE = 'sit-draft-reminder'
 export const DRAFT_REMINDER_SELECT =
   'id, user_id, status, published_at, unpublished_at, title, city, start_date, end_date, absence_reason, sitter_expectations, cover_photo_url, created_at'
 /** Un brouillon n'est relancé qu'après 24 heures. */
 export const DRAFT_REMINDER_MIN_AGE_MS = 24 * 3600_000
-/** Aucune relance dans les 48 heures qui suivent un email de la séquence propriétaire. */
-export const DRAFT_REMINDER_JOURNEY_SPACING_MS = 48 * 3600_000
-export const OWNER_PUBLISH_ASK_TEMPLATES = [...NOEL_V3_ALL_TEMPLATES, 'onboarding-j1', 'owner-no-sit-j3', 'owner-no-sit-j10', 'owner-no-sit-j21']
+// Lot NUR1 bloc B (08/11/2026) : la relance de brouillon n'attend plus les
+// emails de séquence. Elle fait publier 32 % de ses destinataires, contre 2
+// sur environ 150 pour la séquence. Le plafond d'envoi (un email produit par
+// 24 heures, send-transactional-email) reporte au lendemain en cas de
+// collision ; l'inverse reste tenu par evaluate-journeys (owner-no-sit-*
+// attend 48 heures après une relance de brouillon).
 
 export interface DraftReminderDraft {
   id: string; user_id: string; status?: string | null; published_at?: string | null; unpublished_at?: string | null
@@ -81,18 +83,6 @@ export async function evaluateDraftReminder(
   }
 
   const pattern = escapeIlike(email)
-  const since = new Date(now - DRAFT_REMINDER_JOURNEY_SPACING_MS).toISOString()
-  const { data: journey, error: journeyError } = await client.from('email_send_log').select('id')
-    .ilike('recipient_email', pattern).in('status', ['sent', 'pending', 'deferred']).gte('created_at', since)
-    .filter('metadata->>source', 'like', 'journey:%').limit(1)
-  if (journeyError) fail('journey', journeyError)
-  if ((journey ?? []).length > 0) return { send: false, reason: 'journey_spacing' }
-  const { data: asks, error: asksError } = await client.from('email_send_log').select('id')
-    .ilike('recipient_email', pattern).in('status', ['sent', 'pending', 'deferred']).gte('created_at', since)
-    .in('template_name', OWNER_PUBLISH_ASK_TEMPLATES).limit(1)
-  if (asksError) fail('journey', asksError)
-  if ((asks ?? []).length > 0) return { send: false, reason: 'journey_spacing' }
-
   const { data: history, error: historyError } = await client.from('email_send_log')
     .select('status, created_at, metadata').eq('template_name', DRAFT_REMINDER_TEMPLATE)
     .or(draftReminderHistoryFilter(draft.id))
