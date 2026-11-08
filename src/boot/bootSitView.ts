@@ -11,6 +11,7 @@
  * (titre, lieu, dates, urgence, type) ou du carrousel mobile de SitHero se
  * reporte ici (parité verrouillée par src/__tests__/perf12/).
  */
+import { calendarDate, daysBetween } from "@/lib/calendarDate";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { TYPE_LABELS } from "@/components/sits/shared/sitConstants";
 import { storageImageUrl } from "@/lib/storageImage";
@@ -30,28 +31,26 @@ export interface BootSitModel {
   heroUrl: string;
 }
 
-const DAY = 1000 * 60 * 60 * 24;
 const fmtDayMonth = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" });
 const fmtDayMonthYear = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 
 /** « Du 20 décembre au 2 janvier 2027 · 14 jours » (même texte que PublicSitDetail). */
 export function bootDateLabel(start: string | null | undefined, end: string | null | undefined): string {
   if (!start || !end) return "Dates flexibles";
-  const s = new Date(start);
-  const e = new Date(end);
+  const s = calendarDate(start);
+  const e = calendarDate(end);
   const base = `Du ${fmtDayMonth.format(s)} au ${fmtDayMonthYear.format(e)}`;
-  const st = s.getTime();
-  const et = e.getTime();
-  if (Number.isNaN(st) || Number.isNaN(et) || et < st) return base;
-  const days = Math.max(1, Math.round((et - st) / DAY) + 1);
+  const span = daysBetween(start, end);
+  if (span === null || span < 0) return base;
+  const days = Math.max(1, span + 1);
   return `${base} · ${days} jour${days > 1 ? "s" : ""}`;
 }
 
 /** Badge d'urgence de PublicSitDetail (annonce ouverte, début sous 14 jours). */
 export function bootUrgencyLabel(start: string | null | undefined, now: number): string | null {
   if (!start) return null;
-  const diff = Math.ceil((new Date(start).getTime() - now) / DAY);
-  if (Number.isNaN(diff) || diff < 0) return null;
+  const diff = daysBetween(new Date(now), start);
+  if (diff === null || diff < 0) return null;
   if (diff === 0) return "Commence aujourd'hui";
   if (diff === 1) return "Commence demain";
   if (diff <= 14) return `Dans ${diff} jours`;
@@ -79,11 +78,8 @@ export function buildBootSitModel(data: any, now: number): BootSitModel | null {
   const sit = Array.isArray(data?.sit) ? data.sit[0] : null;
   if (!sit || sit.status !== "published" || sit.accepting_applications === false || sit.dates_hidden === true) return null;
   if (sit.end_date) {
-    const end = new Date(sit.end_date);
-    const today = new Date(now);
-    end.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
-    if (Number.isNaN(end.getTime()) || end.getTime() < today.getTime()) return null;
+    const left = daysBetween(new Date(now), sit.end_date);
+    if (left === null || left < 0) return null;
   }
   const owner = Array.isArray(data?.owner) ? data.owner[0] : null;
   const cityLabel = (typeof sit.city === "string" && sit.city.trim()) || owner?.city;

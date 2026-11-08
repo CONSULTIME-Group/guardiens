@@ -1,3 +1,4 @@
+import { calendarDate, daysBetween } from "@/lib/calendarDate";
 import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 
@@ -611,7 +612,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
      if (duration !== "all") {
        final = final.filter((s: any) => {
          if (!s.start_date || !s.end_date) return true;
-         const days = Math.ceil((new Date(s.end_date).getTime() - new Date(s.start_date).getTime()) / (1000 * 60 * 60 * 24));
+         const days = daysBetween(s.start_date, s.end_date) ?? 0;
          switch (duration) { case "short": return days < 7; case "medium": return days >= 7 && days <= 21; case "long": return days > 21; default: return true; }
        });
      }
@@ -1260,7 +1261,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     const placeCoords = coordsOf(sit);
     const dist = searchCoords && placeCoords ? haversineDistance(searchCoords.lat, searchCoords.lng, placeCoords.lat, placeCoords.lng) : null;
     const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
-    const days = sit.start_date && sit.end_date ? differenceInDays(new Date(sit.end_date), new Date(sit.start_date)) : 0;
+    const days = sit.start_date && sit.end_date ? (daysBetween(sit.start_date, sit.end_date) ?? 0) : 0;
     const sitEnvs: string[] = (sit as any).environments || [];
     const ownerEnvs: string[] = (ownerProf as any)?.environments || [];
     const resolvedEnvs = sitEnvs.length > 0 ? sitEnvs : ownerEnvs;
@@ -1582,7 +1583,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
 
  const animalsLabel = animalTypes.length > 0 ? animalTypes.join(" · ") : "Animaux";
  const datesLabel = startDate && endDate
- ? `${format(new Date(startDate), "d MMM", { locale: fr })} → ${format(new Date(endDate), "d MMM", { locale: fr })}`
+ ? `${format(calendarDate(startDate), "d MMM", { locale: fr })} → ${format(calendarDate(endDate), "d MMM", { locale: fr })}`
  : "Dates";
 
  // Compteur "annonces disponibles" : on EXCLUT les démos, les attribuées et les terminées

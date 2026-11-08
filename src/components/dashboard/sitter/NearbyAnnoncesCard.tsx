@@ -1,3 +1,4 @@
+import { calendarDate } from "@/lib/calendarDate";
 import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { format, differenceInHours } from "date-fns";
@@ -186,7 +187,7 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
                           </p>
                           <p className="text-xs text-muted-foreground mt-0.5">
                             {sit.start_date && sit.end_date
-                              ? `${format(new Date(sit.start_date), "d MMM", { locale: fr })} → ${format(new Date(sit.end_date), "d MMM", { locale: fr })}`
+                              ? `${format(calendarDate(sit.start_date), "d MMM", { locale: fr })} → ${format(calendarDate(sit.end_date), "d MMM", { locale: fr })}`
                               : "Dates flexibles"}
                           </p>
                         </div>
@@ -252,7 +253,7 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {sit.start_date && sit.end_date
-                      ? `${format(new Date(sit.start_date), "d MMM", { locale: fr })} → ${format(new Date(sit.end_date), "d MMM", { locale: fr })}`
+                      ? `${format(calendarDate(sit.start_date), "d MMM", { locale: fr })} → ${format(calendarDate(sit.end_date), "d MMM", { locale: fr })}`
                       : "Dates flexibles"}
                   </p>
                 </div>
