@@ -183,16 +183,27 @@ async function writePlace(
   user_id: string,
   coords: { lat: number; lng: number } | null,
   status: PlaceStatus | null,
+  cityFromPostal: string | null = null,
 ): Promise<string | null> {
-  const { error } = await supabase
-    .from("profiles")
-    .update({
-      latitude: coords ? coords.lat : null,
-      longitude: coords ? coords.lng : null,
-      place_status: status,
-      place_status_at: status ? new Date().toISOString() : null,
-    })
-    .eq("id", user_id);
+  const update: Record<string, unknown> = {
+    latitude: coords ? coords.lat : null,
+    longitude: coords ? coords.lng : null,
+    place_status: status,
+    place_status_at: status ? new Date().toISOString() : null,
+  };
+  // Lot META4 : profil sans ville, situé par son code postal. La commune
+  // retenue (la plus peuplée du code postal, lot G1) devient sa ville, pour
+  // que ses annonces et sa fiche affichent un nom de commune et non
+  // « 69380, Rhône ». Une ville saisie n'est jamais remplacée (filtre city vide).
+  if (cityFromPostal) {
+    const { error: cityErr } = await supabase
+      .from("profiles")
+      .update({ city: cityFromPostal })
+      .eq("id", user_id)
+      .or("city.is.null,city.eq.");
+    if (cityErr) return cityErr.message;
+  }
+  const { error } = await supabase.from("profiles").update(update).eq("id", user_id);
   return error ? error.message : null;
 }
 
@@ -231,9 +242,11 @@ async function geocodeProfile(supabase: Supa, user_id: string): Promise<Record<s
 
   let coords: { lat: number; lng: number } | null = null;
   let source = "nominatim";
+  let cityFromPostal: string | null = null;
   if (plan.kind === "postal") {
     const official = await geocodeOfficialFr(plan.postal, true);
     coords = official ? { lat: official.lat, lng: official.lng } : null;
+    cityFromPostal = official?.nom?.trim() || null;
     source = "communes_code_postal";
     if (!coords) return { skipped: "no result", postal: plan.postal };
   } else {
@@ -285,9 +298,9 @@ async function geocodeProfile(supabase: Supa, user_id: string): Promise<Record<s
     if (!coords) return { skipped: "no result", city, country, postal };
   }
 
-  const err = await writePlace(supabase, user_id, coords, null);
+  const err = await writePlace(supabase, user_id, coords, null, cityFromPostal);
   if (err) return { error: err, status: 500 };
-  return { ok: true, lat: coords.lat, lng: coords.lng, source };
+  return { ok: true, lat: coords.lat, lng: coords.lng, source, ...(cityFromPostal ? { city: cityFromPostal } : {}) };
 }
 
 /**
