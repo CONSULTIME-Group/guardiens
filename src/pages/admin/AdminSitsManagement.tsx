@@ -17,7 +17,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { format, isPast, isFuture, differenceInDays, formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AlertTriangle, Search, Eye, XCircle, Star, StickyNote, RotateCcw, User, Calendar, MapPin, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -38,6 +38,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { calendarDate, daysFromToday, isPastDay } from "@/lib/calendarDate";
 
 const AdminSitsManagement = () => {
   const navigate = useNavigate();
@@ -157,10 +158,8 @@ const AdminSitsManagement = () => {
     if (sit.status === "cancelled") return { label: "Annulée", variant: "destructive" as const };
     if (sit.status === "completed") return { label: "Terminée", variant: "secondary" as const };
     if (!sit.start_date) return { label: "À venir", variant: "outline" as const };
-    const start = new Date(sit.start_date);
-    const end = sit.end_date ? new Date(sit.end_date) : null;
-    if (isFuture(start)) return { label: "À venir", variant: "outline" as const };
-    if (end && isPast(end)) return { label: "Dates passées", variant: "destructive" as const };
+    if ((daysFromToday(sit.start_date) ?? 0) > 0) return { label: "À venir", variant: "outline" as const };
+    if (sit.end_date && isPastDay(sit.end_date)) return { label: "Dates passées", variant: "destructive" as const };
     return { label: "En cours", variant: "default" as const };
   };
 
@@ -292,7 +291,7 @@ const AdminSitsManagement = () => {
 
   // Alerts
   const overdueConfirmed = sits.filter((s) => isOverdueGarde(s));
-  const missingReviews14d = sits.filter(s => s.status === "completed" && s._type === "sit" && s.end_date && differenceInDays(new Date(), new Date(s.end_date)) >= 14 && (!reviews[s.id]?.owner || !reviews[s.id]?.sitter));
+  const missingReviews14d = sits.filter(s => s.status === "completed" && s._type === "sit" && s.end_date && -(daysFromToday(s.end_date) ?? 0) >= 14 && (!reviews[s.id]?.owner || !reviews[s.id]?.sitter));
   const cancelledThisWeekCount = countCancelledThisWeek(sits);
 
   const filtered = sits.filter(s => {
@@ -452,9 +451,9 @@ const AdminSitsManagement = () => {
                     </div>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                    {sit.start_date ? format(new Date(sit.start_date), "d MMM", { locale: fr }) : "·"}
+                    {sit.start_date ? format(calendarDate(sit.start_date), "d MMM", { locale: fr }) : "·"}
                     {" → "}
-                    {sit.end_date ? format(new Date(sit.end_date), "d MMM yy", { locale: fr }) : "·"}
+                    {sit.end_date ? format(calendarDate(sit.end_date), "d MMM yy", { locale: fr }) : "·"}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {sit.updated_at ? formatDistanceToNow(new Date(sit.updated_at), { addSuffix: true, locale: fr }) : "·"}
@@ -583,9 +582,9 @@ const AdminSitsManagement = () => {
                     <div>
                       <p className="text-xs text-muted-foreground">Dates</p>
                       <p className="text-sm font-medium">
-                        {selectedSit.start_date ? format(new Date(selectedSit.start_date), "d MMM yyyy", { locale: fr }) : "·"}
+                        {selectedSit.start_date ? format(calendarDate(selectedSit.start_date), "d MMM yyyy", { locale: fr }) : "·"}
                         {" → "}
-                        {selectedSit.end_date ? format(new Date(selectedSit.end_date), "d MMM yyyy", { locale: fr }) : "·"}
+                        {selectedSit.end_date ? format(calendarDate(selectedSit.end_date), "d MMM yyyy", { locale: fr }) : "·"}
                       </p>
                     </div>
                   </div>

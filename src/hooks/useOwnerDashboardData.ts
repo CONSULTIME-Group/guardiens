@@ -11,6 +11,7 @@ import type {
   HighlightRow, OnboardingChecks,
 } from "@/components/dashboard/owner/types";
 import type { AffinitySitterInput } from "@/lib/affinityScore";
+import { daysFromToday } from "@/lib/calendarDate";
 
 export interface PendingReview {
   sitId: string;
@@ -180,11 +181,9 @@ export function useOwnerDashboardData(userId: string | undefined) {
         // dépendent que de sitsData (vague 1) et conditionnent la requête des
         // avis déjà déposés par le propriétaire.
         const completedSitsData = sitsData.filter(s => s.status === "completed");
-        const fourteenDaysAgo = new Date();
-        fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
         const recentCompleted = completedSitsData.filter(s => {
           if (!s.end_date) return false;
-          return new Date(s.end_date) >= fourteenDaysAgo;
+          return (daysFromToday(s.end_date) ?? -15) >= -14;
         });
         const recentSitIds = recentCompleted.map(s => s.id);
 

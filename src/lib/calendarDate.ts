@@ -54,3 +54,22 @@ export function isPastDay(value: string | Date | null | undefined, now: Date = n
   const n = daysFromToday(value, now);
   return n !== null && n < 0;
 }
+
+/** Garde en cours : aujourd'hui (calendrier de l'appareil) est entre le premier et le dernier jour, inclus. */
+export function isOngoingDay(
+  start: string | Date | null | undefined,
+  end: string | Date | null | undefined,
+  now: Date = new Date(),
+): boolean {
+  const s = daysFromToday(start, now);
+  const e = daysFromToday(end, now);
+  return s !== null && e !== null && s <= 0 && e >= 0;
+}
+
+/** Tri croissant de dates du calendrier, les dates absentes en dernier. */
+export function compareCalendarDates(a: string | null | undefined, b: string | null | undefined): number {
+  if (!a && !b) return 0;
+  if (!a) return 1;
+  if (!b) return -1;
+  return a.slice(0, 10) < b.slice(0, 10) ? -1 : a.slice(0, 10) > b.slice(0, 10) ? 1 : 0;
+}

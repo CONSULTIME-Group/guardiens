@@ -63,6 +63,7 @@ import {
   shouldShowSurroundingsParagraph,
   PUBLISH_PHOTO_PROMPT_HREF,
 } from "@/lib/publishPhotoPrompt";
+import { calendarDate } from "@/lib/calendarDate";
 
 
 
@@ -1748,8 +1749,8 @@ const QuickActions = ({
   const btnClass = "text-xs font-medium flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-colors";
 
   if (!isOwner && (effectiveStatus === "in_progress" || effectiveStatus === "confirmed") && sit.application_status === "accepted") {
-    const startDate = sit.start_date ? new Date(sit.start_date) : null;
-    const endDate = sit.end_date ? new Date(sit.end_date) : null;
+    const startDate = sit.start_date ? calendarDate(sit.start_date) : null;
+    const endDate = sit.end_date ? calendarDate(sit.end_date) : null;
     const today = new Date();
     const guideExists = !!sit.houseGuide?.published;
     const guideAccessible = startDate && endDate && isWithinInterval(today, {

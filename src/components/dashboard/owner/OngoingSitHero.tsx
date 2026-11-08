@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
-import { differenceInDays, format } from "date-fns";
+import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { MessageSquare, ArrowRight, Sparkles, Calendar, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import HelpDuringSitDialog from "@/components/sits/HelpDuringSitDialog";
 import { capitalize } from "./helpers";
 import type { SitRow, SitterInfo } from "./types";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { calendarDate, daysBetween, daysFromToday } from "@/lib/calendarDate";
 
 
 interface OngoingSitHeroProps {
@@ -31,9 +32,9 @@ const OngoingSitHero = memo(({ sit, sitterProfiles, coverPhoto }: OngoingSitHero
   const sitter = acceptedApp?.sitter_id ? sitterProfiles[acceptedApp.sitter_id] : null;
 
   const now = new Date();
-  const daysLeft = sit.end_date ? Math.max(0, differenceInDays(new Date(sit.end_date), now)) : null;
+  const daysLeft = sit.end_date ? Math.max(0, daysFromToday(sit.end_date, now) ?? 0) : null;
   const totalDays = sit.start_date && sit.end_date
-    ? Math.max(1, differenceInDays(new Date(sit.end_date), new Date(sit.start_date)))
+    ? Math.max(1, daysBetween(sit.start_date, sit.end_date) ?? 0)
     : null;
   const daysElapsed = totalDays !== null && daysLeft !== null
     ? Math.max(0, totalDays - daysLeft)
@@ -43,8 +44,8 @@ const OngoingSitHero = memo(({ sit, sitterProfiles, coverPhoto }: OngoingSitHero
     : 0;
 
   const sitterName = sitter?.first_name ? capitalize(sitter.first_name) : "Votre gardien";
-  const endLabelLong = sit.end_date ? format(new Date(sit.end_date), "EEEE d MMMM", { locale: fr }) : null;
-  const endLabelShort = sit.end_date ? format(new Date(sit.end_date), "d MMM", { locale: fr }) : null;
+  const endLabelLong = sit.end_date ? format(calendarDate(sit.end_date), "EEEE d MMMM", { locale: fr }) : null;
+  const endLabelShort = sit.end_date ? format(calendarDate(sit.end_date), "d MMM", { locale: fr }) : null;
 
   const badgeLabel = daysLeft === null
     ? "En cours"

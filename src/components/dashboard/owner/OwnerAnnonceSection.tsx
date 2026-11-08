@@ -7,11 +7,12 @@
  */
 import { Link } from "react-router-dom";
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
-import { format, differenceInDays } from "date-fns";
+import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { SectionHeader } from "../sitter/SitterMatchSection";
 import type { SitRow } from "./types";
+import { compareCalendarDates, daysFromToday } from "@/lib/calendarDate";
 
 // Vague 15 : passe par un token CSS pour s'assombrir en dark.
 const PLACEHOLDER_BG = "var(--photo-placeholder-sand)";
@@ -52,9 +53,7 @@ const OwnerAnnonceSection = ({
   const active = sits
     .filter((s) => ["published", "confirmed", "in_progress"].includes(s.status))
     .sort((a, b) => {
-      const at = a.start_date ? new Date(a.start_date).getTime() : Number.POSITIVE_INFINITY;
-      const bt = b.start_date ? new Date(b.start_date).getTime() : Number.POSITIVE_INFINITY;
-      return at - bt;
+      return compareCalendarDates(a.start_date, b.start_date);
     });
 
   if (active.length === 0) return null;
@@ -65,7 +64,7 @@ const OwnerAnnonceSection = ({
   const dates = formatDateRange(featured.start_date, featured.end_date);
   const status = humanStatus(featured.status);
   const daysUntil = featured.start_date
-    ? differenceInDays(new Date(featured.start_date), new Date(now))
+    ? daysFromToday(featured.start_date, new Date(now))
     : null;
   const meta: string[] = [];
   if (dates) meta.push(dates);

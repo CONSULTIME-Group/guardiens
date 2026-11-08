@@ -49,6 +49,7 @@ import { getCountryName } from "@/lib/countries";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { resolveSitStatusBadge, type SitStatusBadgeVariant } from "@/lib/sitStatus";
 import { unpublishReasonAdminLabel } from "@/lib/unpublishReason";
+import { calendarDate, isPastDay } from "@/lib/calendarDate";
 
 
 type BadgeVariant = SitStatusBadgeVariant;
@@ -491,9 +492,8 @@ const AdminListings = () => {
     if (filterStatus === "to_staff" && !focusSitId && !focusOwnerId) {
       // Sans statistiques chargées, on ne sait pas : on n'affiche pas l'annonce.
       if (!stats[l.id]) return false;
-      const today = new Date(); today.setHours(0, 0, 0, 0);
       const apps = stats[l.id].applications;
-      const notPast = !l.end_date || new Date(l.end_date) >= today;
+      const notPast = !l.end_date || !isPastDay(l.end_date);
       if (apps !== 0 || !notPast) return false;
     }
     return true;
@@ -518,8 +518,8 @@ const AdminListings = () => {
         city.city ?? "",
         city.city ? (city.fromOwner ? "Profil du propriétaire" : "Annonce") : "",
         l.country ? getCountryName(l.country) : "",
-        l.start_date ? format(new Date(l.start_date), "yyyy-MM-dd") : "",
-        l.end_date ? format(new Date(l.end_date), "yyyy-MM-dd") : "",
+        l.start_date ? format(calendarDate(l.start_date), "yyyy-MM-dd") : "",
+        l.end_date ? format(calendarDate(l.end_date), "yyyy-MM-dd") : "",
         sit.label,
         sit.detail ?? "",
         n(st?.views), n(st?.uniqueViews), n(st?.messages), n(st?.applications),
@@ -831,9 +831,9 @@ const AdminListings = () => {
                       )}
                     </div>
                     <div className="text-xs whitespace-nowrap">
-                    {listing.start_date ? format(new Date(listing.start_date), "d MMM", { locale: fr }) : "·"}
+                    {listing.start_date ? format(calendarDate(listing.start_date), "d MMM", { locale: fr }) : "·"}
                     {" au "}
-                    {listing.end_date ? format(new Date(listing.end_date), "d MMM yy", { locale: fr }) : "·"}
+                    {listing.end_date ? format(calendarDate(listing.end_date), "d MMM yy", { locale: fr }) : "·"}
                     </div>
                   </TableCell>
                   <TableCell>

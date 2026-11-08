@@ -7,7 +7,7 @@ import { readFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { calendarDate, daysBetween, daysFromToday, isPastDay } from "@/lib/calendarDate";
+import { calendarDate, compareCalendarDates, daysBetween, daysFromToday, isOngoingDay, isPastDay } from "@/lib/calendarDate";
 import { bootDateLabel, bootUrgencyLabel, buildBootSitModel } from "@/boot/bootSitView";
 
 describe("calendarDate", () => {
@@ -42,6 +42,20 @@ describe("écarts en jours du calendrier", () => {
   });
 });
 
+describe("garde en cours et tri (lot DATE1b)", () => {
+  it("le dernier jour de la garde compte comme en cours, toute la journée", () => {
+    const lateEvening = new Date(2026, 11, 18, 23, 30);
+    expect(isOngoingDay("2026-12-05", "2026-12-18", lateEvening)).toBe(true);
+    expect(isOngoingDay("2026-12-05", "2026-12-17", lateEvening)).toBe(false);
+    expect(isOngoingDay("2026-12-19", "2026-12-25", lateEvening)).toBe(false);
+    expect(isOngoingDay(null, "2026-12-25", lateEvening)).toBe(false);
+  });
+  it("trie les dates du calendrier, absentes en dernier", () => {
+    const list = ["2026-12-20", null, "2026-11-30", "2027-01-02"];
+    expect([...list].sort(compareCalendarDates)).toEqual(["2026-11-30", "2026-12-20", "2027-01-02", null]);
+  });
+});
+
 describe("fiche affichée avant son code", () => {
   it("dates, durée et urgence au bon jour", () => {
     expect(bootDateLabel("2026-12-20", "2026-12-27")).toBe("Du 20 décembre au 27 décembre 2026 · 8 jours");
@@ -63,29 +77,11 @@ describe("fiche affichée avant son code", () => {
 });
 
 /**
- * Verrou : aucun new Date() appliqué à une colonne date du calendrier. Les
- * fichiers des lots DATE1b et DATE1c gardent leur reste, qui ne peut que baisser.
+ * Verrou : aucun new Date() appliqué à une colonne date du calendrier, nulle
+ * part dans src/ (chantier DATE1 clos le 08/11/2026). REMAINING reste vide.
  */
 const CALENDAR_COLUMN = /new Date\([^)]*\b(start_date|end_date|date_needed|exchange_date|photo_date|date_of_birth|new_start_date|new_end_date|old_start_date|old_end_date|effective_on|published_on|last_active_on|startDate|endDate|dateNeeded)\b[^)]*\)/g;
-const REMAINING: Record<string, number> = {
-  "src/components/dashboard/OwnerDashboard.tsx": 10,
-  "src/components/dashboard/owner/MonAnnonceCard.tsx": 9,
-  "src/components/dashboard/owner/OngoingSitHero.tsx": 5,
-  "src/components/dashboard/owner/OwnerAnnonceSection.tsx": 3,
-  "src/components/dashboard/owner/OwnerStarSection.tsx": 1,
-  "src/components/messages/ConversationHeader.tsx": 1,
-  "src/components/missions/PublicMissionView.tsx": 2,
-  "src/components/sits/EmergencyAlertBanner.tsx": 1,
-  "src/hooks/useOwnerDashboardData.ts": 1,
-  "src/hooks/useOwnerPriorityAction.ts": 7,
-  "src/lib/admin/sitsActions.ts": 1,
-  "src/lib/nextActions/owner.ts": 6,
-  "src/pages/CreateSit.tsx": 5,
-  "src/pages/EditSit.tsx": 1,
-  "src/pages/Sits.tsx": 2,
-  "src/pages/admin/AdminListings.tsx": 5,
-  "src/pages/admin/AdminSitsManagement.tsx": 7,
-};
+const REMAINING: Record<string, number> = {};
 
 describe("verrou : dates du calendrier lues par calendarDate", () => {
   const files = execSync("git ls-files src", { encoding: "utf8" })
@@ -101,7 +97,7 @@ describe("verrou : dates du calendrier lues par calendarDate", () => {
     const offenders = files.filter((f) => !(f in REMAINING) && count(f) > 0);
     expect(offenders).toEqual([]);
   });
-  it("les fichiers en attente ne gagnent aucun appel", () => {
-    for (const [f, max] of Object.entries(REMAINING)) expect(count(f), f).toBeLessThanOrEqual(max);
+  it("aucune exception en attente", () => {
+    expect(REMAINING).toEqual({});
   });
 });

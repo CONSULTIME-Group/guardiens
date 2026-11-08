@@ -15,7 +15,6 @@
  * pas de fetch supplémentaire. Toutes les copies suivent les règles
  * éditoriales (vouvoiement, pas d'emoji, pas de tiret cadratin).
  */
-import { differenceInDays } from "date-fns";
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import { canShowAffinityPercent } from "@/lib/affinityDisplay";
 import { Link } from "react-router-dom";
@@ -36,6 +35,7 @@ import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 import { selectOwnerStarVariant } from "@/lib/ownerStarVariant";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { staleSuffix } from "@/lib/applicationsAwaiting";
+import { daysFromToday } from "@/lib/calendarDate";
 
 const DATE_FMT = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
@@ -138,7 +138,7 @@ const OngoingCard = ({
 }) => {
   const dates = formatDateRange(sit.start_date, sit.end_date);
   const daysLeft = sit.end_date
-    ? Math.max(0, differenceInDays(new Date(sit.end_date), new Date()))
+    ? Math.max(0, daysFromToday(sit.end_date) ?? 0)
     : null;
   const cover = coverPhoto ? getOptimizedImageUrl(coverPhoto, 900, 78) : null;
   const sitterName = sitter?.first_name ? capitalize(sitter.first_name) : "Votre gardien";
