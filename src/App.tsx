@@ -173,6 +173,7 @@ const AdminHeroWeights = lazy(() => import("./pages/AdminHeroWeights"), "AdminHe
 const TestErrorBoundary = lazy(() => import("./pages/TestErrorBoundary"), "TestErrorBoundary");
 const TestEmptyStates = lazy(() => import("./pages/TestEmptyStates"), "TestEmptyStates");
 const MesCandidatures = lazy(() => import("./pages/MesCandidatures"), "MesCandidatures");
+const ApplicationDetail = lazy(() => import("./pages/ApplicationDetail"), "ApplicationDetail");
 
 
 const PreviewOngoingSitHero = lazy(() => import("./pages/dev/PreviewOngoingSitHero"), "PreviewOngoingSitHero");
@@ -643,6 +644,7 @@ const AppRoutes = () => {
 
         <Route path="/sits" element={<Sits />} />
         <Route path="/mes-candidatures" element={<MesCandidatures />} />
+        <Route path="/candidatures/:id" element={<ApplicationDetail />} />
 
         <Route path="/sits/create" element={<CreateSit />} />
         <Route path="/sits/:id" element={<SitDetail />} />

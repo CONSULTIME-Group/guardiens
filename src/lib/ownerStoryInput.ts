@@ -66,7 +66,9 @@ export function buildOwnerStoryInput(s: OwnerStorySource): OwnerStoryInput {
     awaiting: {
       total: s.awaitingApps.length,
       unread: unread.length,
-      first: first ? { sitId: first.sit_id, sitterFirstName: firstName(s.sitterProfiles, first.sitter_id) } : null,
+      first: first
+        ? { sitId: first.sit_id, applicationId: first.id ?? null, sitterFirstName: firstName(s.sitterProfiles, first.sitter_id) }
+        : null,
     },
     activeSit: active ? { id: active.id, start_date: active.start_date ?? null, end_date: active.end_date ?? null } : null,
     latestDraft: s.latestDraft

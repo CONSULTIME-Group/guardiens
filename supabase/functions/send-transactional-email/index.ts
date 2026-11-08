@@ -113,6 +113,7 @@ import {
   isQuietAt,
   nextQuietEndFrom,
 } from '../_shared/email-cap.ts'
+import { applicationDeepLinkPath } from '../_shared/application-page.ts'
 
 
 // Alma persona (Pass 3 C2) : liste des templates signés visuellement par Alma
@@ -1371,6 +1372,7 @@ Deno.serve(async (req) => {
         : null
       const targetPath = DEEP_LINK_TARGET_OVERRIDES[templateName]
         ?? missionPath
+        ?? applicationDeepLinkPath(templateName, templateData?.applicationId)
         ?? (conversationId
           ? `/messages/${conversationId}`
           : (REVIEW_DEEP_LINK_TEMPLATES.has(templateName) && sitId

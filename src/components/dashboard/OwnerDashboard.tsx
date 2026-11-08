@@ -213,7 +213,7 @@ const OwnerDashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sits]);
 
-  const story = useMemo(() => resolveOwnerStory(buildOwnerStoryInput({
+  const storyInput = useMemo(() => buildOwnerStoryInput({
     today: localTodayIso(),
     sits: sits as any[],
     pets: pets as any[],
@@ -225,7 +225,10 @@ const OwnerDashboard = () => {
     period: storyPeriod,
     city: ownerCity || null,
     nearbySittersCount: nearbyCount,
-  })), [sits, pets, awaitingApps, sitterProfiles, pendingReviews, latestDraft, ongoingSit, storyPeriod, ownerCity, nearbyCount]);
+  }), [sits, pets, awaitingApps, sitterProfiles, pendingReviews, latestDraft, ongoingSit, storyPeriod, ownerCity, nearbyCount]);
+  const story = useMemo(() => resolveOwnerStory(storyInput), [storyInput]);
+  // Lot L6 (B-07) : « Théo attend la sienne. » après une réponse.
+  const waitingName = storyInput.awaiting?.first?.sitterFirstName ?? null;
 
   const askPeriod = story.chapter === "first_listing" && departureCardVisible(departure.data);
   const onPickPeriod = useCallback((p: DeparturePeriod) => {
@@ -502,7 +505,7 @@ const OwnerDashboard = () => {
               /* Lot L4 : accueil téléphone, le récit d'abord (direction B de l'arène v2). */
               <div className="space-y-[14px] pt-3" data-testid="owner-story-home">
                 {/* Lot L5 : retour calme après une publication rapide. */}
-                <PublishedNotice />
+                <PublishedNotice waitingName={waitingName} />
                 {/* Texte agrandi : le choix d'espace passe sous le récit, le bouton reste au premier écran. */}
                 {!compactStory && <RoleSwitch />}
                 <StoryHero

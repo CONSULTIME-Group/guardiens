@@ -2175,6 +2175,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/guides/givors</loc>
+    <lastmod>2026-11-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/departement/pyrenees-orientales</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -3023,6 +3029,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/12650c2a-92c0-486e-b5e2-cc9347ce7c9d</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/13839c10-3cfc-4850-a772-d5a89e721eef</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>

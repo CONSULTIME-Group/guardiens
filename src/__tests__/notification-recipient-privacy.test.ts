@@ -11,6 +11,7 @@ import ts from "typescript";
 import * as deferredAuthorization from "../../supabase/functions/_shared/deferred-member-email-authorization";
 import * as sitEventAuthorization from "../../supabase/functions/_shared/sit-event-email-authorization";
 import * as applicationAuthorization from "../../supabase/functions/_shared/application-email-authorization";
+import * as applicationPage from "../../supabase/functions/_shared/application-page";
 import { describe, expect, it, vi } from "vitest";
 
 vi.stubGlobal("crypto", webcrypto);
@@ -181,6 +182,8 @@ function harness(options: Options = {}) {
       if (specifier.includes("deferred-member-email-authorization")) return deferredAuthorization;
       if (specifier.includes("sit-event-email-authorization")) return sitEventAuthorization;
       if (specifier.includes("application-email-authorization")) return applicationAuthorization;
+      // Lot L6 : cible du lien profond d'un email de candidature.
+      if (specifier.includes("application-page")) return applicationPage;
       if (specifier.includes("supabase-js")) return { createClient };
       if (specifier.includes("registry")) return { TEMPLATES };
       if (specifier.includes("email-categories")) return { getEmailCategory: () => "transactional" };

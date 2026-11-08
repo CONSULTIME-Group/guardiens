@@ -35,11 +35,11 @@ describe("L4, entrée du récit propriétaire", () => {
       ...base,
       sits: [{ id: "t1", status: "published", start_date: "2026-12-19", end_date: "2027-01-03" }],
       awaitingApps: [
-        { sit_id: "t1", sitter_id: "s2", status: "viewed" },
-        { sit_id: "t1", sitter_id: "s1", status: "pending" },
+        { id: "a2", sit_id: "t1", sitter_id: "s2", status: "viewed" },
+        { id: "a1", sit_id: "t1", sitter_id: "s1", status: "pending" },
       ],
     });
-    expect(input.awaiting).toEqual({ total: 2, unread: 1, first: { sitId: "t1", sitterFirstName: "Léa" } });
+    expect(input.awaiting).toEqual({ total: 2, unread: 1, first: { sitId: "t1", applicationId: "a1", sitterFirstName: "Léa" } });
     const story = resolveOwnerStory(input);
     expect(story.chapter).toBe("applications");
     expect(story.cta.label).toBe("Lire la candidature de Léa");

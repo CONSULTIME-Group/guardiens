@@ -21,3 +21,19 @@ export function afterPublishTarget(o: { sitId: string; express: boolean; arrival
   if (o.express && o.phone) return `/dashboard?${PUBLISHED_PARAM}=${encodeURIComponent(o.sitId)}`;
   return `/sits/${o.sitId}`;
 }
+
+/** Lot L6 : retour au récit après une réponse à une candidature (B-07). */
+export const REPLIED_PARAM = "reponse";
+
+/** Prénom affichable dans la confirmation : un mot, lettres, apostrophes et traits d'union, 40 caractères au plus. */
+export function noticeFirstName(raw: string | null | undefined): string | null {
+  const word = (raw ?? "").trim().split(/\s+/)[0] ?? "";
+  const clean = word.replace(/[^\p{L}'’-]/gu, "").slice(0, 40);
+  return clean || null;
+}
+
+export function afterReplyTarget(o: { sitId: string; firstName: string | null; phone: boolean }): string {
+  if (!o.phone) return `/sits/${o.sitId}#candidatures`;
+  const name = noticeFirstName(o.firstName);
+  return name ? `/dashboard?${REPLIED_PARAM}=${encodeURIComponent(name)}` : "/dashboard";
+}
