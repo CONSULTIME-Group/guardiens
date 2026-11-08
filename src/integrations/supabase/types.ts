@@ -20807,6 +20807,7 @@ export type Database = {
       }
       normalize_analytics_source: { Args: { raw: string }; Returns: string }
       normalize_city_name: { Args: { txt: string }; Returns: string }
+      notify_mot_fondateurs_nouveaux_inscrits: { Args: never; Returns: number }
       notify_owner_of_new_application: {
         Args: { _application_id: string }
         Returns: string
