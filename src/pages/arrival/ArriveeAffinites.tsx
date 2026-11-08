@@ -12,6 +12,7 @@ import { fetchMyOwnerProfile, invalidateMyOnboardingStatus } from "@/lib/myProfi
 import { buildAffinityWrites } from "@/lib/affinityOnboardingWrites";
 import { sanitizeRedirect } from "@/lib/safeRedirect";
 import { trackEvent } from "@/lib/analytics";
+import { markArrivalOnboardingDone } from "@/lib/arrivalOnboardingDone";
 import {
   HOME_AMBIANCE_SCORED_OPTIONS, IDEAL_SITTER_SCORED_OPTIONS, INTEREST_OPTIONS, LANGUAGE_OPTIONS, LIFE_PACE_OPTIONS,
   resolveAmbianceConflicts,
@@ -100,6 +101,7 @@ const ArriveeAffinites = () => {
       const { error } = await supabase.from("owner_profiles").upsert(writes.owner as any, { onConflict: "user_id" });
       if (error) { setSaving(false); setFailed(true); return; }
     }
+    await markArrivalOnboardingDone(user.id, "P3", user.role);
     await invalidateMyOnboardingStatus(user.id);
     void trackEvent("affinity_onboarding_completed", { source: "/arrivee/affinites", metadata: { role: user.role, via: "arrival_v2" } });
     trackArrival("completed", "P3");

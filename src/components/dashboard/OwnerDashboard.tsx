@@ -16,7 +16,7 @@ import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import { formatCityLabel } from "@/lib/cityLabel";
 
 import OnboardingWelcome from "./OnboardingWelcome";
-import { useArrivalWelcomeSeen } from "@/hooks/useArrivalWelcomeSeen";
+import { useArrivalV2Account } from "@/hooks/useArrivalV2Account";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
 
@@ -72,7 +72,7 @@ import { compareCalendarDates, daysFromToday, isOngoingDay } from "@/lib/calenda
 const OwnerDashboard = () => {
   const { user } = useAuth();
   // Lot 1 : propriétaire passé par /bienvenue, jamais OnboardingWelcome.
-  const arrivalWelcomeSeen = useArrivalWelcomeSeen(user?.id);
+  const arrivalV2 = useArrivalV2Account(user?.id);
   const { shouldShow: showAlmaFirstMeeting, markSeen: markAlmaFirstMeetingSeen } = useAlmaFirstMeeting();
 
   /* ── Data fetching ── */
@@ -302,8 +302,8 @@ const OwnerDashboard = () => {
   if (loading) return <DashboardSkeleton />;
   if (error) return <DashboardLoadError onRetry={reload} detail={error} />;
 
-  // Lot 1 : jamais pour un propriétaire passé par /bienvenue (arrivée v2).
-  if (showOnboarding && user?.onboardingMinimalCompleted && !arrivalWelcomeSeen) {
+  // Lots 1 et ONB1 : jamais pour un propriétaire arrivée v2.
+  if (showOnboarding && user?.onboardingMinimalCompleted && arrivalV2.ready && !arrivalV2.isV2) {
     return (
       <OnboardingWelcome
         role="owner"

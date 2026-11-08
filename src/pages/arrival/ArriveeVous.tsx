@@ -13,14 +13,14 @@ import { Label } from "@/components/ui/label";
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 import { departmentCodeFromPostal } from "@/lib/postalDepartment";
 import { isPostalCodeValidForCountry } from "@/lib/setupState";
-import { canSkipP1, safeNext } from "@/lib/arrival";
+import { canSkipP1, safeNext, type ArrivalIntent } from "@/lib/arrival";
 import { ArrivalShell, Eyebrow, Gouache, SaveError, SingleChoice, trackArrival, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
 import ArriveeVousGardien from "./ArriveeVousGardien";
 const maisonSeule = new URL("../../assets/aquarelles/arrivee-bonjour-360.webp", import.meta.url).href;
 
 const TYPES = ["house", "apartment", "farm", "chalet", "other"] as const;
 
-export interface P1Input { userId: string; firstName: string; postalCode: string; city: string; country: string; type: string; hasProperty: boolean }
+export interface P1Input { userId: string; firstName: string; postalCode: string; city: string; country: string; type: string; hasProperty: boolean; /** Lot ONB1 : posé seulement si le profil n'en a pas. */ arrivalIntent?: ArrivalIntent | null }
 
 /** Écritures de P1, pures et testables. */
 export function buildP1Writes(i: P1Input) {
@@ -32,6 +32,7 @@ export function buildP1Writes(i: P1Input) {
     country,
     onboarding_minimal_completed: true,
   };
+  if (i.arrivalIntent) profile.arrival_intent = i.arrivalIntent;
   if (country === "FR") profile.departement_code = departmentCodeFromPostal(i.postalCode);
   const property = i.hasProperty ? null : {
     user_id: i.userId, type: i.type, environment: null, rooms_count: null, bedrooms_count: null,
@@ -53,6 +54,8 @@ const ArriveeVousProprietaire = () => {
   const departUrl = `/arrivee/depart?next=${encodeURIComponent(next)}`;
   const [loading, setLoading] = useState(true);
   const [hasProperty, setHasProperty] = useState(false);
+  // Lot ONB1 : intention absente (compte arrivé sans C4) écrite à la première étape.
+  const [intentMissing, setIntentMissing] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [city, setCity] = useState("");
@@ -71,9 +74,10 @@ const ArriveeVousProprietaire = () => {
         supabase.auth.getUser(),
       ]);
       if (cancelled) return;
-      const prof = (p ?? {}) as { first_name?: string; postal_code?: string; city?: string; country?: string | null };
+      const prof = (p ?? {}) as { first_name?: string; postal_code?: string; city?: string; country?: string | null; arrival_intent?: string | null };
       const meta = (auth?.user?.user_metadata ?? {}) as Record<string, string | undefined>;
       const metaName = meta.given_name || meta.first_name || (meta.full_name || meta.name || "").split(" ")[0] || "";
+      setIntentMissing(!prof.arrival_intent);
       const has = (count ?? 0) > 0;
       if (canSkipP1({ firstName: prof.first_name, city: prof.city, hasProperty: has })) {
         navigate(departUrl, { replace: true });
@@ -97,7 +101,7 @@ const ArriveeVousProprietaire = () => {
     if (!user || !valid) return;
     setSaving(true);
     setFailed(false);
-    const w = buildP1Writes({ userId: user.id, firstName, postalCode, city, country, type, hasProperty });
+    const w = buildP1Writes({ userId: user.id, firstName, postalCode, city, country, type, hasProperty, arrivalIntent: intentMissing ? "owner" : null });
     const { error } = await supabase.from("profiles").update(w.profile as any).eq("id", user.id);
     if (error) { setSaving(false); setFailed(true); return; }
     if (w.property) {

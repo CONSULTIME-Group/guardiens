@@ -43,6 +43,7 @@ export type EventType =
   | "arrival_g5_offer_published"     // Lot G-ENT2 : proposition publiée (helps_with)
   | "arrival_g5_owner_mirror_clicked" // Lot G-ENT2 : « Faites garder votre maison »
   | "arrival_owner_also_selected"    // P4 (garder, coup_de_main)
+  | "published_profile_boost_clicked" // Lot ONB1 : complément de profil choisi sur l'annonce en ligne (item, sit_id)
   | "arrival_install_clicked"        // N1 (lot 2)
   | "arrival_push_enabled"           // N1 (nearby)
   | "arrival_push_skipped"           // N1

@@ -11,8 +11,9 @@ import {
 import { format, subDays, startOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import FacebookReferralCard from "@/components/admin/analytics/FacebookReferralCard";
+import ProfileCompletionCohortsCard from "@/components/admin/analytics/ProfileCompletionCohortsCard";
 import { measureBreakNotice } from "@/lib/admin/measureBreak";
-import { distinctCohortPeople, rateOf, ONBOARDING_DEFINITION } from "@/lib/admin/trueCounts";
+import { distinctCohortPeople, rateOf, ONBOARDING_DEFINITION, ONBOARDING_END_EVENT_TYPES, isOnboardingEndEvent } from "@/lib/admin/trueCounts";
 
 type Range = 1 | 7 | 30;
 type RoleFilter = "all" | "owner" | "sitter" | "both";
@@ -102,11 +103,12 @@ const AdminAnalytics = () => {
         // ── 1 bis. Lot ADM9 : auteurs des événements onboarding_completed de la
         // période, pour compter des personnes distinctes et non des événements
         // (100 événements pour 44 personnes du 12 au 19/10/2026).
-        const onboardingQuery = fetchAllRows<{ user_id: string | null }>((from, to) =>
+        // Lot ONB1 : la fin du parcours d'arrivée compte aussi (isOnboardingEndEvent).
+        const onboardingQuery = fetchAllRows<{ user_id: string | null; event_type: string; metadata: { step?: unknown } | null }>((from, to) =>
           supabase
             .from("analytics_events")
-            .select("id, user_id")
-            .eq("event_type", "onboarding_completed")
+            .select("id, user_id, event_type, metadata")
+            .in("event_type", [...ONBOARDING_END_EVENT_TYPES])
             .gte("created_at", since.toISOString())
             .lt("created_at", until.toISOString())
             .order("id")
@@ -210,7 +212,7 @@ const AdminAnalytics = () => {
         setTotalInscrits(filteredProfiles.length);
         setOnboardedPeople(distinctCohortPeople(
           filteredProfiles.map((p: any) => p.id as string),
-          (onboardingData || []).map((e) => e.user_id),
+          (onboardingData || []).filter(isOnboardingEndEvent).map((e) => e.user_id),
         ));
 
         // Map des counts (role-aware vs role-agnostic)
@@ -462,6 +464,9 @@ const AdminAnalytics = () => {
               </p>
             </CardContent>
           </Card>
+
+          {/* Lot ONB1 : remplissage du profil par rôle, comptes de 7 jours et plus. */}
+          <ProfileCompletionCohortsCard />
 
           {/* Lot A10 : l'entonnoir d'inscription unique vit dans l'onglet « Entonnoir d'inscription » (Entonnoir chiffré, 8 étapes, agrégat SQL). */}
           <p className="text-xs text-muted-foreground">
