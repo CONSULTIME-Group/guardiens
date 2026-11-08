@@ -9,6 +9,7 @@ import arrivalFr from "@/i18n/locales/fr/arrival.json";
 import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import type { ArrivalStep } from "@/lib/arrival";
+import { useHideBottomNav } from "@/components/layout/ChromeVisibility";
 import "./arrival.css";
 
 // Textes sous la clé arrival.* du dictionnaire commun, ajoutés au chargement
@@ -78,6 +79,10 @@ export function ArrivalShell({ header, children, stepBar, sitterStep, wide = fal
   /** Lot G-ENT2 : largeur ordinateur de 1120 px (premier pas en deux colonnes). */
   wide?: boolean;
 }) {
+  // Lot ONB2 : parcours en étapes, sans barre basse (comme /bienvenue et le
+  // formulaire express). Tant qu'il manque le lieu ou les affinités, la porte
+  // d'onboarding ramenait de toute façon sur l'étape : la barre menait en boucle.
+  useHideBottomNav(true);
   return (
     <main className="arrival-root min-h-screen min-w-0">
       <div className={`mx-auto w-full max-w-md px-5 pb-16 pt-6 space-y-6${wide ? " lg:max-w-[1120px]" : ""}`}>
