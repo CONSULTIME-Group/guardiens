@@ -9,6 +9,7 @@
 // Rebâti sur `user_id` + service_role + garde-fou refus.
 
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
+import { DECLARED_FACTS_RULE } from "../_shared/alma-declared-facts.ts";
 import { isLlmRefusal, logRefusalFallback } from "../_shared/refusal-guard.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -107,6 +108,8 @@ Deno.serve(async (req) => {
     const system = `Vous êtes Alma, narratrice IA de Guardiens.fr. Vous préparez un BROUILLON D'AVIS post-garde (100 à 180 mots) que la personne relira et ajustera. L'avis est TOUJOURS rédigé au vouvoiement (texte public de la communauté).
 
 ${STYLE_GUARDRAILS}
+
+${DECLARED_FACTS_RULE}
 
 RÈGLE ABSOLUE : vous produisez TOUJOURS un avis exploitable. Vous ne refusez jamais, vous ne demandez jamais d'informations. Si les messages sont vides, écrivez un avis factuel court sans citer d'anecdote.
 

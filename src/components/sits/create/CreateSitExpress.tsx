@@ -30,6 +30,8 @@ export interface CreateSitExpressProps {
   photoUrl: string | null;
   uploading: boolean;
   onPhotoFile: (file: File) => void;
+  /** Lot PHOTO1 : conseil tiré de l'analyse de la photo ajoutée. */
+  photoTip?: string | null;
   startDate: string;
   endDate: string;
   onDates: (start: string, end: string, method: "preset" | "autres") => void;
@@ -128,7 +130,11 @@ const CreateSitExpress = (p: CreateSitExpressProps) => {
                 Photo ajoutée
               </span>
             </div>
-          ) : (
+          ) : null}
+          {p.photoUrl && p.photoTip ? (
+            <p role="status" className="mt-2 text-[14px] text-muted-foreground" data-testid="express-photo-tip">{p.photoTip}</p>
+          ) : null}
+          {p.photoUrl ? null : (
             <div className="mt-3 rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-4" data-testid="express-photo-empty">
               <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="sr-only" onChange={pickFile} aria-label="Prendre une photo" />
               <input ref={galleryRef} type="file" accept="image/*" className="sr-only" onChange={pickFile} aria-label="Choisir dans ma galerie" />
@@ -140,7 +146,7 @@ const CreateSitExpress = (p: CreateSitExpressProps) => {
                   <ImagePlus className="h-4 w-4" aria-hidden="true" /> Choisir dans ma galerie
                 </Button>
               </div>
-              <p className="mt-3 text-[14px] text-muted-foreground">Une photo de chez vous : le jardin, le salon, l'entrée.</p>
+              <p className="mt-3 text-[14px] text-muted-foreground">La maison vue de l'extérieur, la pièce de vie ou la chambre, prise en journée.</p>
             </div>
           )}
         </Card>

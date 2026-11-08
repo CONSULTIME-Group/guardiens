@@ -76,10 +76,11 @@ import InviteSittersBlock from "@/components/sits/owner/InviteSittersBlock";
 import SentProposalsBlock from "@/components/sits/owner/SentProposalsBlock";
 import AnimalMentionDialog from "@/components/sits/owner/AnimalMentionDialog";
 import PublishPhotoPromptDialog from "@/components/sits/owner/PublishPhotoPromptDialog";
+import { loadHomePhotoGap, type HomePhotoGap } from "@/lib/homePhotos";
 import {
   countPropertyPhotos,
   shouldPromptPublishPhotos,
-  shouldShowSurroundingsParagraph,
+  propertyPhotoUrls,
   PUBLISH_PHOTO_PROMPT_HREF,
 } from "@/lib/publishPhotoPrompt";
 
@@ -651,10 +652,22 @@ const OwnerSitView = ({
   const [animalMentionOpen, setAnimalMentionOpen] = useState(false);
   const [photoPromptOpen, setPhotoPromptOpen] = useState(false);
   const propertyPhotoCount = countPropertyPhotos((property as any)?.photos);
-  const photoPromptSurroundings = shouldShowSurroundingsParagraph((property as any)?.region_highlights);
+  const [photoPromptGap, setPhotoPromptGap] = useState<HomePhotoGap | undefined>(undefined);
+  // Lot PHOTO1 : sur l'annonce en ligne, « Montrez votre maison » tant que les
+  // photos manquent. Une lecture seulement à partir de trois photos.
+  const [publishedHomeGap, setPublishedHomeGap] = useState<HomePhotoGap | undefined>(undefined);
+  const propertyPhotoKey = propertyPhotoUrls((property as any)?.photos).join("|");
+  useEffect(() => {
+    if (sit.status !== "published" || !currentUserId) return;
+    let cancelled = false;
+    void loadHomePhotoGap(currentUserId, propertyPhotoKey ? propertyPhotoKey.split("|") : []).then((g) => {
+      if (!cancelled) setPublishedHomeGap(g);
+    });
+    return () => { cancelled = true; };
+  }, [sit.status, currentUserId, propertyPhotoKey]);
 
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!isDraft || publishing) return;
     if (
       shouldPromptAnimalMention(
@@ -676,11 +689,18 @@ const OwnerSitView = ({
     }
     // Recommandation de photos du logement, jamais bloquante
     // (règle : src/lib/publishPhotoPrompt.ts).
-    if (shouldPromptPublishPhotos(propertyPhotoCount)) {
+    // Lot PHOTO1 : trois photos sans le logement visible déclenchent aussi le rappel.
+    const gap = shouldPromptPublishPhotos(propertyPhotoCount)
+      ? (propertyPhotoCount === 0 ? "no_photo" : "few")
+      : currentUserId
+        ? await loadHomePhotoGap(currentUserId, propertyPhotoUrls((property as any)?.photos))
+        : "none";
+    if (gap !== "none") {
       void trackEvent("sit_publish_photo_prompt_shown", {
         source: "republish_owner_view",
-        metadata: { sit_id: sit.id, photo_count: propertyPhotoCount },
+        metadata: { sit_id: sit.id, photo_count: propertyPhotoCount, gap },
       });
+      setPhotoPromptGap(gap);
       setPhotoPromptOpen(true);
       return;
     }
@@ -737,7 +757,7 @@ const OwnerSitView = ({
     const next = new URLSearchParams(publishParams);
     next.delete("publier");
     setPublishParams(next, { replace: true });
-    handlePublish();
+    void handlePublish();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wantsAutoPublish, isDraft, publishNeedsForm, canPublish, publishing]);
 
@@ -1233,7 +1253,7 @@ const OwnerSitView = ({
         // se passer, et l'aperçu de l'annonce.
         if (internalAppCount > 0) return <>{applicationsBlock}{immersiveBlock}{inviteBlock}</>;
         // Lot NOTIF1 : être prévenu des candidatures sur ce téléphone, juste après « Ce qui va se passer ».
-        if (sit.status === "published") return <>{inviteBlock}{applicationsBlock}<PublishedNextSteps key="next" /><PublishedProfileBoosts key="boosts" avatarUrl={owner?.avatar_url} bio={owner?.bio} petsCount={(pets ?? []).length} sitId={sit.id} /><PushMomentOffer key="push" moment="sit_published" className="mb-8" />{immersiveBlock}</>;
+        if (sit.status === "published") return <>{inviteBlock}{applicationsBlock}<PublishedNextSteps key="next" /><PublishedProfileBoosts key="boosts" avatarUrl={owner?.avatar_url} bio={owner?.bio} petsCount={(pets ?? []).length} sitId={sit.id} homePhotoGap={publishedHomeGap} /><PushMomentOffer key="push" moment="sit_published" className="mb-8" />{immersiveBlock}</>;
         return <>{immersiveBlock}{inviteBlock}{applicationsBlock}</>;
       })()}
 
@@ -1385,7 +1405,7 @@ const OwnerSitView = ({
         open={photoPromptOpen}
         onOpenChange={setPhotoPromptOpen}
         photoCount={propertyPhotoCount}
-        showSurroundings={photoPromptSurroundings}
+        gap={photoPromptGap}
         onAddPhotos={() => {
           setPhotoPromptOpen(false);
           void trackEvent("sit_publish_photo_prompt_add_photos", {

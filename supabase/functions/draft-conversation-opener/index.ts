@@ -11,6 +11,7 @@
 //   - Détection refus : aucune réponse de repli rédigée, on annonce l'indisponibilité.
 
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
+import { DECLARED_FACTS_RULE, stripUndeclaredSlots } from "../_shared/alma-declared-facts.ts";
 import { isLlmRefusal, logRefusalFallback } from "../_shared/refusal-guard.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -157,6 +158,8 @@ Deno.serve(async (req) => {
 
 ${STYLE_GUARDRAILS}
 
+${DECLARED_FACTS_RULE}
+
 RÈGLE ABSOLUE : vous produisez TOUJOURS un message exploitable, sans jamais répondre par un refus, une excuse ou une demande d'informations. Si un champ manque, vous l'ignorez.
 
 Contraintes :
@@ -217,6 +220,13 @@ Contraintes :
     if (PROSCRIBED.test(draft)) {
       warnings.push("Un terme sensible a été détecté et neutralisé.");
       draft = draft.replace(PROSCRIBED, "gardien");
+    }
+
+    // Lot L2 : une phrase qui cite un jour ou une heure absents du contexte est retirée.
+    const stripped = stripUndeclaredSlots(draft, JSON.stringify(userPayload));
+    if (stripped.removed > 0) {
+      draft = stripped.text;
+      warnings.push("Une précision de jour ou d'heure a été retirée : ajoutez la vôtre si vous le souhaitez.");
     }
 
     if (!draft.trim()) return unavailable("empty_draft");

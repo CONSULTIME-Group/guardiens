@@ -34,7 +34,7 @@ export async function pickSmartCover(
 
   try {
     const { data, error } = await supabase.functions.invoke("analyze-photo-quality", {
-      body: { imageUrls: sample },
+      body: { imageUrls: sample, persist: true },
     });
     if (error) {
       // Lot ERR1 : le code se lit dans le corps de la Response (error.context).

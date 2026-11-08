@@ -11,6 +11,7 @@
 //  6. Insert sits status='draft' et renvoie l'id.
 
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
+import { DECLARED_FACTS_RULE } from "../_shared/alma-declared-facts.ts";
 import { isLlmRefusal } from "../_shared/refusal-guard.ts";
 import { frenchifyTitleDates } from "./frenchify-title-dates.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
@@ -97,6 +98,8 @@ Deno.serve(async (req) => {
     const system = `Vous êtes rédacteur pour Guardiens.fr, plateforme française de garde d'animaux à domicile entre particuliers de confiance. Un propriétaire vous décrit son besoin en une phrase. Générez un brouillon d'annonce complet, prêt à être relu et publié.
 
 ${STYLE_GUARDRAILS}
+
+${DECLARED_FACTS_RULE}
 
 RÈGLE ABSOLUE : vous produisez TOUJOURS un brouillon complet. Vous ne refusez jamais, vous ne demandez jamais d'informations supplémentaires. Si un point manque, appuyez-vous sur le contexte propriétaire fourni ci-dessous et sur des formulations neutres.
 

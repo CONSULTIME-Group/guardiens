@@ -50,7 +50,7 @@ const PhotoQualityChecker = ({ photos }: Props) => {
     for (let i = 0; i < photos.length; i++) {
       try {
         const { data, error } = await supabase.functions.invoke("analyze-photo-quality", {
-          body: { imageUrl: photos[i] },
+          body: { imageUrl: photos[i], persist: true },
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.error);

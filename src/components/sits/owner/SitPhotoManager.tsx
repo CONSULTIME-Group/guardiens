@@ -138,7 +138,7 @@ const SitPhotoManager = ({
       let fresh: Scored[] = [];
       if (toAnalyze.length > 0) {
         const { data, error } = await supabase.functions.invoke("analyze-photo-quality", {
-          body: { imageUrls: toAnalyze.map((p) => p.photo_url) },
+          body: { imageUrls: toAnalyze.map((p) => p.photo_url), persist: true },
         });
         if (error) {
           // Lot ERR1 : le code métier se lit dans le corps de la réponse

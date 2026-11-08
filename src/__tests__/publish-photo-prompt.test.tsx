@@ -10,8 +10,8 @@ import {
   countPropertyPhotos,
   shouldPromptPublishPhotos,
   publishPhotoPromptTitle,
-  shouldShowSurroundingsParagraph,
-  PUBLISH_PHOTO_PROMPT_SURROUNDINGS,
+  PUBLISH_PHOTO_PROMPT_BODY,
+  PUBLISH_PHOTO_PROMPT_TIPS,
 } from "@/lib/publishPhotoPrompt";
 
 describe("recommandation de photos avant publication", () => {
@@ -35,28 +35,20 @@ describe("recommandation de photos avant publication", () => {
     expect(publishPhotoPromptTitle(2)).toBe("Votre annonce part avec deux photos");
   });
 
-  it("le paragraphe des alentours suit la description existante", () => {
-    expect(shouldShowSurroundingsParagraph(null)).toBe(true);
-    expect(shouldShowSurroundingsParagraph("Village calme")).toBe(true);
-    expect(
-      shouldShowSurroundingsParagraph(
-        "Le village, les balades le long de la rivière, la vue sur les collines.",
-      ),
-    ).toBe(false);
-  });
-
-  it("affiche le second paragraphe quand les alentours restent à décrire", () => {
+  it("lot PHOTO1 : texte de Jérémie et conseils de prise de vue", () => {
     render(
       <PublishPhotoPromptDialog
         open
         onOpenChange={() => {}}
-        photoCount={0}
-        showSurroundings
+        photoCount={3}
+        gap="no_home"
         onAddPhotos={() => {}}
         onPublishAnyway={() => {}}
       />,
     );
-    expect(screen.getByText(PUBLISH_PHOTO_PROMPT_SURROUNDINGS)).toBeInTheDocument();
+    expect(screen.getByText("Montrez où votre gardien va vivre")).toBeInTheDocument();
+    expect(screen.getByText(PUBLISH_PHOTO_PROMPT_BODY)).toBeInTheDocument();
+    expect(screen.getByText(PUBLISH_PHOTO_PROMPT_TIPS)).toBeInTheDocument();
   });
 
   it("« Publier ainsi » publie l'annonce, « Ajouter des photos » ne publie pas", () => {
@@ -81,7 +73,6 @@ describe("recommandation de photos avant publication", () => {
             open={open}
             onOpenChange={setOpen}
             photoCount={photoCount}
-            showSurroundings={false}
             onAddPhotos={() => { setOpen(false); addPhotos(); }}
             onPublishAnyway={() => { setOpen(false); publish(); }}
           />

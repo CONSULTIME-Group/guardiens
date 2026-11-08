@@ -1,22 +1,25 @@
 /**
  * Lot ONB1 (point 5) : après « Ce qui va se passer », trois compléments
  * rapides du profil, seulement ceux qui manquent. Facultatifs, aucune
- * lecture de plus (données déjà chargées par la fiche).
+ * lecture de plus (données déjà chargées par la fiche). Lot PHOTO1 : les
+ * photos du logement viennent en tête quand elles manquent.
  */
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { publishedProfileBoosts } from "@/lib/publishedProfileBoosts";
+import type { HomePhotoGap } from "@/lib/homePhotos";
 
 interface Props {
   avatarUrl: string | null | undefined;
   bio: string | null | undefined;
   petsCount: number;
   sitId: string;
+  homePhotoGap?: HomePhotoGap;
 }
 
-const PublishedProfileBoosts = ({ avatarUrl, bio, petsCount, sitId }: Props) => {
-  const items = publishedProfileBoosts({ avatarUrl, bio, petsCount });
+const PublishedProfileBoosts = ({ avatarUrl, bio, petsCount, sitId, homePhotoGap }: Props) => {
+  const items = publishedProfileBoosts({ avatarUrl, bio, petsCount, homePhotoGap });
   if (items.length === 0) return null;
   return (
     <section aria-labelledby="published-profile-boosts" className="mb-8" data-testid="published-profile-boosts">

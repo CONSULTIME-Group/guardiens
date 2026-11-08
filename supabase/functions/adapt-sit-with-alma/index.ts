@@ -6,6 +6,7 @@
 // Rate limit 5/heure/user via analytics_events.
 
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
+import { DECLARED_FACTS_RULE } from "../_shared/alma-declared-facts.ts";
 import { isLlmRefusal } from "../_shared/refusal-guard.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -63,6 +64,8 @@ Deno.serve(async (req) => {
     const system = `Vous êtes rédacteur pour Guardiens.fr. Un propriétaire souhaite republier une annonce existante en l'adaptant. Vous recevez l'annonce d'origine ET les modifications qu'il demande. Réécrivez UNIQUEMENT les champs texte pour refléter ses ajustements, en gardant la voix, la ville et les contraintes cohérentes avec l'original quand elles ne sont pas explicitement modifiées.
 
 ${STYLE_GUARDRAILS}
+
+${DECLARED_FACTS_RULE}
 
 RÈGLE ABSOLUE : vous produisez TOUJOURS une version adaptée exploitable. Vous ne refusez jamais, vous ne demandez jamais d'informations supplémentaires. Si un point est ambigu, appuyez-vous sur l'original.
 

@@ -23,6 +23,14 @@ import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 // Lot A4 : refus hors annonce publiée et ouverte, repli sans affirmation de disponibilité.
 import { buildFallbackDraft, letterSitRefusal } from "../_shared/application-letter.ts";
+import { DECLARED_FACTS_RULE, letterVariant, stripUndeclaredSlots } from "../_shared/alma-declared-facts.ts";
+
+const WEEKDAY_FR = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+/** Jour de la semaine d'une date AAAA-MM-JJ (fait déduit des dates déclarées). */
+function weekdayOf(date: string | null | undefined): string {
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return "";
+  return WEEKDAY_FR[new Date(`${date}T12:00:00Z`).getUTCDay()];
+}
 
 const RATE_LIMIT_PER_HOUR = 3;
 const PROSCRIBED = /(voisin(e|s|age)?|gratuit à vie|pour toujours|période d'essai|programme fondateur|auvergne-rhône-alpes|\bAURA\b)/i;
@@ -153,9 +161,15 @@ Deno.serve(async (req) => {
       return json({ draft, warnings: ["Contexte de l'annonce limité, brouillon générique proposé."], fallback: true });
     }
 
+    // Lot L2 : accroche et clôture tirées par couple gardien et annonce.
+    const variant = letterVariant(`${userId}:${sit_id}`);
     const system = `Tu es Alma, narratrice IA de Guardiens.fr. Tu rédiges une LETTRE DE CANDIDATURE (120 à 220 mots) qu'un gardien envoie au propriétaire d'une annonce de garde à domicile. La lettre est adressée au propriétaire au VOUVOIEMENT.
 
 ${STYLE_GUARDRAILS}
+
+${DECLARED_FACTS_RULE}
+
+VARIÉTÉ (lot L2) : ${variant.opening} ${variant.closing} Évite les formules toutes faites répétées d'une lettre à l'autre.
 
 RÈGLE ABSOLUE : tu produis TOUJOURS une lettre exploitable, même si certaines infos manquent. Tu ne dois JAMAIS répondre par un refus, une excuse, ni demander plus d'informations. Si un champ manque, tu l'ignores simplement et t'appuies sur ceux disponibles.
 
@@ -231,6 +245,15 @@ Structure attendue :
     // Nettoyage éditorial
     draft = draft.replaceAll("—", ",").replaceAll("–", "-");
     const warnings: string[] = [];
+
+    // Lot L2 : une phrase qui cite un jour ou une heure absents du contexte
+    // est retirée (faits déclarés seulement).
+    const contextText = `${JSON.stringify(payload)} ${weekdayOf(sit.start_date)} ${weekdayOf(sit.end_date)}`;
+    const stripped = stripUndeclaredSlots(draft, contextText);
+    if (stripped.removed > 0) {
+      draft = stripped.text;
+      warnings.push("Une précision de jour ou d'heure a été retirée : ajoutez la vôtre si vous le souhaitez.");
+    }
     if (PROSCRIBED.test(draft)) {
       warnings.push("Un terme sensible a été détecté et neutralisé.");
       draft = draft.replace(PROSCRIBED, "gardien");
