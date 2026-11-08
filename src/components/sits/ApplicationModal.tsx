@@ -178,7 +178,7 @@ const ApplicationModal = ({
           if (petsMismatch) companionsList.push(`mes animaux${ownAnimalsDetail ? ` (${ownAnimalsDetail})` : ""}`);
           if (childrenMismatch) companionsList.push("mes enfants");
           const companions = companionsList.join(" et ");
-          const paragraph = `\n\nJe précise que je voyage habituellement avec ${companions}. Je suis prête à en discuter avec vous et à trouver une solution qui convienne à chacun.`;
+          const paragraph = `\n\nJe précise que je voyage habituellement avec ${companions}. J'en discuterai volontiers avec vous pour trouver une solution qui convienne à chacun.`;
           setMessage((prev) => (prev.includes("Je précise que je voyage") ? prev : `${prev.trimEnd()}${paragraph}`));
         }
       } else {

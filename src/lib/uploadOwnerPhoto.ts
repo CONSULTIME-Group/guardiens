@@ -1,3 +1,4 @@
+import { analyzeHomePhoto } from "@/lib/homePhotos";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImageFile } from "@/lib/compressImage";
 import { getImageDimensions } from "@/lib/imageDimensions";
@@ -48,6 +49,8 @@ export async function uploadOwnerPhoto(params: {
   if (insertErr) throw insertErr;
 
   await appendPropertyPhoto(userId, url);
+  // Lot PHOTO1 : ce que montre la photo, relevé en arrière-plan.
+  void analyzeHomePhoto(userId, url);
 
   return { url };
 }

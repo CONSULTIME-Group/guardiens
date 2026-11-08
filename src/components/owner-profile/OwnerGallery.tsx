@@ -1,3 +1,4 @@
+import { analyzeHomePhoto } from "@/lib/homePhotos";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -257,6 +258,8 @@ const OwnerGallery = () => {
           height: dims.height || null,
         } as any);
         if (insertErr) throw insertErr;
+        // Lot PHOTO1 : ce que montre la photo, relevé en arrière-plan.
+        void analyzeHomePhoto(user.id, urlData.publicUrl);
         nextPosition += 1;
         successCount += 1;
       } catch (err: any) {

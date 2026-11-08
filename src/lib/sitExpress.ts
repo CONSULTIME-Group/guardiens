@@ -49,6 +49,7 @@ const TITLE_PERIOD: Record<DeparturePeriod, string> = {
   plus_tard: "",
 };
 
+/** Première formulation de chaque période (reprise par les tests et l'aperçu). */
 export const EXPRESS_REASON: Record<DeparturePeriod, string> = {
   noel: "Nous partons pour les fêtes de fin d'année.",
   hiver: "Nous partons cet hiver.",
@@ -56,6 +57,34 @@ export const EXPRESS_REASON: Record<DeparturePeriod, string> = {
   ete: "Nous partons cet été.",
   plus_tard: "Nous partons quelques jours.",
 };
+
+/**
+ * Lot L2 élargi (08/11/2026, demande de Jérémie : qu'Alma écrive autre chose
+ * d'une annonce à l'autre) : plusieurs formulations par phrase, tirées par
+ * annonce. Chacune reprend les seuls faits déclarés (période, noms et espèces
+ * des animaux, commune) : aucun proche, aucun lieu, aucun créneau, aucun genre.
+ */
+const REASON_VARIANTS: Record<DeparturePeriod, string[]> = {
+  noel: [EXPRESS_REASON.noel, "Nous nous absentons pour les fêtes de fin d'année.", "Les fêtes de fin d'année nous éloignent de la maison."],
+  hiver: [EXPRESS_REASON.hiver, "Nous nous absentons cet hiver.", "Un départ cet hiver nous éloigne de la maison."],
+  printemps: [EXPRESS_REASON.printemps, "Nous nous absentons au printemps.", "Un départ au printemps nous éloigne de la maison."],
+  ete: [EXPRESS_REASON.ete, "Nous nous absentons cet été.", "Un départ cet été nous éloigne de la maison."],
+  plus_tard: [EXPRESS_REASON.plus_tard, "Nous nous absentons quelques jours.", "Un départ nous éloigne de la maison quelques jours."],
+};
+
+/** Nombre de formulations par phrase (titre, absence, attentes). */
+export const EXPRESS_VARIANT_COUNT = 3;
+
+/** Indice stable tiré d'une graine (identifiant de brouillon ou de membre). Sans graine : 0. */
+export function expressVariantIndex(seed: string | null | undefined, slot: number): number {
+  if (!seed) return 0;
+  let h = 2166136261 ^ (slot * 2654435761);
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0) % EXPRESS_VARIANT_COUNT;
+}
 
 function speciesPhrase(pets: ExpressPet[]): string {
   const kinds = new Set(pets.map((p) => String(p.species ?? "")));
@@ -70,23 +99,48 @@ function speciesPhrase(pets: ExpressPet[]): string {
 
 export interface ExpressTexts { title: string; absenceReason: string; sitterExpectations: string }
 
-export function proposeExpressTexts(o: { period: DeparturePeriod; pets: ExpressPet[]; city?: string | null }): ExpressTexts {
+export function proposeExpressTexts(o: { period: DeparturePeriod; pets: ExpressPet[]; city?: string | null; seed?: string | null }): ExpressTexts {
   const names = joinPetNames(o.pets);
   const city = (o.city ?? "").trim();
   const where = city ? `, à ${city}` : "";
-  let title = `Garde de ${names || "la maison"}${TITLE_PERIOD[o.period]}${where}`;
-  if (title.length > MAX_TITLE_LENGTH) title = `Garde de la maison${TITLE_PERIOD[o.period]}${where}`.slice(0, MAX_TITLE_LENGTH);
+  const period = TITLE_PERIOD[o.period];
+  const [ti, ri, ei] = [0, 1, 2].map((slot) => expressVariantIndex(o.seed, slot));
+
+  const named = petNames(o.pets).length;
+  const plural = named > 0 ? named > 1 : o.pets.length > 1;
+
+  const titles = names
+    ? [
+        `Garde de ${names}${period}${where}`,
+        `Une présence pour ${names}${period}${where}`,
+        `${names} ${plural ? "attendent leur" : "attend son"} gardien${period}${where}`,
+      ]
+    : [
+        `Garde de la maison${period}${where}`,
+        `Une présence à la maison${period}${where}`,
+        `La maison attend son gardien${period}${where}`,
+      ];
+  let title = titles[ti];
+  if (title.length > MAX_TITLE_LENGTH) title = `Garde de la maison${period}${where}`.slice(0, MAX_TITLE_LENGTH);
 
   let sitterExpectations: string;
   if (o.pets.length > 0) {
-    const named = petNames(o.pets).length;
-    const plural = named > 0 ? named > 1 : o.pets.length > 1;
     const subject = names || (plural ? "Nos animaux" : "Notre animal");
-    sitterExpectations = `${subject} ${plural ? "restent" : "reste"} à la maison avec ${plural ? "leurs" : "ses"} habitudes. Nous cherchons une personne attentive, à l'aise avec ${speciesPhrase(o.pets)}.`;
+    const who = names || (plural ? "nos animaux" : "notre animal");
+    const kinds = speciesPhrase(o.pets);
+    sitterExpectations = [
+      `${subject} ${plural ? "restent" : "reste"} à la maison avec ${plural ? "leurs" : "ses"} habitudes. Nous cherchons une personne attentive, à l'aise avec ${kinds}.`,
+      `${subject} ${plural ? "gardent leur" : "garde son"} rythme à la maison. Nous aimerions confier la maison à une personne à l'aise avec ${kinds}.`,
+      `Nous cherchons une personne à l'aise avec ${kinds} pour veiller sur ${who} et sur la maison.`,
+    ][ei];
   } else {
-    sitterExpectations = "Nous cherchons une personne attentive pour prendre soin de la maison pendant notre absence.";
+    sitterExpectations = [
+      "Nous cherchons une personne attentive pour prendre soin de la maison pendant notre absence.",
+      "Nous aimerions confier la maison à une personne attentive pendant notre absence.",
+      "Une présence attentive à la maison pendant notre absence nous rassurerait.",
+    ][ei];
   }
-  return { title, absenceReason: EXPRESS_REASON[o.period], sitterExpectations };
+  return { title, absenceReason: REASON_VARIANTS[o.period][ri], sitterExpectations };
 }
 
 export interface DatePreset { key: string; label: string; start: string; end: string }

@@ -3,6 +3,7 @@
 // Sortie : { drafts: [{ tone, text }, ...] }
 
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
+import { DECLARED_FACTS_RULE } from "../_shared/alma-declared-facts.ts";
 import { isLlmRefusal } from "../_shared/refusal-guard.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -37,6 +38,8 @@ Deno.serve(async (req) => {
     const system = `Vous rédigez la bio publique d'un futur gardien d'animaux et de maison.
 
 ${STYLE_GUARDRAILS}
+
+${DECLARED_FACTS_RULE}
 
 RÈGLE ABSOLUE : vous produisez TOUJOURS les 3 brouillons demandés. Vous ne refusez jamais, vous ne demandez jamais d'informations. Si les réponses fournies sont pauvres, appuyez-vous strictement sur ce qui est fourni.
 

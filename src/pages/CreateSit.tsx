@@ -86,10 +86,11 @@ import { ensureOwnerSpace, needsOwnerSpace } from "@/lib/ownerSpace";
 import PublishExitDialog from "@/components/sits/owner/PublishExitDialog";
 import AnimalMentionDialog from "@/components/sits/owner/AnimalMentionDialog";
 import PublishPhotoPromptDialog from "@/components/sits/owner/PublishPhotoPromptDialog";
+import { analyzeHomePhoto, loadHomePhotoGap, type HomePhotoGap } from "@/lib/homePhotos";
 import {
   countPropertyPhotos,
   shouldPromptPublishPhotos,
-  shouldShowSurroundingsParagraph,
+  propertyPhotoUrls,
   withUploadedPhoto,
 } from "@/lib/publishPhotoPrompt";
 
@@ -492,6 +493,8 @@ const CreateSit = () => {
   const animalMentionConfirmedRef = useRef(false);
   const [completionPanel, setCompletionPanel] = useState<"pets" | "photo" | null>(null);
   const [photoPromptOpen, setPhotoPromptOpen] = useState(false);
+  const [photoPromptGap, setPhotoPromptGap] = useState<HomePhotoGap | undefined>(undefined);
+  const [expressPhotoTip, setExpressPhotoTip] = useState<string | null>(null);
   const photoPromptConfirmedRef = useRef(false);
 
 
@@ -1602,7 +1605,6 @@ const CreateSit = () => {
 
   // Photos du logement : la recommandation ne retient personne, elle propose.
   const propertyPhotoCount = countPropertyPhotos(property?.photos);
-  const photoPromptSurroundings = shouldShowSurroundingsParagraph(property?.region_highlights);
 
   const handlePhotoPromptAddPhotos = () => {
     setPhotoPromptOpen(false);
@@ -1847,15 +1849,22 @@ const CreateSit = () => {
       setAnimalMentionOpen(true);
       return;
     }
-    // Recommandation de photos, jamais bloquante
-    // (règle : src/lib/publishPhotoPrompt.ts).
-    if (!expressActiveRef.current && !photoPromptConfirmedRef.current && shouldPromptPublishPhotos(propertyPhotoCount)) {
-      void trackEvent("sit_publish_photo_prompt_shown", {
-        source: "create_sit_page",
-        metadata: { sit_id: draftId, photo_count: propertyPhotoCount },
-      });
-      setPhotoPromptOpen(true);
-      return;
+    // Recommandation de photos, jamais bloquante, sur toutes les façons de
+    // publier, express compris (lot PHOTO1) : moins de trois photos, ou trois
+    // photos dont aucune analysée ne montre le logement.
+    if (!photoPromptConfirmedRef.current && user) {
+      const gap = shouldPromptPublishPhotos(propertyPhotoCount)
+        ? (propertyPhotoCount === 0 ? "no_photo" : "few")
+        : await loadHomePhotoGap(user.id, propertyPhotoUrls(property?.photos));
+      if (gap !== "none") {
+        void trackEvent("sit_publish_photo_prompt_shown", {
+          source: "create_sit_page",
+          metadata: { sit_id: draftId, photo_count: propertyPhotoCount, gap, express: expressActiveRef.current },
+        });
+        setPhotoPromptGap(gap);
+        setPhotoPromptOpen(true);
+        return;
+      }
     }
     setPublishing(true);
 
@@ -2308,7 +2317,7 @@ const CreateSit = () => {
     // brouillon repris garde ce que le propriétaire a déjà écrit.
     const merged = mergeExpressTexts(
       { title, absenceReason, sitterExpectations },
-      proposeExpressTexts({ period: expressParams.period, pets, city: ownerCity }),
+      proposeExpressTexts({ period: expressParams.period, pets, city: ownerCity, seed: draftId ?? user?.id ?? null }),
       MIN_SUB_DESCRIPTION,
     );
     setTitle(merged.title);
@@ -2340,6 +2349,8 @@ const CreateSit = () => {
       const url = await uploadOwnerGalleryPhoto(user.id, file, ownerPhotos.length);
       registerUploadedPhoto(url);
       setCoverPhotoUrl(url);
+      setExpressPhotoTip(null);
+      void analyzeHomePhoto(user.id, url).then((r) => setExpressPhotoTip(r?.tip ?? null));
       void trackEvent("sits_express_photo_added", { source: "/sits/create", metadata: { period: expressParams.period } });
     } catch (e) {
       console.error("[CreateSit] express photo upload failed", e);
@@ -2521,6 +2532,7 @@ const CreateSit = () => {
           photoUrl={coverPhotoUrl || ownerPhotos[0] || property?.photos?.[0] || null}
           uploading={expressUploading}
           onPhotoFile={(f) => { void handleExpressPhoto(f); }}
+          photoTip={expressPhotoTip}
           startDate={startDate}
           endDate={endDate}
           onDates={(s, e, method) => {
@@ -2560,7 +2572,7 @@ const CreateSit = () => {
           open={photoPromptOpen}
           onOpenChange={setPhotoPromptOpen}
           photoCount={propertyPhotoCount}
-          showSurroundings={photoPromptSurroundings}
+          gap={photoPromptGap}
           onAddPhotos={handlePhotoPromptAddPhotos}
           onPublishAnyway={handlePhotoPromptPublishAnyway}
         />
@@ -3659,7 +3671,7 @@ const CreateSit = () => {
         open={photoPromptOpen}
         onOpenChange={setPhotoPromptOpen}
         photoCount={propertyPhotoCount}
-        showSurroundings={photoPromptSurroundings}
+        gap={photoPromptGap}
         onAddPhotos={handlePhotoPromptAddPhotos}
         onPublishAnyway={handlePhotoPromptPublishAnyway}
       />

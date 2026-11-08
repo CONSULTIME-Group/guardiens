@@ -8,6 +8,7 @@
 // Compat : accepte `{ imageUrl }` (mode legacy, 1 image) ou `{ imageUrls: [...] }`.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { toHomePhotoInsight } from "../_shared/home-photo-insight.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,6 +25,9 @@ type Scored = {
   issues: string[];
   suggestions: string[];
   summary: string;
+  /** Lot PHOTO1 : ce que montre la photo. */
+  subject?: string;
+  shows_home?: boolean;
 };
 
 const systemPrompt = `Vous évaluez des photos de couverture d'annonces de garde de maison/animaux.
@@ -40,6 +44,8 @@ Pénalisez fortement (max 40) : visages humains en gros plan, photos de personne
 Bonus implicite : présence d'animal, lumière naturelle, atmosphère « comme à la maison ».
 
 La qualité technique (netteté, exposition) ne départage qu'à pertinence éditoriale égale.
+
+Dites aussi ce que montre la photo (subject) : exterieur (façade, maison vue du dehors), interieur (une pièce du logement), jardin (jardin, terrasse, cour du logement), animal (un animal au premier plan), alentours (rue, village, paysage autour), autre. shows_home vaut vrai quand on voit le logement lui-même : sa façade, une de ses pièces, son jardin ou sa terrasse. Un animal photographié dans une pièce reconnaissable compte comme logement visible.
 
 Utilisez le vouvoiement, soyez concret, court, bienveillant.`;
 
@@ -97,8 +103,10 @@ async function analyzeOne(imageUrl: string, apiKey: string): Promise<Scored | nu
                 },
                 suggestions: { type: "array", items: { type: "string" }, minItems: 1, maxItems: 3 },
                 summary: { type: "string" },
+                subject: { type: "string", enum: ["exterieur", "interieur", "jardin", "animal", "alentours", "autre"] },
+                shows_home: { type: "boolean" },
               },
-              required: ["score", "verdict", "issues", "suggestions", "summary"],
+              required: ["score", "verdict", "issues", "suggestions", "summary", "subject", "shows_home"],
               additionalProperties: false,
             },
           },
@@ -125,6 +133,26 @@ async function analyzeOne(imageUrl: string, apiKey: string): Promise<Scored | nu
   }
 }
 
+// Lot PHOTO1 : relevé enregistré pour une photo de la galerie du membre ; un
+// échec d'écriture laisse la réponse intacte (le rappel se fie au nombre).
+// deno-lint-ignore no-explicit-any
+async function persistInsight(admin: any, userId: string, r: Scored): Promise<void> {
+  const row = toHomePhotoInsight(userId, r);
+  if (!row) return;
+  try {
+    const { data: owned } = await admin
+      .from("owner_gallery")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("photo_url", r.url)
+      .limit(1);
+    if (!owned || owned.length === 0) return;
+    await admin.from("owner_gallery_insights").upsert(row, { onConflict: "photo_url" });
+  } catch (e) {
+    console.warn("owner_gallery_insights non écrit", e);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -134,6 +162,9 @@ Deno.serve(async (req) => {
     const many: string[] | undefined = Array.isArray(body.imageUrls) ? body.imageUrls : undefined;
 
     const requested = many ?? (single ? [single] : []);
+    // Lot PHOTO1 : persist = true enregistre ce que montre la photo, pour une
+    // photo de la galerie du membre seulement.
+    const persist = body.persist === true;
     if (requested.length === 0) {
       return new Response(JSON.stringify({ error: "imageUrl(s) requis" }), {
         status: 400,
@@ -208,7 +239,10 @@ Deno.serve(async (req) => {
       if (newCount > MAX_PER_DAY) break;
       try {
         const r = await analyzeOne(url, LOVABLE_API_KEY);
-        if (r) results.push(r);
+        if (r) {
+          results.push(r);
+          if (persist) await persistInsight(admin, userId, r);
+        }
       } catch (e) {
         if (e instanceof Response && (e.status === 429 || e.status === 402)) {
           return new Response(

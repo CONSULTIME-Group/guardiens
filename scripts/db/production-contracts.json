@@ -53,6 +53,20 @@
           "sql": "SELECT COALESCE((SELECT city FROM public.profiles WHERE id = '9a405163-afe3-4767-b40c-5c0a18c75d07') = 'Chazay-d''Azergues', false) AS ok"
         }
       ]
+    },
+    {
+      "migration": "0119_photo1_regard_photos_logement.sql",
+      "description": "Relevé de ce que montre chaque photo de la galerie, lu par le propriétaire seul",
+      "checks": [
+        {
+          "name": "owner_gallery_insights_rls",
+          "sql": "SELECT COALESCE((SELECT c.relrowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relname = 'owner_gallery_insights'), false) AND EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'owner_gallery_insights' AND policyname = 'owner reads own gallery insights') AND NOT has_table_privilege('authenticated', 'public.owner_gallery_insights', 'INSERT') AS ok"
+        },
+        {
+          "name": "owner_gallery_insight_purge_trigger",
+          "sql": "SELECT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_purge_owner_gallery_insight' AND NOT tgisinternal) AS ok"
+        }
+      ]
     }
   ]
 }

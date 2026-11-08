@@ -53,6 +53,7 @@ import {
 import { describeSitWriteError, sitWriteErrorNeedsSignal } from "@/lib/sitDbErrors";
 import { trackEvent } from "@/lib/analytics";
 import PublishPhotoPromptDialog from "@/components/sits/owner/PublishPhotoPromptDialog";
+import { loadHomePhotoGap, type HomePhotoGap } from "@/lib/homePhotos";
 import { readVisiblePets } from "@/lib/visiblePets";
 import { isSitReviewable } from "@/lib/reviewEligibility";
 import RemoveSitDialog from "@/components/sits/owner/RemoveSitDialog";
@@ -60,7 +61,7 @@ import { canShowRemoveSit, isDeletedByOwner } from "@/lib/removeSit";
 import {
   countPropertyPhotos,
   shouldPromptPublishPhotos,
-  shouldShowSurroundingsParagraph,
+  propertyPhotoUrls,
   PUBLISH_PHOTO_PROMPT_HREF,
 } from "@/lib/publishPhotoPrompt";
 import { calendarDate } from "@/lib/calendarDate";
@@ -202,7 +203,7 @@ const Sits = () => {
   const [archiveConfirm, setArchiveConfirm] = useState<string | null>(null);
   const [republishDialog, setRepublishDialog] = useState<{ id: string; title?: string | null } | null>(null);
   const [photoPrompt, setPhotoPrompt] = useState<
-    { sitId: string; photoCount: number; showSurroundings: boolean } | null
+    { sitId: string; photoCount: number; gap: HomePhotoGap } | null
   >(null);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -581,29 +582,27 @@ const Sits = () => {
     if (!opts?.skipPhotoPrompt) {
       const propertyId = (sit as any).property_id ?? (sit as any).properties?.id ?? null;
       let photos: unknown = (sit as any).properties?.photos ?? null;
-      let regionHighlights: unknown = (sit as any).properties?.region_highlights ?? null;
       if (propertyId) {
         const { data: prop } = await supabase
           .from("properties")
-          .select("photos, region_highlights")
+          .select("photos")
           .eq("id", propertyId)
           .maybeSingle();
-        if (prop) {
-          photos = (prop as any).photos;
-          regionHighlights = (prop as any).region_highlights;
-        }
+        if (prop) photos = (prop as any).photos;
       }
       const photoCount = countPropertyPhotos(photos);
-      if (shouldPromptPublishPhotos(photoCount)) {
+      // Lot PHOTO1 : trois photos sans le logement visible déclenchent aussi le rappel.
+      const gap: HomePhotoGap = shouldPromptPublishPhotos(photoCount)
+        ? (photoCount === 0 ? "no_photo" : "few")
+        : user?.id
+          ? await loadHomePhotoGap(user.id, propertyPhotoUrls(photos))
+          : "none";
+      if (gap !== "none") {
         void trackEvent("sit_publish_photo_prompt_shown", {
           source: "sits_list_republish",
-          metadata: { sit_id: sitId, photo_count: photoCount },
+          metadata: { sit_id: sitId, photo_count: photoCount, gap },
         });
-        setPhotoPrompt({
-          sitId,
-          photoCount,
-          showSurroundings: shouldShowSurroundingsParagraph(regionHighlights),
-        });
+        setPhotoPrompt({ sitId, photoCount, gap });
         return;
       }
     }
@@ -1255,7 +1254,7 @@ const Sits = () => {
         open={!!photoPrompt}
         onOpenChange={(open) => { if (!open) setPhotoPrompt(null); }}
         photoCount={photoPrompt?.photoCount ?? 0}
-        showSurroundings={photoPrompt?.showSurroundings ?? false}
+        gap={photoPrompt?.gap}
         onAddPhotos={() => {
           const current = photoPrompt;
           setPhotoPrompt(null);
