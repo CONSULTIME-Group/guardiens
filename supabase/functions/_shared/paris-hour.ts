@@ -89,3 +89,12 @@ export function parisWindowVerdictForHours(
   }
   return { run: true, parisHour };
 }
+
+/**
+ * Lot NUR1 (08/11/2026) : récapitulatif « annonces près de chez vous ».
+ * Premier passage à 9 h à Paris, les passages de 10 h à 12 h reprennent
+ * seulement les membres pas encore servis (anti-doublon de 20 heures).
+ * Le 08/11/2026, un seul passage s'arrêtait à 30 envois sur la limite de
+ * débit et 106 membres ne recevaient rien.
+ */
+export const NEARBY_DAILY_DIGEST_TARGET_PARIS_HOURS = [9, 10, 11, 12] as const;

@@ -34,9 +34,9 @@ const NudgeMissingPhotoEmail = ({ firstName }: NudgeMissingPhotoProps) => {
           <Section style={highlightBox}>
             <Text style={highlightTitle}>Il manque votre photo de profil</Text>
             <Text style={highlightText}>
-              Les propriétaires confient leur maison et leurs animaux à une personne,
-              pas à une silhouette. Une photo claire, souriante, multiplie fortement
-              vos chances d'être choisi(e).
+              Les propriétaires confient leur maison et leurs animaux à une personne :
+              ils aiment voir son visage avant d'écrire. Une photo claire et souriante
+              les aide à vous choisir.
             </Text>
           </Section>
 

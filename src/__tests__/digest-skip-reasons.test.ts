@@ -9,6 +9,8 @@ import { describe, expect, it, vi } from "vitest";
 import * as parisHour from "../../supabase/functions/_shared/paris-hour";
 import * as publicationWindow from "../../supabase/functions/_shared/sit-publication-window";
 import * as cronTrace from "../../supabase/functions/_shared/cron-trace";
+import * as outboundRateLimit from "../../supabase/functions/_shared/outbound-rate-limit";
+import * as nearbyPreferences from "../../supabase/functions/send-nearby-daily-digest/preferences";
 
 type Rows = Record<string, unknown[]>;
 
@@ -44,7 +46,7 @@ function loadHandler(path: string, rows: Rows) {
   });
   const inert = async () => ({ data: null, error: null });
   runInNewContext(outputText, {
-    exports: {}, Request, Response, URL, Headers, Date, Error, Math, JSON, Number, Array, Set, Map, Promise, Intl, Boolean, String, Object,
+    exports: {}, Request, Response, URL, Headers, Date, Error, Math, JSON, Number, Array, Set, Map, Promise, Intl, Boolean, String, Object, setTimeout,
     console: { log: vi.fn(), warn: vi.fn(), error: vi.fn() },
     fetch: () => { throw new Error("Unexpected network call"); },
     Deno: { env: { get: (key: string) => env[key] }, serve: (cb: typeof handler) => { handler = cb; } },
@@ -60,6 +62,9 @@ function loadHandler(path: string, rows: Rows) {
       if (specifier.includes("paris-hour")) return parisHour;
       if (specifier.includes("sit-publication-window")) return publicationWindow;
       if (specifier.includes("cron-trace")) return cronTrace;
+      // Lot NUR1 : limite de débit et lecture paginée, modules purs réels.
+      if (specifier.includes("outbound-rate-limit")) return outboundRateLimit;
+      if (specifier.includes("/preferences")) return nearbyPreferences;
       // Lot A1b : appelant autorisé (clé service), le contrôle est testé ailleurs.
       if (specifier.includes("require-cron-caller")) return { requireCronCaller: async () => null };
       throw new Error(`Unexpected import ${specifier}`);

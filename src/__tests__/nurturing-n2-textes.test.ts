@@ -67,8 +67,9 @@ describe('lot N2, vocabulaire des gabarits réécrits', () => {
     );
     expect(read('dormant-sitter-nudge')).toContain('Nous avons pensé à vous.');
     expect(read('availability-nudge')).toContain('Votre profil peut faire la différence.');
+    // Lot NUR1 : l'ancien objet promettait une visibilité à 60 %, fausse depuis le 10/10/2026.
     expect(read('relance-profil-incomplet')).toContain(
-      'Trois informations, et votre profil apparaît près de chez vous',
+      'Une photo et trois lignes, et les propriétaires vous reconnaissent',
     );
     expect(read('relance-cp-manquant')).toContain('Indiquer mon code postal');
     expect(read('owner-no-sit-j3')).toContain('Publier mon annonce');

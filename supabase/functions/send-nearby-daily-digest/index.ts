@@ -16,14 +16,15 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { claimSitNotification, raiseClaimErrorSignal, releaseSitNotification, reportClaimOutcome } from '../_shared/sitNotificationClaim.ts'
-import { parisWindowVerdict } from '../_shared/paris-hour.ts'
+import { NEARBY_DAILY_DIGEST_TARGET_PARIS_HOURS, parisWindowVerdictForHours } from '../_shared/paris-hour.ts'
+import { OUTBOUND_RUN_BUDGET_MS, OUTBOUND_SEND_SPACING_MS, describeThrown, sendWithinRateLimit } from '../_shared/outbound-rate-limit.ts'
+import { fetchAllPreferenceRows } from './preferences.ts'
 import { publicationWindowOrClause } from '../_shared/sit-publication-window.ts'
 import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 import { startCronRun, type CronRun } from '../_shared/cron-run-log.ts'
 import { digestRunStatus, NEARBY_DAILY_DIGEST_CRON_JOB_IDS, readCronJobId, readCronTraceId } from '../_shared/cron-trace.ts'
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
 
-const TARGET_PARIS_HOUR = 9
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -73,7 +74,7 @@ Deno.serve(async (req) => {
   let nominalRun: CronRun | null = isNominal ? await startCronRun('send-nearby-daily-digest') : null
 
   if (isNominal) {
-    const verdict = parisWindowVerdict(new Date(), TARGET_PARIS_HOUR)
+    const verdict = parisWindowVerdictForHours(new Date(), NEARBY_DAILY_DIGEST_TARGET_PARIS_HOURS)
     if (!verdict.run) {
       console.log(JSON.stringify({ event: 'digest_skipped_paris_window', source: 'send-nearby-daily-digest', ...verdict }))
       await nominalRun?.finish('success', {
@@ -202,18 +203,23 @@ Deno.serve(async (req) => {
 
 
     // 3) Récupère les destinataires opt-in avec coordonnées.
-    let recipientsQ = supabase
-      .from('email_preferences')
-      .select('user_id, nearby_daily_radius_km, product_emails, new_mission_digest, sit_alert_frequency')
-      .eq('nearby_daily_digest', true)
-      // Le recapitulatif quotidien ne concerne pas les personnes qui ont
-      // demande un rythme hebdomadaire, ni celles qui ont coupe ce flux.
-      .neq('sit_alert_frequency', 'weekly')
-      .neq('sit_alert_frequency', 'none')
-    if (body.user_id) recipientsQ = recipientsQ.eq('user_id', body.user_id)
-
-    const { data: prefs, error: prefsErr } = await recipientsQ
-    if (prefsErr) throw prefsErr
+    // Lot NUR1 : lecture paginée. Une lecture simple s'arrêtait à 1 000
+    // lignes (plafond de l'API) : 754 des 1 754 inscrits n'étaient jamais
+    // évalués (mesure du 08/11/2026). Le rythme hebdomadaire et « aucun »
+    // restent exclus du récapitulatif quotidien.
+    const prefs = await fetchAllPreferenceRows((from, to) => {
+      let q = supabase
+        .from('email_preferences')
+        .select('user_id, nearby_daily_radius_km, product_emails, new_mission_digest, sit_alert_frequency')
+        .eq('nearby_daily_digest', true)
+        .neq('sit_alert_frequency', 'weekly')
+        .neq('sit_alert_frequency', 'none')
+        .order('user_id', { ascending: true })
+        .range(from, to)
+      if (body.user_id) q = q.eq('user_id', body.user_id)
+      return q
+    })
+    const prefByUser = new Map<string, any>(prefs.map((x: any) => [x.user_id, x]))
 
     // Ajoute aussi les utilisateurs SANS ligne email_preferences (défaut = opt-in)
     // uniquement si un user_id est passé explicitement, sinon on se limite aux
@@ -284,12 +290,20 @@ Deno.serve(async (req) => {
     let deptFallbackUsers = 0
     const claimSkippedBy: Record<string, number> = {}
     const errors: Array<{ user_id: string; reason: string }> = []
+    // Lot NUR1 : budget du passage et limite de débit. Un membre non servi
+    // ici l'est au passage suivant (10 h à 12 h), sa réservation est rendue.
+    const startedAtMs = Date.now()
+    let lastSendAtMs = 0
+    let budgetReached = false
+    let deferredRateLimited = 0
 
 
     for (const p of profiles ?? []) {
+      if (Date.now() - startedAtMs >= OUTBOUND_RUN_BUDGET_MS) { budgetReached = true; break }
+      let claimHeld = false
       try {
         if (p.account_status && p.account_status !== 'active') { skip('compte_inactif'); continue }
-        const pref = (prefs ?? []).find((x: any) => x.user_id === p.id)
+        const pref = prefByUser.get(p.id)
         const radiusKm = pref?.nearby_daily_radius_km ?? 100
         // product_emails=false ne coupe PAS ce digest (opt-in dédié), mais on
         // respecte quand même si l'utilisateur a explicitement tout coupé côté
@@ -432,48 +446,62 @@ Deno.serve(async (req) => {
             continue
           }
           claimGranted++
+          claimHeld = true
         }
 
         const idem = body.manual
           ? `nearby-digest-${p.id}-${Date.now()}`
           : `nearby-digest-${p.id}-${today}`
 
-        const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
-          body: JSON.stringify({
-            templateName: 'nearby-daily-digest',
-            recipientEmail: email,
-            idempotencyKey: idem,
-            templateData: {
-              firstName: p.first_name ?? undefined,
-              radiusKm,
-              city: p.city ?? undefined,
-              items: top,
-            },
-          }),
-        });
-        const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
-        if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
-        const sendErr = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
-        if (sendErr) {
+        const sendBody = JSON.stringify({
+          templateName: 'nearby-daily-digest',
+          recipientEmail: email,
+          idempotencyKey: idem,
+          templateData: {
+            firstName: p.first_name ?? undefined,
+            radiusKm,
+            city: p.city ?? undefined,
+            items: top,
+          },
+        })
+        const spacing = OUTBOUND_SEND_SPACING_MS - (Date.now() - lastSendAtMs)
+        if (lastSendAtMs > 0 && spacing > 0) await new Promise((r) => setTimeout(r, spacing))
+        const outcome = await sendWithinRateLimit(async () => {
+          lastSendAtMs = Date.now()
+          const res = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+            body: sendBody,
+          })
+          return { ok: res.ok, status: res.status, body: res.ok ? '' : await res.text().catch(() => '') }
+        }, { startedAtMs })
+        if (outcome.kind === 'rate_limited') {
+          // Limite de débit : ni échec ni perte, le membre est repris au
+          // passage suivant ; on arrête ce passage.
+          if (claimHeld) await releaseSitNotification(supabase, p.id, 'rate_limited')
+          deferredRateLimited++
+          break
+        }
+        if (outcome.kind === 'failed') {
           await recordDeliveryFailure(supabase, {
             templateName: 'nearby-daily-digest',
-            recipientEmail: (p as any).email ?? null,
+            recipientEmail: email,
             recipientId: p.id,
             entityType: 'user',
             entityId: p.id,
             source: 'send-nearby-daily-digest',
-            errorMessage: `HTTP ${_steRes.status}: ${_steTxt1.slice(0, 500)}`,
-            extra: { http_status: _steRes.status, response_body: _steTxt1.slice(0, 1000) },
+            errorMessage: outcome.detail,
           })
-          if (!body.manual) await releaseSitNotification(supabase, p.id, 'send_failed')
-          errors.push({ user_id: p.id, reason: `send_failed: ${String(sendErr)}` })
+          if (claimHeld) await releaseSitNotification(supabase, p.id, 'send_failed')
+          errors.push({ user_id: p.id, reason: `send_failed: ${outcome.detail}` })
           continue
         }
         usersSent++
       } catch (loopErr) {
-        errors.push({ user_id: p.id, reason: String(loopErr) })
+        // Lot NUR1 : une exception après la réservation la rend, sinon le
+        // membre perdait aussi ses autres récapitulatifs du jour.
+        if (claimHeld) await releaseSitNotification(supabase, p.id, 'send_failed').catch(() => {})
+        errors.push({ user_id: p.id, reason: describeThrown(loopErr) })
       }
     }
 
@@ -483,7 +511,10 @@ Deno.serve(async (req) => {
     // Métriques agrégées uniquement : aucun email, aucun identifiant de
     // membre, aucun jeton, aucun contenu personnel.
     await nominalRun?.finish(digestRunStatus(errors.length), {
+      prefs_total: prefs.length,
       users_considered: (profiles ?? []).length,
+      budget_reached: budgetReached,
+      deferred_rate_limited: deferredRateLimited,
       users_sent: usersSent,
       users_skipped: usersSkipped,
       skipped_by_reason: skippedBy,

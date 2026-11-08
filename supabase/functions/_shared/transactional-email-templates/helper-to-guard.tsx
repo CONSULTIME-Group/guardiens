@@ -9,7 +9,7 @@ import type { TemplateEntry } from './registry.ts'
 
 const SITE_URL = 'https://guardiens.fr'
 const CTA_URL = `${SITE_URL}/login?redirect=${encodeURIComponent('/recherche?utm_source=email&utm_medium=email&utm_campaign=helper_to_guard')}&utm_source=email&utm_medium=email&utm_campaign=helper_to_guard`
-const CTA_OWNER_URL = `${SITE_URL}/login?redirect=${encodeURIComponent('/sits/nouveau?utm_source=email&utm_medium=email&utm_campaign=helper_to_guard')}&utm_source=email&utm_medium=email&utm_campaign=helper_to_guard`
+const CTA_OWNER_URL = `${SITE_URL}/login?redirect=${encodeURIComponent('/sits/create?utm_source=email&utm_medium=email&utm_campaign=helper_to_guard')}&utm_source=email&utm_medium=email&utm_campaign=helper_to_guard`
 
 interface Props {
   firstName?: string
@@ -46,7 +46,7 @@ const HelperToGuardEmail = ({ firstName }: Props) => (
         </Section>
 
         <Text style={text} className="em-text">
-          Aucune pression, aucune obligation. Vous connaissez déjà l'esprit de la maison,
+          À votre rythme, quand l'envie vient. Vous connaissez déjà l'esprit de la maison,
           il vous suffit de pousser la porte d'à côté.
         </Text>
 
