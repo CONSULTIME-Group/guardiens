@@ -19,7 +19,7 @@
  *    lire, garde sous 45 jours, réponse attendue, brouillon, première annonce).
  */
 import { daysBetween, calendarDate } from "@/lib/calendarDate";
-import { finishUrl, type DeparturePeriod } from "@/lib/ownerDeparture";
+import { capitalizePetName, finishUrl, type DeparturePeriod } from "@/lib/ownerDeparture";
 
 export type StorySpace = "owner" | "sitter";
 
@@ -124,9 +124,12 @@ function clean(s: string | null | undefined): string {
   return (s ?? "").trim();
 }
 
-/** « Caramel », « Caramel et Noisette », « Mila, Rex et Nala » (noms déclarés seulement). */
+/**
+ * « Caramel », « Caramel et Noisette », « Mila, Rex et Nala » (noms déclarés
+ * seulement, première lettre en majuscule : « resa » devient « Resa », lot L4b).
+ */
 export function joinNames(names: ReadonlyArray<string | null | undefined>): string {
-  const list = names.map(clean).filter(Boolean);
+  const list = names.map(capitalizePetName).filter(Boolean);
   if (list.length === 0) return "";
   if (list.length === 1) return list[0];
   return `${list.slice(0, -1).join(", ")} et ${list[list.length - 1]}`;
