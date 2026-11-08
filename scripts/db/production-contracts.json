@@ -43,6 +43,16 @@
           "sql": "SELECT COALESCE((SELECT string_agg(st.step_order || ':' || st.template_name, ',' ORDER BY st.step_order) FROM public.nurturing_steps st JOIN public.nurturing_sequences s ON s.id = st.sequence_id WHERE s.key = 'onboarding-owner') = '1:onboarding-j1,2:owner-no-sit-j3,3:owner-no-sit-j21', false) AS ok"
         }
       ]
+    },
+    {
+      "migration": "0118_meta4_ville_depuis_code_postal.sql",
+      "description": "Profil Chazay-d'Azergues (69380) repris : ville écrite depuis le code postal",
+      "checks": [
+        {
+          "name": "profil_69380_a_une_ville",
+          "sql": "SELECT COALESCE((SELECT city FROM public.profiles WHERE id = '9a405163-afe3-4767-b40c-5c0a18c75d07') = 'Chazay-d''Azergues', false) AS ok"
+        }
+      ]
     }
   ]
 }

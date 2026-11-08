@@ -13,7 +13,9 @@ const compiled = ts.transpileModule(source, { compilerOptions: { target: ts.Scri
 function harness({ admin = false, user = true, roleError = null, city = "", country = "FR", postal = "", latitude = null as number | null, longitude = null as number | null, secret = "trigger-secret", fetchResponse = undefined as undefined | ((url: string) => Promise<any>) } = {}) {
   let handler: (req: Request) => Promise<Response>;
   const profileRead = vi.fn().mockResolvedValue({ data: { city, postal_code: postal, country, latitude, longitude }, error: null });
-  const update = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) });
+  // .eq() se termine (await) ou se prolonge par .or() (lot META4, ville depuis le code postal).
+  const eqResult = () => Object.assign(Promise.resolve({ error: null }), { or: vi.fn().mockResolvedValue({ error: null }) });
+  const update = vi.fn().mockReturnValue({ eq: vi.fn().mockImplementation(eqResult) });
   const rpc = vi.fn().mockResolvedValue({ data: admin, error: roleError });
   const client = {
     auth: { getUser: vi.fn().mockResolvedValue({ data: { user: user ? { id: "caller" } : null }, error: null }) },
@@ -85,8 +87,10 @@ describe("manual profile geocoding authorization", () => {
       ] };
     } });
     expect(await (await h.run({ "x-geocode-secret": "trigger-secret" })).json())
-      .toMatchObject({ ok: true, lat: 45.87, lng: 4.7, source: "communes_code_postal" });
+      .toMatchObject({ ok: true, lat: 45.87, lng: 4.7, source: "communes_code_postal", city: "Grande" });
     expect(h.update).toHaveBeenCalledWith({ latitude: 45.87, longitude: 4.7, place_status: null, place_status_at: null });
+    // Lot META4 : la commune retenue devient la ville, seulement si elle est vide.
+    expect(h.update).toHaveBeenCalledWith({ city: "Grande" });
   });
   it("returns a skipped result without writing when the city is missing", async () => {
     const h = harness({ admin: true });
