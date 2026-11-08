@@ -13,6 +13,7 @@ import {
 } from '../_shared/nearby-open-sits.ts'
 import { deferDecision } from '../_shared/journey-defer.ts'
 import { journeyIsOwner } from '../_shared/journey-audience.ts'
+import { communityTotals } from '../_shared/community-totals.js'
 import { loadPublishedOwnerIdSet, ownerHasPublished } from '../_shared/published-sit.ts'
 import {
   loadOwnerSitterPool,
@@ -327,6 +328,23 @@ async function runEvaluation(
     return sitterPoolCache
   }
 
+  // Lot NUR1 (08/11/2026, décision de Jérémie : « 43 et 248, dynamique ») :
+  // maisons gardées et animaux accompagnés, même cumul que l'accueil et
+  // llms.txt (communityTotals). Un seul chargement par passage ; lecture en
+  // échec = aucun chiffre dans l'email, jamais un chiffre figé.
+  let communityTotalsCache: { houses: number; animals: number } | null | undefined
+  const loadCommunityTotals = async (): Promise<{ houses: number; animals: number } | null> => {
+    if (communityTotalsCache !== undefined) return communityTotalsCache
+    try {
+      const { data, error } = await supabase.rpc('get_public_stats')
+      const row = Array.isArray(data) ? data[0] : data
+      communityTotalsCache = error || !row ? null : communityTotals(row)
+    } catch {
+      communityTotalsCache = null
+    }
+    return communityTotalsCache
+  }
+
   for (const j of activeJourneys ?? []) {
     if (stats.sent >= MAX_SENDS_PER_RUN) { stats.capped = true; break }
     if (Date.now() > DEADLINE_MS) { stats.capped = true; break }
@@ -541,6 +559,10 @@ async function runEvaluation(
           ownerContext = ownerNearbyTemplateData(ctx)
         } catch (ctxErr) {
           console.warn('[owner-context] nearby lookup failed, sending without enrichment', ctxErr)
+        }
+        if (template === 'owner-no-sit-j21') {
+          const totals = await loadCommunityTotals()
+          if (totals) ownerContext = { ...ownerContext, communityHouses: totals.houses, communityAnimals: totals.animals }
         }
         if (template === 'owner-no-sit-j3') {
           try {
