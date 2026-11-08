@@ -55,7 +55,7 @@ const SitterDashboard = () => {
   const { user } = useAuth();
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { shouldShow: showAlmaFirstMeeting, markSeen: markAlmaFirstMeetingSeen } = useAlmaFirstMeeting();
+  const { shouldShow: showAlmaFirstMeeting, markSeen: markAlmaFirstMeetingSeen, recordSeen: recordAlmaFirstMeetingSeen } = useAlmaFirstMeeting();
   // Une seule voix Alma par écran, portée par AlmaRailWhisper dans le rail.
   useAlmaCulturalFact({ surface: "dashboard", context: { role: "sitter" }, enabled: false });
 
@@ -195,7 +195,7 @@ const SitterDashboard = () => {
     <div className="overflow-hidden lg:overflow-visible pb-24 md:pb-8">
       {showAlmaFirstMeeting && (
         <div className="px-4 sm:px-5 md:px-8 pt-2">
-          <AlmaFirstMeeting role="sitter" onDone={markAlmaFirstMeetingSeen} />
+          <AlmaFirstMeeting role="sitter" onDone={markAlmaFirstMeetingSeen} onSeen={recordAlmaFirstMeetingSeen} />
         </div>
       )}
       <div className="px-4 sm:px-5 md:px-8">

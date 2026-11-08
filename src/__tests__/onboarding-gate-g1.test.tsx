@@ -83,14 +83,15 @@ describe("lot G1, pages jamais interrompues", () => {
     expect(await landOn(url)).toBe(url.split("?")[0]);
   });
 
-  it("le tableau de bord reste soumis au questionnaire", async () => {
-    expect(await landOn("/dashboard")).toBe("/onboarding/affinity");
+  it("lot L0 : le tableau de bord s'affiche, la recherche garde le questionnaire", async () => {
+    expect(await landOn("/dashboard")).toBe("/dashboard");
+    expect(await landOn("/search")).toBe("/onboarding/affinity");
   });
 
   it("les préfixes ne débordent pas sur d'autres pages", () => {
     expect(isGateAlwaysOpenPath("/messagesX")).toBe(false);
     expect(isGateAlwaysOpenPath("/sitsearch")).toBe(false);
-    expect(isGateAlwaysOpenPath("/dashboard")).toBe(false);
+    expect(isGateAlwaysOpenPath("/dashboardx")).toBe(false);
     expect(isGateAlwaysOpenPath("/profile")).toBe(false);
     expect(isGateAlwaysOpenPath(null)).toBe(false);
   });
@@ -104,11 +105,11 @@ describe("lot G1, « Plus tard »", () => {
     expect(isAffinityOnboardingSnoozed(now + AFFINITY_SNOOZE_MS + 1)).toBe(false);
   });
 
-  it("pendant le report, le tableau de bord n'est plus redirigé", async () => {
+  it("pendant le report, la recherche n'est plus redirigée", async () => {
     snoozeAffinityOnboarding();
-    expect(await landOn("/dashboard")).toBe("/dashboard");
+    expect(await landOn("/search")).toBe("/search");
     clearAffinitySnooze();
-    expect(await landOn("/dashboard")).toBe("/onboarding/affinity");
+    expect(await landOn("/search")).toBe("/onboarding/affinity");
   });
 
   it("une valeur illisible ne vaut pas report", () => {

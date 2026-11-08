@@ -1,7 +1,7 @@
 /**
  * Lot 2b : après C4 en intention entraide, le cache my-profile (rempli avant
  * C4) porte arrival_intent, et le garde-fou ne renvoie pas le membre vers
- * /onboarding/affinity depuis /dashboard.
+ * /onboarding/affinity depuis la recherche (lot L0 : /dashboard est toujours ouvert).
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
@@ -42,7 +42,7 @@ beforeEach(() => {
 });
 
 describe("lot 2b, cache du profil après C4", () => {
-  it("entraide : cache rempli avant C4, aucune redirection vers /onboarding/affinity depuis /dashboard", async () => {
+  it("entraide : cache rempli avant C4, aucune redirection vers /onboarding/affinity depuis /search", async () => {
     const { fetchMyProfile } = await import("@/lib/myProfile");
     await fetchMyProfile("u1"); // cache rempli avant C4, sans intention
 
@@ -61,11 +61,11 @@ describe("lot 2b, cache du profil après C4", () => {
 
     const { default: OnboardingGate } = await import("@/components/onboarding/OnboardingGate");
     render(
-      <MemoryRouter initialEntries={["/dashboard"]}>
+      <MemoryRouter initialEntries={["/search"]}>
         <Routes><Route path="*" element={<><OnboardingGate /><Where /></>} /></Routes>
       </MemoryRouter>,
     );
     await new Promise((r) => setTimeout(r, 50));
-    expect(path).toBe("/dashboard");
+    expect(path).toBe("/search");
   });
 });

@@ -19,7 +19,7 @@ describe("I1b, entraide jamais interrompue", () => {
 
   it("les autres pages gardent la porte", () => {
     expect(isGateAlwaysOpenPath("/petites-missionsx")).toBe(false);
-    expect(isGateAlwaysOpenPath("/dashboard")).toBe(false);
+    expect(isGateAlwaysOpenPath("/search")).toBe(false);
     expect(isGateAlwaysOpenPath("/profile")).toBe(false);
   });
 

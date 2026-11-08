@@ -47,9 +47,11 @@ const COPY: Record<Role, Copy> = {
 interface Props {
   role: Role;
   onDone: () => void;
+  /** Lot L0 : appelé une fois à l'affichage, la rencontre est enregistrée. */
+  onSeen?: () => void;
 }
 
-export function AlmaFirstMeeting({ role, onDone }: Props) {
+export function AlmaFirstMeeting({ role, onDone, onSeen }: Props) {
   const navigate = useNavigate();
   const { claimProactiveSurface, releaseProactiveSurface } = useAlma();
   const { data: evolution } = useAlmaEvolution();
@@ -70,6 +72,7 @@ export function AlmaFirstMeeting({ role, onDone }: Props) {
   useEffect(() => {
     if (seenFiredRef.current) return;
     seenFiredRef.current = true;
+    onSeen?.();
     try {
       void trackEvent("alma_dashboard_first_meeting_seen", {
         metadata: { role },
@@ -77,7 +80,7 @@ export function AlmaFirstMeeting({ role, onDone }: Props) {
     } catch {
       /* silent */
     }
-  }, [role]);
+  }, [role, onSeen]);
 
   useEffect(() => {
     const t = setTimeout(() => setMood("idle"), 800);
