@@ -33,6 +33,16 @@
           "sql": "SELECT COALESCE((SELECT position('has_role(auth.uid()' in pg_get_functiondef(p.oid)) > 0 AND position('cardinality(p_owner_ids) > 500' in pg_get_functiondef(p.oid)) > 0 AND position('s.published_at IS NULL' in pg_get_functiondef(p.oid)) > 0 FROM pg_proc p WHERE p.oid=to_regprocedure('public.admin_draft_email_preferences(uuid[])')),false) AS ok"
         }
       ]
+    },
+    {
+      "migration": "0117_nur1_sequence_proprietaire.sql",
+      "description": "Séquence propriétaire à trois emails : J+1, J+3, J+21, sans J+10",
+      "checks": [
+        {
+          "name": "owner_sequence_three_steps",
+          "sql": "SELECT COALESCE((SELECT string_agg(st.step_order || ':' || st.template_name, ',' ORDER BY st.step_order) FROM public.nurturing_steps st JOIN public.nurturing_sequences s ON s.id = st.sequence_id WHERE s.key = 'onboarding-owner') = '1:onboarding-j1,2:owner-no-sit-j3,3:owner-no-sit-j21', false) AS ok"
+        }
+      ]
     }
   ]
 }
