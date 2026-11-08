@@ -17,9 +17,20 @@ interface Props {
   nearbySittersLabel?: string | null
   /** Lien de désinscription à jeton, posé par send-transactional-email. */
   unsubscribeAllUrl?: string
+  /** Lot NUR1 : cumul communityTotals (fondateurs et communauté), lu à l'envoi. */
+  communityHouses?: number
+  communityAnimals?: number
 }
 
-const Email = ({ firstName, nearbySittersLabel, unsubscribeAllUrl }: Props) => {
+/** Phrase des gardes, seulement avec deux chiffres lus à l'envoi. */
+export function gardesSentence(houses?: number, animals?: number): string | null {
+  const ok = (v?: number) => typeof v === 'number' && Number.isFinite(v) && v > 0
+  if (!ok(houses) || !ok(animals)) return null
+  return `Entre nos gardes et celles de la communauté, cela fait ${Math.floor(houses!)}\u00a0maisons gardées et ${Math.floor(animals!)}\u00a0animaux accompagnés.`
+}
+
+const Email = ({ firstName, nearbySittersLabel, unsubscribeAllUrl, communityHouses, communityAnimals }: Props) => {
+  const gardes = gardesSentence(communityHouses, communityAnimals)
   const name = firstName || ''
   const label = typeof nearbySittersLabel === 'string' && nearbySittersLabel.trim() ? nearbySittersLabel.trim() : null
   const publishUrl = `${SITE_URL}/sits/create?utm_source=email&utm_campaign=owner_no_sit&utm_medium=j21`
@@ -37,8 +48,9 @@ const Email = ({ firstName, nearbySittersLabel, unsubscribeAllUrl }: Props) => {
           <Heading style={h1}>{name ? `Bonjour ${name},` : 'Bonjour,'}</Heading>
 
           <Text style={text}>
-            Je m'appelle Jérémie. Avec Elisa, nous avons créé Guardiens après avoir gardé
-            37&nbsp;maisons à travers la France. Nous savons ce que représente le fait de confier sa
+            Je m'appelle Jérémie. Avec Elisa, nous gardons des maisons à travers la France
+            depuis 2021, et nous avons créé Guardiens pour partager cette façon de faire.
+            {gardes ? ` ${gardes}` : ''} Nous savons ce que représente le fait de confier sa
             maison et ses animaux.
           </Text>
 
@@ -87,6 +99,8 @@ export const template = {
   subject: 'Une question de Jérémie',
   displayName: 'Propriétaire sans annonce, J+21 (relance personnelle)',
   previewData: {
+    communityHouses: 44,
+    communityAnimals: 249,
     firstName: 'Camille',
     city: 'Lyon',
     nearby_sitters_count: 137,
