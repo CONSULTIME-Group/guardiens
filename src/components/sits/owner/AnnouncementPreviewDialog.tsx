@@ -59,12 +59,19 @@ const typeLabels: Record<string, string> = {
   apartment: "Appartement", house: "Maison", farm: "Ferme", chalet: "Chalet", other: "Logement",
 };
 
-const formatDate = (d: string) => {
+/**
+ * Lot PUB3 : une date « AAAA-MM-JJ » est un jour du calendrier. new Date("2026-12-20")
+ * la lit à minuit UTC : à l'ouest de Greenwich (Antilles, Guyane, Polynésie,
+ * Amériques) l'aperçu affichait la veille, 19 au lieu de 20 décembre.
+ */
+export const formatPreviewDate = (d: string) => {
   if (!d) return "";
-  try {
-    return new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
-  } catch { return d; }
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d);
+  const date = m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : new Date(d);
+  if (Number.isNaN(date.getTime())) return d;
+  return date.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 };
+const formatDate = formatPreviewDate;
 
 const AnnouncementPreviewDialog = ({
   open, onOpenChange, onConfirmPublish, publishing, canPublish,

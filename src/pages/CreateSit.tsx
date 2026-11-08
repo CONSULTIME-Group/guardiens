@@ -3517,7 +3517,7 @@ const CreateSit = () => {
                   onClick={handleSaveAndExit}
                   disabled={savingDraft || !property}
                 >
-                  {savingDraft ? "Sauvegarde…" : "Enregistrer & quitter"}
+                  {savingDraft ? "Sauvegarde…" : <><span className="hidden sm:inline">Enregistrer & quitter</span><span className="sm:hidden">Enregistrer</span></>}
                 </Button>
               </>
             )}
@@ -3526,10 +3526,13 @@ const CreateSit = () => {
             {/* Preview (last step, desktop) : toujours accessible, la modale
                 gère elle-même le blocage de la publication. */}
             {currentStep === 2 && (
+              // Lot PUB3 : sur téléphone, le bouton principal ouvre déjà l'aperçu.
+              // Les quatre boutons côte à côte poussaient « Aperçu & publier »
+              // hors de l'écran (x = 347 sur 360 px, recette du 08/11/2026).
               <Button
                 type="button"
                 variant="outline"
-                className="h-12 px-4 shrink-0 gap-2 inline-flex text-base"
+                className="h-12 px-4 shrink-0 gap-2 hidden sm:inline-flex text-base"
                 onClick={() => setPreviewOpen(true)}
               >
                 <Eye className="h-4 w-4" />
