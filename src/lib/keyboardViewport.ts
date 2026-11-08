@@ -20,6 +20,8 @@ import { useEffect } from "react";
 
 export const KEYBOARD_MIN_PX = 120;
 export const DIALOG_ATTR = "data-guardiens-dialog";
+/** Lot L1 : feuilles du bas et panneaux latéraux, même règle que les fenêtres. */
+export const SHEET_ATTR = "data-guardiens-sheet";
 
 let users = 0;
 let detach: (() => void) | null = null;
@@ -40,7 +42,7 @@ function sync() {
   if (open) {
     root.setAttribute("data-keyboard-open", "");
     const active = document.activeElement as HTMLElement | null;
-    if (active && active.closest?.(`[${DIALOG_ATTR}]`) && typeof active.scrollIntoView === "function") {
+    if (active && active.closest?.(`[${DIALOG_ATTR}], [${SHEET_ATTR}]`) && typeof active.scrollIntoView === "function") {
       active.scrollIntoView({ block: "nearest" });
     }
   } else {
