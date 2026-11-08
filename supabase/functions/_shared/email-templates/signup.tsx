@@ -31,7 +31,7 @@ const BANNER_URL =
   'https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/email-assets/welcome-banner.jpg'
 
 /**
- * Email d'inscription Guardiens — fusion bienvenue + confirmation.
+ * Email d'inscription Guardiens : fusion bienvenue + confirmation.
  *
  * Un seul email envoyé après l'inscription :
  * - accueil chaleureux (ton humain, vouvoiement, pas d'emoji)
@@ -123,10 +123,9 @@ export const SignupEmail = ({
         </Heading>
 
         <Text style={stepText}>
-          <strong style={stepNum}>1.</strong> Quelques minutes pour
-          présenter votre profil, un prénom, une ville, une photo, et
-          quelques mots sur votre rapport aux animaux. C'est ce qui
-          permettra aux autres de vous reconnaître.
+          <strong style={stepNum}>1.</strong> Quelques minutes pour faire
+          connaissance : un prénom, une commune, puis vos affinités.
+          C'est ce qui permettra aux autres de vous reconnaître.
         </Text>
         <Text style={stepText}>
           <strong style={stepNum}>2.</strong> Vous découvrirez les

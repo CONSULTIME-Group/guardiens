@@ -49,8 +49,16 @@ export function roleForSignupIntent(intent: SignupIntent | null): SignupRole | n
 export function arrivalIntentForSignup(
   entraideChosen: boolean,
   detected: SignupIntent | null,
+  /**
+   * Lot INS1 (08/11/2026) : rôle réellement choisi sur la page. Le choix gagne
+   * sur l'intention déduite du lien : 2 comptes arrivés par « Publier mon
+   * annonce » puis inscrits « Je veux garder » portaient arrival_intent owner
+   * avec le rôle sitter. Polyvalent : l'intention déduite, s'il y en a une.
+   */
+  chosenRole?: SignupRole | null,
 ): SignupIntent | null {
   if (entraideChosen) return "entraide";
+  if (chosenRole === "owner" || chosenRole === "sitter") return chosenRole;
   return detected === "owner" || detected === "sitter" ? detected : null;
 }
 
@@ -68,4 +76,20 @@ export function signupIntentBannerKey(
   if (redirectTarget?.startsWith("/projets/publier")) return "entraide_projet";
   if (redirectTarget?.startsWith("/petites-missions")) return "entraide";
   return "projets";
+}
+
+/**
+ * Lot INS1 : le bandeau de contexte (« publier votre annonce », « contacter ce
+ * gardien »…) ne s'affiche que si le rôle choisi correspond encore à
+ * l'intention déduite du lien. Un polyvalent couvre les deux rôles.
+ */
+export function signupIntentMatchesRole(
+  intent: SignupIntent | null,
+  chosenRole: SignupRole | null,
+  entraideChosen: boolean,
+): boolean {
+  if (!intent) return false;
+  if (intent === "entraide") return entraideChosen;
+  if (!chosenRole) return true;
+  return chosenRole === "both" || chosenRole === intent;
 }
