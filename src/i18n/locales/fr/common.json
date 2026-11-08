@@ -698,6 +698,8 @@
     "email": "Email",
     "location": "Localisation",
     "location_value": "Lyon, France",
+    "social_title": "Suivez Guardiens",
+    "social_intro": "Les nouvelles annonces, les coups de main du moment et la vie du réseau, près de chez vous.",
     "sent_title": "Message envoyé !",
     "sent_body": "Merci pour votre message. Nous vous répondrons dans les plus brefs délais.",
     "send_another": "Envoyer un autre message",

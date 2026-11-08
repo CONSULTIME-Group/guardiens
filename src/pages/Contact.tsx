@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Mail, MapPin, Send, CheckCircle2 } from "lucide-react";
+import { Mail, MapPin, Send, CheckCircle2, Facebook, Instagram, Linkedin } from "lucide-react";
+import { SOCIAL_LINKS } from "@/data/socialLinks";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -112,6 +113,31 @@ const Contact = () => {
               <h3 className="font-heading font-semibold text-foreground mb-2">{t("contact.location")}</h3>
               <p>{t("contact.location_value")}</p>
             </div>
+          </div>
+
+          {/* Réseaux sociaux : liens officiels, ouverts dans un nouvel onglet */}
+          <div className="bg-card rounded-xl p-6">
+            <h3 className="font-heading font-semibold text-foreground mb-2">{t("contact.social_title")}</h3>
+            <p className="mb-4">{t("contact.social_intro")}</p>
+            <ul className="flex flex-wrap gap-3">
+              {SOCIAL_LINKS.map((s) => {
+                const Icon = s.name === "Facebook" ? Facebook : s.name === "Instagram" ? Instagram : Linkedin;
+                return (
+                  <li key={s.name}>
+                    <a
+                      href={s.url}
+                      target="_blank"
+                      rel="noopener noreferrer me"
+                      aria-label={`${s.label} (nouvel onglet)`}
+                      className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-primary hover:bg-primary/5 hover:underline"
+                    >
+                      <Icon className="h-5 w-5" aria-hidden="true" />
+                      <span>{s.name}</span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
 
           {/* Contact Form */}
