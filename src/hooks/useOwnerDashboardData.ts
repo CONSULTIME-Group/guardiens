@@ -43,6 +43,8 @@ export interface OwnerDashboardData {
   propertyType: string | null;
   propertyEnvironment: string | null;
   propertyCoverPhoto: string | null;
+  /** Lot L4 : photos du premier logement (properties.photos), déjà lues. */
+  propertyPhotos: string[];
   onboardingChecks: OnboardingChecks;
   pendingReviews: PendingReview[];
   profile: {
@@ -72,6 +74,7 @@ const INITIAL: OwnerDashboardData = {
   propertyType: null,
   propertyEnvironment: null,
   propertyCoverPhoto: null,
+  propertyPhotos: [],
   onboardingChecks: {
     hasName: false, hasAvatar: false, hasBio: false,
     hasIdentity: false, hasProperty: false, hasPets: false, hasSit: false,
@@ -397,6 +400,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
           propertyType,
           propertyEnvironment,
           propertyCoverPhoto,
+          propertyPhotos: Array.isArray(photos) ? photos.filter((u): u is string => typeof u === "string" && u.trim() !== "") : [],
           onboardingChecks,
           pendingReviews,
           profile: p ? {

@@ -6,8 +6,8 @@
       "fetchedAt": "2026-10-14T09:50:39.484Z"
     },
     "seo_city_pages": {
-      "head": "2026-10-14T09:48:32.337944+00:00|172",
-      "fetchedAt": "2026-10-14T09:50:39.485Z"
+      "head": "2026-11-08T18:50:07.074642+00:00|172",
+      "fetchedAt": "2026-11-08T21:39:30.785Z"
     },
     "seo_department_pages": {
       "head": "2026-10-14T04:07:00.228068+00:00|102",
@@ -18,12 +18,16 @@
       "fetchedAt": "2026-10-14T09:50:39.491Z"
     },
     "articles": {
-      "head": "2026-10-13T18:14:50.446745+00:00|133",
-      "fetchedAt": "2026-10-14T09:50:39.686Z"
+      "head": "2026-11-08T20:25:05.490217+00:00|134",
+      "fetchedAt": "2026-11-08T21:39:30.615Z"
     },
     "city_guides": {
-      "head": "2026-10-14T07:40:50.390715+00:00|102",
-      "fetchedAt": "2026-10-14T09:50:39.721Z"
+      "head": "2026-11-07T10:10:05.235611+00:00|119",
+      "fetchedAt": "2026-11-08T21:39:30.841Z"
+    },
+    "seo_department_pages_v2": {
+      "head": "2026-11-08T04:07:00.17231+00:00|103#2026-11-08T18:50:07.074642+00:00|172",
+      "fetchedAt": "2026-11-08T21:39:30.827Z"
     }
   },
   "entries": {
@@ -2813,6 +2817,12 @@
     ],
     "city_guides": [
       {
+        "loc": "/guides/classun",
+        "lastmod": "2026-10-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/guides/tassin-la-demi-lune",
         "lastmod": "2026-10-14",
         "changefreq": "weekly",
@@ -2891,6 +2901,12 @@
         "priority": "0.7"
       },
       {
+        "loc": "/guides/canet-en-roussillon",
+        "lastmod": "2026-10-29",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/guides/cezy",
         "lastmod": "2026-10-14",
         "changefreq": "weekly",
@@ -2917,6 +2933,12 @@
       {
         "loc": "/guides/paris",
         "lastmod": "2026-10-14",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/quissac-en-quercy",
+        "lastmod": "2026-11-02",
         "changefreq": "weekly",
         "priority": "0.7"
       },
@@ -2951,6 +2973,12 @@
         "priority": "0.7"
       },
       {
+        "loc": "/guides/massat",
+        "lastmod": "2026-10-19",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/guides/voiron",
         "lastmod": "2026-10-14",
         "changefreq": "weekly",
@@ -2977,6 +3005,12 @@
       {
         "loc": "/guides/aix-les-bains",
         "lastmod": "2026-10-14",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/siros",
+        "lastmod": "2026-10-19",
         "changefreq": "weekly",
         "priority": "0.7"
       },
@@ -3059,8 +3093,20 @@
         "priority": "0.7"
       },
       {
+        "loc": "/guides/rodilhan",
+        "lastmod": "2026-10-20",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/guides/roanne",
         "lastmod": "2026-10-14",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/plechatel",
+        "lastmod": "2026-10-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
@@ -3155,6 +3201,12 @@
         "priority": "0.7"
       },
       {
+        "loc": "/guides/barjols",
+        "lastmod": "2026-10-23",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/guides/saint-etienne",
         "lastmod": "2026-10-14",
         "changefreq": "weekly",
@@ -3179,6 +3231,12 @@
         "priority": "0.7"
       },
       {
+        "loc": "/guides/brassac",
+        "lastmod": "2026-11-07",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/guides/montreuil",
         "lastmod": "2026-10-14",
         "changefreq": "weekly",
@@ -3187,6 +3245,12 @@
       {
         "loc": "/guides/decines-charpieu",
         "lastmod": "2026-10-14",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/st-cyr-au-mont-d-or",
+        "lastmod": "2026-10-26",
         "changefreq": "weekly",
         "priority": "0.7"
       },
@@ -3227,6 +3291,12 @@
         "priority": "0.7"
       },
       {
+        "loc": "/guides/bazolles",
+        "lastmod": "2026-10-15",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/guides/sonnaz",
         "lastmod": "2026-10-14",
         "changefreq": "weekly",
@@ -3257,6 +3327,12 @@
         "priority": "0.7"
       },
       {
+        "loc": "/guides/nice",
+        "lastmod": "2026-11-05",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/guides/champlemy",
         "lastmod": "2026-10-14",
         "changefreq": "weekly",
@@ -3275,6 +3351,12 @@
         "priority": "0.7"
       },
       {
+        "loc": "/guides/vabres-l-abbaye",
+        "lastmod": "2026-10-23",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/guides/clermont-ferrand",
         "lastmod": "2026-10-14",
         "changefreq": "weekly",
@@ -3283,6 +3365,12 @@
       {
         "loc": "/guides/le-puy-en-velay",
         "lastmod": "2026-10-14",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/vouille",
+        "lastmod": "2026-10-19",
         "changefreq": "weekly",
         "priority": "0.7"
       },
@@ -3347,6 +3435,12 @@
         "priority": "0.7"
       },
       {
+        "loc": "/guides/sallertaine",
+        "lastmod": "2026-10-15",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/guides/vichy",
         "lastmod": "2026-10-14",
         "changefreq": "weekly",
@@ -3367,6 +3461,12 @@
       {
         "loc": "/guides/venissieux",
         "lastmod": "2026-10-14",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/carpentras",
+        "lastmod": "2026-11-07",
         "changefreq": "weekly",
         "priority": "0.7"
       },
@@ -3401,6 +3501,12 @@
         "priority": "0.7"
       },
       {
+        "loc": "/guides/le-val",
+        "lastmod": "2026-10-31",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/guides/rouans",
         "lastmod": "2026-10-14",
         "changefreq": "weekly",
@@ -3423,6 +3529,428 @@
         "lastmod": "2026-10-14",
         "changefreq": "weekly",
         "priority": "0.7"
+      }
+    ],
+    "seo_department_pages_v2": [
+      {
+        "loc": "/departement/pyrenees-orientales",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/correze",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/doubs",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/mayenne",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/seine-maritime",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/haute-corse",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/loiret",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/ardennes",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/bouches-du-rhone",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/aude",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/nouvelle-caledonie",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/pas-de-calais",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/eure",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/seine-saint-denis",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/cote-d-or",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/indre-et-loire",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/finistere",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/vaucluse",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/paris",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/oise",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/aube",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/haute-savoie",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/martinique",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/la-reunion",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/tarn",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/hauts-de-seine",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/isere",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/polynesie-francaise",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/cotes-d-armor",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/marne",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/calvados",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/val-de-marne",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/vienne",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/loire-atlantique",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/maine-et-loire",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/haut-rhin",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/loire",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/gard",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/moselle",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/somme",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/manche",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/alpes-maritimes",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/morbihan",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/rhone",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/seine-et-marne",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/loir-et-cher",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/bas-rhin",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/herault",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/savoie",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/corse-du-sud",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/essonne",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/meurthe-et-moselle",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/haute-garonne",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/sarthe",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/val-d-oise",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/aisne",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/deux-sevres",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/drome",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/nord",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/charente-maritime",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/territoire-de-belfort",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/pyrenees-atlantiques",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/haute-vienne",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/gironde",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/cher",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/puy-de-dome",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/ille-et-vilaine",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/indre",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/var",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/yvelines",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.8"
       }
     ]
   }

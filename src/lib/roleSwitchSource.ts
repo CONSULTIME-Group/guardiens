@@ -11,4 +11,5 @@ export type RoleSwitchSource =
   | "recherche"
   | "entraide"
   | "publication"
+  | "accueil"
   | "autre";

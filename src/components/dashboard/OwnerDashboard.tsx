@@ -41,7 +41,6 @@ import { useRailReadings } from "@/hooks/useRailReadings";
 import { useProfileCompletionMissing } from "@/hooks/useProfileCompletionMissing";
 import { ownerNextStep, remainingTouchesPhrase } from "@/lib/dashboardNextStep";
 
-import MobileStickyCTA from "./owner/MobileStickyCTA";
 import { useInView } from "@/hooks/useInView";
 
 /* ── Vague 12 : rail ── */
@@ -68,6 +67,17 @@ import { awaitingLink, awaitingSentence, isAwaitingDecision, sitStatusMap, summa
 const CLOSED_FOR_DECISION: readonly string[] = ["expired", "cancelled", "archived", "completed"];
 import { pickActiveEntraideMission } from "@/lib/activeEntraideMission";
 import { compareCalendarDates, daysFromToday, isOngoingDay } from "@/lib/calendarDate";
+/* ── Lot L4 : récit de l'accueil sur téléphone ── */
+import { resolveOwnerStory } from "@/lib/dashboardStory";
+import { buildOwnerStoryInput } from "@/lib/ownerStoryInput";
+import { localTodayIso } from "@/lib/localDate";
+import { departureCardVisible } from "./owner/OwnerDepartureAlmaCard";
+import StoryHero from "./story/StoryHero";
+import RoleSwitch from "./story/RoleSwitch";
+import EntraideLine from "./story/EntraideLine";
+import HomePhotoCard from "./story/HomePhotoCard";
+import { useCompactStory } from "./story/useCompactStory";
+import type { DeparturePeriod } from "@/lib/ownerDeparture";
 
 const OwnerDashboard = () => {
   const { user } = useAuth();
@@ -102,7 +112,9 @@ const OwnerDashboard = () => {
   /* ── Lot D1 : accueil ── */
   const helpsWithMissing = useHelpsWithMissing();
   const { unreadCount } = useNavBadgeCounts(user?.id);
-  const digestLine = useOwnerDigestLine(!!user?.id);
+  // Lot L4 : la ligne du cockpit ne s'affiche que sur ordinateur, le récit la remplace sur téléphone.
+  const isDesktopRail = useIsDesktopRail();
+  const digestLine = useOwnerDigestLine(!!user?.id && isDesktopRail);
   const { data: ownerProfile, loading: ownerProfileLoading, loadError: ownerProfileLoadError } = useOwnerProfile();
   const ownerCity = ownerProfile?.city ? formatCityLabel(ownerProfile.city) : "";
 
@@ -112,7 +124,6 @@ const OwnerDashboard = () => {
   // Montage différé de la section « Les gardiens » (sous la ligne de
   // flottaison) : ses hooks ne partent qu'à 400 px du viewport, le contenu
   // est prêt avant d'être atteint et aucun décalage visible ne se produit.
-  const isDesktopRail = useIsDesktopRail();
   const { ref: spotlightRef, inView: spotlightInView } = useInView<HTMLDivElement>({
     rootMargin: "400px 0px",
     threshold: 0,
@@ -176,6 +187,11 @@ const OwnerDashboard = () => {
   const nearbyCount = nearbyOwnerSittersData?.totalCount ?? 0;
   const nearbyRadius = nearbyOwnerSittersData?.radiusUsed ?? null;
 
+  /* ── Lot L4 : récit (aucune lecture de plus) ── */
+  const compactStory = useCompactStory();
+  const [pickedPeriod, setPickedPeriod] = useState<DeparturePeriod | null>(null);
+  const storyPeriod: DeparturePeriod | null = pickedPeriod ?? departure.data?.period ?? null;
+
   const ongoingSit = useMemo(() =>
     sits.find(s => s.status === "confirmed" && isOngoingDay(s.start_date, s.end_date, now)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -195,6 +211,28 @@ const OwnerDashboard = () => {
     return imminent || orphanPublished;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sits]);
+
+  const story = useMemo(() => resolveOwnerStory(buildOwnerStoryInput({
+    today: localTodayIso(),
+    sits: sits as any[],
+    pets: pets as any[],
+    awaitingApps: awaitingApps as any[],
+    sitterProfiles: sitterProfiles as any,
+    pendingReviews: (pendingReviews as any[]).map((r) => ({ sitId: r.sitId, sitterName: r.sitterName })),
+    latestDraft: latestDraft as any,
+    ongoingSit: (ongoingSit as any) ?? null,
+    period: storyPeriod,
+    city: ownerCity || null,
+    nearbySittersCount: nearbyCount,
+  })), [sits, pets, awaitingApps, sitterProfiles, pendingReviews, latestDraft, ongoingSit, storyPeriod, ownerCity, nearbyCount]);
+
+  const askPeriod = story.chapter === "first_listing" && departureCardVisible(departure.data);
+  const onPickPeriod = useCallback((p: DeparturePeriod) => {
+    setPickedPeriod(p);
+    void departure.pick(p);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [departure.pick]);
+  const showPhotoCard = sits.some((s) => s.status === "published") || !!latestDraft;
 
   /* ── Onboarding ── */
   useEffect(() => {
@@ -346,6 +384,9 @@ const OwnerDashboard = () => {
   const priorityToRail = ["verify", "pets"].includes(priorityAction.variant);
   if (priorityToTodo) todos.push({ key: "priority", label: priorityAction.ctaLabel, to: priorityAction.ctaTo });
 
+  // Lot L4 : « À faire » sous le récit, sans les candidatures (le récit y mène).
+  const storyTodos = todos.filter((t) => t.key !== "apps" && t.key !== "priority");
+
   const priorityToRailCard = priorityToRail ? (
     <PriorityActionCard
       eyebrow={priorityAction.eyebrow}
@@ -402,54 +443,104 @@ const OwnerDashboard = () => {
       : subtitle);
 
   const hasActiveAnnonce = activeSits.length > 0;
-  const starIsPublishForm = !ongoingSit && pendingAppCount === 0 && !latestDraft && !hasActiveAnnonce;
 
   return (
     <div className="overflow-hidden lg:overflow-visible pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-32">
-      {showAlmaFirstMeeting && (
+      {isDesktopRail && showAlmaFirstMeeting && (
         <div className="px-4 sm:px-5 md:px-8 pt-2">
           <AlmaFirstMeeting role="owner" onDone={markAlmaFirstMeetingSeen} onSeen={recordAlmaFirstMeetingSeen} />
         </div>
       )}
 
-      <div className="px-4 sm:px-5 md:px-8">
-        <RoleActivationBanner userRole={user?.role || "owner"} />
-      </div>
+      {isDesktopRail && (
+        <div className="px-4 sm:px-5 md:px-8">
+          <RoleActivationBanner userRole={user?.role || "owner"} />
+        </div>
+      )}
 
       {/* Lot L1 : annonce publiée sans commune. */}
-      <div className="px-4 sm:px-5 md:px-8">
-        <MissingSitCityBanner userId={user?.id} />
-      </div>
+      {isDesktopRail && (
+        <div className="px-4 sm:px-5 md:px-8">
+          <MissingSitCityBanner userId={user?.id} />
+        </div>
+      )}
 
       {/* Grille lot D1 : colonne principale 720 px, colonne de droite 328 px, écart 48 px */}
       <div className="min-w-0">
         <div className="mx-auto w-full max-w-[720px] lg:max-w-[1160px] px-4 sm:px-5 lg:px-8 lg:grid lg:grid-cols-[minmax(0,720px)_328px] lg:gap-[48px] lg:justify-center lg:items-start">
           <div className="min-w-0 space-y-[34px] md:space-y-[52px]">
-            {/* 0. Lot N4 : Alma « Vous partez quand ? », masquée après publication et pour le témoin */}
-            <OwnerDepartureAlmaCard data={departure.data} onPick={departure.pick} busy={departure.busy} />
+            {isDesktopRail ? (
+              <>
+                {/* 0. Lot N4 : Alma « Vous partez quand ? », masquée après publication et pour le témoin */}
+                <OwnerDepartureAlmaCard data={departure.data} onPick={departure.pick} busy={departure.busy} />
 
-            {/* 1. Accueil */}
-            <OwnerCockpit
-              userId={user?.id}
-              firstName={user?.firstName}
-              line={cockpitLine}
-              todos={todos}
-            />
+                {/* 1. Accueil */}
+                <OwnerCockpit
+                  userId={user?.id}
+                  firstName={user?.firstName}
+                  line={cockpitLine}
+                  todos={todos}
+                />
 
-            {/* 2. Vedette unique */}
-            <OwnerStarSection
-              ongoingSit={ongoingSit ?? null}
-              pendingApps={awaitingApps}
-              oldestWaitingDays={awaiting.oldest?.days ?? 0}
-              sitterProfiles={sitterProfiles}
-              sitterAffinityProfiles={sitterAffinityProfiles}
-              latestDraft={latestDraft as any}
-              propertyCoverPhoto={propertyCoverPhoto}
-              primaryAction={primaryAction}
-              activeAnnonce={hasActiveAnnonce ? (
-                <OwnerAnnonceSection sits={sits} coverPhoto={propertyCoverPhoto} pendingAppCount={pendingAppCount} />
-              ) : undefined}
-            />
+                {/* 2. Vedette unique */}
+                <OwnerStarSection
+                  ongoingSit={ongoingSit ?? null}
+                  pendingApps={awaitingApps}
+                  oldestWaitingDays={awaiting.oldest?.days ?? 0}
+                  sitterProfiles={sitterProfiles}
+                  sitterAffinityProfiles={sitterAffinityProfiles}
+                  latestDraft={latestDraft as any}
+                  propertyCoverPhoto={propertyCoverPhoto}
+                  primaryAction={primaryAction}
+                  activeAnnonce={hasActiveAnnonce ? (
+                    <OwnerAnnonceSection sits={sits} coverPhoto={propertyCoverPhoto} pendingAppCount={pendingAppCount} />
+                  ) : undefined}
+                />
+              </>
+            ) : (
+              /* Lot L4 : accueil téléphone, le récit d'abord (direction B de l'arène v2). */
+              <div className="space-y-[14px] pt-3" data-testid="owner-story-home">
+                {/* Texte agrandi : le choix d'espace passe sous le récit, le bouton reste au premier écran. */}
+                {!compactStory && <RoleSwitch />}
+                <StoryHero
+                  story={story}
+                  compact={compactStory}
+                  periodPicker={askPeriod ? { value: storyPeriod, onPick: onPickPeriod, busy: departure.busy } : null}
+                />
+                {compactStory && <RoleSwitch />}
+                {storyTodos.length > 0 && (
+                  <ul className="flex flex-wrap gap-[8px]" data-testid="story-todos" aria-label="À faire">
+                    {storyTodos.map((t) => (
+                      <li key={t.key}>
+                        <Link
+                          to={t.to}
+                          className="inline-flex min-h-[44px] items-center gap-[8px] rounded-full border border-border bg-card px-[14px] text-[14px] font-semibold text-foreground"
+                        >
+                          {t.label}
+                          {typeof t.count === "number" && t.count > 0 && (
+                            <span className="rounded-full bg-primary px-[7px] text-[12px] leading-[20px] text-primary-foreground">{t.count}</span>
+                          )}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <EntraideLine
+                  helpersCount={nearbyHelpersCount}
+                  radiusKm={helpersProximity?.radiusKm ?? 30}
+                  activeMission={myActiveMission as any}
+                />
+                <MissingSitCityBanner userId={user?.id} />
+                {showAlmaFirstMeeting && (
+                  <AlmaFirstMeeting role="owner" onDone={markAlmaFirstMeetingSeen} onSeen={recordAlmaFirstMeetingSeen} />
+                )}
+                {showPhotoCard && (
+                  <DeferredMount minHeight={0}>
+                    <HomePhotoCard userId={user?.id} photos={data.propertyPhotos} />
+                  </DeferredMount>
+                )}
+              </div>
+            )}
 
             {/* Plafond de candidatures, seulement quand il s'applique */}
             <StagedMount testId="cap">
@@ -461,6 +552,11 @@ const OwnerDashboard = () => {
               {spotlightInView ? <OwnerNearbySitters /> : <div aria-hidden="true" className="min-h-[320px]" />}
             </div>
 
+            {/* Lot L4 : sur téléphone, l'annonce et ses candidatures après les gardiens à proximité. */}
+            {!isDesktopRail && hasActiveAnnonce && (
+              <OwnerAnnonceSection sits={sits} coverPhoto={propertyCoverPhoto} pendingAppCount={pendingAppCount} />
+            )}
+
             {/* 4. Votre famille (lot P1b : montage différé, sous la ligne de flottaison) */}
             <DeferredMount minHeight={240}>
               <OwnerFamilySection
@@ -470,6 +566,13 @@ const OwnerDashboard = () => {
                 getNextSitForPet={getNextSitForPet}
               />
             </DeferredMount>
+
+            {/* Lot L4 : activation de l'autre espace, sous le récit sur téléphone. */}
+            {!isDesktopRail && (
+              <DeferredMount minHeight={0}>
+                <RoleActivationBanner userRole={user?.role || "owner"} />
+              </DeferredMount>
+            )}
 
             {/* 5. Bandeau entraide */}
             <DeferredMount minHeight={160}>
@@ -526,10 +629,7 @@ const OwnerDashboard = () => {
         </div>
       </div>
 
-      {/* CTA collant mobile : seulement pour les candidatures à traiter */}
-      {pendingAppCount > 0 && !starIsPublishForm && (
-        <MobileStickyCTA label="Voir les candidatures" to={awaitingLink(awaiting)} badge={pendingAppCount} />
-      )}
+      {/* Lot L4 : plus de bouton collant, le récit porte l'unique bouton plein sur téléphone. */}
     </div>
   );
 };

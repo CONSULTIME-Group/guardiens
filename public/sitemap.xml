@@ -41,76 +41,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/petites-missions/lyon</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/petites-missions/marseille</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/petites-missions/strasbourg</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/petites-missions/paris</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/petites-missions/toulouse</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/petites-missions/lille</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/petites-missions/annecy</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/petites-missions/nice</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/petites-missions/nantes</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/petites-missions/saint-etienne</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/petites-missions/rennes</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/petites-missions/montpellier</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/petites-missions/grenoble</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/petites-missions/bordeaux</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/gardien-urgence</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -1531,6 +1461,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/guides/classun</loc>
+    <lastmod>2026-10-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/guides/tassin-la-demi-lune</loc>
     <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -1609,6 +1545,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/guides/canet-en-roussillon</loc>
+    <lastmod>2026-10-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/guides/cezy</loc>
     <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -1635,6 +1577,12 @@
   <url>
     <loc>https://guardiens.fr/guides/paris</loc>
     <lastmod>2026-10-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/quissac-en-quercy</loc>
+    <lastmod>2026-11-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1669,6 +1617,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/guides/massat</loc>
+    <lastmod>2026-10-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/guides/voiron</loc>
     <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -1695,6 +1649,12 @@
   <url>
     <loc>https://guardiens.fr/guides/aix-les-bains</loc>
     <lastmod>2026-10-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/siros</loc>
+    <lastmod>2026-10-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1777,8 +1737,20 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/guides/rodilhan</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/guides/roanne</loc>
     <lastmod>2026-10-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/plechatel</loc>
+    <lastmod>2026-10-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1873,6 +1845,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/guides/barjols</loc>
+    <lastmod>2026-10-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/guides/saint-etienne</loc>
     <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -1897,6 +1875,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/guides/brassac</loc>
+    <lastmod>2026-11-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/guides/montreuil</loc>
     <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -1905,6 +1889,12 @@
   <url>
     <loc>https://guardiens.fr/guides/decines-charpieu</loc>
     <lastmod>2026-10-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/st-cyr-au-mont-d-or</loc>
+    <lastmod>2026-10-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1945,6 +1935,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/guides/bazolles</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/guides/sonnaz</loc>
     <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -1975,6 +1971,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/guides/nice</loc>
+    <lastmod>2026-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/guides/champlemy</loc>
     <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -1993,6 +1995,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/guides/vabres-l-abbaye</loc>
+    <lastmod>2026-10-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/guides/clermont-ferrand</loc>
     <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -2001,6 +2009,12 @@
   <url>
     <loc>https://guardiens.fr/guides/le-puy-en-velay</loc>
     <lastmod>2026-10-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/vouille</loc>
+    <lastmod>2026-10-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2065,6 +2079,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/guides/sallertaine</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/guides/vichy</loc>
     <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -2085,6 +2105,12 @@
   <url>
     <loc>https://guardiens.fr/guides/venissieux</loc>
     <lastmod>2026-10-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/carpentras</loc>
+    <lastmod>2026-11-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2119,6 +2145,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/guides/le-val</loc>
+    <lastmod>2026-10-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/guides/rouans</loc>
     <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -2148,27 +2180,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/departement/lozere</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/departement/correze</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/departement/doubs</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/ariege</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/vosges</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2183,16 +2200,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/departement/alpes-de-haute-provence</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/haute-saone</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/departement/haute-corse</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -2203,17 +2210,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/departement/haute-loire</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/departement/ardennes</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/meuse</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2229,11 +2226,6 @@
   </url>
   <url>
     <loc>https://guardiens.fr/departement/nouvelle-caledonie</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/haute-marne</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2283,26 +2275,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/departement/hautes-alpes</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/dordogne</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/creuse</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/lot-et-garonne</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/departement/aube</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -2313,22 +2285,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/departement/landes</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/departement/martinique</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/departement/la-reunion</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/nievre</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2348,12 +2310,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/departement/cotes-d-armor</loc>
+    <loc>https://guardiens.fr/departement/polynesie-francaise</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/departement/tarn-et-garonne</loc>
+    <loc>https://guardiens.fr/departement/cotes-d-armor</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2368,47 +2330,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/departement/allier</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/charente</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/departement/val-de-marne</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/departement/orne</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/ardeche</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/eure-et-loir</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/departement/vienne</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/ain</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/cantal</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2419,11 +2346,6 @@
   </url>
   <url>
     <loc>https://guardiens.fr/departement/maine-et-loire</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/guadeloupe</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2453,22 +2375,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/departement/yonne</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/departement/manche</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/departement/alpes-maritimes</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/lot</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2523,16 +2435,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/departement/jura</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/hautes-pyrenees</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/departement/haute-garonne</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -2544,11 +2446,6 @@
   </url>
   <url>
     <loc>https://guardiens.fr/departement/val-d-oise</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/gers</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2603,17 +2500,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/departement/vendee</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/departement/puy-de-dome</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/departement/saone-et-loire</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -3115,6 +3002,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/0ab88258-f9e6-4082-be6e-a3831001f757</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/0dd3fa01-8777-4210-a352-1f13c33a9ed2</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3155,12 +3047,27 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/2103af60-ba1b-4385-bcc6-17d075a4189c</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/22ab2ecb-e656-4af8-a600-b6cb22690a1e</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/24a69602-e6c1-46d6-92cf-5b42f2b4235f</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/25df09bd-f5c7-4b7f-928a-a3a79f105ee2</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/274f7e47-2ffa-4950-912d-c147c5474d9f</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3200,12 +3107,22 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/32356551-09ef-4cbf-9367-93edaa151880</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/339f8d3b-7f54-4d9c-ae05-62172327476a</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/358eccf7-0d96-486b-bf1a-166de234f2d4</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/361370b3-2d75-4584-a5b0-97dd7beb6e58</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3235,12 +3152,22 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/456f27e0-f9f5-46b4-9f3a-d364145a7018</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/469e1f18-d1be-4b8c-8bad-8f8516e02938</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/48ca81a7-1b5f-40f2-b9ad-b76a2976533e</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/4b076a43-94b7-4ca8-b220-ca14c6825e7b</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3266,6 +3193,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/4eb8398e-3da9-4b84-9a02-a614ddba2de3</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/4ec98758-f8ba-46b4-a07b-cc6b98e580d4</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3300,6 +3232,16 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/55e036bd-2a39-4a95-a840-b818bfd306cf</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/578cd168-83df-4ff0-b342-46206e0ca6cb</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/5816bf95-4f23-4ef2-9127-2fb63063eb91</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3316,6 +3258,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/5cebd098-3f25-48fe-9c60-af6083883f98</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/5f0f683a-ae7e-4b5e-9f70-94f7a45ec3ad</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3366,6 +3313,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/68b6010f-2844-480e-99f0-da81d3361896</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/69d4f8e3-d1dd-4d55-abc9-99927b48e4e3</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3440,6 +3392,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/7d70c355-2dd2-4f62-a959-a9ef8284370d</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/7dd7581e-9763-4320-ac89-98c2f4b5e021</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3455,6 +3412,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/7f214988-3187-406d-a746-998c7df2010b</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/8015ad64-6c3e-4dc3-86f8-d6cfe7c6d325</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3466,6 +3428,21 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/827ce63a-e584-4e4b-a5c6-c559f4ad6c99</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/828a5202-9b8e-450a-acc2-088c9b1d27e8</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/83577ad1-aff2-4ba4-9a19-ae92012cf62a</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/8835e65a-cc8c-48dd-a923-a585e97689f3</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3495,6 +3472,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/8bc9e59b-ac10-4010-a2d3-86890ad98364</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/8cb04415-bae5-4738-a48e-346a4d571308</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3515,6 +3497,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/97a879ca-84bc-4fca-8628-c80e0f4f2ca5</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/98617b15-e5ed-48fe-841f-3c8eb6769b62</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3530,7 +3517,22 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/9c3b4c95-b93b-4871-9414-ec71bbb30aec</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/9e9965a8-d0a3-4f35-bf2b-8ad22a666143</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/9f4d46c2-b04b-49e5-a847-fbe0c59a2c47</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/9fc4b8fd-4e0a-4151-ad65-2ef492a1d395</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3570,7 +3572,17 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/a9f05dce-6700-4171-9141-7c43e0c3f8b5</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/aabc891d-7824-4e79-a204-bb3d4da7160b</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/ab56a0fb-02cc-4966-aa3c-81f0612e939d</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3591,6 +3603,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/b00c0955-04ce-4f3f-b389-47da5838dbea</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/b1b67079-2211-4c2b-bfda-1e47b2b82a22</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3635,6 +3652,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/bd3716bf-adb6-4f35-9f6a-aef4555ac786</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/bde9a7c2-0fc1-4ea3-bbea-c0e456359ea2</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3666,6 +3688,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/c576eaa3-0157-4712-8ea7-c64252ed2d62</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/c5a0f356-c157-4090-b0f1-ca995727b7c4</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3726,6 +3753,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/d593fac5-cf87-4696-8041-70fd3a8d3c76</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/d5e48ea2-1cf9-40bd-913e-9e3d83e5f564</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3795,6 +3827,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/ed6cf072-8c27-41f1-9f7d-a6de1e073457</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/edfe5c97-0e8e-4130-8782-47e9ffb04ede</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3855,6 +3892,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/annonces/garde-de-moustik-lizy-zina-flocon-rouxy-et-piwy-et-kiwy-pend-classun-05ee43</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/annonces/garde-maison-avec-1-chienne-et-3-chats-grandchamp-des-fontaines-08b43a</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -3865,12 +3907,12 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/garde-de-aiko-mon-border-collie-licq-atherey-2a2cfe</loc>
+    <loc>https://guardiens.fr/annonces/garde-de-deux-jeunes-chattes-louve-et-ltna-de-6-mois-quissac-en-quercy-24ea5a</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/garde-milo-a-son-domicile-maison-a-la-campagne-saint-chef-2c79fa</loc>
+    <loc>https://guardiens.fr/annonces/garde-de-aiko-mon-border-collie-licq-atherey-2a2cfe</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3880,22 +3922,22 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/garde-chien-du-28-octobre-au-6-novembre-collonges-sous-saleve-4af335</loc>
+    <loc>https://guardiens.fr/annonces/nounou-pour-vos-toutous-givors-4acc66</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/garde-de-chienne-a-saint-cyr-sur-mer-du-19-au-28-octobre-202-st-cyr-sur-mer-4e838b</loc>
+    <loc>https://guardiens.fr/annonces/garde-d-appart-pendant-les-fetes-a-papeete-6d402b</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/urgent-garde-d-un-chien-en-cevennes-vialas-503f7c</loc>
+    <loc>https://guardiens.fr/annonces/garde-d-animaux-chien-chat-poules-cochons-d-inde-vabres-l-abbaye-78bf59</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/garde-de-vos-deux-chiens-a-sallertaine-presence-bienveillant-795a38</loc>
+    <loc>https://guardiens.fr/annonces/garde-ponctuelle-de-ma-chienne-siros-7e13cf</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3905,17 +3947,22 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/annonces/jolie-maison-avec-jardins-provence-verte-garde-d-animaux-barjols-a6b62c</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/annonces/garde-16-animaux-a-marlhes-ab96d6</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/garde-de-maison-et-animaux-a-taravao-tahiti-hauteur-de-taravao-b96ae3</loc>
+    <loc>https://guardiens.fr/annonces/garde-de-nosloulous-dans-notre-village-d-ardeche-vallon-pont-vallon-pont-d-arc-b93ec5</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/garde-3-chiens-zellwiller-c6b0f5</loc>
+    <loc>https://guardiens.fr/annonces/garde-4-chiens-et-2-chats-brassac-82-c5c1bc</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3925,17 +3972,27 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/garde-de-chatte-douce-et-casaniere-les-issambres-d8da32</loc>
+    <loc>https://guardiens.fr/annonces/garde-de-deux-chattes-sphynx-dans-le-sud-de-la-france-clarensac-cffaaf</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/garde-2-chats-a-la-campagne-a-deux-pas-de-chambery-sonnaz-dff478</loc>
+    <loc>https://guardiens.fr/annonces/garde-de-la-maison-et-de-mon-petit-chat-cet-hiver-a-nice-e1b4c1</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/petites-missions/un-coup-de-main-pour-transporter-des-meubles</loc>
+    <loc>https://guardiens.fr/annonces/une-garde-de-2-chiens-et-1-chat-saint-vulbas-f5e13d</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/annonces/garde-de-alpha-chouchen-maika-mango-et-pompon-cet-hiver-a-pl-plechatel-fe9775</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/petites-missions/d-une-personne-pouvant-s-occuper-de-ma-chienne-gaia-lorsque-je-suis-absente</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3945,7 +4002,22 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/petites-missions/une-ou-un-gardien-pour-notre-boxette</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/petites-missions/besoin-un-coin-jardin-pour-mettre-en-securite-mon-camping-car-et-mon-chat-je-vis</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/petites-missions/cherche-un-coup-de-main-pour-rempoter-deux-monsteras-avec-les-conseils-pour-qu-e</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/petites-missions/lyon-5-tassin-1-petit-chien-eduque-et-craintif-du-31-12-26-au-2-janvier-2027</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -4007,6 +4079,41 @@
   <url>
     <loc>https://guardiens.fr/associations/cosa-animalia-grenoble</loc>
     <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/petites-missions/lyon</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/petites-missions/marseille</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/petites-missions/paris</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/petites-missions/annecy</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/petites-missions/montpellier</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/petites-missions/grenoble</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/petites-missions/bordeaux</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 </urlset>
