@@ -25,7 +25,7 @@ const PublishedProfileBoosts = ({ avatarUrl, bio, petsCount, sitId }: Props) => 
         Pour que les gardiens vous connaissent
       </p>
       <p className="mt-2 text-[15px] leading-relaxed text-foreground">
-        Votre annonce est complète. Ces ajouts prennent une minute chacun, quand vous voulez.
+        {items.length > 1 ? "Ces ajouts prennent une minute chacun, quand vous voulez." : "Cet ajout prend une minute, quand vous voulez."}
       </p>
       <ul className="mt-3 space-y-2">
         {items.map((b) => (

@@ -35,6 +35,8 @@ export interface CohortWeek {
   signups: number;
   /** Une partie de la semaine a moins de 7 jours : chiffres provisoires. */
   partial: boolean;
+  /** Jour où tous les comptes de la semaine ont 7 jours (« 16/11 »). */
+  completeFrom: string;
   ownerShare: number | null;
   sitter: GroupStats;
   owner: GroupStats;
@@ -86,6 +88,7 @@ export function computeCompletionCohorts(rows: CompletionRow[], now: Date, weeks
       label: format(start, "dd/MM"),
       signups: inWeek.length,
       partial: end.getTime() - 1 > matureBefore,
+      completeFrom: format(addDays(end, MATURE_AFTER_DAYS), "dd/MM"),
       ownerShare: inWeek.length ? Math.round((owners / inWeek.length) * 100) : null,
       sitter: stats(scores("sitter")),
       owner: stats(scores("owner")),

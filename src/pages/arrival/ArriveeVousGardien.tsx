@@ -15,6 +15,7 @@ import { departmentCodeFromPostal } from "@/lib/postalDepartment";
 import { isPostalCodeValidForCountry } from "@/lib/setupState";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { afterG1, canSkipG1, readCarry, type ArrivalIntent } from "@/lib/arrival";
+import { markArrivalOnboardingDone } from "@/lib/arrivalOnboardingDone";
 import { ArrivalShell, Eyebrow, Gouache, SaveError, trackArrival, uploadAvatar, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
 const maisonSeule = new URL("../../assets/aquarelles/arrivee-bonjour-360.webp", import.meta.url).href;
 
@@ -93,6 +94,8 @@ const ArriveeVousGardien = () => {
     setFailed(false);
     const { error } = await supabase.from("profiles").update(buildG1Writes({ firstName, postalCode, city, country, arrivalIntent: intentMissing ? (entraide ? "entraide" : "sitter") : null }) as any).eq("id", user.id);
     if (error) { setSaving(false); setFailed(true); return; }
+    // Lot ONB1 : pour l'entraide, G1 est tout le parcours exigé.
+    if (entraide) await markArrivalOnboardingDone(user.id, "G1", user.role);
     await invalidateMyOnboardingStatus(user.id);
     trackArrival("completed", "G1");
     void Promise.resolve(refreshProfile?.()).catch(() => {});

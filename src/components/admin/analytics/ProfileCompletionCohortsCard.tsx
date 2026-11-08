@@ -10,11 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorState, LoadingState } from "@/components/admin/ui";
 import {
   COMPLETION_THRESHOLD, MATURE_AFTER_DAYS, cohortsSince, computeCompletionCohorts,
-  type CompletionRow, type GroupStats,
+  type CohortWeek, type CompletionRow, type GroupStats,
 } from "@/lib/admin/profileCompletionCohorts";
 
-const cell = (g: GroupStats) =>
-  g.mature === 0 ? "aucun compte" : `${g.shareAbove} % · médiane ${g.median} % (${g.mature})`;
+const cell = (g: GroupStats, w: CohortWeek) => {
+  if (g.mature > 0) return `${g.shareAbove} % · médiane ${g.median} % (${g.mature})`;
+  return w.partial ? `lisible le ${w.completeFrom}` : "0 compte";
+};
 
 const ProfileCompletionCohortsCard = () => {
   const q = useQuery({
@@ -47,7 +49,7 @@ const ProfileCompletionCohortsCard = () => {
         {q.error && <ErrorState detail={(q.error as Error).message} onRetry={() => q.refetch()} />}
         {q.data && (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm whitespace-nowrap">
               <thead>
                 <tr className="text-left text-muted-foreground">
                   <th className="py-2 pr-3 font-medium">Semaine du</th>
@@ -63,8 +65,8 @@ const ProfileCompletionCohortsCard = () => {
                     <td className="py-2 pr-3">{w.label}{w.partial ? " (provisoire)" : ""}</td>
                     <td className="py-2 pr-3">{w.signups}</td>
                     <td className="py-2 pr-3">{w.ownerShare === null ? "" : `${w.ownerShare} %`}</td>
-                    <td className="py-2 pr-3">{cell(w.sitter)}</td>
-                    <td className="py-2">{cell(w.owner)}</td>
+                    <td className="py-2 pr-3">{cell(w.sitter, w)}</td>
+                    <td className="py-2">{cell(w.owner, w)}</td>
                   </tr>
                 ))}
               </tbody>

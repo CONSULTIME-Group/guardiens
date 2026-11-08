@@ -75,7 +75,8 @@ const ArriveeVousConnaitre = () => {
       const { error } = await supabase.from("sitter_profiles").upsert(row as any, { onConflict: "user_id" });
       if (error) { setSaving(false); setFailed(true); return; }
     }
-    await markArrivalOnboardingDone(user.id, "G3", user.role);
+    // Lot ONB1 : fin du parcours gardien. Un propriétaire qui passe ici après P4 a déjà fini en P3.
+    if (carry.flow !== "owner") await markArrivalOnboardingDone(user.id, "G3", user.role);
     await invalidateMyOnboardingStatus(user.id);
     trackArrival("completed", "G3");
     navigate(afterG3(carry));

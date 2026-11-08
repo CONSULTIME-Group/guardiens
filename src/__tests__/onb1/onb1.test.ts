@@ -48,6 +48,17 @@ describe("point 1 : fin du parcours v2 comptée", () => {
     expect(events[1].payload).toMatchObject({ source: "/arrivee/affinites", metadata: { step: "P3", role: "owner" } });
   });
 
+  it("G1 de l'entraide vaut fin de parcours (seul le lieu est exigé)", async () => {
+    await markArrivalOnboardingDone("u3", "G1", "sitter");
+    expect(events.at(-1)?.payload).toMatchObject({ source: "/arrivee/vous", metadata: { step: "G1" } });
+    const g1 = src("src/pages/arrival/ArriveeVousGardien.tsx");
+    expect(g1).toContain('if (entraide) await markArrivalOnboardingDone(user.id, "G1", user.role);');
+  });
+
+  it("G3 ne compte pas une seconde fois un propriétaire déjà passé par P3", () => {
+    expect(src("src/pages/arrival/ArriveeVousConnaitre.tsx")).toContain('if (carry.flow !== "owner") await markArrivalOnboardingDone(user.id, "G3", user.role);');
+  });
+
   it("les deux écrans de fin appellent la règle avant l'invalidation du profil", () => {
     for (const [file, step] of [["src/pages/arrival/ArriveeVousConnaitre.tsx", "G3"], ["src/pages/arrival/ArriveeAffinites.tsx", "P3"]] as const) {
       const s = src(file);
@@ -149,6 +160,7 @@ describe("point 4 : remplissage du profil par rôle, comptes de 7 jours et plus"
     expect(cur.signups).toBe(1);
     expect(cur.sitter.mature).toBe(0);
     expect(cur.sitter.shareAbove).toBeNull();
+    expect(cur.completeFrom).toBe("16/11");
     expect(old.getDay()).toBe(1);
     expect(weeks[0].weekStart).toBe("2026-11-02");
     expect(weeks).toHaveLength(8);
@@ -170,6 +182,12 @@ describe("point 5 : compléments proposés sur l'annonce en ligne", () => {
     for (const b of all) expect(`${b.title} ${b.text}`).not.toMatch(/[–—]/);
     expect(src("src/components/sits/owner/PublishedProfileBoosts.tsx")).not.toMatch(/[–—]/);
     expect(src("src/components/admin/analytics/ProfileCompletionCohortsCard.tsx")).not.toMatch(/[–—]/);
+  });
+  it("code mort retiré : plus de lecture arrival_welcome_seen_at seule, plus de copie locale du critère v2", () => {
+    expect(() => src("src/hooks/useArrivalWelcomeSeen.ts")).toThrow();
+    const gate = src("src/components/onboarding/OnboardingGate.tsx");
+    expect(gate).toContain('import { isArrivalV2Account } from "@/lib/arrivalFlag";');
+    expect(gate).not.toMatch(/const isArrivalV2Account =/);
   });
   it("monté sur l'annonce en ligne, après « Ce qui va se passer », sans lecture de plus", () => {
     const view = src("src/components/sits/views/OwnerSitView.tsx");

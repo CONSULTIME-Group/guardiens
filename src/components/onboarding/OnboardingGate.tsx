@@ -15,10 +15,8 @@ import { useFeatureFlag, getFlag } from "@/hooks/useFeatureFlag";
 import { useAffinityOnboardingStatus } from "@/hooks/useAffinityOnboardingStatus";
 import { isPublishPath, rememberPublishIntent } from "@/lib/postOnboardingIntent";
 import { isAffinityOnboardingSnoozed, isGateAlwaysOpenPath, isGateOpenProfileFocus } from "@/lib/onboardingGateRules";
-
-/** Lot 1 : compte arrivée v2 (copie locale de src/lib/arrivalFlag.ts, évite un module de plus dans la coquille). */
-const isArrivalV2Account = (f: { enabled: boolean; appliesSince: string | null }, created: string | null | undefined) =>
-  !!(f.enabled && f.appliesSince && created) && new Date(created!).getTime() >= new Date(f.appliesSince!).getTime();
+// Lot ONB1 : arrivalFlag est déjà dans la coquille (useArrivalV2Account), plus de copie locale.
+import { isArrivalV2Account } from "@/lib/arrivalFlag";
 
 const OnboardingGate = () => {
   const { user, loading } = useAuth();
