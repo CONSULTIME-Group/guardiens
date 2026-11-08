@@ -100,7 +100,7 @@ export default function FoundersLetterActions() {
         </h2>
         <p className="text-muted-foreground mb-4">
           Guardiens est gratuit, et chaque inscription près de chez vous vous sert aussi : plus de gardiens et de
-          voisins prêts à aider autour de vous. Partagez-le sur votre mur, en une minute.
+          voisins prêts à aider autour de vous. Partagez-le sur votre mur.
         </p>
         <blockquote className="rounded-lg bg-muted/60 p-4 text-sm text-foreground mb-4 whitespace-pre-line">
           {SHARE_MESSAGE}
