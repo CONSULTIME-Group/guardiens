@@ -14297,6 +14297,36 @@ export type Database = {
           },
         ]
       }
+      owner_gallery_insights: {
+        Row: {
+          analyzed_at: string
+          issues: string[]
+          photo_url: string
+          score: number | null
+          shows_home: boolean
+          subject: string
+          user_id: string
+        }
+        Insert: {
+          analyzed_at?: string
+          issues?: string[]
+          photo_url: string
+          score?: number | null
+          shows_home: boolean
+          subject: string
+          user_id: string
+        }
+        Update: {
+          analyzed_at?: string
+          issues?: string[]
+          photo_url?: string
+          score?: number | null
+          shows_home?: boolean
+          subject?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       owner_highlights: {
         Row: {
           created_at: string

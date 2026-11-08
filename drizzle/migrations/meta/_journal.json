@@ -750,6 +750,13 @@
       "when": 1794076560224,
       "tag": "0106_sec2_lectures_publiques",
       "breakpoints": true
+    },
+    {
+      "idx": 107,
+      "version": "7",
+      "when": 1794166931058,
+      "tag": "0107_photo1_regard_photos_logement",
+      "breakpoints": true
     }
   ]
 }
