@@ -13,6 +13,7 @@ import {
   TYPE_LABELS,
   getSitStatusConfig,
 } from "@/components/sits/shared/sitConstants";
+import { calendarDate, compareCalendarDates, daysFromToday } from "@/lib/calendarDate";
 
 interface MonAnnonceCardProps {
   sits: SitRow[];
@@ -33,22 +34,21 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
   // /!\ On NE FALLBACK PLUS sur la dernière garde terminée : afficher un sit
   // passé comme « hero » est démotivant et trompeur (badge « Terminée » +
   // dates passées). On bascule sur un état dédié « Relancer / republier ».
-  const nowTs = now.getTime();
   const startTs = (s: typeof sits[number]) =>
-    s.start_date ? new Date(s.start_date).getTime() : Number.POSITIVE_INFINITY;
+    s.start_date ? calendarDate(s.start_date).getTime() : Number.POSITIVE_INFINITY;
 
   const inProgress = sits.find(s => s.status === "in_progress");
   const upcomingConfirmed = sits
-    .filter(s => s.status === "confirmed" && s.start_date && new Date(s.start_date).getTime() >= nowTs)
+    .filter(s => s.status === "confirmed" && s.start_date && (daysFromToday(s.start_date, now) ?? -1) >= 0)
     .sort((a, b) => startTs(a) - startTs(b))[0];
   const upcomingPublished = sits
-    .filter(s => s.status === "published" && s.start_date && new Date(s.start_date).getTime() >= nowTs)
+    .filter(s => s.status === "published" && s.start_date && (daysFromToday(s.start_date, now) ?? -1) >= 0)
     .sort((a, b) => startTs(a) - startTs(b))[0];
   const anyPublished = sits.find(s => s.status === "published");
   // Conservé uniquement pour le CTA « Republier » (pas pour le hero principal).
   const lastCompleted = sits
     .filter(s => s.status === "completed")
-    .sort((a, b) => (new Date(b.end_date || 0).getTime()) - (new Date(a.end_date || 0).getTime()))[0];
+    .sort((a, b) => compareCalendarDates(b.end_date, a.end_date))[0];
 
   const currentSit =
     inProgress || upcomingConfirmed || upcomingPublished || anyPublished;
@@ -77,7 +77,7 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
   // On ne ressuscite PAS le passé en hero : on propose explicitement de republier.
   if (!currentSit && lastCompleted) {
     const lastDate = lastCompleted.end_date
-      ? format(new Date(lastCompleted.end_date), "MMMM yyyy", { locale: fr })
+      ? format(calendarDate(lastCompleted.end_date), "MMMM yyyy", { locale: fr })
       : null;
     return (
       <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
@@ -142,13 +142,13 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
   const isActive = ["published", "confirmed", "in_progress"].includes(currentSit.status);
   const statusConf = getSitStatusConfig(currentSit.status);
   const dateRange = [
-    currentSit.start_date ? format(new Date(currentSit.start_date), "d MMM", { locale: fr }) : "",
-    currentSit.end_date ? format(new Date(currentSit.end_date), "d MMM yyyy", { locale: fr }) : "",
+    currentSit.start_date ? format(calendarDate(currentSit.start_date), "d MMM", { locale: fr }) : "",
+    currentSit.end_date ? format(calendarDate(currentSit.end_date), "d MMM yyyy", { locale: fr }) : "",
   ].filter(Boolean).join(" → ");
 
   const appCount = currentSit.applications?.length || 0;
   const daysUntilStart = currentSit.start_date
-    ? differenceInDays(new Date(currentSit.start_date), now)
+    ? daysFromToday(currentSit.start_date, now)
     : null;
 
   // Diagnostic auto : annonce publiée depuis plus de 3 jours sans aucune

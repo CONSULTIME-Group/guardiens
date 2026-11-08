@@ -13,6 +13,7 @@
  */
 
 import { differenceInDays } from "date-fns";
+import { compareCalendarDates, daysFromToday, isOngoingDay } from "@/lib/calendarDate";
 
 export interface NextActionInput {
   sits: any[];
@@ -67,10 +68,7 @@ export function computeOwnerNextActions(input: NextActionInput): NextAction[] {
   const ongoing = sits.find(
     (s) =>
       s.status === "confirmed" &&
-      s.start_date &&
-      new Date(s.start_date) <= now &&
-      s.end_date &&
-      new Date(s.end_date) >= now
+      isOngoingDay(s.start_date, s.end_date, now)
   );
   if (ongoing) {
     out.push({
@@ -86,13 +84,11 @@ export function computeOwnerNextActions(input: NextActionInput): NextAction[] {
   // Prochaine garde J-7
   const nextConfirmed = sits
     .filter(
-      (s) => s.status === "confirmed" && s.start_date && new Date(s.start_date) > now
+      (s) => s.status === "confirmed" && s.start_date && (daysFromToday(s.start_date, now) ?? -1) > 0
     )
-    .sort(
-      (a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
-    )[0];
+    .sort((a, b) => compareCalendarDates(a.start_date, b.start_date))[0];
   if (nextConfirmed) {
-    const daysUntil = differenceInDays(new Date(nextConfirmed.start_date), now);
+    const daysUntil = daysFromToday(nextConfirmed.start_date, now) ?? 0;
     if (daysUntil <= 7) {
       out.push({
         id: "next-sit",

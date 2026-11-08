@@ -20,6 +20,7 @@ import AuthorReturnBanner from "@/components/entraide/AuthorReturnBanner";
 import MissionQuestions from "@/components/entraide/MissionQuestions";
 import { needTitleSizeClass, needWhenLabel } from "@/lib/needVisual";
 import { notifiedLine, responsesLine } from "@/lib/missionNotifiedCount";
+import { calendarDate } from "@/lib/calendarDate";
 
 // Lot E21 (25/10/2026) : un besoin sans photo montre le panneau gouache de
 // sa catégorie (NeedPaperPanel), décision de Jérémie qui remplace la règle du
@@ -887,10 +888,10 @@ const PublicMissionView = ({
                     </p>
                     <p className="text-base font-semibold text-foreground">
                       {mission.date_needed
-                        ? new Date(mission.date_needed).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })
+                        ? calendarDate(mission.date_needed).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })
                         : t("mission_detail.asap")}
                       {mission.end_date
-                        ? ` → ${new Date(mission.end_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}`
+                        ? ` → ${calendarDate(mission.end_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}`
                         : ""}
                     </p>
                   </div>

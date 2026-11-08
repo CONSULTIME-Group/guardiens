@@ -103,6 +103,7 @@ import { localTodayIso } from "@/lib/localDate";
 import { chooseDraftSource, localResumeDateFlags, resumeDraftDates } from "@/lib/sitDraftResume";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import type { ExitIntent } from "@/lib/sitCreateAbandon";
+import { calendarDate, daysBetween, daysFromToday } from "@/lib/calendarDate";
 
 /**
  * Lot PUB1 (07/11/2026) : « Décrire en une phrase » s'ouvre ici, dans une
@@ -1745,7 +1746,7 @@ const CreateSit = () => {
   };
 
   const nDays = (startDate && endDate && !dateError)
-    ? Math.max(1, Math.round((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000) + 1)
+    ? Math.max(1, (daysBetween(startDate, endDate) ?? 0) + 1)
     : 0;
 
   // Lot P1 : alerte douce, jamais bloquante, quand les dates recoupent une
@@ -1775,15 +1776,15 @@ const CreateSit = () => {
     const cityPart = ownerCity ? ` à ${ownerCity}` : "";
     // Dates au format FR long, ex : "du 14 août au 18 août 2026"
     const monthsFR = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const start = calendarDate(startDate);
+    const end = calendarDate(endDate);
     const sameYear = start.getFullYear() === end.getFullYear();
     const startLabel = `${start.getDate()} ${monthsFR[start.getMonth()]}${sameYear ? "" : ` ${start.getFullYear()}`}`;
     const endLabel = `${end.getDate()} ${monthsFR[end.getMonth()]} ${end.getFullYear()}`;
     return `Garde${cityPart ? " de maison" : ""} ${animals !== "animaux" ? `pour ${animals}` : ""}${cityPart}, du ${startLabel} au ${endLabel}`.replace(/\s+/g, " ").trim();
   };
 
-  const showUrgent = flexibleDates || (startDate && new Date(startDate).getTime() - Date.now() < 7 * 86400000);
+  const showUrgent = flexibleDates || (startDate && (daysFromToday(startDate) ?? 99) <= 7);
 
   const handlePublish = async () => {
     void trackEvent("sit_publish_attempted", {

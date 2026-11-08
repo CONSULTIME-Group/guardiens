@@ -1,4 +1,5 @@
 // Lot A9 : règles des actions admin sur les gardes après acceptation.
+import { isPastDay } from "@/lib/calendarDate";
 
 /** Statuts d'après acceptation proposés par le filtre de la page Gardes. */
 export const POST_ACCEPTANCE_STATUSES = ["confirmed", "in_progress", "completed", "cancelled"] as const;
@@ -11,7 +12,7 @@ export function isActiveGarde(status: string | null | undefined): boolean {
 /** Garde active dont la date de fin est passée. */
 export function isOverdueGarde(sit: { status?: string | null; end_date?: string | null }, now = new Date()): boolean {
   if (!isActiveGarde(sit.status) || !sit.end_date) return false;
-  return new Date(sit.end_date).getTime() < now.getTime();
+  return isPastDay(sit.end_date, now);
 }
 
 export const canForceEnd = (sit: { status?: string | null; end_date?: string | null }, now = new Date()) => isOverdueGarde(sit, now);

@@ -19,7 +19,6 @@ import OnboardingWelcome from "./OnboardingWelcome";
 import { useArrivalWelcomeSeen } from "@/hooks/useArrivalWelcomeSeen";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
-import { differenceInDays } from "date-fns";
 
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
@@ -68,6 +67,7 @@ import { awaitingLink, awaitingSentence, isAwaitingDecision, sitStatusMap, summa
 
 const CLOSED_FOR_DECISION: readonly string[] = ["expired", "cancelled", "archived", "completed"];
 import { pickActiveEntraideMission } from "@/lib/activeEntraideMission";
+import { compareCalendarDates, daysFromToday, isOngoingDay } from "@/lib/calendarDate";
 
 const OwnerDashboard = () => {
   const { user } = useAuth();
@@ -177,19 +177,17 @@ const OwnerDashboard = () => {
   const nearbyRadius = nearbyOwnerSittersData?.radiusUsed ?? null;
 
   const ongoingSit = useMemo(() =>
-    sits.find(s => s.status === "confirmed" && s.start_date && new Date(s.start_date) <= now && s.end_date && new Date(s.end_date) >= now),
+    sits.find(s => s.status === "confirmed" && isOngoingDay(s.start_date, s.end_date, now)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [sits]
   );
 
   const showEmergencyHelp = useMemo(() => {
-    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-    const imminent = sits.some(s =>
-      s.status === "confirmed" &&
-      s.start_date &&
-      new Date(s.start_date).getTime() - now.getTime() < sevenDaysMs &&
-      new Date(s.start_date).getTime() > now.getTime()
-    );
+    const imminent = sits.some(s => {
+      if (s.status !== "confirmed" || !s.start_date) return false;
+      const d = daysFromToday(s.start_date, now);
+      return d !== null && d >= 1 && d <= 7;
+    });
     const orphanPublished = sits.some(s =>
       s.status === "published" &&
       (s.applications || []).length === 0
@@ -213,12 +211,12 @@ const OwnerDashboard = () => {
   /* ── Sous-titre contextuel pour le cockpit ── */
   const subtitle = useMemo(() => {
     if (ongoingSit) {
-      const daysLeft = ongoingSit.end_date ? differenceInDays(new Date(ongoingSit.end_date), now) : null;
+      const daysLeft = ongoingSit.end_date ? daysFromToday(ongoingSit.end_date, now) : null;
       return `Votre garde est en cours${daysLeft !== null ? `, fin dans ${daysLeft} jour${daysLeft > 1 ? "s" : ""}` : ""}.`;
     }
-    const nextConfirmed = sits.find(s => s.status === "confirmed" && s.start_date && new Date(s.start_date) > now);
+    const nextConfirmed = sits.find(s => s.status === "confirmed" && s.start_date && (daysFromToday(s.start_date, now) ?? -1) > 0);
     if (nextConfirmed) {
-      const daysUntil = differenceInDays(new Date(nextConfirmed.start_date!), now);
+      const daysUntil = daysFromToday(nextConfirmed.start_date!, now) ?? 0;
       return `Votre prochaine garde commence dans ${daysUntil} jour${daysUntil > 1 ? "s" : ""}.`;
     }
     if (pendingAppCount > 0) {
@@ -251,8 +249,8 @@ const OwnerDashboard = () => {
   const getNextSitForPet = useCallback((pet: Pet) => {
     const currentDate = new Date();
     return sits
-      .filter(s => s.property_id === pet.property_id && ["published", "confirmed"].includes(s.status) && s.start_date && new Date(s.start_date) >= currentDate)
-      .sort((a, b) => new Date(a.start_date!).getTime() - new Date(b.start_date!).getTime())[0];
+      .filter(s => s.property_id === pet.property_id && ["published", "confirmed"].includes(s.status) && s.start_date && (daysFromToday(s.start_date, currentDate) ?? -1) >= 0)
+      .sort((a, b) => compareCalendarDates(a.start_date, b.start_date))[0];
   }, [sits]);
 
   const priorityAction = useOwnerPriorityAction({

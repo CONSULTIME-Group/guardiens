@@ -19,13 +19,14 @@ import { conversationSitBanner } from "@/lib/conversationSitBanner";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { chooseMissionResponse, declineMissionResponse } from "@/lib/missionResponseDecision";
 import { toast } from "sonner";
-import { format, isPast } from "date-fns";
+import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { appStatusBadge } from "@/lib/messageStatus";
 import ContextHeaderCard from "./ContextHeaderCard";
 import PresenceBadge from "./PresenceBadge";
 import ProAvatarBadge from "@/components/badges/ProAvatarBadge";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { daysFromToday } from "@/lib/calendarDate";
 
 interface ConversationHeaderProps {
   conv: any;
@@ -545,7 +546,7 @@ const ConversationHeader = ({
         <div className="px-4 py-2 bg-success-soft border-t border-success-border flex items-center gap-2">
           <CheckCircle className="text-success w-4 h-4 shrink-0" />
           <span className="text-sm text-success-foreground font-medium">Échange accepté</span>
-          {missionData.date_needed && isPast(new Date(missionData.date_needed)) && (
+          {missionData.date_needed && (daysFromToday(missionData.date_needed) ?? 1) <= 0 && (
             <Button
               size="sm"
               variant="outline"

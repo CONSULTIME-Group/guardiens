@@ -34,6 +34,7 @@ import {
 import { getSitPublishBlockers, buildSitPublishInput, MAX_TITLE_LENGTH } from "@/lib/sitPublishRules";
 import { DEFAULT_MAX_APPLICATIONS } from "@/lib/applicationCap";
 import MaxApplicationsField from "@/components/sits/owner/MaxApplicationsField";
+import { daysFromToday } from "@/lib/calendarDate";
 
 /** Carte de section pour grouper visuellement les champs d'édition. */
 const SectionCard = ({
@@ -351,7 +352,7 @@ const EditSit = () => {
   const showUrgent =
     !isConfirmed &&
     (flexibleDates ||
-      (startDate && new Date(startDate).getTime() - Date.now() < 2 * 86400000));
+      (startDate && (daysFromToday(startDate) ?? 99) <= 2));
 
   useEffect(() => {
     if (!showUrgent && isUrgent) setIsUrgent(false);

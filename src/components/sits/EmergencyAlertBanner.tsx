@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Zap, CheckCircle2, Loader2, X, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import { daysFromToday } from "@/lib/calendarDate";
 
 interface EmergencyAlertBannerProps {
   sitId: string;
@@ -29,7 +30,7 @@ const EmergencyAlertBanner = ({ sitId, sitCity, startDate }: EmergencyAlertBanne
   const [expanded, setExpanded] = useState(false);
 
   const daysUntilStart = startDate
-    ? Math.ceil((new Date(startDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    ? daysFromToday(startDate)
     : null;
   const inWindow = daysUntilStart !== null && daysUntilStart <= 15 && daysUntilStart >= 0;
 
