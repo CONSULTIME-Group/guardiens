@@ -398,7 +398,10 @@ export default function ArticleDetail() {
           .select("slug, title, excerpt, category")
           .eq("published", true)
           .neq("slug", slug)
-          .contains("internal_links", [{ url: `/actualites/${slug}` }])
+          // Lot ERRFIX du 09/11 : JSON en texte. Un tableau d'objets était écrit
+          // « {[object Object]} » (tableau Postgres) et la base répondait 400 :
+          // les articles qui citent celui-ci ne s'affichaient jamais.
+          .contains("internal_links", JSON.stringify([{ url: `/actualites/${slug}` }]))
           .limit(6),
         supabase
           .from("articles")
