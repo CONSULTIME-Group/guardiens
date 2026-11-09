@@ -83,6 +83,8 @@ export const SIGNAL_TYPES: Record<string, SignalTypeConfig> = {
   // Modération
   suspicious_account: { label: 'Compte suspect', family: 'moderation', defaultSeverity: 'warning', destinations: Q, autoResolve: false },
   sit_like_mission: { label: 'Mission qui ressemble à une garde', family: 'moderation', defaultSeverity: 'warning', destinations: Q, autoResolve: false },
+  // Lot ADM12 (09/11/2026) : type déclaré, il s'affichait brut (« mission_no_audience : 1 »).
+  mission_no_audience: { label: 'Coup de main sans personne de plus à prévenir à 30 km', family: 'moderation', defaultSeverity: 'critical', destinations: Q, autoResolve: false },
   animal_rehoming_listing: { label: 'Cession ou adoption d\'animal', family: 'moderation', defaultSeverity: 'warning', destinations: Q, autoResolve: false },
   contact_details_in_public_content: { label: 'Coordonnées dans un contenu public', family: 'moderation', defaultSeverity: 'warning', destinations: Q, autoResolve: false },
   undeclared_pricing: { label: 'Mention de tarif non déclarée', family: 'moderation', defaultSeverity: 'warning', destinations: Q, autoResolve: false },

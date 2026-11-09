@@ -1,4 +1,5 @@
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { LoadingState } from "@/components/admin/ui";
@@ -16,7 +17,14 @@ import { ProgressSection, SystemSection, TechnicalSignalsLine, TodaySection } fr
 const TrendsPanel = lazy(() => import("./_components/dashboard/TrendsPanel"), "TrendsPanel");
 
 /** Contenu du bloc replié, lu seulement à l'ouverture (activité, IA, crons, tendances). */
-const MoreContent = () => {
+const MoreContent = ({ focusCrons = false }: { focusCrons?: boolean }) => {
+  const cronsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!focusCrons) return;
+    // Après l'animation d'ouverture du bloc replié.
+    const t = window.setTimeout(() => cronsRef.current?.scrollIntoView?.({ block: "start", behavior: "smooth" }), 350);
+    return () => window.clearTimeout(t);
+  }, [focusCrons]);
   const keyFigures = useKeyFigures();
   const activity = useRecentActivity();
   const { analysis, loading, error, refreshing, refresh } = useActivityAnalysis();
@@ -30,7 +38,7 @@ const MoreContent = () => {
       <Suspense fallback={<LoadingState label="Chargement des tendances…" />}>
         <TrendsPanel />
       </Suspense>
-      <CronHealthCard />
+      <div ref={cronsRef} id="taches-planifiees"><CronHealthCard /></div>
       <ActivityAnalysisCard analysis={analysis} loading={loading} error={error} refreshing={refreshing} onRefresh={refresh} />
     </div>
   );
@@ -46,8 +54,16 @@ const MoreContent = () => {
  * Puis « Le système s'en charge » (relances automatiques, synthèse du lundi)
  * et, replié, activité récente, animation, tendances, tâches planifiées, IA.
  */
+/** Lot ADM12 : le voyant « Tâches planifiées » mène ici, bloc replié ouvert sur la carte des tâches. */
+export const OVERVIEW_CRONS_PARAM = "taches";
+
 const AdminOverview = () => {
-  const [moreOpened, setMoreOpened] = useState(false);
+  const [searchParams] = useSearchParams();
+  const focusCrons = searchParams.get("plus") === OVERVIEW_CRONS_PARAM;
+  const [moreOpened, setMoreOpened] = useState(focusCrons);
+  useEffect(() => {
+    if (focusCrons) setMoreOpened(true);
+  }, [focusCrons]);
   return (
     <div className="mx-auto max-w-[1080px] space-y-10">
       <AdminPageHeader
@@ -69,11 +85,13 @@ const AdminOverview = () => {
 
       <div data-block="plus">
         <CollapsibleSection
+          key={focusCrons ? "plus-ouvert" : "plus"}
           title="Pour aller plus loin : activité récente, animation, tendances, tâches planifiées, analyse IA"
           testId="overview-more"
+          defaultOpen={focusCrons}
           onOpenChange={(o) => o && setMoreOpened(true)}
         >
-          {moreOpened && <MoreContent />}
+          {moreOpened && <MoreContent focusCrons={focusCrons} />}
         </CollapsibleSection>
       </div>
     </div>

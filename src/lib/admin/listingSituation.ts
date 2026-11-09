@@ -162,7 +162,7 @@ export type ListingFilter = typeof LISTING_FILTERS[number];
 export const LISTING_FILTER_LABELS: Record<ListingFilter, string> = {
   published: "Cherchent un gardien (par défaut)",
   recent: "Publiées depuis 7 jours",
-  to_staff: "Sans candidature",
+  to_staff: "Sans candidature depuis 48 h",
   ready: "Brouillons prêts à publier",
   preparing: "En préparation",
   withdrawn: "Retirées par le propriétaire",

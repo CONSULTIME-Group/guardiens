@@ -140,6 +140,8 @@ function vousCopy(type: string, k: number): { title: string; action: string } {
       return { title: `Vérifier ${k} ${n(k, "coup de main qui ressemble à une garde", "coups de main qui ressemblent à une garde")}`, action: "Vérifier" };
     case "animal_rehoming_listing":
       return { title: `Vérifier ${k} ${n(k, "annonce de cession d'animal", "annonces de cession d'animal")}`, action: "Vérifier" };
+    case "mission_no_audience":
+      return { title: `Relayer ${k} ${n(k, "coup de main", "coups de main")} : tout le monde à 30 km a été prévenu`, action: "Ouvrir" };
     case "no_applications":
       return { title: `Diffuser ${k} ${n(k, "annonce sans candidature", "annonces sans candidature")} après 48 heures`, action: "Diffuser" };
     case "identity_needs_review":
@@ -177,7 +179,10 @@ export function buildPilotage(
   const technique: PilotageSignal[] = [];
 
   for (const s of signals) {
-    if (s.severity === "info") continue;
+    // Lot ADM12 : une annonce sans candidature reste dans la liste même sans
+    // gardien dans le rayon (sévérité « info ») ; c'est elle qui a le plus
+    // besoin d'une diffusion large (Vabres-l'Abbaye, 09/11/2026).
+    if (s.severity === "info" && s.signal_type !== "no_applications") continue;
     const nature = signalNature(s.signal_type);
     const start = startOf(s);
     // Garde commencée : plus aucune action avant le départ (règle ADM1).

@@ -1,3 +1,4 @@
+import { nurturingReasonLabel } from "@/lib/admin/nurturingOutcome";
 import { adminLabel } from "@/lib/admin/labels";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -215,7 +216,7 @@ export const SequenceRecipientsDialog = ({ open, onOpenChange, sequenceKey, sequ
                         {STATUS_LABEL[j.status] ?? adminLabel(j.status)}
                       </Badge>
                       {j.exit_reason && (
-                        <p className="text-[10px] text-muted-foreground mt-1">{j.exit_reason}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1">{nurturingReasonLabel(j.exit_reason)}</p>
                       )}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
@@ -242,7 +243,7 @@ export const SequenceRecipientsDialog = ({ open, onOpenChange, sequenceKey, sequ
                               key={idx}
                               className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-mono ${tone}`}
                               title={`Étape ${l.step_order} · ${l.template_name} · ${
-                                l.sent ? "envoyé" : `non envoyé (${l.reason ?? "·"})`
+                                l.sent ? "envoyé" : `écarté : ${nurturingReasonLabel(l.reason).toLowerCase()}`
                               }${open ? " · ouvert" : ""}${click ? " · cliqué" : ""}`}
                             >
                               {l.step_order}

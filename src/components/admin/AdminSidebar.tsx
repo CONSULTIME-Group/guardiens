@@ -47,7 +47,7 @@ export const BADGE_TITLES: Record<string, string> = {
   guideRequests: "demandes de guides en attente",
   analysisRequests: "demandes d'analyse à traiter",
   deletionRequests: "demandes de suppression en attente",
-  sitsToStaff: "annonces à staffer (aucune candidature)",
+  sitsToStaff: "annonces sans candidature depuis 48 h",
 };
 
 interface NavGroup {
@@ -98,7 +98,8 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/experiences", icon: Award, label: "Expériences", badgeKey: "experiences" },
       { to: "/admin/skills", icon: Lightbulb, label: "Compétences", badgeKey: "skills" },
       { to: "/admin/review-disputes", icon: AlertTriangle, label: "Contestations", badgeKey: "reviewDisputes" },
-      { to: "/admin/messages", icon: MessageSquare, label: "Messagerie", badgeKey: "adminMessageFailed" },
+      // Lot ADM12 : plus de pastille, la page ne montre pas les échecs d'envoi (audit du 09/11/2026, lot-C ME1).
+      { to: "/admin/messages", icon: MessageSquare, label: "Messagerie" },
     ],
   },
   {
@@ -137,6 +138,25 @@ const adminNavGroups: NavGroup[] = [
 /** Lot ADM4 : somme des pastilles d'une liste d'entrées (pastilles indisponibles ignorées). */
 export function sumBadges(items: NavItem[], badges: Record<string, number | undefined>): number {
   return items.reduce((n, it) => n + (it.badgeKey ? Number(badges[it.badgeKey] ?? 0) || 0 : 0), 0);
+}
+
+/**
+ * Lot ADM12 : texte du total d'un groupe de pastilles (bouton du menu mobile,
+ * « Outils »). Une lecture en échec donne « ? », jamais 0 ni rien.
+ */
+export function badgeTotalText(
+  items: NavItem[],
+  badges: Record<string, number | undefined>,
+  unavailable: boolean,
+): string | null {
+  if (unavailable && items.some((it) => it.badgeKey)) return "?";
+  const n = sumBadges(items, badges);
+  return n > 0 ? String(n) : null;
+}
+
+/** Lot ADM12 : une entrée dont la pastille est allumée mène tout entière à sa file filtrée. */
+export function navItemTarget(item: NavItem, badge: { show: boolean; text: string }): string {
+  return badge.show && badge.text !== "?" && item.badgeTo ? item.badgeTo : item.to;
 }
 
 /** Lot ADM4 : la page courante est-elle dans les Outils ? (ouvre le groupe replié) */
@@ -202,7 +222,7 @@ export const AdminSidebar = () => {
   const dailyGroups = adminNavGroups.filter((g) => !g.tool);
   const toolGroups = adminNavGroups.filter((g) => g.tool);
   const showTools = toolsOpen || isToolPath(location.pathname);
-  const toolsBadge = sumBadges(toolGroups.flatMap((g) => g.items), badges as Record<string, number | undefined>);
+  const toolsBadge = badgeTotalText(toolGroups.flatMap((g) => g.items), badges as Record<string, number | undefined>, unavailable);
 
   const renderItem = (item: NavItem) => {
     const badge = resolveBadge(item.badgeKey, badges as Record<string, number | undefined>, unavailable, BADGE_TITLES);
@@ -210,7 +230,7 @@ export const AdminSidebar = () => {
     return (
       <NavLink
         key={item.to}
-        to={item.to}
+        to={navItemTarget(item, badge)}
         end={item.end}
         title={collapsed ? item.label : undefined}
         className={({ isActive }) =>
@@ -233,21 +253,7 @@ export const AdminSidebar = () => {
         {!collapsed && (
           <>
             <span className="truncate flex-1">{item.label}</span>
-            {badge.show && (item.badgeTo ? (
-              <span
-                role="link"
-                tabIndex={0}
-                className="ml-auto rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label={`${item.label} : ${badge.label}`}
-                title={badge.label}
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(item.badgeTo!); }}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); navigate(item.badgeTo!); } }}
-              >
-                <AdminBadgePill text={badge.text} label={badge.label} />
-              </span>
-            ) : (
-              <AdminBadgePill text={badge.text} label={badge.label} className="ml-auto" />
-            ))}
+            {badge.show && <AdminBadgePill text={badge.text} label={badge.label} className="ml-auto" />}
           </>
         )}
       </NavLink>
@@ -306,7 +312,7 @@ export const AdminSidebar = () => {
               data-testid="admin-tools-toggle"
             >
               <span className="flex-1 text-left">Outils</span>
-              {toolsBadge > 0 && <AdminBadgePill text={String(toolsBadge)} label={`${toolsBadge} en attente dans les outils`} />}
+              {toolsBadge && <AdminBadgePill text={toolsBadge} label={toolsBadge === "?" ? "Compteur indisponible" : `${toolsBadge} en attente dans les outils`} />}
               {showTools ? <ChevronUp className="h-3 w-3" aria-hidden /> : <ChevronDown className="h-3 w-3" aria-hidden />}
             </button>
           )}

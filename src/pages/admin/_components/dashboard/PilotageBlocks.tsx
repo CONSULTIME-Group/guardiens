@@ -39,7 +39,9 @@ export function usePilotage() {
         .from("admin_signals")
         .select("id, signal_type, severity, entity_type, entity_id, detected_at, metadata")
         .is("resolved_at", null)
-        .neq("severity", "info")
+        // Lot ADM12 : une annonce sans candidature reste lue même sans gardien
+        // dans le rayon (sévérité info), comme la pastille du menu.
+        .or("severity.neq.info,signal_type.eq.no_applications")
         .order("detected_at", { ascending: false })
         .limit(1000);
       if (error) throw error;
