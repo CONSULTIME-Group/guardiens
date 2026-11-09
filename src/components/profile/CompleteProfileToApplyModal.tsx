@@ -587,15 +587,15 @@ const CompleteProfileToApplyModal = ({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[92vh] overflow-y-auto rounded-3xl p-0">
+      <DialogContent className="max-w-2xl max-h-[92vh] overflow-y-auto overflow-x-hidden rounded-3xl p-0 grid-cols-[minmax(0,1fr)]">
         <div className="px-6 pt-6 pb-4 border-b border-border bg-card sticky top-0 z-10 rounded-t-3xl">
           <DialogHeader className="space-y-1.5 text-left">
             <DialogTitle className="font-heading text-xl">
-              Il ne manque presque rien pour postuler
+              D'abord, vous.
             </DialogTitle>
             <DialogDescription className="text-sm">
               Les propriétaires choisissent sur ces éléments. Complétez-les ici, vous
-              restez sur l'annonce.
+              restez sur l'annonce, puis vous écrivez votre mot.
             </DialogDescription>
           </DialogHeader>
 
@@ -744,7 +744,7 @@ const CompleteProfileToApplyModal = ({
 
                   {f.key === "bio" && (
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
                         <Label htmlFor="gate_bio">Bio</Label>
                         <GenerateBioButton onPick={(text) => patch({ bio: text })} />
                       </div>
@@ -847,7 +847,7 @@ const CompleteProfileToApplyModal = ({
                 Enregistrement
               </>
             ) : (
-              "Enregistrer et postuler"
+              "Enregistrer et écrire mon mot"
             )}
           </Button>
 
