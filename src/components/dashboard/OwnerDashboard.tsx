@@ -523,7 +523,7 @@ const OwnerDashboard = () => {
       {/* Grille lot D1 : colonne principale 720 px, colonne de droite 328 px, écart 48 px */}
       <div className="min-w-0">
         <div className="mx-auto w-full max-w-[720px] lg:max-w-[1160px] px-4 sm:px-5 lg:px-8 lg:grid lg:grid-cols-[minmax(0,720px)_328px] lg:gap-[48px] lg:justify-center lg:items-start">
-          <div className="min-w-0 space-y-[34px] md:space-y-[52px]">
+          <div className="min-w-0 space-y-[34px] md:space-y-[52px] lg:space-y-[32px]">
             {isDesktopRail ? (
               <>
                 {/* 0. Lot N4 : Alma « Vous partez quand ? », masquée après publication et pour le témoin.

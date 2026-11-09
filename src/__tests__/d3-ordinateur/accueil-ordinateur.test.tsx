@@ -205,3 +205,11 @@ describe("D3, textes", () => {
     }
   });
 });
+
+describe("D3c, écart de la colonne principale sur ordinateur", () => {
+  it("32 px entre les blocs à partir de 1 024 px, téléphone et tablette inchangés", () => {
+    for (const f of ["src/components/dashboard/OwnerDashboard.tsx", "src/components/dashboard/SitterDashboard.tsx"]) {
+      expect(read(f)).toContain('className="min-w-0 space-y-[34px] md:space-y-[52px] lg:space-y-[32px]"');
+    }
+  });
+});
