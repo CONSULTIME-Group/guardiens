@@ -19426,6 +19426,7 @@ export type Database = {
       }
       admin_cron_health: { Args: never; Returns: Json }
       admin_dashboard_snapshot: { Args: never; Returns: Json }
+      admin_work_list: { Args: never; Returns: Json }
       admin_dashboard_summary: { Args: never; Returns: Json }
       admin_draft_email_preferences: {
         Args: { p_owner_ids: string[] }

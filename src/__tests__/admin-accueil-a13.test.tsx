@@ -89,7 +89,8 @@ describe("Vue d'ensemble", () => {
   it("aucun appel de fonction serveur au montage, et moins de 16 lectures", async () => {
     renderOverview();
     await screen.findByText("Gardes confirmées à venir");
-    await waitFor(() => expect(mocks.calls).toContain("rpc:admin_menu_badges"));
+    // Lot ADM13 : une lecture pour toute la liste de travail (signaux, files, voyants, relances).
+    await waitFor(() => expect(mocks.calls).toContain("rpc:admin_work_list"));
     // Lot ADM10 : activité récente et analyse IA lues à l'ouverture de « Plus » seulement.
     expect(mocks.calls).not.toContain("from:admin_activity_analysis");
     // « Plus » replié : santé des crons et compteurs d'animation lus à l'ouverture seulement.

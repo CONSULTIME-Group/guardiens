@@ -10,7 +10,8 @@ import {
   CLASSIFICATION_DIRECTIVE,
 } from "../../supabase/functions/_shared/alma-classify";
 import { SIGNAL_TYPES } from "../../supabase/functions/_shared/admin-signal-config";
-import { almaWeeklyLines, isActionableCritical } from "../../supabase/functions/alert-admin-signals/digest";
+import { almaWeeklyLines } from "../../supabase/functions/alert-admin-signals/digest";
+import { buildWorkList } from "../../supabase/functions/_shared/admin-work-list";
 import { checkReplayAnswer, isKnownPath } from "@/lib/alma/replayChecks";
 import { ALMA_REPLAY_CASES } from "@/data/almaReplayCases";
 import {
@@ -125,12 +126,13 @@ describe("J2-B, signaux", () => {
   });
 
   it("le bug supposé part dans l'email quotidien malgré sa gravité avertissement ; sans réponse, jamais", () => {
-    const s = (type: string, severity: string) => ({ signal_type: type, severity, detected_at: "", entity_type: "profile", entity_id: "x", metadata: {} });
-    expect(isActionableCritical(s("alma_bug_report", "warning"))).toBe(true);
-    expect(isActionableCritical(s("alma_unanswered", "info"))).toBe(false);
-    // Lot ADM2 : l'annonce sans candidature entre dans l'email ; une discussion à l'arrêt reste sur l'écran.
-    expect(isActionableCritical(s("no_applications", "warning"))).toBe(true);
-    expect(isActionableCritical(s("stalled_discussion", "warning"))).toBe(false);
+    // Lot ADM13 : l'email reprend la liste de travail de la vue d'ensemble.
+    const inList = (type: string, severity: string) => buildWorkList({ signals: [{ id: "x", signal_type: type, severity, detected_at: "2026-11-01T08:00:00Z", entity_type: "profile", entity_id: "x", metadata: {} }] }).items.length > 0;
+    expect(inList("alma_bug_report", "warning")).toBe(true);
+    expect(inList("alma_unanswered", "info")).toBe(false);
+    // Lot ADM2 : l'annonce sans candidature entre dans la liste ; une discussion à l'arrêt, relancée seule, non.
+    expect(inList("no_applications", "warning")).toBe(true);
+    expect(inList("stalled_discussion", "warning")).toBe(false);
   });
 
   it("un signal par membre, par type et par jour, erreurs techniques jointes pour un bug", () => {

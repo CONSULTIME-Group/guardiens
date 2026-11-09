@@ -1,46 +1,48 @@
 import { assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts'
-import { buildDigestLines, humanQueueLines, siteHealthLines, isActionableCritical, signalAgeHours, weeklyCoverageLine, weeklySummaryLines, type OpenSignal } from './digest.ts'
+import { weeklyCoverageLine, weeklySummaryLines, workListDigestLines, workListNotices, type OpenSignal } from './digest.ts'
+import { buildWorkList, type PilotageSignal } from '../_shared/admin-work-list.ts'
 
-const NOW = Date.parse('2026-09-28T06:00:00Z')
-const app = (sit: string, title: string, d = '2026-09-19T09:00:00Z'): OpenSignal => ({
-  signal_type: 'pending_application', severity: 'critical', detected_at: d,
-  entity_type: 'application', entity_id: crypto.randomUUID(),
-  metadata: { sit_id: sit, sit_title: title },
-})
-const sits = new Map([
-  ['marseille', { id: 'marseille', title: 'Garde 2 chats centre ville de Marseille', start_date: '2026-10-04' }],
-  ['tahiti', { id: 'tahiti', title: 'Garde de maison et animaux à Taravao, Tahiti', start_date: '2026-10-03' }],
-  ['hl', { id: 'hl', title: 'Garder 2 chats en Haute-Loire', start_date: '2026-10-02' }],
-])
-
-Deno.test('D : une ligne par annonce, pas une par candidature', () => {
-  const lines = buildDigestLines([
-    app('marseille', 'M'), app('marseille', 'M'), app('marseille', 'M'), app('marseille', 'M'),
-    app('tahiti', 'T'), app('tahiti', 'T'),
-  ], sits, NOW)
-  assertEquals(lines.length, 2)
-  assertEquals(lines.find((l) => l.key === 'sit:marseille')!.count, 4)
-  assertEquals(lines.find((l) => l.key === 'sit:marseille')!.action,
-    'Relancer le propriétaire : 4 candidatures attendent sa réponse. La plus ancienne attend depuis 8 jours.')
+// Lot ADM13 : l'email du matin reprend la liste de travail de la vue
+// d'ensemble ; les règles de la liste sont verrouillées côté site
+// (src/__tests__/adm13/), ce fichier vérifie la forme de l'email.
+const NOW = Date.parse('2026-11-09T06:00:00Z')
+const sig = (type: string, severity: string, extra: Partial<PilotageSignal> = {}): PilotageSignal => ({
+  id: crypto.randomUUID(), signal_type: type, severity, entity_type: null, entity_id: null,
+  detected_at: '2026-11-05T08:00:00Z', metadata: {}, ...extra,
 })
 
-Deno.test('D : tri par date de début de garde la plus proche', () => {
-  const lines = buildDigestLines([
-    app('marseille', 'M'), app('tahiti', 'T'),
-    { signal_type: 'owner_sit_unconfirmed', severity: 'critical', detected_at: '2026-09-19T08:40:00Z',
-      entity_type: 'sit', entity_id: 'hl', metadata: {} },
-  ], sits, NOW)
-  assertEquals(lines.map((l) => l.key), ['sit:hl', 'sit:tahiti', 'sit:marseille'])
-  assertEquals(lines[0].action, 'Aider le propriétaire à confirmer son gardien avant le départ.')
+Deno.test('ADM13 : une ligne d\'email par ligne de la liste, liens absolus', () => {
+  const model = buildWorkList({
+    signals: [sig('suspicious_account', 'warning'), sig('suspicious_account', 'warning'), sig('alma_churn', 'critical')],
+    queues: [{ key: 'contactMessages', count: 2, oldest: '2026-11-07T06:00:00Z' }],
+    relances_failed_7d: 1,
+    health: [{ key: 'tasks', label: 'Tâches planifiées', state: 'alert', detail: 'Dernier passage en échec ou en retard : Récapitulatif', link: '/admin?plus=taches' }],
+  }, NOW)
+  const lines = workListDigestLines(model, NOW)
+  assertEquals(lines.length, model.items.length)
+  assertEquals(lines.map((l) => l.title), [
+    'Vérifier les tâches planifiées',
+    'Répondre à 2 messages de contact',
+    'Écrire au membre qui veut partir',
+    'Examiner 2 comptes suspects',
+    'Vérifier 1 relance automatique en échec',
+  ])
+  assertEquals(lines[0].link, 'https://guardiens.fr/admin?plus=taches')
+  assertEquals(lines[1].ageDays, 2)
 })
 
-Deno.test('B et D : trous de couverture et warnings exclus, rien si aucun critique actionnable', () => {
-  const cov: OpenSignal = { signal_type: 'city_coverage_gap', severity: 'critical', detected_at: '2026-09-20T00:00:00Z',
-    entity_type: 'city', entity_id: 'x', metadata: { city: 'Troyes' } }
-  // Candidature récente (moins de 96 h) : reste sur l'écran.
-  const warn: OpenSignal = { ...app('tahiti', 'T', '2026-09-27T06:00:00Z'), severity: 'warning', metadata: { sit_id: 'tahiti', hours_since_created: 24 } }
-  assertEquals(isActionableCritical(cov), false)
-  assertEquals(buildDigestLines([cov, warn], sits, NOW), [])
+Deno.test('ADM13 : une source illisible est écrite en tête de l\'email', () => {
+  const model = buildWorkList({ sources: { queues: false, health: false }, signals: [] }, NOW)
+  assertEquals(workListNotices(model), ['Lecture impossible : files des membres, état du site. La liste est incomplète.'])
+})
+
+Deno.test('ADM13 : aucun tiret cadratin dans les lignes', () => {
+  const model = buildWorkList({
+    signals: [sig('no_applications', 'warning', { entity_type: 'sit', entity_id: 's1' })],
+    sits: [{ id: 's1', title: 'Garde \u2014 Lyon', city: 'Lyon', start_date: '2026-12-20' }],
+  }, NOW)
+  const text = JSON.stringify(workListDigestLines(model, NOW))
+  assertEquals(/[\u2014\u2013]/.test(text), false)
 })
 
 Deno.test('B : synthèse hebdomadaire le lundi seulement', () => {
@@ -49,34 +51,6 @@ Deno.test('B : synthèse hebdomadaire le lundi seulement', () => {
   assertEquals(weeklyCoverageLine([cov, cov], new Date('2026-09-28T06:00:00Z')),
     'Couverture : 2 villes suivies comptent moins de 3 gardiens à 30 km.')
   assertEquals(weeklyCoverageLine([cov], new Date('2026-09-29T06:00:00Z')), null)
-})
-
-Deno.test('D : aucun tiret cadratin dans les lignes', () => {
-  const lines = buildDigestLines([app('zz', 'Garde \u2014 Lyon')], new Map([['zz', { id: 'zz', title: null, start_date: '2026-09-30' }]]), NOW)
-  assertEquals(lines[0].title, 'Garde , Lyon')
-})
-
-Deno.test('S2 : candidatures et discussions d\'une annonce en une ligne', () => {
-  const stalled: OpenSignal = { ...app('tahiti', 'T'), signal_type: 'stalled_discussion' }
-  const lines = buildDigestLines([app('tahiti', 'T'), app('tahiti', 'T'), stalled], sits, NOW)
-  assertEquals(lines.length, 1)
-  assertEquals(lines[0].action, 'Relancer le propriétaire : 2 candidatures sans réponse, 1 discussion à l\'arrêt. La plus ancienne attend depuis 8 jours.')
-})
-
-Deno.test('S2 : files de digest regroupées en « File des digests »', () => {
-  const d = (t: string): OpenSignal => ({ signal_type: t, severity: 'critical', detected_at: '2026-09-27T06:00:00Z', entity_type: 'system', entity_id: null, metadata: {} })
-  const lines = buildDigestLines([d('digest_queue_stalled'), d('digest_queue_morning_backlog')], sits, NOW)
-  assertEquals(lines.length, 1)
-  assertEquals(lines[0].title, 'File des digests')
-  assertEquals(lines[0].count, 2)
-})
-
-Deno.test('S2 : éditorial quotidien seulement pour la panne du détecteur', () => {
-  const c = (t: string): OpenSignal => ({ signal_type: t, severity: 'critical', detected_at: '2026-09-27T06:00:00Z', entity_type: 'system', entity_id: t, metadata: {} })
-  assertEquals(isActionableCritical(c('content_detector_broken')), true)
-  assertEquals(isActionableCritical(c('content_defect_outside_freeze')), false)
-  assertEquals(isActionableCritical(c('dormant_sitter')), false)
-  assertEquals(isActionableCritical(c('untapped_city')), false)
 })
 
 Deno.test('S2 : synthèse du lundi, couverture, éditorial, À animer', () => {
@@ -88,85 +62,4 @@ Deno.test('S2 : synthèse du lundi, couverture, éditorial, À animer', () => {
     'À animer : 1 gardien dormant, 2 onboardings affinité inachevés.',
   ])
   assertEquals(weeklySummaryLines(rows, new Date('2026-09-29T06:00:00Z')), [])
-})
-
-Deno.test('ADM1 : une garde commencée la veille sort de l\'email, le jour même reste', () => {
-  const day = Date.parse('2026-10-16T05:30:00Z') // 7 h 30 à Paris
-  const started = new Map([
-    ['milo', { id: 'milo', title: 'Garde Milo', start_date: '2026-10-09' }],
-    ['cevennes', { id: 'cevennes', title: 'Garde en Cévennes', start_date: '2026-10-16' }],
-  ])
-  const lines = buildDigestLines([
-    app('milo', 'Milo'),
-    { signal_type: 'owner_sit_unconfirmed', severity: 'critical', detected_at: '2026-10-13T08:00:00Z',
-      entity_type: 'sit', entity_id: 'milo', metadata: {} },
-    { signal_type: 'owner_sit_unconfirmed', severity: 'critical', detected_at: '2026-10-13T08:00:00Z',
-      entity_type: 'sit', entity_id: 'cevennes', metadata: {} },
-  ], started, day)
-  assertEquals(lines.map((l) => l.key), ['sit:cevennes'])
-})
-
-Deno.test('ADM2 : une candidature « warning » de 96 h et plus entre dans l\'email (âge réel)', () => {
-  const w = (hours: number, detected: string): OpenSignal => ({ ...app('marseille', 'M', detected), severity: 'warning', metadata: { sit_id: 'marseille', hours_since_created: hours } })
-  // Repérée à 72 h, il y a 1 jour : 96 h réelles.
-  const old = w(72, '2026-09-27T06:00:00Z')
-  const young = w(24, '2026-09-27T06:00:00Z')
-  assertEquals(Math.round(signalAgeHours(old, NOW)), 96)
-  assertEquals(isActionableCritical(old, NOW), true)
-  assertEquals(isActionableCritical(young, NOW), false)
-  assertEquals(buildDigestLines([old, young], sits, NOW).map((l) => l.count), [1])
-})
-
-Deno.test('ADM2 : annonce sans candidature dans l\'email, sauf sans gardien éligible (info)', () => {
-  const n = (severity: string): OpenSignal => ({ signal_type: 'no_applications', severity, detected_at: '2026-09-27T10:00:00Z', entity_type: 'sit', entity_id: 'tahiti', metadata: {} })
-  assertEquals(isActionableCritical(n('warning'), NOW), true)
-  assertEquals(isActionableCritical(n('info'), NOW), false)
-})
-
-Deno.test('ADM2 : files humaines en lignes lisibles, vides écartées', () => {
-  const lines = humanQueueLines([
-    { key: 'contactMessages', count: 2, oldest: '2026-09-26T08:00:00Z' },
-    { key: 'reports', count: 0, oldest: null },
-    { key: 'deletionRequests', count: 1, oldest: '2026-09-27T08:00:00Z' },
-    { key: 'inconnu', count: 3, oldest: null },
-  ], NOW)
-  assertEquals(lines.map((l) => [l.title, l.ageDays, l.link]), [
-    ['2 messages de contact', 1, 'https://guardiens.fr/admin/contact-messages'],
-    ['1 demande RGPD', 0, 'https://guardiens.fr/admin/demandes-suppression'],
-  ])
-  assertEquals(humanQueueLines(null, NOW), [])
-  for (const l of lines) assertEquals(/[\u2014\u2013]/.test(l.action + l.title), false)
-})
-
-Deno.test('ADM5 : un brouillon sans titre garde une ligne lisible', () => {
-  const draft: OpenSignal = { signal_type: 'stale_draft', severity: 'critical', detected_at: '2026-09-27T06:00:00Z', entity_type: 'sit', entity_id: 'brassac', metadata: {} }
-  const lines = buildDigestLines([draft], new Map([['brassac', { id: 'brassac', title: '  ', start_date: '2026-10-01' }]]), NOW)
-  assertEquals(lines[0].title, 'Annonce sans titre')
-})
-
-Deno.test('ADM6 : seuls les voyants rouges passent, le rendu SEO jamais (porté par son signal)', () => {
-  const lines = siteHealthLines([
-    { key: 'tasks', label: 'Tâches planifiées', state: 'ok', detail: '41 tâches suivies', link: null },
-    { key: 'ai', label: 'IA', state: 'alert', detail: 'Aucune analyse quotidienne depuis 17/10', link: '/admin/alma' },
-    { key: 'seo', label: 'Rendu SEO', state: 'alert', detail: 'Plafond atteint', link: '/admin/prerender' },
-    { key: 'errors', label: 'Erreurs du site', state: 'alert', detail: '', link: 'https://ailleurs.example' },
-  ])
-  assertEquals(lines.map((l) => l.key), ['health:ai', 'health:errors'])
-  assertEquals(lines[0].title, 'État du site : IA')
-  assertEquals(lines[0].link, 'https://guardiens.fr/admin/alma')
-  assertEquals(lines[1].link, 'https://guardiens.fr/admin')
-  assertEquals(siteHealthLines(null), [])
-})
-
-Deno.test('ADM10 : une situation relancée seule entre dans l\'email à 7 jours du départ ou moins', () => {
-  const far = new Map([['loin', { id: 'loin', title: 'Garde lointaine', start_date: '2026-11-20' }]])
-  const draft: OpenSignal = { signal_type: 'stale_draft', severity: 'critical', detected_at: '2026-09-27T06:00:00Z', entity_type: 'sit', entity_id: 'loin', metadata: {} }
-  const noApps: OpenSignal = { signal_type: 'no_applications', severity: 'warning', detected_at: '2026-09-27T10:00:00Z', entity_type: 'sit', entity_id: 'loin', metadata: {} }
-  // Brouillon et candidatures relancés automatiquement : hors email loin du départ.
-  assertEquals(buildDigestLines([draft, app('loin', 'L')], far, NOW), [])
-  // Annonce sans candidature : la diffusion reste un geste du fondateur.
-  assertEquals(buildDigestLines([noApps], far, NOW).length, 1)
-  // À 6 jours du départ, la même situation revient.
-  const near = new Map([['loin', { id: 'loin', title: 'Garde proche', start_date: '2026-10-04' }]])
-  assertEquals(buildDigestLines([draft], near, NOW).length, 1)
 })

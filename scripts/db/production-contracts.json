@@ -131,6 +131,24 @@
           "sql": "SELECT (SELECT count(*) FROM cron.job WHERE active AND ((jobname = 'alert-digest-12h' AND schedule = '0 10,11 * * *') OR (jobname = 'alert-digest-18h' AND schedule = '0 16,17 * * *') OR (jobname = 'nearby-daily-digest' AND schedule = '5 6-11 * * *'))) = 3 AS ok"
         }
       ]
+    },
+    {
+      "migration": "0124_adm13_une_liste.sql",
+      "description": "Admin : une lecture pour la liste de travail, candidatures sans réponse et tarif resserrés",
+      "checks": [
+        {
+          "name": "work_list_sources",
+          "sql": "SELECT position('ok_relances' IN pg_get_functiondef('public.admin_work_list()'::regprocedure)) > 0 AND position('admin_site_health()' IN pg_get_functiondef('public.admin_work_list()'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "liquidite_sans_reponse",
+          "sql": "SELECT position('adm13_sans_reponse' IN pg_get_functiondef('public.admin_liquidity_snapshot()'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "tarif_montant_seul",
+          "sql": "SELECT NOT public.looks_like_pricing('3 sorties par jour') AND public.looks_like_pricing('20 euros la nuit') AS ok"
+        }
+      ]
     }
   ]
 }

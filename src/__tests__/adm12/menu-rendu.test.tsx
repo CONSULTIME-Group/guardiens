@@ -61,13 +61,9 @@ describe("menu rendu", () => {
 });
 
 describe("vue d'ensemble : les annonces sans gardien dans le rayon sont lues", () => {
-  it.each([
-    "src/pages/admin/_components/dashboard/PilotageBlocks.tsx",
-    "src/pages/admin/_components/dashboard/SignalsSection.tsx",
-  ])("%s lit no_applications en sévérité info, comme la pastille", (p) => {
-    const src = read(p);
-    expect(src).toContain('.or("severity.neq.info,signal_type.eq.no_applications")');
-    expect(src).not.toContain('.neq("severity", "info")');
+  it("la liste de travail lit no_applications en sévérité info, comme la pastille (lot ADM13 : une lecture)", () => {
+    expect(read("src/pages/admin/_components/dashboard/PilotageBlocks.tsx")).toContain('supabase.rpc("admin_work_list")');
+    expect(read("drizzle/migrations/0124_adm13_une_liste.sql")).toContain("(severity IS DISTINCT FROM 'info' OR signal_type = 'no_applications')");
   });
 });
 
