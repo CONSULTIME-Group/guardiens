@@ -11,7 +11,9 @@ import type { CockpitTodo } from "./owner/OwnerCockpit";
 import { useHelpsWithMissing } from "./HelpsWithReminder";
 import CommunityPulseLine from "./shared/CommunityPulseLine";
 import { useNavBadgeCounts } from "@/hooks/useNavBadgeCounts";
-import { useOwnerDigestLine } from "@/hooks/useOwnerDigestLine";
+import { useDashboardMovement } from "@/hooks/useDashboardMovement";
+import { buildMovementBand } from "@/lib/dashboardMovement";
+import MovementBand from "./shared/MovementBand";
 import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import { formatCityLabel } from "@/lib/cityLabel";
 import { pickOwnerCockpitLine } from "@/lib/ownerCockpitLine";
@@ -117,7 +119,9 @@ const OwnerDashboard = () => {
   const { unreadCount } = useNavBadgeCounts(user?.id);
   // Lot L4 : la ligne du cockpit ne s'affiche que sur ordinateur, le récit la remplace sur téléphone.
   const isDesktopRail = useIsDesktopRail();
-  const digestLine = useOwnerDigestLine(!!user?.id && isDesktopRail);
+  // Lot D4 : ce qui a bougé depuis la dernière visite, sur ordinateur seulement
+  // (remplace la ligne get_activity_since_last_visit, même nombre de lectures).
+  const movement = useDashboardMovement(user?.id, isDesktopRail);
   const { data: ownerProfile, loading: ownerProfileLoading, loadError: ownerProfileLoadError } = useOwnerProfile();
   const ownerCity = ownerProfile?.city ? formatCityLabel(ownerProfile.city) : "";
 
@@ -443,6 +447,8 @@ const OwnerDashboard = () => {
       {isDesktopRail && (
         <ReassuranceRailCard
           nearby={nearbyCount > 0 && nearbyRadius ? { count: nearbyCount, radiusKm: nearbyRadius, city: ownerCity || null } : null}
+          community={movement.data?.community ?? null}
+          showReviews
         />
       )}
       {ownerReadings.length > 0 && <RailReadingsCard items={ownerReadings} />}
@@ -459,9 +465,10 @@ const OwnerDashboard = () => {
     nearby: nearbyCount > 0 && nearbyRadius
       ? `${nearbyCount} gardien${nearbyCount > 1 ? "s sont inscrits" : " est inscrit"} à moins de ${nearbyRadius} km${ownerCity ? ` de ${ownerCity}` : ""}.`
       : null,
-    digest: digestLine ?? null,
+    digest: null,
     fallback: subtitle,
   });
+  const movementBand = buildMovementBand("owner", movement.data, { previousVisit: movement.previousVisit });
 
   const hasActiveAnnonce = activeSits.length > 0;
   // Lot D3 : ordinateur, propriétaire sans annonce ni brouillon : le récit remplace la vedette « Publier ».
@@ -514,6 +521,7 @@ const OwnerDashboard = () => {
                   firstName={user?.firstName}
                   line={cockpitLine}
                   todos={todos}
+                  movement={movementBand ? <MovementBand band={movementBand} space="owner" /> : null}
                 />
 
                 {/* 2. Vedette unique. Lot D3 : avant la première annonce, le récit du

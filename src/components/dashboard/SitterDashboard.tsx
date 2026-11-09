@@ -17,7 +17,10 @@ import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
 import { useNearbyHelpers } from "@/hooks/useNearbyHelpers";
 import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import { useHelpsWithMissing } from "./HelpsWithReminder";
-import { useSitterDigestLine } from "@/hooks/useOwnerDigestLine";
+import { useDashboardMovement } from "@/hooks/useDashboardMovement";
+import { buildMovementBand, nearestSitLine } from "@/lib/dashboardMovement";
+import { calendarDate } from "@/lib/calendarDate";
+import MovementBand from "./shared/MovementBand";
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import { formatCityLabel } from "@/lib/cityLabel";
 import DashboardLoadError from "./DashboardLoadError";
@@ -63,6 +66,8 @@ import RoleSwitch from "./story/RoleSwitch";
 import EntraideLine from "./story/EntraideLine";
 import { useCompactStory } from "./story/useCompactStory";
 import PublishedNotice from "./story/PublishedNotice";
+
+const DAY_MONTH = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" });
 
 export const SITTER_ENTRAIDE_HEADLINE = "Entre deux gardes, un coup de main près de chez vous.";
 
@@ -121,8 +126,9 @@ const SitterDashboard = () => {
   // Lot D2 : accueil.
   const helpsWithMissing = useHelpsWithMissing();
   const isDesktopRail = useIsDesktopRail();
-  // Lot L7 : la ligne du cockpit n'est lue que sur ordinateur (le récit la remplace sur téléphone).
-  const digestLine = useSitterDigestLine(!!user?.id && isDesktopRail);
+  // Lot D4 : ce qui a bougé depuis la dernière visite, sur ordinateur seulement
+  // (remplace la ligne get_activity_since_last_visit, même nombre de lectures).
+  const movement = useDashboardMovement(user?.id, isDesktopRail);
 
   /* ── Lot L7 : récit gardien (aucune lecture de plus) ── */
   const compactStory = useCompactStory();
@@ -199,16 +205,23 @@ const SitterDashboard = () => {
     (identityStatus === "verified" || !!identityVerified);
   const openingVisible = isNewSitter && !allChecklistDone;
 
-  // Ligne sous le titre : prochaine garde, sinon digest réel, sinon rien.
+  // Ligne sous le titre : prochaine garde, sinon (lot D4) la garde ouverte la
+  // plus proche quand elle est au-delà de 50 km, sinon rien.
+  const farLine = nearestSitLine(
+    movement.data?.nearest_sit,
+    formatCityLabel,
+    (iso) => DAY_MONTH.format(calendarDate(iso)),
+  );
   const guardRange = nextGuard ? formatDateRangeFr(nextGuard.start_date, nextGuard.end_date) : null;
   const cockpitLine: SitterCockpitLine | null = nextGuard && guardRange
     ? {
         text: `Votre prochaine garde : ${guardRange}${nextGuard.city ? `, à ${formatCityLabel(nextGuard.city)}` : ""}.`,
         link: { label: "Préparer", to: `/sits/${nextGuard.id}` },
       }
-    : digestLine
-      ? { text: digestLine }
+    : farLine
+      ? { text: farLine, link: { label: "Voir la garde", to: `/sits/${movement.data!.nearest_sit!.sit_id}` } }
       : null;
+  const movementBand = buildMovementBand("sitter", movement.data, { previousVisit: movement.previousVisit });
 
   // Rangée « À faire » : actions réelles en attente, 3 au plus, dans cet ordre.
   const todos: CockpitTodo[] = [];
@@ -238,7 +251,7 @@ const SitterDashboard = () => {
           ? { variant: "newSitter" as const, openingCardVisible: openingVisible }
           : { checklistVisible: false })}
       />
-      {isDesktopRail && <ReassuranceRailCard />}
+      {isDesktopRail && <ReassuranceRailCard community={movement.data?.community ?? null} />}
       {railReadings.length > 0 && <RailReadingsCard items={railReadings} />}
       {showAccessGate && (
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
@@ -278,6 +291,7 @@ const SitterDashboard = () => {
                 greeting={openingVisible ? "Bienvenue" : undefined}
                 line={cockpitLine}
                 todos={todos}
+                movement={movementBand ? <MovementBand band={movementBand} space="sitter" /> : null}
               />
             ) : (
               /* Lot L7 : accueil téléphone, le récit d'abord (direction B de l'arène v2). */

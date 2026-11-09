@@ -58,5 +58,8 @@ jobs:
       - name: Publication réservée au propriétaire, lot P1 (Postgres local)
         run: npm run test:sql:p1
 
+      - name: Mouvement de l'accueil ordinateur, lot D4 (Postgres local)
+        run: npm run test:sql:d4
+
       - name: Diagnostic des brouillons, préférences réservées aux admins
         run: node scripts/test-draft-reminder-admin-privacy.mjs
