@@ -47,10 +47,15 @@ const speciesLabel = (species: string[]): string | null => {
  * phrase que le récit du téléphone (« Une maison attend son gardien à … »),
  * le titre de l'annonce passe en sous-titre. Sans commune : le titre seul.
  */
-export const starHeadline = (sit: { city?: string | null; title?: string | null }): string => {
-  const city = sit.city ? formatCityLabel(sit.city) : "";
-  if (city) return `Une maison attend son gardien à ${city}.`;
-  return sit.title?.trim() || "Une garde à découvrir";
+export const starCity = (sit: { city?: string | null; place_city?: string | null }): string => {
+  // Lot D3b : commune de l'annonce, sinon celle du propriétaire (place_city), comme le récit téléphone.
+  const raw = (sit.city || "").trim() || (sit.place_city || "").trim();
+  return raw ? formatCityLabel(raw) : "";
+};
+
+export const starHeadline = (sit: { city?: string | null; place_city?: string | null; title?: string | null }): string => {
+  const city = starCity(sit);
+  return city ? `Une maison attend son gardien à ${city}.` : "Une maison attend son gardien.";
 };
 
 /** Lot D3 : bouton au prénom du propriétaire, comme le récit (« Découvrir chez Laurence »). */
@@ -148,7 +153,7 @@ const StarCard = ({
 }) => {
   const place = [
     sit.owner_first_name ? `Chez ${sit.owner_first_name}` : null,
-    sit.city ? formatCityLabel(sit.city) : null,
+    starCity(sit) || null,
   ].filter(Boolean).join(" · ");
   const dates = formatDateRangeFr(sit.start_date, sit.end_date);
   const species = speciesLabel(sit.pet_species);
@@ -159,7 +164,6 @@ const StarCard = ({
   const photoUrl = sit.pet_photo_url ?? sit.cover_photo_url;
   const cover = photoUrl ? getOptimizedImageUrl(photoUrl, 900, 78) : null;
   // Lot D3 : la phrase du récit téléphone, l'annonce en sous-titre, le bouton au prénom.
-  const cityLabel = sit.city ? formatCityLabel(sit.city) : "";
   const headline = starHeadline(sit);
   const ctaLabel = starCtaLabel(sit.owner_first_name);
 
@@ -200,7 +204,7 @@ const StarCard = ({
           <h2 className="font-heading text-foreground mt-[8px] text-[23px] md:text-[24px] font-semibold leading-tight">
             {headline}
           </h2>
-          {cityLabel && sit.title && (
+          {sit.title && (
             <p className="text-foreground/85 mt-[8px] text-[14px] leading-snug line-clamp-2" data-testid="sitter-star-title">{sit.title}</p>
           )}
           {meta && <p className="text-muted-foreground mt-[8px] text-[14px] leading-snug">{meta}</p>}

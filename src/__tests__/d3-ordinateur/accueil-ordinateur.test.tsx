@@ -149,7 +149,9 @@ describe("D3, récit sur ordinateur avant la première annonce", () => {
 describe("D3, garde mise en avant au récit", () => {
   it("phrase du récit, prénom sur le bouton", () => {
     expect(starHeadline({ city: "chazay d'azergues", title: "Nous recherchons…" })).toBe("Une maison attend son gardien à Chazay-d'Azergues.");
-    expect(starHeadline({ city: null, title: "Garde de 2 chats" })).toBe("Garde de 2 chats");
+    // Lot D3b : sans commune d'annonce, celle du propriétaire ; sinon une phrase courte, le titre passe dessous.
+    expect(starHeadline({ city: null, place_city: "chazay d'azergues", title: "Nous recherchons…" })).toBe("Une maison attend son gardien à Chazay-d'Azergues.");
+    expect(starHeadline({ city: null, title: "Garde de 2 chats" })).toBe("Une maison attend son gardien.");
     expect(starCtaLabel("laurence")).toBe("Découvrir chez Laurence");
     expect(starCtaLabel(null)).toBe("Découvrir cette garde");
   });
