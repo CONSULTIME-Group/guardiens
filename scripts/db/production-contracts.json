@@ -107,6 +107,20 @@
           "sql": "SELECT position('send-alert-digest' IN pg_get_functiondef('public.admin_cron_health()'::regprocedure)) > 0 AS ok"
         }
       ]
+    },
+    {
+      "migration": "0122_l9_guide_lu.sql",
+      "description": "Le gardien retenu marque le guide de la maison lu ; le propriétaire le voit sur l'accueil",
+      "checks": [
+        {
+          "name": "applications_guide_read_at",
+          "sql": "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'applications' AND column_name = 'guide_read_at') AS ok"
+        },
+        {
+          "name": "mark_house_guide_read_member_only",
+          "sql": "SELECT to_regprocedure('public.mark_house_guide_read(uuid)') IS NOT NULL AND NOT has_function_privilege('anon', 'public.mark_house_guide_read(uuid)', 'EXECUTE') AND has_function_privilege('authenticated', 'public.mark_house_guide_read(uuid)', 'EXECUTE') AS ok"
+        }
+      ]
     }
   ]
 }

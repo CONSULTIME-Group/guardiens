@@ -28,8 +28,10 @@ const firstName = (profiles: OwnerStorySource["sitterProfiles"], id: string | nu
   return typeof n === "string" && n.trim() ? n.trim().split(/\s+/)[0] : null;
 };
 
-const acceptedSitterId = (sit: Row): string | null =>
-  ((sit.applications ?? []) as Row[]).find((a) => a.status === "accepted")?.sitter_id ?? null;
+const acceptedApp = (sit: Row): Row | null =>
+  ((sit.applications ?? []) as Row[]).find((a) => a.status === "accepted") ?? null;
+
+const acceptedSitterId = (sit: Row): string | null => acceptedApp(sit)?.sitter_id ?? null;
 
 const byStart = (a: Row, b: Row) => String(a.start_date ?? "9999").localeCompare(String(b.start_date ?? "9999"));
 
@@ -61,6 +63,7 @@ export function buildOwnerStoryInput(s: OwnerStorySource): OwnerStoryInput {
           start_date: confirmed.start_date ?? null,
           end_date: confirmed.end_date ?? null,
           sitterFirstName: firstName(s.sitterProfiles, acceptedSitterId(confirmed)),
+          guideRead: Boolean(acceptedApp(confirmed)?.guide_read_at),
         }
       : null,
     awaiting: {

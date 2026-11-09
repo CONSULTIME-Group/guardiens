@@ -11,7 +11,7 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
-import { STORY_EVENTS, type Story } from "@/lib/dashboardStory";
+import { STORY_EVENTS, type Story, type StoryLink } from "@/lib/dashboardStory";
 import { PERIOD_BUTTONS, type DeparturePeriod } from "@/lib/ownerDeparture";
 import { cn } from "@/lib/utils";
 import DashEyebrow from "@/components/dashboard/owner/DashEyebrow";
@@ -31,6 +31,11 @@ interface Props {
   periodPicker?: StoryPeriodPicker | null;
   /** Mesure : un seul « vu » par chapitre et par montage. */
   track?: boolean;
+  /**
+   * Lot L9 : geste ouvert sur place (lien porteur d'une action, « prepare »).
+   * Sans ce rappel, le lien est suivi comme avant.
+   */
+  onAction?: (link: StoryLink) => void;
 }
 
 /** Vrai si le bas du bouton tient dans la fenêtre au premier affichage. */
@@ -41,8 +46,8 @@ export function ctaAboveFold(el: Element | null): boolean | null {
   return r.bottom <= window.innerHeight;
 }
 
-export default function StoryHero({ story, compact = false, periodPicker, track = true }: Props) {
-  const ctaRef = useRef<HTMLAnchorElement | null>(null);
+export default function StoryHero({ story, compact = false, periodPicker, track = true, onAction }: Props) {
+  const ctaRef = useRef<HTMLAnchorElement & HTMLButtonElement>(null);
   const seenRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -65,31 +70,46 @@ export default function StoryHero({ story, compact = false, periodPicker, track 
     if (!track) return;
     trackEvent(STORY_EVENTS.ctaClicked, {
       source: "/dashboard",
-      metadata: { space: story.space, chapter: story.chapter, href: story.cta.href },
+      metadata: { space: story.space, chapter: story.chapter, href: story.cta.href, action: story.cta.action ?? null },
     });
   };
+  const ctaAction = story.cta.action && onAction ? () => onAction(story.cta) : null;
+  const secondaryAction = story.secondary?.action && onAction ? () => onAction(story.secondary!) : null;
+  const ctaClass = cn("flex min-h-[48px] w-full items-center justify-center rounded-full bg-primary px-[20px] text-center text-[16px] font-semibold text-primary-foreground transition-opacity hover:opacity-90", compact ? "mt-[14px]" : "mt-[18px]");
+  const secondaryClass = "mt-[6px] flex min-h-[44px] w-full items-center justify-center text-[15px] font-medium text-foreground underline underline-offset-4";
 
   const art = STORY_ART[story.art];
   const actions = (
     <>
-      <Link
-        ref={ctaRef}
-        to={story.cta.href}
-        onClick={onCta}
-        data-testid="story-cta"
-        className={cn("flex min-h-[48px] w-full items-center justify-center rounded-full bg-primary px-[20px] text-center text-[16px] font-semibold text-primary-foreground transition-opacity hover:opacity-90", compact ? "mt-[14px]" : "mt-[18px]")}
-      >
-        {story.cta.label}
-      </Link>
-      {story.secondary && (
-        <Link
-          to={story.secondary.href}
-          data-testid="story-secondary"
-          className="mt-[6px] flex min-h-[44px] items-center justify-center text-[15px] font-medium text-foreground underline underline-offset-4"
+      {ctaAction ? (
+        <button
+          ref={ctaRef}
+          type="button"
+          onClick={() => {
+            onCta();
+            ctaAction();
+          }}
+          data-testid="story-cta"
+          aria-haspopup="dialog"
+          className={ctaClass}
         >
-          {story.secondary.label}
+          {story.cta.label}
+        </button>
+      ) : (
+        <Link ref={ctaRef} to={story.cta.href} onClick={onCta} data-testid="story-cta" className={ctaClass}>
+          {story.cta.label}
         </Link>
       )}
+      {story.secondary &&
+        (secondaryAction ? (
+          <button type="button" onClick={secondaryAction} data-testid="story-secondary" aria-haspopup="dialog" className={secondaryClass}>
+            {story.secondary.label}
+          </button>
+        ) : (
+          <Link to={story.secondary.href} data-testid="story-secondary" className={secondaryClass}>
+            {story.secondary.label}
+          </Link>
+        ))}
     </>
   );
 

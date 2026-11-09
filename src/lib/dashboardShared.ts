@@ -40,7 +40,7 @@ export function fetchMySitsFull(userId: string, opts?: { fresh?: boolean }): Pro
   return cached(key, async () => {
     const { data, error } = await supabase
       .from("sits")
-      .select("*, applications(id, status, sitter_id)")
+      .select("*, applications(id, status, sitter_id, guide_read_at)")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
     if (error) throw error;
