@@ -97,7 +97,7 @@ import DestinationCountrySelect from "@/components/search/DestinationCountrySele
 import { profilePlacePoint } from "@/lib/sitPlacePoint";
 import { markMilestone, perfViewElapsed, setViewExtra, skipMilestones } from "@/lib/perfMarks";
 import { diffSearchInputs, formatTriggers, searchKey, triggerMotif, type SearchInputs } from "@/lib/searchTrigger";
-import { NEAREST_OUTSIDE_SHOWN, NEAREST_OUTSIDE_THRESHOLD, pickNearestOutside, type NearestTier } from "@/lib/nearestOutsideZone";
+import { NEAREST_OUTSIDE_SHOWN, NEAREST_OUTSIDE_THRESHOLD, nearestTierOf, pickNearestOutside, type NearestTier } from "@/lib/nearestOutsideZone";
 import { NearestOutsideSection } from "@/components/search/listing/NearestOutsideSection";
 import { applyOpenSitFilter, checkGeocodedPoint, communeDeptFromCoords, pointUsable, fetchAllPages, fetchInChunks, isEndedSit, isFrancePlace, isOpenSit, isPastSit, isWithinRadius, parisTodayIso, resolveSitPlace, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
@@ -268,6 +268,11 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  const [loading, setLoading] = useState(false);
  // Lot perf 19c : réserve des gardes ouvertes les plus proches hors du rayon.
  const [nearestPool, setNearestPool] = useState<any[]>([]);
+ // Lot perf 19d : en rayon, le département de référence arrive après la liste ;
+ // les paliers des gardes proches sont recalculés à son arrivée.
+ const nearestRefDeptRef = useRef<{ gen: number; dept: string | null } | null>(null);
+ const retierNearest = (list: any[], dept: string | null) =>
+  list.map((s: any) => ({ ...s, nearestTier: nearestTierOf(s.locationDept, dept) }));
   const [searchError, setSearchError] = useState<string | null>(null);
  // Vrai quand la requête serveur a atteint le plafond (jeu potentiellement tronqué → tri distance/affinité partiel).
  const [resultsTruncated, setResultsTruncated] = useState(false);
@@ -1142,6 +1147,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
       if (searchGenRef.current !== gen) return;
       applyDeptCounts(rd, applied);
       setDeptCountsPending(false);
+      nearestRefDeptRef.current = { gen, dept: rd };
+      setNearestPool((prev) => retierNearest(prev, rd));
     });
   } else {
     setDeptCountsPending(false);
@@ -1411,7 +1418,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   // Lot H3 : carte à situer à son ouverture quand la recherche n'avait pas de point.
   deferredMapItemsRef.current = !searchCoords && enriched.some((sit: any) => !coordsMap.has(sit.id) && sitCoordsKey(sit)) ? enriched : null;
   setRawResults(enriched);
-  setNearestPool(nearestEnriched);
+  const knownRef = nearestRefDeptRef.current;
+  setNearestPool(knownRef && knownRef.gen === gen ? retierNearest(nearestEnriched, knownRef.dept) : nearestEnriched);
   setRawAvailableMembers([]);
   // Seconde passe (lot perf 9) : le « Voir plus » déjà ouvert reste ouvert.
   if (!preLocated) setVisibleCount(12);
