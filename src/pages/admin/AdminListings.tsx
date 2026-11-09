@@ -49,7 +49,8 @@ import { getCountryName } from "@/lib/countries";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { resolveSitStatusBadge, type SitStatusBadgeVariant } from "@/lib/sitStatus";
 import { unpublishReasonAdminLabel } from "@/lib/unpublishReason";
-import { calendarDate, isPastDay } from "@/lib/calendarDate";
+import { calendarDate } from "@/lib/calendarDate";
+import { isListingToStaff } from "@/lib/admin/listingToStaff";
 
 
 type BadgeVariant = SitStatusBadgeVariant;
@@ -492,9 +493,10 @@ const AdminListings = () => {
     if (filterStatus === "to_staff" && !focusSitId && !focusOwnerId) {
       // Sans statistiques chargées, on ne sait pas : on n'affiche pas l'annonce.
       if (!stats[l.id]) return false;
-      const apps = stats[l.id].applications;
-      const notPast = !l.end_date || !isPastDay(l.end_date);
-      if (apps !== 0 || !notPast) return false;
+      // Lot ADM12 : même règle que la pastille (admin_menu_badges) et le signal
+      // (detect_stale_sits) : en ligne depuis 48 h, départ à venir, aucune
+      // candidature active.
+      if (!isListingToStaff({ ...l, activeApplications: stats[l.id].applications })) return false;
     }
     return true;
   });

@@ -11,10 +11,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
-  blockingRenderOffset,
   CONSUMER_RENDER_CEILING,
-  estimatedResumeAt,
+  nextRenderCycleStart,
   prerenderResumeSentence,
+  renderCycleStart,
 } from "@/lib/admin/prerenderResume";
 
 const root = join(__dirname, "..", "..", "..");
@@ -77,19 +77,23 @@ describe("seo_reserve_render : migration préparée", () => {
   });
 });
 
-describe("reprise estimée", () => {
-  it("rien ne bloque sous le plafond", () => {
-    expect(blockingRenderOffset(CONSUMER_RENDER_CEILING - 1)).toBeNull();
-    expect(blockingRenderOffset(CONSUMER_RENDER_CEILING)).toBe(0);
-    expect(blockingRenderOffset(18970)).toBe(9070);
+describe("reprise sur le cycle Prerender (lot ADM12, cycle du lot PR3)", () => {
+  it("le cycle part du 4 du mois à 0 h, heure de Paris", () => {
+    expect(renderCycleStart(new Date("2026-11-09T07:00:00Z")).toISOString()).toBe("2026-11-03T23:00:00.000Z");
+    expect(renderCycleStart(new Date("2026-11-03T22:59:00Z")).toISOString()).toBe("2026-10-03T22:00:00.000Z");
+    expect(renderCycleStart(new Date("2026-01-02T10:00:00Z")).toISOString()).toBe("2025-12-03T23:00:00.000Z");
   });
-  it("reprise = rendu bloquant + 30 jours", () => {
-    expect(estimatedResumeAt("2026-10-08T09:10:16Z")!.toISOString()).toBe("2026-11-07T09:10:16.000Z");
-    expect(estimatedResumeAt(null)).toBeNull();
+  it("la reprise tombe au début du cycle suivant", () => {
+    expect(nextRenderCycleStart(new Date("2026-11-09T07:00:00Z")).toISOString()).toBe("2026-12-03T23:00:00.000Z");
+    expect(nextRenderCycleStart(new Date("2026-12-20T07:00:00Z")).toISOString()).toBe("2027-01-03T23:00:00.000Z");
   });
-  it("phrase lisible", () => {
-    const s = prerenderResumeSentence({ okRendersInWindow: 18970, resumeAt: new Date("2026-11-07T09:10:16Z"), backlog: 498 });
-    expect(s).toBe("Plafond atteint : 18970 rendus sur 30 jours (plafond 9900), reprise estimée le 07/11/2026, 498 pages en attente de rendu.");
+  it("phrase lisible, sous et au plafond", () => {
+    const cycleStart = new Date("2026-11-03T23:00:00Z");
+    const nextCycleStart = new Date("2026-12-03T23:00:00Z");
+    expect(prerenderResumeSentence({ okRendersInCycle: 1969, cycleStart, nextCycleStart, backlog: 0 }))
+      .toBe("Rendu actif : 1969 rendus depuis le 04/11/2026 (plafond 9900), 0 page en attente de rendu.");
+    expect(prerenderResumeSentence({ okRendersInCycle: CONSUMER_RENDER_CEILING, cycleStart, nextCycleStart, backlog: 498 }))
+      .toBe("Plafond atteint : 9900 rendus depuis le 04/11/2026 (plafond 9900), reprise le 04/12/2026, 498 pages en attente de rendu.");
   });
 
   it("Vue d'ensemble : la ligne s'affiche sous le voyant rouge, refus exclus de la lecture", async () => {
@@ -100,10 +104,10 @@ describe("reprise estimée", () => {
       </QueryClientProvider>,
     );
     const line = await screen.findByTestId("prerender-resume");
-    expect(line.textContent).toContain("reprise estimée le 07/11/2026");
+    expect(line.textContent).toContain("Plafond atteint : 18970 rendus depuis le");
     expect(line.textContent).toContain("480 pages en attente de rendu");
     const logReads = calls.list.filter((c) => c.table === "prerender_recache_log");
-    expect(logReads.length).toBe(2);
+    expect(logReads.length).toBe(1);
     for (const r of logReads) expect(r.ops).toContainEqual(["eq", ["ok", true]]);
   });
 });

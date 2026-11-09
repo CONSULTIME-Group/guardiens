@@ -63,7 +63,9 @@ describe("Menu rangé", () => {
   it("mobile : total des pastilles sur le bouton, Outils replié", () => {
     const layout = read("src/components/admin/AdminLayout.tsx");
     expect(layout).toContain('data-testid="admin-mobile-menu-button"');
-    expect(layout).toContain("totalBadges > 0");
+    // Lot ADM12 : total en texte, « ? » quand la lecture échoue (badgeTotalText).
+    expect(layout).toContain("badgeTotalText(allItems");
+    expect(layout).toContain("!mobileMenuOpen && totalBadges && (");
     expect(layout).toContain('data-testid="admin-mobile-tools-toggle"');
   });
 });

@@ -81,6 +81,32 @@
           "sql": "SELECT to_regprocedure('public.mark_application_viewed(uuid)') IS NOT NULL AND NOT has_function_privilege('anon', 'public.mark_application_viewed(uuid)', 'EXECUTE') AND has_function_privilege('authenticated', 'public.mark_application_viewed(uuid)', 'EXECUTE') AS ok"
         }
       ]
+    },
+    {
+      "migration": "0121_adm12_rouges_vrais.sql",
+      "description": "Admin : voyants rouges tant que la cause est présente, une définition des annonces sans candidature",
+      "checks": [
+        {
+          "name": "site_health_cycle_prerender",
+          "sql": "SELECT position('v_cycle_start' IN pg_get_functiondef('public.admin_site_health()'::regprocedure)) > 0 AND position('/admin?plus=taches' IN pg_get_functiondef('public.admin_site_health()'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "badge_sans_candidature_48h",
+          "sql": "SELECT position('interval ''48 hours''' IN pg_get_functiondef('public.admin_menu_badges()'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "detect_stale_sits_candidatures_actives",
+          "sql": "SELECT position('NOT IN (''rejected'', ''cancelled'')' IN pg_get_functiondef('public.detect_stale_sits()'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "auto_resolve_causes_adm12",
+          "sql": "SELECT position('adm12_prerender_back' IN d) > 0 AND position('adm12_digest_drained' IN d) > 0 AND position('adm12_sit_published' IN d) > 0 AS ok FROM (SELECT pg_get_functiondef('public.auto_resolve_admin_signals()'::regprocedure) AS d) f"
+        },
+        {
+          "name": "cron_recapitulatifs_suivis",
+          "sql": "SELECT position('send-alert-digest' IN pg_get_functiondef('public.admin_cron_health()'::regprocedure)) > 0 AS ok"
+        }
+      ]
     }
   ]
 }

@@ -76,6 +76,7 @@ export function signalAdminLink(s: AdminSignalBase): string {
       return "/admin/listings";
 
     case "mission":
+    case "small_mission":
       return "/admin/small-missions";
     case "profile":
       return "/admin/users";

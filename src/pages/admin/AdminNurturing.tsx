@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { TRUNCATED_NOTICE } from "@/lib/admin/csv";
 import { supabase } from "@/integrations/supabase/client";
+import { isNurturingFailure, nurturingOutcome, nurturingReasonLabel } from "@/lib/admin/nurturingOutcome";
 import { formatOpenRate, openRatePct } from "@/lib/admin/openRate";
 import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -128,18 +129,6 @@ const TEMPLATE_LABELS: Record<string, string> = {
   "referral-boost-monthly": "Parrainage, rappel mensuel",
 };
 
-const REASON_LABELS: Record<string, string> = {
-  exit_condition_met: "Objectif atteint (sortie normale)",
-  no_email: "Pas d'adresse email",
-  send_failed_400: "Erreur 400 à l'envoi",
-  send_failed_500: "Erreur 500 à l'envoi",
-  send_failed: "Échec d'envoi",
-  template_not_found: "Modèle introuvable",
-  user_unsubscribed: "Désinscrit",
-  user_not_found: "Utilisateur introuvable",
-  unknown: "Raison inconnue",
-};
-
 const AUDIENCE_LABELS: Record<string, string> = {
   owner: "Propriétaires",
   sitter: "Gardiens",
@@ -162,7 +151,7 @@ const formatDelay = (hours: number): string => {
 
 const labelSequence = (key: string) => SEQUENCE_LABELS[key] ?? adminLabel(key);
 const labelTemplate = (key: string) => TEMPLATE_LABELS[key] ?? adminLabel(key);
-const labelReason = (key: string | null) => REASON_LABELS[key ?? "unknown"] ?? adminLabel(key);
+const labelReason = (key: string | null) => nurturingReasonLabel(key);
 
 const StatCard = ({
   label,
@@ -439,11 +428,12 @@ const AdminNurturing = () => {
     const total = logs.length;
     const sent = logs.filter((l) => l.sent).length;
     const exited = logs.filter((l) => !l.sent && l.reason === "exit_condition_met").length;
-    const failed = logs.filter((l) => !l.sent && l.reason !== "exit_condition_met").length;
+    const failed = logs.filter((l) => isNurturingFailure(l)).length;
+    const skipped = logs.filter((l) => nurturingOutcome(l) === "skipped").length;
     const sendable = sent + failed;
     const successRate = sendable > 0 ? Math.round((sent / sendable) * 1000) / 10 : 0;
     const failureRate = sendable > 0 ? Math.round((failed / sendable) * 1000) / 10 : 0;
-    return { total, sent, failed, exited, successRate, failureRate, sendable };
+    return { total, sent, failed, exited, skipped, successRate, failureRate, sendable };
   }, [logs]);
 
   const queueStats = useMemo(() => {
@@ -474,7 +464,7 @@ const AdminNurturing = () => {
       const r = map.get(key) ?? { sequence: labelSequence(key), sent: 0, failed: 0, exited: 0 };
       if (l.sent) r.sent++;
       else if (l.reason === "exit_condition_met") r.exited++;
-      else r.failed++;
+      else if (isNurturingFailure(l)) r.failed++;
       map.set(key, r);
     }
     return Array.from(map.values()).sort((a, b) => b.sent + b.failed - (a.sent + a.failed));
@@ -488,7 +478,7 @@ const AdminNurturing = () => {
       const r = map.get(key) ?? { template: display, sent: 0, failed: 0, exited: 0 };
       if (l.sent) r.sent++;
       else if (l.reason === "exit_condition_met") r.exited++;
-      else r.failed++;
+      else if (isNurturingFailure(l)) r.failed++;
       map.set(key, r);
     }
     return Array.from(map.values()).sort((a, b) => b.failed - a.failed || b.sent - a.sent);
@@ -508,7 +498,7 @@ const AdminNurturing = () => {
       if (!b) continue;
       if (l.sent) b.sent++;
       else if (l.reason === "exit_condition_met") b.exited++;
-      else b.failed++;
+      else if (isNurturingFailure(l)) b.failed++;
     }
     return Array.from(buckets.values()).map((b) => ({
       ...b,
@@ -536,7 +526,7 @@ const AdminNurturing = () => {
   // Bannière contextuelle : tous les échecs de la fenêtre concentrés sur 1 seul jour ancien
   // ET dernier run récent et propre → on rassure plutôt que d'alarmer.
   const failureBurst = useMemo(() => {
-    const failures = logs.filter((l) => !l.sent && l.reason !== "exit_condition_met");
+    const failures = logs.filter((l) => isNurturingFailure(l));
     if (failures.length === 0) return null;
     const days = new Set(failures.map((f) => f.created_at.slice(0, 10)));
     if (days.size > 1) return null;
@@ -548,7 +538,7 @@ const AdminNurturing = () => {
   }, [logs, lastRunAt, lastRunSent]);
 
   const recentFailures = useMemo(
-    () => logs.filter((l) => !l.sent && l.reason !== "exit_condition_met").slice(0, 30),
+    () => logs.filter((l) => isNurturingFailure(l)).slice(0, 30),
     [logs]
   );
 
@@ -584,7 +574,7 @@ const AdminNurturing = () => {
       } else if (l.reason === "exit_condition_met") {
         r.exited++;
         r.actions++; // exit goal_met compte comme action
-      } else {
+      } else if (isNurturingFailure(l)) {
         r.failed++;
       }
       m.set(k, r);
@@ -822,7 +812,7 @@ const AdminNurturing = () => {
           <div className="flex items-center gap-2">
             <span className={`inline-block h-2.5 w-2.5 rounded-full ${dotClass(deliveryTone)}`} />
             <div>
-              <p className="text-xs text-muted-foreground">Délivrabilité (evaluator)</p>
+              <p className="text-xs text-muted-foreground">Envois réussis</p>
               <p className="text-sm font-medium">
                 {stats.sendable === 0 ? "·" : `${stats.successRate}% (${stats.sent}/${stats.sendable})`}
               </p>
@@ -1355,10 +1345,10 @@ const AdminNurturing = () => {
                 hint={`${stats.successRate}% de réussite`}
               />
               <StatCard
-                label="Échecs evaluator"
+                label="Vrais échecs"
                 value={stats.failed}
                 tone={stats.failed > 0 ? "err" : "ok"}
-                hint={`${stats.failureRate}% des tentatives`}
+                hint={`${stats.failureRate}% des tentatives · ${stats.skipped} écarts voulus (plafond, désinscription, adresse bloquée)`}
               />
               <StatCard
                 label="Parcours créés"
@@ -1417,7 +1407,7 @@ const AdminNurturing = () => {
             <div className="grid gap-4 md:grid-cols-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Raisons d'échec</CardTitle>
+                  <CardTitle>Motifs de non-envoi</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {reasonBreakdown.length === 0 ? (
@@ -1437,11 +1427,9 @@ const AdminNurturing = () => {
                             <TableCell className="text-right">
                               <Badge
                                 variant={
-                                  r.reason === "exit_condition_met"
-                                    ? "outline"
-                                    : r.reason === "no_email"
-                                      ? "secondary"
-                                      : "destructive"
+                                  isNurturingFailure({ sent: false, reason: r.reason })
+                                    ? "destructive"
+                                    : "outline"
                                 }
                               >
                                 {r.count}

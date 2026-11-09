@@ -1,7 +1,7 @@
 import { Fragment, useState } from "react";
 import { Outlet, Navigate, NavLink, useNavigate, useLocation } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
-import { AdminSidebar, adminNavGroups_export, BADGE_TITLES, isToolPath, resolveNavActive, sumBadges } from "./AdminSidebar";
+import { AdminSidebar, adminNavGroups_export, BADGE_TITLES, badgeTotalText, isToolPath, navItemTarget, resolveNavActive } from "./AdminSidebar";
 import { useAdminBadges } from "@/hooks/useAdminBadges";
 import { AdminBadgePill, resolveBadge } from "./AdminBadgePill";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -43,8 +43,8 @@ export const AdminLayout = () => {
   // ne lise rien tant que l'admin n'est pas confirmé.
   const { badges, unavailable } = useAdminBadges(!authLoading && !adminLoading && isAuthenticated && isAdmin);
   const allItems = adminNavGroups_export.flatMap((g) => g.items);
-  const totalBadges = sumBadges(allItems, badges as Record<string, number | undefined>);
-  const toolsBadge = sumBadges(adminNavGroups_export.filter((g) => g.tool).flatMap((g) => g.items), badges as Record<string, number | undefined>);
+  const totalBadges = badgeTotalText(allItems, badges as Record<string, number | undefined>, unavailable);
+  const toolsBadge = badgeTotalText(adminNavGroups_export.filter((g) => g.tool).flatMap((g) => g.items), badges as Record<string, number | undefined>, unavailable);
   const mobileToolsShown = mobileToolsOpen || isToolPath(location.pathname);
 
   if (authLoading || adminLoading) {
@@ -80,15 +80,15 @@ export const AdminLayout = () => {
         </div>
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label={mobileMenuOpen ? "Fermer le menu" : totalBadges > 0 ? `Ouvrir le menu, ${totalBadges} en attente` : "Ouvrir le menu"}
+          aria-label={mobileMenuOpen ? "Fermer le menu" : totalBadges === "?" ? "Ouvrir le menu, compteur indisponible" : totalBadges ? `Ouvrir le menu, ${totalBadges} en attente` : "Ouvrir le menu"}
           aria-expanded={mobileMenuOpen}
           className="relative p-1.5 rounded-lg hover:bg-accent transition-colors"
           data-testid="admin-mobile-menu-button"
         >
           {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           {/* Lot ADM4 : total des pastilles sur le bouton du menu mobile. */}
-          {!mobileMenuOpen && totalBadges > 0 && (
-            <AdminBadgePill compact text={String(totalBadges)} label={`${totalBadges} en attente`} className="absolute -top-1 -right-1" />
+          {!mobileMenuOpen && totalBadges && (
+            <AdminBadgePill compact text={totalBadges} label={totalBadges === "?" ? "Compteur indisponible" : `${totalBadges} en attente`} className="absolute -top-1 -right-1" />
           )}
         </button>
       </div>
@@ -110,7 +110,7 @@ export const AdminLayout = () => {
                   data-testid="admin-mobile-tools-toggle"
                 >
                   <span className="flex-1 text-left">Outils</span>
-                  {toolsBadge > 0 && <AdminBadgePill text={String(toolsBadge)} label={`${toolsBadge} en attente dans les outils`} />}
+                  {toolsBadge && <AdminBadgePill text={toolsBadge} label={toolsBadge === "?" ? "Compteur indisponible" : `${toolsBadge} en attente dans les outils`} />}
                   {mobileToolsShown ? <ChevronUp className="h-4 w-4" aria-hidden /> : <ChevronDown className="h-4 w-4" aria-hidden />}
                 </button>
               ) : null;
@@ -129,7 +129,7 @@ export const AdminLayout = () => {
                     return (
                       <NavLink
                         key={item.to}
-                        to={item.to}
+                        to={navItemTarget(item, badge)}
                         end={item.end}
                         onClick={() => setMobileMenuOpen(false)}
                         className={({ isActive }) =>
@@ -142,15 +142,8 @@ export const AdminLayout = () => {
                         }
                         aria-label={badgeLabel ? `${item.label}, ${badgeLabel}` : undefined}
                       >
-                        <span className="relative shrink-0">
-                          <item.icon className="h-4 w-4" />
-                          {badge.show && (
-                            <span
-                              className="absolute -top-1 -right-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background"
-                              aria-hidden="true"
-                            />
-                          )}
-                        </span>
+                        {/* Lot ADM12 : une seule marque par entrée, la pastille chiffrée. */}
+                        <item.icon className="h-4 w-4 shrink-0" />
                         <span className="flex-1">{item.label}</span>
                         {badge.show && (
                           <AdminBadgePill text={badge.text} label={badge.label} className="ml-auto" />
