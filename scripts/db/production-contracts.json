@@ -151,7 +151,21 @@
       ]
     },
     {
-      "migration": "0125_adm13_une_liste.sql",
+      "migration": "0125_d7_zone_alerte.sql",
+      "description": "Accueil gardien : zones d'alerte proposées au gardien loin de tout (lecture seule)",
+      "checks": [
+        {
+          "name": "get_alert_zone_options_membre_seul",
+          "sql": "SELECT to_regprocedure('public.get_alert_zone_options()') IS NOT NULL AND NOT has_function_privilege('anon', 'public.get_alert_zone_options()', 'EXECUTE') AND has_function_privilege('authenticated', 'public.get_alert_zone_options()', 'EXECUTE') AS ok"
+        },
+        {
+          "name": "get_alert_zone_options_lecture_seule",
+          "sql": "SELECT provolatile = 's' AS ok FROM pg_proc WHERE oid = 'public.get_alert_zone_options()'::regprocedure"
+        }
+      ]
+    },
+    {
+      "migration": "0126_adm13_une_liste.sql",
       "description": "Admin : une lecture pour la liste de travail, candidatures sans réponse et tarif resserrés",
       "checks": [
         {

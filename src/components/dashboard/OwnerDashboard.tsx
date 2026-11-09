@@ -39,6 +39,7 @@ import ApplicationCapSection from "./owner/ApplicationCapSection";
 import OwnerFamilySection from "./owner/OwnerFamilySection";
 import NextStepRailCard from "./shared/NextStepRailCard";
 import { selectOwnerStarVariant } from "@/lib/ownerStarVariant";
+import { pickRepublishSource } from "@/lib/ownerRepublish";
 import RailReadingsCard from "./shared/RailReadingsCard";
 import ReassuranceRailCard from "./shared/ReassuranceRailCard";
 import DashboardRail from "./shared/DashboardRail";
@@ -141,6 +142,8 @@ const OwnerDashboard = () => {
   /* ── Derived values ── */
   const now = new Date();
   const activeSits = useMemo(() => sits.filter(s => ["published", "confirmed"].includes(s.status)), [sits]);
+  // Lot D6 (état P2) : un propriétaire qui a déjà publié republie sa dernière annonce.
+  const republishSource = useMemo(() => pickRepublishSource(sits as any[]), [sits]);
   // Lot X3a (A-03, A-05) : toute candidature qui attend une décision compte
   // (pending, viewed, discussing), sur les annonces encore ouvertes ; la plus
   // ancienne et son ancienneté donnent le repère de l'accueil.
@@ -493,7 +496,8 @@ const OwnerDashboard = () => {
       hasActiveAnnonce,
       latestDraft: latestDraft as any,
     }) === "publish" &&
-    primaryAction?.action !== "publish_draft";
+    primaryAction?.action !== "publish_draft" &&
+    !republishSource;
 
   return (
     <div className="overflow-hidden lg:overflow-visible pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-32">
@@ -557,6 +561,7 @@ const OwnerDashboard = () => {
                   ongoingSit={ongoingSit ?? null}
                   pendingApps={awaitingApps}
                   oldestWaitingDays={awaiting.oldest?.days ?? 0}
+                  republishSource={republishSource}
                   sitterProfiles={sitterProfiles}
                   sitterAffinityProfiles={sitterAffinityProfiles}
                   latestDraft={latestDraft as any}

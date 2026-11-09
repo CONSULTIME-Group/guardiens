@@ -778,6 +778,20 @@
       "when": 1794227148870,
       "tag": "0110_cron_heure_hiver",
       "breakpoints": true
+    },
+    {
+      "idx": 111,
+      "version": "7",
+      "when": 1794235371762,
+      "tag": "0111_d4_mouvement_accueil",
+      "breakpoints": true
+    },
+    {
+      "idx": 112,
+      "version": "7",
+      "when": 1794235399052,
+      "tag": "0112_d7_zone_alerte",
+      "breakpoints": true
     }
   ]
 }

@@ -31,6 +31,7 @@ export const DASHBOARD_BLOCKS = [
   "story",
   "star",
   "opening",
+  "alert_zone",
   "match",
   "missing",
   "cap",

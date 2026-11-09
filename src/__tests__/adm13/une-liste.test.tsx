@@ -23,7 +23,7 @@ import { AUTO_RELANCE_TEMPLATES, SIGNAL_TYPES, signalNature } from "../../../sup
 import { workListDigestLines, workListNotices } from "../../../supabase/functions/alert-admin-signals/digest.ts";
 
 const read = (p: string) => readFileSync(p, "utf8");
-const MIGRATION = read("drizzle/migrations/0125_adm13_une_liste.sql");
+const MIGRATION = read("drizzle/migrations/0126_adm13_une_liste.sql");
 const NOW = Date.parse("2026-11-09T06:00:00Z");
 
 const sig = (type: string, severity: string, extra: Partial<PilotageSignal> = {}): PilotageSignal => ({
