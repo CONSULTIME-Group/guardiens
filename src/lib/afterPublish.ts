@@ -32,6 +32,20 @@ export function noticeFirstName(raw: string | null | undefined): string | null {
   return clean || null;
 }
 
+/**
+ * Lot L8 : retour au récit après une candidature envoyée depuis l'annonce
+ * (arène v2, B-12). Sur téléphone, l'accueil raconte « Votre mot est chez
+ * Laurence » avec la frise sur Réponse ; sur ordinateur, le gardien reste
+ * sur l'annonce comme avant.
+ */
+export const APPLIED_PARAM = "candidature";
+
+export function afterApplyTarget(o: { firstName: string | null; phone: boolean }): string | null {
+  if (!o.phone) return null;
+  const name = noticeFirstName(o.firstName);
+  return name ? `/dashboard?${APPLIED_PARAM}=${encodeURIComponent(name)}` : `/dashboard?${APPLIED_PARAM}=1`;
+}
+
 export function afterReplyTarget(o: { sitId: string; firstName: string | null; phone: boolean }): string {
   if (!o.phone) return `/sits/${o.sitId}#candidatures`;
   const name = noticeFirstName(o.firstName);

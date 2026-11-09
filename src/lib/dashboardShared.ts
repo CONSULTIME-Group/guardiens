@@ -56,6 +56,11 @@ export function invalidateMySits(userId: string) {
   getAppQueryClient()?.removeQueries({ queryKey: ["my-sits-full", userId], exact: true });
 }
 
+/** Lot L8 : après une candidature envoyée, l'accueil gardien relit ses candidatures. */
+export function invalidateMySentApplications(userId: string) {
+  getAppQueryClient()?.removeQueries({ queryKey: ["my-applications-index", userId], exact: true });
+}
+
 /** Lot L6 : après une réponse à une candidature, l'accueil relit les candidatures et les annonces. */
 export function invalidateMyApplications(userId: string) {
   getAppQueryClient()?.removeQueries({ queryKey: ["applications-on-my-sits", userId], exact: true });

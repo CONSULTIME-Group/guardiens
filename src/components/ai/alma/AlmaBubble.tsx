@@ -84,8 +84,9 @@ export function AlmaBubble({
         </button>
       )}
 
-      <div className={cn("flex items-start gap-3", onDismiss && "pr-10")}>
-        <div className="flex flex-col items-center gap-1 shrink-0 text-primary">
+      {/* Lot L8 : écran utile très étroit (zoom à 130 % sur téléphone), Alma au-dessus du texte. */}
+      <div className={cn("flex items-start gap-3 max-[340px]:flex-col", onDismiss && "pr-10")}>
+        <div className="flex flex-col items-center gap-1 shrink-0 text-primary max-[340px]:flex-row max-[340px]:items-center max-[340px]:gap-2">
           <AlmaAvatar size={AVATAR_SIZE[variant]} mood={mood} breathe stage={stage} />
           <span className="text-[10px] font-semibold uppercase tracking-wider text-primary/80">
             Alma

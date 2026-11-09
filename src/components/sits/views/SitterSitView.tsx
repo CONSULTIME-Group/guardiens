@@ -724,6 +724,7 @@ const SitterSitView = ({
         open={applyOpen}
         onOpenChange={setApplyOpen}
         hideIdentityHint={showIdentityInvite}
+        returnToStory
         sitId={sit.id}
         ownerId={sit.user_id}
         ownerFirstName={owner?.first_name || ""}
