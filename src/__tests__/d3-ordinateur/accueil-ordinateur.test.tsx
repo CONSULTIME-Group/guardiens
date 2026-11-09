@@ -168,8 +168,9 @@ describe("D3, Guardiens aujourd'hui", () => {
   it("sur ordinateur, la carte remplace la ligne du pouls, le téléphone garde la ligne", () => {
     for (const f of ["src/components/dashboard/OwnerDashboard.tsx", "src/components/dashboard/SitterDashboard.tsx"]) {
       const src = read(f);
-      expect(src).toMatch(/\{isDesktopRail && (\(\s*)?<ReassuranceRailCard/);
-      expect(src).toMatch(/\{!isDesktopRail && \(\s*<DeferredMount minHeight=\{40\}>\s*<CommunityPulseLine/);
+      // Lot D5 : un DashboardBlock de mesure peut envelopper le bloc.
+      expect(src).toMatch(/\{isDesktopRail && (\(\s*)?(<DashboardBlock[^>]*>\s*)?<ReassuranceRailCard/);
+      expect(src).toMatch(/\{!isDesktopRail && \(\s*(<DashboardBlock[^>]*>\s*)?<DeferredMount minHeight=\{40\}>\s*<CommunityPulseLine/);
     }
   });
 });

@@ -13,6 +13,7 @@ import CommunityPulseLine from "./shared/CommunityPulseLine";
 import { useNavBadgeCounts } from "@/hooks/useNavBadgeCounts";
 import { useDashboardMovement } from "@/hooks/useDashboardMovement";
 import { buildMovementBand } from "@/lib/dashboardMovement";
+import DashboardBlock from "@/components/dashboard/shared/DashboardBlock";
 import MovementBand from "./shared/MovementBand";
 import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import { formatCityLabel } from "@/lib/cityLabel";
@@ -415,9 +416,13 @@ const OwnerDashboard = () => {
       urgency={priorityAction.urgency}
     />
   ) : null;
+  // Lot D5 : mesure par bloc, même découpage sur ordinateur et téléphone.
+  const blockLayout = isDesktopRail ? "desktop" as const : "phone" as const;
+
   const railContent = (
     <>
       {ownerNextStepRail && (
+        <DashboardBlock block="next_step" space="owner" layout={blockLayout}>
         <NextStepRailCard
           variant="owner"
           step={{
@@ -427,7 +432,9 @@ const OwnerDashboard = () => {
               : ownerNextStepRail.phrase,
           }}
         />
+        </DashboardBlock>
       )}
+      <DashboardBlock block="alma" space="owner" layout={blockLayout}>
       <AlmaRailWhisper
         variant="owner"
         skillsMissing={!ownerProfileLoading && !ownerProfileLoadError && (ownerProfile?.owner_competences?.length ?? 0) === 0}
@@ -445,19 +452,24 @@ const OwnerDashboard = () => {
           oldestAwaitingSitId: awaiting.oldest?.sitId ?? null,
         }}
       />
+      </DashboardBlock>
       {isDesktopRail && (
+        <DashboardBlock block="reassurance" space="owner" layout={blockLayout}>
         <ReassuranceRailCard
           nearby={nearbyCount > 0 && nearbyRadius ? { count: nearbyCount, radiusKm: nearbyRadius, city: ownerCity || null } : null}
           community={movement.data?.community ?? null}
           showReviews
         />
+        </DashboardBlock>
       )}
-      {ownerReadings.length > 0 && <RailReadingsCard items={ownerReadings} />}
-      {priorityToRailCard}
+      {ownerReadings.length > 0 && <DashboardBlock block="readings" space="owner" layout={blockLayout}><RailReadingsCard items={ownerReadings} /></DashboardBlock>}
+      {priorityToRailCard && <DashboardBlock block="priority" space="owner" layout={blockLayout}>{priorityToRailCard}</DashboardBlock>}
       {!(level === 4 || level === "3B") && (
-        <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+        <DashboardBlock block="access_gate" space="owner" layout={blockLayout}>
+          <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+        </DashboardBlock>
       )}
-      {showEmergencyHelp && <NearbyEmergencySitters />}
+      {showEmergencyHelp && <DashboardBlock block="emergency" space="owner" layout={blockLayout}><NearbyEmergencySitters /></DashboardBlock>}
     </>
   );
 
@@ -486,22 +498,22 @@ const OwnerDashboard = () => {
   return (
     <div className="overflow-hidden lg:overflow-visible pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-32">
       {isDesktopRail && showAlmaFirstMeeting && (
-        <div className="px-4 sm:px-5 md:px-8 pt-2">
+        <DashboardBlock block="alma_first_meeting" space="owner" layout={blockLayout} className="px-4 sm:px-5 md:px-8 pt-2">
           <AlmaFirstMeeting role="owner" onDone={markAlmaFirstMeetingSeen} onSeen={recordAlmaFirstMeetingSeen} />
-        </div>
+        </DashboardBlock>
       )}
 
       {isDesktopRail && (
-        <div className="px-4 sm:px-5 md:px-8">
+        <DashboardBlock block="role_activation" space="owner" layout={blockLayout} className="px-4 sm:px-5 md:px-8">
           <RoleActivationBanner userRole={user?.role || "owner"} />
-        </div>
+        </DashboardBlock>
       )}
 
       {/* Lot L1 : annonce publiée sans commune. */}
       {isDesktopRail && (
-        <div className="px-4 sm:px-5 md:px-8">
+        <DashboardBlock block="missing_city" space="owner" layout={blockLayout} className="px-4 sm:px-5 md:px-8">
           <MissingSitCityBanner userId={user?.id} />
-        </div>
+        </DashboardBlock>
       )}
 
       {/* Grille lot D1 : colonne principale 720 px, colonne de droite 328 px, écart 48 px */}
@@ -513,10 +525,13 @@ const OwnerDashboard = () => {
                 {/* 0. Lot N4 : Alma « Vous partez quand ? », masquée après publication et pour le témoin.
                     Lot D3 : sur la première annonce, la question passe dans le récit (un seul bloc). */}
                 {!desktopFirstListing && (
-                  <OwnerDepartureAlmaCard data={departure.data} onPick={departure.pick} busy={departure.busy} />
+                  <DashboardBlock block="departure" space="owner" layout={blockLayout}>
+                    <OwnerDepartureAlmaCard data={departure.data} onPick={departure.pick} busy={departure.busy} />
+                  </DashboardBlock>
                 )}
 
                 {/* 1. Accueil */}
+                <DashboardBlock block="cockpit" space="owner" layout={blockLayout}>
                 <OwnerCockpit
                   userId={user?.id}
                   firstName={user?.firstName}
@@ -524,16 +539,20 @@ const OwnerDashboard = () => {
                   todos={todos}
                   movement={movementBand ? <MovementBand band={movementBand} space="owner" /> : null}
                 />
+                </DashboardBlock>
 
                 {/* 2. Vedette unique. Lot D3 : avant la première annonce, le récit du
                     téléphone en mise en page ordinateur (question de départ comprise). */}
                 {desktopFirstListing ? (
+                  <DashboardBlock block="story" space="owner" layout={blockLayout}>
                   <StoryHero
                     story={story}
                     layout="desktop"
                     periodPicker={askPeriod ? { value: storyPeriod, onPick: onPickPeriod, busy: departure.busy } : null}
                   />
+                  </DashboardBlock>
                 ) : (
+                <DashboardBlock block="star" space="owner" layout={blockLayout}>
                 <OwnerStarSection
                   ongoingSit={ongoingSit ?? null}
                   pendingApps={awaitingApps}
@@ -547,10 +566,12 @@ const OwnerDashboard = () => {
                     <OwnerAnnonceSection sits={sits} coverPhoto={propertyCoverPhoto} pendingAppCount={pendingAppCount} city={ownerCity || null} />
                   ) : undefined}
                 />
+                </DashboardBlock>
                 )}
               </>
             ) : (
               /* Lot L4 : accueil téléphone, le récit d'abord (direction B de l'arène v2). */
+              <DashboardBlock block="story" space="owner" layout={blockLayout}>
               <div className="space-y-[14px] pt-3" data-testid="owner-story-home">
                 {/* Lot L5 : retour calme après une publication rapide. */}
                 <PublishedNotice waitingName={waitingName} />
@@ -595,24 +616,32 @@ const OwnerDashboard = () => {
                   </DeferredMount>
                 )}
               </div>
+              </DashboardBlock>
             )}
 
             {/* Plafond de candidatures, seulement quand il s'applique */}
-            <StagedMount testId="cap">
-              <ApplicationCapSection sits={sits} onUpdated={reload} />
-            </StagedMount>
+            <DashboardBlock block="cap" space="owner" layout={blockLayout}>
+              <StagedMount testId="cap">
+                <ApplicationCapSection sits={sits} onUpdated={reload} />
+              </StagedMount>
+            </DashboardBlock>
 
             {/* 3. Près de chez vous (montage différé sous la ligne de flottaison) */}
-            <div ref={spotlightRef} className="min-w-0">
-              {spotlightInView ? <OwnerNearbySitters /> : <div aria-hidden="true" className="min-h-[320px]" />}
-            </div>
+            <DashboardBlock block="nearby_sitters" space="owner" layout={blockLayout}>
+              <div ref={spotlightRef} className="min-w-0">
+                {spotlightInView ? <OwnerNearbySitters /> : <div aria-hidden="true" className="min-h-[320px]" />}
+              </div>
+            </DashboardBlock>
 
             {/* Lot L4 : sur téléphone, l'annonce et ses candidatures après les gardiens à proximité. */}
             {!isDesktopRail && hasActiveAnnonce && (
-              <OwnerAnnonceSection sits={sits} coverPhoto={propertyCoverPhoto} pendingAppCount={pendingAppCount} />
+              <DashboardBlock block="annonce" space="owner" layout={blockLayout}>
+                <OwnerAnnonceSection sits={sits} coverPhoto={propertyCoverPhoto} pendingAppCount={pendingAppCount} />
+              </DashboardBlock>
             )}
 
             {/* 4. Votre famille (lot P1b : montage différé, sous la ligne de flottaison) */}
+            <DashboardBlock block="family" space="owner" layout={blockLayout}>
             <DeferredMount minHeight={240}>
               <OwnerFamilySection
                 pets={pets}
@@ -621,17 +650,21 @@ const OwnerDashboard = () => {
                 getNextSitForPet={getNextSitForPet}
               />
             </DeferredMount>
+            </DashboardBlock>
 
             {/* Lot L4 : activation de l'autre espace, sous le récit sur téléphone. */}
             {!isDesktopRail && (
-              <DeferredMount minHeight={0}>
-                <RoleActivationBanner userRole={user?.role || "owner"} />
-              </DeferredMount>
+              <DashboardBlock block="role_activation" space="owner" layout={blockLayout}>
+                <DeferredMount minHeight={0}>
+                  <RoleActivationBanner userRole={user?.role || "owner"} />
+                </DeferredMount>
+              </DashboardBlock>
             )}
 
             {/* 5. Bandeau entraide */}
             {/* Lot L10 : un seul bloc entraide sur téléphone. La ligne sous le récit en est l'entrée ;
                 le suivi n'apparaît qu'avec une réponse attendue ou des propositions à suivre. */}
+            <DashboardBlock block="entraide" space="owner" layout={blockLayout}>
             {isDesktopRail ? (
               <DeferredMount minHeight={160}>
                 <OwnerEntraideBand
@@ -646,6 +679,7 @@ const OwnerDashboard = () => {
                 <EntraideFollowUp />
               </DeferredMount>
             )}
+            </DashboardBlock>
 
             {/* 6. Colonne de droite en mobile : après l'entraide. Lot P1b : une
                 seule des deux colonnes est rendue selon la largeur. */}
@@ -657,13 +691,16 @@ const OwnerDashboard = () => {
 
             {/* 7. Pouls. Lot D3 : sur ordinateur, les chiffres vivent dans « Guardiens aujourd'hui ». */}
             {!isDesktopRail && (
-              <DeferredMount minHeight={40}>
-                <CommunityPulseLine />
-              </DeferredMount>
+              <DashboardBlock block="pulse" space="owner" layout={blockLayout}>
+                <DeferredMount minHeight={40}>
+                  <CommunityPulseLine />
+                </DeferredMount>
+              </DashboardBlock>
             )}
 
             {/* 8. Historique des candidatures, accordéon discret */}
             {hasReadApps && (
+              <DashboardBlock block="history" space="owner" layout={blockLayout}>
               <StagedMount testId="history" minHeight={48}>
               <details className="rounded-2xl bg-card border border-border overflow-hidden">
                 <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
@@ -681,6 +718,7 @@ const OwnerDashboard = () => {
                 </div>
               </details>
               </StagedMount>
+              </DashboardBlock>
             )}
           </div>
 

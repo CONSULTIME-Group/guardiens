@@ -54,7 +54,8 @@ describe("SitterDashboard, composition lot D2", () => {
     expect(dash).toContain("headline={SITTER_ENTRAIDE_HEADLINE}");
   });
   it("AccessGateBanner seulement si le niveau d'accès est incomplet", () => {
-    expect(dash).toMatch(/showAccessGate && \(\s*<AccessGateBanner/);
+    // Lot D5 : le bandeau peut être enveloppé par un DashboardBlock de mesure.
+    expect(dash).toMatch(/showAccessGate && \(\s*(<DashboardBlock[^>]*>\s*)?<AccessGateBanner/);
   });
 });
 
