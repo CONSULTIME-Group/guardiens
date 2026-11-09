@@ -78,7 +78,7 @@ describe("section", () => {
     expect(screen.getByRole("heading", { name: "Les gardes ouvertes les plus proches de vous" })).toBeTruthy();
     expect(screen.getByText("Votre rayon reste à 15 km.")).toBeTruthy();
     expect(screen.getByText("Dans votre département")).toBeTruthy();
-    expect(screen.getByText("Dans votre région")).toBeTruthy();
+    expect(screen.getByText("Dans la même région")).toBeTruthy();
     expect(track).toHaveBeenCalledWith("nearest_outside_seen", expect.objectContaining({ metadata: expect.objectContaining({ cards: 2, widest_tier: "region" }) }));
     fireEvent.click(screen.getByText("carte b"));
     expect(track).toHaveBeenCalledWith("nearest_outside_card_clicked", expect.objectContaining({ metadata: { rank: 2, tier: "region", distance_km: 102 } }));

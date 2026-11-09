@@ -15,7 +15,7 @@ export type NearestTier = "dept" | "region" | "france";
 
 export const NEAREST_TIER_LABELS: Record<NearestTier, string> = {
   dept: "Dans votre département",
-  region: "Dans votre région",
+  region: "Dans la même région",
   france: "Ailleurs en France",
 };
 
