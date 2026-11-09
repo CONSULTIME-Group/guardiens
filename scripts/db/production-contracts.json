@@ -123,7 +123,17 @@
       ]
     },
     {
-      "migration": "0123_d4_mouvement_accueil.sql",
+      "migration": "0123_cron_heure_hiver.sql",
+      "description": "Récapitulatifs d'alerte de 12 h et 18 h et reprises de proximité servis été comme hiver",
+      "checks": [
+        {
+          "name": "recapitulatifs_deux_saisons",
+          "sql": "SELECT (SELECT count(*) FROM cron.job WHERE active AND ((jobname = 'alert-digest-12h' AND schedule = '0 10,11 * * *') OR (jobname = 'alert-digest-18h' AND schedule = '0 16,17 * * *') OR (jobname = 'nearby-daily-digest' AND schedule = '5 6-11 * * *'))) = 3 AS ok"
+        }
+      ]
+    },
+    {
+      "migration": "0124_d4_mouvement_accueil.sql",
       "description": "Accueil ordinateur : ce qui a bougé près du membre (lecture seule) et chiffres de Guardiens aujourd'hui",
       "checks": [
         {

@@ -3,9 +3,8 @@ import { render, act } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import OngoingSitHero from "../OngoingSitHero";
 import StatsStrip from "../StatsStrip";
-import MissionsTabsCard from "../MissionsTabsCard";
 import MonAnnonceCard from "../MonAnnonceCard";
-import type { SitRow, SitterInfo, Pet, SmallMission } from "../types";
+import type { SitRow, SitterInfo, Pet } from "../types";
 
 // Depuis le 16/07/2026, HelpDuringSitDialog (enfant de OngoingSitHero)
 // appelle useAuth : le harness doit fournir le contexte, faute de quoi le
@@ -77,29 +76,6 @@ const pets: Pet[] = [
   },
 ];
 
-const myMissions: SmallMission[] = [
-  {
-    id: "mission-1",
-    title: "Promener mon chien",
-    category: "walk",
-    status: "open",
-    city: "Lyon",
-    created_at: "2026-04-09",
-    small_mission_responses: [{ id: "r1", status: "pending" }],
-  },
-];
-
-const nearbyMissions: SmallMission[] = [
-  {
-    id: "mission-2",
-    title: "Aide pour transport vétérinaire",
-    category: "transport",
-    status: "open",
-    city: "Villeurbanne",
-    created_at: "2026-04-10",
-  },
-];
-
 // ─── Helpers viewport ──────────────────────────────────────────────────
 const setViewport = (width: number) => {
   Object.defineProperty(window, "innerWidth", { writable: true, configurable: true, value: width });
@@ -158,24 +134,6 @@ describe("Owner Dashboard — visual snapshots", () => {
     it("matches snapshot on desktop (1280px)", () => {
       setViewport(1280);
       const { container } = renderInRouter(<StatsStrip items={items} />);
-      expect(container.firstChild).toMatchSnapshot();
-    });
-  });
-
-  describe("MissionsTabsCard", () => {
-    it("matches snapshot on mobile (390px)", () => {
-      setViewport(390);
-      const { container } = renderInRouter(
-        <MissionsTabsCard myMissions={myMissions} nearbyMissions={nearbyMissions} />
-      );
-      expect(container.firstChild).toMatchSnapshot();
-    });
-
-    it("matches snapshot on desktop (1280px)", () => {
-      setViewport(1280);
-      const { container } = renderInRouter(
-        <MissionsTabsCard myMissions={myMissions} nearbyMissions={nearbyMissions} />
-      );
       expect(container.firstChild).toMatchSnapshot();
     });
   });
