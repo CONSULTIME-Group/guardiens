@@ -191,6 +191,24 @@
           "sql": "SELECT position('adm14_files_completes' IN pg_get_functiondef('public.admin_human_queues()'::regprocedure)) > 0 AND position('errorsOld' IN pg_get_functiondef('public.admin_human_queues()'::regprocedure)) > 0 AS ok"
         }
       ]
+    },
+    {
+      "migration": "0128_perf_sante_admin.sql",
+      "description": "Santé admin en lectures bornées : index des pages vues et de cron_run_log, admin_cron_health par tâche suivie, historique des tâches gardé 7 jours",
+      "checks": [
+        {
+          "name": "cron_health_bornee",
+          "sql": "SELECT position('perf_adm_lectures_bornees' IN pg_get_functiondef('public.admin_cron_health()'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "index_sante_admin",
+          "sql": "SELECT count(*) = 2 AS ok FROM pg_index i JOIN pg_class c ON c.oid = i.indexrelid WHERE c.relname IN ('analytics_events_page_view_created_idx', 'cron_run_log_edge_started_cover_idx') AND i.indisvalid"
+        },
+        {
+          "name": "purge_sept_jours",
+          "sql": "SELECT EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'purge-cron-run-details' AND active AND command LIKE '%interval ''7 days''%') AS ok"
+        }
+      ]
     }
   ]
 }
