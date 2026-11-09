@@ -1,24 +1,27 @@
 /**
- * Retour calme au récit de l'accueil (lots L5 et L6). Une phrase en
+ * Retour calme au récit de l'accueil (lots L5, L6 et L8). Une phrase en
  * role="status" au-dessus du récit, jusqu'au geste suivant du membre
  * (toucher, clavier), puis elle s'efface. Le paramètre quitte l'adresse tout
  * de suite, un rechargement ne la rejoue pas.
  *  - ?publiee= (L5, B-03) : « Votre annonce est en ligne. »
  *  - ?reponse=Prénom (L6, B-07) : « Camille a votre réponse. », suivi de
  *    « Théo attend la sienne. » quand une autre candidature attend.
+ *  - ?candidature=Prénom (L8, B-12) : « Votre candidature est envoyée à
+ *    Laurence. », au-dessus du récit « Votre mot est chez Laurence. »
  */
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Check } from "lucide-react";
-import { PUBLISHED_PARAM, REPLIED_PARAM, noticeFirstName } from "@/lib/afterPublish";
+import { APPLIED_PARAM, PUBLISHED_PARAM, REPLIED_PARAM, noticeFirstName } from "@/lib/afterPublish";
 
 /** Délai avant d'écouter le geste suivant : le toucher qui a mené ici ne compte pas. */
 export const PUBLISHED_NOTICE_ARM_MS = 600;
 
-type Notice = { kind: "published" } | { kind: "replied"; name: string };
+type Notice = { kind: "published" } | { kind: "replied"; name: string } | { kind: "applied"; name: string | null };
 
 function readNotice(params: URLSearchParams): Notice | null {
   if (params.get(PUBLISHED_PARAM)) return { kind: "published" };
+  if (params.get(APPLIED_PARAM)) return { kind: "applied", name: noticeFirstName(params.get(APPLIED_PARAM)) };
   const name = noticeFirstName(params.get(REPLIED_PARAM));
   return name ? { kind: "replied", name } : null;
 }
@@ -34,10 +37,11 @@ export default function PublishedNotice({ waitingName }: Props) {
   const [visible, setVisible] = useState(!!notice);
 
   useEffect(() => {
-    if (!params.has(PUBLISHED_PARAM) && !params.has(REPLIED_PARAM)) return;
+    if (!params.has(PUBLISHED_PARAM) && !params.has(REPLIED_PARAM) && !params.has(APPLIED_PARAM)) return;
     const next = new URLSearchParams(params);
     next.delete(PUBLISHED_PARAM);
     next.delete(REPLIED_PARAM);
+    next.delete(APPLIED_PARAM);
     setParams(next, { replace: true });
   }, [params, setParams]);
 
@@ -67,7 +71,11 @@ export default function PublishedNotice({ waitingName }: Props) {
       <span className="mt-[1px] flex h-[24px] w-[24px] shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary" aria-hidden="true">
         <Check className="h-[14px] w-[14px]" />
       </span>
-      {notice.kind === "published" ? (
+      {notice.kind === "applied" ? (
+        <p className="text-[15px] leading-snug text-foreground">
+          <span className="font-semibold">{notice.name ? `Votre candidature est envoyée à ${notice.name}.` : "Votre candidature est envoyée."}</span>
+        </p>
+      ) : notice.kind === "published" ? (
         <p className="text-[15px] leading-snug text-foreground">
           <span className="font-semibold">Votre annonce est en ligne.</span> Les gardiens peuvent maintenant vous proposer leur aide.
         </p>
