@@ -143,6 +143,10 @@ export type EventType =
   | "dashboard_story_seen"            // Récit affiché (space, chapter, compact, above_fold)
   | "dashboard_story_cta_clicked"     // Clic du bouton du récit (space, chapter, href)
   | "dashboard_frieze_step_clicked"   // Réservé : étape de la frise (étapes inertes au lot L4)
+  // Lot L6, page d'une candidature reçue ----------------------------------------
+  | "application_page_opened"         // Page /candidatures/:id ouverte par le propriétaire (application_id, status)
+  | "application_page_reply"          // « Répondre à {prénom} » (application_id)
+  | "application_page_declined"       // Déclin avec un mot aimable (application_id, kind_word : rang du mot proposé, -1 si réécrit)
   | "checklist_item_completed"        // Item checklist coché (item_name, order)
   | "checklist_all_completed"         // Checklist finalisée (user_role, time_seconds_since_signup)
   | "sitter_no_nearby_sit_shown"      // Empty state annonces (radius_km, alert_subscribed)

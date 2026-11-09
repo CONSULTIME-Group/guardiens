@@ -23,6 +23,9 @@ const ALWAYS_OPEN_PREFIXES = [
   "/messages",
   "/sits",
   "/mes-candidatures",
+  // Lot L6 (09/11/2026) : la page d'une candidature reçue, ouverte depuis la
+  // notification ou l'email.
+  "/candidatures",
   "/propositions",
   "/notifications",
   "/review",

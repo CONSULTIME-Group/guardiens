@@ -7,6 +7,7 @@ import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import { QuickActions } from './_quick-actions.tsx'
 import type { TemplateEntry } from './registry.ts'
+import { applicationPagePath } from '../application-page.ts'
 
 const SITE_URL = 'https://guardiens.fr'
 
@@ -14,6 +15,8 @@ interface Props {
   sitterFirstName?: string
   sitTitle?: string
   sitId?: string
+  /** Lot L6 : la candidature, pour mener à sa page. */
+  applicationId?: string
   messagePreview?: string
   sitterCity?: string
   sitterExperience?: string
@@ -28,6 +31,7 @@ const FirstApplicationEmail = ({
   sitterFirstName,
   sitTitle,
   sitId,
+  applicationId,
   messagePreview,
   sitterCity,
   sitterExperience,
@@ -38,6 +42,7 @@ const FirstApplicationEmail = ({
 }: Props) => {
   const sitter = sitterFirstName || 'Un gardien'
   const ctaHref = deepLinkUrl
+    || (applicationPagePath(applicationId) ? `${SITE_URL}${applicationPagePath(applicationId)}` : null)
     || (sitId ? `${SITE_URL}/sits/${sitId}#candidatures` : `${SITE_URL}/dashboard`)
   return (
     <Html lang="fr" dir="ltr">

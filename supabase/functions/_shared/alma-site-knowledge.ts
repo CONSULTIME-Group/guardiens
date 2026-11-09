@@ -68,6 +68,8 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
   {
     key: "mes_annonces",
     path: "/sits",
+    // Lot L6 : la page d'une candidature reçue, ouverte depuis la notification.
+    aliases: ["/candidatures/:id"],
     label: "Mes annonces et candidatures reçues",
     purpose: "Les annonces du propriétaire, leurs brouillons, les candidatures reçues à ouvrir, accepter ou décliner, puis l'accord de garde signé des deux côtés.",
     audience: "owner",

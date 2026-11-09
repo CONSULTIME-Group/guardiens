@@ -162,6 +162,9 @@ const PERIOD_PHRASE: Record<DeparturePeriod, string> = {
 };
 
 const SIT_CANDIDATES_HREF = (sitId: string) => `/sits/${sitId}#candidatures`;
+/** Lot L6 : une candidature précise s'ouvre sur sa page. */
+const APPLICATION_HREF = (first: { sitId: string; applicationId?: string | null }) =>
+  first.applicationId ? `/candidatures/${first.applicationId}` : SIT_CANDIDATES_HREF(first.sitId);
 
 /* ───────────────────────────── Propriétaire ───────────────────────────── */
 
@@ -181,7 +184,7 @@ export interface OwnerStoryInput {
     /** Nouvelles (pending). */
     unread: number;
     /** La plus ancienne à lire, sinon la plus ancienne en attente. */
-    first?: { sitId: string; sitterFirstName?: string | null } | null;
+    first?: { sitId: string; applicationId?: string | null; sitterFirstName?: string | null } | null;
   } | null;
   activeSit?: { id: string; start_date?: string | null; end_date?: string | null } | null;
   latestDraft?: { id: string; end_date?: string | null; cancellation_reason?: string | null } | null;
@@ -228,7 +231,7 @@ export function resolveOwnerStory(i: OwnerStoryInput): Story {
       eyebrow: "Votre garde",
       title: `${first || "Un gardien"} propose de veiller sur ${who}.`,
       lead: others > 0 ? `${others === 1 ? "Une autre candidature vous attend" : `${others} autres candidatures vous attendent`}.` : undefined,
-      cta: { label: first ? `Lire la candidature de ${first}` : "Lire sa candidature", href: SIT_CANDIDATES_HREF(awaiting.first.sitId) },
+      cta: { label: first ? `Lire la candidature de ${first}` : "Lire sa candidature", href: APPLICATION_HREF(awaiting.first) },
       frieze: frieze(1),
       art: "lettre",
       urgency: URGENCY.applications,

@@ -67,6 +67,20 @@
           "sql": "SELECT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_purge_owner_gallery_insight' AND NOT tgisinternal) AS ok"
         }
       ]
+    },
+    {
+      "migration": "0120_l6_candidature_recue.sql",
+      "description": "La notification de candidature mène à /candidatures/{candidature} ; ouvrir une candidature la marque lue",
+      "checks": [
+        {
+          "name": "new_application_link_to_application_page",
+          "sql": "SELECT position('/candidatures/' in pg_get_functiondef('public.notify_new_application()'::regprocedure)) > 0 AND position('applicationId' in pg_get_functiondef('public.notify_new_application()'::regprocedure)) > 0 AND position('/candidatures/' in pg_get_functiondef('public.notify_owner_of_new_application(uuid)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "mark_application_viewed_owner_only",
+          "sql": "SELECT to_regprocedure('public.mark_application_viewed(uuid)') IS NOT NULL AND NOT has_function_privilege('anon', 'public.mark_application_viewed(uuid)', 'EXECUTE') AND has_function_privilege('authenticated', 'public.mark_application_viewed(uuid)', 'EXECUTE') AS ok"
+        }
+      ]
     }
   ]
 }

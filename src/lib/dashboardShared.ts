@@ -56,6 +56,12 @@ export function invalidateMySits(userId: string) {
   getAppQueryClient()?.removeQueries({ queryKey: ["my-sits-full", userId], exact: true });
 }
 
+/** Lot L6 : après une réponse à une candidature, l'accueil relit les candidatures et les annonces. */
+export function invalidateMyApplications(userId: string) {
+  getAppQueryClient()?.removeQueries({ queryKey: ["applications-on-my-sits", userId], exact: true });
+  invalidateMySits(userId);
+}
+
 const ts = (v: string | null | undefined) => (v ? Date.parse(v) || 0 : 0);
 
 /** Annonces du membre, triées updated_at desc puis created_at desc. */

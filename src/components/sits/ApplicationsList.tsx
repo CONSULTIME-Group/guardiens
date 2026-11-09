@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
+import { declineApplication, KIND_DECLINE_MESSAGES } from "@/lib/applicationDecline";
 import {
   Star, MapPin, CheckCircle2,
   ChevronDown,
@@ -85,11 +85,8 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
   const [declinedOpen, setDeclinedOpen] = useState(true);
   const [sortMode, setSortMode] = useState<"affinity" | "rating" | "recent">("affinity");
   const navigate = useNavigate();
-  const declineTemplates = [
-    "Merci pour votre candidature ! J'ai trouvé un gardien dont le profil correspondait davantage à mes besoins cette fois-ci. N'hésitez pas à postuler à mes prochaines annonces !",
-    "Merci de votre intérêt ! Les dates ne correspondent malheureusement pas tout à fait. J'espère qu'on pourra collaborer une prochaine fois !",
-    "Merci pour votre message ! J'ai choisi un gardien plus proche géographiquement pour cette garde. Bonne continuation sur Guardiens !",
-  ];
+  // Lot L6 : mots aimables partagés avec la page d'une candidature.
+  const declineTemplates = KIND_DECLINE_MESSAGES;
 
   const load = async () => {
     const { data } = await supabase
@@ -245,44 +242,15 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
   const handleDecline = async (app: any, message?: string) => {
     try {
-      const { error: declineErr } = await supabase.from("applications").update({ status: "rejected" as any }).eq("id", app.id);
-      if (declineErr) throw declineErr;
-
-    if (user) {
-      const { data: rejConv } = await supabase
-        .from("conversations")
-        .select("id")
-        .eq("sit_id", sitId)
-        .eq("sitter_id", app.sitter_id)
-        .maybeSingle();
-      if (rejConv) {
-        const systemMsg = "Votre candidature a été déclinée pour cette garde.";
-        await supabase.from("messages").insert({
-          conversation_id: rejConv.id,
-          sender_id: user.id,
-          content: systemMsg,
-          is_system: true,
-        });
-        if (message?.trim()) {
-          await supabase.from("messages").insert({
-            conversation_id: rejConv.id,
-            sender_id: user.id,
-            content: message.trim(),
-            is_system: false,
-          });
-        }
-        await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", rejConv.id);
-      }
-
-      // Email transactionnel, candidature déclinée manuellement (non-bloquant)
-      sendTransactionalEmail({
-        templateName: "application-declined",
-        recipientUserId: app.sitter_id,
-        idempotencyKey: `app-declined-${app.id}`,
-        templateData: { sitTitle },
-      }).catch(() => {});
-    }
-
+      if (!user) return;
+      await declineApplication({
+        applicationId: app.id,
+        sitId,
+        sitterId: app.sitter_id,
+        sitTitle,
+        ownerId: user.id,
+        message,
+      });
       toast({ title: "Candidature déclinée" });
       setDeclineApp(null);
       setDeclineMessage("");
@@ -556,7 +524,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setDeclineApp(app)}
+              onClick={() => { setDeclineApp(app); setDeclineMessage(KIND_DECLINE_MESSAGES[0]); setDeclineCustom(false); }}
               className="text-muted-foreground hover:text-destructive ml-auto"
             >
               Décliner
@@ -595,7 +563,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setDeclineApp(app)}
+              onClick={() => { setDeclineApp(app); setDeclineMessage(KIND_DECLINE_MESSAGES[0]); setDeclineCustom(false); }}
               className="text-muted-foreground hover:text-destructive ml-auto"
             >
               Décliner
@@ -739,7 +707,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             </DialogHeader>
 
             <div className="space-y-3 mt-2">
-              <p className="text-sm font-medium text-foreground">Message d'accompagnement <span className="text-muted-foreground font-normal">(optionnel)</span></p>
+              <p className="text-sm font-medium text-foreground">Un mot aimable pour le gardien</p>
               
               {declineTemplates.map((tpl, i) => (
                 <button
