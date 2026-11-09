@@ -8,7 +8,6 @@ import {
   type SuggestedAction,
 } from "@/components/admin/signals/actionQueue";
 import type { AdminSignalBase } from "@/components/admin/signals/signalGrouping";
-import { queueSummaryLine } from "@/pages/admin/_components/dashboard/SignalsSection";
 import { sitGroupAction, startCountdown } from "@/components/admin/signals/SitSignalGroupCard";
 import {
   isSitImminent,
@@ -155,12 +154,7 @@ describe("ADM1, file À traiter", () => {
 });
 
 describe("ADM1, textes", () => {
-  it("ligne de compte en actions par section", () => {
-    expect(queueSummaryLine({ membres: 4, moderation: 1, technique: 2 }))
-      .toBe("7 actions : 4 membres à contacter, 1 en modération, 2 techniques.");
-    expect(queueSummaryLine({ membres: 1, moderation: 0, technique: 0 })).toBe("1 action : 1 membre à contacter.");
-    expect(queueSummaryLine({ membres: 0, moderation: 0, technique: 0 })).toBeNull();
-  });
+  // Lot ADM14 : queueSummaryLine retirée avec l'ancienne file (SignalsSection).
 
   it("verbe d'action et échéance de l'annonce", () => {
     expect(sitGroupAction(["pending_application", "owner_sit_unconfirmed"]))
@@ -186,7 +180,7 @@ describe("ADM1, textes", () => {
     const files = [
       "supabase/functions/_shared/admin-signal-config.ts",
       "src/components/admin/signals/SitSignalGroupCard.tsx",
-      "src/pages/admin/_components/dashboard/SignalsSection.tsx",
+      "src/pages/admin/_components/dashboard/signalEntries.tsx",
     ];
     for (const f of files) expect(readFileSync(f, "utf8")).not.toMatch(/[—–]/);
   });

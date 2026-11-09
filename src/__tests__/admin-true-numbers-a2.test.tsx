@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { computeAffinityStats } from "@/pages/admin/_components/dashboard/AffinityPilotCard";
-import { resolveNavActive, adminNavGroups_export } from "@/components/admin/AdminSidebar";
+import { adminNavGroups_export } from "@/components/admin/AdminSidebar";
 
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
 
@@ -96,8 +96,9 @@ describe("menu admin : un seul élément actif", () => {
     const p = to.split("?")[0];
     return pathname === p || (!end && pathname.startsWith(p + "/"));
   };
-  const actives = (pathname: string, search: string) =>
-    items.filter((it) => resolveNavActive(it as any, { pathname, search }, navMatch(it.to, pathname, (it as any).end))).map((it) => it.label);
+  // Lot ADM14 : plus d'entrée par onglet (Projets hors menu), l'état actif est celui de NavLink.
+  const actives = (pathname: string, _search: string) =>
+    items.filter((it) => navMatch(it.to, pathname, it.end)).map((it) => it.label);
 
   it("?tab=mutual-aid : Pilotage entraide", () => {
     expect(actives("/admin/pilotage-entraide", "")).toEqual(["Pilotage entraide"]);
@@ -109,8 +110,8 @@ describe("menu admin : un seul élément actif", () => {
   it("/admin/emails : Santé email", () => {
     expect(actives("/admin/emails", "")).toEqual(["Santé email"]);
   });
-  it("le menu mobile applique la même règle", () => {
-    expect(read("src/components/admin/AdminLayout.tsx")).toContain("resolveNavActive(item, location, isActive)");
+  it("Entraide reste active sur l'onglet Projets", () => {
+    expect(actives("/admin/small-missions", "?tab=projets")).toEqual(["Entraide"]);
   });
 });
 

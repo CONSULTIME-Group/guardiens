@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { SignalPriorityBadge } from "./PriorityBadge";
+import { IgnoreSignalsButton } from "./IgnoreSignalsButton";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface PendingApplicationSignal {
@@ -33,7 +33,6 @@ interface Props {
 export const PendingApplicationCard = ({ signal }: Props) => {
   const qc = useQueryClient();
   const [sending, setSending] = useState(false);
-  const [ignoring, setIgnoring] = useState(false);
 
   const m = signal.metadata ?? {};
   const isCritical = signal.severity === "critical";
@@ -46,18 +45,6 @@ export const PendingApplicationCard = ({ signal }: Props) => {
 
   const invalidate = () =>
     qc.invalidateQueries({ queryKey: ["admin_dashboard_snapshot"] });
-
-  const resolveSignal = async (action: "email_sent" | "dismissed") => {
-    const { data: { user } } = await supabase.auth.getUser();
-    return supabase
-      .from("admin_signals")
-      .update({
-        resolved_at: new Date().toISOString(),
-        action_taken: action,
-        admin_id: user?.id ?? null,
-      })
-      .eq("id", signal.id);
-  };
 
   const handleSendReminder = async () => {
     setSending(true);
@@ -94,17 +81,6 @@ export const PendingApplicationCard = ({ signal }: Props) => {
     }
   };
 
-  const handleIgnore = async () => {
-    setIgnoring(true);
-    const { error } = await resolveSignal("dismissed");
-    setIgnoring(false);
-    if (error) {
-      toast.error("Impossible d'ignorer ce signal.");
-      return;
-    }
-    toast.success("Signal ignoré.");
-    invalidate();
-  };
 
   const tone = isCritical
     ? "border-destructive/30 bg-destructive/5"
@@ -127,7 +103,6 @@ export const PendingApplicationCard = ({ signal }: Props) => {
               <h3 className="text-sm font-semibold text-foreground">
                 Candidature sans réponse
               </h3>
-              <SignalPriorityBadge severity={signal.severity} />
             </div>
             <div className="text-sm text-foreground">
               {m.sitter_first_name || "Un gardien"} a candidaté à «&nbsp;{m.sit_title ?? "annonce"}&nbsp;» il y a {days} jour{days > 1 ? "s" : ""}.
@@ -155,9 +130,7 @@ export const PendingApplicationCard = ({ signal }: Props) => {
                   Voir la candidature
                 </a>
               </Button>
-              <Button size="sm" variant="ghost" onClick={handleIgnore} disabled={ignoring}>
-                Ignorer
-              </Button>
+              <IgnoreSignalsButton ids={[signal.id]} />
             </div>
           </div>
         </div>

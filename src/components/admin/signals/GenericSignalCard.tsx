@@ -1,11 +1,7 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { IgnoreSignalsButton } from "./IgnoreSignalsButton";
 import { signalAdminLink, signalTypeLabel, type AdminSignalBase } from "./signalGrouping";
-import { SignalPriorityBadge } from "./PriorityBadge";
 import { SIGNAL_ACTIONS } from "../../../../supabase/functions/_shared/admin-signal-config.ts";
 
 /**
@@ -14,35 +10,13 @@ import { SIGNAL_ACTIONS } from "../../../../supabase/functions/_shared/admin-sig
  * et bouton "Ignorer" qui pose resolved_at sur la ligne.
  */
 export const GenericSignalCard = ({ signal }: { signal: AdminSignalBase }) => {
-  const qc = useQueryClient();
-  const [ignoring, setIgnoring] = useState(false);
   const excerpt =
     typeof signal.metadata?.excerpt === "string" ? signal.metadata.excerpt : null;
 
-  const handleIgnore = async () => {
-    setIgnoring(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase
-      .from("admin_signals")
-      .update({
-        resolved_at: new Date().toISOString(),
-        action_taken: "dismissed",
-        admin_id: user?.id ?? null,
-      })
-      .eq("id", signal.id);
-    setIgnoring(false);
-    if (error) {
-      toast.error("Impossible d'ignorer ce signal.");
-      return;
-    }
-    toast.success("Signal ignoré.");
-    qc.invalidateQueries({ queryKey: ["admin_dashboard_snapshot"] });
-  };
 
   return (
     <div className="rounded-lg border p-3 space-y-2">
       <div className="flex items-start gap-3">
-        <SignalPriorityBadge severity={signal.severity} />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-foreground">
             {signalTypeLabel(signal.signal_type)}
@@ -64,9 +38,7 @@ export const GenericSignalCard = ({ signal }: { signal: AdminSignalBase }) => {
         <Button size="sm" variant="outline" asChild>
           <Link to={signalAdminLink(signal)}>Ouvrir la page</Link>
         </Button>
-        <Button size="sm" variant="ghost" onClick={handleIgnore} disabled={ignoring}>
-          {ignoring ? "En cours..." : "Ignorer"}
-        </Button>
+        <IgnoreSignalsButton ids={[signal.id]} />
       </div>
     </div>
   );

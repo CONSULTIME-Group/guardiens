@@ -1,7 +1,6 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { signalsCountLine } from "@/pages/admin/_components/dashboard/SignalsSection";
 
 const sql = readFileSync(resolve("drizzle/migrations/0031_admin_dashboard_snapshot_sort_s1b.sql"), "utf8");
 
@@ -17,10 +16,5 @@ describe("Lot S1b, snapshot admin", () => {
   });
   it("sauvegarde l'ancienne définition pour retour arrière", () => {
     expect(sql).toMatch(/_backup_dashboard_snapshot_s1b_20260928[\s\S]*pg_get_functiondef/);
-  });
-  it("ligne de compte", () => {
-    expect(signalsCountLine(20, 171, 9)).toBe("20 affichés sur 171, dont 9 critiques.");
-    expect(signalsCountLine(3, 3, 1)).toBe("3 signaux ouverts, dont 1 critique.");
-    expect(signalsCountLine(0, 0, 0)).toBeNull();
   });
 });

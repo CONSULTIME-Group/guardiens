@@ -9,7 +9,6 @@ import {
   type WriteToMemberTarget,
 } from "@/pages/admin/_components/users/WriteToMemberDialog";
 import { ownerMessageDraft } from "@/lib/admin/ownerMessageDrafts";
-import { SignalPriorityBadge } from "./PriorityBadge";
 import type { AdminSignalBase } from "./signalGrouping";
 import {
   daysUntilStart,
@@ -66,7 +65,7 @@ export function sitGroupOwner(items: AdminSignalBase[]): { userId: string; name:
  * Lot ADM2 : « Écrire au propriétaire » envoie un vrai email (admin-personal-message)
  * et ne ferme les signaux qu'après un envoi accepté.
  */
-export const SitSignalGroupCard = ({ sitId, sit, items, severity }: Props) => {
+export const SitSignalGroupCard = ({ sitId, sit, items }: Props) => {
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
   const fallbackTitle = (items[0]?.metadata?.sit_title as string | undefined) ?? null;
@@ -108,7 +107,6 @@ export const SitSignalGroupCard = ({ sitId, sit, items, severity }: Props) => {
           <p className="text-sm text-muted-foreground">{line}</p>
           {countdown && <p className="text-xs font-medium text-foreground" data-testid="sit-countdown">{countdown}</p>}
         </div>
-        <SignalPriorityBadge severity={severity} />
       </div>
       <div className="flex flex-wrap gap-2">
         {owner && (

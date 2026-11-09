@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { SignalPriorityBadge } from "./PriorityBadge";
+import { IgnoreSignalsButton } from "./IgnoreSignalsButton";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface OwnerMissingCoordinatesSignal {
@@ -29,7 +29,6 @@ interface Props {
 export const OwnerMissingCoordinatesCard = ({ signal }: Props) => {
   const qc = useQueryClient();
   const [sending, setSending] = useState(false);
-  const [ignoring, setIgnoring] = useState(false);
 
   const m = signal.metadata ?? {};
   const firstName = m.owner_first_name?.trim() || "Ce propriétaire";
@@ -86,27 +85,6 @@ export const OwnerMissingCoordinatesCard = ({ signal }: Props) => {
     }
   };
 
-  const handleIgnore = async () => {
-    setIgnoring(true);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    const { error } = await supabase
-      .from("admin_signals")
-      .update({
-        resolved_at: new Date().toISOString(),
-        action_taken: "dismissed",
-        admin_id: user?.id ?? null,
-      })
-      .eq("id", signal.id);
-    setIgnoring(false);
-    if (error) {
-      toast.error("Impossible d'ignorer ce signal.");
-      return;
-    }
-    toast.success("Signal ignoré.");
-    invalidate();
-  };
 
   return (
     <Card className="border-warning/30 bg-warning/5">
@@ -120,7 +98,6 @@ export const OwnerMissingCoordinatesCard = ({ signal }: Props) => {
               <h3 className="text-sm font-semibold text-foreground">
                 Propriétaire sans coordonnées
               </h3>
-              <SignalPriorityBadge severity={signal.severity} />
             </div>
             <p className="text-sm text-foreground">
               {firstName} a publié « {sitTitle} » mais n'a pas de coordonnées
@@ -135,14 +112,7 @@ export const OwnerMissingCoordinatesCard = ({ signal }: Props) => {
                 <MailPlus className="h-4 w-4 mr-2" />
                 Envoyer un email de relance
               </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleIgnore}
-                disabled={ignoring}
-              >
-                Ignorer
-              </Button>
+              <IgnoreSignalsButton ids={[signal.id]} />
             </div>
           </div>
         </div>

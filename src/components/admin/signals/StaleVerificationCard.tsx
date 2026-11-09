@@ -1,11 +1,7 @@
-import { useState } from "react";
 import { ShieldAlert, ExternalLink } from "lucide-react";
-import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { SignalPriorityBadge } from "./PriorityBadge";
-import { supabase } from "@/integrations/supabase/client";
+import { IgnoreSignalsButton } from "./IgnoreSignalsButton";
 
 export interface StaleVerificationSignal {
   id: string;
@@ -26,8 +22,6 @@ interface Props {
 }
 
 export const StaleVerificationCard = ({ signal }: Props) => {
-  const qc = useQueryClient();
-  const [ignoring, setIgnoring] = useState(false);
   const m = signal.metadata ?? {};
   const isCritical = signal.severity === "critical";
   const first = m.first_name || "Ce membre";
@@ -43,22 +37,6 @@ export const StaleVerificationCard = ({ signal }: Props) => {
 
 
 
-  const handleIgnore = async () => {
-    setIgnoring(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase
-      .from("admin_signals")
-      .update({
-        resolved_at: new Date().toISOString(),
-        action_taken: "dismissed",
-        admin_id: user?.id ?? null,
-      })
-      .eq("id", signal.id);
-    setIgnoring(false);
-    if (error) { toast.error("Impossible d'ignorer ce signal."); return; }
-    toast.success("Signal ignoré.");
-    qc.invalidateQueries({ queryKey: ["admin_dashboard_snapshot"] });
-  };
 
   return (
     <Card className={tone}>
@@ -72,7 +50,6 @@ export const StaleVerificationCard = ({ signal }: Props) => {
               <h3 className="text-sm font-semibold text-foreground">
                 Vérification d'identité en attente
               </h3>
-              <SignalPriorityBadge severity={signal.severity} />
             </div>
             <div className="text-sm text-foreground">
               {first} attend depuis {days} jour{days > 1 ? "s" : ""}.
@@ -84,9 +61,7 @@ export const StaleVerificationCard = ({ signal }: Props) => {
                   Ouvrir la vérification
                 </a>
               </Button>
-              <Button size="sm" variant="ghost" onClick={handleIgnore} disabled={ignoring}>
-                Ignorer
-              </Button>
+              <IgnoreSignalsButton ids={[signal.id]} />
             </div>
           </div>
         </div>

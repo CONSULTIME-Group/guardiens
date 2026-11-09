@@ -1,69 +1,45 @@
-import { useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { KpiTile } from "@/components/admin/ui";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
-import { ADMIN_BADGES_REFRESH_EVENT } from "@/hooks/useAdminBadges";
+import { useWorkList, workListCountText, WORK_LIST_QUERY_KEY } from "@/hooks/useWorkList";
+import { isMondayInParis, technicalFamiliesText } from "@/lib/admin/overviewText";
 import { UNAVAILABLE_LABEL, reportAdminReadError } from "@/lib/admin/readError";
 import {
   autoBreakdown,
-  buildWorkList,
   hebdoBreakdown,
   unavailableSentence,
   WORK_FAMILY_LABELS,
   WORK_FAMILY_ORDER,
   type PilotageSignal,
   type WorkItem,
-  type WorkListModel,
-  type WorkListRaw,
 } from "@/lib/admin/pilotage";
 import { buildActionQueue } from "@/components/admin/signals/actionQueue";
 import type { AdminSignalBase } from "@/components/admin/signals/signalGrouping";
 import type { SitInfo } from "@/components/admin/signals/SitSignalGroupCard";
 import { AUTO_RELANCE_TEMPLATES } from "../../../../../supabase/functions/_shared/admin-signal-config.ts";
-import { renderEntry } from "./SignalsSection";
+import { renderEntry } from "./signalEntries";
 import { useKeyFigures, useListingFlow } from "./useDashboardData";
 import { useLiquiditySnapshot } from "./LiquidityBlock";
 
-/** Clé rangée sous admin_dashboard_snapshot : une carte traitée rafraîchit la liste. */
-export const WORK_LIST_QUERY_KEY = ["admin_dashboard_snapshot", "work-list"] as const;
+export { WORK_LIST_QUERY_KEY };
 
 /**
  * Lot ADM10 puis lot ADM13 (09/11/2026) : la vue d'ensemble lit la liste de
  * travail en une lecture (public.admin_work_list) et la met en forme par
  * buildWorkList (supabase/functions/_shared/admin-work-list.ts), comme l'email
- * du matin : même nombre de lignes à l'écran et dans l'email.
+ * du matin : même nombre de lignes à l'écran et dans l'email. Lot ADM14 : la
+ * même lecture (useWorkList) porte la pastille du menu et l'état du site.
  */
 export function usePilotage() {
   const { enabled: flagEnabled, loading: flagLoading } = useFeatureFlag("admin_signals_active");
-  const q = useQuery<WorkListModel>({
-    queryKey: WORK_LIST_QUERY_KEY,
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc("admin_work_list");
-      if (error) {
-        reportAdminReadError("Vue d'ensemble : liste de travail", error);
-        throw error;
-      }
-      return buildWorkList(data as unknown as WorkListRaw);
-    },
-    staleTime: 30_000,
-    // admin_site_health compte les pages vues de 8 jours : relue toutes les 5 minutes.
-    refetchInterval: 300_000,
-  });
-  // Une action dans une file des membres (contact, signalement, RGPD) rafraîchit
-  // aussi la liste, comme le menu.
-  const qc = useQueryClient();
-  useEffect(() => {
-    const onRefresh = () => { void qc.invalidateQueries({ queryKey: WORK_LIST_QUERY_KEY }); };
-    window.addEventListener(ADMIN_BADGES_REFRESH_EVENT, onRefresh);
-    return () => window.removeEventListener(ADMIN_BADGES_REFRESH_EVENT, onRefresh);
-  }, [qc]);
-  const model = q.data ?? null;
+  const { model, loading, error } = useWorkList();
   const sitMap = (model?.sits ?? new Map()) as unknown as Map<string, SitInfo>;
-  return { flagEnabled, flagLoading, model, sitMap, loading: q.isLoading, error: q.error };
+  return { flagEnabled, flagLoading, model, sitMap, loading, error };
 }
 
 /** Cartes d'action existantes d'une ligne, regroupées comme dans l'ancienne file. */
@@ -79,8 +55,10 @@ const TONE_CLASS: Record<WorkItem["tone"], string> = {
 };
 
 /**
- * Une ligne de la liste : un signal ou plus déplie ses cartes d'action ; une
- * ligne sans signal (voyant, file des membres, relances) mène à sa file.
+ * Une ligne de la liste : la phrase dit quoi faire, le bouton « Voir » montre
+ * où (lot ADM14, lot A V4 : le bouton ne promet plus une action qu'il ne fait
+ * pas). Un signal ou plus déplie ses cartes d'action ; une ligne sans signal
+ * (voyant, file des membres, relances) mène à sa file.
  */
 const LineRow = ({ line, sitMap, last }: { line: WorkItem; sitMap: Map<string, SitInfo>; last: boolean }) => {
   const [open, setOpen] = useState(false);
@@ -102,11 +80,11 @@ const LineRow = ({ line, sitMap, last }: { line: WorkItem; sitMap: Map<string, S
             aria-controls={id}
             onClick={() => setOpen((o) => !o)}
           >
-            {open ? "Replier" : line.action}
+            {open ? "Replier" : "Voir"}
           </Button>
         ) : (
           <Button asChild variant="outline" className="min-h-11 rounded-full px-5 font-bold">
-            <Link to={line.link}>{line.action}</Link>
+            <Link to={line.link}>Voir</Link>
           </Button>
         )}
       </div>
@@ -126,14 +104,23 @@ const LineGroup = ({ label, lines, sitMap, urgent }: { label: string; lines: Wor
 
 /** Question 1, suite de l'état du site : les signaux techniques, repliés. */
 export const TechnicalSignalsLine = () => {
-  const { model, sitMap } = usePilotage();
+  const { model, sitMap, loading, error } = usePilotage();
   const [open, setOpen] = useState(false);
-  if (!model || model.technique.length === 0) return null;
+  if (loading) return null;
+  // Lot ADM14 (lot A V10) : une lecture en échec se dit, la ligne ne disparaît pas.
+  if (error || !model || model.unavailable.includes("signals")) {
+    return (
+      <p className="mt-2 rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-foreground" data-testid="pilotage-technique-error">
+        Signaux techniques : lecture impossible.
+      </p>
+    );
+  }
+  if (model.technique.length === 0) return null;
   const k = model.technique.length;
   return (
     <div className="mt-2 rounded-xl border border-border bg-card" data-testid="pilotage-technique">
       <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-        <p className="text-sm text-foreground">{k} {k > 1 ? "signaux techniques ouverts" : "signal technique ouvert"} (emails, rendu SEO, contenus).</p>
+        <p className="text-sm text-foreground">{k} {k > 1 ? "signaux techniques ouverts" : "signal technique ouvert"} : {technicalFamiliesText(model.technique)}.</p>
         <Button variant="ghost" size="sm" aria-expanded={open} onClick={() => setOpen((o) => !o)}>{open ? "Replier" : "Voir"}</Button>
       </div>
       {open && <LineDetail signals={model.technique} sitMap={sitMap} />}
@@ -153,7 +140,7 @@ export const TodaySection = () => {
     <section aria-labelledby="pilotage-today" className="space-y-3.5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 id="pilotage-today" className="font-heading text-2xl font-semibold">Ce qui vous attend aujourd'hui</h2>
-        {model && <p className="text-sm text-muted-foreground" data-testid="pilotage-count">{lineCount} {lineCount > 1 ? "lignes" : "ligne"}</p>}
+        {model && <p className="text-sm text-muted-foreground" data-testid="pilotage-count">{workListCountText(lineCount)}</p>}
       </div>
 
       {!flagEnabled && (
@@ -166,7 +153,7 @@ export const TodaySection = () => {
       {loading ? (
         <div className="space-y-2"><Skeleton className="h-16 rounded-2xl" /><Skeleton className="h-16 rounded-2xl" /></div>
       ) : error || !model ? (
-        <p className="text-sm text-destructive" data-testid="pilotage-error">Lecture de la liste impossible. Ouvrez les files depuis le menu.</p>
+        <p className="text-sm text-destructive" data-testid="pilotage-error">Lecture impossible : les files restent ouvertes dans le menu, sous Outils.</p>
       ) : (
         <>
           {model.unavailable.length > 0 && (
@@ -188,7 +175,7 @@ export const TodaySection = () => {
           {lineCount === 0 && model.unavailable.length === 0 && <p className="text-sm text-foreground">Tout est à jour aujourd'hui.</p>}
           {!membresWaiting && !model.unavailable.includes("queues") && (
             <p className="text-sm text-muted-foreground" data-testid="waiting-members">
-              Tous les membres ont leur réponse : messages de contact, signalements, demandes RGPD, contestations d'avis et vérifications d'identité sont à jour.
+              Tous les membres ont leur réponse.
             </p>
           )}
         </>
@@ -281,31 +268,55 @@ export function useAutomation() {
   });
 }
 
-/** Le système s'en charge : ce qui avance seul, pour surveiller sans agir. */
-export const SystemSection = () => {
+/**
+ * Le système s'en charge : ce qui avance seul, pour surveiller sans agir.
+ * Lot ADM14 : replié (une phrase), le détail des relances n'est lu qu'à
+ * l'ouverture ; la synthèse de la semaine ne s'affiche que le lundi (lot A V12).
+ */
+export const SystemSection = ({ now = Date.now() }: { now?: number } = {}) => {
   const { model } = usePilotage();
-  const auto = useAutomation();
+  const [open, setOpen] = useState(false);
   if (!model) return null;
-  const a = auto.data;
+  const headline = model.autoTotal > 0
+    ? `${model.autoTotal} ${model.autoTotal > 1 ? "situations suivies" : "situation suivie"} par les relances automatiques.`
+    : "Relances automatiques : file vide.";
   return (
     <section aria-labelledby="pilotage-system" className="space-y-2.5 rounded-2xl border border-primary/20 bg-primary/5 p-5 sm:p-6" data-testid="pilotage-systeme">
-      <h2 id="pilotage-system" className="text-base font-semibold text-primary">Le système s'en charge, vous surveillez</h2>
-      <p className="text-[15px] leading-relaxed text-foreground">
-        {model.autoTotal > 0
-          ? `${model.autoTotal} ${model.autoTotal > 1 ? "situations suivies" : "situation suivie"} par les relances automatiques : ${autoBreakdown(model.auto)}. Elles remontent en haut si le départ approche ou si une relance échoue.`
-          : "Relances automatiques : file vide."}
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0">
+          <h2 id="pilotage-system" className="text-base font-semibold text-primary">Le site s'en charge, vous surveillez</h2>
+          <p className="text-[15px] text-foreground">{headline}</p>
+        </div>
+        <Button variant="ghost" size="sm" className="min-h-11" aria-expanded={open} aria-controls="pilotage-system-detail" onClick={() => setOpen((o) => !o)}>
+          {open ? "Replier" : "Voir"}
+        </Button>
+      </div>
+      {open && <SystemDetail model={model} />}
+      {isMondayInParis(now) && model.hebdo.length > 0 && (
+        <p className="border-t border-primary/15 pt-3 text-sm text-muted-foreground" data-testid="pilotage-hebdo">Synthèse de la semaine : {hebdoBreakdown(model.hebdo)}.</p>
+      )}
+    </section>
+  );
+};
+
+const SystemDetail = ({ model }: { model: NonNullable<ReturnType<typeof usePilotage>["model"]> }) => {
+  const auto = useAutomation();
+  const a = auto.data;
+  return (
+    <div id="pilotage-system-detail" className="space-y-2.5">
+      {model.autoTotal > 0 && (
+        <p className="text-[15px] leading-relaxed text-foreground">
+          {`Dans le détail : ${autoBreakdown(model.auto)}. Elles remontent dans la liste si le départ approche ou si une relance échoue.`}
+        </p>
+      )}
       <p className="text-sm text-foreground/80">
         {auto.error
           ? `Relances des dernières 24 heures : ${UNAVAILABLE_LABEL.toLowerCase()}.`
           : !a
             ? "Relances des dernières 24 heures : chargement…"
-            : `Dernières 24 heures : ${a.sent24h} ${a.sent24h > 1 ? "relances parties" : "relance partie"}, ${a.waiting24h} en attente d'envoi, ${a.failed24h === 0 ? "aucun échec" : `${a.failed24h} en échec`}. ${a.closed24h} ${a.closed24h > 1 ? "situations closes" : "situation close"} d'elles-mêmes.`}
+            : `Dernières 24 heures : ${a.sent24h} ${a.sent24h > 1 ? "relances parties" : "relance partie"}, ${a.waiting24h} en attente d'envoi, ${a.failed24h} en échec. ${a.closed24h} ${a.closed24h > 1 ? "situations closes" : "situation close"} d'elles-mêmes.`}
       </p>
       <Link to="/admin/emails" className="inline-flex min-h-11 items-center text-sm font-semibold text-primary underline underline-offset-2">Voir le détail des relances</Link>
-      {model.hebdo.length > 0 && (
-        <p className="border-t border-primary/15 pt-3 text-sm text-muted-foreground">Synthèse du lundi : {hebdoBreakdown(model.hebdo)}.</p>
-      )}
-    </section>
+    </div>
   );
 };

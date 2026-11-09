@@ -18,17 +18,16 @@ vi.mock("@/contexts/AuthContext", () => ({
 }));
 vi.mock("@/hooks/useAdmin", () => ({ useAdmin: () => adminState }));
 
-import {
-  useAdminBadges, adminBadgesQueryKey, refreshAdminBadges, ADMIN_BADGES_QUERY_KEY,
-} from "@/hooks/useAdminBadges";
-import { AdminSidebar, adminNavGroups_export, BADGE_TITLES } from "@/components/admin/AdminSidebar";
-import { resolveBadge } from "@/components/admin/AdminBadgePill";
+import { refreshAdminBadges } from "@/hooks/useAdminBadges";
+import { useWorkList } from "@/hooks/useWorkList";
+import { AdminSidebar, adminNavGroups_export } from "@/components/admin/AdminSidebar";
 
 const read = (p: string) => readFileSync(p, "utf8");
 const mkClient = () => new QueryClient({ defaultOptions: { queries: { retry: false } } });
 const wrap = (qc: QueryClient) => ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={qc}><MemoryRouter>{children}</MemoryRouter></QueryClientProvider>
 );
+const EMPTY = { sources: {}, signals: [], queues: [], health: [] };
 
 beforeEach(() => {
   rpcSpy.mockReset();
@@ -37,14 +36,16 @@ beforeEach(() => {
   adminState.loading = false;
 });
 
-describe("useAdminBadges", () => {
-  it("un seul appel admin_menu_badges par rafraîchissement", async () => {
-    rpcSpy.mockResolvedValue({ data: { reports: 3 }, error: null });
+// Lot ADM14 : les pastilles par file sont remplacées par la pastille unique
+// de la liste de travail (useWorkList). Mêmes garanties qu'au lot A5b.
+describe("useWorkList (pastille du menu)", () => {
+  it("un seul appel admin_work_list par rafraîchissement", async () => {
+    rpcSpy.mockResolvedValue({ data: EMPTY, error: null });
     const qc = mkClient();
-    const Probe = () => { useAdminBadges(); useAdminBadges(true); return null; };
+    const Probe = () => { useWorkList(); useWorkList(true); return null; };
     render(<Probe />, { wrapper: wrap(qc) });
     await waitFor(() => expect(rpcSpy).toHaveBeenCalledTimes(1));
-    expect(rpcSpy).toHaveBeenCalledWith("admin_menu_badges");
+    expect(rpcSpy).toHaveBeenCalledWith("admin_work_list");
     refreshAdminBadges();
     await waitFor(() => expect(rpcSpy).toHaveBeenCalledTimes(2));
   });
@@ -53,21 +54,16 @@ describe("useAdminBadges", () => {
     adminState.loading = true;
     adminState.isAdmin = false;
     const qc = mkClient();
-    const Probe = () => { useAdminBadges(); useAdminBadges(false); return null; };
+    const Probe = () => { useWorkList(); useWorkList(false); return null; };
     render(<Probe />, { wrapper: wrap(qc) });
     await new Promise((r) => setTimeout(r, 30));
     expect(rpcSpy).not.toHaveBeenCalled();
   });
 
-  it("clé par utilisateur", () => {
-    expect(adminBadgesQueryKey("a")).toEqual([...ADMIN_BADGES_QUERY_KEY, "a"]);
-    expect(adminBadgesQueryKey("a")).not.toEqual(adminBadgesQueryKey("b"));
-  });
-
   it("réglages de fraîcheur", () => {
-    const src = read("src/hooks/useAdminBadges.ts");
+    const src = read("src/hooks/useWorkList.ts");
     expect(src).toContain("staleTime: 30_000");
-    expect(src).toContain("refetchInterval: 60_000");
+    expect(src).toContain("refetchInterval: 120_000");
     expect(src).toContain("refetchOnWindowFocus: true");
   });
 });
@@ -75,26 +71,17 @@ describe("useAdminBadges", () => {
 describe("menu", () => {
   const items = adminNavGroups_export.flatMap((g) => g.items);
 
-  it("« ? » avec « Compteur indisponible » sur erreur, jamais 0", async () => {
+  it("« ? » sur erreur, jamais 0", async () => {
     const err = vi.spyOn(console, "error").mockImplementation(() => {});
     rpcSpy.mockResolvedValue({ data: null, error: { message: "boom" } });
     render(<AdminSidebar />, { wrapper: wrap(mkClient()) });
-    await waitFor(() => expect(screen.getAllByTitle("Compteur indisponible").length).toBeGreaterThan(0), { timeout: 4000 });
-    expect(screen.getAllByTitle("Compteur indisponible")[0].textContent).toBe("?");
-    expect(err).toHaveBeenCalled();
+    await waitFor(() => expect(screen.getAllByTitle("Liste de travail indisponible").length).toBeGreaterThan(0), { timeout: 4000 });
+    expect(screen.getAllByTitle("Liste de travail indisponible")[0].textContent).toBe("?");
     err.mockRestore();
-    expect(resolveBadge("reports", {}, true, BADGE_TITLES).text).toBe("?");
   });
 
-  it("Demandes RGPD porte la pastille deletionRequests", () => {
-    expect(items.find((i) => i.label === "Demandes RGPD")?.badgeKey).toBe("deletionRequests");
-    expect(BADGE_TITLES.deletionRequests).toBe("demandes de suppression en attente");
-  });
-
-  it("Entraide ne porte aucune pastille ; clés retirées", () => {
-    expect(items.find((i) => i.label === "Entraide")?.badgeKey).toBeUndefined();
-    expect(BADGE_TITLES).not.toHaveProperty("reportsSit");
-    expect(BADGE_TITLES).not.toHaveProperty("reportsMission");
+  it("seule la vue d'ensemble porte une pastille", () => {
+    expect(items.filter((i) => i.workList).map((i) => i.label)).toEqual(["Vue d'ensemble"]);
   });
 });
 

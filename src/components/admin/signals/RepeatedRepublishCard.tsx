@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { SignalPriorityBadge } from "./PriorityBadge";
+import { IgnoreSignalsButton } from "./IgnoreSignalsButton";
 import { supabase } from "@/integrations/supabase/client";
 import {
   WriteToMemberDialog,
@@ -29,7 +29,6 @@ interface Props { signal: RepeatedRepublishSignal; }
 
 export const RepeatedRepublishCard = ({ signal }: Props) => {
   const qc = useQueryClient();
-  const [busy, setBusy] = useState<string | null>(null);
   const m = signal.metadata ?? {};
   const first = m.first_name || "Un propriétaire";
   const pattern = m.sit_title_pattern || "annonce";
@@ -54,14 +53,6 @@ export const RepeatedRepublishCard = ({ signal }: Props) => {
     invalidate();
   };
 
-  const handleIgnore = async () => {
-    setBusy("ignore");
-    const { error } = await resolve("dismissed");
-    setBusy(null);
-    if (error) { toast.error("Impossible d'ignorer."); return; }
-    toast.success("Signal ignoré.");
-    invalidate();
-  };
 
   return (
     <Card className="border-warning/30 bg-warning/5">
@@ -73,7 +64,6 @@ export const RepeatedRepublishCard = ({ signal }: Props) => {
           <div className="flex-1 min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-sm font-semibold text-foreground">Annonce republiée sans succès</h3>
-              <SignalPriorityBadge severity={signal.severity} />
             </div>
             <div className="text-sm text-foreground">
               {first} a republié « {pattern}... » {count} fois en 180 jours.
@@ -82,7 +72,6 @@ export const RepeatedRepublishCard = ({ signal }: Props) => {
               <Button
                 size="sm"
                 onClick={() => setWriteTarget({ userId: signal.entity_id, userName: m.first_name || "ce propriétaire" })}
-                disabled={busy !== null}
               >
                 Écrire au propriétaire
               </Button>
@@ -92,9 +81,7 @@ export const RepeatedRepublishCard = ({ signal }: Props) => {
                   Voir annonces
                 </a>
               </Button>
-              <Button size="sm" variant="ghost" onClick={handleIgnore} disabled={busy !== null}>
-                Ignorer
-              </Button>
+              <IgnoreSignalsButton ids={[signal.id]} />
             </div>
           </div>
         </div>

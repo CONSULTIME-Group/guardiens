@@ -123,6 +123,8 @@ export interface WorkListModel extends PilotageModel {
   /** Sources en échec : la liste est incomplète et le dit. */
   unavailable: WorkSource[]
   sits: Map<string, PilotageSit>
+  /** Lot ADM14 : voyants lus dans la même lecture, affichés par l'état du site. */
+  health: HealthCheck[]
   generatedAt: string | null
 }
 
@@ -243,12 +245,20 @@ export const HEALTH_COVERED_TYPES = new Set([
 ])
 
 /** Files où un membre attend une réponse (public.admin_human_queues). */
-export const QUEUE_COPY: Record<string, { title: (k: number) => string; link: string }> = {
+export const QUEUE_COPY: Record<string, { title: (k: number) => string; link: string; family?: WorkFamily }> = {
   contactMessages: { title: (k) => `Répondre à ${k} ${n(k, 'message de contact', 'messages de contact')}`, link: '/admin/contact-messages' },
   reports: { title: (k) => `Traiter ${k} ${n(k, 'signalement', 'signalements')}`, link: '/admin/reports' },
   deletionRequests: { title: (k) => `Traiter ${k} ${n(k, 'demande RGPD', 'demandes RGPD')} (délai légal d'un mois)`, link: '/admin/demandes-suppression' },
   reviewDisputes: { title: (k) => `Trancher ${k} ${n(k, 'contestation d\'avis', 'contestations d\'avis')}`, link: '/admin/review-disputes' },
   verifications: { title: (k) => `Contrôler ${k} ${n(k, 'pièce d\'identité', 'pièces d\'identité')}`, link: '/admin/verifications' },
+  // Lot ADM14 : files que seule une pastille du menu signalait (drizzle 0127).
+  reviewsModeration: { title: (k) => `Valider ${k} ${n(k, 'avis d\'annulation', 'avis d\'annulation')}`, link: '/admin/reviews' },
+  experiences: { title: (k) => `Vérifier ${k} ${n(k, 'expérience déclarée', 'expériences déclarées')}`, link: '/admin/experiences' },
+  skills: { title: (k) => `Valider ${k} ${n(k, 'compétence proposée', 'compétences proposées')}`, link: '/admin/skills' },
+  guideRequests: { title: (k) => `Traiter ${k} ${n(k, 'demande de guide', 'demandes de guide')}`, link: '/admin/guides' },
+  analysisRequests: { title: (k) => `Traiter ${k} ${n(k, 'demande d\'analyse', 'demandes d\'analyse')}`, link: '/admin/analysis-requests' },
+  // Erreurs non résolues apparues il y a plus de 24 h : le voyant ne regarde que les nouvelles.
+  errorsOld: { title: (k) => `Corriger ${k} ${n(k, 'erreur du site ouverte', 'erreurs du site ouvertes')} depuis plus de 24 h`, link: '/admin/errors', family: 'site' },
 }
 
 /**
@@ -523,10 +533,13 @@ export function buildWorkList(raw: WorkListRaw | null | undefined, now: number =
     const count = Number(q?.count ?? 0)
     if (!def || !Number.isFinite(count) || count <= 0) continue
     const covered = signals.filter((x) => QUEUE_COVERED_BY[x.signal_type] === q.key)
+    const family = def.family ?? 'membres'
     items.push({
-      key: `membres:${q.key}`, family: 'membres', type: `queue:${q.key}`,
+      key: `${family}:${q.key}`, family, type: `queue:${q.key}`,
       title: def.title(count),
-      detail: q.oldest ? `Le plus ancien attend depuis le ${shortDate(q.oldest)}.` : 'Un membre attend votre réponse.',
+      detail: family !== 'membres'
+        ? (q.oldest ? `La plus ancienne date du ${shortDate(q.oldest)}.` : 'À lire dans le journal des erreurs.')
+        : q.oldest ? `Le plus ancien attend depuis le ${shortDate(q.oldest)}.` : 'Un membre attend votre réponse.',
       deadline: 'Aujourd\'hui', tone: 'normal', action: 'Répondre', signals: [],
       link: def.link, waitingSince: q.oldest ?? null, startDate: null, count, elements: elementsOf(covered, sits, def.link),
     })
@@ -559,6 +572,7 @@ export function buildWorkList(raw: WorkListRaw | null | undefined, now: number =
     items: items.sort((a, b) => WORK_FAMILY_ORDER.indexOf(a.family) - WORK_FAMILY_ORDER.indexOf(b.family)),
     unavailable,
     sits,
+    health: Array.isArray(raw?.health) ? raw!.health! : [],
     generatedAt: typeof raw?.generated_at === 'string' ? raw.generated_at : null,
   }
 }

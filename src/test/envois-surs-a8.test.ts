@@ -52,8 +52,8 @@ describe("Lot A8, sécurité du formulaire", () => {
     expect(read("src/components/admin/mass-email/MassEmailFilters.tsx")).toContain("onTargetingPreset?.()");
   });
   it("carte activation retirée du tableau de bord", () => {
-    const s = read("src/pages/admin/_components/dashboard/SignalsSection.tsx");
-    expect(s).not.toContain("<OwnerActivationCampaignCard");
+    // Lot ADM14 : l'ancienne file (SignalsSection) est retirée ; la vue d'ensemble ne monte pas la carte.
+    expect(read("src/pages/admin/_components/dashboard/PilotageBlocks.tsx")).not.toContain("<OwnerActivationCampaignCard");
     // Lot ADM2 : la phrase de renvoi vers Envois groupés quitte la file ; l'entrée reste au menu.
     expect(read("src/components/admin/AdminSidebar.tsx")).toContain('"/admin/envois-groupes"');
   });

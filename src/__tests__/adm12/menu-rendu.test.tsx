@@ -33,36 +33,42 @@ beforeEach(() => {
   try { localStorage.clear(); } catch { /* stockage indisponible */ }
 });
 
+// Lot ADM14 : une seule pastille, sur la vue d'ensemble, longueur de la liste de travail.
+const line = (key: string) => ({ id: key, signal_type: "no_applications", severity: "warning", entity_type: "sit", entity_id: key, detected_at: "2026-11-01T10:00:00Z", metadata: {} });
+
 describe("menu rendu", () => {
-  it("Annonces allumée : l'entrée entière mène à la file filtrée, Messagerie sans pastille", async () => {
-    rpcSpy.mockResolvedValue({ data: { sitsToStaff: 6, adminMessageFailed: 4 }, error: null });
+  it("la vue d'ensemble porte la pastille de la liste, aucune autre entrée", async () => {
+    rpcSpy.mockResolvedValue({ data: { sources: {}, signals: [line("a"), line("b")], queues: [{ key: "reports", count: 2, oldest: null }], health: [] }, error: null });
     renderSidebar();
-    const pill = await screen.findByTitle("6 annonces sans candidature depuis 48 h");
-    expect(pill.closest("a")?.getAttribute("href")).toBe("/admin/listings?filter=to_staff");
-    expect(screen.queryByTitle(/échecs d'envoi/)).toBeNull();
+    const pill = await screen.findByTitle(/choses? à faire/);
+    expect(pill.closest("a")?.getAttribute("href")).toBe("/admin");
+    expect(screen.getAllByTestId("admin-badge")).toHaveLength(1);
+    expect(rpcSpy).toHaveBeenCalledWith("admin_work_list");
+    expect(rpcSpy).not.toHaveBeenCalledWith("admin_menu_badges");
   });
 
-  it("rien à traiter : Annonces mène à la liste", async () => {
-    rpcSpy.mockResolvedValue({ data: { sitsToStaff: 0 }, error: null });
+  it("rien à traiter : aucune pastille", async () => {
+    rpcSpy.mockResolvedValue({ data: { sources: {}, signals: [], queues: [], health: [] }, error: null });
     renderSidebar();
     await waitFor(() => expect(rpcSpy).toHaveBeenCalled());
-    const link = screen.getAllByRole("link").find((a) => a.textContent?.includes("Annonces"));
-    expect(link?.getAttribute("href")).toBe("/admin/listings");
+    await new Promise((r) => setTimeout(r, 20));
+    expect(screen.queryAllByTestId("admin-badge")).toHaveLength(0);
   });
 
-  it("lecture en échec : « ? » sur le total des Outils aussi", async () => {
+  it("lecture en échec : « ? » sur la vue d'ensemble, Outils sans pastille", async () => {
     const err = vi.spyOn(console, "error").mockImplementation(() => {});
     rpcSpy.mockResolvedValue({ data: null, error: { message: "boom" } });
     renderSidebar();
-    const toggle = await screen.findByTestId("admin-tools-toggle");
-    await waitFor(() => expect(toggle.textContent).toContain("?"), { timeout: 4000 });
+    const pill = await screen.findByTitle("Liste de travail indisponible", undefined, { timeout: 4000 });
+    expect(pill.textContent).toBe("?");
+    expect(screen.getByTestId("admin-tools-toggle").textContent).not.toContain("?");
     err.mockRestore();
   });
 });
 
 describe("vue d'ensemble : les annonces sans gardien dans le rayon sont lues", () => {
   it("la liste de travail lit no_applications en sévérité info, comme la pastille (lot ADM13 : une lecture)", () => {
-    expect(read("src/pages/admin/_components/dashboard/PilotageBlocks.tsx")).toContain('supabase.rpc("admin_work_list")');
+    expect(read("src/hooks/useWorkList.ts")).toContain('supabase.rpc("admin_work_list")');
     expect(read("drizzle/migrations/0126_adm13_une_liste.sql")).toContain("(severity IS DISTINCT FROM 'info' OR signal_type = 'no_applications')");
   });
 });

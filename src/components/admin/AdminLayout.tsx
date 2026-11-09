@@ -1,9 +1,10 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Outlet, Navigate, NavLink, useNavigate, useLocation } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
-import { AdminSidebar, adminNavGroups_export, BADGE_TITLES, badgeTotalText, isToolPath, navItemTarget, resolveNavActive } from "./AdminSidebar";
-import { useAdminBadges } from "@/hooks/useAdminBadges";
-import { AdminBadgePill, resolveBadge } from "./AdminBadgePill";
+import { AdminSidebar, adminNavGroups_export, isToolPath, navItemBadge, navItemNews } from "./AdminSidebar";
+import { markAdminNewsSeen, useAdminNews } from "@/hooks/useAdminNews";
+import { useWorkList, workListBadgeLabel, workListBadgeText } from "@/hooks/useWorkList";
+import { AdminBadgePill, AdminNewsPill } from "./AdminBadgePill";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useAuth } from "@/contexts/AuthContext";
 import { Menu, X, ArrowLeft, LogOut, ChevronDown, ChevronUp } from "lucide-react";
@@ -17,10 +18,15 @@ const ADMIN_TITLE_FALLBACKS: Record<string, string> = {
   "/admin/build-info": "Version en ligne",
   "/admin/prerender": "Instantanés des pages",
   "/admin/articles-longue-traine": "Articles longue traîne",
+  // Lot ADM14 : hors menu, routes gardées.
+  "/admin/analysis-requests": "Demandes d'analyse",
+  "/admin/hero-weights": "Poids des hero",
 };
 
-const resolveAdminTitle = (pathname: string): string => {
+export const resolveAdminTitle = (pathname: string, search = ""): string => {
   const path = pathname.replace(/\/+$/, "") || "/admin";
+  // Lot ADM14 : l'onglet Projets d'Entraide porte son nom dans l'onglet du navigateur.
+  if (path === "/admin/small-missions" && new URLSearchParams(search).get("tab") === "projets") return "Projets";
   const navLabel = adminNavGroups_export
     .flatMap((group) => group.items)
     .find((item) => item.to.split("?")[0] === path)?.label;
@@ -31,20 +37,24 @@ const resolveAdminTitle = (pathname: string): string => {
 };
 
 export const AdminLayout = () => {
-  const { isAuthenticated, loading: authLoading, logout } = useAuth();
+  const { isAuthenticated, loading: authLoading, logout, user } = useAuth();
   const { isAdmin, loading: adminLoading } = useAdmin();
   const navigate = useNavigate();
   const location = useLocation();
-  const adminTitle = resolveAdminTitle(location.pathname);
+  const adminTitle = resolveAdminTitle(location.pathname, location.search);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   // Lot ADM4 : Outils replié sur mobile aussi, ouvert sur une page d'outil.
   const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
   // Le hook est appelé avant la garde : on lui passe l'état admin pour qu'il
   // ne lise rien tant que l'admin n'est pas confirmé.
-  const { badges, unavailable } = useAdminBadges(!authLoading && !adminLoading && isAuthenticated && isAdmin);
-  const allItems = adminNavGroups_export.flatMap((g) => g.items);
-  const totalBadges = badgeTotalText(allItems, badges as Record<string, number | undefined>, unavailable);
-  const toolsBadge = badgeTotalText(adminNavGroups_export.filter((g) => g.tool).flatMap((g) => g.items), badges as Record<string, number | undefined>, unavailable);
+  // Lot ADM14 : le bouton du menu porte la pastille unique, longueur de la liste de travail.
+  const { model, error } = useWorkList(!authLoading && !adminLoading && isAuthenticated && isAdmin);
+  const totalBadges = workListBadgeText(model, !!error);
+  const news = useAdminNews(!authLoading && !adminLoading && isAuthenticated && isAdmin);
+  // Lot ADM14 : ouvrir Annonces ou Entraide efface leur compteur de nouveautés.
+  useEffect(() => {
+    if (isAdmin) markAdminNewsSeen(location.pathname, user?.id);
+  }, [location.pathname, isAdmin, user?.id]);
   const mobileToolsShown = mobileToolsOpen || isToolPath(location.pathname);
 
   if (authLoading || adminLoading) {
@@ -80,7 +90,7 @@ export const AdminLayout = () => {
         </div>
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label={mobileMenuOpen ? "Fermer le menu" : totalBadges === "?" ? "Ouvrir le menu, compteur indisponible" : totalBadges ? `Ouvrir le menu, ${totalBadges} en attente` : "Ouvrir le menu"}
+          aria-label={mobileMenuOpen ? "Fermer le menu" : totalBadges ? `Ouvrir le menu, ${workListBadgeLabel(totalBadges)}` : "Ouvrir le menu"}
           aria-expanded={mobileMenuOpen}
           className="relative p-1.5 rounded-lg hover:bg-accent transition-colors"
           data-testid="admin-mobile-menu-button"
@@ -88,7 +98,7 @@ export const AdminLayout = () => {
           {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           {/* Lot ADM4 : total des pastilles sur le bouton du menu mobile. */}
           {!mobileMenuOpen && totalBadges && (
-            <AdminBadgePill compact text={totalBadges} label={totalBadges === "?" ? "Compteur indisponible" : `${totalBadges} en attente`} className="absolute -top-1 -right-1" />
+            <AdminBadgePill compact text={totalBadges} label={workListBadgeLabel(totalBadges)} className="absolute -top-1 -right-1" />
           )}
         </button>
       </div>
@@ -110,7 +120,6 @@ export const AdminLayout = () => {
                   data-testid="admin-mobile-tools-toggle"
                 >
                   <span className="flex-1 text-left">Outils</span>
-                  {toolsBadge && <AdminBadgePill text={toolsBadge} label={toolsBadge === "?" ? "Compteur indisponible" : `${toolsBadge} en attente dans les outils`} />}
                   {mobileToolsShown ? <ChevronUp className="h-4 w-4" aria-hidden /> : <ChevronDown className="h-4 w-4" aria-hidden />}
                 </button>
               ) : null;
@@ -124,18 +133,19 @@ export const AdminLayout = () => {
                 </p>
                 <div className="space-y-0.5">
                   {group.items.map((item) => {
-                    const badge = resolveBadge(item.badgeKey, badges as Record<string, number | undefined>, unavailable, BADGE_TITLES);
-                    const badgeLabel = badge.show ? badge.label : undefined;
+                    const badge = navItemBadge(item, totalBadges);
+                    const fresh = navItemNews(item, news);
+                    const badgeLabel = badge ? workListBadgeLabel(badge) : fresh?.label;
                     return (
                       <NavLink
                         key={item.to}
-                        to={navItemTarget(item, badge)}
+                        to={item.to}
                         end={item.end}
                         onClick={() => setMobileMenuOpen(false)}
                         className={({ isActive }) =>
                           cn(
                             "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                            resolveNavActive(item, location, isActive)
+                            isActive
                               ? "bg-primary/10 text-primary"
                               : "text-muted-foreground hover:bg-accent hover:text-foreground"
                           )
@@ -145,9 +155,10 @@ export const AdminLayout = () => {
                         {/* Lot ADM12 : une seule marque par entrée, la pastille chiffrée. */}
                         <item.icon className="h-4 w-4 shrink-0" />
                         <span className="flex-1">{item.label}</span>
-                        {badge.show && (
-                          <AdminBadgePill text={badge.text} label={badge.label} className="ml-auto" />
+                        {badge && (
+                          <AdminBadgePill text={badge} label={badgeLabel} className="ml-auto" />
                         )}
+                        {fresh && <AdminNewsPill text={fresh.text} label={fresh.label} className="ml-auto" />}
                       </NavLink>
                     );
                   })}
