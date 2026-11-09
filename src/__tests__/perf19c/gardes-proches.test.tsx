@@ -5,7 +5,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { pickNearestOutside, NEAREST_TIER_LABELS } from "@/lib/nearestOutsideZone";
+import { pickNearestOutside, nearestTierOf, NEAREST_TIER_LABELS } from "@/lib/nearestOutsideZone";
 import { NearestOutsideSection } from "@/components/search/listing/NearestOutsideSection";
 
 type S = { id: string; lat?: number; lng?: number; dept: string };
@@ -101,5 +101,22 @@ describe("branchement de la recherche", () => {
   it("aucune annonce d'exemple mêlée aux gardes réelles proches, card_source mesuré", () => {
     expect(src).toContain("isPublic || nearestComing ? 0");
     expect(src).toContain('card_source: radiusCount > 0 ? "radius" : "nearest"');
+  });
+});
+
+describe("lot perf 19d : paliers recalculés à l'arrivée du département", () => {
+  it("Gap (05) : Carpentras, Barjols et Nice dans la même région, Ardèche ailleurs", () => {
+    expect(nearestTierOf("84", "05")).toBe("region");
+    expect(nearestTierOf("83", "05")).toBe("region");
+    expect(nearestTierOf("06", "05")).toBe("region");
+    expect(nearestTierOf("07", "05")).toBe("france");
+    expect(nearestTierOf("05", "05")).toBe("dept");
+    expect(nearestTierOf("84", null)).toBe("france");
+  });
+  it("le département arrivé après la liste repasse sur les paliers, même si la liste arrive après lui", () => {
+    const src = readFileSync("src/components/search/SearchSitter.tsx", "utf8");
+    expect(src).toContain("nearestRefDeptRef.current = { gen, dept: rd };");
+    expect(src).toContain("setNearestPool((prev) => retierNearest(prev, rd));");
+    expect(src).toContain("knownRef && knownRef.gen === gen ? retierNearest(nearestEnriched, knownRef.dept) : nearestEnriched");
   });
 });

@@ -30,6 +30,16 @@ export interface NearestOutside<T> {
   distanceKm: number;
 }
 
+/** Palier d'une garde selon le département de référence du membre. */
+export function nearestTierOf(dept: string | null | undefined, refDept: string | null): NearestTier {
+  const d = dept ?? null;
+  if (refDept && d === refDept) return "dept";
+  // Outre-mer : la table des régions regroupe tous les 97x sous « DOM », qui
+  // n'est pas une région de voisinage (La Réunion et la Guadeloupe).
+  const refRegion = refDept && refDept.startsWith("97") ? null : getRegionCode(refDept);
+  return refRegion && d && getRegionCode(d) === refRegion ? "region" : "france";
+}
+
 export function pickNearestOutside<T>(
   open: readonly T[],
   coordsOf: (s: T) => { lat: number; lng: number } | null,
@@ -39,19 +49,13 @@ export function pickNearestOutside<T>(
   refDept: string | null,
   limit = NEAREST_OUTSIDE_SHOWN,
 ): NearestOutside<T>[] {
-  // Outre-mer : la table des régions regroupe tous les 97x sous « DOM », qui
-  // n'est pas une région de voisinage (La Réunion et la Guadeloupe).
-  const refRegion = refDept && refDept.startsWith("97") ? null : getRegionCode(refDept);
   const out: (NearestOutside<T> & { raw: number })[] = [];
   for (const s of open) {
     const co = coordsOf(s);
     if (!co) continue;
     const d = haversineDistance(point.lat, point.lng, co.lat, co.lng);
     if (!Number.isFinite(d) || d <= radiusKm) continue;
-    const dept = deptOf(s) ?? null;
-    const tier: NearestTier = refDept && dept === refDept
-      ? "dept"
-      : refRegion && dept && getRegionCode(dept) === refRegion ? "region" : "france";
+    const tier = nearestTierOf(deptOf(s), refDept);
     out.push({ sit: s, tier, distanceKm: Math.round(d), raw: d });
   }
   out.sort((a, b) => a.raw - b.raw);
