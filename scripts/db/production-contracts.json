@@ -133,7 +133,25 @@
       ]
     },
     {
-      "migration": "0124_adm13_une_liste.sql",
+      "migration": "0124_d4_mouvement_accueil.sql",
+      "description": "Accueil ordinateur : ce qui a bougé près du membre (lecture seule) et chiffres de Guardiens aujourd'hui",
+      "checks": [
+        {
+          "name": "get_dashboard_movement_membre_seul",
+          "sql": "SELECT to_regprocedure('public.get_dashboard_movement(timestamptz)') IS NOT NULL AND NOT has_function_privilege('anon', 'public.get_dashboard_movement(timestamptz)', 'EXECUTE') AND has_function_privilege('authenticated', 'public.get_dashboard_movement(timestamptz)', 'EXECUTE') AS ok"
+        },
+        {
+          "name": "dashboard_movement_counts_interne",
+          "sql": "SELECT to_regprocedure('public.dashboard_movement_counts(uuid, double precision, double precision, timestamptz)') IS NOT NULL AND NOT has_function_privilege('authenticated', 'public.dashboard_movement_counts(uuid, double precision, double precision, timestamptz)', 'EXECUTE') AS ok"
+        },
+        {
+          "name": "get_dashboard_movement_lecture_seule",
+          "sql": "SELECT provolatile = 's' AS ok FROM pg_proc WHERE oid = 'public.get_dashboard_movement(timestamptz)'::regprocedure"
+        }
+      ]
+    },
+    {
+      "migration": "0125_adm13_une_liste.sql",
       "description": "Admin : une lecture pour la liste de travail, candidatures sans réponse et tarif resserrés",
       "checks": [
         {

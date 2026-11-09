@@ -10,6 +10,7 @@
  * plus utile au quotidien), puis les étapes de profil, puis l'identité.
  */
 import { ALMA_PROFILE_NUDGE_THRESHOLD } from "@/lib/alma/profileNudge";
+import { formatCityLabel } from "@/lib/cityLabel";
 
 /**
  * Lot Z2 (audit E-17 du 13/10/2026) : SitterProfile ne lit que ?section= et
@@ -249,7 +250,8 @@ export interface OwnerNextStepInput {
 export const ownerNextStep = (input: OwnerNextStepInput): RailNextStep | null => {
   const pct = clampPct(input.profileCompletion);
   if (input.action && pct >= NEXT_STEP_ACTION_THRESHOLD) {
-    return ownerActionStep({ ...input.action, missing: input.missing });
+    const step = ownerActionStep({ ...input.action, missing: input.missing });
+    if (step) return step;
   }
   if (pct >= 100) return null;
   const deepLink = topMissingHref(input.missing) ?? "/owner-profile";
@@ -316,7 +318,8 @@ export const profileSecondaryLink = (
 };
 
 const cityPart = (city?: string | null): string | null => {
-  const c = (city || "").trim();
+  // Lot D3 : « Saint vulbas » saisi librement s'affiche « Saint-Vulbas ».
+  const c = formatCityLabel(city);
   return c ? `à ${c}` : null;
 };
 
@@ -325,13 +328,16 @@ export interface SitterActionInput {
   nearbyMissions: RailNearbyMission[];
   /** Identifiant de la garde mise en avant par « Une garde faite pour vous ». */
   starSitId?: string | null;
+  /** Lot D3 : gardes déjà montrées par la colonne principale (vedette et « Aussi pour vous »). */
+  shownSitIds?: string[] | null;
   missing?: RailMissingItem[] | null;
 }
 
 export const sitterActionStep = (input: SitterActionInput): RailActionStep => {
   const secondaryLink = profileSecondaryLink(input.missing, SITTER_PROFILE_IDENTITY_PATH);
   const open = (m: RailNearbyMission) => !m.status || m.status === "open";
-  const sit = input.nearbyListings.find((s) => s.id && s.id !== input.starSitId);
+  const shown = new Set([input.starSitId, ...(input.shownSitIds ?? [])].filter(Boolean) as string[]);
+  const sit = input.nearbyListings.find((s) => s.id && !shown.has(s.id));
   if (sit) {
     const start = safeFmt(sit.start_date);
     const end = safeFmt(sit.end_date);
@@ -387,17 +393,17 @@ export interface OwnerActionInput {
   missing?: RailMissingItem[] | null;
 }
 
-export const ownerActionStep = (input: OwnerActionInput): RailActionStep => {
+/**
+ * Lot D3 (09/11/2026) : la colonne de droite ne propose jamais un second pas
+ * concurrent de la colonne principale. Sans annonce en ligne, la vedette
+ * porte déjà « Publier » ou « Reprendre » : aucune action ici (le profil
+ * prend la place, sinon rien). Avant le lot D3, un propriétaire sans annonce
+ * lisait « Publier mon annonce » au centre et « Demander un coup de main » à
+ * droite.
+ */
+export const ownerActionStep = (input: OwnerActionInput): RailActionStep | null => {
   const secondaryLink = profileSecondaryLink(input.missing, "/owner-profile");
-  if (!input.hasActiveSit && input.starVariant !== "publish") {
-    return {
-      eyebrow: "Votre prochain pas",
-      title: "Votre maison mérite son gardien",
-      ctaLabel: "Publier mon annonce de garde",
-      ctaTo: "/sits/create",
-      secondaryLink,
-    };
-  }
+  if (!input.hasActiveSit) return null;
   if (input.hasActiveSit && input.nearbySittersCount > 0) {
     return {
       eyebrow: "Votre prochain pas",

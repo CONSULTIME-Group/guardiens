@@ -40,6 +40,8 @@ export interface OwnerEntraideBandViewProps {
   activeMission?: ActiveMissionInput | null;
   /** Lot X3b (C-11) : propositions d'aide du membre, à suivre. */
   proposals?: HelpProposal[];
+  /** Lot D3 : sur ordinateur, bouton en contour (un seul bouton plein par écran). */
+  ctaTone?: "primary" | "outline";
 }
 
 /** Lot X3b (C-04) : adresse (projet ou besoin) et propositions en attente, quand elles sont connues. */
@@ -65,6 +67,7 @@ export function OwnerEntraideBandView({
   headline,
   activeMission,
   proposals = [],
+  ctaTone = "primary",
 }: OwnerEntraideBandViewProps) {
   const ongoing = exchanges.find((r) => r.status === "in_progress") ?? null;
   const lastDone = ongoing ? null : exchanges.find((r) => r.status === "completed") ?? null;
@@ -190,7 +193,12 @@ export function OwnerEntraideBandView({
         <div className="mt-[22px] flex flex-col sm:flex-row sm:items-center gap-[14px]">
           <Link
             to="/petites-missions/creer"
-            className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-[18px] min-h-[44px] text-[14px] font-bold hover:bg-primary/90"
+            data-testid="entraide-band-cta"
+            className={
+              ctaTone === "outline"
+                ? "inline-flex items-center justify-center rounded-full border border-primary bg-card text-primary px-[18px] min-h-[44px] text-[14px] font-semibold hover:bg-primary/5"
+                : "inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-[18px] min-h-[44px] text-[14px] font-bold hover:bg-primary/90"
+            }
           >
             Demander un coup de main
           </Link>
@@ -216,6 +224,7 @@ export default function OwnerEntraideBand(props: {
   mission?: EntraideMission | null;
   headline?: string;
   activeMission?: ActiveMissionInput | null;
+  ctaTone?: "primary" | "outline";
 }) {
   const { rows, proposals, busy, answer } = useMyHelpExchanges();
   const mutualRadiusKm = useMutualAidRadiusKm();

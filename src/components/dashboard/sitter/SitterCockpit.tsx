@@ -1,7 +1,7 @@
 /**
  * Accueil gardien (lot D2, maquette validée), sur le modèle d'OwnerCockpit.
  *
- * Carte papier (--hero-paper), rayon 20. Gouache à droite sur 210 px et
+ * Carte papier (--hero-paper), rayon 20. Gouache à droite sur 150 px (lot D3, 210 px avant) et
  * toute la hauteur (mobile : en haut, pleine largeur, 150 px), object-cover,
  * PLEINE : ni masque, ni opacité réduite, ni voile, ni lavis.
  * sitter-cockpit-morning si disponible, sitter-match-empty sinon.
@@ -30,11 +30,13 @@ interface SitterCockpitProps {
   greeting?: string;
   line?: SitterCockpitLine | null;
   todos?: CockpitTodo[];
+  /** Lot D4 : tuiles « Depuis votre dernière visite » (ordinateur). */
+  movement?: React.ReactNode;
   /** Heure forcée (tests). */
   hour?: number;
 }
 
-const SitterCockpit = ({ firstName, isAvailable, greeting, line, todos = [], hour }: SitterCockpitProps) => {
+const SitterCockpit = ({ firstName, isAvailable, greeting, line, todos = [], hour, movement }: SitterCockpitProps) => {
   const displayName = firstName ? capitalize(firstName) : "";
   const hello = greeting ?? greetingForHour(hour ?? new Date().getHours());
   const title = displayName ? `${hello}, ${displayName}.` : `${hello}.`;
@@ -46,9 +48,9 @@ const SitterCockpit = ({ firstName, isAvailable, greeting, line, todos = [], hou
         className="relative overflow-hidden flex flex-col-reverse md:flex-row"
         style={{ backgroundColor: "hsl(var(--hero-paper))", borderRadius: "20px" }}
       >
-        <div className="min-w-0 flex-1 p-[22px] md:p-[34px]">
+        <div className="min-w-0 flex-1 p-[22px] md:px-[28px] md:py-[24px]">
           <DashEyebrow>Espace gardien</DashEyebrow>
-          <h1 className="font-heading text-foreground mt-[14px] text-[34px] md:text-[44px] font-semibold leading-[1.08]">
+          <h1 className="font-heading text-foreground mt-[14px] text-[34px] md:text-[38px] font-semibold leading-[1.08]">
             {title}
           </h1>
 
@@ -83,6 +85,7 @@ const SitterCockpit = ({ firstName, isAvailable, greeting, line, todos = [], hou
             </p>
           )}
 
+          {movement}
           {shown.length > 0 && (
             <div className="mt-[22px]" data-testid="sitter-cockpit-todos">
               <p className="text-muted-foreground uppercase text-[11px] font-bold tracking-[0.16em]">À faire</p>
@@ -106,11 +109,11 @@ const SitterCockpit = ({ firstName, isAvailable, greeting, line, todos = [], hou
             </div>
           )}
         </div>
-        <div className="shrink-0 w-full h-[150px] md:w-[210px] md:h-auto md:self-stretch">
+        <div className="shrink-0 w-full h-[150px] md:w-[150px] md:h-auto md:self-stretch">
           <img
             src={isAvailable ? cockpitMorning : cockpitWaiting}
             alt=""
-            width={210}
+            width={150}
             height={260}
             loading="eager"
             fetchPriority="high"

@@ -208,6 +208,7 @@ const ApplicationCard = ({
   affinity,
   affinityInput,
   extraCount,
+  othersHref = "/sits",
   onCtaClick,
 }: {
   app: AppRow;
@@ -215,6 +216,8 @@ const ApplicationCard = ({
   affinity: AffinityResult | null;
   affinityInput: AffinitySitterInput | null;
   extraCount: number;
+  /** Lot D3 : les autres candidatures de l'annonce quand elles portent toutes sur la même. */
+  othersHref?: string;
   onCtaClick?: () => void;
 }) => {
   const firstName = sitter?.first_name ? capitalize(sitter.first_name) : "Un gardien";
@@ -302,7 +305,7 @@ const ApplicationCard = ({
             </PrimaryCta>
             {extraCount > 0 && (
               <Link
-                to="/sits"
+                to={othersHref}
                 className="text-primary hover:underline"
                 style={{ fontSize: "13px", fontWeight: 700 }}
               >
@@ -380,6 +383,8 @@ const ApplicationsStar = ({
     ? sitterProfiles[featured.sitter.id] ?? featured.sitter
     : featured.sitter;
   const n = pendingApps.length;
+  const sitIds = new Set(pendingApps.map((a) => a.sit_id).filter(Boolean));
+  const othersHref = sitIds.size === 1 && featured.sit_id ? `/sits/${featured.sit_id}#candidatures` : "/sits";
 
   return (
     <>
@@ -396,6 +401,7 @@ const ApplicationsStar = ({
         affinity={featuredAffinity}
         affinityInput={featuredInput}
         extraCount={n - 1}
+        othersHref={othersHref}
         onCtaClick={onCtaClick}
       />
     </>

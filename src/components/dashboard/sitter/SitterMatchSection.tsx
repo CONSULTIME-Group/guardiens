@@ -42,6 +42,23 @@ const speciesLabel = (species: string[]): string | null => {
   return `${species.length} animaux`;
 };
 
+/**
+ * Lot D3 (09/11/2026) : titre de la garde mise en avant sur ordinateur, même
+ * phrase que le récit du téléphone (« Une maison attend son gardien à … »),
+ * le titre de l'annonce passe en sous-titre. Sans commune : le titre seul.
+ */
+export const starHeadline = (sit: { city?: string | null; title?: string | null }): string => {
+  const city = sit.city ? formatCityLabel(sit.city) : "";
+  if (city) return `Une maison attend son gardien à ${city}.`;
+  return sit.title?.trim() || "Une garde à découvrir";
+};
+
+/** Lot D3 : bouton au prénom du propriétaire, comme le récit (« Découvrir chez Laurence »). */
+export const starCtaLabel = (ownerFirstName?: string | null): string => {
+  const name = (ownerFirstName ?? "").trim();
+  return name ? `Découvrir chez ${name.charAt(0).toUpperCase()}${name.slice(1)}` : "Découvrir cette garde";
+};
+
 /** Lien de sortie vers le catalogue, compte réel, jamais codé en dur. */
 export const catalogExitLabel = (totalPublished: number): string =>
   totalPublished > 1
@@ -141,10 +158,14 @@ const StarCard = ({
   const total = sit.affinity?.total ?? 0;
   const photoUrl = sit.pet_photo_url ?? sit.cover_photo_url;
   const cover = photoUrl ? getOptimizedImageUrl(photoUrl, 900, 78) : null;
+  // Lot D3 : la phrase du récit téléphone, l'annonce en sous-titre, le bouton au prénom.
+  const cityLabel = sit.city ? formatCityLabel(sit.city) : "";
+  const headline = starHeadline(sit);
+  const ctaLabel = starCtaLabel(sit.owner_first_name);
 
   return (
-    <article className={CARD_CLASS} style={CARD_STYLE} data-testid="sitter-star-card">
-      <div className="relative w-full photo-placeholder-green h-[200px] md:h-[280px]">
+    <article className={`${CARD_CLASS} md:flex md:flex-row`} style={CARD_STYLE} data-testid="sitter-star-card">
+      <div className="relative w-full photo-placeholder-green h-[200px] md:h-auto md:min-h-[260px] md:w-[280px] md:shrink-0">
         {cover && (
           <img
             src={cover}
@@ -168,7 +189,7 @@ const StarCard = ({
         )}
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-start gap-[22px] p-[22px] md:px-[34px] md:py-[32px]">
+      <div className="flex flex-col md:flex-row md:items-start gap-[22px] p-[22px] md:px-[28px] md:py-[26px] md:min-w-0 md:flex-1">
         {showPercent && (
           <div className="shrink-0" data-testid="sitter-star-ring">
             <AffinityRing score={sit.affinity!.score} result={sit.affinity} size={76} />
@@ -176,9 +197,12 @@ const StarCard = ({
         )}
         <div className="min-w-0 flex-1">
           <DashEyebrow>Une garde faite pour vous</DashEyebrow>
-          <h2 className="font-heading text-foreground mt-[8px] text-[23px] md:text-[26px] font-semibold leading-tight">
-            {sit.title ?? "Une garde à découvrir"}
+          <h2 className="font-heading text-foreground mt-[8px] text-[23px] md:text-[24px] font-semibold leading-tight">
+            {headline}
           </h2>
+          {cityLabel && sit.title && (
+            <p className="text-foreground/85 mt-[8px] text-[14px] leading-snug line-clamp-2" data-testid="sitter-star-title">{sit.title}</p>
+          )}
           {meta && <p className="text-muted-foreground mt-[8px] text-[14px] leading-snug">{meta}</p>}
 
           {reasons.length > 0 && (
@@ -201,7 +225,7 @@ const StarCard = ({
               onClick={onCtaClick}
               className="shrink-0 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors min-h-[48px] px-[22px] text-[14px]"
             >
-              Découvrir cette garde
+              {ctaLabel}
             </Link>
             {showPercent && total > 0 && (
               <p className="text-muted-foreground text-[12.5px] leading-snug">

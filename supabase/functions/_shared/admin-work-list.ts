@@ -1,7 +1,7 @@
 // Lot ADM13 (09/11/2026, plan de l'arène admin, lot 2 « Une fonction, une
 // liste ») : la liste de travail des fondateurs, mise en forme une seule fois.
 // La base livre toutes les sources en une lecture (public.admin_work_list,
-// drizzle/migrations/0124_adm13_une_liste.sql) ; ce module pur en fait une
+// drizzle/migrations/0125_adm13_une_liste.sql) ; ce module pur en fait une
 // ligne par type d'élément à traiter (« Diffuser 3 annonces… ») : famille,
 // phrase qui commence par un verbe, lien vers la file, date d'attente, et les
 // éléments nommés (annonces, membres) que l'email cite sous la ligne. La vue d'ensemble (src/pages/admin/_components/dashboard/

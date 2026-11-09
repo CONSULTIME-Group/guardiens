@@ -17,7 +17,11 @@ import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
 import { useNearbyHelpers } from "@/hooks/useNearbyHelpers";
 import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import { useHelpsWithMissing } from "./HelpsWithReminder";
-import { useSitterDigestLine } from "@/hooks/useOwnerDigestLine";
+import { useDashboardMovement } from "@/hooks/useDashboardMovement";
+import { buildMovementBand, nearestSitLine } from "@/lib/dashboardMovement";
+import { calendarDate } from "@/lib/calendarDate";
+import DashboardBlock from "@/components/dashboard/shared/DashboardBlock";
+import MovementBand from "./shared/MovementBand";
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import { formatCityLabel } from "@/lib/cityLabel";
 import DashboardLoadError from "./DashboardLoadError";
@@ -39,6 +43,7 @@ import CommunityPulseLine from "./shared/CommunityPulseLine";
 import { useSitterPriorityAction } from "@/hooks/useSitterPriorityAction";
 import NextStepRailCard from "./shared/NextStepRailCard";
 import RailReadingsCard from "./shared/RailReadingsCard";
+import ReassuranceRailCard from "./shared/ReassuranceRailCard";
 import DashboardRail from "./shared/DashboardRail";
 import { useRailReadings } from "@/hooks/useRailReadings";
 import { useProfileCompletionMissing } from "@/hooks/useProfileCompletionMissing";
@@ -63,6 +68,8 @@ import EntraideLine from "./story/EntraideLine";
 import EntraideFollowUp from "./story/EntraideFollowUp";
 import { useCompactStory } from "./story/useCompactStory";
 import PublishedNotice from "./story/PublishedNotice";
+
+const DAY_MONTH = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" });
 
 export const SITTER_ENTRAIDE_HEADLINE = "Entre deux gardes, un coup de main près de chez vous.";
 
@@ -121,8 +128,9 @@ const SitterDashboard = () => {
   // Lot D2 : accueil.
   const helpsWithMissing = useHelpsWithMissing();
   const isDesktopRail = useIsDesktopRail();
-  // Lot L7 : la ligne du cockpit n'est lue que sur ordinateur (le récit la remplace sur téléphone).
-  const digestLine = useSitterDigestLine(!!user?.id && isDesktopRail);
+  // Lot D4 : ce qui a bougé depuis la dernière visite, sur ordinateur seulement
+  // (remplace la ligne get_activity_since_last_visit, même nombre de lectures).
+  const movement = useDashboardMovement(user?.id, isDesktopRail);
 
   /* ── Lot L7 : récit gardien (aucune lecture de plus) ── */
   const compactStory = useCompactStory();
@@ -182,6 +190,8 @@ const SitterDashboard = () => {
       nearbyListings: (nearbyListings ?? []) as any,
       nearbyMissions: (nearbyMissions ?? []) as any,
       starSitId: (topSits[0] ?? fallbackSits[0])?.id ?? null,
+      // Lot D3 : jamais une garde déjà visible dans la colonne principale.
+      shownSitIds: Array.from(new Set([...topSits, ...fallbackSits].map((s) => s.id))).slice(0, 3),
     },
   });
 
@@ -197,16 +207,23 @@ const SitterDashboard = () => {
     (identityStatus === "verified" || !!identityVerified);
   const openingVisible = isNewSitter && !allChecklistDone;
 
-  // Ligne sous le titre : prochaine garde, sinon digest réel, sinon rien.
+  // Ligne sous le titre : prochaine garde, sinon (lot D4) la garde ouverte la
+  // plus proche quand elle est au-delà de 50 km, sinon rien.
+  const farLine = nearestSitLine(
+    movement.data?.nearest_sit,
+    formatCityLabel,
+    (iso) => DAY_MONTH.format(calendarDate(iso)),
+  );
   const guardRange = nextGuard ? formatDateRangeFr(nextGuard.start_date, nextGuard.end_date) : null;
   const cockpitLine: SitterCockpitLine | null = nextGuard && guardRange
     ? {
         text: `Votre prochaine garde : ${guardRange}${nextGuard.city ? `, à ${formatCityLabel(nextGuard.city)}` : ""}.`,
         link: { label: "Préparer", to: `/sits/${nextGuard.id}` },
       }
-    : digestLine
-      ? { text: digestLine }
+    : farLine
+      ? { text: farLine, link: { label: "Voir la garde", to: `/sits/${movement.data!.nearest_sit!.sit_id}` } }
       : null;
+  const movementBand = buildMovementBand("sitter", movement.data, { previousVisit: movement.previousVisit });
 
   // Rangée « À faire » : actions réelles en attente, 3 au plus, dans cet ordre.
   const todos: CockpitTodo[] = [];
@@ -225,9 +242,13 @@ const SitterDashboard = () => {
   const listSits = (rows: typeof topSits) => (storyOpeningId ? rows.filter((r) => r.id !== storyOpeningId) : rows);
   const showAccessGate = !(level === 4 || level === "3B");
 
+  // Lot D5 : mesure par bloc, même découpage sur ordinateur et téléphone.
+  const blockLayout = isDesktopRail ? "desktop" as const : "phone" as const;
+
   const railContent = (
     <>
-      {nextStepRail && <NextStepRailCard step={nextStepRail} />}
+      {nextStepRail && <DashboardBlock block="next_step" space="sitter" layout={blockLayout}><NextStepRailCard step={nextStepRail} /></DashboardBlock>}
+      <DashboardBlock block="alma" space="sitter" layout={blockLayout}>
       <AlmaRailWhisper
         profileCompletion={profileCompletion ?? 0}
         isAvailable={!!isAvailable}
@@ -236,9 +257,13 @@ const SitterDashboard = () => {
           ? { variant: "newSitter" as const, openingCardVisible: openingVisible }
           : { checklistVisible: false })}
       />
-      {railReadings.length > 0 && <RailReadingsCard items={railReadings} />}
+      </DashboardBlock>
+      {isDesktopRail && <DashboardBlock block="reassurance" space="sitter" layout={blockLayout}><ReassuranceRailCard community={movement.data?.community ?? null} /></DashboardBlock>}
+      {railReadings.length > 0 && <DashboardBlock block="readings" space="sitter" layout={blockLayout}><RailReadingsCard items={railReadings} /></DashboardBlock>}
       {showAccessGate && (
-        <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+        <DashboardBlock block="access_gate" space="sitter" layout={blockLayout}>
+          <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
+        </DashboardBlock>
       )}
     </>
   );
@@ -246,21 +271,21 @@ const SitterDashboard = () => {
   return (
     <div className="overflow-hidden lg:overflow-visible pb-24 md:pb-8">
       {isDesktopRail && showAlmaFirstMeeting && (
-        <div className="px-4 sm:px-5 md:px-8 pt-2">
+        <DashboardBlock block="alma_first_meeting" space="sitter" layout={blockLayout} className="px-4 sm:px-5 md:px-8 pt-2">
           <AlmaFirstMeeting role="sitter" onDone={markAlmaFirstMeetingSeen} onSeen={recordAlmaFirstMeetingSeen} />
-        </div>
+        </DashboardBlock>
       )}
       {isDesktopRail && (
-        <div className="px-4 sm:px-5 md:px-8">
+        <DashboardBlock block="role_activation" space="sitter" layout={blockLayout} className="px-4 sm:px-5 md:px-8">
           <RoleActivationBanner userRole={user?.role || "sitter"} />
-        </div>
+        </DashboardBlock>
       )}
 
       {/* Lot X3a (A-07) : candidatures reçues d'un compte double rôle. */}
       {isDesktopRail && (
-        <div className="px-4 sm:px-5 md:px-8 mt-3 empty:hidden">
+        <DashboardBlock block="inbox_nudge" space="sitter" layout={blockLayout} className="px-4 sm:px-5 md:px-8 mt-3 empty:hidden">
           <OwnerInboxNudge />
-        </div>
+        </DashboardBlock>
       )}
 
       {/* Grille lots D1 et D2 : colonne principale 720 px, colonne de droite 328 px, écart 48 px */}
@@ -269,15 +294,19 @@ const SitterDashboard = () => {
           <div className="min-w-0 space-y-[34px] md:space-y-[52px]">
             {isDesktopRail ? (
               /* 1. Accueil (ordinateur, inchangé jusqu'au 31/01/2027) */
+              <DashboardBlock block="cockpit" space="sitter" layout={blockLayout}>
               <SitterCockpit
                 firstName={user?.firstName}
                 isAvailable={!!isAvailable}
                 greeting={openingVisible ? "Bienvenue" : undefined}
                 line={cockpitLine}
                 todos={todos}
+                movement={movementBand ? <MovementBand band={movementBand} space="sitter" /> : null}
               />
+              </DashboardBlock>
             ) : (
               /* Lot L7 : accueil téléphone, le récit d'abord (direction B de l'arène v2). */
+              <DashboardBlock block="story" space="sitter" layout={blockLayout}>
               <div className="space-y-[14px] pt-3" data-testid="sitter-story-home">
                 {/* Lot L8 : retour calme après une candidature envoyée depuis l'annonce. */}
                 <PublishedNotice />
@@ -325,6 +354,7 @@ const SitterDashboard = () => {
                   <AlmaFirstMeeting role="sitter" onDone={markAlmaFirstMeetingSeen} onSeen={recordAlmaFirstMeetingSeen} primaryVariant="outline" />
                 )}
               </div>
+              </DashboardBlock>
             )}
 
             {(nextGuardError || nearbyError) && (
@@ -340,16 +370,19 @@ const SitterDashboard = () => {
 
             {/* 2. Nouveau gardien : la liste d'ouverture est la vedette tant qu'elle n'est pas terminée */}
             {openingVisible && (
-              <SitterOpeningCard
-                hasAvatar={!!avatarUrl}
-                hasBioMin={!!(bio && bio.length >= 50)}
-                hasPostalCode={!!postalCode}
-                ctaTone={isDesktopRail ? "primary" : "outline"}
-              />
+              <DashboardBlock block="opening" space="sitter" layout={blockLayout}>
+                <SitterOpeningCard
+                  hasAvatar={!!avatarUrl}
+                  hasBioMin={!!(bio && bio.length >= 50)}
+                  hasPostalCode={!!postalCode}
+                  ctaTone={isDesktopRail ? "primary" : "outline"}
+                />
+              </DashboardBlock>
             )}
 
             {/* 3. Vedette unique et « Aussi pour vous », puis l'encart unique */}
             <div className="min-w-0 space-y-[22px]">
+              <DashboardBlock block="match" space="sitter" layout={blockLayout}>
               <SitterMatchSection
                 topSits={isDesktopRail ? topSits : listSits(topSits)}
                 fallbackSits={isDesktopRail ? fallbackSits : listSits(fallbackSits)}
@@ -359,27 +392,34 @@ const SitterDashboard = () => {
                 // Lot L7 : sur téléphone, le récit porte la garde mise en avant, la liste suit en lignes.
                 layout={openingVisible || !isDesktopRail ? "rows" : "star"}
               />
-              <StagedMount testId="missing">
-                <SitterMissingOpportunities fallbackTotalPublished={nbaLoading ? undefined : totalPublished} />
-              </StagedMount>
+              </DashboardBlock>
+              <DashboardBlock block="missing" space="sitter" layout={blockLayout}>
+                <StagedMount testId="missing">
+                  <SitterMissingOpportunities fallbackTotalPublished={nbaLoading ? undefined : totalPublished} />
+                </StagedMount>
+              </DashboardBlock>
             </div>
 
             {/* Lot L7 : activation de l'autre espace, sous le récit sur téléphone. */}
             {!isDesktopRail && (
-              <DeferredMount minHeight={0}>
-                <RoleActivationBanner userRole={user?.role || "sitter"} />
-              </DeferredMount>
+              <DashboardBlock block="role_activation" space="sitter" layout={blockLayout}>
+                <DeferredMount minHeight={0}>
+                  <RoleActivationBanner userRole={user?.role || "sitter"} />
+                </DeferredMount>
+              </DashboardBlock>
             )}
 
             {/* 4. Bandeau entraide (lot P1b : montage différé) */}
             {/* Lot L10 : un seul bloc entraide sur téléphone. La ligne sous le récit en est l'entrée ;
                 le suivi n'apparaît qu'avec une réponse attendue ou des propositions à suivre. */}
+            <DashboardBlock block="entraide" space="sitter" layout={blockLayout}>
             {isDesktopRail ? (
               <DeferredMount minHeight={160}>
                 <OwnerEntraideBand
                   helpersCount={nearbyHelpersCount}
                   helpersRadiusKm={helpersProximity?.radiusKm ?? 30}
                   activeMission={myActiveMission}
+                  ctaTone="outline"
                   headline={SITTER_ENTRAIDE_HEADLINE}
                 />
               </DeferredMount>
@@ -388,6 +428,7 @@ const SitterDashboard = () => {
                 <EntraideFollowUp />
               </DeferredMount>
             )}
+            </DashboardBlock>
 
             {/* 5. Colonne de droite en mobile : après l'entraide. Lot P1b : une
                 seule des deux colonnes est rendue selon la largeur. */}
@@ -397,10 +438,14 @@ const SitterDashboard = () => {
               </DeferredMount>
             )}
 
-            {/* 6. Pouls */}
-            <DeferredMount minHeight={40}>
-              <CommunityPulseLine testId="sitter-pulse-line" />
-            </DeferredMount>
+            {/* 6. Pouls. Lot D3 : sur ordinateur, les chiffres vivent dans « Guardiens aujourd'hui ». */}
+            {!isDesktopRail && (
+              <DashboardBlock block="pulse" space="sitter" layout={blockLayout}>
+                <DeferredMount minHeight={40}>
+                  <CommunityPulseLine testId="sitter-pulse-line" />
+                </DeferredMount>
+              </DashboardBlock>
+            )}
           </div>
 
           {/* Colonne de droite, desktop */}
