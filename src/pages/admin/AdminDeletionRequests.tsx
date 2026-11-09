@@ -2,6 +2,9 @@ import { adminLabel } from "@/lib/admin/labels";
 import { useCallback, useEffect, useState } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { supabase } from "@/integrations/supabase/client";
+import { ErrorState } from "@/components/admin/ui";
+import { reportAdminReadError } from "@/lib/admin/readError";
+import { maskEmail } from "@/lib/admin/maskEmail";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -89,6 +92,8 @@ export default function AdminDeletionRequests() {
   const [rows, setRows] = useState<RequestRow[]>([]);
   const [admins, setAdmins] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  // Lot ADM16 (lot B E1) : lecture en échec dite, jamais une liste vide.
+  const [loadError, setLoadError] = useState(false);
   const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [lookup, setLookup] = useState<LookupResult | null>(null);
@@ -103,9 +108,11 @@ export default function AdminDeletionRequests() {
       .order("requested_at", { ascending: false })
       .limit(200);
     if (error) {
-      toast.error("Chargement impossible : " + error.message);
+      reportAdminReadError("Demandes RGPD : liste", error);
       setRows([]);
+      setLoadError(true);
     } else {
+      setLoadError(false);
       const list = (data ?? []) as RequestRow[];
       setRows(list);
       const ids = Array.from(new Set(list.map((r) => r.processed_by).filter(Boolean))) as string[];
@@ -356,6 +363,8 @@ export default function AdminDeletionRequests() {
             <div className="space-y-2">
               {[0, 1, 2].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
             </div>
+          ) : loadError ? (
+            <ErrorState detail="Les demandes n'ont pas pu être lues." onRetry={() => void load()} />
           ) : rows.length === 0 ? (
             <p className="text-sm text-muted-foreground">Aucune demande enregistrée.</p>
           ) : (
@@ -383,7 +392,9 @@ export default function AdminDeletionRequests() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm">
-                        {r.requester_email ?? (r.user_id ? r.user_id : "·")}
+                        {r.requester_email
+                          ? (r.status === "completed" ? maskEmail(r.requester_email) : r.requester_email)
+                          : (r.user_id ? r.user_id : "·")}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {SOURCE_LABEL[r.source] ?? adminLabel(r.source)}

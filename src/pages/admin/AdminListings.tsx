@@ -140,6 +140,8 @@ const AdminListings = () => {
   // Traffic sheet
   const [trafficOpen, setTrafficOpen] = useState(false);
   const [trafficListing, setTrafficListing] = useState<any | null>(null);
+  // Lot ADM16 (lot A A3) : sources en échec dites, jamais « aucune source ».
+  const [trafficError, setTrafficError] = useState(false);
   const [trafficSources, setTrafficSources] = useState<Array<{ referrer_host: string; hits: number; last_hit_at: string }>>([]);
   const [trafficLoading, setTrafficLoading] = useState(false);
 
@@ -325,8 +327,12 @@ const AdminListings = () => {
     setTrafficOpen(true);
     setTrafficLoading(true);
     setTrafficSources([]);
+    setTrafficError(false);
     const { data, error } = await supabase.rpc("admin_get_listing_traffic_sources" as any, { p_sit_id: listing.id, p_limit: 20 });
-    if (error) console.error("admin_get_listing_traffic_sources:", error);
+    if (error) {
+      console.error("admin_get_listing_traffic_sources:", error);
+      setTrafficError(true);
+    }
     setTrafficSources((data as any[]) || []);
     setTrafficLoading(false);
   };
@@ -873,6 +879,11 @@ const AdminListings = () => {
                           <Send className="h-4 w-4 mr-1" /> Publier à sa place
                         </Button>
                       )}
+                      {listing.status === "published" && (filterStatus === "to_staff" || focusSitId) && (
+                        <Button size="sm" onClick={() => setProximityListing(listing)} data-testid="row-broadcast">
+                          <Send className="h-4 w-4 mr-1" /> Diffuser
+                        </Button>
+                      )}
                       <Button variant="outline" size="sm" onClick={() => setDetailListing(listing)}>
                         <Info className="h-4 w-4 mr-1" /> Détails
                       </Button>
@@ -905,7 +916,7 @@ const AdminListings = () => {
                           {st && st.messages > 0 && (
                             <DropdownMenuItem onSelect={() => openDrill(listing, "conversations")}><MessageSquare className="h-4 w-4 mr-2" /> Conversations ({st.messages} messages)</DropdownMenuItem>
                           )}
-                          <DropdownMenuItem disabled={!listing.user_id} onSelect={() => setMessageModal({ open: true, listing, content: "" })}><MessageSquare className="h-4 w-4 mr-2" /> Message rapide au propriétaire</DropdownMenuItem>
+                          <DropdownMenuItem disabled={!listing.user_id} onSelect={() => setMessageModal({ open: true, listing, content: "" })}><MessageSquare className="h-4 w-4 mr-2" /> Message dans la messagerie</DropdownMenuItem>
                           {listing.status === "published" && (
                             <DropdownMenuItem onSelect={() => setProximityListing(listing)}><Send className="h-4 w-4 mr-2" /> Envoyer aux gardiens du coin</DropdownMenuItem>
                           )}
@@ -953,6 +964,20 @@ const AdminListings = () => {
         ) : null}
         footer={detailListing ? (
           <div className="flex flex-wrap gap-2">
+            {detailListing.status === "published" && (
+              <Button size="sm" onClick={() => { const l = detailListing; setDetailListing(null); setProximityListing(l); }}>
+                <Send className="h-4 w-4 mr-1" /> Diffuser
+              </Button>
+            )}
+            {detailListing.user_id && (
+              <Button size="sm" variant="outline" onClick={() => {
+                const l = detailListing;
+                setDetailListing(null);
+                setWriteTarget({ userId: l.user_id, userName: [l.owner?.first_name, l.owner?.last_name].filter(Boolean).join(" ") || "ce membre", sitId: l.id });
+              }}>
+                <Mail className="h-4 w-4 mr-1" /> Contacter
+              </Button>
+            )}
             <Button size="sm" variant="outline" onClick={() => navigate(`/sits/${detailListing.id}`)}>Voir l'annonce publique</Button>
             {detailListing.user_id && <Button size="sm" variant="ghost" onClick={() => navigate(`/admin/users?user=${detailListing.user_id}`)}>Fiche du membre</Button>}
           </div>
@@ -1047,6 +1072,8 @@ const AdminListings = () => {
             </p>
             {trafficLoading ? (
               <p className="text-sm text-muted-foreground">Chargement…</p>
+            ) : trafficError ? (
+              <ErrorState detail="Sources de trafic" onRetry={() => trafficListing && void openTraffic(trafficListing)} />
             ) : trafficSources.length === 0 ? (
               <p className="text-sm text-muted-foreground">Aucune vue enregistrée.</p>
             ) : (

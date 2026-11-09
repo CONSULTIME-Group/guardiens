@@ -3,6 +3,8 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { createSeqGuard } from "@/lib/admin/requestSeq";
+import { ErrorState, LoadingState } from "@/components/admin/ui";
+import { reportAdminReadError } from "@/lib/admin/readError";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -68,7 +70,7 @@ export function targetHref(targetType: string, targetId: string, conversationId?
     case "profile": return `/admin/users?user=${targetId}`;
     case "sit":
     case "listing": return `/admin/listings?sit=${targetId}`;
-    case "small_mission": return `/admin/small-missions`;
+    case "small_mission": return `/admin/small-missions?mission=${targetId}`;
     case "mission_question": return `/admin/small-missions`;
     case "review": return `/admin/reviews`;
     case "message": return conversationId ? `/admin/messages?conversation=${conversationId}` : `/admin/messages`;
@@ -79,6 +81,8 @@ export function targetHref(targetType: string, targetId: string, conversationId?
 const AdminReports = () => {
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  // Lot ADM16 (lot B B1) : lecture en échec dite, jamais « Aucun signalement ».
+  const [loadError, setLoadError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [filterStatus, setFilterStatus] = useState("pending");
   const [page, setPage] = useState(0);
@@ -110,8 +114,12 @@ const AdminReports = () => {
     const { data, error, count } = await query.range(from, to);
     // Réponse périmée : une requête plus récente a été lancée entre-temps.
     if (!reportsSeq.current.isCurrent(token)) return;
-    if (error) toast.error("Erreur de chargement");
-    else {
+    if (error) {
+      reportAdminReadError("Signalements : liste", error);
+      setReports([]);
+      setLoadError(true);
+    } else {
+      setLoadError(false);
       setReports(data || []);
       setTotal(count ?? 0);
     }
@@ -241,7 +249,11 @@ const AdminReports = () => {
         </SelectContent>
       </Select>
 
-      {reports.length === 0 ? (
+      {loadError ? (
+        <ErrorState detail="Les signalements n'ont pas pu être lus." onRetry={() => void fetchReports()} />
+      ) : loading && reports.length === 0 ? (
+        <LoadingState />
+      ) : reports.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <ShieldAlert className="h-12 w-12 mx-auto mb-3 text-primary/40" />
           <p className="font-medium">Aucun signalement</p>

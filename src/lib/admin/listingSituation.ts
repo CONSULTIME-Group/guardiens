@@ -229,7 +229,8 @@ const endOfDay = (iso: string) => { const d = new Date(iso); d.setHours(23, 59, 
 /** Date d'échéance dépassée. Une offre sans échéance n'est jamais périmée. */
 export function missionDatePassed(m: MissionLike, now = new Date()): boolean {
   const t = now.getTime();
-  if (m.end_date && endOfDay(m.end_date) < t) return true;
+  // Lot ADM16 (lot A E4) : une date de fin fait foi ; « du 5 au 11 » reste ouvert le 9.
+  if (m.end_date) return endOfDay(m.end_date) < t;
   if (m.mission_type !== "offre" && m.date_needed && endOfDay(m.date_needed) < t) return true;
   return false;
 }

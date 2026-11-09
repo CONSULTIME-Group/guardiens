@@ -442,8 +442,25 @@ function elementOf(s: PilotageSignal, sits: Map<string, PilotageSit>, link: stri
   const label = (quote && !base.includes(quote.slice(0, 40)) ? `${base} : « ${clean(quote).slice(0, 160)} »` : base).slice(0, 240)
   const own = typeof m.admin_url === 'string' && m.admin_url.startsWith('https://guardiens.fr/admin')
     ? m.admin_url.replace('https://guardiens.fr', '')
-    : link
+    : elementLinkOf(s) ?? link
   return { label, link: own }
+}
+
+/**
+ * Lot ADM16 (lot 4 de l'arène, lot A E5) : lien vers l'élément même,
+ * l'annonce (?sit=), le besoin (?mission=), la fiche du membre (?user=).
+ * null quand le signal ne nomme aucun élément : la ligne garde sa file.
+ */
+export function elementLinkOf(s: PilotageSignal): string | null {
+  const m = s.metadata ?? {}
+  const enc = encodeURIComponent
+  if (typeof m.profile_id === 'string' && m.profile_id) return `/admin/users?user=${enc(m.profile_id)}`
+  const sitId = sitIdOf(s)
+  if (sitId) return `/admin/listings?sit=${enc(sitId)}`
+  if (!s.entity_id) return null
+  if (s.entity_type === 'small_mission' || s.entity_type === 'mission') return `/admin/small-missions?mission=${enc(s.entity_id)}`
+  if (s.entity_type === 'profile') return `/admin/users?user=${enc(s.entity_id)}`
+  return null
 }
 
 /** Éléments distincts d'une ligne (deux candidatures d'une annonce = une annonce). */

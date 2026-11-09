@@ -2,6 +2,8 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { supabase } from "@/integrations/supabase/client";
+import { ErrorState } from "@/components/admin/ui";
+import { reportAdminReadError } from "@/lib/admin/readError";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +22,9 @@ type StatusFilter = "pending" | "verified" | "rejected";
 const AdminExperienceVerification = () => {
   const [experiences, setExperiences] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  // Lot ADM16 (lot C EX1) : lectures en échec dites, jamais « Toutes vérifiées » ni 0.
+  const [listError, setListError] = useState(false);
+  const [countsError, setCountsError] = useState(false);
   const [activeTab, setActiveTab] = useState<StatusFilter>("pending");
   const [counts, setCounts] = useState({ pending: 0, verified: 0, rejected: 0 });
   const [rejectModal, setRejectModal] = useState<{ open: boolean; id: string; reason: string; customReason: string }>({
@@ -52,16 +57,31 @@ const AdminExperienceVerification = () => {
       supabase.from("external_experiences").select("id", { count: "exact", head: true }).eq("verification_status", "verified"),
       supabase.from("external_experiences").select("id", { count: "exact", head: true }).eq("verification_status", "rejected"),
     ]);
+    const failed = [p, v, r].find((x) => x.error);
+    if (failed) {
+      reportAdminReadError("Expériences : compteurs", failed.error);
+      setCountsError(true);
+      return;
+    }
+    setCountsError(false);
     setCounts({ pending: p.count || 0, verified: v.count || 0, rejected: r.count || 0 });
   }, []);
 
   const fetchExperiences = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("external_experiences")
       .select("*, profile:profiles!external_experiences_user_id_fkey(first_name, last_name, avatar_url, role)")
       .eq("verification_status", activeTab)
       .order("created_at", { ascending: activeTab === "pending" });
+    if (error) {
+      reportAdminReadError("Expériences : liste", error);
+      setListError(true);
+      setExperiences([]);
+      setLoading(false);
+      return;
+    }
+    setListError(false);
     const exps = data || [];
     const allPaths = exps.flatMap((exp: any) => exp.screenshot_urls || []);
     await hydrateSignedUrls(allPaths);
@@ -241,19 +261,21 @@ const AdminExperienceVerification = () => {
         <TabsList>
           <TabsTrigger value="pending" className="gap-1.5">
             <Clock className="h-3.5 w-3.5" /> En attente
-            {counts.pending > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{counts.pending}</Badge>}
+            {(countsError || counts.pending > 0) && <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{countsError ? "?" : counts.pending}</Badge>}
           </TabsTrigger>
           <TabsTrigger value="verified" className="gap-1.5">
-            <CheckCircle2 className="h-3.5 w-3.5" /> Validées ({counts.verified})
+            <CheckCircle2 className="h-3.5 w-3.5" /> Validées ({countsError ? "?" : counts.verified})
           </TabsTrigger>
           <TabsTrigger value="rejected" className="gap-1.5">
-            <XCircle className="h-3.5 w-3.5" /> Refusées ({counts.rejected})
+            <XCircle className="h-3.5 w-3.5" /> Refusées ({countsError ? "?" : counts.rejected})
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value={activeTab} className="mt-4">
           {loading ? (
             <div className="text-muted-foreground py-8 text-center">Chargement…</div>
+          ) : listError ? (
+            <ErrorState detail="Les expériences n'ont pas pu être lues." onRetry={() => void fetchExperiences()} />
           ) : experiences.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Briefcase className="h-12 w-12 mx-auto mb-3 opacity-30" />

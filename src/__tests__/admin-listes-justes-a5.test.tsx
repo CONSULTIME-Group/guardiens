@@ -149,7 +149,9 @@ describe("filtres passés dans l'URL", () => {
       expect(calls.some((c) => c.table === "profiles" && has(c, "eq", "id", "u-42"))).toBe(true);
     });
     expect(await screen.findByText("Aucun membre ne correspond à cet identifiant.")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Retirer le filtre" })).toBeTruthy();
+    // Lot ADM16 : ?user= ouvre aussi la fiche du membre, la liste reste filtrée derrière.
+    expect(await screen.findByRole("dialog", { name: "Fiche membre" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Retirer le filtre", hidden: true })).toBeTruthy();
   });
 
   it("AdminListings ?sit= lit l'annonce sans filtre de statut", async () => {

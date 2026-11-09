@@ -609,6 +609,16 @@ const AdminUsers = () => {
 
   // ── Lot A12 : fiche membre et menu d'actions ──
   const memberId = urlParams.get(MEMBER_PARAM);
+  // Lot ADM16 (lot B B2) : un lien ?user= (signalements, signaux, Alma) ouvre
+  // aussi la fiche du membre, une fois ; la liste reste filtrée sur lui.
+  const openedFromUserRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!focusUserId || memberId || openedFromUserRef.current === focusUserId) return;
+    openedFromUserRef.current = focusUserId;
+    const next = new URLSearchParams(urlParams);
+    next.set(MEMBER_PARAM, focusUserId);
+    setUrlParams(next, { replace: true });
+  }, [focusUserId, memberId, urlParams, setUrlParams]);
   const openMember = (id: string) => {
     const next = new URLSearchParams(urlParams);
     next.set(MEMBER_PARAM, id);

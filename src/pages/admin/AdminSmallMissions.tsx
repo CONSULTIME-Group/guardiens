@@ -30,6 +30,8 @@ import { fr } from "date-fns/locale";
 import { Search, Archive, Trash2, Eye, RotateCcw, Mail, AlertTriangle, ArrowUpDown, Download, Send, Info, MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ErrorState } from "@/components/admin/ui";
+import { UrlFilterNotice } from "@/components/admin/UrlFilterNotice";
+import { reportAdminReadError } from "@/lib/admin/readError";
 import DossierDetailSheet from "@/components/admin/DossierDetailSheet";
 import { missionSituation } from "@/lib/admin/listingSituation";
 import { proximityBlockReason } from "@/lib/admin/missionDiffusion";
@@ -118,6 +120,16 @@ const AdminSmallMissions = () => {
   // directement sur les projets. Les projets participatifs ont leurs propres
   // indicateurs, et la liste est la même, filtrée sur la catégorie côté serveur.
   const [projetKpis, setProjetKpis] = useState<ProjetKpis | null>(null);
+  // Lot ADM16 (lot A E1, lot C P1) : indicateurs projets en échec, dits.
+  const [projetKpisError, setProjetKpisError] = useState(false);
+  const [projetNonce, setProjetNonce] = useState(0);
+  // Lot ADM16 (lot A E5) : ?mission= mène au besoin et ouvre sa fiche.
+  const focusMissionId = searchParams.get("mission");
+  const clearFocusMission = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("mission");
+    setSearchParams(next, { replace: true });
+  };
   // Diffusion différée : le premier projet d'un porteur attend douze heures
   // avant d'être annoncé aux membres. L'administration peut l'avancer.
   const [releasingId, setReleasingId] = useState<string | null>(null);
@@ -142,16 +154,20 @@ const AdminSmallMissions = () => {
   useEffect(() => {
     if (tab !== "projets") return;
     let cancelled = false;
+    setProjetKpisError(false);
+    setProjetKpis(null);
     (async () => {
       const { data, error } = await (supabase as any).rpc("admin_projet_kpis");
+      if (cancelled) return;
       if (error) {
-        toast.error("Indicateurs projets indisponibles");
+        reportAdminReadError("Projets : indicateurs", error);
+        setProjetKpisError(true);
         return;
       }
-      if (!cancelled) setProjetKpis(data as ProjetKpis);
+      setProjetKpis(data as ProjetKpis);
     })();
     return () => { cancelled = true; };
-  }, [tab]);
+  }, [tab, projetNonce]);
 
   const switchTab = (next: "entraide" | "projets") => {
     setPage(0);
@@ -269,6 +285,7 @@ const AdminSmallMissions = () => {
 
   const filtered = useMemo(() => {
     let list = missions;
+    if (focusMissionId) return list.filter((m) => m.id === focusMissionId);
     if (search) {
       const s = search.toLowerCase();
       list = list.filter((m) =>
@@ -288,7 +305,15 @@ const AdminSmallMissions = () => {
       });
     }
     return list;
-  }, [missions, search, sortBy, sortDir, responseCounts, filterStatus, responseCountsReady, responseError]);
+  }, [missions, search, sortBy, sortDir, responseCounts, filterStatus, responseCountsReady, responseError, focusMissionId]);
+
+  // La fiche du besoin cité par l'adresse s'ouvre une fois la liste lue.
+  const openedFocusRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!focusMissionId || loading || openedFocusRef.current === focusMissionId) return;
+    const m = missions.find((x) => x.id === focusMissionId);
+    if (m) { openedFocusRef.current = focusMissionId; setDetailMission(m); }
+  }, [focusMissionId, missions, loading]);
 
   const paginated = useMemo(() => filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE), [filtered, page]);
 
@@ -450,7 +475,8 @@ const AdminSmallMissions = () => {
     open: listOk ? filtered.filter((m) => m.status === "open").length : null,
     views: filtered.reduce((a, m) => a + (m.view_count || 0), 0),
     responses: !listOk || responseError || !responseCountsReady ? null : filtered.reduce((a, m) => a + (responseCounts[m.id] || 0), 0),
-    noResponse: !listOk || responseError || !responseCountsReady ? null : filtered.filter((m) => !responseCounts[m.id]).length,
+    // Lot ADM16 (lot A E3) : seuls les besoins encore ouverts attendent une réponse.
+    noResponse: !listOk || responseError || !responseCountsReady ? null : filtered.filter((m) => m.status === "open" && !responseCounts[m.id]).length,
     notified: listOk && notifiedCounts ? filtered.reduce((a, m) => a + (notifiedCounts[m.id] || 0), 0) : null,
     zeroReach: listOk && notifiedCounts ? filtered.filter((m) => !notifiedCounts[m.id]).length : null,
   };
@@ -495,11 +521,13 @@ const AdminSmallMissions = () => {
 
       {tab === "projets" && (
         <div className="space-y-4">
+          {projetKpisError && <ErrorState detail="Indicateurs des projets" onRetry={() => setProjetNonce((n) => n + 1)} />}
+          {!projetKpisError && (<>
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
             <Card><CardContent className="p-4">
               <p className="text-xs text-muted-foreground">Projets publiés</p>
-              <p className="text-2xl font-bold tabular-nums">{projetKpis?.published ?? 0}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{projetKpis?.open ?? 0} ouverts</p>
+              <p className="text-2xl font-bold tabular-nums">{projetKpis ? projetKpis.published : "…"}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{projetKpis ? `${projetKpis.open} ouverts` : ""}</p>
             </CardContent></Card>
             <Card><CardContent className="p-4">
               <p className="text-xs text-muted-foreground" title="Médiane des candidatures reçues par projet">Candidatures par projet, médiane</p>
@@ -517,21 +545,23 @@ const AdminSmallMissions = () => {
             </CardContent></Card>
             <Card><CardContent className="p-4">
               <p className="text-xs text-muted-foreground" title="Projets clôturés avec au moins une candidature acceptée">Taux de projets pourvus</p>
-              <p className="text-2xl font-bold tabular-nums">{projetFilled != null ? `${projetFilled}%` : "·"}</p>
+              <p className="text-2xl font-bold tabular-nums">{projetFilled != null ? `${projetFilled}%` : projetKpis ? "·" : "…"}</p>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                {projetKpis?.closed_filled ?? 0} sur {projetKpis?.closed_count ?? 0} clôturés
+                {projetKpis ? `${projetKpis.closed_filled} sur ${projetKpis.closed_count} clôturés` : ""}
               </p>
             </CardContent></Card>
             <Card className="border-primary/40"><CardContent className="p-4">
               <p className="text-xs text-muted-foreground" title="Membres ayant candidaté à une garde et à un projet">Gardes et projets, mêmes membres</p>
-              <p className="text-2xl font-bold tabular-nums">{projetKpis?.cross_members ?? 0}</p>
+              <p className="text-2xl font-bold tabular-nums">{projetKpis ? projetKpis.cross_members : "…"}</p>
             </CardContent></Card>
           </div>
 
           <Card className={((projetKpis?.zero_response_14d?.length ?? 0) > 0) ? "border-warning-border bg-warning-soft" : undefined}>
             <CardContent className="p-4 space-y-2">
               <p className="text-xs text-muted-foreground">Projets sans candidature après 14 jours</p>
-              {(projetKpis?.zero_response_14d?.length ?? 0) === 0 ? (
+              {!projetKpis ? (
+                <p className="text-sm text-muted-foreground">Lecture en cours…</p>
+              ) : (projetKpis.zero_response_14d?.length ?? 0) === 0 ? (
                 <p className="text-sm text-muted-foreground">Tous les projets ouverts ont reçu au moins une candidature.</p>
               ) : (
                 <ul className="space-y-1">
@@ -552,6 +582,7 @@ const AdminSmallMissions = () => {
                 </ul>
               )}
             </CardContent></Card>
+          </>)}
 
           {pendingProjets.length > 0 && (
             <Card>
@@ -598,7 +629,7 @@ const AdminSmallMissions = () => {
             { label: "Publications affichées", value: kpiValue(shownKpis.total) },
             { label: "Ouvertes", value: kpiValue(shownKpis.open) },
             { label: "Réponses reçues", value: kpiValue(shownKpis.responses) },
-            { label: "Sans réponse", value: kpiValue(shownKpis.noResponse) },
+            { label: "Ouverts sans réponse", value: kpiValue(shownKpis.noResponse) },
             { label: "Personnes notifiées (somme par publication)", value: kpiValue(shownKpis.notified) },
             { label: "Sans envoi réussi enregistré", value: kpiValue(shownKpis.zeroReach) },
           ].map((k) => (
@@ -617,6 +648,14 @@ const AdminSmallMissions = () => {
       {notifiedError && <ErrorState detail={`Notifiés : ${notifiedError}`} onRetry={() => setNotifiedNonce((n) => n + 1)} />}
       {responseError && <ErrorState detail={`Réponses : ${responseError}`} onRetry={() => setResponseNonce((n) => n + 1)} />}
       {loadError && <ErrorState detail={`Liste : ${loadError}`} onRetry={fetchMissions} />}
+      {focusMissionId && (
+        <UrlFilterNotice
+          label="Filtré sur un besoin"
+          notFound={!loading && !loadError && filtered.length === 0}
+          notFoundText={tab === "projets" ? "Ce besoin se trouve dans l'onglet Entraide, ou a été supprimé." : "Ce besoin se trouve dans l'onglet Projets, ou a été supprimé."}
+          onClear={clearFocusMission}
+        />
+      )}
 
       {suspectMissions.length > 0 && (
         <Card className="border-warning-border bg-warning-soft">

@@ -260,7 +260,8 @@ describe("la liste : « Voir » sur chaque ligne", () => {
     const lines = await screen.findAllByTestId("pilotage-line");
     expect(lines).toHaveLength(LINES);
     for (const l of lines) {
-      const buttons = [...l.querySelectorAll("button, a")];
+      // Lot ADM16 : les liens des éléments nommés s'ajoutent, le bouton reste « Voir ».
+      const buttons = [...l.querySelectorAll("button, a")].filter((b) => !b.closest('[data-testid="pilotage-elements"]'));
       expect(buttons.map((b) => b.textContent)).toEqual(["Voir"]);
     }
     expect(screen.getByTestId("pilotage-count").textContent).toBe(`${LINES} choses à faire`);
