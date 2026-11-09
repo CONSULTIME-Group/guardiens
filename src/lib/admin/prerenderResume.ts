@@ -53,6 +53,8 @@ export function formatParisDay(d: Date): string {
   return new Intl.DateTimeFormat("fr-FR", { timeZone: PARIS, day: "2-digit", month: "2-digit", year: "numeric" }).format(d);
 }
 
+const fmtCount = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
+
 export interface PrerenderResumeInput {
   okRendersInCycle: number;
   cycleStart: Date;
@@ -65,7 +67,7 @@ export function prerenderResumeSentence({ okRendersInCycle, cycleStart, nextCycl
   const pages = `${backlog} page${backlog > 1 ? "s" : ""} en attente de rendu`;
   const since = `depuis le ${formatParisDay(cycleStart)}`;
   if (okRendersInCycle < CONSUMER_RENDER_CEILING) {
-    return `Rendu actif : ${okRendersInCycle} rendus ${since} (plafond ${CONSUMER_RENDER_CEILING}), ${pages}.`;
+    return `Rendu actif : ${fmtCount(okRendersInCycle)} rendus ${since} (plafond ${fmtCount(CONSUMER_RENDER_CEILING)}), ${pages}.`;
   }
-  return `Plafond atteint : ${okRendersInCycle} rendus ${since} (plafond ${CONSUMER_RENDER_CEILING}), reprise le ${formatParisDay(nextCycleStart)}, ${pages}.`;
+  return `${fmtCount(okRendersInCycle)} rendus ${since} (plafond ${fmtCount(CONSUMER_RENDER_CEILING)}), reprise le ${formatParisDay(nextCycleStart)}, ${pages}.`;
 }

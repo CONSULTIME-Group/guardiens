@@ -130,7 +130,7 @@ describe("pastilles du menu", () => {
 
 describe("nurturing : vrais échecs seulement", () => {
   it("plafond, désinscription, adresse bloquée, compte suspendu, saut : écarts voulus", () => {
-    for (const reason of ["frequency_capped", "skipped_unsubscribed_category", "skipped_email_suppressed", "skipped_account_suspended", "skip_condition_met"]) {
+    for (const reason of ["frequency_capped", "skipped_unsubscribed_category", "skipped_email_suppressed", "skipped_account_suspended", "skip_condition_met", "skipped_sit_not_published", "already_sent_other_path", "owner_never_published"]) {
       expect(nurturingOutcome({ sent: false, reason })).toBe("skipped");
       expect(isNurturingFailure({ sent: false, reason })).toBe(false);
     }
@@ -154,6 +154,7 @@ describe("nurturing : vrais échecs seulement", () => {
 
 describe("signal d'entraide déclaré", () => {
   it("mission_no_audience a un libellé et revient aux fondateurs", () => {
+    expect(read("src/lib/admin/pilotage.ts")).toContain("tout le monde à 30 km a été prévenu");
     expect(SIGNAL_TYPES.mission_no_audience?.label).toBe("Coup de main sans personne de plus à prévenir à 30 km");
     expect(signalNature("mission_no_audience")).toBe("vous");
   });

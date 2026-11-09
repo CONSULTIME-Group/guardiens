@@ -1407,11 +1407,11 @@ const AdminNurturing = () => {
             <div className="grid gap-4 md:grid-cols-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Motifs de non-envoi</CardTitle>
+                  <CardTitle>Étapes écartées ou en échec, par motif</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {reasonBreakdown.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-8 text-center">Aucun échec sur la période.</p>
+                    <p className="text-sm text-muted-foreground py-8 text-center">Toutes les étapes de la période sont parties.</p>
                   ) : (
                     <Table>
                       <TableHeader>
@@ -1521,7 +1521,7 @@ const AdminNurturing = () => {
               </CardHeader>
               <CardContent className="overflow-x-auto">
                 {recentFailures.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-8 text-center">Aucun échec sur la période.</p>
+                  <p className="text-sm text-muted-foreground py-8 text-center">Tous les envois de la période ont abouti ou ont été écartés volontairement.</p>
                 ) : (
                   <Table>
                     <TableHeader>

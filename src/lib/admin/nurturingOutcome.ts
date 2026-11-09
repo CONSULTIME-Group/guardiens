@@ -18,12 +18,17 @@ export const VOLUNTARY_SKIP_REASONS: ReadonlySet<string> = new Set([
   "skipped_account_suspended",
   "skipped_ttl_exceeded",
   "user_unsubscribed",
+  "already_sent_other_path",
+  "owner_never_published",
 ]);
+
+/** Motifs de saut écrits par evaluate-journeys et journey-defer (préfixe « skipped_ »). */
+export const VOLUNTARY_SKIP_PREFIX = "skipped_";
 
 export function nurturingOutcome(l: { sent: boolean; reason: string | null | undefined }): NurturingOutcome {
   if (l.sent) return "sent";
   if (l.reason === "exit_condition_met") return "exited";
-  if (l.reason && VOLUNTARY_SKIP_REASONS.has(l.reason)) return "skipped";
+  if (l.reason && (VOLUNTARY_SKIP_REASONS.has(l.reason) || l.reason.startsWith(VOLUNTARY_SKIP_PREFIX))) return "skipped";
   return "failed";
 }
 
@@ -48,6 +53,8 @@ export const NURTURING_REASON_LABELS: Record<string, string> = {
   template_not_found: "Modèle introuvable",
   user_unsubscribed: "Désinscrit",
   user_not_found: "Utilisateur introuvable",
+  already_sent_other_path: "Déjà envoyé par une autre voie",
+  owner_never_published: "Propriétaire sans annonce publiée",
   unknown: "Raison inconnue",
 };
 
@@ -56,5 +63,6 @@ export function nurturingReasonLabel(reason: string | null | undefined): string 
   if (NURTURING_REASON_LABELS[reason]) return NURTURING_REASON_LABELS[reason];
   if (reason.startsWith("send_transient_failure")) return "Échec passager à l'envoi";
   if (reason.startsWith("send_failed")) return "Échec d'envoi";
+  if (reason.startsWith(VOLUNTARY_SKIP_PREFIX)) return "Étape sautée";
   return "Autre motif";
 }

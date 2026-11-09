@@ -189,6 +189,7 @@ DECLARE
   v_cron jsonb;
   v_bad_tasks text[];
   v_unmonitored text[];
+  v_task_items text[];
   v_tasks jsonb;
   v_email jsonb;
   v_ia jsonb;
@@ -234,22 +235,23 @@ BEGIN
     ) t
    WHERE t.status = 'failed'
      AND NOT EXISTS (SELECT 1 FROM jsonb_array_elements(v_cron) x WHERE x->>'edge_name' = t.edge_name);
+  v_task_items := v_bad_tasks || CASE WHEN cardinality(v_unmonitored) > 0
+                                      THEN ARRAY[format('%s tâche(s) technique(s) hors carte', cardinality(v_unmonitored))]
+                                      ELSE '{}'::text[] END;
   v_tasks := jsonb_build_object(
     'key', 'tasks', 'label', 'Tâches planifiées',
-    'state', CASE WHEN cardinality(v_bad_tasks) + cardinality(v_unmonitored) > 0 THEN 'alert' ELSE 'ok' END,
-    'detail', CASE WHEN cardinality(v_bad_tasks) + cardinality(v_unmonitored) > 0
+    'state', CASE WHEN cardinality(v_task_items) > 0 THEN 'alert' ELSE 'ok' END,
+    'detail', CASE WHEN cardinality(v_task_items) > 0
       THEN 'Dernier passage en échec ou en retard : '
-           || array_to_string((v_bad_tasks || CASE WHEN cardinality(v_unmonitored) > 0
-                                                   THEN ARRAY[format('%s tâche(s) technique(s) non suivie(s)', cardinality(v_unmonitored))]
-                                                   ELSE '{}'::text[] END)[1:3], ', ')
-           || CASE WHEN cardinality(v_bad_tasks) > 3
-                   THEN format(' et %s autre(s)', cardinality(v_bad_tasks) - 3) ELSE '' END
+           || array_to_string(v_task_items[1:3], ', ')
+           || CASE WHEN cardinality(v_task_items) > 3
+                   THEN format(' et %s autre(s)', cardinality(v_task_items) - 3) ELSE '' END
       ELSE format('%s tâches suivies, dernier passage réussi pour chacune', jsonb_array_length(v_cron)) END,
     'link', '/admin?plus=taches');
 
   -- Emails : la file des récapitulatifs se vide jusqu'à 13 h ; son signal ne
-  -- compte qu'après 14 h le jour où il est levé, et se ferme quand la file
-  -- est vide (auto_resolve_admin_signals).
+  -- compte qu'après 14 h le jour où il est levé, et seulement tant que des
+  -- lignes d'avant le signal attendent encore (même règle que sa fermeture).
   SELECT * INTO h FROM public.email_pipeline_health LIMIT 1;
   IF h.stuck_rate_limit IS TRUE THEN v_email_bad := array_append(v_email_bad, 'envois bloqués par la limite de débit'); END IF;
   IF coalesce(h.dlq_last_hour, 0) > 0 THEN v_email_bad := array_append(v_email_bad, format('%s envoi(s) abandonné(s) depuis une heure', h.dlq_last_hour)); END IF;
@@ -259,7 +261,7 @@ BEGIN
            WHEN 'email_delivery_low' THEN 'livraison des emails dégradée'
            WHEN 'email_queue_failures' THEN 'échecs dans la file d''envoi'
            WHEN 'digest_queue_stalled' THEN 'file des récapitulatifs bloquée'
-           WHEN 'digest_queue_morning_backlog' THEN 'récapitulatifs gardiens non partis à 14 h'
+           WHEN 'digest_queue_morning_backlog' THEN 'récapitulatifs gardiens encore en file après 14 h'
            WHEN 'email_recipient_address_invalid' THEN 'adresse de membre refusée par le fournisseur'
          END), '{}')
     INTO v_signal_titles
@@ -269,7 +271,11 @@ BEGIN
                            'digest_queue_morning_backlog', 'email_recipient_address_invalid')
      AND NOT (s.signal_type = 'digest_queue_morning_backlog'
               AND (s.detected_at AT TIME ZONE 'Europe/Paris')::date = v_paris::date
-              AND v_paris::time < time '14:00');
+              AND v_paris::time < time '14:00')
+     AND NOT (s.signal_type = 'digest_queue_morning_backlog'
+              AND NOT EXISTS (
+                SELECT 1 FROM public.sitter_digest_queue q
+                WHERE q.status = 'queued' AND (q.queued_at IS NULL OR q.queued_at <= s.detected_at)));
   v_email_bad := v_email_bad || v_signal_titles;
   v_email := jsonb_build_object(
     'key', 'emails', 'label', 'Emails',
@@ -304,10 +310,13 @@ BEGIN
   v_seo := jsonb_build_object(
     'key', 'seo', 'label', 'Rendu SEO',
     'state', CASE WHEN v_renders >= 9900 AND v_allowance <= 0 THEN 'alert' ELSE 'ok' END,
-    'detail', CASE WHEN v_renders >= 9900 AND v_allowance <= 0
-      THEN format('Plafond du mois atteint (%s rendus depuis le %s) : les robots reçoivent des pages anciennes jusqu''au %s',
-                  v_renders, to_char(v_cycle_local, 'DD/MM'), to_char(v_next_cycle AT TIME ZONE 'Europe/Paris', 'DD/MM'))
-      ELSE format('Rendu actif : %s rendus sur 9 900 depuis le %s', v_renders, to_char(v_cycle_local, 'DD/MM')) END,
+    'detail', CASE
+      WHEN v_renders >= 9900 AND v_allowance <= 0
+        THEN format('Plafond du mois atteint : les robots reçoivent des pages anciennes jusqu''au %s',
+                    to_char(v_next_cycle AT TIME ZONE 'Europe/Paris', 'DD/MM'))
+      WHEN v_renders >= 9900
+        THEN format('Rendu actif sur la rallonge : %s rendus restants', replace(to_char(v_allowance, 'FM999G999'), ',', ' '))
+      ELSE format('Rendu actif : %s rendus sur 9 900 depuis le %s', replace(to_char(v_renders, 'FM999G999'), ',', ' '), to_char(v_cycle_local, 'DD/MM')) END,
     'link', '/admin/prerender');
 
   SELECT count(*) INTO v_new_errors FROM public.error_logs e
@@ -353,5 +362,13 @@ GRANT EXECUTE ON FUNCTION public.admin_menu_badges() TO authenticated;
 REVOKE ALL ON FUNCTION public.detect_stale_sits() FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.detect_stale_sits() TO service_role;
 
--- 6. Refermer tout de suite ce que la cause ne justifie plus.
+-- 6. Fermeture chaque heure : seul l'email du matin la lançait (06 h 35), un
+--    signal dont la cause avait disparu restait ouvert jusqu'au lendemain.
+SELECT cron.schedule(
+  'admin-signals-auto-resolve-hourly',
+  '20 * * * *',
+  $cmd$SELECT public.auto_resolve_admin_signals();$cmd$
+);
+
+-- 7. Refermer tout de suite ce que la cause ne justifie plus.
 SELECT * FROM public.auto_resolve_admin_signals();

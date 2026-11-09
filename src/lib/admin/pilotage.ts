@@ -141,7 +141,7 @@ function vousCopy(type: string, k: number): { title: string; action: string } {
     case "animal_rehoming_listing":
       return { title: `Vérifier ${k} ${n(k, "annonce de cession d'animal", "annonces de cession d'animal")}`, action: "Vérifier" };
     case "mission_no_audience":
-      return { title: `Relayer ${k} ${n(k, "coup de main", "coups de main")} : plus personne de nouveau à prévenir à 30 km`, action: "Ouvrir" };
+      return { title: `Relayer ${k} ${n(k, "coup de main", "coups de main")} : tout le monde à 30 km a été prévenu`, action: "Ouvrir" };
     case "no_applications":
       return { title: `Diffuser ${k} ${n(k, "annonce sans candidature", "annonces sans candidature")} après 48 heures`, action: "Diffuser" };
     case "identity_needs_review":

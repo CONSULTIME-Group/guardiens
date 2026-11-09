@@ -90,10 +90,12 @@ describe("reprise sur le cycle Prerender (lot ADM12, cycle du lot PR3)", () => {
   it("phrase lisible, sous et au plafond", () => {
     const cycleStart = new Date("2026-11-03T23:00:00Z");
     const nextCycleStart = new Date("2026-12-03T23:00:00Z");
-    expect(prerenderResumeSentence({ okRendersInCycle: 1969, cycleStart, nextCycleStart, backlog: 0 }))
-      .toBe("Rendu actif : 1969 rendus depuis le 04/11/2026 (plafond 9900), 0 page en attente de rendu.");
-    expect(prerenderResumeSentence({ okRendersInCycle: CONSUMER_RENDER_CEILING, cycleStart, nextCycleStart, backlog: 498 }))
-      .toBe("Plafond atteint : 9900 rendus depuis le 04/11/2026 (plafond 9900), reprise le 04/12/2026, 498 pages en attente de rendu.");
+    const sp = (t: string) => t.replace(/[\u202f\u00a0]/g, " ");
+    expect(sp(prerenderResumeSentence({ okRendersInCycle: 1969, cycleStart, nextCycleStart, backlog: 0 })))
+      .toBe("Rendu actif : 1 969 rendus depuis le 04/11/2026 (plafond 9 900), 0 page en attente de rendu.");
+    // Au plafond, le voyant dit déjà « plafond atteint » : la ligne donne les chiffres et la reprise.
+    expect(sp(prerenderResumeSentence({ okRendersInCycle: CONSUMER_RENDER_CEILING, cycleStart, nextCycleStart, backlog: 498 })))
+      .toBe("9 900 rendus depuis le 04/11/2026 (plafond 9 900), reprise le 04/12/2026, 498 pages en attente de rendu.");
   });
 
   it("Vue d'ensemble : la ligne s'affiche sous le voyant rouge, refus exclus de la lecture", async () => {
@@ -104,7 +106,7 @@ describe("reprise sur le cycle Prerender (lot ADM12, cycle du lot PR3)", () => {
       </QueryClientProvider>,
     );
     const line = await screen.findByTestId("prerender-resume");
-    expect(line.textContent).toContain("Plafond atteint : 18970 rendus depuis le");
+    expect(line.textContent!.replace(/[\u202f\u00a0]/g, " ")).toContain("18 970 rendus depuis le");
     expect(line.textContent).toContain("480 pages en attente de rendu");
     const logReads = calls.list.filter((c) => c.table === "prerender_recache_log");
     expect(logReads.length).toBe(1);

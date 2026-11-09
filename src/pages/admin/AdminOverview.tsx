@@ -20,7 +20,10 @@ const TrendsPanel = lazy(() => import("./_components/dashboard/TrendsPanel"), "T
 const MoreContent = ({ focusCrons = false }: { focusCrons?: boolean }) => {
   const cronsRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (focusCrons) cronsRef.current?.scrollIntoView?.({ block: "start", behavior: "smooth" });
+    if (!focusCrons) return;
+    // Après l'animation d'ouverture du bloc replié.
+    const t = window.setTimeout(() => cronsRef.current?.scrollIntoView?.({ block: "start", behavior: "smooth" }), 350);
+    return () => window.clearTimeout(t);
   }, [focusCrons]);
   const keyFigures = useKeyFigures();
   const activity = useRecentActivity();

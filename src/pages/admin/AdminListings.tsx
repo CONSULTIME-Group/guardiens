@@ -297,7 +297,7 @@ const AdminListings = () => {
       if (error) {
         console.error("admin_get_listings_stats:", error);
         setStats({});
-        setStatsError("Statistiques des annonces indisponibles : le filtre « Sans candidature » et les compteurs ne sont pas affichés.");
+        setStatsError("Statistiques des annonces indisponibles : le filtre « Sans candidature depuis 48 h » et les compteurs ne sont pas affichés.");
         return;
       }
       const map: Record<string, Stats> = {};
