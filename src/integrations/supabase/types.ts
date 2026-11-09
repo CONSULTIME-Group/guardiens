@@ -10229,6 +10229,7 @@ export type Database = {
           decline_reason: string | null
           decline_variant: number | null
           declined_at: string | null
+          guide_read_at: string | null
           id: string
           message: string | null
           pricing_flag: boolean
@@ -10242,6 +10243,7 @@ export type Database = {
           decline_reason?: string | null
           decline_variant?: number | null
           declined_at?: string | null
+          guide_read_at?: string | null
           id?: string
           message?: string | null
           pricing_flag?: boolean
@@ -10255,6 +10257,7 @@ export type Database = {
           decline_reason?: string | null
           decline_variant?: number | null
           declined_at?: string | null
+          guide_read_at?: string | null
           id?: string
           message?: string | null
           pricing_flag?: boolean
@@ -20716,6 +20719,10 @@ export type Database = {
       looks_like_pricing: { Args: { txt: string }; Returns: boolean }
       mark_application_viewed: {
         Args: { p_application_id: string }
+        Returns: boolean
+      }
+      mark_house_guide_read: {
+        Args: { p_property_id: string }
         Returns: boolean
       }
       mark_mission_choose_prompt_sent: {
