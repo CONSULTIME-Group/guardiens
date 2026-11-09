@@ -113,7 +113,7 @@ import {
   isQuietAt,
   nextQuietEndFrom,
 } from '../_shared/email-cap.ts'
-import { applicationDeepLinkPath } from '../_shared/application-page.ts'
+import { applicationDeepLinkPath, withApplicationIdFromKey } from '../_shared/application-page.ts'
 
 
 // Alma persona (Pass 3 C2) : liste des templates signés visuellement par Alma
@@ -283,6 +283,8 @@ Deno.serve(async (req) => {
       // Only the server can create provenance; it is never a template prop.
       delete templateData[EMAIL_ORIGIN_FIELD]
     }
+    // Lot L6b : la candidature des emails de candidature, lue dans la clé d'envoi.
+    templateData = withApplicationIdFromKey(templateName, templateData, idempotencyKey)
     if (body.logMetadata && typeof body.logMetadata === 'object') {
       logMetadata = body.logMetadata
     }

@@ -6,7 +6,7 @@ import { render, screen, fireEvent, cleanup, waitFor } from "@testing-library/re
 import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { readFileSync } from "node:fs";
-import { applicationDeepLinkPath, applicationPagePath } from "../../../supabase/functions/_shared/application-page.ts";
+import { applicationDeepLinkPath, applicationPagePath, withApplicationIdFromKey } from "../../../supabase/functions/_shared/application-page.ts";
 import { KIND_DECLINE_MESSAGES } from "@/lib/applicationDecline";
 import { afterReplyTarget, noticeFirstName, REPLIED_PARAM } from "@/lib/afterPublish";
 import { resolveOwnerStory } from "@/lib/dashboardStory";
@@ -69,15 +69,33 @@ describe("L6, liens vers la page d'une candidature", () => {
     expect(applicationDeepLinkPath("new-message", APP_ID)).toBeNull();
   });
 
-  it("migration 0120 : notification vers la page, applicationId dans l'email, lecture marquée", () => {
+  it("migration 0120 : lien de notification réécrit par déclencheur, sans le coffre, lecture marquée", () => {
     const sql = readFileSync("drizzle/migrations/0120_l6_candidature_recue.sql", "utf8");
-    expect(sql.match(/'\/candidatures\/' \|\|/g)?.length).toBe(2);
-    expect(sql).not.toContain("'#candidatures'");
-    expect(sql).toContain("'applicationId', NEW.id");
+    // L'outil de migration refuse tout texte qui cite le coffre des secrets.
+    expect(sql).not.toMatch(/vault/i);
+    expect(sql).not.toContain("FUNCTION public.notify_new_application");
+    expect(sql).toContain("NEW.link := '/candidatures/' || v_app_id::text;");
+    expect(sql).toContain("AND a.created_at = now()");
+    expect(sql).toContain("IF v_count = 1 AND v_app_id IS NOT NULL THEN");
+    expect(sql).toMatch(/CREATE TRIGGER trg_notification_application_page_link\s+BEFORE INSERT ON public\.notifications/);
+    expect(sql).toContain("REVOKE EXECUTE ON FUNCTION public.notification_application_page_link() FROM PUBLIC, anon, authenticated;");
     expect(sql).toContain("FUNCTION public.mark_application_viewed(p_application_id uuid)");
     expect(sql).toContain("REVOKE EXECUTE ON FUNCTION public.mark_application_viewed(uuid) FROM PUBLIC, anon, authenticated;");
     const contracts = JSON.parse(readFileSync("scripts/db/production-contracts.json", "utf8"));
-    expect(contracts.contracts.some((c: any) => c.migration === "0120_l6_candidature_recue.sql")).toBe(true);
+    const c = contracts.contracts.find((x: any) => x.migration === "0120_l6_candidature_recue.sql");
+    expect(c.checks.map((k: any) => k.name)).toEqual(["new_application_link_to_application_page", "mark_application_viewed_owner_only"]);
+    expect(c.checks[0].sql).toContain("trg_notification_application_page_link");
+  });
+
+  it("email de candidature : l'identifiant vient de la clé d'envoi", () => {
+    const k = `new-application-${APP_ID}`;
+    expect(withApplicationIdFromKey("new-application", { a: 1 }, k)).toEqual({ a: 1, applicationId: APP_ID });
+    expect(withApplicationIdFromKey("first-application-received", {}, `first-application-${APP_ID}`)).toEqual({ applicationId: APP_ID });
+    const other = "11111111-2222-4333-8444-555555555555";
+    expect(withApplicationIdFromKey("new-application", { applicationId: other }, k)).toEqual({ applicationId: other });
+    expect(withApplicationIdFromKey("new-message", {}, k)).toEqual({});
+    expect(withApplicationIdFromKey("new-application", {}, "new-application-x")).toEqual({});
+    expect(withApplicationIdFromKey("new-application", {}, undefined)).toEqual({});
   });
 
   it("le récit mène à la candidature à lire", () => {
