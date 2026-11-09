@@ -72,7 +72,8 @@ export function ConversationsTab({ since }: { since: string }) {
       // Lot J3 : seules les réponses qui proposent une action comptent, et
       // l'action compte seulement si la personne ouvre ce chemin ou publie,
       // postule, répond (alma_answer_acted, via admin_alma_action_rate).
-      const days = Math.max(1, Math.ceil((Date.now() - new Date(since).getTime()) / 86_400_000));
+      // Lot ADM17 (lot B G1) : la période choisie, sans jour de plus (30 et non 31).
+      const days = Math.max(1, Math.round((Date.now() - new Date(since).getTime()) / 86_400_000));
       const { data, error } = await supabase.rpc("admin_alma_action_rate" as any, { p_days: days });
       if (error) { reportAdminReadError("Alma : réponses suivies d'une action", error); throw error; }
       return measureActionFollowUp((data ?? []) as ActionRateRow[]);

@@ -193,7 +193,8 @@ function BubblesTab({ since, range }: { since: string; range: Range }) {
 
   const kpis = useMemo(() => kpisFromCounts(bubble ?? { unique_7d: 0, unique_30d: 0, by_type: [] }), [bubble]);
   const moments = useMemo(() => momentsFromCounts(bubble?.by_type ?? []), [bubble]);
-  const show = (v: number | string) => (isError ? UNAVAILABLE_LABEL : v);
+  // Lot ADM17 (lot B G3) : « … » pendant la lecture, jamais 0.
+  const show = (v: number | string) => (isError ? UNAVAILABLE_LABEL : isLoading ? "…" : v);
 
   const onExport = () => {
     void trackEvent("admin_alma_export_csv_clicked", {
@@ -287,6 +288,15 @@ function BubblesTab({ since, range }: { since: string; range: Range }) {
 }
 
 /* ══════════════════════════ Onglet Whispers ══════════════════════════ */
+
+/**
+ * Lot ADM17 (lot B G4) : sans aucun clic d'action enregistré sur la période,
+ * le taux n'est pas une mesure (0 clic depuis le 18/09/2026 pour des milliers
+ * d'émissions) : « Non mesuré » plutôt que « 0,0 % ».
+ */
+export function whisperActionMeasured(t: { emitted: number; actionRate: number }): boolean {
+  return t.emitted === 0 || t.actionRate > 0;
+}
 
 function WhispersTab({ since, range }: { since: string; range: Range }) {
   const { data: whisperRows = [], isLoading, isError: whispersError } = useQuery({
@@ -386,7 +396,10 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <KpiCard label="Murmures émis" value={whispersError ? UNAVAILABLE_LABEL : totals.emitted} />
-        <KpiCard label="Taux d'action" value={whispersError ? UNAVAILABLE_LABEL : fmtPct(totals.actionRate)} />
+        <KpiCard
+          label="Taux d'action"
+          value={whispersError ? UNAVAILABLE_LABEL : isLoading ? "…" : whisperActionMeasured(totals) ? fmtPct(totals.actionRate) : "Non mesuré"}
+        />
         <KpiCard label="Taux de rejet" value={whispersError ? UNAVAILABLE_LABEL : fmtPct(totals.dismissRate)} />
         <KpiCard label="Personnes qui ont coupé ce type" value={whispersError ? UNAVAILABLE_LABEL : totals.blacklisted} />
       </div>

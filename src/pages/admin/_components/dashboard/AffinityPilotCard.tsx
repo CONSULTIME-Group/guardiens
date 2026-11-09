@@ -1,4 +1,5 @@
-import { EmptyState } from "@/components/admin/ui";
+import { EmptyState, ErrorState } from "@/components/admin/ui";
+import { reportAdminReadError } from "@/lib/admin/readError";
 import { adminLabel, SURFACE_LABELS, reasonLabel } from "@/lib/admin/labels";
 /**
  * Carte admin : pilotage du score d'affinité.
@@ -93,9 +94,14 @@ export function computeAffinityStats(data: Array<{ metadata: unknown }>): Omit<S
 export const AffinityPilotCard = () => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+  // Lot ADM17 (lot C AF1) : lecture en échec dite, jamais « Aucune donnée ».
+  const [loadError, setLoadError] = useState(false);
+  const [nonce, setNonce] = useState(0);
 
   useEffect(() => {
     const load = async () => {
+      setLoading(true);
+      setLoadError(false);
       const since = new Date();
       since.setDate(since.getDate() - 30);
       try {
@@ -111,13 +117,15 @@ export const AffinityPilotCard = () => {
             .range(from, to),
         );
         setStats({ ...computeAffinityStats(rows), partial: truncated });
-      } catch {
-        setStats({ total: 0, displayed: 0, hidden: 0, missing: 0, buckets: [], byContext: [], hiddenReasons: [], partial: false });
+      } catch (e) {
+        reportAdminReadError("Affinité : lecture", e);
+        setLoadError(true);
+        setStats(null);
       }
       setLoading(false);
     };
     void load();
-  }, []);
+  }, [nonce]);
 
   if (loading) {
     return (
@@ -127,6 +135,19 @@ export const AffinityPilotCard = () => {
         </CardHeader>
         <CardContent>
           <Skeleton className="h-32 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Pilotage du score d'affinité (30 j)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ErrorState detail="Affichages du score d'affinité" onRetry={() => setNonce((n) => n + 1)} />
         </CardContent>
       </Card>
     );

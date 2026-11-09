@@ -1,6 +1,8 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { NOT_DELETED_FILTER } from "./_components/dashboard/useDashboardData";
+import { trafficWindow } from "@/lib/admin/trafficWindow";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, TrendingUp, TrendingDown, Users, MousePointerClick, AlertCircle, Filter } from "lucide-react";
@@ -28,7 +30,7 @@ interface DailyStat {
 
 // Étapes du funnel d'activation (ordre = entonnoir)
 const FUNNEL_STEPS = [
-  { key: "signup_started", label: "1. Visite /inscription" },
+  { key: "signup_started", label: "1. Inscription démarrée" },
   { key: "signup_role_selected", label: "2. Rôle choisi" },
   { key: "signup_form_submitted", label: "3. Formulaire envoyé" },
   { key: "signup_email_confirmed", label: "4. Email confirmé" },
@@ -48,6 +50,12 @@ const ROLE_AGNOSTIC_EVENTS = new Set([
   "fb_referral_feedback",
   "fb_referral_dismissed",
 ]);
+
+/**
+ * Lot ADM17 (lot B H3) : le tableau par rôle ne montre que les étapes qui
+ * portent le rôle (metadata.role) ; les autres valaient toujours 0.
+ */
+const ROLE_TABLE_STEPS = FUNNEL_STEPS.filter((s) => !ROLE_AGNOSTIC_EVENTS.has(s.key) && s.key !== "first_action");
 
 interface FunnelCounts { [key: string]: number; }
 interface TopPage { path: string; views: number; }
@@ -79,10 +87,10 @@ const AdminAnalytics = () => {
       setError(null);
 
       // Fenêtres temporelles cohérentes : [since, until[ et [sincePrev, since[
+      // Lot ADM17 (lot B H1, F1) : fenêtre glissante (7 jours = 168 h), la même
+      // que l'entonnoir d'inscription, Utilisateurs et la vue d'ensemble.
       const now = new Date();
-      const until = now;
-      const since = startOfDay(subDays(now, range - 1));
-      const sincePrev = startOfDay(subDays(since, range));
+      const { since, until, sincePrev } = trafficWindow(range, now);
       // Pour le filtre rôle envoyé en RPC : on n'envoie le rôle que pour les
       // events role-aware. Pour les role-agnostic, on calcule sans filtre.
       const rpcRole = roleFilter === "all" ? null : roleFilter;
@@ -94,6 +102,7 @@ const AdminAnalytics = () => {
           supabase
             .from("profiles")
             .select("id, created_at, role")
+            .or(NOT_DELETED_FILTER)
             .gte("created_at", since.toISOString())
             .lt("created_at", until.toISOString())
             .order("id")
@@ -243,7 +252,7 @@ const AdminAnalytics = () => {
 
         // Daily : compléter les jours sans events à 0 + ajouter inscrits
         const dayMap = new Map<string, DailyStat>();
-        for (let i = 0; i < range; i++) {
+        for (let i = 0; i <= range; i++) {
           const d = format(subDays(now, i), "yyyy-MM-dd");
           dayMap.set(d, { jour: d, inscrits: 0, page_views: 0, signup_started: 0, signup_completed: 0 });
         }
@@ -318,7 +327,7 @@ const AdminAnalytics = () => {
       "hsl(var(--primary))",
     ];
     return [
-      { etape: "1. Visite /inscription", count: funnelCounts.signup_started || 0, color: colors[0] },
+      { etape: "1. Inscription démarrée", count: funnelCounts.signup_started || 0, color: colors[0] },
       { etape: "2. Rôle choisi", count: funnelCounts.signup_role_selected || 0, color: colors[1] },
       { etape: "3. Formulaire envoyé", count: funnelCounts.signup_form_submitted || 0, color: colors[2] },
       { etape: "4. Compte créé (réel)", count: totalInscrits, color: colors[3] },
@@ -356,7 +365,7 @@ const AdminAnalytics = () => {
 
       {(() => {
         // Lot ADM6 : la période comparée chevauche la rupture de mesure du 14/10.
-        const notice = measureBreakNotice(startOfDay(subDays(startOfDay(subDays(new Date(), range - 1)), range)));
+        const notice = measureBreakNotice(trafficWindow(range, new Date()).sincePrev);
         return notice ? (
           <p className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-foreground" data-testid="measure-break-notice">
             {notice}
@@ -405,7 +414,7 @@ const AdminAnalytics = () => {
               value={totalInscrits}
               delta={null}
               icon={Users}
-              hint="Source : table profiles"
+              hint={range === 1 ? "Comptes non supprimés, 24 dernières heures" : `Comptes non supprimés, ${range} derniers jours glissants`}
             />
             <StatCard
               label="Pages vues"
@@ -491,7 +500,7 @@ const AdminAnalytics = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {FUNNEL_STEPS.map((s) => (
+                      {ROLE_TABLE_STEPS.map((s) => (
                         <tr key={s.key} className="border-b border-border last:border-0">
                           <td className="py-2 text-foreground">{s.label}</td>
                           <td className="text-right py-2 tabular-nums">{stepDropoffByRole.owner?.[s.key] || 0}</td>

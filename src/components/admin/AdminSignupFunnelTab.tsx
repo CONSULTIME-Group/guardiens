@@ -168,7 +168,7 @@ export default function AdminSignupFunnelTab() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div>
-            <CardTitle>Entonnoir d'inscription, {period} derniers jours</CardTitle>
+            <CardTitle>Formulaire d'inscription, {period} derniers jours</CardTitle>
             {data && (
               <p className="text-xs text-muted-foreground mt-1">
                 Du {new Date(data.period_start).toLocaleDateString("fr-FR")} au{" "}
@@ -246,44 +246,14 @@ export default function AdminSignupFunnelTab() {
         </Card>
       )}
 
-      {/* Bloc funnel */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Entonnoir chiffré</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="space-y-2">
-              {[...Array(8)].map((_, i) => (
-                <Skeleton key={i} className="h-8 w-full" />
-              ))}
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Étape</TableHead>
-                  <TableHead className="text-right">Volume</TableHead>
-                  <TableHead className="text-right">Conv. étape précédente</TableHead>
-                  <TableHead className="text-right">Conv. depuis top</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data?.funnel.map((row) => (
-                  <TableRow key={row.step}>
-                    <TableCell className="font-medium">{STEP_LABELS[row.step] ?? eventLabel(row.step)}</TableCell>
-                    <TableCell className="text-right">{row.volume.toLocaleString("fr-FR")}</TableCell>
-                    <TableCell className={cn("text-right", convClass(row.conv_prev))}>
-                      {pct(row.conv_prev)}
-                    </TableCell>
-                    <TableCell className={cn("text-right", convClass(row.conv_top))}>
-                      {pct(row.conv_top)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+      {/* Lot ADM17 (lot B H1) : un seul entonnoir, celui d'Activation interne
+          (mêmes événements, même fenêtre glissante). Cet onglet garde ce qui
+          lui est propre : blocages, échecs, sous-étapes du formulaire. */}
+      <Card data-testid="single-funnel-note">
+        <CardContent className="py-4 text-sm text-muted-foreground">
+          L'entonnoir d'inscription chiffré est dans l'onglet{" "}
+          <a href="/admin/traffic?tab=interne" className="font-semibold text-primary underline underline-offset-2">Activation interne</a>.
+          Ici : blocages du formulaire, échecs et sous-étapes.
         </CardContent>
       </Card>
 

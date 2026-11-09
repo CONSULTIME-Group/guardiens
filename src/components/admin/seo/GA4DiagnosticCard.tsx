@@ -39,18 +39,9 @@ const GA4DiagnosticCard = () => {
   const [tagDetected, setTagDetected] = useState<boolean | null>(null);
   const [localLastEvent, setLocalLastEvent] = useState<string | null>(null);
 
+  // Lot ADM17 (lot B H4) : le dernier événement reçu, quel qu'il soit. La
+  // ligne lisait le dernier test GA4 et laissait croire le suivi arrêté.
   const fetchLocalLast = async () => {
-    const { data: row } = await supabase
-      .from("analytics_events")
-      .select("created_at")
-      .eq("event_type", "admin_ga4_diag_test")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (row?.created_at) {
-      setLocalLastEvent(row.created_at);
-      return;
-    }
     const { data: anyRow } = await supabase
       .from("analytics_events")
       .select("created_at")
@@ -236,7 +227,7 @@ const GA4DiagnosticCard = () => {
             </span>
           </div>
           <div className="flex items-center justify-between gap-2">
-            <span className="text-muted-foreground">Dernier événement local (table analytics_events)</span>
+            <span className="text-muted-foreground">Dernier événement reçu par le site</span>
             <span className="flex items-center gap-1.5">
               <StatusIcon ok={!!localLastEvent} />
               <span className="font-medium">

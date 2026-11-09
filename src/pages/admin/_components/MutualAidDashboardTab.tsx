@@ -1,4 +1,4 @@
-import { KpiTile } from "@/components/admin/ui";
+import { KpiTile, ErrorState } from "@/components/admin/ui";
 import { adminLabel, CLOSE_REASON_LABELS } from "@/lib/admin/labels";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -136,6 +136,8 @@ const MutualAidDashboardTab = () => {
   const [emailStats, setEmailStats] = useState<EmailStats[]>([]);
   const [dormant, setDormant] = useState<DormantMission[]>([]);
   const [loadError, setLoadError] = useState(false);
+  // Lot ADM17 (lot C PE1) : tunnel en échec dit, il ne disparaît plus.
+  const [funnelError, setFunnelError] = useState(false);
   const [autoClosed, setAutoClosed] = useState<AutoClosedMission[]>([]);
   const [closingId, setClosingId] = useState<string | null>(null);
   const seenRef = useRef(false);
@@ -168,7 +170,7 @@ const MutualAidDashboardTab = () => {
 
 
     const [
-      { count: newMissions },
+      { count: newMissions, error: newMissionsError },
       responsesRes,
       feedbacksRes,
       thanksRes,
@@ -213,6 +215,7 @@ const MutualAidDashboardTab = () => {
         .range(f, t)),
     ]);
 
+    if (newMissionsError) throw newMissionsError;
     const projetIdSet = new Set(projetIds);
     const responseRows = (responsesRes.data || []).filter((r: any) => !projetIdSet.has(r.mission_id));
     const feedbackRows = (feedbacksRes.data || []).filter((r: any) => !projetIdSet.has(r.mission_id));
@@ -271,10 +274,12 @@ const MutualAidDashboardTab = () => {
         "get_mutual_aid_funnel_metrics" as any,
         { p_period_days: periodDays },
       );
-      if (!funnelErr && funnelData) setFunnel(funnelData as unknown as FunnelMetrics);
-      else if (funnelErr) console.warn("[MutualAidDashboard] funnel rpc failed", funnelErr.message);
+      if (!funnelErr && funnelData) { setFunnel(funnelData as unknown as FunnelMetrics); setFunnelError(false); }
+      else if (funnelErr) { reportAdminReadError("Pilotage entraide : tunnel", funnelErr); setFunnelError(true); setFunnel(null); }
     } catch (e) {
-      console.warn("[MutualAidDashboard] funnel rpc threw", e);
+      reportAdminReadError("Pilotage entraide : tunnel", e);
+      setFunnelError(true);
+      setFunnel(null);
     }
     } catch (e) {
       setLoadError(true);
@@ -365,7 +370,10 @@ const MutualAidDashboardTab = () => {
         </CardContent>
       </Card>
 
-      {funnel && (
+      {(funnelError || loadError) && (
+        <ErrorState detail="Tunnel de l'entraide" onRetry={() => void load()} />
+      )}
+      {funnel && !loadError && (
         <Card>
           <CardContent className="pt-6 space-y-4">
             <div>
@@ -375,7 +383,7 @@ const MutualAidDashboardTab = () => {
               </p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-              <FunnelStep label="Publiées" value={funnel.missions.published} rate={null} />
+              <FunnelStep label="Publiées" value={funnel.missions.published} rate={null} first />
               <FunnelStep label="Avec une réponse" value={funnel.missions.with_response} rate={funnel.missions.rate_response} />
               <FunnelStep label="Personne retenue" value={funnel.missions.with_accepted} rate={funnel.missions.rate_accepted} />
               <FunnelStep label="Terminées" value={funnel.missions.completed} rate={funnel.missions.rate_completed} />
@@ -417,7 +425,10 @@ const MutualAidDashboardTab = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {emailStats.map((s) => (
+              {loadError && (
+                <TableRow><TableCell colSpan={6}><ErrorState detail="Engagement par email" onRetry={() => void load()} /></TableCell></TableRow>
+              )}
+              {!loadError && emailStats.map((s) => (
                 <TableRow key={s.key}>
                   <TableCell className="font-medium">{s.label}</TableCell>
                   <TableCell className="text-right tabular-nums">{s.sent}</TableCell>
@@ -443,7 +454,9 @@ const MutualAidDashboardTab = () => {
               <Download className="h-3.5 w-3.5 mr-1" /> Exporter CSV
             </Button>
           </div>
-          {dormant.length === 0 ? (
+          {loadError ? (
+            <ErrorState detail="Missions dormantes" onRetry={() => void load()} />
+          ) : dormant.length === 0 ? (
             <p className="text-sm text-muted-foreground py-6 text-center">Aucune mission dormante. Bien joué.</p>
           ) : (
             <Table>
@@ -500,7 +513,9 @@ const MutualAidDashboardTab = () => {
               <Download className="h-3.5 w-3.5 mr-1" /> Exporter CSV
             </Button>
           </div>
-          {autoClosed.length === 0 ? (
+          {loadError ? (
+            <ErrorState detail="Clôtures automatiques" onRetry={() => void load()} />
+          ) : autoClosed.length === 0 ? (
             <p className="text-sm text-muted-foreground py-6 text-center">Aucune clôture automatique enregistrée ce mois.</p>
           ) : (
             <Table>
@@ -534,12 +549,12 @@ const MutualAidDashboardTab = () => {
 
 const KpiCard = ({ label, value }: { label: string; value: number | string }) => <KpiTile label={label} value={value} />;
 
-const FunnelStep = ({ label, value, rate }: { label: string; value: number; rate: number | null }) => (
+const FunnelStep = ({ label, value, rate, first = false }: { label: string; value: number; rate: number | null; first?: boolean }) => (
   <div className="rounded-xl border border-border bg-card px-3 py-3">
     <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">{label}</p>
     <p className="mt-1 text-xl font-bold tabular-nums text-foreground">{value}</p>
     <p className="text-[11px] text-muted-foreground tabular-nums">
-      {rate != null ? `${rate}% de l'étape précédente` : "point de départ"}
+      {rate != null ? `${rate}% de l'étape précédente` : first ? "point de départ" : "étape précédente à 0"}
     </p>
   </div>
 );
