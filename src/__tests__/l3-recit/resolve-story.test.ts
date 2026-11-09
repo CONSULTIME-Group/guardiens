@@ -206,7 +206,7 @@ describe("L3, récit gardien", () => {
     expect(s.chapter).toBe("confirmed");
     expect(s.eyebrow).toBe("Annecy · dans 41 jours");
     expect(s.title).toBe("Figue et Olive vous attendent le 19 décembre.");
-    expect(s.cta).toEqual({ label: "Écrire à Anne", href: "/sits/c1" });
+    expect(s.cta).toEqual({ label: "Écrire à Anne", href: "/sits/c1", action: "prepare" });
     expect(s.lead).toBe("Se rencontrer avant, si vous le souhaitez. Le guide de la maison s'ouvre le 12 décembre.");
     expect(s.frieze?.current).toBe(FRIEZE_MEETING_STEP);
     checkDoctrine(s);

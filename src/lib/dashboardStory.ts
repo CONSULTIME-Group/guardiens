@@ -48,6 +48,12 @@ export type StoryArt = "porte" | "animal" | "lettre" | "depart" | "cles" | "mati
 export interface StoryLink {
   label: string;
   href: string;
+  /**
+   * Lot L9 : geste ouvert sur place au lieu de suivre le lien. « prepare »
+   * ouvre la feuille « Préparer votre arrivée » (garde confirmée, gardien) ;
+   * le lien reste le repli quand l'écran ne sait pas l'ouvrir.
+   */
+  action?: "prepare";
 }
 
 export interface StoryFrieze {
@@ -187,7 +193,14 @@ export interface OwnerStoryInput {
   /** Noms des animaux déclarés (fiche du logement). */
   petNames?: ReadonlyArray<string | null | undefined>;
   ongoingSit?: { id: string; end_date?: string | null; sitterFirstName?: string | null } | null;
-  confirmedSit?: { id: string; start_date?: string | null; end_date?: string | null; sitterFirstName?: string | null } | null;
+  confirmedSit?: {
+    id: string;
+    start_date?: string | null;
+    end_date?: string | null;
+    sitterFirstName?: string | null;
+    /** Lot L9 : le gardien retenu a ouvert le guide de la maison (applications.guide_read_at). */
+    guideRead?: boolean;
+  } | null;
   /** Candidatures en attente sur les annonces ouvertes (pending, viewed, discussing). */
   awaiting?: {
     total: number;
@@ -354,7 +367,9 @@ function ownerConfirmed(
     title: date
       ? `${sitter || "Votre gardien"} veillera sur ${who} à partir du ${date}.`
       : `${sitter || "Votre gardien"} veillera sur ${who}.`,
-    lead: "Se rencontrer avant, si vous le souhaitez : une visite ou un appel.",
+    lead: c.guideRead
+      ? `${sitter || "Votre gardien"} a lu le guide de la maison.`
+      : "Se rencontrer avant, si vous le souhaitez : une visite ou un appel.",
     cta: { label: sitter ? `Écrire à ${sitter}` : "Écrire à votre gardien", href: `/sits/${c.id}` },
     frieze: frieze(FRIEZE_MEETING_STEP),
     art: names ? "animal" : "cles",
@@ -467,7 +482,7 @@ export function resolveSitterStory(i: SitterStoryInput): Story {
         title,
         lead: owner ? `Le guide de la maison ${deName(owner)} est ouvert.` : "Le guide de la maison est ouvert.",
         cta: { label: "Lire le guide de la maison", href: `/house-guide/${c.propertyId}` },
-        secondary: { label: owner ? `Écrire à ${owner}` : "Écrire au propriétaire", href: `/sits/${c.id}` },
+        secondary: { label: owner ? `Écrire à ${owner}` : "Écrire au propriétaire", href: `/sits/${c.id}`, action: "prepare" },
         frieze: frieze(FRIEZE_MEETING_STEP),
         art: "cles",
         urgency: URGENCY.guideOpen,
@@ -482,7 +497,7 @@ export function resolveSitterStory(i: SitterStoryInput): Story {
       lead: guideDate
         ? `Se rencontrer avant, si vous le souhaitez. Le guide de la maison s'ouvre le ${guideDate}.`
         : "Se rencontrer avant, si vous le souhaitez.",
-      cta: { label: owner ? `Écrire à ${owner}` : "Écrire au propriétaire", href: `/sits/${c.id}` },
+      cta: { label: owner ? `Écrire à ${owner}` : "Écrire au propriétaire", href: `/sits/${c.id}`, action: "prepare" },
       frieze: frieze(FRIEZE_MEETING_STEP),
       art: names ? "animal" : "cles",
       urgency: n !== null && n <= CONFIRMED_URGENT_DAYS ? URGENCY.confirmedSoon : URGENCY.confirmedLater,

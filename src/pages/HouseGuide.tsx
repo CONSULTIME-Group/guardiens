@@ -12,6 +12,7 @@ import Head from "@/components/seo/Head";
 import { readFormDraft, writeFormDraft, clearFormDraft, getFormDraftSavedAt } from "@/lib/formDraft";
 import DraftStatus, { type DraftState } from "@/components/shared/DraftStatus";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { markHouseGuideRead } from "@/lib/houseGuideRead";
 
 interface GuideData {
   id?: string;
@@ -138,6 +139,7 @@ const HouseGuide = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [access, setAccess] = useState<AccessState>("denied");
+  const markedReadRef = useRef<string | null>(null);
   const [openDate, setOpenDate] = useState<Date | null>(null);
 
   // Filet local : 19 champs libres, hors champs sensibles jamais stockés.
@@ -224,6 +226,11 @@ const HouseGuide = () => {
         setAccess("owner");
       } else if (data) {
         setAccess("readable");
+        // Lot L9 : première ouverture par le gardien retenu, notée pour le propriétaire.
+        if (markedReadRef.current !== propertyId) {
+          markedReadRef.current = propertyId;
+          void markHouseGuideRead(propertyId);
+        }
       } else {
         // Guide non lisible : soit la garde n'a pas encore atteint l'ouverture
         // à J-7, soit la personne n'a aucun droit d'accès.

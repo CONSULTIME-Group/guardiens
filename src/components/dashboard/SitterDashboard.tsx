@@ -47,12 +47,17 @@ import { sitterNextStep } from "@/lib/dashboardNextStep";
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
 import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
 import { SITTER_APPLICATIONS_PATH } from "@/lib/sitterApplicationsLink";
-import { useMemo } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { resolveSitterStory } from "@/lib/dashboardStory";
 import { buildSitterStoryInput } from "@/lib/sitterStoryInput";
 import { localTodayIso } from "@/lib/localDate";
 import StoryHero from "./story/StoryHero";
+import type { PrepareSitTarget } from "./story/PrepareSitSheet";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
+
+// Lot L9 : chargée au premier geste « Écrire à » d'une garde confirmée.
+const PrepareSitSheet = lazyWithRetry(() => import("./story/PrepareSitSheet"), "PrepareSitSheet");
 import RoleSwitch from "./story/RoleSwitch";
 import EntraideLine from "./story/EntraideLine";
 import { useCompactStory } from "./story/useCompactStory";
@@ -131,6 +136,20 @@ const SitterDashboard = () => {
     appliedSitIds: appliedSitIds ?? [],
     openCount: totalPublished,
   })), [ongoingGuard, nextGuard, reviewDue, pendingApplication, rankedSits, appliedSitIds, totalPublished]);
+
+  // Lot L9 : « Écrire à {propriétaire} » d'une garde confirmée ouvre la feuille de préparation.
+  const [prepareOpen, setPrepareOpen] = useState(false);
+  // Montée au premier geste, puis gardée : la feuille se referme avec son historique.
+  const [prepareMounted, setPrepareMounted] = useState(false);
+  const prepareTarget: PrepareSitTarget | null = nextGuard?.id && nextGuard?.user_id
+    ? { sitId: nextGuard.id, ownerId: nextGuard.user_id, ownerFirstName: nextGuard.ownerName || null, startDate: nextGuard.start_date ?? null }
+    : null;
+  const onStoryAction = prepareTarget
+    ? () => {
+        setPrepareMounted(true);
+        setPrepareOpen(true);
+      }
+    : undefined;
 
   const sitterPriorityAction = useSitterPriorityAction({
     nextGuard,
@@ -262,7 +281,19 @@ const SitterDashboard = () => {
                 {/* Lot L8 : retour calme après une candidature envoyée depuis l'annonce. */}
                 <PublishedNotice />
                 {!compactStory && <RoleSwitch />}
-                <StoryHero story={story} compact={compactStory} />
+                <StoryHero story={story} compact={compactStory} onAction={onStoryAction} />
+                {user?.id && prepareMounted && (
+                  <Suspense fallback={null}>
+                  <PrepareSitSheet
+                    open={prepareOpen}
+                    onOpenChange={setPrepareOpen}
+                    target={prepareTarget}
+                    userId={user.id}
+                    sitterFirstName={user.firstName}
+                    chapter={story.chapter}
+                  />
+                  </Suspense>
+                )}
                 {compactStory && <RoleSwitch />}
                 <div className="empty:hidden">
                   <OwnerInboxNudge />

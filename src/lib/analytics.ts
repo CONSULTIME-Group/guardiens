@@ -147,6 +147,8 @@ export type EventType =
   | "application_page_opened"         // Page /candidatures/:id ouverte par le propriétaire (application_id, status)
   | "application_page_reply"          // « Répondre à {prénom} » (application_id)
   | "application_page_declined"       // Déclin avec un mot aimable (application_id, kind_word : rang du mot proposé, -1 si réécrit)
+  | "dashboard_prepare_sheet_opened"  // Lot L9 : feuille « Préparer votre arrivée » ouverte (chapter)
+  | "dashboard_prepare_sheet_sent"    // Lot L9 : message de préparation envoyé (slot, meeting, edited)
   | "checklist_item_completed"        // Item checklist coché (item_name, order)
   | "checklist_all_completed"         // Checklist finalisée (user_role, time_seconds_since_signup)
   | "sitter_no_nearby_sit_shown"      // Empty state annonces (radius_km, alert_subscribed)
