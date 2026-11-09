@@ -121,6 +121,16 @@
           "sql": "SELECT to_regprocedure('public.mark_house_guide_read(uuid)') IS NOT NULL AND NOT has_function_privilege('anon', 'public.mark_house_guide_read(uuid)', 'EXECUTE') AND has_function_privilege('authenticated', 'public.mark_house_guide_read(uuid)', 'EXECUTE') AS ok"
         }
       ]
+    },
+    {
+      "migration": "0123_cron_heure_hiver.sql",
+      "description": "Récapitulatifs d'alerte de 12 h et 18 h et reprises de proximité servis été comme hiver",
+      "checks": [
+        {
+          "name": "recapitulatifs_deux_saisons",
+          "sql": "SELECT (SELECT count(*) FROM cron.job WHERE active AND ((jobname = 'alert-digest-12h' AND schedule = '0 10,11 * * *') OR (jobname = 'alert-digest-18h' AND schedule = '0 16,17 * * *') OR (jobname = 'nearby-daily-digest' AND schedule = '5 6-11 * * *'))) = 3 AS ok"
+        }
+      ]
     }
   ]
 }
