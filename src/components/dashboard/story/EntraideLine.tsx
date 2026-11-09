@@ -1,6 +1,8 @@
 /**
  * Lot L4 : une ligne entraide sous le récit (emprunt A-18 de l'arène v2).
- * Besoin en cours de l'auteur d'abord, sinon les voisins prêts à aider.
+ * Besoin en cours de l'auteur d'abord, sinon les personnes prêtes à aider.
+ * Lot D3 (09/11/2026) : « personnes prêtes à aider » remplace un mot proscrit,
+ * et « Entre deux gardes » réservé à l'espace gardien.
  */
 import { Link } from "react-router-dom";
 import entraide from "@/assets/aquarelles/coup-de-main-448.webp";
@@ -9,9 +11,11 @@ interface Props {
   helpersCount: number;
   radiusKm: number;
   activeMission?: { id: string; title?: string | null; path?: string | null; pendingCount?: number | null } | null;
+  /** Lot D3 : espace de l'accueil, « Entre deux gardes » ne se dit qu'au gardien. */
+  space?: "owner" | "sitter";
 }
 
-export function entraideLineCopy({ helpersCount, radiusKm, activeMission }: Props): { text: string; link: string; href: string } {
+export function entraideLineCopy({ helpersCount, radiusKm, activeMission, space = "sitter" }: Props): { text: string; link: string; href: string } {
   if (activeMission) {
     const n = activeMission.pendingCount ?? 0;
     return {
@@ -24,8 +28,10 @@ export function entraideLineCopy({ helpersCount, radiusKm, activeMission }: Prop
   }
   return {
     text: helpersCount > 0
-      ? `Entre deux gardes, ${helpersCount} ${helpersCount > 1 ? "voisins prêts" : "voisin prêt"} à aider à moins de ${radiusKm} km.`
-      : "Entre deux gardes, les voisins se rendent des coups de main.",
+      ? `${space === "owner" ? "Pour un coup de main" : "Entre deux gardes"}, ${helpersCount} ${helpersCount > 1 ? "personnes prêtes" : "personne prête"} à aider à moins de ${radiusKm} km.`
+      : space === "owner"
+        ? "Un coup de main se demande et se rend près de chez vous."
+        : "Entre deux gardes, un coup de main se demande et se rend près de chez vous.",
     link: "Demander un coup de main",
     href: "/petites-missions/creer",
   };

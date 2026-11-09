@@ -68,9 +68,17 @@ const SidebarItem = ({
   </NavLink>
 );
 
+/**
+ * Lot D3 (09/11/2026) : sur l'accueil, le bouton « Publier » du menu passe en
+ * contour, l'accueil porte déjà le seul bouton plein de l'écran.
+ */
+export const sidebarPublishVariant = (pathname: string): "default" | "outline" =>
+  pathname === "/dashboard" ? "outline" : "default";
+
 export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean }) => {
   const { user, activeRole, setActiveRole } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { hasAccess } = useSubscriptionAccess();
   const { unreadCount, ownerInboxCount, sitterActionCount, missionBadgeCount } =
     useNavBadgeCounts(user?.id);
@@ -204,6 +212,7 @@ export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean 
         <div className="px-3 pb-2">
           <Button
             tabIndex={navScrolled ? -1 : undefined}
+            variant={sidebarPublishVariant(pathname)}
             className="w-full gap-2"
             onClick={() =>
               navigate(

@@ -1,8 +1,9 @@
 /**
  * Lot L4 : /dashboard propriétaire monté en entier (coquille membre, client
  * Supabase simulé du lot P1b). Téléphone : le récit remplace cockpit et
- * vedette, aucun bouton collant ; ordinateur : accueil inchangé jusqu'au
- * 31/01/2027 ; budget : 40 lectures au plus, relevés de photos compris.
+ * vedette, aucun bouton collant ; ordinateur : accueil et vedette (lot D3 :
+ * récit ordinateur avant la première annonce seulement, src/__tests__/d3-ordinateur/) ;
+ * budget : 40 lectures au plus, relevés de photos compris.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, cleanup, act, screen } from "@testing-library/react";
@@ -124,7 +125,7 @@ describe("L4, accueil propriétaire monté", () => {
     expect(rec.reads.length).toBeLessThanOrEqual(40);
   }, 30000);
 
-  it("ordinateur : accueil d'avant, sans récit", async () => {
+  it("ordinateur, candidatures reçues : accueil et vedette, sans récit", async () => {
     setDesktop(true);
     h.role = "owner";
     populate([]);

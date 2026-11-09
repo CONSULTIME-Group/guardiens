@@ -14,6 +14,7 @@ import { useNavBadgeCounts } from "@/hooks/useNavBadgeCounts";
 import { useOwnerDigestLine } from "@/hooks/useOwnerDigestLine";
 import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import { formatCityLabel } from "@/lib/cityLabel";
+import { pickOwnerCockpitLine } from "@/lib/ownerCockpitLine";
 
 import OnboardingWelcome from "./OnboardingWelcome";
 import { useArrivalV2Account } from "@/hooks/useArrivalV2Account";
@@ -36,6 +37,7 @@ import OwnerFamilySection from "./owner/OwnerFamilySection";
 import NextStepRailCard from "./shared/NextStepRailCard";
 import { selectOwnerStarVariant } from "@/lib/ownerStarVariant";
 import RailReadingsCard from "./shared/RailReadingsCard";
+import ReassuranceRailCard from "./shared/ReassuranceRailCard";
 import DashboardRail from "./shared/DashboardRail";
 import { useRailReadings } from "@/hooks/useRailReadings";
 import { useProfileCompletionMissing } from "@/hooks/useProfileCompletionMissing";
@@ -251,7 +253,9 @@ const OwnerDashboard = () => {
   }, [loading, user, data.profile]);
 
   /* ── Sous-titre contextuel pour le cockpit ── */
-  const subtitle = useMemo(() => {
+  // Lot D3 : la situation (cinq premiers cas) est séparée du reste, elle passe
+  // avant le compte de proximité sur ordinateur (pickOwnerCockpitLine).
+  const situationLine = useMemo((): string | null => {
     if (ongoingSit) {
       const daysLeft = ongoingSit.end_date ? daysFromToday(ongoingSit.end_date, now) : null;
       return `Votre garde est en cours${daysLeft !== null ? `, fin dans ${daysLeft} jour${daysLeft > 1 ? "s" : ""}` : ""}.`;
@@ -270,6 +274,12 @@ const OwnerDashboard = () => {
     if (latestDraft) {
       return "Vous avez commencé une annonce. Reprenez où vous en étiez.";
     }
+    return null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ongoingSit, sits, pendingAppCount, awaiting, latestDraft]);
+
+  const subtitle = useMemo(() => {
+    if (situationLine) return situationLine;
     if (noActiveSit && sits.length > 0 && !earlyOwner) {
       const hello = "Ravi de vous revoir.";
       if (nearbyCount > 0 && nearbyRadius) {
@@ -285,8 +295,7 @@ const OwnerDashboard = () => {
       return `${hello} Publiez votre première annonce, on vous accompagne.`;
     }
     return "Publiez votre première annonce pour trouver un gardien.";
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ongoingSit, sits, pendingAppCount, awaiting, latestDraft, noActiveSit, earlyOwner, nearbyCount, nearbyRadius]);
+  }, [situationLine, sits, noActiveSit, earlyOwner, nearbyCount, nearbyRadius]);
 
   const getNextSitForPet = useCallback((pet: Pet) => {
     const currentDate = new Date();
@@ -431,6 +440,11 @@ const OwnerDashboard = () => {
           oldestAwaitingSitId: awaiting.oldest?.sitId ?? null,
         }}
       />
+      {isDesktopRail && (
+        <ReassuranceRailCard
+          nearby={nearbyCount > 0 && nearbyRadius ? { count: nearbyCount, radiusKm: nearbyRadius, city: ownerCity || null } : null}
+        />
+      )}
       {ownerReadings.length > 0 && <RailReadingsCard items={ownerReadings} />}
       {priorityToRailCard}
       {!(level === 4 || level === "3B") && (
@@ -440,13 +454,26 @@ const OwnerDashboard = () => {
     </>
   );
 
-  const cockpitLine =
-    digestLine ??
-    (nearbyCount > 0 && nearbyRadius
+  const cockpitLine = pickOwnerCockpitLine({
+    situation: situationLine,
+    nearby: nearbyCount > 0 && nearbyRadius
       ? `${nearbyCount} gardien${nearbyCount > 1 ? "s sont inscrits" : " est inscrit"} à moins de ${nearbyRadius} km${ownerCity ? ` de ${ownerCity}` : ""}.`
-      : subtitle);
+      : null,
+    digest: digestLine ?? null,
+    fallback: subtitle,
+  });
 
   const hasActiveAnnonce = activeSits.length > 0;
+  // Lot D3 : ordinateur, propriétaire sans annonce ni brouillon : le récit remplace la vedette « Publier ».
+  const desktopFirstListing =
+    story.chapter === "first_listing" &&
+    selectOwnerStarVariant({
+      ongoingSit: ongoingSit ?? null,
+      pendingAppsCount: awaitingApps.length,
+      hasActiveAnnonce,
+      latestDraft: latestDraft as any,
+    }) === "publish" &&
+    primaryAction?.action !== "publish_draft";
 
   return (
     <div className="overflow-hidden lg:overflow-visible pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-32">
@@ -475,8 +502,11 @@ const OwnerDashboard = () => {
           <div className="min-w-0 space-y-[34px] md:space-y-[52px]">
             {isDesktopRail ? (
               <>
-                {/* 0. Lot N4 : Alma « Vous partez quand ? », masquée après publication et pour le témoin */}
-                <OwnerDepartureAlmaCard data={departure.data} onPick={departure.pick} busy={departure.busy} />
+                {/* 0. Lot N4 : Alma « Vous partez quand ? », masquée après publication et pour le témoin.
+                    Lot D3 : sur la première annonce, la question passe dans le récit (un seul bloc). */}
+                {!desktopFirstListing && (
+                  <OwnerDepartureAlmaCard data={departure.data} onPick={departure.pick} busy={departure.busy} />
+                )}
 
                 {/* 1. Accueil */}
                 <OwnerCockpit
@@ -486,7 +516,15 @@ const OwnerDashboard = () => {
                   todos={todos}
                 />
 
-                {/* 2. Vedette unique */}
+                {/* 2. Vedette unique. Lot D3 : avant la première annonce, le récit du
+                    téléphone en mise en page ordinateur (question de départ comprise). */}
+                {desktopFirstListing ? (
+                  <StoryHero
+                    story={story}
+                    layout="desktop"
+                    periodPicker={askPeriod ? { value: storyPeriod, onPick: onPickPeriod, busy: departure.busy } : null}
+                  />
+                ) : (
                 <OwnerStarSection
                   ongoingSit={ongoingSit ?? null}
                   pendingApps={awaitingApps}
@@ -497,9 +535,10 @@ const OwnerDashboard = () => {
                   propertyCoverPhoto={propertyCoverPhoto}
                   primaryAction={primaryAction}
                   activeAnnonce={hasActiveAnnonce ? (
-                    <OwnerAnnonceSection sits={sits} coverPhoto={propertyCoverPhoto} pendingAppCount={pendingAppCount} />
+                    <OwnerAnnonceSection sits={sits} coverPhoto={propertyCoverPhoto} pendingAppCount={pendingAppCount} city={ownerCity || null} />
                   ) : undefined}
                 />
+                )}
               </>
             ) : (
               /* Lot L4 : accueil téléphone, le récit d'abord (direction B de l'arène v2). */
@@ -535,6 +574,7 @@ const OwnerDashboard = () => {
                   helpersCount={nearbyHelpersCount}
                   radiusKm={helpersProximity?.radiusKm ?? 30}
                   activeMission={myActiveMission as any}
+                  space="owner"
                 />
                 <MissingSitCityBanner userId={user?.id} />
                 {showAlmaFirstMeeting && (
@@ -586,6 +626,7 @@ const OwnerDashboard = () => {
                 helpersCount={nearbyHelpersCount}
                 helpersRadiusKm={helpersProximity?.radiusKm ?? 30}
                 activeMission={myActiveMission}
+                ctaTone={isDesktopRail ? "outline" : "primary"}
               />
             </DeferredMount>
 
@@ -597,10 +638,12 @@ const OwnerDashboard = () => {
               </DeferredMount>
             )}
 
-            {/* 7. Pouls */}
-            <DeferredMount minHeight={40}>
-              <CommunityPulseLine />
-            </DeferredMount>
+            {/* 7. Pouls. Lot D3 : sur ordinateur, les chiffres vivent dans « Guardiens aujourd'hui ». */}
+            {!isDesktopRail && (
+              <DeferredMount minHeight={40}>
+                <CommunityPulseLine />
+              </DeferredMount>
+            )}
 
             {/* 8. Historique des candidatures, accordéon discret */}
             {hasReadApps && (

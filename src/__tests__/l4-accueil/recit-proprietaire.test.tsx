@@ -135,10 +135,13 @@ describe("L4, StoryHero", () => {
 });
 
 describe("L4, ligne entraide et carte photos", () => {
-  it("ligne entraide : besoin en cours d'abord, sinon voisins prêts à aider", () => {
+  it("ligne entraide : besoin en cours d'abord, sinon personnes prêtes à aider (lot D3)", () => {
     expect(entraideLineCopy({ helpersCount: 9, radiusKm: 30 })).toMatchObject({
-      text: "Entre deux gardes, 9 voisins prêts à aider à moins de 30 km.",
+      text: "Entre deux gardes, 9 personnes prêtes à aider à moins de 30 km.",
       href: "/petites-missions/creer",
+    });
+    expect(entraideLineCopy({ helpersCount: 9, radiusKm: 30, space: "owner" })).toMatchObject({
+      text: "Pour un coup de main, 9 personnes prêtes à aider à moins de 30 km.",
     });
     expect(entraideLineCopy({ helpersCount: 9, radiusKm: 30, activeMission: { id: "m1", path: "/petites-missions/m1", pendingCount: 2 } })).toMatchObject({
       text: "2 personnes proposent de vous aider.",
