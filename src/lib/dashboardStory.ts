@@ -124,6 +124,16 @@ function clean(s: string | null | undefined): string {
   return (s ?? "").trim();
 }
 
+const ELIDES = /^[aeiouyhàâäéèêëîïôöùûü]/i;
+/** « que Laurence », « qu'Anne » (lot L7 : élision devant une voyelle ou un h). */
+export function queName(name: string): string {
+  return ELIDES.test(name) ? `qu'${name}` : `que ${name}`;
+}
+/** « de Marc », « d'Hélène ». */
+export function deName(name: string): string {
+  return ELIDES.test(name) ? `d'${name}` : `de ${name}`;
+}
+
 /**
  * « Caramel », « Caramel et Noisette », « Mila, Rex et Nala » (noms déclarés
  * seulement, première lettre en majuscule : « resa » devient « Resa », lot L4b).
@@ -385,11 +395,14 @@ export interface SitterStoryInput {
   openCount?: number;
 }
 
+/** Lot L7 (défaut 4 de l'arène v2) : la recherche s'ouvre sur la France entière. */
+export const NATIONAL_SEARCH_HREF = "/search?zone=france";
+
 function openLink(n: number | undefined): StoryLink {
   const count = n ?? 0;
   return {
     label: count > 1 ? `Voir les ${count} gardes ouvertes` : "Voir les gardes ouvertes",
-    href: "/search",
+    href: NATIONAL_SEARCH_HREF,
   };
 }
 
@@ -425,7 +438,7 @@ export function resolveSitterStory(i: SitterStoryInput): Story {
       space: "sitter",
       chapter: "ongoing",
       eyebrow: "Votre garde",
-      title: names ? `Vous veillez sur ${names}.` : owner ? `Vous veillez sur la maison de ${owner}.` : "Vous veillez sur la maison.",
+      title: names ? `Vous veillez sur ${names}.` : owner ? `Vous veillez sur la maison ${deName(owner)}.` : "Vous veillez sur la maison.",
       lead: end ? `Jusqu'au ${end}.` : undefined,
       cta: { label: "Ouvrir la garde", href: `/sits/${i.ongoingSit.id}` },
       frieze: frieze(3),
@@ -445,14 +458,14 @@ export function resolveSitterStory(i: SitterStoryInput): Story {
     const eyebrow = [city || null, countdown(n)?.toLocaleLowerCase("fr-FR") ?? null].filter(Boolean).join(" · ") || "Votre garde";
     const title = names
       ? `${names} vous ${plural ? "attendent" : "attend"}${date ? ` le ${date}` : ""}.`
-      : `${owner ? `La maison de ${owner}` : "La maison"} vous attend${date ? ` le ${date}` : ""}.`;
+      : `${owner ? `La maison ${deName(owner)}` : "La maison"} vous attend${date ? ` le ${date}` : ""}.`;
     if (n !== null && n <= GUIDE_OPENS_DAYS_BEFORE && c.propertyId) {
       return {
         space: "sitter",
         chapter: "guide_open",
         eyebrow: cap(eyebrow),
         title,
-        lead: owner ? `Le guide de la maison de ${owner} est ouvert.` : "Le guide de la maison est ouvert.",
+        lead: owner ? `Le guide de la maison ${deName(owner)} est ouvert.` : "Le guide de la maison est ouvert.",
         cta: { label: "Lire le guide de la maison", href: `/house-guide/${c.propertyId}` },
         secondary: { label: owner ? `Écrire à ${owner}` : "Écrire au propriétaire", href: `/sits/${c.id}` },
         frieze: frieze(FRIEZE_MEETING_STEP),
@@ -505,7 +518,7 @@ export function resolveSitterStory(i: SitterStoryInput): Story {
         space: "sitter",
         chapter: "second_application",
         eyebrow: "Votre prochaine garde",
-        title: owner ? `Pendant que ${owner} choisit, ${subject}${where}.` : `${cap(subject)}${where}.`,
+        title: owner ? `Pendant ${queName(owner)} choisit, ${subject}${where}.` : `${cap(subject)}${where}.`,
         lead: openingLead(o),
         cta: { label: discoverLabel(o), href: `/sits/${o.slug || o.id}` },
         secondary: openLink(i.openCount),
@@ -520,7 +533,7 @@ export function resolveSitterStory(i: SitterStoryInput): Story {
       eyebrow: "Candidature envoyée",
       title: owner ? `Votre mot est chez ${owner}.` : "Votre candidature est envoyée.",
       lead: "La réponse arrive dans vos messages.",
-      cta: { label: "Découvrir une autre garde", href: "/search" },
+      cta: { label: "Découvrir une autre garde", href: NATIONAL_SEARCH_HREF },
       secondary: { label: "Voir mes candidatures", href: "/mes-candidatures" },
       frieze: frieze(1),
       art: "lettre",

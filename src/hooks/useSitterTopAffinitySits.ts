@@ -35,6 +35,8 @@ export interface AffinitySitCard {
   pet_photo_url: string | null;
   owner_first_name: string | null;
   pet_species: string[];
+  /** Lot L7 : noms déclarés des animaux (public_pets), cités par le récit gardien. */
+  pet_names?: string[];
   affinity: AffinityResult | null;
   distance_km: number | null;
   environments: string[];
@@ -211,7 +213,7 @@ export function useSitterTopAffinitySits(): Result {
             // retenu, les annonces ouvertes se lisent par public_pets.
             (supabase as any)
               .from("public_pets" as any)
-              .select("property_id, species, special_needs, photo_url, breed")
+              .select("property_id, species, special_needs, photo_url, breed, name")
               .in("property_id", propertyIds)
           : Promise.resolve({ data: [] }),
         ownerIds.length > 0
@@ -245,11 +247,11 @@ export function useSitterTopAffinitySits(): Result {
 
       const petsByProperty = new Map<
         string,
-        { species: string | null; special_needs: string | null; photo_url: string | null; breed: string | null }[]
+        { species: string | null; special_needs: string | null; photo_url: string | null; breed: string | null; name: string | null }[]
       >();
       for (const p of (petsRes.data ?? []) as any[]) {
         const arr = petsByProperty.get(p.property_id) ?? [];
-        arr.push({ species: p.species, special_needs: p.special_needs, photo_url: p.photo_url ?? null, breed: p.breed ?? null });
+        arr.push({ species: p.species, special_needs: p.special_needs, photo_url: p.photo_url ?? null, breed: p.breed ?? null, name: p.name ?? null });
         petsByProperty.set(p.property_id, arr);
       }
       const ownerPrefsById = new Map<string, any>(
@@ -278,6 +280,7 @@ export function useSitterTopAffinitySits(): Result {
           pet_photo_url: pets.find((p) => p.photo_url)?.photo_url ?? null,
           owner_first_name: ownerFirstName,
           pet_species: pets.map((p) => p.species ?? "").filter(Boolean),
+          pet_names: pets.map((p) => (p.name ?? "").trim()).filter(Boolean),
           affinity: null,
           distance_km: null,
           environments: Array.isArray(sit.environments) ? sit.environments : [],
