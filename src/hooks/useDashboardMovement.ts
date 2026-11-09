@@ -23,7 +23,7 @@ export function useDashboardMovement(userId: string | undefined, enabled: boolea
     retry: false,
     queryFn: async () => {
       try {
-        // Fonction ajoutée par la migration 0123, absente des types générés.
+        // Fonction ajoutée par la migration 0124, absente des types générés.
         const rpc = supabase.rpc.bind(supabase) as unknown as (
           fn: string,
           args: Record<string, unknown>,

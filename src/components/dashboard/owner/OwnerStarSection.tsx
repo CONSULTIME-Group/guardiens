@@ -18,7 +18,7 @@
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import { canShowAffinityPercent } from "@/lib/affinityDisplay";
 import { Link } from "react-router-dom";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import AffinityRing from "@/components/matching/AffinityRing";
 import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
@@ -36,6 +36,13 @@ import { selectOwnerStarVariant } from "@/lib/ownerStarVariant";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { staleSuffix } from "@/lib/applicationsAwaiting";
 import { daysFromToday } from "@/lib/calendarDate";
+import { RepublishAlmaDialog } from "@/components/ai/alma/RepublishAlmaDialog";
+import {
+  REPUBLISH_CTA_LABEL,
+  REPUBLISH_OTHER_LABEL,
+  republishStarCopy,
+  type RepublishSource,
+} from "@/lib/ownerRepublish";
 
 const DATE_FMT = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
@@ -549,6 +556,56 @@ const PublishStar = ({
 };
 
 /* ================================================================== */
+/*  E. Lot D6 (état P2) : déjà publié, rien en cours, republier                 */
+/* ================================================================== */
+export const RepublishStar = ({
+  source,
+  onCtaClick,
+}: {
+  source: RepublishSource;
+  onCtaClick?: () => void;
+}) => {
+  const [open, setOpen] = useState(false);
+  const copy = republishStarCopy(source);
+  return (
+    <div data-testid="owner-star-republish">
+      <SectionHeader eyebrow={copy.eyebrow} title={copy.title} subtitle={copy.subtitle} />
+      <div className="flex flex-wrap items-center gap-x-[18px] gap-y-[10px]">
+        <button
+          type="button"
+          aria-haspopup="dialog"
+          data-testid="owner-star-republish-cta"
+          onClick={() => {
+            onCtaClick?.();
+            setOpen(true);
+          }}
+          className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground font-bold transition-colors hover:bg-primary/90"
+          style={{
+            padding: "10px 18px",
+            minHeight: "44px",
+            fontSize: "14px",
+            fontWeight: 700,
+            boxShadow: "0 6px 14px rgba(44,109,80,0.24)",
+          }}
+        >
+          {REPUBLISH_CTA_LABEL}
+        </button>
+        <Link
+          to={OWNER_STAR_PUBLISH_PATH}
+          className="text-primary hover:underline underline-offset-4"
+          style={{ fontSize: "13.5px", fontWeight: 600 }}
+        >
+          {REPUBLISH_OTHER_LABEL}
+        </Link>
+      </div>
+      {open && (
+        <RepublishAlmaDialog open={open} onOpenChange={setOpen} sitId={source.id} sourceTitle={source.title} />
+      )}
+    </div>
+  );
+};
+
+/* ================================================================== */
 /*  Section wrapper                                                   */
 /* ================================================================== */
 export interface OwnerStarSectionProps {
@@ -567,6 +624,8 @@ export interface OwnerStarSectionProps {
   activeAnnonce?: React.ReactNode;
   /** Lot X3a (A-05) : ancienneté (jours) de la plus ancienne candidature en attente. */
   oldestWaitingDays?: number;
+  /** Lot D6 (état P2) : dernière annonce passée à republier (vedette « publish » seulement). */
+  republishSource?: RepublishSource | null;
 }
 
 const OwnerStarSection = ({
@@ -579,6 +638,7 @@ const OwnerStarSection = ({
   primaryAction,
   activeAnnonce,
   oldestWaitingDays = 0,
+  republishSource = null,
 }: OwnerStarSectionProps) => {
   const variant = selectOwnerStarVariant({
     ongoingSit,
@@ -587,18 +647,24 @@ const OwnerStarSection = ({
     latestDraft,
   });
 
+  // Lot D6 (état P2) : republier remplace « Publier » quand une annonce passée existe
+  // (un brouillon prêt garde sa reprise).
+  const showRepublish =
+    variant === "publish" && !latestDraft && !!republishSource && primaryAction?.action !== "publish_draft";
+  const eventVariant = showRepublish ? "republish" : variant;
+
   const sectionRef = useRef<HTMLElement | null>(null);
-  useImpressionOnce(sectionRef, `owner_star:${variant}`, () => {
+  useImpressionOnce(sectionRef, `owner_star:${eventVariant}`, () => {
     void trackEvent("dashboard_star_seen", {
       source: "owner_dashboard",
-      metadata: { surface: "owner_dashboard", variant },
+      metadata: { surface: "owner_dashboard", variant: eventVariant },
     });
   });
 
   const onCtaClick = () =>
     void trackEvent("dashboard_star_cta_clicked", {
       source: "owner_dashboard",
-      metadata: { surface: "owner_dashboard", variant },
+      metadata: { surface: "owner_dashboard", variant: eventVariant },
     });
 
   let content: React.ReactNode;
@@ -636,6 +702,8 @@ const OwnerStarSection = ({
     );
   } else if (latestDraft) {
     content = <DraftStar draft={latestDraft} onCtaClick={onCtaClick} />;
+  } else if (showRepublish && republishSource) {
+    content = <RepublishStar source={republishSource} onCtaClick={onCtaClick} />;
   } else {
     content = <PublishStar primaryAction={primaryAction} onCtaClick={onCtaClick} />;
   }

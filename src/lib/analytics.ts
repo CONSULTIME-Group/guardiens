@@ -152,6 +152,7 @@ export type EventType =
   | "movement_click"                  // Lot D4 : tuile cliquée (space, mode, key)
   | "dashboard_block_seen"            // Lot D5 : bloc de l'accueil vu, une fois par session (block, space, layout, above_fold, viewport_h)
   | "dashboard_block_clicked"         // Lot D5 : lien ou bouton d'un bloc de l'accueil (block, space, layout, kind, href sans paramètres)
+  | "dashboard_alert_zone_seen"       // Lot D7 (état G3) : carte « Votre zone d'alerte » vue (zones, counts, nearest_km, full)
   | "dashboard_prepare_sheet_sent"    // Lot L9 : message de préparation envoyé (slot, meeting, edited)
   | "checklist_item_completed"        // Item checklist coché (item_name, order)
   | "checklist_all_completed"         // Checklist finalisée (user_role, time_seconds_since_signup)
