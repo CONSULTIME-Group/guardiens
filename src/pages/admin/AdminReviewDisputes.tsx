@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import Head from "@/components/seo/Head";
 import { supabase } from "@/integrations/supabase/client";
+import { ErrorState } from "@/components/admin/ui";
+import { reportAdminReadError } from "@/lib/admin/readError";
 import { useAdmin } from "@/hooks/useAdmin";
 import { Navigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -53,6 +55,8 @@ const AdminReviewDisputes = () => {
   const { isAdmin, loading: adminLoading } = useAdmin();
   const [disputes, setDisputes] = useState<DisputeRow[]>([]);
   const [loading, setLoading] = useState(true);
+  // Lot ADM16 (lot C CT1) : lecture en échec dite, jamais « Aucune contestation ».
+  const [loadError, setLoadError] = useState(false);
   const [tab, setTab] = useState<DisputeStatus>("pending");
   const [resolveTarget, setResolveTarget] = useState<{ dispute: DisputeRow; action: "accepted" | "rejected" } | null>(null);
   const [adminNote, setAdminNote] = useState("");
@@ -67,7 +71,8 @@ const AdminReviewDisputes = () => {
       .order("created_at", { ascending: false });
 
     if (error) {
-      toast.error("Impossible de charger les contestations");
+      reportAdminReadError("Contestations : liste", error);
+      setLoadError(true);
       setLoading(false);
       return;
     }
@@ -84,6 +89,14 @@ const AdminReviewDisputes = () => {
         : Promise.resolve({ data: [] as any[] }),
     ]);
 
+    // Les avis sont lus pour chaque carte : sans eux, rien n'est tranchable.
+    if ((revRes as { error?: unknown }).error) {
+      reportAdminReadError("Contestations : avis", (revRes as { error?: unknown }).error);
+      setLoadError(true);
+      setLoading(false);
+      return;
+    }
+    setLoadError(false);
     const reviewMap = new Map((revRes.data || []).map((r: any) => [r.id, r]));
     const profMap = new Map((profRes.data || []).map((p: any) => [p.id, p]));
 
@@ -194,9 +207,9 @@ const AdminReviewDisputes = () => {
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as DisputeStatus)}>
         <TabsList className="grid w-full grid-cols-3 mb-6">
-          <TabsTrigger value="pending">En attente ({counts.pending})</TabsTrigger>
-          <TabsTrigger value="accepted">Acceptées ({counts.accepted})</TabsTrigger>
-          <TabsTrigger value="rejected">Refusées ({counts.rejected})</TabsTrigger>
+          <TabsTrigger value="pending">En attente ({loadError ? "?" : counts.pending})</TabsTrigger>
+          <TabsTrigger value="accepted">Acceptées ({loadError ? "?" : counts.accepted})</TabsTrigger>
+          <TabsTrigger value="rejected">Refusées ({loadError ? "?" : counts.rejected})</TabsTrigger>
         </TabsList>
 
         <TabsContent value={tab}>
@@ -204,6 +217,8 @@ const AdminReviewDisputes = () => {
             <div className="flex justify-center py-12">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
+          ) : loadError ? (
+            <ErrorState detail="Les contestations n'ont pas pu être lues." onRetry={() => void load()} />
           ) : filtered.length === 0 ? (
             <div className="rounded-xl border border-border bg-card p-8 text-center">
               <p className="text-sm text-muted-foreground">Aucune contestation {STATUS_META[tab].label.toLowerCase()}.</p>

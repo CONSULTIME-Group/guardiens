@@ -68,13 +68,12 @@ export const entityNoun = (signals: AdminSignalBase[]): string => {
   return n > 1 ? "éléments" : "élément";
 };
 
-export function signalAdminLink(s: AdminSignalBase): string {
-  // Lot J1 : lien exact vers la fiche membre quand le signal le porte.
-  if (typeof s.metadata?.profile_id === "string") return `/admin/users?user=${s.metadata.profile_id}`;
+/** Liste admin du type d'entité (carte groupée : plusieurs éléments). */
+export function signalListLink(s: AdminSignalBase): string {
   switch (s.entity_type) {
     case "sit":
+    case "application":
       return "/admin/listings";
-
     case "mission":
     case "small_mission":
       return "/admin/small-missions";
@@ -85,13 +84,38 @@ export function signalAdminLink(s: AdminSignalBase): string {
     case "report":
       return "/admin/reports";
     case "message":
+      return "/admin/messages";
+    default:
+      return "/admin";
+  }
+}
+
+/**
+ * Lien vers l'élément même (lot ADM16, lot A V4 et E5) : l'annonce
+ * (?sit=), le besoin (?mission=), la fiche du membre (?user=, qui ouvre la
+ * fiche), le fil (?conversation=). Sans identifiant, la liste du type.
+ */
+export function signalAdminLink(s: AdminSignalBase): string {
+  // Lot J1 : lien exact vers la fiche membre quand le signal le porte.
+  if (typeof s.metadata?.profile_id === "string") return `/admin/users?user=${s.metadata.profile_id}`;
+  const id = typeof s.entity_id === "string" && s.entity_id ? encodeURIComponent(s.entity_id) : null;
+  const sitId = typeof s.metadata?.sit_id === "string" ? encodeURIComponent(s.metadata.sit_id) : null;
+  switch (s.entity_type) {
+    case "sit":
+      return id ? `/admin/listings?sit=${id}` : "/admin/listings";
+    case "application":
+      return sitId ? `/admin/listings?sit=${sitId}` : "/admin/listings";
+    case "mission":
+    case "small_mission":
+      return id ? `/admin/small-missions?mission=${id}` : "/admin/small-missions";
+    case "profile":
+      return id ? `/admin/users?user=${id}` : "/admin/users";
+    case "message":
       return s.metadata?.conversation_id
         ? `/admin/messages?conversation=${s.metadata.conversation_id as string}`
         : "/admin/messages";
-    case "application":
-      return "/admin/listings";
     default:
-      return "/admin";
+      return signalListLink(s);
   }
 }
 

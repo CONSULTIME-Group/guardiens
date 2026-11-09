@@ -6,7 +6,7 @@ import { IgnoreSignalsButton } from "./IgnoreSignalsButton";
 import { shortDetectedAt } from "@/lib/admin/overviewText";
 import {
   entityNoun,
-  signalAdminLink,
+  signalListLink,
   signalTypeLabel,
   type AdminSignalBase,
 } from "./signalGrouping";
@@ -32,7 +32,7 @@ export const GroupedSignalCard = ({ signalType, signals, renderDetail }: Props) 
     (max, s) => (s.detected_at > max ? s.detected_at : max),
     signals[0]?.detected_at ?? "",
   );
-  const link = signals[0] ? signalAdminLink(signals[0]) : "/admin";
+  const link = signals[0] ? signalListLink(signals[0]) : "/admin";
 
 
   return (

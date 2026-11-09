@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { supabase } from "@/integrations/supabase/client";
 import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
+import { ErrorState } from "@/components/admin/ui";
 import { competenceInsertError } from "@/lib/admin/competenceErrors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,6 +70,9 @@ const AdminSkills = () => {
   const [editLabel, setEditLabel] = useState("");
   const [counts, setCounts] = useState({ pending: 0, approved: 0, rejected: 0, members: 0 });
   const [staleCount, setStaleCount] = useState(0);
+  // Lot ADM16 (lot C CO1) : lectures en échec dites, jamais « Référentiel (0) ».
+  const [skillsError, setSkillsError] = useState(false);
+  const [competencesError, setCompetencesError] = useState(false);
   const [newCompLabel, setNewCompLabel] = useState("");
   const [newCompCategorie, setNewCompCategorie] = useState("jardin");
   const [pendingCompetences, setPendingCompetences] = useState<{ label: string; count: number; sources: string[] }[]>([]);
@@ -89,7 +93,14 @@ const AdminSkills = () => {
       query = query.eq("status", filter);
     }
 
-    const { data } = await query;
+    const { data, error: listError } = await query;
+    if (listError) {
+      reportAdminReadError("Compétences libres : liste", listError);
+      setSkillsError(true);
+      setSkills([]);
+      setLoading(false);
+      return;
+    }
     setSkills((data as any as SkillRow[]) || []);
 
     // Fetch counts
@@ -107,6 +118,14 @@ const AdminSkills = () => {
       .select("id", { count: "exact", head: true })
       .neq("custom_skills", "[]");
 
+    const countFailed = [pendingRes, approvedRes, rejectedRes, staleRes, memberRes].find((r) => r.error);
+    if (countFailed) {
+      reportAdminReadError("Compétences libres : compteurs", countFailed.error);
+      setSkillsError(true);
+      setLoading(false);
+      return;
+    }
+    setSkillsError(false);
     setCounts({
       pending: pendingRes.count || 0,
       approved: approvedRes.count || 0,
@@ -118,10 +137,17 @@ const AdminSkills = () => {
   }, [filter]);
 
   const fetchCompetences = useCallback(async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("competences_validees")
       .select("*")
       .order("usage_count", { ascending: false });
+    if (error) {
+      reportAdminReadError("Compétences : référentiel", error);
+      setCompetencesError(true);
+      setCompetences([]);
+      return;
+    }
+    setCompetencesError(false);
     setCompetences((data as any as CompetenceRow[]) || []);
   }, []);
 
@@ -252,9 +278,9 @@ const AdminSkills = () => {
 
       <Tabs value={tab} onValueChange={(v) => { setTab(v); setTabChosen(true); }}>
         <TabsList>
-          <TabsTrigger value="competences">Référentiel ({competences.length})</TabsTrigger>
+          <TabsTrigger value="competences">Référentiel ({competencesError ? UNAVAILABLE_LABEL : competences.length})</TabsTrigger>
           <TabsTrigger value="pending">En attente ({pendingError ? UNAVAILABLE_LABEL : pendingCompetences.length})</TabsTrigger>
-          <TabsTrigger value="legacy">Compétences libres ({counts.pending})</TabsTrigger>
+          <TabsTrigger value="legacy">Compétences libres ({skillsError ? UNAVAILABLE_LABEL : counts.pending})</TabsTrigger>
         </TabsList>
 
         {/* Tab: Référentiel competences_validees */}
@@ -283,6 +309,7 @@ const AdminSkills = () => {
             </Button>
           </div>
 
+          {competencesError && <ErrorState detail="Le référentiel n'a pas pu être lu." onRetry={() => void fetchCompetences()} />}
           <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-sm">
               <thead className="bg-muted/50">
@@ -362,7 +389,7 @@ const AdminSkills = () => {
         {/* Tab: Legacy skills_library */}
         <TabsContent value="legacy" className="space-y-4 mt-4">
           <p className="text-sm text-muted-foreground">
-            {counts.pending} en attente · {counts.approved} approuvées · {counts.members || 0} membres concernés
+            {skillsError ? UNAVAILABLE_LABEL : `${counts.pending} en attente · ${counts.approved} approuvées · ${counts.members || 0} membres concernés`}
           </p>
 
           {staleCount > 0 && (
@@ -395,6 +422,8 @@ const AdminSkills = () => {
 
           {loading ? (
             <p className="text-muted-foreground text-sm py-8 text-center">Chargement...</p>
+          ) : skillsError ? (
+            <ErrorState detail="Les compétences libres n'ont pas pu être lues." onRetry={() => void fetchSkills()} />
           ) : skills.length === 0 ? (
             <p className="text-muted-foreground text-sm py-8 text-center">Aucune compétence dans ce filtre.</p>
           ) : (

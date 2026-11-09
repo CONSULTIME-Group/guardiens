@@ -17,6 +17,8 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { ErrorState } from "@/components/admin/ui";
+import { reportAdminReadError } from "@/lib/admin/readError";
 import { logger } from "@/lib/logger";
 import ConversationThreadPanel from "./ConversationThreadPanel";
 import { UrlFilterNotice } from "../UrlFilterNotice";
@@ -81,6 +83,8 @@ export const ConversationsTable = ({
   const [rows, setRows] = useState<AdminConversationRow[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  // Lot ADM16 (lot C ME2) : lecture en échec dite, jamais « 0 conversation ».
+  const [loadError, setLoadError] = useState(false);
 
   const [openRow, setOpenRow] = useState<AdminConversationRow | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -132,7 +136,16 @@ export const ConversationsTable = ({
       p_limit: PAGE_SIZE,
       p_offset: page * PAGE_SIZE,
     });
-    if (error) logger.error("admin_list_conversations failed", { error: String(error.message) });
+    if (error) {
+      logger.error("admin_list_conversations failed", { error: String(error.message) });
+      reportAdminReadError("Messagerie : conversations", error);
+      setLoadError(true);
+      setRows([]);
+      setTotal(0);
+      setLoading(false);
+      return;
+    }
+    setLoadError(false);
     const list = (data as unknown as AdminConversationRow[]) || [];
     setRows(list);
     setTotal(list.length > 0 ? Number(list[0].total_count) : 0);
@@ -278,7 +291,7 @@ export const ConversationsTable = ({
             )}
 
             <span className="text-xs text-muted-foreground ml-auto">
-              {loading ? "Chargement" : `${total} conversation(s)`}
+              {loading ? "Chargement" : loadError ? "Lecture impossible" : `${total} conversation(s)`}
             </span>
           </div>
         </CardContent>
@@ -290,6 +303,8 @@ export const ConversationsTable = ({
             <div className="p-4 space-y-3">
               {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
             </div>
+          ) : loadError ? (
+            <ErrorState className="m-4" detail="Les conversations n'ont pas pu être lues." onRetry={() => void load()} />
           ) : rows.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-10">
               Aucune conversation ne correspond à ces filtres.

@@ -54,6 +54,32 @@ const TONE_CLASS: Record<WorkItem["tone"], string> = {
   normal: "text-muted-foreground",
 };
 
+/** Éléments nommés montrés sur une ligne, au plus (lot ADM16). */
+export const ELEMENT_LINKS_SHOWN = 3;
+
+/**
+ * Lot ADM16 (lot 4 de l'arène) : chaque élément nommé d'une ligne s'ouvre en
+ * un toucher (annonce, besoin, fiche du membre), sans passer par la file.
+ */
+const ElementLinks = ({ line }: { line: WorkItem }) => {
+  const own = (line.elements ?? []).filter((e) => e.link && e.link !== line.link);
+  if (own.length === 0) return null;
+  const shown = own.slice(0, ELEMENT_LINKS_SHOWN);
+  const rest = own.length - shown.length;
+  return (
+    <ul className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1" data-testid="pilotage-elements">
+      {shown.map((e) => (
+        <li key={`${e.link}|${e.label}`}>
+          <Link to={e.link} className="inline-flex min-h-11 sm:min-h-8 items-center text-[13px] font-semibold text-primary underline underline-offset-2">
+            {e.label.length > 60 ? `${e.label.slice(0, 57).trimEnd()}…` : e.label}
+          </Link>
+        </li>
+      ))}
+      {rest > 0 && <li className="inline-flex min-h-11 sm:min-h-8 items-center text-[13px] text-muted-foreground">et {rest} {rest > 1 ? "autres" : "autre"}</li>}
+    </ul>
+  );
+};
+
 /**
  * Une ligne de la liste : la phrase dit quoi faire, le bouton « Voir » montre
  * où (lot ADM14, lot A V4 : le bouton ne promet plus une action qu'il ne fait
@@ -70,6 +96,7 @@ const LineRow = ({ line, sitMap, last }: { line: WorkItem; sitMap: Map<string, S
         <div className="min-w-0 flex-[1_1_320px]">
           <p className="text-[15px] font-semibold text-foreground">{line.title}</p>
           <p className="mt-0.5 text-[13px] text-muted-foreground">{line.detail}</p>
+          <ElementLinks line={line} />
         </div>
         <span className={`text-[13px] ${TONE_CLASS[line.tone]}`}>{line.deadline}</span>
         {unfolds ? (

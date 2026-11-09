@@ -1,5 +1,6 @@
 import { conversationTypeLabel } from "@/lib/admin/labels";
-import { KpiTile, EmptyState } from "@/components/admin/ui";
+import { KpiTile, EmptyState, ErrorState } from "@/components/admin/ui";
+import { reportAdminReadError } from "@/lib/admin/readError";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,6 +81,10 @@ export default function AdminMessages() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [topUsers, setTopUsers] = useState<TopUser[]>([]);
   const [loading, setLoading] = useState(true);
+  // Lot ADM16 (lot C ME2) : statistiques et classement en échec, dits.
+  const [statsError, setStatsError] = useState(false);
+  const [topError, setTopError] = useState(false);
+  const [statsNonce, setStatsNonce] = useState(0);
 
   const sinceISO = (p: Period): string | null => {
     const now = new Date();
@@ -99,14 +104,14 @@ export default function AdminMessages() {
       const { data: statsData, error: statsErr } = await supabase.rpc("admin_message_stats", {
         _since: since,
       });
-      if (statsErr) console.error("admin_message_stats error", statsErr);
+      if (statsErr) reportAdminReadError("Messagerie : statistiques", statsErr);
 
       // 2) Top users, RPC admin (contourne RLS, classement fiable)
       const { data: topData, error: topErr } = await supabase.rpc("admin_top_message_users", {
         _since: since,
         _limit: 20,
       });
-      if (topErr) console.error("admin_top_message_users error", topErr);
+      if (topErr) reportAdminReadError("Messagerie : membres les plus actifs", topErr);
       const top: TopUser[] = ((topData as any[]) || []).map((u) => ({
         user_id: u.user_id,
         first_name: u.first_name,
@@ -118,6 +123,8 @@ export default function AdminMessages() {
       }));
 
       if (!cancelled) {
+        setStatsError(!!statsErr);
+        setTopError(!!topErr);
         setStats((statsData as unknown as Stats) || null);
         setTopUsers(top);
         setLoading(false);
@@ -127,7 +134,7 @@ export default function AdminMessages() {
     return () => {
       cancelled = true;
     };
-  }, [period]);
+  }, [period, statsNonce]);
 
   const roleLabel = (r: string | null) =>
     r === "owner" ? "Propriétaire" : r === "sitter" ? "Gardien" : r === "both" ? "Propriétaire et gardien" : "·";
@@ -171,6 +178,8 @@ export default function AdminMessages() {
         <TabsContent value="stats" className="mt-4 space-y-6">
 
 
+      {statsError && <ErrorState detail="Statistiques de la messagerie" onRetry={() => setStatsNonce((n) => n + 1)} />}
+      {!statsError && (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {loading || !stats ? (
           Array.from({ length: 6 }).map((_, i) => (
@@ -211,6 +220,7 @@ export default function AdminMessages() {
           </>
         )}
       </div>
+      )}
 
       {/* Breakdown by context */}
       {!loading && stats && ctxTotal > 0 && (
@@ -294,6 +304,8 @@ export default function AdminMessages() {
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
             </div>
+          ) : topError ? (
+            <ErrorState detail="Membres les plus actifs" onRetry={() => setStatsNonce((n) => n + 1)} />
           ) : topUsers.length === 0 ? (
             <EmptyState>Aucun message sur cette période.</EmptyState>
           ) : (

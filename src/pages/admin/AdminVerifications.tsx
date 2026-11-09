@@ -2,6 +2,8 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { UrlFilterNotice } from "@/components/admin/UrlFilterNotice";
+import { ErrorState } from "@/components/admin/ui";
+import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,6 +32,9 @@ const AdminVerifications = () => {
     setUrlParams(next, { replace: true });
   };
   const [loading, setLoading] = useState(true);
+  // Lot ADM16 (lot B C2) : une lecture en échec se dit, jamais « 0 en attente ».
+  const [queueError, setQueueError] = useState(false);
+  const [historyError, setHistoryError] = useState(false);
   const [busyUserId, setBusyUserId] = useState<string | null>(null);
   const rejectingRef = useRef(false);
   const [metrics, setMetrics] = useState({ pending: 0, verifiedWeek: 0, rejectedWeek: 0 });
@@ -108,6 +113,14 @@ const AdminVerifications = () => {
       supabase.from("profiles").select(SELECT).eq("identity_verification_status", "not_submitted").not("identity_document_url", "is", null),
       supabase.from("profiles").select(SELECT).eq("identity_verification_status", "not_submitted").not("identity_selfie_url", "is", null),
     ]);
+    const queueFailed = [pendingFull, incompleteDoc, incompleteSelfie].find((r) => r.error);
+    if (queueFailed) {
+      reportAdminReadError("Vérifications : file", queueFailed.error);
+      setQueueError(true);
+      setQueue([]);
+      setLoading(false);
+      return;
+    }
     const map = new Map<string, any>();
     [...(pendingFull.data || []), ...(incompleteDoc.data || []), ...(incompleteSelfie.data || [])].forEach((p: any) => {
       map.set(p.id, p);
@@ -126,6 +139,14 @@ const AdminVerifications = () => {
       supabase.from("identity_verification_logs").select("id", { count: "exact", head: true }).eq("result", "verified").gte("created_at", weekStart),
       supabase.from("identity_verification_logs").select("id", { count: "exact", head: true }).eq("result", "rejected").gte("created_at", weekStart),
     ]);
+    const countFailed = [verifiedRes, rejectedRes].find((r) => r.error);
+    if (countFailed) {
+      reportAdminReadError("Vérifications : compteurs", countFailed.error);
+      setQueueError(true);
+      setLoading(false);
+      return;
+    }
+    setQueueError(false);
     setMetrics({
       pending: merged.length,
       verifiedWeek: verifiedRes.count || 0,
@@ -145,7 +166,14 @@ const AdminVerifications = () => {
     // Only include profiles that have actually submitted (not_submitted excluded)
     query = query.neq("identity_verification_status", "not_submitted");
 
-    const { data, count } = await query;
+    const { data, count, error } = await query;
+    if (error) {
+      reportAdminReadError("Vérifications : historique", error);
+      setHistoryError(true);
+      setHistory([]);
+      return;
+    }
+    setHistoryError(false);
     setHistory(data || []);
     setHistoryTotal(count || 0);
 
@@ -293,19 +321,19 @@ const AdminVerifications = () => {
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-warning-soft"><Clock className="h-5 w-5 text-warning" /></div>
-            <div><p className="text-2xl font-bold">{metrics.pending}</p><p className="text-xs text-muted-foreground">En attente</p></div>
+            <div><p className="text-2xl font-bold">{queueError ? UNAVAILABLE_LABEL : metrics.pending}</p><p className="text-xs text-muted-foreground">En attente</p></div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-success-soft"><CheckCircle2 className="h-5 w-5 text-success" /></div>
-            <div><p className="text-2xl font-bold">{metrics.verifiedWeek}</p><p className="text-xs text-muted-foreground">Validées cette semaine</p></div>
+            <div><p className="text-2xl font-bold">{queueError ? UNAVAILABLE_LABEL : metrics.verifiedWeek}</p><p className="text-xs text-muted-foreground">Validées cette semaine</p></div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-destructive/10"><XCircle className="h-5 w-5 text-destructive" /></div>
-            <div><p className="text-2xl font-bold">{metrics.rejectedWeek}</p><p className="text-xs text-muted-foreground">Refusées cette semaine</p></div>
+            <div><p className="text-2xl font-bold">{queueError ? UNAVAILABLE_LABEL : metrics.rejectedWeek}</p><p className="text-xs text-muted-foreground">Refusées cette semaine</p></div>
           </CardContent>
         </Card>
       </div>
@@ -313,11 +341,13 @@ const AdminVerifications = () => {
       {focusId && (
         <UrlFilterNotice
           label="Vérification de ce membre mise en avant"
-          notFound={!loading && !queue.some((u) => u.id === focusId)}
+          notFound={!loading && !queueError && !queue.some((u) => u.id === focusId)}
           notFoundText="Ce membre n'a aucune vérification en attente. Consultez l'historique ci-dessous."
           onClear={clearFocus}
         />
       )}
+
+      {queueError && <ErrorState detail="La file des vérifications n'a pas pu être lue." onRetry={() => void fetchQueue()} />}
 
       {/* Pending Queue */}
       {queue.length > 0 && (
@@ -520,7 +550,9 @@ const AdminVerifications = () => {
           </div>
         </div>
 
-        {history.length === 0 ? (
+        {historyError ? (
+          <ErrorState detail="L'historique n'a pas pu être lu." onRetry={() => void fetchHistory()} />
+        ) : history.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <ShieldCheck className="h-12 w-12 mx-auto mb-3 text-primary/40" />
             <p className="font-medium">

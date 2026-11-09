@@ -4,6 +4,8 @@ import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { createSeqGuard } from "@/lib/admin/requestSeq";
 import { supabase } from "@/integrations/supabase/client";
+import { ErrorState } from "@/components/admin/ui";
+import { reportAdminReadError } from "@/lib/admin/readError";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -100,7 +102,7 @@ function ReviewListingCell({ review }: { review: any }) {
   }
   const meta = [ref.kind === "entraide" ? "Entraide" : null, ref.city, ref.dates].filter(Boolean).join(", ");
   return (
-    <span className="inline-flex flex-col min-w-0">
+    <span className="flex w-full min-w-0 flex-col">
       <a href={ref.href!} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-primary hover:underline truncate">
         {ref.title}
       </a>
@@ -113,6 +115,8 @@ function ReviewListingCell({ review }: { review: any }) {
 const AdminReviews = () => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  // Lot ADM16 (lot B D2) : lecture en échec dite, jamais « Aucun avis ».
+  const [loadError, setLoadError] = useState(false);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
   const [filterStatus, setFilterStatus] = useState("all");
@@ -158,8 +162,12 @@ const AdminReviews = () => {
 
     const { data, error, count } = await query.range(from, to);
     if (!reviewsSeq.current.isCurrent(token)) return;
-    if (error) toast.error("Erreur de chargement");
-    else {
+    if (error) {
+      reportAdminReadError("Avis : liste", error);
+      setReviews([]);
+      setLoadError(true);
+    } else {
+      setLoadError(false);
       setReviews(data || []);
       setTotal(count ?? 0);
       const sitIds = [...new Set((data || []).map(r => r.sit_id))];
@@ -445,6 +453,8 @@ const AdminReviews = () => {
               <TableBody>
                 {loading ? (
                   <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+                ) : loadError ? (
+                  <TableRow><TableCell colSpan={9}><ErrorState detail="Les avis n'ont pas pu être lus." onRetry={() => void fetchReviews()} /></TableCell></TableRow>
                 ) : reviews.length === 0 ? (
                   <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Aucun avis</TableCell></TableRow>
                 ) : reviews.map((review) => (
@@ -457,7 +467,7 @@ const AdminReviews = () => {
                         <span>{review.reviewee?.first_name} {review.reviewee?.last_name}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="max-w-[240px]"><ReviewListingCell review={review} /></TableCell>
+                    <TableCell className="max-w-[240px] overflow-hidden"><ReviewListingCell review={review} /></TableCell>
                     <TableCell className="text-xs text-muted-foreground">{reviewDirectionLabel(review)}</TableCell>
                     <TableCell>{renderStars(review.overall_rating)}</TableCell>
                     <TableCell>
