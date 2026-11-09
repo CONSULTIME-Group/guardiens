@@ -3,6 +3,8 @@ import { useState, useEffect, useCallback } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { supabase } from "@/integrations/supabase/client";
 import { ErrorState } from "@/components/admin/ui";
+import { logAdminAction } from "@/lib/admin/adminJournal";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { reportAdminReadError } from "@/lib/admin/readError";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -94,15 +96,19 @@ const AdminExperienceVerification = () => {
   const handleVerify = async (id: string, userId: string) => {
     const { error } = await supabase.from("external_experiences").update({ verification_status: "verified" }).eq("id", id);
     if (error) { toast.error("Erreur"); return; }
-    await supabase.from("notifications").insert({
+    // Lot ADM18 (lot C EX2) : notification et journal contrôlés, le toast dit ce qui manque.
+    const { error: notifError } = await supabase.from("notifications").insert({
       user_id: userId, type: "experience_verified",
       title: "Expérience vérifiée",
       body: "Votre expérience externe a été validée et apparaît maintenant sur votre profil.",
       link: "/profile",
     });
+    const { ok: logged } = await logAdminAction({ action: "experience_verified", targetType: "profile", targetId: userId, metadata: { experience_id: id } });
     setExperiences(prev => prev.filter(e => e.id !== id));
     setCounts(prev => ({ ...prev, pending: prev.pending - 1, verified: prev.verified + 1 }));
-    toast.success("Expérience validée !");
+    if (notifError) toast.warning("Expérience validée, notification du membre à refaire.");
+    else if (!logged) toast.warning("Expérience validée, journal à compléter.");
+    else toast.success("Expérience validée");
     refreshAdminBadges();
   };
 
@@ -238,9 +244,13 @@ const AdminExperienceVerification = () => {
         {/* Actions, only for pending */}
         {activeTab === "pending" && (
           <div className="flex items-center gap-3 pt-2 border-t border-border">
-            <Button size="sm" className="gap-1.5" onClick={() => handleVerify(exp.id, exp.user_id)}>
-              <CheckCircle2 className="h-4 w-4" /> Valider
-            </Button>
+            <ConfirmDialog
+              trigger={<Button size="sm" className="gap-1.5"><CheckCircle2 className="h-4 w-4" /> Valider</Button>}
+              title="Valider cette expérience ?"
+              description="Elle apparaît sur le profil public du membre, qui reçoit une notification."
+              confirmLabel="Valider"
+              onConfirm={() => handleVerify(exp.id, exp.user_id)}
+            />
             <Button size="sm" variant="destructive" className="gap-1.5" onClick={() => setRejectModal({ open: true, id: exp.id, reason: "", customReason: "" })}>
               <XCircle className="h-4 w-4" /> Refuser
             </Button>

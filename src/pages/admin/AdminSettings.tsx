@@ -695,15 +695,14 @@ const AdminSettings = () => {
             <Separator />
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">Google-Extended (entraînement Gemini)</p>
+                <p className="text-sm font-medium">Google-Extended (Gemini)</p>
+                {/* Lot ADM18 (lot E G1) : décrit tel que public/robots.txt le sert
+                    (même groupe que les robots des moteurs, Allow: /). */}
                 <p className="text-xs text-muted-foreground">
-                  Décision politique : protection IP marque en construction. Documenté dans{" "}
-                  <code>robots.txt</code>. Réévaluer post-notoriété (~T2 2027).
+                  Autorisé, comme les robots des moteurs de recherche et des assistants (public/robots.txt).
                 </p>
               </div>
-              <Badge variant="outline" className="text-xs border-warning text-warning">
-                Disallow
-              </Badge>
+              <Badge variant="default" className="text-xs">Autorisé</Badge>
             </div>
           </CardContent>
         </Card>

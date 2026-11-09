@@ -276,6 +276,20 @@ export const AUDIT_ACTION_LABELS: Dict = {
   suspend_account: "Suspension de compte",
   reactivate_account: "Réactivation de compte",
   resend_signup_confirmation: "Email de confirmation renvoyé",
+  // Lot ADM18 (lot E H3) : toutes les actions présentes en base et celles du lot.
+  view_conversation_thread: "Lecture d'une conversation",
+  review_show: "Avis remis en ligne",
+  release_projet: "Projet diffusé avant la date prévue",
+  association_publish: "Association publiée",
+  association_unpublish: "Association dépubliée",
+  association_archive: "Association archivée",
+  association_consent_requested: "Accord photos demandé",
+  association_consent_granted: "Accord photos reçu",
+  association_consent_refused: "Accord photos refusé",
+  contact_message_en_cours: "Message de contact pris en charge",
+  contact_message_closed: "Message de contact clos",
+  contact_message_replied: "Message de contact marqué répondu",
+  experience_verified: "Expérience validée",
   toggle_super_gardien: "Super gardien modifié",
   identity_approved: "Identité validée",
   identity_rejected: "Identité refusée",
@@ -283,6 +297,9 @@ export const AUDIT_ACTION_LABELS: Dict = {
 };
 
 export const AUDIT_ENTITY_LABELS: Dict = {
+  association: "Association",
+  contact_message: "Message de contact",
+  conversation: "Conversation",
   small_mission: "Demande d'entraide",
   profiles_bulk: "Profils (lot)",
   profile: "Profil",

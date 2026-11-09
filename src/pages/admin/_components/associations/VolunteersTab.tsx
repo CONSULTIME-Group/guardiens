@@ -9,6 +9,9 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { ErrorState } from "@/components/admin/ui";
+import { reportAdminReadError } from "@/lib/admin/readError";
+import { logAdminMessageFailure } from "@/lib/admin/adminMessageFailure";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -68,6 +71,9 @@ export const VolunteersTab = () => {
   const [contact, setContact] = useState<VolunteerRow | null>(null);
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+  // Lot ADM18 (lot C AS1) : lecture en échec dite, jamais « Aucune déclaration ».
+  const [loadError, setLoadError] = useState(false);
+  const [nonce, setNonce] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -79,7 +85,8 @@ export const VolunteersTab = () => {
           "user_id, available, structure_types, skills, departments, frequency, current_association, created_at",
         )
         .order("created_at", { ascending: false });
-      if (error) toast.error("Chargement impossible");
+      if (error) reportAdminReadError("Bénévoles : déclarations", error);
+      if (!cancelled) setLoadError(!!error);
       const list = ((data as any) ?? []) as VolunteerRow[];
 
       let profiles: Array<{ id: string; first_name: string | null; email: string | null }> = [];
@@ -108,7 +115,7 @@ export const VolunteersTab = () => {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [nonce]);
 
   const departements = useMemo(() => {
     const set = new Set<string>();
@@ -145,6 +152,7 @@ export const VolunteersTab = () => {
     });
     setSending(false);
     if (error) {
+      await logAdminMessageFailure(contact.user_id, content, error.message);
       toast.error(error.message || "Envoi impossible");
       return;
     }
@@ -213,6 +221,12 @@ export const VolunteersTab = () => {
               <TableRow>
                 <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
                   Chargement…
+                </TableCell>
+              </TableRow>
+            ) : loadError ? (
+              <TableRow>
+                <TableCell colSpan={8}>
+                  <ErrorState detail="Les déclarations n'ont pas pu être lues." onRetry={() => setNonce((n) => n + 1)} />
                 </TableCell>
               </TableRow>
             ) : filtered.length === 0 ? (
