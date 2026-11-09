@@ -14,10 +14,15 @@ export interface AdminSignalLine {
   ageDays: number | null
   count: number
   link: string
+  /** Lot ADM13 : éléments nommés de la ligne (annonces, membres), cinq au plus. */
+  elements?: { label: string; link: string }[]
+  /** Éléments de la ligne au-delà des cinq nommés. */
+  moreCount?: number
 }
 
 interface Props {
   criticalCount?: number
+  /** Lot ADM13 : situations suivies par les relances automatiques (hors liste). */
   warningCount?: number
   staleCount?: number
   coverageLine?: string | null
@@ -85,6 +90,16 @@ const Email = ({
               <Text style={itemTitle}>{l.title}</Text>
               {itemWhen(l) ? <Text style={itemDetail}>{itemWhen(l)}</Text> : null}
               <Text style={itemDetail}>{l.action}</Text>
+              {(l.elements ?? []).map((e, j) => (
+                <Text key={j} style={itemDetail}>
+                  <Link href={e.link} style={link}>{e.label}</Link>
+                </Text>
+              ))}
+              {(l.moreCount ?? 0) > 0 ? (
+                <Text style={itemDetail}>
+                  {`Et ${l.moreCount} autre${(l.moreCount ?? 0) > 1 ? 's' : ''} dans l'administration.`}
+                </Text>
+              ) : null}
               <Text style={itemDetail}>
                 <Link href={l.link} style={link}>Ouvrir dans l'administration</Link>
               </Text>
@@ -96,7 +111,7 @@ const Email = ({
 
         {coverageLine ? <Text style={text}>{coverageLine}</Text> : null}
         <Text style={text}>
-          Autres signaux ouverts, sur l'accueil admin : {warningCount}.
+          Situations que le site relance seul : {warningCount}.
         </Text>
 
         <LegalFooter purpose="le suivi opérationnel de la plateforme" basis="6.1.f" />
@@ -117,20 +132,21 @@ export const template = {
     coverageLine: 'Couverture : 5 villes suivies comptent moins de 3 gardiens à 30 km.',
     lines: [
       {
-        title: '2 messages de contact',
-        action: 'Répondre depuis Messages contact : le bouton Répondre envoie l\'email et le trace.',
+        title: 'Répondre à 2 messages de contact',
+        action: 'Le plus ancien attend depuis le 07/11.',
         startDate: null,
         ageDays: 2,
         count: 2,
         link: 'https://guardiens.fr/admin/contact-messages',
       },
       {
-        title: 'Garde 2 chats centre ville de Marseille',
-        action: 'Relancer le propriétaire : 4 candidatures attendent sa réponse.',
+        title: 'Relancer le propriétaire qui n\'a pas répondu à ses candidats',
+        action: 'Départ dans 3 jours, la relance automatique est déjà partie.',
         startDate: '2026-10-31',
         ageDays: 9,
         count: 4,
-        link: 'https://guardiens.fr/admin/listings',
+        link: 'https://guardiens.fr/admin/listings?filter=published',
+        elements: [{ label: 'Garde 2 chats centre ville de Marseille, Marseille', link: 'https://guardiens.fr/admin/listings?filter=published' }],
       },
     ],
   },

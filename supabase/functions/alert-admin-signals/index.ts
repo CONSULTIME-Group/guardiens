@@ -1,6 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
-import { almaWeeklyLines, buildDigestLines, humanQueueLines, isActionableCritical, siteHealthLines, sitIdOf, weeklySummaryLines, type AlmaWeeklyStats, type HumanQueue, type OpenSignal, type SiteHealthCheck, type SitInfo } from './digest.ts'
+import { almaWeeklyLines, weeklySummaryLines, workListDigestLines, workListNotices, type AlmaWeeklyStats, type OpenSignal } from './digest.ts'
+import { buildWorkList, type WorkListRaw } from '../_shared/admin-work-list.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -66,40 +67,15 @@ Deno.serve(async (req) => {
       notices.push('Signaux désactivés dans Paramètres : aucun nouveau signal ni relance automatique depuis la coupure.')
     }
 
-    // 2) Signaux restants
-    const { data: open, error: openErr } = await admin
-      .from('admin_signals')
-      .select('signal_type, severity, detected_at, entity_type, entity_id, metadata')
-      .is('resolved_at', null)
-    if (openErr) throw openErr
-
-    const rows = (open ?? []) as OpenSignal[]
+    // 2) Lot ADM13 : une lecture (public.admin_work_list), une liste, celle
+    // de la vue d'ensemble. Une source illisible est écrite en tête de l'email.
+    const { data: raw, error: wlErr } = await admin.rpc('admin_work_list')
+    if (wlErr) throw wlErr
     const now = Date.now()
-    const actionable = rows.filter((r) => isActionableCritical(r, now))
-    const sitIds = [...new Set(actionable.map(sitIdOf).filter((x): x is string => !!x))]
-    const sits = new Map<string, SitInfo>()
-    if (sitIds.length) {
-      const { data: sitRows, error: sitErr } = await admin
-        .from('sits').select('id, title, start_date').in('id', sitIds)
-      if (sitErr) throw sitErr
-      for (const r of sitRows ?? []) sits.set(r.id, r as SitInfo)
-    }
-    // Lot ADM2 : files humaines (contact, signalements, RGPD, contestations,
-    // vérifications) en tête, puis les signaux.
-    const { data: queues, error: qErr } = await admin.rpc('admin_human_queues')
-    if (qErr) {
-      console.error('admin_human_queues error', qErr)
-      notices.push('Lecture des files humaines impossible (contact, signalements, RGPD, contestations, vérifications) : ouvrez l\'accueil admin.')
-    }
-    const humanLines = humanQueueLines(qErr ? [] : (queues as HumanQueue[] | null), now)
-    // Lot ADM6 : voyants rouges de l'état du site en tête (lecture en échec écrite en avis).
-    const { data: health, error: hErr } = await admin.rpc('admin_site_health')
-    if (hErr) {
-      console.error('admin_site_health error', hErr)
-      notices.push('Lecture de l\'état du site impossible : ouvrez l\'accueil admin.')
-    }
-    const healthLines = siteHealthLines(hErr ? [] : (health as SiteHealthCheck[] | null))
-    const lines = [...healthLines, ...humanLines, ...buildDigestLines(rows, sits, now)]
+    const model = buildWorkList(raw as WorkListRaw, now)
+    notices.push(...workListNotices(model))
+    const rows = ((raw as WorkListRaw | null)?.signals ?? []) as OpenSignal[]
+    const lines = workListDigestLines(model, now)
     // Lundi : couverture, qualité éditoriale, À animer, dans le paragraphe de synthèse existant.
     // Lot J2-B : section Alma du lundi, lue en lecture seule.
     let almaStats: AlmaWeeklyStats | null = null
@@ -109,7 +85,8 @@ Deno.serve(async (req) => {
       else almaStats = aw as AlmaWeeklyStats
     }
     const coverageLine = [...weeklySummaryLines(rows), ...almaWeeklyLines(almaStats)].join(' ') || null
-    const warningCount = rows.filter((r) => r.severity === 'warning').length
+    // Situations que le site relance seul, hors liste : dites en bas de l'email.
+    const warningCount = model.autoTotal
     const staleCount = lines.filter((l) => (l.ageDays ?? 0) > 3).length
 
     // 3) Lot ADM2 : l'email part chaque matin, « Rien à traiter » compris
@@ -126,7 +103,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({
         ok: true, sent: false, dry_run: true,
         auto_resolved: autoResolved ?? [],
-        critical_open: lines.length, human_queues: humanLines.length, site_health: healthLines.length,
+        critical_open: lines.length, families: lines.map((l) => l.key.split(':')[0]),
         warning_open: warningCount, stale_count: staleCount,
         coverage_line: coverageLine, notices, lines,
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
@@ -146,14 +123,14 @@ Deno.serve(async (req) => {
           staleCount,
           coverageLine,
           notices,
-          lines: lines.slice(0, 20),
+          lines,
         },
       }),
     })
     const txt = res.ok ? '' : await res.text().catch(() => '')
     if (!res.ok) console.error('send-transactional-email failed', res.status, txt)
 
-    const metrics = { sent: res.ok, lines: lines.length, human_queues: humanLines.length, warning_open: warningCount, notices }
+    const metrics = { sent: res.ok, lines: lines.length, warning_open: warningCount, notices }
     await finishRun(
       !res.ok ? 'failed' : notices.length ? 'partial' : 'success',
       metrics,
@@ -163,7 +140,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({
       ok: res.ok, sent: res.ok, recipient: RECIPIENT,
       auto_resolved: autoResolved ?? [],
-      critical_open: lines.length, human_queues: humanLines.length,
+      critical_open: lines.length,
       warning_open: warningCount, stale_count: staleCount,
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   } catch (e) {

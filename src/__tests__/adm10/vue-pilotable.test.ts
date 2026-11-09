@@ -5,7 +5,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { buildPilotage, autoBreakdown, departureLabel, type PilotageSignal } from "@/lib/admin/pilotage";
+import { buildPilotage, buildWorkList, autoBreakdown, departureLabel, type PilotageSignal } from "@/lib/admin/pilotage";
 import { summarizeRelances } from "@/pages/admin/_components/dashboard/PilotageBlocks";
 import { signalNature, SIGNAL_TYPES } from "../../../supabase/functions/_shared/admin-signal-config.ts";
 
@@ -83,7 +83,7 @@ describe("Rangement des signaux", () => {
   it("les relances automatiques loin du départ restent dans « le système s'en charge »", () => {
     expect(model.auto).toEqual([{ type: "pending_application", count: 2 }, { type: "stale_draft", count: 1 }]);
     expect(model.autoTotal).toBe(3);
-    expect(autoBreakdown(model.auto)).toBe("2 candidatures sans réponse, 1 brouillon");
+    expect(autoBreakdown(model.auto)).toBe("2 candidatures relancées auprès du propriétaire, 1 brouillon");
   });
 
   it("technique avec l'état du site, animation au lundi", () => {
@@ -124,7 +124,12 @@ describe("Page et email suivent la même règle", () => {
     expect(page).not.toMatch(/<SignalsSection/);
   });
   it("l'email du matin écarte une situation relancée seule loin du départ", () => {
+    // Lot ADM13 : l'email lit la même liste que la page (workListDigestLines).
     const digest = read("supabase/functions/alert-admin-signals/digest.ts");
-    expect(digest).toMatch(/signalNature\(t\) === 'auto'\) && !isSitImminent\(startDate, now\)/);
+    expect(digest).toContain("model.items.map");
+    const far: PilotageSignal = { id: "p", signal_type: "pending_application", severity: "critical", entity_type: "sit", entity_id: "s1", detected_at: "2026-10-01T08:00:00Z", metadata: {} };
+    const model = buildWorkList({ signals: [far], sits: [{ id: "s1", start_date: "2027-01-10" }] }, Date.parse("2026-11-09T08:00:00Z"));
+    expect(model.items).toHaveLength(0);
+    expect(model.autoTotal).toBe(1);
   });
 });

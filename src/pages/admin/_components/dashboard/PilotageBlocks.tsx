@@ -1,74 +1,69 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { KpiTile } from "@/components/admin/ui";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
-import { ADMIN_BADGES_QUERY_KEY, fetchAdminBadges, type AdminBadges } from "@/hooks/useAdminBadges";
+import { ADMIN_BADGES_REFRESH_EVENT } from "@/hooks/useAdminBadges";
 import { UNAVAILABLE_LABEL, reportAdminReadError } from "@/lib/admin/readError";
 import {
   autoBreakdown,
-  buildPilotage,
+  buildWorkList,
   hebdoBreakdown,
-  type PilotageLine,
-  type PilotageModel,
+  unavailableSentence,
+  WORK_FAMILY_LABELS,
+  WORK_FAMILY_ORDER,
   type PilotageSignal,
+  type WorkItem,
+  type WorkListModel,
+  type WorkListRaw,
 } from "@/lib/admin/pilotage";
 import { buildActionQueue } from "@/components/admin/signals/actionQueue";
 import type { AdminSignalBase } from "@/components/admin/signals/signalGrouping";
 import type { SitInfo } from "@/components/admin/signals/SitSignalGroupCard";
 import { AUTO_RELANCE_TEMPLATES } from "../../../../../supabase/functions/_shared/admin-signal-config.ts";
-import { renderEntry, waitingQueueItems } from "./SignalsSection";
+import { renderEntry } from "./SignalsSection";
 import { useKeyFigures, useListingFlow } from "./useDashboardData";
 import { useLiquiditySnapshot } from "./LiquidityBlock";
 
+/** Clé rangée sous admin_dashboard_snapshot : une carte traitée rafraîchit la liste. */
+export const WORK_LIST_QUERY_KEY = ["admin_dashboard_snapshot", "work-list"] as const;
+
 /**
- * Lot ADM10 (22/10/2026, maquette Claude Design validée par Jérémie) :
- * la vue d'ensemble répond à trois questions. Une seule lecture des signaux
- * ouverts (clé rangée sous admin_dashboard_snapshot : une carte traitée
- * disparaît aussitôt), rangée par buildPilotage (src/lib/admin/pilotage.ts).
+ * Lot ADM10 puis lot ADM13 (09/11/2026) : la vue d'ensemble lit la liste de
+ * travail en une lecture (public.admin_work_list) et la met en forme par
+ * buildWorkList (supabase/functions/_shared/admin-work-list.ts), comme l'email
+ * du matin : même nombre de lignes à l'écran et dans l'email.
  */
 export function usePilotage() {
   const { enabled: flagEnabled, loading: flagLoading } = useFeatureFlag("admin_signals_active");
-  const open = useQuery<PilotageSignal[]>({
-    queryKey: ["admin_dashboard_snapshot", "open"],
+  const q = useQuery<WorkListModel>({
+    queryKey: WORK_LIST_QUERY_KEY,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("admin_signals")
-        .select("id, signal_type, severity, entity_type, entity_id, detected_at, metadata")
-        .is("resolved_at", null)
-        // Lot ADM12 : une annonce sans candidature reste lue même sans gardien
-        // dans le rayon (sévérité info), comme la pastille du menu.
-        .or("severity.neq.info,signal_type.eq.no_applications")
-        .order("detected_at", { ascending: false })
-        .limit(1000);
-      if (error) throw error;
-      return (data ?? []) as unknown as PilotageSignal[];
+      const { data, error } = await supabase.rpc("admin_work_list");
+      if (error) {
+        reportAdminReadError("Vue d'ensemble : liste de travail", error);
+        throw error;
+      }
+      return buildWorkList(data as unknown as WorkListRaw);
     },
-    enabled: flagEnabled,
     staleTime: 30_000,
+    // admin_site_health compte les pages vues de 8 jours : relue toutes les 5 minutes.
+    refetchInterval: 300_000,
   });
-  const signals = open.data ?? [];
-  const sitIds = [...new Set(signals.map((s) => {
-    const m = s.metadata ?? {};
-    return typeof m.sit_id === "string" ? m.sit_id : s.entity_type === "sit" ? s.entity_id : null;
-  }).filter((x): x is string => typeof x === "string"))].sort();
-  const sits = useQuery<Map<string, SitInfo>>({
-    queryKey: ["admin_signal_sits", sitIds],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("sits").select("id, title, city, start_date").in("id", sitIds);
-      if (error) throw error;
-      return new Map((data ?? []).map((r) => [r.id, r as SitInfo]));
-    },
-    enabled: flagEnabled && sitIds.length > 0,
-    staleTime: 60_000,
-  });
-  const sitMap = sits.data ?? new Map<string, SitInfo>();
-  const ready = !open.isLoading && (sitIds.length === 0 || !sits.isLoading);
-  const model: PilotageModel | null = flagEnabled && open.data && ready ? buildPilotage(signals, sitMap) : null;
-  return { flagEnabled, flagLoading, model, sitMap, loading: open.isLoading || (sitIds.length > 0 && sits.isLoading), error: open.error || sits.error };
+  // Une action dans une file des membres (contact, signalement, RGPD) rafraîchit
+  // aussi la liste, comme le menu.
+  const qc = useQueryClient();
+  useEffect(() => {
+    const onRefresh = () => { void qc.invalidateQueries({ queryKey: WORK_LIST_QUERY_KEY }); };
+    window.addEventListener(ADMIN_BADGES_REFRESH_EVENT, onRefresh);
+    return () => window.removeEventListener(ADMIN_BADGES_REFRESH_EVENT, onRefresh);
+  }, [qc]);
+  const model = q.data ?? null;
+  const sitMap = (model?.sits ?? new Map()) as unknown as Map<string, SitInfo>;
+  return { flagEnabled, flagLoading, model, sitMap, loading: q.isLoading, error: q.error };
 }
 
 /** Cartes d'action existantes d'une ligne, regroupées comme dans l'ancienne file. */
@@ -77,40 +72,51 @@ const LineDetail = ({ signals, sitMap }: { signals: PilotageSignal[]; sitMap: Ma
   return <ul className="space-y-2 px-4 pb-4 sm:px-5">{entries.map((e) => renderEntry(e, sitMap))}</ul>;
 };
 
-const TONE_CLASS: Record<PilotageLine["tone"], string> = {
+const TONE_CLASS: Record<WorkItem["tone"], string> = {
   urgent: "text-destructive font-semibold",
   late: "text-secondary font-semibold",
   normal: "text-muted-foreground",
 };
 
-const LineRow = ({ line, sitMap, last }: { line: PilotageLine; sitMap: Map<string, SitInfo>; last: boolean }) => {
+/**
+ * Une ligne de la liste : un signal ou plus déplie ses cartes d'action ; une
+ * ligne sans signal (voyant, file des membres, relances) mène à sa file.
+ */
+const LineRow = ({ line, sitMap, last }: { line: WorkItem; sitMap: Map<string, SitInfo>; last: boolean }) => {
   const [open, setOpen] = useState(false);
   const id = `pilotage-${line.key.replace(/[^a-z0-9_-]/gi, "-")}`;
+  const unfolds = line.signals.length > 0;
   return (
-    <li className={last ? "" : "border-b border-border/70"} data-testid="pilotage-line">
+    <li className={last ? "" : "border-b border-border/70"} data-testid="pilotage-line" data-family={line.family}>
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-4 sm:px-5">
         <div className="min-w-0 flex-[1_1_320px]">
           <p className="text-[15px] font-semibold text-foreground">{line.title}</p>
           <p className="mt-0.5 text-[13px] text-muted-foreground">{line.detail}</p>
         </div>
         <span className={`text-[13px] ${TONE_CLASS[line.tone]}`}>{line.deadline}</span>
-        <Button
-          variant="outline"
-          className="min-h-11 rounded-full px-5 font-bold"
-          aria-expanded={open}
-          aria-controls={id}
-          onClick={() => setOpen((o) => !o)}
-        >
-          {open ? "Replier" : line.action}
-        </Button>
+        {unfolds ? (
+          <Button
+            variant="outline"
+            className="min-h-11 rounded-full px-5 font-bold"
+            aria-expanded={open}
+            aria-controls={id}
+            onClick={() => setOpen((o) => !o)}
+          >
+            {open ? "Replier" : line.action}
+          </Button>
+        ) : (
+          <Button asChild variant="outline" className="min-h-11 rounded-full px-5 font-bold">
+            <Link to={line.link}>{line.action}</Link>
+          </Button>
+        )}
       </div>
-      {open && <div id={id}><LineDetail signals={line.signals} sitMap={sitMap} /></div>}
+      {unfolds && open && <div id={id}><LineDetail signals={line.signals} sitMap={sitMap} /></div>}
     </li>
   );
 };
 
-const LineGroup = ({ label, lines, sitMap, urgent }: { label: string; lines: PilotageLine[]; sitMap: Map<string, SitInfo>; urgent?: boolean }) => (
-  <div className="overflow-hidden rounded-2xl border border-border bg-card">
+const LineGroup = ({ label, lines, sitMap, urgent }: { label: string; lines: WorkItem[]; sitMap: Map<string, SitInfo>; urgent?: boolean }) => (
+  <div className="overflow-hidden rounded-2xl border border-border bg-card" data-testid="pilotage-group">
     <p className={`border-b border-border/70 px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] sm:px-5 ${urgent ? "bg-destructive/5 text-destructive" : "text-muted-foreground"}`}>
       {label}
     </p>
@@ -135,70 +141,58 @@ export const TechnicalSignalsLine = () => {
   );
 };
 
-/** Question 2 : ce qui vous attend aujourd'hui. */
+/** Question 2 : ce qui vous attend aujourd'hui, la liste de travail entière. */
 export const TodaySection = () => {
   const { flagEnabled, flagLoading, model, sitMap, loading, error } = usePilotage();
-  const { data: badges, isError: badgesError } = useQuery<AdminBadges>({
-    queryKey: [...ADMIN_BADGES_QUERY_KEY, "accueil"],
-    queryFn: fetchAdminBadges,
-    staleTime: 30_000,
-    refetchInterval: 60_000,
-  });
-  const failed = useAutomation().data?.failed7d ?? 0;
-  const waiting = waitingQueueItems(badges ?? {});
   if (flagLoading) return null;
-  const lineCount = (model?.urgent.length ?? 0) + (model?.vous.length ?? 0) + (failed > 0 ? 1 : 0);
+  const items = model?.items ?? [];
+  const lineCount = items.length;
+  const membresWaiting = items.some((i) => i.family === "membres");
 
   return (
     <section aria-labelledby="pilotage-today" className="space-y-3.5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 id="pilotage-today" className="font-heading text-2xl font-semibold">Ce qui vous attend aujourd'hui</h2>
-        {model && <p className="text-sm text-muted-foreground">{lineCount} {lineCount > 1 ? "lignes" : "ligne"}</p>}
+        {model && <p className="text-sm text-muted-foreground" data-testid="pilotage-count">{lineCount} {lineCount > 1 ? "lignes" : "ligne"}</p>}
       </div>
 
-      {!flagEnabled ? (
+      {!flagEnabled && (
         <p className="text-sm text-foreground" data-testid="signals-disabled">
           Les signaux sont désactivés : la file ne se remplit plus et les relances automatiques sont coupées.{" "}
           <Link to="/admin/settings" className="underline">Réactiver dans Paramètres</Link>.
         </p>
-      ) : loading ? (
-        <div className="space-y-2"><Skeleton className="h-16 rounded-2xl" /><Skeleton className="h-16 rounded-2xl" /></div>
-      ) : error || !model ? (
-        <p className="text-sm text-destructive">Lecture des signaux impossible. Ouvrez les files depuis le menu.</p>
-      ) : (
-        <>
-          {model.urgent.length > 0 && (
-            <LineGroup label="Départ sous 7 jours, la relance automatique ne suffit plus" lines={model.urgent} sitMap={sitMap} urgent />
-          )}
-          {model.vous.length > 0 && <LineGroup label="Seul vous pouvez trancher" lines={model.vous} sitMap={sitMap} />}
-          {failed > 0 && (
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-2xl border border-border bg-card px-4 py-4 sm:px-5" data-testid="pilotage-relances-echec">
-              <div className="min-w-0 flex-[1_1_320px]">
-                <p className="text-[15px] font-semibold">Vérifier {failed} {failed > 1 ? "relances automatiques en échec" : "relance automatique en échec"}</p>
-                <p className="mt-0.5 text-[13px] text-muted-foreground">Sur 7 jours : le membre n'a pas reçu son rappel.</p>
-              </div>
-              <Button asChild variant="outline" className="min-h-11 rounded-full px-5 font-bold"><Link to="/admin/emails">Vérifier</Link></Button>
-            </div>
-          )}
-          {lineCount === 0 && <p className="text-sm text-foreground">Tout est à jour aujourd'hui.</p>}
-        </>
       )}
 
-      <p className="text-sm text-muted-foreground" data-testid="waiting-members">
-        {badgesError ? (
-          "Membres qui attendent : lecture indisponible, ouvrez les files depuis le menu."
-        ) : waiting.length === 0 ? (
-          "Tous les membres ont leur réponse : messages de contact, signalements, demandes RGPD, contestations d'avis et vérifications d'identité sont à jour."
-        ) : (
-          <>
-            <span className="font-semibold text-foreground">Membres qui attendent une réponse : </span>
-            {waiting.map((w, i) => (
-              <span key={w.to}>{i > 0 && ", "}<Link to={w.to} className="text-primary underline underline-offset-2">{w.label}</Link></span>
-            ))}
-            .
-          </>
-        )}
-      </p>
+      {loading ? (
+        <div className="space-y-2"><Skeleton className="h-16 rounded-2xl" /><Skeleton className="h-16 rounded-2xl" /></div>
+      ) : error || !model ? (
+        <p className="text-sm text-destructive" data-testid="pilotage-error">Lecture de la liste impossible. Ouvrez les files depuis le menu.</p>
+      ) : (
+        <>
+          {model.unavailable.length > 0 && (
+            <p className="text-sm font-semibold text-destructive" data-testid="pilotage-unavailable">{unavailableSentence(model.unavailable)}</p>
+          )}
+          {WORK_FAMILY_ORDER.map((family) => {
+            const lines = items.filter((i) => i.family === family);
+            if (lines.length === 0) return null;
+            return (
+              <LineGroup
+                key={family}
+                label={WORK_FAMILY_LABELS[family]}
+                lines={lines}
+                sitMap={sitMap}
+                urgent={family === "depart" || family === "site"}
+              />
+            );
+          })}
+          {lineCount === 0 && model.unavailable.length === 0 && <p className="text-sm text-foreground">Tout est à jour aujourd'hui.</p>}
+          {!membresWaiting && !model.unavailable.includes("queues") && (
+            <p className="text-sm text-muted-foreground" data-testid="waiting-members">
+              Tous les membres ont leur réponse : messages de contact, signalements, demandes RGPD, contestations d'avis et vérifications d'identité sont à jour.
+            </p>
+          )}
+        </>
+      )}
     </section>
   );
 };

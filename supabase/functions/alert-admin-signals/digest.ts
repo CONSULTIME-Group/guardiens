@@ -1,10 +1,8 @@
 // Lot S1 : construction pure de l'email quotidien des signaux admin.
-// Critiques actionnables seulement, une ligne par annonce, tri par échéance.
-// Lot S2 : le routage (quotidien, lundi, À animer) est lu dans
-// _shared/admin-signal-config.ts, seule source des destinations.
-import {
-  hasDestination, isSitImminent, isSitStarted, sitGroupSummary, signalAction, signalNature, SIGNAL_TYPES, SIT_ACTION_PRIORITY, SIT_TIMED_TYPES,
-} from '../_shared/admin-signal-config.ts'
+// Lot ADM13 : les lignes viennent de la liste de travail partagée avec la vue
+// d'ensemble ; ce fichier garde la mise en forme de l'email et la synthèse du lundi.
+import { SIGNAL_TYPES } from '../_shared/admin-signal-config.ts'
+import { unavailableSentence, type WorkListModel } from '../_shared/admin-work-list.ts'
 
 export interface OpenSignal {
   signal_type: string
@@ -14,8 +12,6 @@ export interface OpenSignal {
   entity_id: string | null
   metadata: Record<string, unknown> | null
 }
-
-export interface SitInfo { id: string; title: string | null; start_date: string | null }
 
 export interface DigestLine {
   key: string
@@ -27,196 +23,42 @@ export interface DigestLine {
   count: number
   signalTypes: string[]
   link: string
+  /** Éléments nommés de la ligne (annonces, membres), cinq au plus. */
+  elements: { label: string; link: string }[]
+  /** Éléments de la ligne au-delà des cinq nommés. */
+  moreCount: number
 }
 
-// Types jamais dans l'email quotidien, dérivés de la configuration.
-export const NON_ACTIONABLE_TYPES = new Set(
-  Object.entries(SIGNAL_TYPES).filter(([, c]) => !c.destinations.includes('daily_email')).map(([t]) => t),
-)
+const ADMIN_ORIGIN = 'https://guardiens.fr'
 
-// Lot ADM1 : verbes d'action lus dans la configuration unique (partagés avec l'accueil admin).
-
-const LINKS: Record<string, string> = {
-  stale_draft: 'https://guardiens.fr/admin/listings',
-  no_applications: 'https://guardiens.fr/admin/listings',
-  pending_application: 'https://guardiens.fr/admin/listings',
-  stalled_discussion: 'https://guardiens.fr/admin/listings',
-  owner_sit_unconfirmed: 'https://guardiens.fr/admin/listings',
-  suspicious_account: 'https://guardiens.fr/admin/users',
-  notification_delivery_failed: 'https://guardiens.fr/admin/emails',
-  nurturing_run_anomaly: 'https://guardiens.fr/admin/emails',
-  email_delivery_low: 'https://guardiens.fr/admin/emails',
-}
-
-export const actionFor = (type: string) => signalAction(type)
-
-const linkFor = (type: string) => LINKS[type] ?? 'https://guardiens.fr/admin'
-
-const PRIORITY = SIT_ACTION_PRIORITY
-
-export const sitIdOf = (s: OpenSignal): string | null => {
-  const m = s.metadata ?? {}
-  if (typeof m.sit_id === 'string') return m.sit_id
-  if (s.entity_type === 'sit' && s.entity_id) return s.entity_id
-  return null
-}
-
-// Lot ADM2 : âge réel d'un signal en heures. La gravité d'une candidature est
-// figée à l'insertion ; hours_since_created (au repérage) plus le temps écoulé
-// depuis le repérage donne l'âge vrai de la candidature.
-export const PENDING_APPLICATION_EMAIL_HOURS = 96
-
-export function signalAgeHours(s: OpenSignal, now: number = Date.now()): number {
-  const base = Number((s.metadata ?? {}).hours_since_created)
-  const since = (now - new Date(s.detected_at).getTime()) / 3_600_000
-  return (Number.isFinite(base) ? base : 0) + Math.max(0, since)
-}
-
-// Lot ADM2 : annonce publiée sans candidature (warning), dans l'email du matin.
-// Le niveau « info » (aucun gardien éligible à proximité) reste sur l'écran.
-const EMAIL_WARNING_TYPES = new Set(['no_applications'])
-
-export function isActionableCritical(s: OpenSignal, now: number = Date.now()): boolean {
-  if (!hasDestination(s.signal_type, 'daily_email')) return false
-  if (s.severity === 'critical' || SIGNAL_TYPES[s.signal_type]?.dailyEmailAnySeverity === true) return true
-  if (s.severity !== 'warning') return false
-  if (EMAIL_WARNING_TYPES.has(s.signal_type)) return true
-  return s.signal_type === 'pending_application' && signalAgeHours(s, now) >= PENDING_APPLICATION_EMAIL_HOURS
-}
-
-// Lot ADM2 : files où un membre attend une réponse humaine (admin_human_queues),
-// placées en tête de l'email. Même forme que les lignes de signaux.
-export interface HumanQueue { key: string; count: number; oldest: string | null }
-
-const HUMAN_QUEUES: Record<string, { one: string; many: string; action: string; link: string }> = {
-  contactMessages: { one: 'message de contact', many: 'messages de contact', action: 'Répondre depuis Messages contact : le bouton Répondre envoie l\'email et le trace.', link: 'https://guardiens.fr/admin/contact-messages' },
-  reports: { one: 'signalement', many: 'signalements', action: 'Traiter le signalement : décision et message au membre.', link: 'https://guardiens.fr/admin/reports' },
-  deletionRequests: { one: 'demande RGPD', many: 'demandes RGPD', action: 'Traiter la demande de suppression (délai légal d\'un mois).', link: 'https://guardiens.fr/admin/demandes-suppression' },
-  reviewDisputes: { one: 'contestation d\'avis', many: 'contestations d\'avis', action: 'Trancher la contestation.', link: 'https://guardiens.fr/admin/review-disputes' },
-  verifications: { one: 'vérification d\'identité', many: 'vérifications d\'identité', action: 'Valider ou refuser la pièce d\'identité.', link: 'https://guardiens.fr/admin/verifications' },
-}
-
-export function humanQueueLines(queues: HumanQueue[] | null | undefined, now: number = Date.now()): DigestLine[] {
-  const out: DigestLine[] = []
-  for (const q of queues ?? []) {
-    const def = HUMAN_QUEUES[q?.key]
-    const count = Number(q?.count ?? 0)
-    if (!def || !Number.isFinite(count) || count <= 0) continue
-    const oldest = q.oldest ? new Date(q.oldest).getTime() : NaN
-    out.push({
-      key: `queue:${q.key}`,
-      title: `${count} ${count > 1 ? def.many : def.one}`,
-      action: def.action,
-      startDate: null,
-      ageDays: Number.isFinite(oldest) ? Math.max(0, Math.floor((now - oldest) / 86_400_000)) : null,
-      count,
-      signalTypes: [],
-      link: def.link,
-    })
-  }
-  return out
-}
-
-// Lot ADM6 : voyants rouges de l'état du site (admin_site_health), en tête de
-// l'email. Le rendu SEO est déjà porté par son signal critique : jamais deux fois.
-export interface SiteHealthCheck { key: string; label: string; state: string; detail?: string | null; link?: string | null }
-
-const SITE_HEALTH_EMAIL_SKIP = new Set(['seo'])
-
-export function siteHealthLines(checks: SiteHealthCheck[] | null | undefined): DigestLine[] {
-  const out: DigestLine[] = []
-  for (const c of Array.isArray(checks) ? checks : []) {
-    if (!c || typeof c.key !== 'string' || c.state !== 'alert' || SITE_HEALTH_EMAIL_SKIP.has(c.key)) continue
-    const path = typeof c.link === 'string' && c.link.startsWith('/admin') ? c.link : '/admin'
-    out.push({
-      key: `health:${c.key}`,
-      title: `État du site : ${c.label}`,
-      action: (typeof c.detail === 'string' && c.detail) ? c.detail : 'À regarder depuis l\'accueil admin.',
-      startDate: null,
-      ageDays: null,
-      count: 1,
-      signalTypes: [],
-      link: `https://guardiens.fr${path}`,
-    })
-  }
-  return out
-}
-
-export function buildDigestLines(
-  signals: OpenSignal[],
-  sits: Map<string, SitInfo>,
-  now: number = Date.now(),
-): DigestLine[] {
-  const groups = new Map<string, OpenSignal[]>()
-  for (const s of signals.filter((x) => isActionableCritical(x, now))) {
-    const sitId = sitIdOf(s)
-    const group = SIGNAL_TYPES[s.signal_type]?.queueGroup
-    const key = sitId
-      ? `sit:${sitId}`
-      : group === 'digest_queue'
-        ? 'group:digest_queue'
-        : `sig:${s.signal_type}:${s.entity_id ?? s.detected_at}`
-    const arr = groups.get(key) ?? []
-    arr.push(s)
-    groups.set(key, arr)
-  }
-
-  const lines: DigestLine[] = []
-  for (const [key, arr] of groups) {
-    const types = [...new Set(arr.map((s) => s.signal_type))]
-    const main = PRIORITY.find((t) => types.includes(t)) ?? types[0]
-    const oldest = Math.min(...arr.map((s) => new Date(s.detected_at).getTime()))
-    const sitId = key.startsWith('sit:') ? key.slice(4) : null
-    const sit = sitId ? sits.get(sitId) : undefined
-    const m = arr[0].metadata ?? {}
-    // Lot ADM1 : garde commencée, plus aucune action avant le départ.
-    const startDate = sit?.start_date ?? (m.start_date as string) ?? null
-    if (sitId && types.every((t) => SIT_TIMED_TYPES.has(t)) && isSitStarted(startDate, now)) continue
-    // Lot ADM10 : une situation que le site relance déjà seul (nature auto)
-    // n'entre dans l'email qu'à 7 jours du départ ou moins, comme sur l'accueil.
-    if (types.every((t) => signalNature(t) === 'auto') && !isSitImminent(startDate, now)) continue
-    // Lot ADM5 : un titre vide (brouillon sans titre) ne laisse jamais une ligne muette.
-    const firstText = (...v: unknown[]) => v.map((x) => (typeof x === 'string' ? x.trim() : '')).find((x) => x) ?? ''
-    const title = (key === 'group:digest_queue' ? 'File des digests' : firstText(sit?.title, m.sit_title, m.title) || (sitId ? 'Annonce sans titre' : SIGNAL_TYPES[main]?.label ?? main))
-      .replace(/[\u2014\u2013]/g, ',')
-    const count = arr.length
-    let action = actionFor(main)
-    const allTypes = arr.map((x) => x.signal_type)
-    if (types.includes('pending_application') && types.includes('stalled_discussion') && main !== 'owner_sit_unconfirmed') {
-      action = `Relancer le propriétaire : ${sitGroupSummary(allTypes)}.`
-    } else if (main.startsWith('alma_') && Array.isArray(m.messages)) {
-      // Lot J1 : les messages concernés, dans l'email quotidien.
-      const quotes = (m.messages as { text?: string }[]).map((x) => `« ${String(x.text ?? '').slice(0, 160)} »`).join(' ')
-      action = `${actionFor(main)} Messages : ${quotes}`.replace(/[\u2014\u2013]/g, ',')
-    } else if (main === 'pending_application' && count > 1) {
-      action = `Relancer le propriétaire : ${count} candidatures attendent sa réponse.`
+// Lot ADM13 : l'email du matin reprend la liste de travail de la vue
+// d'ensemble (buildWorkList, _shared/admin-work-list.ts), ligne pour ligne.
+// Même longueur à l'écran et dans l'email, par construction.
+export function workListDigestLines(model: WorkListModel, now: number = Date.now()): DigestLine[] {
+  return model.items.map((it) => {
+    const since = it.waitingSince ? new Date(it.waitingSince).getTime() : NaN
+    return {
+      key: it.key,
+      title: it.title,
+      action: it.detail,
+      startDate: it.startDate,
+      ageDays: Number.isFinite(since) ? Math.max(0, Math.floor((now - since) / 86_400_000)) : null,
+      count: it.count,
+      signalTypes: [...new Set(it.signals.map((s) => s.signal_type))],
+      link: `${ADMIN_ORIGIN}${it.link.startsWith('/admin') ? it.link : '/admin'}`,
+      elements: it.elements.slice(0, 5).map((e) => ({
+        label: e.label,
+        link: `${ADMIN_ORIGIN}${e.link.startsWith('/admin') ? e.link : '/admin'}`,
+      })),
+      moreCount: Math.max(0, it.elements.length - 5),
     }
-    // Lot ADM2 : âge vrai de la plus ancienne candidature, en jours.
-    if (types.includes('pending_application')) {
-      const maxH = Math.max(...arr.filter((x) => x.signal_type === 'pending_application').map((x) => signalAgeHours(x, now)))
-      const d = Math.floor(maxH / 24)
-      if (d >= 1) action = `${action} La plus ancienne attend depuis ${d} jour${d > 1 ? 's' : ''}.`
-    }
-    lines.push({
-      key,
-      title,
-      action,
-      startDate,
-      ageDays: Math.floor((now - oldest) / 86_400_000),
-      count,
-      signalTypes: types,
-      // Lot J1 : un signal peut porter son lien exact (fiche membre).
-      link: typeof m.admin_url === 'string' && m.admin_url.startsWith('https://guardiens.fr/admin') ? m.admin_url : linkFor(main),
-    })
-  }
-
-  // Échéance la plus proche d'abord ; sans date, après, du plus ancien au plus récent.
-  return lines.sort((a, b) => {
-    if (a.startDate && b.startDate) return a.startDate.localeCompare(b.startDate)
-    if (a.startDate) return -1
-    if (b.startDate) return 1
-    return (b.ageDays ?? 0) - (a.ageDays ?? 0)
   })
+}
+
+/** Phrase des sources illisibles, écrite en tête de l'email. */
+export function workListNotices(model: WorkListModel): string[] {
+  const s = unavailableSentence(model.unavailable)
+  return s ? [s] : []
 }
 
 // Synthèse hebdomadaire des trous de couverture et tensions SEO, le lundi seulement.
