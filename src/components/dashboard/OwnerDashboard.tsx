@@ -538,7 +538,7 @@ const OwnerDashboard = () => {
                 />
                 <MissingSitCityBanner userId={user?.id} />
                 {showAlmaFirstMeeting && (
-                  <AlmaFirstMeeting role="owner" onDone={markAlmaFirstMeetingSeen} onSeen={recordAlmaFirstMeetingSeen} />
+                  <AlmaFirstMeeting role="owner" onDone={markAlmaFirstMeetingSeen} onSeen={recordAlmaFirstMeetingSeen} primaryVariant="outline" />
                 )}
                 {showPhotoCard && (
                   <DeferredMount minHeight={0}>

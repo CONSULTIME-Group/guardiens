@@ -1,4 +1,4 @@
-import { daysFromToday } from "@/lib/calendarDate";
+import { daysFromToday, isOngoingDay } from "@/lib/calendarDate";
 import { publicProfilesLoader } from "@/lib/batchedReads";
 import { fetchMyBadges, fetchMyEmergencyProfileId, fetchMySmallMissionsIndex, fetchMyConversationsIndex, fetchOpenPublishedSits, fetchMyApplicationsIndex } from "@/lib/dashboardShared";
 import { fetchMyProfile, fetchMyPublicProfile, fetchMySitterProfile } from "@/lib/myProfile";
@@ -20,6 +20,28 @@ export interface ReputationData {
   note_moyenne: number;
   is_manual_super: boolean;
   statut_gardien: "novice" | "confirme" | "super_gardien";
+}
+
+/** Lot L7 : garde en cours, candidature en attente et avis à laisser, pour le récit gardien. */
+export interface SitterGuardStory {
+  id: string;
+  start_date: string | null;
+  end_date: string | null;
+  city: string | null;
+  property_id: string | null;
+  ownerName: string;
+  pets: Array<{ name?: string | null }>;
+}
+
+export interface SitterPendingApplication {
+  sitId: string;
+  ownerFirstName: string | null;
+  created_at: string | null;
+}
+
+export interface SitterReviewDue {
+  sitId: string;
+  ownerFirstName: string | null;
 }
 
 export interface SitterDashboardData {
@@ -50,6 +72,14 @@ export interface SitterDashboardData {
   hasAcceptedRecent: boolean;
   nextGuard: any | null;
   nextGuardError: string | null;
+  /** Lot L7 : garde en cours (gardien retenu, aujourd'hui entre le premier et le dernier jour). */
+  ongoingGuard: SitterGuardStory | null;
+  /** Lot L7 : candidature ouverte la plus récente sur une annonce publiée. */
+  pendingApplication: SitterPendingApplication | null;
+  /** Lot L7 : garde terminée depuis 14 jours au plus, sans avis du gardien. */
+  reviewDue: SitterReviewDue | null;
+  /** Lot L7 : annonces où le gardien a déjà candidaté (tout statut). */
+  appliedSitIds: string[];
   nearbyListings: any[];
   nearbyListingsRadius: number | null;
   nearbyError: string | null;
@@ -96,6 +126,10 @@ const INITIAL_STATE: SitterDashboardData = {
   hasAcceptedRecent: false,
   nextGuard: null,
   nextGuardError: null,
+  ongoingGuard: null,
+  pendingApplication: null,
+  reviewDue: null,
+  appliedSitIds: [],
   nearbyListings: [],
   nearbyListingsRadius: null,
   nearbyError: null,
@@ -256,6 +290,20 @@ export function useSitterDashboardData(userId: string | undefined) {
         .filter((a: any) => a.sit?.start_date && (daysFromToday(a.sit.start_date, now) ?? -1) > 0)
         .sort((a: any, b: any) => String(a.sit.start_date).localeCompare(String(b.sit.start_date)));
 
+      // Lot L7 : garde en cours et garde terminée à raconter (aucune lecture de plus
+      // sauf les avis déjà laissés, lus seulement s'il existe une garde terminée récente).
+      const ongoingApp = acceptedApps.find((a: any) =>
+        a.sit && (a.sit.status === "confirmed" || a.sit.status === "in_progress")
+        && isOngoingDay(a.sit.start_date, a.sit.end_date, now)) ?? null;
+      const recentDoneApps = acceptedApps.filter((a: any) =>
+        a.sit && (a.sit.status === "completed" || a.sit.status === "archived")
+        && a.sit.end_date && (daysFromToday(a.sit.end_date, now) ?? -15) >= -14 && (daysFromToday(a.sit.end_date, now) ?? 1) <= 0);
+      const guardTargets = [ongoingApp, futureGuards[0] ?? null].filter(Boolean) as any[];
+      const detailOwnerIds = Array.from(new Set(
+        [...guardTargets, ...recentDoneApps].map((a: any) => a.sit?.user_id).filter(Boolean),
+      )) as string[];
+      const guardPropertyIds = Array.from(new Set(guardTargets.map((a: any) => a.sit?.property_id).filter(Boolean))) as string[];
+
       // Étape B, vague 2 : un seul Promise.all.
       // 1) Coordonnées des propriétaires, en
       //    lots de 150 ids lancés en parallèle. Obligatoire : au-delà d'environ
@@ -267,19 +315,34 @@ export function useSitterDashboardData(userId: string | undefined) {
       // Lot P1b : chargeur partagé (lots de 150 et cache par identifiant).
       const coordsBatches = [publicProfilesLoader.rows(coordsIds)];
       const neutralResult = Promise.resolve({ data: null, error: null } as any);
-      const nextOwnerPromise = futureGuards.length > 0
-        ? publicProfilesLoader.rows([futureGuards[0].sit.user_id]).then((r) => ({ data: r.data[0] ?? null, error: r.error }))
+      const detailOwnersPromise = detailOwnerIds.length > 0
+        ? publicProfilesLoader.rows(detailOwnerIds).then((r) => ({ data: r.data, error: r.error }))
+        : Promise.resolve({ data: [] as any[], error: null } as any);
+      const guardPetsPromise = guardPropertyIds.length > 0
+        ? supabase.from("pets").select("id, name, species, breed, property_id").in("property_id", guardPropertyIds)
         : neutralResult;
-      const nextPetsPromise = futureGuards.length > 0
-        ? supabase.from("pets").select("id, name, species, breed").eq("property_id", futureGuards[0].sit.property_id)
+      const writtenReviewsPromise = recentDoneApps.length > 0
+        ? supabase.from("reviews").select("sit_id").eq("reviewer_id", userId!).in("sit_id", recentDoneApps.map((a: any) => a.sit.id))
         : neutralResult;
 
-      const [coordsResults, nextOwnerRes, nextPetsRes] = await Promise.all([
+      const [coordsResults, detailOwnersRes, guardPetsRes, writtenReviewsRes] = await Promise.all([
         Promise.all(coordsBatches),
-        nextOwnerPromise,
-        nextPetsPromise,
+        detailOwnersPromise,
+        guardPetsPromise,
+        writtenReviewsPromise,
       ]);
       if (cancelled) return;
+      const detailOwnerById = new Map<string, any>(((detailOwnersRes as any).data ?? []).map((o: any) => [o.id, o]));
+      const petsOf = (propertyId: string | null | undefined) =>
+        ((guardPetsRes as any).data ?? []).filter((p: any) => p.property_id === propertyId);
+      const nextOwnerRes = {
+        data: futureGuards.length > 0 ? detailOwnerById.get(futureGuards[0].sit.user_id) ?? null : null,
+        error: (detailOwnersRes as any).error ?? null,
+      };
+      const nextPetsRes = {
+        data: futureGuards.length > 0 ? petsOf(futureGuards[0].sit.property_id) : null,
+        error: (guardPetsRes as any).error ?? null,
+      };
 
       // En mémoire, à partir du même jeu de lignes de coordonnées.
       const coordsErr = (coordsResults as any[]).some((r) => r?.error);
@@ -420,6 +483,41 @@ export function useSitterDashboardData(userId: string | undefined) {
       }
 
 
+      // Lot L7 : récit gardien.
+      const firstNameOf = (o: any): string | null =>
+        typeof o?.first_name === "string" && o.first_name.trim() ? o.first_name.trim().split(/\s+/)[0] : null;
+      const ongoingGuard: SitterGuardStory | null = ongoingApp
+        ? {
+            id: ongoingApp.sit.id,
+            start_date: ongoingApp.sit.start_date ?? null,
+            end_date: ongoingApp.sit.end_date ?? null,
+            city: ongoingApp.sit.city ?? null,
+            property_id: ongoingApp.sit.property_id ?? null,
+            ownerName: firstNameOf(detailOwnerById.get(ongoingApp.sit.user_id)) ?? "",
+            pets: petsOf(ongoingApp.sit.property_id),
+          }
+        : null;
+      const openApp = apps.find((a: any) =>
+        ["pending", "viewed", "discussing"].includes(a.status) && a.sit?.status === "published") ?? null;
+      const pendingApplication: SitterPendingApplication | null = openApp
+        ? {
+            sitId: openApp.sit_id ?? openApp.sit?.id,
+            ownerFirstName: firstNameOf(coordById.get(openApp.sit?.user_id) ?? detailOwnerById.get(openApp.sit?.user_id)),
+            created_at: openApp.created_at ?? null,
+          }
+        : null;
+      const reviewedSitIds = new Set((((writtenReviewsRes as any).error ? null : (writtenReviewsRes as any).data) ?? []).map((r: any) => r.sit_id));
+      // Avis déjà laissés illisibles : aucun rappel, plutôt qu'un rappel faux.
+      const reviewApp = (writtenReviewsRes as any).error
+        ? null
+        : recentDoneApps
+            .filter((a: any) => !reviewedSitIds.has(a.sit.id))
+            .sort((a: any, b: any) => String(b.sit.end_date).localeCompare(String(a.sit.end_date)))[0] ?? null;
+      const reviewDue: SitterReviewDue | null = reviewApp
+        ? { sitId: reviewApp.sit.id, ownerFirstName: firstNameOf(detailOwnerById.get(reviewApp.sit.user_id)) }
+        : null;
+      const appliedSitIds = Array.from(new Set(apps.map((a: any) => a.sit_id ?? a.sit?.id).filter(Boolean))) as string[];
+
       if (cancelled) return;
       setData({
         loading: false,
@@ -452,6 +550,10 @@ export function useSitterDashboardData(userId: string | undefined) {
         hasAcceptedRecent: recentAccepted,
         nextGuard,
         nextGuardError,
+        ongoingGuard,
+        pendingApplication,
+        reviewDue,
+        appliedSitIds,
         nearbyListings,
         nearbyListingsRadius,
         nearbyError,
