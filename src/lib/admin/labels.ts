@@ -262,6 +262,7 @@ export const AUDIT_ACTION_LABELS: Dict = {
   setting_update: "Modification d'un paramètre",
   suspend_account: "Suspension de compte",
   reactivate_account: "Réactivation de compte",
+  resend_signup_confirmation: "Email de confirmation renvoyé",
   toggle_super_gardien: "Super gardien modifié",
   identity_approved: "Identité validée",
   identity_rejected: "Identité refusée",

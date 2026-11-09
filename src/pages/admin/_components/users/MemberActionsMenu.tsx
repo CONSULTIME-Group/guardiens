@@ -21,7 +21,7 @@ export interface MemberActionsTarget {
   account_status?: string | null;
   identity_verified?: boolean | null;
   is_manual_super?: boolean | null;
-  /** false seulement si l'on sait que l'email n'est pas confirmé ; inconnu = entrée affichée. */
+  /** Lot ADM15 : entrée « Renvoyer » seulement si l'on sait l'email non confirmé (la liste ne le lit pas, la fiche oui). */
   email_confirmed?: boolean | null;
   has_identity_documents?: boolean | null;
 }
@@ -45,37 +45,49 @@ export interface MemberActionsHandlers {
 }
 
 export function visibleMemberActions(t: MemberActionsTarget): string[] {
+  // Lot ADM15 : un compte supprimé est anonymisé, il ne reste qu'à relire.
+  if (t.account_status === "deleted") return ["last-message", "note"];
   const suspended = t.account_status === "suspended";
   const keys = ["write", "message", "last-message"];
-  if (t.email_confirmed !== true) keys.push("resend-confirmation");
+  if (t.email_confirmed === false) keys.push("resend-confirmation");
   if (!t.identity_verified) keys.push("force-verify");
   if (t.has_identity_documents) keys.push("documents");
-  keys.push("change-role", "super", "note", suspended ? "reactivate" : "suspend");
-  if (t.account_status !== "deleted") keys.push("terminate");
-  keys.push("delete");
+  keys.push("geocode", "change-role", "super", "note", suspended ? "reactivate" : "suspend", "terminate", "delete");
   return keys;
 }
 
-export const MemberActionsMenu = ({ target, handlers, align = "end" }: { target: MemberActionsTarget; handlers: MemberActionsHandlers; align?: "start" | "end" }) => {
+export const MemberActionsMenu = ({ target, handlers, align = "end", large = false }: { target: MemberActionsTarget; handlers: MemberActionsHandlers; align?: "start" | "end"; large?: boolean }) => {
   const show = new Set(visibleMemberActions(target));
+  const communicate = show.has("write") || show.has("message") || show.has("last-message") || show.has("resend-confirmation");
+  const account = ["change-role", "super", "note", "suspend", "reactivate", "terminate"].some((k) => show.has(k));
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" aria-label={`Actions pour ${target.name}`} className="gap-1.5">
+        <Button variant="outline" size="sm" aria-label={`Actions pour ${target.name}`} className={large ? "h-11 min-w-11 shrink-0 gap-1.5" : "gap-1.5"}>
           <MoreHorizontal className="h-4 w-4" aria-hidden />
           <span className="hidden sm:inline">Actions</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} className="w-64 font-body">
-        <DropdownMenuLabel className="text-xs text-muted-foreground">Communiquer</DropdownMenuLabel>
-        <DropdownMenuGroup>
-          <DropdownMenuItem onSelect={handlers.onWrite}>Écrire à ce membre</DropdownMenuItem>
-          <DropdownMenuItem onSelect={handlers.onMessage}>Envoyer un message</DropdownMenuItem>
-          <DropdownMenuItem onSelect={handlers.onLastMessage}>Voir le dernier message</DropdownMenuItem>
-          {show.has("resend-confirmation") && (
-            <DropdownMenuItem onSelect={handlers.onResendConfirmation}>Renvoyer l'email de confirmation</DropdownMenuItem>
-          )}
-        </DropdownMenuGroup>
+      {/* Lot ADM15 : le menu tient dans l'écran et défile au besoin. */}
+      <DropdownMenuContent
+        align={align}
+        collisionPadding={8}
+        data-testid="member-actions-menu"
+        className="w-64 max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto font-body"
+      >
+        {communicate && (
+          <>
+            <DropdownMenuLabel className="text-xs text-muted-foreground">Communiquer</DropdownMenuLabel>
+            <DropdownMenuGroup>
+              {show.has("write") && <DropdownMenuItem onSelect={handlers.onWrite}>Email personnel</DropdownMenuItem>}
+              {show.has("message") && <DropdownMenuItem onSelect={handlers.onMessage}>Message dans la messagerie</DropdownMenuItem>}
+              {show.has("last-message") && <DropdownMenuItem onSelect={handlers.onLastMessage}>Voir le dernier message</DropdownMenuItem>}
+              {show.has("resend-confirmation") && (
+                <DropdownMenuItem onSelect={handlers.onResendConfirmation}>Renvoyer l'email de confirmation</DropdownMenuItem>
+              )}
+            </DropdownMenuGroup>
+          </>
+        )}
         {(show.has("force-verify") || show.has("documents")) && (
           <>
             <DropdownMenuSeparator />
@@ -92,8 +104,8 @@ export const MemberActionsMenu = ({ target, handlers, align = "end" }: { target:
             </DropdownMenuGroup>
           </>
         )}
-        <DropdownMenuSeparator />
-        {handlers.onGeocode && (
+        {communicate && account && <DropdownMenuSeparator />}
+        {handlers.onGeocode && show.has("geocode") && (
           <>
             <DropdownMenuLabel className="text-xs text-muted-foreground">Localisation</DropdownMenuLabel>
             <DropdownMenuItem onSelect={handlers.onGeocode} disabled={handlers.geocoding}>
@@ -102,30 +114,37 @@ export const MemberActionsMenu = ({ target, handlers, align = "end" }: { target:
             <DropdownMenuSeparator />
           </>
         )}
-        <DropdownMenuLabel className="text-xs text-muted-foreground">Compte</DropdownMenuLabel>
-        <DropdownMenuGroup>
-          <DropdownMenuItem onSelect={handlers.onChangeRole}>Changer le rôle</DropdownMenuItem>
-          <DropdownMenuItem onSelect={handlers.onToggleSuper}>
-            {target.is_manual_super ? "Retirer le statut super gardien" : "Activer le statut super gardien"}
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={handlers.onNote}>Note interne</DropdownMenuItem>
-          {show.has("reactivate") ? (
-            <DropdownMenuItem onSelect={handlers.onReactivate}>Réactiver le compte</DropdownMenuItem>
-          ) : (
-            <DropdownMenuItem onSelect={handlers.onSuspend}>Suspendre le compte</DropdownMenuItem>
-          )}
-          {show.has("terminate") && handlers.onTerminate && (
-            <DropdownMenuItem onSelect={handlers.onTerminate}>Résilier le compte</DropdownMenuItem>
-          )}
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onSelect={handlers.onDelete}
-          data-destructive="true"
-          className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-        >
-          Supprimer définitivement
-        </DropdownMenuItem>
+        {account && (
+          <>
+            <DropdownMenuLabel className="text-xs text-muted-foreground">Compte</DropdownMenuLabel>
+            <DropdownMenuGroup>
+              {show.has("change-role") && <DropdownMenuItem onSelect={handlers.onChangeRole}>Changer le rôle</DropdownMenuItem>}
+              {show.has("super") && (
+                <DropdownMenuItem onSelect={handlers.onToggleSuper}>
+                  {target.is_manual_super ? "Retirer le statut super gardien" : "Activer le statut super gardien"}
+                </DropdownMenuItem>
+              )}
+              {show.has("note") && <DropdownMenuItem onSelect={handlers.onNote}>Note interne</DropdownMenuItem>}
+              {show.has("reactivate") && <DropdownMenuItem onSelect={handlers.onReactivate}>Réactiver le compte</DropdownMenuItem>}
+              {show.has("suspend") && <DropdownMenuItem onSelect={handlers.onSuspend}>Suspendre le compte</DropdownMenuItem>}
+              {show.has("terminate") && handlers.onTerminate && (
+                <DropdownMenuItem onSelect={handlers.onTerminate}>Résilier le compte</DropdownMenuItem>
+              )}
+            </DropdownMenuGroup>
+          </>
+        )}
+        {show.has("delete") && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onSelect={handlers.onDelete}
+              data-destructive="true"
+              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+            >
+              Supprimer définitivement
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
