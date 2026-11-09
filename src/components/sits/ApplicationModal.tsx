@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { afterApplyTarget, isDesktopViewport } from "@/lib/afterPublish";
+import { invalidateMySentApplications } from "@/lib/dashboardShared";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { storageImageUrl } from "@/lib/storageImage";
 import {
@@ -49,13 +51,20 @@ interface ApplicationModalProps {
   onSuccess: () => void;
   /** Vrai si la page d'annonce affiche déjà l'invitation à vérifier l'identité. */
   hideIdentityHint?: boolean;
+  /**
+   * Lot L8 : sur téléphone, après l'envoi, retour au récit de l'accueil
+   * (« Votre mot est chez Laurence », frise sur Réponse). Sur ordinateur,
+   * le gardien reste sur l'annonce.
+   */
+  returnToStory?: boolean;
 }
 
 const ApplicationModal = ({
   open, onOpenChange, sitId, ownerId, ownerFirstName,
-  petNames, city, startDate, endDate, onSuccess, hideIdentityHint = false,
+  petNames, city, startDate, endDate, onSuccess, hideIdentityHint = false, returnToStory = false,
 }: ApplicationModalProps) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { identityRecommended } = useAccessLevel();
   const animalText = petNames.length > 0 ? petNames.join(", ") : "vos animaux";
   const defaultMessage = `Bonjour ${ownerFirstName || ""},\n\nVotre annonce pour ${animalText} à ${city || "votre ville"} m'intéresse beaucoup.\n\n\n\nJe serais disponible du ${startDate} au ${endDate}.`;
@@ -412,12 +421,18 @@ const ApplicationModal = ({
     }
 
     setSending(false);
-    toast({
-      title: "Candidature envoyée !",
-      description: "Vous serez notifié quand le propriétaire répondra.",
-    });
+    // Lot L8 : l'accueil relit les candidatures du gardien (récit « candidature envoyée »).
+    invalidateMySentApplications(user.id);
+    const storyTarget = returnToStory ? afterApplyTarget({ firstName: ownerFirstName, phone: !isDesktopViewport() }) : null;
+    if (!storyTarget) {
+      toast({
+        title: "Candidature envoyée !",
+        description: "Vous serez notifié quand le propriétaire répondra.",
+      });
+    }
     onOpenChange(false);
     onSuccess();
+    if (storyTarget) navigate(storyTarget);
   };
 
   /**
@@ -468,7 +483,7 @@ const ApplicationModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden grid-cols-[minmax(0,1fr)]">
         <DialogHeader>
           <DialogTitle className="font-heading">Postuler à cette garde</DialogTitle>
           <DialogDescription>Le propriétaire verra votre profil ci-dessous en plus de votre message.</DialogDescription>
@@ -522,7 +537,7 @@ const ApplicationModal = ({
           </div>
         )}
 
-        <div className="grid md:grid-cols-[1fr_220px] gap-4">
+        <div className="grid grid-cols-[minmax(0,1fr)] md:grid-cols-[minmax(0,1fr)_220px] gap-4">
           {/* Left: message */}
           <div className="space-y-3">
             <label htmlFor="application-message" className="text-sm font-medium">Votre message</label>
@@ -537,6 +552,7 @@ const ApplicationModal = ({
                     <Button
                       type="button"
                       size="sm"
+                      className="h-auto min-h-[44px] whitespace-normal text-left"
                       onClick={async () => {
                         setAlmaLoading(true);
                         try {
@@ -561,7 +577,7 @@ const ApplicationModal = ({
                     >
                       Oui, écrire un brouillon
                     </Button>
-                    <Button type="button" size="sm" variant="ghost" onClick={() => setAlmaDismissed(true)}>
+                    <Button type="button" size="sm" variant="ghost" className="h-auto min-h-[44px] whitespace-normal text-left" onClick={() => setAlmaDismissed(true)}>
                       Non, je préfère écrire moi-même
                     </Button>
                   </>
