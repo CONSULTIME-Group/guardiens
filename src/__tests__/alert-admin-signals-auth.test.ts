@@ -7,6 +7,23 @@ import { describe, expect, it, vi } from "vitest";
 const serviceKey = "fixture-service-secret";
 const forgedJwt = `eyJhbGciOiJIUzI1NiJ9.${Buffer.from(JSON.stringify({ role: "service_role" })).toString("base64url")}.invalid`;
 
+// Charge un module TypeScript des fonctions serveur et ses imports relatifs.
+const loaded = new Map<string, Record<string, unknown>>();
+function loadTs(path: string): Record<string, unknown> {
+  const hit = loaded.get(path);
+  if (hit) return hit;
+  const out = ts.transpileModule(readFileSync(resolve(path), "utf8"), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
+  const mod = { exports: {} as Record<string, unknown> };
+  loaded.set(path, mod.exports);
+  const dir = path.slice(0, path.lastIndexOf("/"));
+  const req = (spec: string) => {
+    if (!spec.startsWith(".")) throw new Error(`Unexpected import ${spec}`);
+    return loadTs(resolve(dir, spec).slice(resolve(".").length + 1));
+  };
+  runInNewContext(out, { exports: mod.exports, module: mod, require: req, Date, Math, Set, Map, Object, Number, Array, Intl, String });
+  return mod.exports;
+}
+
 function harness(options: { signal?: boolean; noServiceKey?: boolean; readError?: boolean; queues?: Array<{ key: string; count: number; oldest: string | null }>; flagOff?: boolean; queuesError?: boolean } = {}) {
   let handler: (request: Request) => Promise<Response>;
   const writes: string[] = [];
@@ -28,17 +45,24 @@ function harness(options: { signal?: boolean; noServiceKey?: boolean; readError?
       chain.maybeSingle = async () => ({ data: { enabled: !options.flagOff }, error: null });
       return chain;
     }
-    if (table !== "admin_signals") throw new Error(`Unexpected table ${table}`);
-    const result = { data: options.signal ? [{ signal_type: "fixture-critical", severity: "critical", detected_at: new Date().toISOString(), metadata: { detail: "fixture" } }] : [], error: options.readError ? { message: "fixture read failure" } : null };
-    const chain: Record<string, any> = {};
-    for (const method of ["select", "is"]) chain[method] = () => chain;
-    chain.limit = async () => result;
-    chain.then = (resolve: (value: unknown) => unknown) => Promise.resolve(result).then(resolve);
-    return chain;
+    throw new Error(`Unexpected table ${table}`);
   });
-  const rpc = vi.fn(async (name: string) => (name === "admin_human_queues" && options.queuesError
-    ? { data: null, error: { message: "fixture queues failure" } }
-    : { data: name === "admin_human_queues" ? (options.queues ?? []) : [], error: null }));
+  // Lot ADM13 : une lecture, public.admin_work_list, toutes sources comprises.
+  const rpc = vi.fn(async (name: string) => {
+    if (name !== "admin_work_list") return { data: [], error: null };
+    if (options.readError) return { data: null, error: { message: "fixture read failure" } };
+    return {
+      data: {
+        sources: { signals: true, sits: true, queues: !options.queuesError, relances: true, health: true },
+        signals: options.signal ? [{ id: "s1", signal_type: "fixture-critical", severity: "critical", entity_type: null, entity_id: null, detected_at: new Date().toISOString(), metadata: { detail: "fixture" } }] : [],
+        sits: [],
+        queues: options.queuesError ? [] : (options.queues ?? []),
+        relances_failed_7d: 0,
+        health: [],
+      },
+      error: null,
+    };
+  });
   const createClient = vi.fn(() => ({ from, rpc }));
   const fetch = vi.fn(async () => new Response(JSON.stringify({ success: true, sent: true }), { status: 200 }));
   const env = { SUPABASE_URL: "https://fixture.invalid", SUPABASE_SERVICE_ROLE_KEY: options.noServiceKey ? undefined : serviceKey };
@@ -50,25 +74,13 @@ function harness(options: { signal?: boolean; noServiceKey?: boolean; readError?
     require: (specifier: string) => {
       if (specifier.endsWith("/cors")) return { corsHeaders: { "Access-Control-Allow-Origin": "*" } };
       if (specifier.includes("supabase-js")) return { createClient };
-      if (specifier === "./digest.ts") {
-        const digest = ts.transpileModule(readFileSync(resolve("supabase/functions/alert-admin-signals/digest.ts"), "utf8"), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
-        const mod = { exports: {} as Record<string, unknown> };
-        // Lot S2 : digest.ts lit la configuration partagée des types de signaux.
-        const cfgRequire = (spec: string) => {
-          if (spec !== "../_shared/admin-signal-config.ts") throw new Error(`Unexpected import ${spec}`);
-          const cfg = ts.transpileModule(readFileSync(resolve("supabase/functions/_shared/admin-signal-config.ts"), "utf8"), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
-          const cmod = { exports: {} as Record<string, unknown> };
-          runInNewContext(cfg, { exports: cmod.exports, module: cmod, Date, Math, Set, Map, Object, Number });
-          return cmod.exports;
-        };
-        runInNewContext(digest, { exports: mod.exports, module: mod, require: cfgRequire, Date, Math, Set, Map, Object });
-        return mod.exports;
-      }
+      if (specifier === "./digest.ts") return loadTs("supabase/functions/alert-admin-signals/digest.ts");
+      if (specifier === "../_shared/admin-work-list.ts") return loadTs("supabase/functions/_shared/admin-work-list.ts");
       throw new Error(`Unexpected import ${specifier}`);
     },
   });
-  const reads = () => (from.mock.calls as unknown[][]).filter(([t]) => t !== "cron_run_log" && t !== "feature_flags");
-  const writeRpcs = () => (rpc.mock.calls as unknown[][]).filter(([n]) => n !== "alma_weekly_summary" && n !== "admin_human_queues" && n !== "admin_site_health");
+  const reads = () => (rpc.mock.calls as unknown[][]).filter(([n]) => n === "admin_work_list");
+  const writeRpcs = () => (rpc.mock.calls as unknown[][]).filter(([n]) => n !== "alma_weekly_summary" && n !== "admin_work_list");
   return { from, rpc, fetch, writes, reads, writeRpcs, invoke: (request: Request) => handler(request) };
 }
 
@@ -128,7 +140,7 @@ describe("alert-admin-signals service authorization", () => {
     const [, init] = h.fetch.mock.calls[0] as unknown as [string, RequestInit];
     const data = JSON.parse(String(init.body)).templateData;
     expect(data.criticalCount).toBe(2);
-    expect(data.lines[0]).toMatchObject({ title: "2 messages de contact", ageDays: 2, link: "https://guardiens.fr/admin/contact-messages" });
+    expect(data.lines[0]).toMatchObject({ title: "Répondre à 2 messages de contact", ageDays: 2, link: "https://guardiens.fr/admin/contact-messages" });
   });
 
   it("writes failed reads and switched-off signals into the email, never a false calm", async () => {
@@ -138,7 +150,7 @@ describe("alert-admin-signals service authorization", () => {
     const notices: string[] = JSON.parse(String(init.body)).templateData.notices;
     expect(notices).toHaveLength(2);
     expect(notices.join(" ")).toMatch(/Signaux désactivés/);
-    expect(notices.join(" ")).toMatch(/Lecture des files humaines impossible/);
+    expect(notices.join(" ")).toMatch(/Lecture impossible : files des membres/);
   });
 
   it("does not reconcile on a dry run", async () => {

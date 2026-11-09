@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { readFileSync } from "node:fs";
 import { almaDirectAnswer, almaHelpDirective, detectAlmaIntent, detectFrustration } from "../../supabase/functions/_shared/alma-intent";
 import { SIGNAL_TYPES, hasDestination } from "../../supabase/functions/_shared/admin-signal-config";
-import { buildDigestLines } from "../../supabase/functions/alert-admin-signals/digest";
+import { workListDigestLines } from "../../supabase/functions/alert-admin-signals/digest";
+import { buildWorkList } from "../../supabase/functions/_shared/admin-work-list";
 import { isPublishPath, rememberPublishIntent, resolvePostOnboardingTarget, clearPublishIntent, readPublishIntent } from "@/lib/postOnboardingIntent";
 
 const M1 = "je ne pose pas ma candidature je cherche au contraire de l'aide !!!";
@@ -63,13 +64,15 @@ describe("Lot J1, signal alma_frustration", () => {
     expect(c.autoResolve).toBe(false);
   });
   it("email : lien vers la fiche membre et messages cités", () => {
-    const lines = buildDigestLines([{
+    // Lot ADM13 : l'email reprend la liste de travail ; l'élément porte le lien exact et le message cité.
+    const lines = workListDigestLines(buildWorkList({ signals: [{
       id: "s", signal_type: "alma_frustration", severity: "critical", entity_type: "profile", entity_id: "e",
       detected_at: new Date().toISOString(),
       metadata: { title: "Paul, Lyon (both)", admin_url: "https://guardiens.fr/admin/users?user=u1", messages: [{ text: M1 }, { text: M3 }] },
-    } as any], new Map());
-    expect(lines[0].link).toBe("https://guardiens.fr/admin/users?user=u1");
-    expect(lines[0].action).toContain(M3);
+    }] }));
+    expect(lines).toHaveLength(1);
+    expect(lines[0].elements[0].link).toBe("https://guardiens.fr/admin/users?user=u1");
+    expect(lines[0].elements[0].label).toContain(M1.slice(0, 60));
   });
 });
 
