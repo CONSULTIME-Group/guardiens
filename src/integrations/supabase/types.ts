@@ -19982,6 +19982,10 @@ export type Database = {
         Args: { p_message?: string; p_sit_id: string; p_sitter_id: string }
         Returns: string
       }
+      dashboard_movement_counts: {
+        Args: { p_from: string; p_lat: number; p_lng: number; p_uid: string }
+        Returns: Json
+      }
       deactivate_my_space: {
         Args: { p_keep: Database["public"]["Enums"]["user_role"] }
         Returns: Database["public"]["Enums"]["user_role"]
@@ -20271,6 +20275,7 @@ export type Database = {
       }
       get_activity_since_last_visit: { Args: never; Returns: Json }
       get_affinity_completeness_stats: { Args: never; Returns: Json }
+      get_alert_zone_options: { Args: never; Returns: Json }
       get_alma_blacklisted_types: {
         Args: never
         Returns: {
@@ -20314,6 +20319,7 @@ export type Database = {
         Args: { p_city_slug?: string; p_department_slug?: string }
         Returns: Json
       }
+      get_dashboard_movement: { Args: { p_since?: string }; Returns: Json }
       get_dormant_recovery_context: {
         Args: { _user_id: string }
         Returns: Json
