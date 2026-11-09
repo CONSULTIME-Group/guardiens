@@ -74,7 +74,7 @@
       "checks": [
         {
           "name": "new_application_link_to_application_page",
-          "sql": "SELECT position('/candidatures/' in pg_get_functiondef('public.notify_new_application()'::regprocedure)) > 0 AND position('applicationId' in pg_get_functiondef('public.notify_new_application()'::regprocedure)) > 0 AND position('/candidatures/' in pg_get_functiondef('public.notify_owner_of_new_application(uuid)'::regprocedure)) > 0 AS ok"
+          "sql": "SELECT EXISTS (SELECT 1 FROM pg_trigger t JOIN pg_class c ON c.oid = t.tgrelid JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relname = 'notifications' AND t.tgname = 'trg_notification_application_page_link' AND t.tgenabled <> 'D') AND position('/candidatures/' in pg_get_functiondef('public.notification_application_page_link()'::regprocedure)) > 0 AND NOT has_function_privilege('anon', 'public.notification_application_page_link()', 'EXECUTE') AS ok"
         },
         {
           "name": "mark_application_viewed_owner_only",
