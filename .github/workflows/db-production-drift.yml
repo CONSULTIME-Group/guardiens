@@ -37,16 +37,37 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     environment: production
+    env:
+      # Seul l'indicateur de présence est exposé au job ; l'URL reste limitée à la sonde.
+      HAS_PROD_DB_SECRET: ${{ secrets.GUARDIENS_PROD_DATABASE_URL != '' }}
     steps:
+      # Base Lovable Cloud : l'accès direct à PostgreSQL n'est pas fourni. Sans
+      # secret, la sonde est remplacée par un avertissement visible et les
+      # contrats sont vérifiés à la main (docs/database-deployment.md).
+      - name: Signaler le contrôle manuel requis
+        if: env.HAS_PROD_DB_SECRET != 'true'
+        run: |
+          echo "::warning title=Contrôle manuel requis::Secret GUARDIENS_PROD_DATABASE_URL absent. Vérifier les contrats de scripts/db/production-contracts.json à la main sur la base de production."
+          {
+            echo "### Contrôle manuel requis"
+            echo ""
+            echo "La base de production est gérée par Lovable Cloud, sans accès direct depuis GitHub."
+            echo "Exécuter les requêtes des contrats de \`scripts/db/production-contracts.json\` pour chaque migration appliquée, et noter le résultat dans la livraison."
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/checkout@v4
+        if: env.HAS_PROD_DB_SECRET == 'true'
       - uses: actions/setup-node@v4
+        if: env.HAS_PROD_DB_SECRET == 'true'
         with:
           node-version: 24
       - uses: oven-sh/setup-bun@v2
+        if: env.HAS_PROD_DB_SECRET == 'true'
         with:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
+        if: env.HAS_PROD_DB_SECRET == 'true'
       - name: Vérifier les contrats sur la base réelle en lecture seule
+        if: env.HAS_PROD_DB_SECRET == 'true'
         env:
           GUARDIENS_PROD_DATABASE_URL: ${{ secrets.GUARDIENS_PROD_DATABASE_URL }}
         run: node scripts/db/check-production-drift.mjs
