@@ -36,8 +36,13 @@ const ACTION_LABELS: Record<string, string> = {
   delete: "Contenu supprimé (signalement)",
 };
 
-const ACTION_OPTIONS = Object.keys(ACTION_LABELS);
-const TARGET_OPTIONS = ["profile", "small_mission", "sit", "pro_directory", "pro", "competence", "profiles_bulk", "review", "report"];
+// Lot ADM18 (lot E H2) : le filtre propose aussi toutes les actions nommées
+// dans labels.ts, dont celles écrites en base (publication à la place, lecture
+// de conversation, effacement RGPD…).
+const ACTION_OPTIONS = Array.from(new Set([...Object.keys(ACTION_LABELS), ...Object.keys(AUDIT_ACTION_LABELS)])).sort((a, b) =>
+  actionLabel(a).localeCompare(actionLabel(b), "fr"),
+);
+const TARGET_OPTIONS = ["profile", "small_mission", "sit", "application", "review", "report", "conversation", "association", "contact_message", "guide", "breed", "pro_directory", "pro", "competence", "profiles_bulk"];
 
 const PERIOD_DAYS: Record<string, number | null> = {
   "7": 7, "30": 30, "90": 90, "all": null,

@@ -1,6 +1,9 @@
 import { adminLabel } from "@/lib/admin/labels";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logAdminAction } from "@/lib/admin/adminJournal";
+import { ErrorState } from "@/components/admin/ui";
+import { reportAdminReadError } from "@/lib/admin/readError";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -124,6 +127,8 @@ const TEXT_FIELDS: Array<{ key: keyof AssociationRow; label: string }> = [
 export default function AdminAssociations() {
   const [rows, setRows] = useState<AssociationRow[]>([]);
   const [loading, setLoading] = useState(true);
+  // Lot ADM18 (lot C AS1) : lecture en échec dite, jamais « Aucune fiche ».
+  const [loadError, setLoadError] = useState(false);
   const [editing, setEditing] = useState<AssociationRow | null>(null);
   const [saving, setSaving] = useState(false);
   const [copying, setCopying] = useState(false);
@@ -135,7 +140,8 @@ export default function AdminAssociations() {
       .from("animal_associations" as any)
       .select("*")
       .order("name");
-    if (error) toast.error("Chargement impossible");
+    if (error) reportAdminReadError("Associations : fiches", error);
+    setLoadError(!!error);
     setRows(((data as any) ?? []) as AssociationRow[]);
     setLoading(false);
   };
@@ -152,7 +158,7 @@ export default function AdminAssociations() {
   const patch = (values: Partial<AssociationRow>) =>
     setEditing((prev) => (prev ? { ...prev, ...values } : prev));
 
-  const persist = async (id: string, values: Record<string, unknown>) => {
+  const persist = async (id: string, values: Record<string, unknown>, journal?: { action: string; name: string }) => {
     const { error } = await supabase
       .from("animal_associations" as any)
       .update(values as any)
@@ -160,6 +166,16 @@ export default function AdminAssociations() {
     if (error) {
       toast.error(error.message);
       return false;
+    }
+    // Lot ADM18 (lot C AS2) : statut et accord photos laissent une ligne au journal.
+    if (journal) {
+      const { ok } = await logAdminAction({
+        action: journal.action,
+        targetType: "association",
+        targetId: id,
+        metadata: { name: journal.name, ...values },
+      });
+      if (!ok) toast.warning("Enregistré, journal à compléter.");
     }
     await load();
     return true;
@@ -294,6 +310,8 @@ export default function AdminAssociations() {
         <TabsContent value="fiches" className="space-y-6">
       {loading ? (
         <p className="text-sm text-muted-foreground">Chargement…</p>
+      ) : loadError ? (
+        <ErrorState detail="Les fiches n'ont pas pu être lues." onRetry={() => void load()} />
       ) : rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">Aucune fiche pour le moment.</p>
       ) : (
@@ -319,53 +337,57 @@ export default function AdminAssociations() {
                     Modifier
                   </Button>
                   {row.status !== "published" && (
-                    <Button size="sm" onClick={() => persist(row.id, { status: "published" })}>
-                      Publier
-                    </Button>
+                    <ConfirmDialog
+                      trigger={<Button size="sm">Publier</Button>}
+                      title={`Publier « ${row.name} » ?`}
+                      description="La fiche apparaît sur le site public."
+                      confirmLabel="Publier"
+                      onConfirm={async () => { await persist(row.id, { status: "published" }, { action: "association_publish", name: row.name }); }}
+                    />
                   )}
                   {row.status === "published" && (
-                    <Button size="sm" variant="outline" onClick={() => persist(row.id, { status: "draft" })}>
-                      Dépublier
-                    </Button>
+                    <ConfirmDialog
+                      trigger={<Button size="sm" variant="outline">Dépublier</Button>}
+                      title={`Dépublier « ${row.name} » ?`}
+                      description="La fiche quitte le site public et reste en brouillon."
+                      confirmLabel="Dépublier"
+                      onConfirm={async () => { await persist(row.id, { status: "draft" }, { action: "association_unpublish", name: row.name }); }}
+                    />
                   )}
                   <ConfirmDialog
                     trigger={<Button size="sm" variant="outline">Archiver</Button>}
                     title="Archiver cette association ?"
                     description="La fiche quitte le site public. Vous pourrez la republier ensuite."
                     confirmLabel="Archiver"
-                    onConfirm={async () => { await persist(row.id, { status: "archived" }); }}
+                    onConfirm={async () => { await persist(row.id, { status: "archived" }, { action: "association_archive", name: row.name }); }}
                   />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      persist(row.id, {
-                        consent_status: "requested",
-                        consent_requested_at: new Date().toISOString(),
-                      })
-                    }
-                  >
-                    Demande envoyée
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      persist(row.id, {
-                        consent_status: "granted",
-                        consent_granted_at: new Date().toISOString(),
-                      })
-                    }
-                  >
-                    Accord reçu
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => persist(row.id, { consent_status: "refused" })}
-                  >
-                    Refus
-                  </Button>
+                  <ConfirmDialog
+                    trigger={<Button size="sm" variant="outline">Demande envoyée</Button>}
+                    title="Noter la demande d'accord comme envoyée ?"
+                    description={`Accord photos de « ${row.name} » : demande envoyée aujourd'hui.`}
+                    confirmLabel="Noter la demande"
+                    onConfirm={async () => {
+                      await persist(row.id, { consent_status: "requested", consent_requested_at: new Date().toISOString() }, { action: "association_consent_requested", name: row.name });
+                    }}
+                  />
+                  <ConfirmDialog
+                    trigger={<Button size="sm" variant="outline">Accord reçu</Button>}
+                    title="Enregistrer l'accord photos ?"
+                    description={`Photos et logo de « ${row.name} » s'affichent sur le site public dès l'enregistrement. Gardez l'écrit de l'association.`}
+                    confirmLabel="Enregistrer l'accord"
+                    onConfirm={async () => {
+                      await persist(row.id, { consent_status: "granted", consent_granted_at: new Date().toISOString() }, { action: "association_consent_granted", name: row.name });
+                    }}
+                  />
+                  <ConfirmDialog
+                    trigger={<Button size="sm" variant="outline">Refus</Button>}
+                    title="Enregistrer le refus de l'association ?"
+                    description={`Photos et logo de « ${row.name} » restent masqués, les initiales s'affichent.`}
+                    confirmLabel="Enregistrer le refus"
+                    onConfirm={async () => {
+                      await persist(row.id, { consent_status: "refused" }, { action: "association_consent_refused", name: row.name });
+                    }}
+                  />
                   <Button size="sm" variant="outline" onClick={() => copyConsentEmail(row)}>
                     Copier l'email de demande
                   </Button>

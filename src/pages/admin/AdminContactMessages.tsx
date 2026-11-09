@@ -3,6 +3,8 @@ import { contactSubjectLabel } from "@/lib/admin/labels";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logAdminAction } from "@/lib/admin/adminJournal";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -84,7 +86,10 @@ const AdminContactMessages = () => {
 
     const { error } = await supabase.from("contact_messages").update(update).eq("id", id);
     if (error) { toast.error(`Mise à jour impossible : ${error.message}`); return; }
-    toast.success("Statut mis à jour");
+    // Lot ADM18 (lot B A2) : chaque changement de statut laisse sa ligne au journal.
+    const { ok } = await logAdminAction({ action: `contact_message_${status}`, targetType: "contact_message", targetId: id });
+    if (ok) toast.success("Statut mis à jour");
+    else toast.warning("Statut mis à jour, journal à compléter.");
     fetchMessages();
     window.dispatchEvent(new Event("admin-badges-refresh"));
   };
@@ -94,9 +99,7 @@ const AdminContactMessages = () => {
     setAdminNotes(msg.admin_notes || "");
     setAssignedTo(msg.assigned_to || "");
     setReplyText("");
-    if (msg.status === "new") {
-      await updateStatus(msg.id, "en_cours");
-    }
+    // Lot ADM18 (lot B A1) : lire n'écrit plus ; « Je m'en occupe » ou la réponse changent le statut.
   };
 
   const handleSaveNote = async () => {
@@ -321,13 +324,21 @@ const AdminContactMessages = () => {
                         </Button>
                         {(msg.status === "new") && (
                           <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => updateStatus(msg.id, "en_cours")}>
-                            <PlayCircle className="h-3.5 w-3.5" /> En cours
+                            <PlayCircle className="h-3.5 w-3.5" /> Je m'en occupe
                           </Button>
                         )}
                         {msg.status !== "closed" && (
-                          <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => updateStatus(msg.id, "closed")}>
-                            <XCircle className="h-3.5 w-3.5" /> Fermer
-                          </Button>
+                          <ConfirmDialog
+                            trigger={
+                              <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs">
+                                <XCircle className="h-3.5 w-3.5" /> Clore
+                              </Button>
+                            }
+                            title="Clore ce message ?"
+                            description={`Le message de ${msg.name || "ce membre"} passe dans « Fermés ».`}
+                            confirmLabel="Clore le message"
+                            onConfirm={() => updateStatus(msg.id, "closed")}
+                          />
                         )}
                       </div>
                     </TableCell>

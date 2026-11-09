@@ -43,11 +43,24 @@ Deno.serve(async (req) => {
 
   const since = new Date(Date.now() - t.window_days * 86400_000).toISOString()
 
-  const { data: rows, error } = await supabase
-    .from('email_send_log')
-    .select('template_name, status, delivered_at, first_opened_at, first_clicked_at, bounced_at, complained_at, message_id, resend_id, metadata')
-    .gte('created_at', since)
-    .limit(100000)
+  // Lot ADM18 (lot D T1) : l'API coupe chaque réponse à 1 000 lignes, et
+  // une limite plus haute ne dépasse pas cette borne. Lecture par pages, ordre stable,
+  // sinon le rapport du jour ne voit qu'une partie de la semaine.
+  const PAGE = 1000
+  const CAP = 100000
+  const rows: any[] = []
+  let error: { message: string } | null = null
+  for (let from = 0; from < CAP; from += PAGE) {
+    const { data, error: pageError } = await supabase
+      .from('email_send_log')
+      .select('id, template_name, status, delivered_at, first_opened_at, first_clicked_at, bounced_at, complained_at, message_id, resend_id, metadata')
+      .gte('created_at', since)
+      .order('id', { ascending: true })
+      .range(from, from + PAGE - 1)
+    if (pageError) { error = pageError; break }
+    rows.push(...(data ?? []))
+    if (!data || data.length < PAGE) break
+  }
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {

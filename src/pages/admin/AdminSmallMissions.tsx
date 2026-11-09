@@ -32,6 +32,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { ErrorState } from "@/components/admin/ui";
 import { UrlFilterNotice } from "@/components/admin/UrlFilterNotice";
 import { reportAdminReadError } from "@/lib/admin/readError";
+import { logAdminAction as logAdminJournal } from "@/lib/admin/adminJournal";
+import { logAdminMessageFailure } from "@/lib/admin/adminMessageFailure";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import DossierDetailSheet from "@/components/admin/DossierDetailSheet";
 import { missionSituation } from "@/lib/admin/listingSituation";
 import { proximityBlockReason } from "@/lib/admin/missionDiffusion";
@@ -73,16 +76,10 @@ type ProjetKpis = {
   cross_members: number;
 };
 
-async function logAdminAction(action: string, targetId: string, metadata?: Record<string, unknown>) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  await supabase.from("admin_action_logs").insert({
-    admin_id: user.id,
-    action,
-    target_type: "small_mission",
-    target_id: targetId,
-    metadata: (metadata ?? null) as any,
-  });
+/** Lot ADM18 (lot E H1) : journal commun, résultat contrôlé. */
+async function logAdminAction(action: string, targetId: string, metadata?: Record<string, unknown>): Promise<boolean> {
+  const { ok } = await logAdminJournal({ action, targetType: "small_mission", targetId, metadata });
+  return ok;
 }
 
 const AdminSmallMissions = () => {
@@ -337,8 +334,9 @@ const AdminSmallMissions = () => {
       toast.error("Diffusion impossible");
       return;
     }
-    await logAdminAction("release_projet", id);
-    toast.success("Projet diffusé");
+    const logged = await logAdminAction("release_projet", id);
+    if (logged) toast.success("Projet diffusé");
+    else toast.warning("Projet diffusé, journal à compléter.");
     fetchMissions();
   };
 
@@ -443,6 +441,8 @@ const AdminSmallMissions = () => {
     });
     setContactSending(false);
     if (error) {
+      // Lot ADM18 (lot C ME1) : l'échec entre dans l'historique des envois.
+      await logAdminMessageFailure(mission.user_id, content, error.message);
       toast.error(`Envoi impossible : ${error.message}`);
       return;
     }
@@ -603,14 +603,18 @@ const AdminSmallMissions = () => {
                       <Badge variant="secondary">
                         Diffusion le {format(new Date(p.notify_after), "d MMM yyyy à HH:mm", { locale: fr })}
                       </Badge>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={releasingId === p.id}
-                        onClick={() => releaseProjet(p.id)}
-                      >
-                        <Send className="h-4 w-4 mr-2" /> Valider et diffuser
-                      </Button>
+                      {/* Lot ADM18 (lot A E2, lot C P3) : diffuser prévient des membres, après confirmation. */}
+                      <ConfirmDialog
+                        trigger={
+                          <Button size="sm" variant="outline" disabled={releasingId === p.id}>
+                            <Send className="h-4 w-4 mr-2" /> Valider et diffuser
+                          </Button>
+                        }
+                        title={`Diffuser « ${p.title} » maintenant ?`}
+                        description="Les membres à proximité reçoivent le projet tout de suite, sans attendre la date prévue."
+                        confirmLabel="Diffuser"
+                        onConfirm={() => releaseProjet(p.id)}
+                      />
                     </li>
                   ))}
                 </ul>
