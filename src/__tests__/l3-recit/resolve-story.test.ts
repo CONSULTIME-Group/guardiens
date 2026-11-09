@@ -158,7 +158,7 @@ describe("L3, récit gardien", () => {
     expect(s.title).toBe("Pompon attend son gardien à Écully.");
     expect(s.lead).toBe("Chez Laurence, du 9 janvier au 20 janvier.");
     expect(s.cta).toEqual({ label: "Découvrir chez Laurence", href: "/sits/garde-ecully" });
-    expect(s.secondary).toEqual({ label: "Voir les 23 gardes ouvertes", href: "/search" });
+    expect(s.secondary).toEqual({ label: "Voir les 23 gardes ouvertes", href: "/search?zone=france" });
     expect(s.frieze).toEqual({ labels: SITTER_FRIEZE, current: 0 });
     checkDoctrine(s);
   });
@@ -227,7 +227,7 @@ describe("L3, récit gardien", () => {
     const s = resolveSitterStory({ today: TODAY, openCount: 23 });
     expect(s.chapter).toBe("discover");
     expect(s.title).toBe("23 gardes ouvertes vous attendent en France.");
-    expect(s.cta.href).toBe("/search");
+    expect(s.cta.href).toBe("/search?zone=france");
     checkDoctrine(s);
   });
 });

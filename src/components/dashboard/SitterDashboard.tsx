@@ -29,7 +29,6 @@ import AccessGateBanner from "@/components/access/AccessGateBanner";
 import SitterCockpit, { type SitterCockpitLine } from "./sitter/SitterCockpit";
 import type { CockpitTodo } from "./owner/OwnerCockpit";
 import DashboardSectionState from "./sitter/DashboardSectionState";
-import SitterMobileStickyCTA from "./sitter/SitterMobileStickyCTA";
 import SitterDashboardSkeleton from "./sitter/SitterDashboardSkeleton";
 import SitterMatchSection from "./sitter/SitterMatchSection";
 import SitterMissingOpportunities from "./sitter/SitterMissingOpportunities";
@@ -48,6 +47,15 @@ import { sitterNextStep } from "@/lib/dashboardNextStep";
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
 import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
 import { SITTER_APPLICATIONS_PATH } from "@/lib/sitterApplicationsLink";
+import { useMemo } from "react";
+import { Link } from "react-router-dom";
+import { resolveSitterStory } from "@/lib/dashboardStory";
+import { buildSitterStoryInput } from "@/lib/sitterStoryInput";
+import { localTodayIso } from "@/lib/localDate";
+import StoryHero from "./story/StoryHero";
+import RoleSwitch from "./story/RoleSwitch";
+import EntraideLine from "./story/EntraideLine";
+import { useCompactStory } from "./story/useCompactStory";
 
 export const SITTER_ENTRAIDE_HEADLINE = "Entre deux gardes, un coup de main près de chez vous.";
 
@@ -67,6 +75,7 @@ const SitterDashboard = () => {
     nextGuard, nextGuardError,
     nearbyListings, nearbyError,
     myMissions, reload,
+    ongoingGuard, pendingApplication, reviewDue, appliedSitIds,
   } = useSitterDashboardData(user?.id);
   // Lot UA2 : le rail propose le même coup de main que le bloc commun (même lecture
   // partagée par React Query, même rayon choisi, mêmes règles de savoir-faire).
@@ -104,7 +113,23 @@ const SitterDashboard = () => {
 
   // Lot D2 : accueil.
   const helpsWithMissing = useHelpsWithMissing();
-  const digestLine = useSitterDigestLine(!!user?.id);
+  const isDesktopRail = useIsDesktopRail();
+  // Lot L7 : la ligne du cockpit n'est lue que sur ordinateur (le récit la remplace sur téléphone).
+  const digestLine = useSitterDigestLine(!!user?.id && isDesktopRail);
+
+  /* ── Lot L7 : récit gardien (aucune lecture de plus) ── */
+  const compactStory = useCompactStory();
+  const rankedSits = topSits.length > 0 ? topSits : fallbackSits;
+  const story = useMemo(() => resolveSitterStory(buildSitterStoryInput({
+    today: localTodayIso(),
+    ongoingGuard: ongoingGuard ?? null,
+    nextGuard: nextGuard ?? null,
+    reviewDue: reviewDue ?? null,
+    pendingApplication: pendingApplication ?? null,
+    rankedSits,
+    appliedSitIds: appliedSitIds ?? [],
+    openCount: totalPublished,
+  })), [ongoingGuard, nextGuard, reviewDue, pendingApplication, rankedSits, appliedSitIds, totalPublished]);
 
   const sitterPriorityAction = useSitterPriorityAction({
     nextGuard,
@@ -119,7 +144,6 @@ const SitterDashboard = () => {
   });
   const identityRailAction = sitterPriorityAction.variant === "identity" ? sitterPriorityAction : null;
 
-  const isDesktopRail = useIsDesktopRail();
   const railReadings = useRailReadings({ role: "sitter", userId: user?.id, upcomingGuard: nextGuard });
   const completionMissing = useProfileCompletionMissing("sitter", user?.id);
 
@@ -171,6 +195,13 @@ const SitterDashboard = () => {
   if (helpsWithMissing) todos.push({ key: "helps", label: "Votre phrase d'entraide", to: "/ma-ligne" });
 
   const myActiveMission = myMissions.find((m: any) => m.status !== "completed" && m.status !== "cancelled") ?? null;
+  // Lot L7 : sous le récit, les candidatures sont racontées par le récit lui-même.
+  const storyTodos = todos.filter((t) => t.key !== "apps");
+  // Sous le récit, la garde mise en avant n'est pas répétée dans la liste.
+  const storyOpeningId = story.chapter === "opening" || story.chapter === "second_application"
+    ? story.cta.href.replace(/^\/sits\//, "")
+    : null;
+  const listSits = (rows: typeof topSits) => (storyOpeningId ? rows.filter((r) => r.id !== storyOpeningId) : rows);
   const showAccessGate = !(level === 4 || level === "3B");
 
   const railContent = (
@@ -193,32 +224,73 @@ const SitterDashboard = () => {
 
   return (
     <div className="overflow-hidden lg:overflow-visible pb-24 md:pb-8">
-      {showAlmaFirstMeeting && (
+      {isDesktopRail && showAlmaFirstMeeting && (
         <div className="px-4 sm:px-5 md:px-8 pt-2">
           <AlmaFirstMeeting role="sitter" onDone={markAlmaFirstMeetingSeen} onSeen={recordAlmaFirstMeetingSeen} />
         </div>
       )}
-      <div className="px-4 sm:px-5 md:px-8">
-        <RoleActivationBanner userRole={user?.role || "sitter"} />
-      </div>
+      {isDesktopRail && (
+        <div className="px-4 sm:px-5 md:px-8">
+          <RoleActivationBanner userRole={user?.role || "sitter"} />
+        </div>
+      )}
 
       {/* Lot X3a (A-07) : candidatures reçues d'un compte double rôle. */}
-      <div className="px-4 sm:px-5 md:px-8 mt-3 empty:hidden">
-        <OwnerInboxNudge />
-      </div>
+      {isDesktopRail && (
+        <div className="px-4 sm:px-5 md:px-8 mt-3 empty:hidden">
+          <OwnerInboxNudge />
+        </div>
+      )}
 
       {/* Grille lots D1 et D2 : colonne principale 720 px, colonne de droite 328 px, écart 48 px */}
       <div className="min-w-0">
         <div className="mx-auto w-full max-w-[720px] lg:max-w-[1160px] px-4 sm:px-5 lg:px-8 lg:grid lg:grid-cols-[minmax(0,720px)_328px] lg:gap-[48px] lg:justify-center lg:items-start">
           <div className="min-w-0 space-y-[34px] md:space-y-[52px]">
-            {/* 1. Accueil */}
-            <SitterCockpit
-              firstName={user?.firstName}
-              isAvailable={!!isAvailable}
-              greeting={openingVisible ? "Bienvenue" : undefined}
-              line={cockpitLine}
-              todos={todos}
-            />
+            {isDesktopRail ? (
+              /* 1. Accueil (ordinateur, inchangé jusqu'au 31/01/2027) */
+              <SitterCockpit
+                firstName={user?.firstName}
+                isAvailable={!!isAvailable}
+                greeting={openingVisible ? "Bienvenue" : undefined}
+                line={cockpitLine}
+                todos={todos}
+              />
+            ) : (
+              /* Lot L7 : accueil téléphone, le récit d'abord (direction B de l'arène v2). */
+              <div className="space-y-[14px] pt-3" data-testid="sitter-story-home">
+                {!compactStory && <RoleSwitch />}
+                <StoryHero story={story} compact={compactStory} />
+                {compactStory && <RoleSwitch />}
+                <div className="empty:hidden">
+                  <OwnerInboxNudge />
+                </div>
+                {storyTodos.length > 0 && (
+                  <ul className="flex flex-wrap gap-[8px]" data-testid="story-todos" aria-label="À faire">
+                    {storyTodos.map((t) => (
+                      <li key={t.key}>
+                        <Link
+                          to={t.to}
+                          className="inline-flex min-h-[44px] items-center gap-[8px] rounded-full border border-border bg-card px-[14px] text-[14px] font-semibold text-foreground"
+                        >
+                          {t.label}
+                          {typeof t.count === "number" && t.count > 0 && (
+                            <span className="rounded-full bg-primary px-[7px] text-[12px] leading-[20px] text-primary-foreground">{t.count}</span>
+                          )}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <EntraideLine
+                  helpersCount={nearbyHelpersCount}
+                  radiusKm={helpersProximity?.radiusKm ?? 30}
+                  activeMission={myActiveMission as any}
+                />
+                {showAlmaFirstMeeting && (
+                  <AlmaFirstMeeting role="sitter" onDone={markAlmaFirstMeetingSeen} onSeen={recordAlmaFirstMeetingSeen} primaryVariant="outline" />
+                )}
+              </div>
+            )}
 
             {(nextGuardError || nearbyError) && (
               <div className="space-y-2">
@@ -237,23 +309,32 @@ const SitterDashboard = () => {
                 hasAvatar={!!avatarUrl}
                 hasBioMin={!!(bio && bio.length >= 50)}
                 hasPostalCode={!!postalCode}
+                ctaTone={isDesktopRail ? "primary" : "outline"}
               />
             )}
 
             {/* 3. Vedette unique et « Aussi pour vous », puis l'encart unique */}
             <div className="min-w-0 space-y-[22px]">
               <SitterMatchSection
-                topSits={topSits}
-                fallbackSits={fallbackSits}
+                topSits={isDesktopRail ? topSits : listSits(topSits)}
+                fallbackSits={isDesktopRail ? fallbackSits : listSits(fallbackSits)}
                 rankingSource={rankingSource}
                 isLoading={nbaLoading}
                 totalPublished={totalPublished}
-                layout={openingVisible ? "rows" : "star"}
+                // Lot L7 : sur téléphone, le récit porte la garde mise en avant, la liste suit en lignes.
+                layout={openingVisible || !isDesktopRail ? "rows" : "star"}
               />
               <StagedMount testId="missing">
                 <SitterMissingOpportunities fallbackTotalPublished={nbaLoading ? undefined : totalPublished} />
               </StagedMount>
             </div>
+
+            {/* Lot L7 : activation de l'autre espace, sous le récit sur téléphone. */}
+            {!isDesktopRail && (
+              <DeferredMount minHeight={0}>
+                <RoleActivationBanner userRole={user?.role || "sitter"} />
+              </DeferredMount>
+            )}
 
             {/* 4. Bandeau entraide (lot P1b : montage différé) */}
             <DeferredMount minHeight={160}>
@@ -296,8 +377,7 @@ const SitterDashboard = () => {
         </button>
       </div>
 
-      {/* CTA collant mobile : seulement s'il y a des candidatures en attente ou des messages non lus */}
-      <SitterMobileStickyCTA pendingAppsCount={pendingAppsCount} unreadCount={unreadCount} />
+      {/* Lot L7 : plus de bouton collant, le récit porte l'unique bouton plein sur téléphone. */}
     </div>
   );
 };

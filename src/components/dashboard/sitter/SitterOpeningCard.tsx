@@ -24,12 +24,15 @@ interface SitterOpeningCardProps {
   hasAvatar: boolean;
   hasBioMin: boolean;
   hasPostalCode: boolean;
+  /** Lot L7 : sous le récit, sur téléphone, le bouton passe en contour (un seul bouton plein par écran). */
+  ctaTone?: "primary" | "outline";
 }
 
 const SitterOpeningCard = ({
   hasAvatar,
   hasBioMin,
   hasPostalCode,
+  ctaTone = "primary",
 }: SitterOpeningCardProps) => {
   const steps: OpeningStep[] = [
     {
@@ -259,13 +262,16 @@ const SitterOpeningCard = ({
           <Link
             to={firstUndone.to}
             onClick={() => trackStep("continue")}
-            className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground font-bold transition-colors hover:bg-primary/90"
+            className={ctaTone === "outline"
+              ? "inline-flex items-center justify-center rounded-full border border-primary text-primary font-bold transition-colors hover:bg-primary/5"
+              : "inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground font-bold transition-colors hover:bg-primary/90"}
+            data-cta-tone={ctaTone}
             style={{
               padding: "10px 22px",
               minHeight: "44px",
               fontSize: "14px",
               fontWeight: 700,
-              boxShadow: "0 6px 14px rgba(44,109,80,0.24)",
+              boxShadow: ctaTone === "outline" ? undefined : "0 6px 14px rgba(44,109,80,0.24)",
             }}
           >
             Continuer mon profil

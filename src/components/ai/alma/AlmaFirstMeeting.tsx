@@ -49,9 +49,11 @@ interface Props {
   onDone: () => void;
   /** Lot L0 : appelé une fois à l'affichage, la rencontre est enregistrée. */
   onSeen?: () => void;
+  /** Lots L4 et L7 : sous le récit, sur téléphone, le bouton passe en contour (un seul bouton plein par écran). */
+  primaryVariant?: "default" | "outline";
 }
 
-export function AlmaFirstMeeting({ role, onDone, onSeen }: Props) {
+export function AlmaFirstMeeting({ role, onDone, onSeen, primaryVariant = "default" }: Props) {
   const navigate = useNavigate();
   const { claimProactiveSurface, releaseProactiveSurface } = useAlma();
   const { data: evolution } = useAlmaEvolution();
@@ -139,7 +141,7 @@ export function AlmaFirstMeeting({ role, onDone, onSeen }: Props) {
           </div>
           <p className="text-sm text-foreground/90 leading-relaxed">{copy.body}</p>
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
-            <Button size="sm" onClick={handlePrimary}>
+            <Button size="sm" variant={primaryVariant} onClick={handlePrimary}>
               {copy.primaryLabel}
             </Button>
             <Button size="sm" variant="ghost" onClick={handleLater}>
