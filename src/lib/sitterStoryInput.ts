@@ -29,6 +29,8 @@ export interface SitterOpeningSource {
   owner_first_name?: string | null;
   distance_km?: number | null;
   pet_names?: string[] | null;
+  /** Commune de la garde, celle du propriétaire à défaut (lot L7b). */
+  place_city?: string | null;
 }
 
 export interface SitterStorySource {
@@ -68,7 +70,7 @@ export function pickSitterOpening(s: Pick<SitterStorySource, "rankedSits" | "app
   return {
     id: o.id,
     ownerFirstName: firstWord(o.owner_first_name),
-    city: formatCityLabel(o.city) || null,
+    city: formatCityLabel(o.city || o.place_city) || null,
     distanceKm: typeof o.distance_km === "number" ? o.distance_km : null,
     start_date: o.start_date ?? null,
     end_date: o.end_date ?? null,

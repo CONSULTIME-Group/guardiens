@@ -124,3 +124,18 @@ describe("L7, élision des prénoms", () => {
     expect(s.lead).toBe("Le guide de la maison d'Élodie est ouvert.");
   });
 });
+
+describe("L7b, commune de la garde mise en avant", () => {
+  it("annonce sans commune : celle du propriétaire, comme sur la fiche", () => {
+    const o = pickSitterOpening({
+      rankedSits: [{ id: "y", city: null, place_city: "Chazay-d'Azergues", start_date: "2027-01-09", end_date: "2027-01-20", owner_first_name: "Laurence" }],
+      appliedSitIds: [],
+    });
+    expect(o?.city).toBe("Chazay-d'Azergues");
+    const s = resolveSitterStory(buildSitterStoryInput({
+      today: TODAY, appliedSitIds: [], openCount: 21,
+      rankedSits: [{ id: "y", city: null, place_city: "Chazay-d'Azergues", start_date: "2027-01-09", end_date: "2027-01-20", owner_first_name: "Laurence" }],
+    }));
+    expect(s.title).toBe("Une maison attend son gardien à Chazay-d'Azergues.");
+  });
+});
