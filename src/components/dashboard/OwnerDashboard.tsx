@@ -75,6 +75,7 @@ import { departureCardVisible } from "./owner/OwnerDepartureAlmaCard";
 import StoryHero from "./story/StoryHero";
 import RoleSwitch from "./story/RoleSwitch";
 import EntraideLine from "./story/EntraideLine";
+import EntraideFollowUp from "./story/EntraideFollowUp";
 import HomePhotoCard from "./story/HomePhotoCard";
 import PublishedNotice from "./story/PublishedNotice";
 import { useCompactStory } from "./story/useCompactStory";
@@ -581,13 +582,21 @@ const OwnerDashboard = () => {
             )}
 
             {/* 5. Bandeau entraide */}
-            <DeferredMount minHeight={160}>
-              <OwnerEntraideBand
-                helpersCount={nearbyHelpersCount}
-                helpersRadiusKm={helpersProximity?.radiusKm ?? 30}
-                activeMission={myActiveMission}
-              />
-            </DeferredMount>
+            {/* Lot L10 : un seul bloc entraide sur téléphone. La ligne sous le récit en est l'entrée ;
+                le suivi n'apparaît qu'avec une réponse attendue ou des propositions à suivre. */}
+            {isDesktopRail ? (
+              <DeferredMount minHeight={160}>
+                <OwnerEntraideBand
+                  helpersCount={nearbyHelpersCount}
+                  helpersRadiusKm={helpersProximity?.radiusKm ?? 30}
+                  activeMission={myActiveMission}
+                />
+              </DeferredMount>
+            ) : (
+              <DeferredMount minHeight={0}>
+                <EntraideFollowUp />
+              </DeferredMount>
+            )}
 
             {/* 6. Colonne de droite en mobile : après l'entraide. Lot P1b : une
                 seule des deux colonnes est rendue selon la largeur. */}
