@@ -110,6 +110,27 @@ const THIRD_PARTY_STACK_PATTERNS: RegExp[] = [
 ];
 
 /**
+ * Lot ERRFIX du 09/11 : récursion d'un script que Chrome sur iPhone injecte
+ * lui-même dans la page (traduction, remplissage, fonctions Closure renommées
+ * à chaque version : Ik/Gk en août, Qk/Ok en septembre, Bk/zk en novembre).
+ * Signature : navigateur CriOS, « Maximum call stack size exceeded », et
+ * aucune frame dans un fichier .js du site (toutes pointent la page elle-même,
+ * à des numéros de ligne absents du HTML servi : 231 pour 194 lignes).
+ * 6 dossiers depuis le 29/08/2026, tous CriOS, aucun autre navigateur.
+ */
+export function isBrowserInjectedRecursion(
+  message: string | null | undefined,
+  stack: string | null | undefined,
+  userAgent: string | null | undefined,
+): boolean {
+  if (!/CriOS\//.test(userAgent ?? "")) return false;
+  if (!/Maximum call stack size exceeded/i.test(message ?? "")) return false;
+  const frames = (stack ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
+  if (frames.length === 0) return false;
+  return !frames.some((f) => /\.(m?js|tsx?)(\?[^:]*)?:\d+:\d+/.test(f));
+}
+
+/**
  * Type de filtrage appliqué à une erreur "tierce".
  * Permet d'expliquer dans l'admin pourquoi elle est marquée comme ignorée.
  */
@@ -120,6 +141,7 @@ export type ThirdPartyReason =
   | "tracking_pixel"        // Source = gtag, fbevents, hotjar, intercom…
   | "cross_origin_script"   // Source = autre origine que la nôtre
   | "anonymous_inline"      // Source vide, stack majoritairement anonyme (injection inline)
+  | "browser_injected"      // Script du navigateur lui-même (Chrome sur iPhone), jamais un fichier du site
   | "empty_source";         // Source vide/blanche
 
 /**
@@ -381,9 +403,12 @@ async function send(payload: {
   // première frame chrome/moz/safari-extension) n'est pas du site : rien
   // n'est enregistré (ex. "reading 'M_ID'", 301 occurrences).
   if (sourceReason === "extension") return;
+  const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
   const thirdPartyReason: ThirdPartyReason | null = inApp
     ? "in_app_webview"
-    : sourceReason;
+    : isBrowserInjectedRecursion(payload.message, payload.stack, ua)
+      ? "browser_injected"
+      : sourceReason;
 
   let severity = payload.severity ?? "error";
   // Sanitise les clés URL-like du contexte explicite (url, referrer, hash,

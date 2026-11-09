@@ -91,6 +91,11 @@ const THIRD_PARTY_REASON_LABELS: Record<string, { label: string; explanation: st
     explanation:
       "Aucune source identifiable et stack majoritairement anonyme, typique d'un JS injecté inline par un WebView ou un script tiers.",
   },
+  browser_injected: {
+    label: "Script du navigateur (Chrome sur iPhone)",
+    explanation:
+      "Chrome sur iPhone injecte ses propres scripts dans la page (traduction, remplissage). Leur récursion se produit hors des fichiers du site : le parcours du membre continue (cas du 09/11/2026 : inscription et accueil menés à bout).",
+  },
   empty_source: {
     label: "Source vide",
     explanation: "Le navigateur n'a pas fourni de source pour cette erreur (souvent cross-origin masqué).",
