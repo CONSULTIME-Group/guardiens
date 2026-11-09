@@ -7,6 +7,14 @@
  *  - FIRST_CARD : première carte d'annonce affichée (liste /annonces, /search) ;
  *  - FIRST_CARD_PHOTO : photo de la première carte chargée ;
  *  - SIT_HERO : contenu d'une fiche d'annonce affiché.
+ * Lot perf 19 (09/11/2026) :
+ *  - FIRST_RESULT : fin de la première recherche de la vue (attr outcome
+ *    « cards » ou « empty ») ;
+ *  - GESTURE_CARD : temps entre un geste du membre (élargir, changer de lieu,
+ *    de rayon, de filtres) et la première carte de la recherche qu'il lance.
+ * Après une première issue vide, FIRST_CARD et FIRST_CARD_PHOTO sont tenus
+ * pour atteints : une carte arrivée après un geste n'est jamais comptée comme
+ * première annonce (elle compterait le temps de réflexion du membre).
  * Le chrono part de la navigation du document (vue « hard ») ou du changement
  * de route (vue « soft », navigation interne).
  *
@@ -14,7 +22,7 @@
  * avant que le collecteur (webVitals.ts, monté après le premier affichage)
  * soit prêt ; les jalons sont gardés puis rejoués à l'abonnement.
  */
-export type MilestoneName = "FIRST_CARD" | "FIRST_CARD_PHOTO" | "SIT_HERO";
+export type MilestoneName = "FIRST_CARD" | "FIRST_CARD_PHOTO" | "SIT_HERO" | "FIRST_RESULT" | "GESTURE_CARD";
 export type NavKind = "hard" | "soft";
 
 export interface PerfView {
@@ -32,12 +40,18 @@ export interface Milestone {
   value: number;
   view: PerfView;
   extra?: Record<string, string | number | boolean | null>;
+  /** Lot perf 19 : détail propre au jalon (metrics.<nom>.attr). */
+  attr?: Record<string, string | number>;
 }
+
+/** Lot perf 19 : champs de la ligne de la vue, tenus à jour jusqu'à l'envoi. */
+export type ViewExtra = Record<string, string | number | boolean | null>;
 
 type Listener = {
   onMilestone: (m: Milestone) => void;
   onViewEnd: (view: PerfView, endedAt: number) => void;
   onSkip?: (view: PerfView, reason: string) => void;
+  onExtra?: (view: PerfView, extra: ViewExtra) => void;
 };
 
 const now = () => (typeof performance !== "undefined" ? performance.now() : 0);
@@ -85,6 +99,7 @@ let view: PerfView = { seq: 0, nav: "hard", path: initialPath(), start: 0 };
 let marked = new Set<MilestoneName>();
 const buffer: Milestone[] = [];
 const skipped = new Map<number, string>();
+const pendingExtra = new Map<number, ViewExtra>();
 let listener: Listener | null = null;
 
 /** Vue courante (copie). */
@@ -126,16 +141,23 @@ export function perfViewElapsed(): number {
   return Math.max(0, Math.round(now() - view.start));
 }
 
-/** Jalon atteint dans la vue courante ; le premier de chaque nom compte seul. */
+/**
+ * Jalon atteint dans la vue courante ; le premier de chaque nom compte seul.
+ * `detail.since` (lot perf 19) : origine du chrono à la place du début de la
+ * vue (moment du geste pour GESTURE_CARD) ; `detail.attr` : détail du jalon.
+ */
 export function markMilestone(
   name: MilestoneName,
   extra?: Milestone["extra"],
   at: number = now(),
+  detail?: { since?: number; attr?: Milestone["attr"] },
 ): void {
   syncWithUrl();
   if (marked.has(name)) return;
   marked.add(name);
-  const m: Milestone = { name, value: Math.max(0, at - view.start), view: { ...view }, extra };
+  const from = detail?.since ?? view.start;
+  const m: Milestone = { name, value: Math.max(0, at - from), view: { ...view }, extra };
+  if (detail?.attr) m.attr = detail.attr;
   if (listener) listener.onMilestone(m);
   else if (buffer.length < 20) buffer.push(m);
 }
@@ -147,14 +169,30 @@ export function markMilestone(
 export function skipMilestones(reason: string): void {
   syncWithUrl();
   if (marked.has("FIRST_CARD") || marked.has("SIT_HERO")) return;
+  // Lot perf 19 : la première issue de la vue est tombée sans carte ; une
+  // carte tardive (après un geste) n'est plus une première annonce.
+  marked.add("FIRST_CARD");
+  marked.add("FIRST_CARD_PHOTO");
   const v = { ...view };
   if (listener) listener.onSkip?.(v, reason);
   else skipped.set(v.seq, reason);
 }
 
+/**
+ * Lot perf 19 : champs de la ligne de la vue courante (motifs des recherches,
+ * recherches évitées, geste), fusionnés jusqu'à l'envoi de la ligne.
+ */
+export function setViewExtra(extra: ViewExtra): void {
+  syncWithUrl();
+  if (listener?.onExtra) { listener.onExtra({ ...view }, extra); return; }
+  pendingExtra.set(view.seq, { ...(pendingExtra.get(view.seq) ?? {}), ...extra });
+}
+
 /** Abonnement du collecteur : rejoue les jalons déjà atteints. */
 export function subscribePerfMarks(l: Listener): () => void {
   listener = l;
+  for (const [seq, extra] of pendingExtra) if (seq === view.seq) l.onExtra?.({ ...view }, extra);
+  pendingExtra.clear();
   while (buffer.length) l.onMilestone(buffer.shift()!);
   for (const [seq, reason] of skipped) l.onSkip?.({ ...view, seq }, reason);
   skipped.clear();
@@ -167,6 +205,7 @@ export function __resetPerfMarks(path = "/"): void {
   marked = new Set();
   buffer.length = 0;
   skipped.clear();
+  pendingExtra.clear();
   urlChangedAt.clear();
   listener = null;
 }

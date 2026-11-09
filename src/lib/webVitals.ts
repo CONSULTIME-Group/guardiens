@@ -35,6 +35,13 @@
  * état de chargement, déplacement vertical, élément juste au-dessus de la
  * cible, trois plus grands décalages), sous le plafond de 2 048 octets de
  * l'insertion anonyme (fitVitalPayload).
+ *
+ * Lot perf 19 (09/11/2026) : sur une liste, FIRST_RESULT (fin de la première
+ * recherche, attr outcome) devient le jalon principal attendu ; une vue sans
+ * première recherche aboutie compte comme abandonnée sur FIRST_RESULT.
+ * GESTURE_CARD mesure la carte après un geste ; la ligne porte triggers
+ * (motifs des recherches, « 1:init,2:radius », 6 au plus), same_key
+ * (relances évitées) et gesture. fitVitalPayload retire triggers en premier.
  */
 import { onCLS, onINP, onFCP, onLCP, onTTFB, type MetricWithAttribution } from "web-vitals/attribution";
 import { currentPerfView, subscribePerfMarks, type Milestone, type PerfView } from "@/lib/perfMarks";
@@ -54,7 +61,7 @@ export const LONG_TASK_WINDOW_MS = 10_000;
 
 export type DeviceKind = "mobile" | "tablet" | "desktop";
 export type VitalName = "LCP" | "INP" | "CLS" | "FCP" | "TTFB" | "LONG_TASK";
-export type MilestoneMetric = "FIRST_CARD" | "FIRST_CARD_PHOTO" | "SIT_HERO";
+export type MilestoneMetric = "FIRST_CARD" | "FIRST_CARD_PHOTO" | "SIT_HERO" | "FIRST_RESULT" | "GESTURE_CARD";
 
 export function deviceKind(width: number): DeviceKind {
   if (width < 768) return "mobile";
@@ -190,7 +197,14 @@ export function milestoneRating(ms: number): "good" | "needs-improvement" | "poo
   return "poor";
 }
 
-const PRIMARY: Record<"list" | "fiche", MilestoneMetric> = { list: "FIRST_CARD", fiche: "SIT_HERO" };
+/**
+ * Jalon principal : marqué « abandoned » si la vue se termine sans lui. Lot
+ * perf 19 : FIRST_RESULT sur une liste (FIRST_CARD, toujours posé avec lui,
+ * vaut aussi réponse). EXPECTED : jalons qui envoient la ligne sans attendre
+ * la fin de la vue (une liste vide attend la fin, un geste peut suivre).
+ */
+const PRIMARY: Record<"list" | "fiche", MilestoneMetric> = { list: "FIRST_RESULT", fiche: "SIT_HERO" };
+const ANSWERED: Record<"list" | "fiche", MilestoneMetric[]> = { list: ["FIRST_RESULT", "FIRST_CARD"], fiche: ["SIT_HERO"] };
 const EXPECTED: Record<"list" | "fiche", MilestoneMetric[]> = { list: ["FIRST_CARD", "FIRST_CARD_PHOTO"], fiche: ["SIT_HERO"] };
 
 export interface MilestoneReporterEnv {
@@ -225,6 +239,7 @@ export function createMilestoneReporter(env: MilestoneReporterEnv) {
     if (!current || view.seq >= current.seq) current = view;
     return st;
   };
+  const answered = (st: State, template: "list" | "fiche") => ANSWERED[template].some((k) => st.metrics[k]);
   const close = (st: State) => {
     st.sent = true;
     done.add(st.view.seq);
@@ -236,7 +251,7 @@ export function createMilestoneReporter(env: MilestoneReporterEnv) {
     if (!template && Object.keys(st.metrics).length === 0) { if (endedAt !== null) close(st); return; }
     if (st.skip && Object.keys(st.metrics).length === 0) { if (endedAt !== null) close(st); return; }
     let abandoned = false;
-    if (template && endedAt !== null && !st.skip && !st.metrics[PRIMARY[template]]) {
+    if (template && endedAt !== null && !st.skip && !answered(st, template)) {
       st.metrics[PRIMARY[template]] = { value: Math.max(0, Math.round(endedAt - st.view.start)), rating: "abandoned" };
       abandoned = true;
     }
@@ -258,7 +273,7 @@ export function createMilestoneReporter(env: MilestoneReporterEnv) {
       const st = stateOf(m.view);
       if (st.sent) return;
       const value = Math.round(m.value);
-      st.metrics[m.name] = { value, rating: milestoneRating(value) };
+      st.metrics[m.name] = m.attr ? { value, rating: milestoneRating(value), attr: m.attr } : { value, rating: milestoneRating(value) };
       if (m.extra) Object.assign(st.extra, m.extra);
       const template = milestoneTemplate(m.view.path);
       if (template && EXPECTED[template].every((k) => st.metrics[k])) flushState(st, null);
@@ -270,6 +285,11 @@ export function createMilestoneReporter(env: MilestoneReporterEnv) {
       const st = stateOf(view);
       if (!st.sent) st.skip = reason;
     },
+    /** Lot perf 19 : champs de la ligne (triggers, same_key, gesture) tenus à jour jusqu'à l'envoi. */
+    onExtra(view: PerfView, extra: Record<string, unknown>) {
+      const st = stateOf(view);
+      if (!st.sent) Object.assign(st.extra, extra);
+    },
     /**
      * Page masquée (final faux) : la vue part seulement si son jalon principal
      * est là, sinon elle attend (le visiteur peut revenir). Page quittée
@@ -280,7 +300,7 @@ export function createMilestoneReporter(env: MilestoneReporterEnv) {
       if (!v) return;
       const st = stateOf(v);
       const template = milestoneTemplate(st.view.path);
-      if (!final && template && !st.metrics[PRIMARY[template]]) return;
+      if (!final && template && !answered(st, template)) return;
       flushState(st, final ? endedAt : null);
     },
   };
@@ -302,16 +322,23 @@ const shortSelector = (s: unknown) => (typeof s === "string" ? s.slice(0, 120) :
  * Lot perf 18 : l'insertion anonyme refuse une ligne dont metadata dépasse
  * 2 048 octets (politique « Anonymous can insert anonymous events »). Le JSON
  * compact est gardé sous VITAL_PAYLOAD_BUDGET caractères : on retire d'abord
- * le détail des décalages, puis l'élément au-dessus, jamais les mesures.
+ * les motifs des recherches (lot perf 19, triggers), puis le détail des
+ * décalages, puis l'élément au-dessus, jamais les mesures.
  */
 export const VITAL_PAYLOAD_BUDGET = 1400;
 export function fitVitalPayload<T extends Record<string, unknown>>(metadata: T): T {
   const size = (x: unknown) => { try { return JSON.stringify(x).length; } catch { return 0; } };
   if (size(metadata) <= VITAL_PAYLOAD_BUDGET) return metadata;
-  const metrics = (metadata as { metrics?: Record<string, VitalEntry> }).metrics;
+  let base = metadata;
+  if ("triggers" in metadata) {
+    const { triggers: _t, ...rest } = metadata as Record<string, unknown>;
+    base = rest as T;
+    if (size(base) <= VITAL_PAYLOAD_BUDGET) return base;
+  }
+  const metrics = (base as { metrics?: Record<string, VitalEntry> }).metrics;
   const cls = metrics?.CLS?.attr;
-  if (!metrics || !cls) return metadata;
-  const copy = { ...metadata, metrics: { ...metrics, CLS: { ...metrics.CLS, attr: { ...cls } } } } as T & { metrics: Record<string, VitalEntry> };
+  if (!metrics || !cls) return base;
+  const copy = { ...base, metrics: { ...metrics, CLS: { ...metrics.CLS, attr: { ...cls } } } } as T & { metrics: Record<string, VitalEntry> };
   const attr = copy.metrics.CLS.attr as Record<string, string | number>;
   for (const k of ["shifts", "above", "top", "n", "load_state"]) {
     delete attr[k];
@@ -502,6 +529,7 @@ const reportWebVitals = (onPerfEntry?: (metric: MetricWithAttribution) => void) 
     onMilestone: (m) => milestones.onMilestone(m),
     onViewEnd: (v, at) => milestones.onViewEnd(v, at),
     onSkip: (v, reason) => milestones.onSkip(v, reason),
+    onExtra: (v, extra) => milestones.onExtra(v, extra),
   });
 
   // Plus longue tâche des 10 premières secondes (entrées tamponnées depuis le début).

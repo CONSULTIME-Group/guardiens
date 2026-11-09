@@ -4,14 +4,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/ui";
 import { summarizeVitals, type SummaryDevice, type VitalCell, type VitalRow } from "@/lib/webVitalsSummary";
+import { firstCardMeasureNotice } from "@/lib/admin/measureBreak";
 
 const DEVICE_LABEL: Record<SummaryDevice, string> = { mobile: "Téléphone", tablet: "Tablette", desktop: "Ordinateur" };
 const MAX_ROWS = 5000;
 
 const fmt = (c: VitalCell) => (c.p75 == null ? "·" : `${c.p75} ms`);
+const WINDOW_MS = 7 * 86_400_000;
 
 export async function fetchWebVitalRows(): Promise<VitalRow[]> {
-  const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
+  const since = new Date(Date.now() - WINDOW_MS).toISOString();
   const { data, error } = await supabase
     .from("analytics_events")
     .select("metadata")
@@ -28,6 +30,7 @@ export async function fetchWebVitalRows(): Promise<VitalRow[]> {
 export default function WebVitalsCard() {
   const q = useQuery({ queryKey: ["admin", "web-vitals-7d"], queryFn: fetchWebVitalRows, staleTime: 5 * 60_000 });
   const summary = q.data ? summarizeVitals(q.data) : null;
+  const breakNotice = firstCardMeasureNotice(new Date(Date.now() - WINDOW_MS));
   return (
     <Card>
       <CardHeader>
@@ -36,6 +39,8 @@ export default function WebVitalsCard() {
           Site public guardiens.fr, 7 derniers jours, 75e centile (3 visites sur 4 font mieux). Affichage principal (LCP), réactivité (INP), plus longue tâche des 10 premières secondes.
           {summary ? ` ${summary.measures.toLocaleString("fr-FR")} mesures.` : ""}
           {q.data && q.data.length >= MAX_ROWS ? ` Limité aux ${MAX_ROWS.toLocaleString("fr-FR")} plus récentes.` : ""}
+          {" "}« Après un geste » : de l'élargissement ou du changement de lieu à la première carte. « Issue vide » : vues dont la première recherche n'a rendu aucune carte.
+          {breakNotice ? ` ${breakNotice}` : ""}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -50,6 +55,8 @@ export default function WebVitalsCard() {
                   <TableHead>Appareil</TableHead>
                   <TableHead className="text-right">Affichage</TableHead>
                   <TableHead className="text-right">Première annonce</TableHead>
+                  <TableHead className="text-right">Après un geste</TableHead>
+                  <TableHead className="text-right">Issue vide</TableHead>
                   <TableHead className="text-right">Réactivité</TableHead>
                   <TableHead className="text-right">Plus longue tâche</TableHead>
                   <TableHead className="text-right">Mesures</TableHead>
@@ -58,7 +65,7 @@ export default function WebVitalsCard() {
               <TableBody>
                 {summary.paths.flatMap((p) =>
                   (Object.keys(DEVICE_LABEL) as SummaryDevice[])
-                    .filter((d) => Object.values(p.byDevice[d]).some((c) => c.count > 0))
+                    .filter((d) => Object.values(p.byDevice[d]).some((c) => c.count > 0) || p.emptyFirst[d] > 0)
                     .map((d) => {
                       const c = p.byDevice[d];
                       return (
@@ -67,6 +74,8 @@ export default function WebVitalsCard() {
                           <TableCell>{DEVICE_LABEL[d]}</TableCell>
                           <TableCell className="text-right">{fmt(c.LCP)}</TableCell>
                           <TableCell className="text-right">{fmt(c.CONTENT)}</TableCell>
+                          <TableCell className="text-right">{fmt(c.GESTURE)}</TableCell>
+                          <TableCell className="text-right">{p.emptyFirst[d] || "·"}</TableCell>
                           <TableCell className="text-right">{fmt(c.INP)}</TableCell>
                           <TableCell className="text-right">{fmt(c.LONG_TASK)}</TableCell>
                           <TableCell className="text-right">{Math.max(c.LCP.count, c.INP.count, c.LONG_TASK.count, c.CONTENT.count)}</TableCell>
