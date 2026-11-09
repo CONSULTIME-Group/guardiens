@@ -757,6 +757,13 @@
       "when": 1794166931058,
       "tag": "0107_photo1_regard_photos_logement",
       "breakpoints": true
+    },
+    {
+      "idx": 108,
+      "version": "7",
+      "when": 1794206863805,
+      "tag": "0108_l6_candidature_recue",
+      "breakpoints": true
     }
   ]
 }

@@ -20714,6 +20714,10 @@ export type Database = {
         Returns: string
       }
       looks_like_pricing: { Args: { txt: string }; Returns: boolean }
+      mark_application_viewed: {
+        Args: { p_application_id: string }
+        Returns: boolean
+      }
       mark_mission_choose_prompt_sent: {
         Args: { p_response_id: string }
         Returns: boolean
