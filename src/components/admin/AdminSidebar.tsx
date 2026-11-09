@@ -12,7 +12,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWorkList, workListBadgeLabel, workListBadgeText } from "@/hooks/useWorkList";
-import { AdminBadgePill } from "./AdminBadgePill";
+import { AdminBadgePill, AdminNewsPill } from "./AdminBadgePill";
+import { newsLabel, newsText, useAdminNews, type AdminNewsKey, type AdminNews } from "@/hooks/useAdminNews";
 import { PRICING_IS_ACTIVE } from "@/config/pricing";
 
 export interface NavItem {
@@ -22,6 +23,8 @@ export interface NavItem {
   end?: boolean;
   /** Lot ADM14 : l'entrée porte la pastille unique, longueur de la liste de travail. */
   workList?: boolean;
+  /** Lot ADM14 : compteur gris des nouveautés depuis la dernière visite de la page. */
+  news?: AdminNewsKey;
 }
 
 export interface NavGroup {
@@ -32,10 +35,11 @@ export interface NavGroup {
 }
 
 // Lot ADM14 (lot 3 du plan de l'arène admin du 09/11/2026, décision 1 validée
-// par Jérémie) : une seule pastille, sur la vue d'ensemble, égale au nombre de
-// lignes de la liste de travail ; « Chaque semaine » pour les écrans qu'on lit
-// sans file d'attente ; tout le reste rangé sous « Outils », replié, sans
-// pastille. Projets, Demandes d'analyse et Poids des hero quittent le menu,
+// par Jérémie) : une seule pastille rouge, sur la vue d'ensemble, égale au
+// nombre de choses à faire ; Annonces et Entraide restent au quotidien avec un
+// compteur gris des nouveautés (pas une tâche) ; « Chaque semaine » pour les
+// écrans qu'on lit sans file d'attente ; le reste rangé sous « Outils »,
+// replié, sans pastille. Projets, Demandes d'analyse et Poids des hero quittent le menu,
 // leurs routes restent (Projets est un onglet d'Entraide, les demandes
 // d'analyse entrent dans la liste quand il y en a une).
 const adminNavGroups: NavGroup[] = [
@@ -43,6 +47,10 @@ const adminNavGroups: NavGroup[] = [
     label: "AU QUOTIDIEN",
     items: [
       { to: "/admin", icon: LayoutDashboard, label: "Vue d'ensemble", end: true, workList: true },
+      // Annonces et Entraide : les annonces du site, lues chaque jour (Jérémie, 09/11/2026).
+      { to: "/admin/listings", icon: Megaphone, label: "Annonces", news: "listings" },
+      { to: "/admin/small-missions", icon: Handshake, label: "Entraide", news: "entraide" },
+      { to: "/admin/users", icon: Users, label: "Utilisateurs" },
     ],
   },
   {
@@ -55,13 +63,10 @@ const adminNavGroups: NavGroup[] = [
     ],
   },
   {
-    label: "MEMBRES ET ANNONCES",
+    label: "MEMBRES ET GARDES",
     tool: true,
     items: [
-      { to: "/admin/listings", icon: Megaphone, label: "Annonces" },
-      { to: "/admin/small-missions", icon: Handshake, label: "Entraide" },
       { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
-      { to: "/admin/users", icon: Users, label: "Utilisateurs" },
       { to: "/admin/contact-messages", icon: Mail, label: "Messages contact" },
       { to: "/admin/reports", icon: Flag, label: "Signalements" },
       { to: "/admin/verifications", icon: ShieldCheck, label: "Vérifications ID" },
@@ -136,12 +141,21 @@ export function navItemBadge(item: NavItem, workBadge: string | null): string | 
   return item.workList ? workBadge : null;
 }
 
+/** Compteur gris de l'entrée : nouveautés depuis la dernière visite, sinon rien. */
+export function navItemNews(item: NavItem, news: Partial<AdminNews>): { text: string; label: string } | null {
+  if (!item.news) return null;
+  const n = news[item.news];
+  const text = newsText(n);
+  return text && n ? { text, label: newsLabel(item.news, n) } : null;
+}
+
 export const AdminSidebar = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { model, error } = useWorkList();
   const workBadge = workListBadgeText(model, !!error);
+  const news = useAdminNews();
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem(STORAGE_KEY) === "1";
@@ -166,7 +180,8 @@ export const AdminSidebar = () => {
 
   const renderItem = (item: NavItem) => {
     const badge = navItemBadge(item, workBadge);
-    const badgeLabel = badge ? workListBadgeLabel(badge) : undefined;
+    const fresh = navItemNews(item, news);
+    const badgeLabel = badge ? workListBadgeLabel(badge) : fresh?.label;
     return (
       <NavLink
         key={item.to}
@@ -189,11 +204,15 @@ export const AdminSidebar = () => {
           {collapsed && badge && (
             <AdminBadgePill compact text={badge} label={badgeLabel} className="absolute -top-1.5 -right-2" />
           )}
+          {collapsed && fresh && (
+            <AdminNewsPill compact text={fresh.text} label={fresh.label} className="absolute -top-1.5 -right-2" />
+          )}
         </span>
         {!collapsed && (
           <>
             <span className="truncate flex-1">{item.label}</span>
             {badge && <AdminBadgePill text={badge} label={badgeLabel} className="ml-auto" />}
+            {fresh && <AdminNewsPill text={fresh.text} label={fresh.label} className="ml-auto" />}
           </>
         )}
       </NavLink>

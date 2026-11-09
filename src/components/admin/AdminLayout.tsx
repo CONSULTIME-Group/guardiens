@@ -1,9 +1,10 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Outlet, Navigate, NavLink, useNavigate, useLocation } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
-import { AdminSidebar, adminNavGroups_export, isToolPath, navItemBadge } from "./AdminSidebar";
+import { AdminSidebar, adminNavGroups_export, isToolPath, navItemBadge, navItemNews } from "./AdminSidebar";
+import { markAdminNewsSeen, useAdminNews } from "@/hooks/useAdminNews";
 import { useWorkList, workListBadgeLabel, workListBadgeText } from "@/hooks/useWorkList";
-import { AdminBadgePill } from "./AdminBadgePill";
+import { AdminBadgePill, AdminNewsPill } from "./AdminBadgePill";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useAuth } from "@/contexts/AuthContext";
 import { Menu, X, ArrowLeft, LogOut, ChevronDown, ChevronUp } from "lucide-react";
@@ -36,7 +37,7 @@ export const resolveAdminTitle = (pathname: string, search = ""): string => {
 };
 
 export const AdminLayout = () => {
-  const { isAuthenticated, loading: authLoading, logout } = useAuth();
+  const { isAuthenticated, loading: authLoading, logout, user } = useAuth();
   const { isAdmin, loading: adminLoading } = useAdmin();
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,6 +50,11 @@ export const AdminLayout = () => {
   // Lot ADM14 : le bouton du menu porte la pastille unique, longueur de la liste de travail.
   const { model, error } = useWorkList(!authLoading && !adminLoading && isAuthenticated && isAdmin);
   const totalBadges = workListBadgeText(model, !!error);
+  const news = useAdminNews(!authLoading && !adminLoading && isAuthenticated && isAdmin);
+  // Lot ADM14 : ouvrir Annonces ou Entraide efface leur compteur de nouveautés.
+  useEffect(() => {
+    if (isAdmin) markAdminNewsSeen(location.pathname, user?.id);
+  }, [location.pathname, isAdmin, user?.id]);
   const mobileToolsShown = mobileToolsOpen || isToolPath(location.pathname);
 
   if (authLoading || adminLoading) {
@@ -128,7 +134,8 @@ export const AdminLayout = () => {
                 <div className="space-y-0.5">
                   {group.items.map((item) => {
                     const badge = navItemBadge(item, totalBadges);
-                    const badgeLabel = badge ? workListBadgeLabel(badge) : undefined;
+                    const fresh = navItemNews(item, news);
+                    const badgeLabel = badge ? workListBadgeLabel(badge) : fresh?.label;
                     return (
                       <NavLink
                         key={item.to}
@@ -151,6 +158,7 @@ export const AdminLayout = () => {
                         {badge && (
                           <AdminBadgePill text={badge} label={badgeLabel} className="ml-auto" />
                         )}
+                        {fresh && <AdminNewsPill text={fresh.text} label={fresh.label} className="ml-auto" />}
                       </NavLink>
                     );
                   })}

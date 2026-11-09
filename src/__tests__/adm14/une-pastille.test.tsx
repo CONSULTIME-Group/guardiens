@@ -8,14 +8,29 @@ import { render, screen, waitFor, fireEvent, within } from "@testing-library/rea
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 
-const { rpcSpy, updates, toastSuccess } = vi.hoisted(() => ({
+const { rpcSpy, updates, toastSuccess, newsReads, newsCounts } = vi.hoisted(() => ({
   rpcSpy: vi.fn(),
   updates: [] as Array<{ values: Record<string, unknown>; ids: unknown; filter: string }>,
   toastSuccess: vi.fn(),
+  newsReads: [] as Array<{ table: string; ops: Array<[string, unknown[]]> }>,
+  newsCounts: { sits: 0, small_missions: 0 } as Record<string, number>,
 }));
 
 vi.mock("@/integrations/supabase/client", () => {
-  const from = () => ({
+  // Lectures de comptage (nouveautés) : chaîne select(...).gte().in()... puis await.
+  const counter = (table: string) => {
+    const entry = { table, ops: [] as Array<[string, unknown[]]> };
+    newsReads.push(entry);
+    const b: Record<string, unknown> = new Proxy({}, {
+      get: (_t, k: string) => {
+        if (k === "then") return (ok: (v: unknown) => unknown) => Promise.resolve({ count: newsCounts[table] ?? 0, error: null }).then(ok);
+        return (...a: unknown[]) => { entry.ops.push([k, a]); return b; };
+      },
+    });
+    return b;
+  };
+  const from = (table: string) => ({
+    select: (...a: unknown[]) => { const c = counter(table) as Record<string, (...x: unknown[]) => unknown>; return c.select(...a); },
     update: (values: Record<string, unknown>) => ({
       in: (_c: string, ids: unknown) => ({
         is: (col: string) => { updates.push({ values, ids, filter: `is:${col}` }); return Promise.resolve({ error: null }); },
@@ -43,6 +58,7 @@ vi.mock("sonner", () => ({ toast: { success: (...a: unknown[]) => toastSuccess(.
 import { AdminSidebar, adminNavGroups_export, isToolPath } from "@/components/admin/AdminSidebar";
 import { AdminLayout, resolveAdminTitle } from "@/components/admin/AdminLayout";
 import { workListBadgeText, workListBadgeLabel } from "@/hooks/useWorkList";
+import { markAdminNewsSeen, newsKeyForPath, readNewsSince, NEWS_DEFAULT_WINDOW_MS } from "@/hooks/useAdminNews";
 import { SystemSection, TechnicalSignalsLine, TodaySection } from "@/pages/admin/_components/dashboard/PilotageBlocks";
 import { SiteHealthStrip } from "@/pages/admin/_components/dashboard/SiteHealthStrip";
 import { IgnoreSignalsButton, ignoreConfirmTitle } from "@/components/admin/signals/IgnoreSignalsButton";
@@ -87,6 +103,9 @@ const wrap = (ui: React.ReactNode, path = "/admin") => {
 beforeEach(() => {
   rpcSpy.mockReset();
   updates.length = 0;
+  newsReads.length = 0;
+  newsCounts.sits = 0;
+  newsCounts.small_missions = 0;
   toastSuccess.mockReset();
   try { localStorage.clear(); } catch { /* stockage indisponible */ }
 });
@@ -99,14 +118,15 @@ describe("pastille unique = longueur de la liste", () => {
     expect(workListBadgeText(null, false)).toBeNull();
     expect(workListBadgeText(buildWorkList({ sources: { queues: false } }), false)).toBe("?");
     expect(workListBadgeText(buildWorkList({ sources: {} }), false)).toBeNull();
-    expect(workListBadgeLabel("1")).toBe("1 ligne dans la liste de travail");
+    expect(workListBadgeLabel("1")).toBe("1 chose à faire");
+    expect(workListBadgeLabel("6")).toBe("6 choses à faire");
     expect(workListBadgeLabel("?")).toBe("Liste de travail indisponible");
   });
 
   it("menu de bureau : une pastille, sur la vue d'ensemble, égale aux lignes", async () => {
     rpcSpy.mockResolvedValue({ data: RAW, error: null });
     wrap(<AdminSidebar />);
-    const pill = await screen.findByTitle(`${LINES} lignes dans la liste de travail`);
+    const pill = await screen.findByTitle(`${LINES} choses à faire`);
     expect(pill.textContent).toBe(String(LINES));
     expect(pill.closest("a")?.getAttribute("href")).toBe("/admin");
     expect(screen.getAllByTestId("admin-badge")).toHaveLength(1);
@@ -116,7 +136,7 @@ describe("pastille unique = longueur de la liste", () => {
     rpcSpy.mockResolvedValue({ data: RAW, error: null });
     wrap(<AdminLayout />);
     const btn = await screen.findByTestId("admin-mobile-menu-button");
-    await waitFor(() => expect(btn.getAttribute("aria-label")).toBe(`Ouvrir le menu, ${LINES} lignes dans la liste de travail`));
+    await waitFor(() => expect(btn.getAttribute("aria-label")).toBe(`Ouvrir le menu, ${LINES} choses à faire`));
     expect(within(btn).getByTestId("admin-badge").textContent).toBe(String(LINES));
     fireEvent.click(btn);
     // Pastille du bureau (cachée sous md), puis celle du tiroir : deux, sur la même entrée.
@@ -132,8 +152,9 @@ describe("menu", () => {
   const tools = adminNavGroups_export.filter((g) => g.tool);
   const all = adminNavGroups_export.flatMap((g) => g.items);
 
-  it("Vue d'ensemble, puis Chaque semaine, puis Outils sans pastille", () => {
+  it("Vue d'ensemble, Annonces, Entraide, Utilisateurs, puis Chaque semaine, puis Outils sans pastille", () => {
     expect(daily.map((g) => g.label)).toEqual(["AU QUOTIDIEN", "CHAQUE SEMAINE"]);
+    expect(daily[0].items.map((i) => i.label)).toEqual(["Vue d'ensemble", "Annonces", "Entraide", "Utilisateurs"]);
     expect(daily[1].items.map((i) => i.label)).toEqual(["Trafic", "Alma", "Affinité", "Pilotage entraide"]);
     expect(all.filter((i) => i.workList).map((i) => i.to)).toEqual(["/admin"]);
     for (const g of tools) for (const i of g.items) expect(i.workList, i.label).toBeFalsy();
@@ -154,8 +175,10 @@ describe("menu", () => {
     expect(resolveAdminTitle("/admin/hero-weights")).toBe("Poids des hero");
   });
 
-  it("Outils s'ouvre seul sur une page d'outil, Projets compris", () => {
-    expect(isToolPath("/admin/small-missions")).toBe(true);
+  it("Outils s'ouvre seul sur une page d'outil ; Annonces et Entraide restent au quotidien", () => {
+    expect(isToolPath("/admin/small-missions")).toBe(false);
+    expect(isToolPath("/admin/listings")).toBe(false);
+    expect(isToolPath("/admin/reports")).toBe(true);
     expect(isToolPath("/admin/traffic")).toBe(false);
   });
 
@@ -170,6 +193,66 @@ describe("menu", () => {
   });
 });
 
+describe("nouveautés : compteur gris sur Annonces et Entraide", () => {
+  it("repère : dernière ouverture de la page, sinon 7 jours", () => {
+    const now = Date.parse("2026-11-09T18:00:00Z");
+    expect(readNewsSince("listings", "admin-1", now)).toBe(new Date(now - NEWS_DEFAULT_WINDOW_MS).toISOString());
+    markAdminNewsSeen("/admin/listings", "admin-1", now);
+    expect(readNewsSince("listings", "admin-1", now + 1000)).toBe(new Date(now).toISOString());
+    expect(readNewsSince("entraide", "admin-1", now)).toBe(new Date(now - NEWS_DEFAULT_WINDOW_MS).toISOString());
+    // Le repère par défaut est gardé : il ne bouge plus d'un affichage à l'autre.
+    expect(readNewsSince("entraide", "admin-1", now + 60_000)).toBe(new Date(now - NEWS_DEFAULT_WINDOW_MS).toISOString());
+    expect(newsKeyForPath("/admin/small-missions")).toBe("entraide");
+    expect(newsKeyForPath("/admin")).toBeNull();
+  });
+
+  it("compteurs gris, hors pastille rouge, lus sur published_at et sur les besoins visibles", async () => {
+    newsCounts.sits = 3;
+    newsCounts.small_missions = 1;
+    rpcSpy.mockResolvedValue({ data: RAW, error: null });
+    wrap(<AdminSidebar />);
+    const listings = await screen.findByTitle("3 nouvelles annonces depuis votre dernière visite");
+    expect(listings.closest("a")?.getAttribute("href")).toBe("/admin/listings");
+    expect(screen.getByTitle("1 nouveau besoin d'entraide depuis votre dernière visite").closest("a")?.getAttribute("href")).toBe("/admin/small-missions");
+    expect(screen.getAllByTestId("admin-badge")).toHaveLength(1);
+    const sits = newsReads.find((r) => r.table === "sits")!;
+    expect(sits.ops.map(([k]) => k)).toEqual(expect.arrayContaining(["gte", "in"]));
+    expect(sits.ops.find(([k]) => k === "gte")?.[1][0]).toBe("published_at");
+    const missions = newsReads.find((r) => r.table === "small_missions")!;
+    expect(missions.ops).toContainEqual(["eq", ["mission_type", "besoin"]]);
+    expect(missions.ops).toContainEqual(["is", ["moderation_hidden_at", null]]);
+  });
+
+  it("le bouton du menu mobile ne compte que les choses à faire", async () => {
+    newsCounts.sits = 4;
+    rpcSpy.mockResolvedValue({ data: RAW, error: null });
+    wrap(<AdminLayout />, "/admin/traffic");
+    const btn = await screen.findByTestId("admin-mobile-menu-button");
+    await waitFor(() => expect(within(btn).getByTestId("admin-badge").textContent).toBe(String(LINES)));
+    expect(within(btn).queryByTestId("admin-news")).toBeNull();
+  });
+
+  it("ouvrir Annonces efface son compteur", async () => {
+    newsCounts.sits = 2;
+    rpcSpy.mockResolvedValue({ data: RAW, error: null });
+    wrap(<AdminLayout />, "/admin/listings");
+    await waitFor(() => expect(Date.now() - Date.parse(readNewsSince("listings", "admin-1"))).toBeLessThan(60_000));
+  });
+});
+
+describe("erreurs du site ouvertes depuis plus de 24 h", () => {
+  it("une ligne dans la famille du site, verbe en tête, lien vers les erreurs", () => {
+    const m = buildWorkList({ ...RAW, queues: [{ key: "errorsOld", count: 2, oldest: "2026-11-01T08:00:00Z" }] });
+    const line = m.items.find((i) => i.type === "queue:errorsOld")!;
+    expect(line.family).toBe("site");
+    expect(line.title).toBe("Corriger 2 erreurs du site ouvertes depuis plus de 24 h");
+    expect(isVerbFirst(line.title)).toBe(true);
+    expect(line.link).toBe("/admin/errors");
+    expect(line.detail).toBe("La plus ancienne date du 01/11.");
+    expect(MIGRATION).toContain("first_seen_at <= now() - interval '24 hours'");
+  });
+});
+
 describe("la liste : « Voir » sur chaque ligne", () => {
   it("chaque bouton de ligne dit « Voir », la phrase porte le verbe", async () => {
     rpcSpy.mockResolvedValue({ data: RAW, error: null });
@@ -180,11 +263,11 @@ describe("la liste : « Voir » sur chaque ligne", () => {
       const buttons = [...l.querySelectorAll("button, a")];
       expect(buttons.map((b) => b.textContent)).toEqual(["Voir"]);
     }
-    expect(screen.getByTestId("pilotage-count").textContent).toBe(`${LINES} lignes`);
+    expect(screen.getByTestId("pilotage-count").textContent).toBe(`${LINES} choses à faire`);
   });
 
   it("les files signalées jusqu'ici par une pastille ont leur ligne, verbe en tête et route réelle", () => {
-    for (const key of ["reviewsModeration", "experiences", "skills", "guideRequests", "analysisRequests"]) {
+    for (const key of ["reviewsModeration", "experiences", "skills", "guideRequests", "analysisRequests", "errorsOld"]) {
       const c = QUEUE_COPY[key];
       expect(c, key).toBeDefined();
       for (const k of [1, 2]) expect(isVerbFirst(c.title(k)), c.title(k)).toBe(true);

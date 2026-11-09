@@ -9,7 +9,10 @@
 -- Mêmes définitions que admin_menu_badges, plus la date du plus ancien.
 -- La partie « compétences libres saisies dans les profils » de l'ancienne
 -- pastille reste à l'écran Compétences : elle compte des mots, pas une
--- demande en attente. Rejouable.
+-- demande en attente.
+-- Erreurs du site : le voyant ne regarde que les erreurs apparues en 24 h ;
+-- la file errorsOld compte celles, non résolues, apparues avant, qu'aucune
+-- pastille ne signalerait plus. Rejouable.
 
 CREATE OR REPLACE FUNCTION public.admin_human_queues()
  RETURNS jsonb
@@ -43,9 +46,15 @@ AS $function$
     (SELECT jsonb_build_object('key', 'guideRequests', 'count', count(*), 'oldest', min(created_at))
        FROM guide_requests WHERE status = 'pending'),
     (SELECT jsonb_build_object('key', 'analysisRequests', 'count', count(*), 'oldest', min(created_at))
-       FROM analysis_requests WHERE status = 'new')
+       FROM analysis_requests WHERE status = 'new'),
+    (SELECT jsonb_build_object('key', 'errorsOld', 'count', count(*), 'oldest', min(first_seen_at))
+       FROM error_logs
+       WHERE resolved_at IS NULL
+         AND severity IS DISTINCT FROM 'ignored_third_party'
+         AND first_seen_at <= now() - interval '24 hours')
   );
 $function$;
 
 REVOKE ALL ON FUNCTION public.admin_human_queues() FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_human_queues() TO service_role;
+

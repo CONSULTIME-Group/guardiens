@@ -30,10 +30,10 @@ describe("Menu rangé", () => {
   const daily = adminNavGroups_export.filter((g) => !g.tool).flatMap((g) => g.items);
   const tools = adminNavGroups_export.filter((g) => g.tool).flatMap((g) => g.items);
 
-  // Lot ADM14 : Vue d'ensemble seule au quotidien, puis « Chaque semaine ».
-  it("vue d'ensemble, puis les écrans de la semaine, dans l'ordre", () => {
+  // Lot ADM14 : au quotidien la vue d'ensemble et les annonces, puis « Chaque semaine ».
+  it("vue d'ensemble, annonces, entraide, utilisateurs, puis les écrans de la semaine", () => {
     expect(daily.map((i) => i.label)).toEqual([
-      "Vue d'ensemble", "Trafic", "Alma", "Affinité", "Pilotage entraide",
+      "Vue d'ensemble", "Annonces", "Entraide", "Utilisateurs", "Trafic", "Alma", "Affinité", "Pilotage entraide",
     ]);
   });
 
@@ -52,8 +52,9 @@ describe("Menu rangé", () => {
 
   it("Outils s'ouvre seul sur une page d'outil, jamais sur une page du quotidien", () => {
     expect(isToolPath("/admin/envois-groupes/stats")).toBe(true);
-    expect(isToolPath("/admin/listings")).toBe(true);
-    expect(isToolPath("/admin/small-missions")).toBe(true);
+    expect(isToolPath("/admin/listings")).toBe(false);
+    expect(isToolPath("/admin/small-missions")).toBe(false);
+    expect(isToolPath("/admin/contact-messages")).toBe(true);
     expect(isToolPath("/admin")).toBe(false);
     expect(isToolPath("/admin/traffic")).toBe(false);
   });

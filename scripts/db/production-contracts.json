@@ -188,7 +188,7 @@
       "checks": [
         {
           "name": "files_completes",
-          "sql": "SELECT position('adm14_files_completes' IN pg_get_functiondef('public.admin_human_queues()'::regprocedure)) > 0 AND jsonb_array_length(public.admin_human_queues()) = 10 AS ok"
+          "sql": "SELECT position('adm14_files_completes' IN pg_get_functiondef('public.admin_human_queues()'::regprocedure)) > 0 AND position('errorsOld' IN pg_get_functiondef('public.admin_human_queues()'::regprocedure)) > 0 AS ok"
         }
       ]
     }

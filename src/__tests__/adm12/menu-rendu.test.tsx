@@ -40,7 +40,7 @@ describe("menu rendu", () => {
   it("la vue d'ensemble porte la pastille de la liste, aucune autre entrée", async () => {
     rpcSpy.mockResolvedValue({ data: { sources: {}, signals: [line("a"), line("b")], queues: [{ key: "reports", count: 2, oldest: null }], health: [] }, error: null });
     renderSidebar();
-    const pill = await screen.findByTitle(/lignes? dans la liste de travail/);
+    const pill = await screen.findByTitle(/choses? à faire/);
     expect(pill.closest("a")?.getAttribute("href")).toBe("/admin");
     expect(screen.getAllByTestId("admin-badge")).toHaveLength(1);
     expect(rpcSpy).toHaveBeenCalledWith("admin_work_list");

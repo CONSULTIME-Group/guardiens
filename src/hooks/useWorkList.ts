@@ -74,8 +74,13 @@ export function workListBadgeText(model: WorkListModel | null, failed: boolean):
   return String(n);
 }
 
-/** Libellé lu par les lecteurs d'écran avec la pastille. */
+/** « 6 choses à faire » : ce que compte la pastille, dit en clair (survol et lecture d'écran). */
+export function workListCountText(n: number): string {
+  return n > 1 ? `${n} choses à faire` : `${n} chose à faire`;
+}
+
+/** Libellé de la pastille. */
 export function workListBadgeLabel(text: string): string {
   if (text === "?") return "Liste de travail indisponible";
-  return text === "1" ? "1 ligne dans la liste de travail" : `${text} lignes dans la liste de travail`;
+  return workListCountText(Number(text));
 }

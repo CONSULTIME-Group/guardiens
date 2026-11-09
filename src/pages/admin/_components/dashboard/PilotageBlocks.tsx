@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { KpiTile } from "@/components/admin/ui";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
-import { useWorkList, WORK_LIST_QUERY_KEY } from "@/hooks/useWorkList";
+import { useWorkList, workListCountText, WORK_LIST_QUERY_KEY } from "@/hooks/useWorkList";
 import { isMondayInParis, technicalFamiliesText } from "@/lib/admin/overviewText";
 import { UNAVAILABLE_LABEL, reportAdminReadError } from "@/lib/admin/readError";
 import {
@@ -140,7 +140,7 @@ export const TodaySection = () => {
     <section aria-labelledby="pilotage-today" className="space-y-3.5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 id="pilotage-today" className="font-heading text-2xl font-semibold">Ce qui vous attend aujourd'hui</h2>
-        {model && <p className="text-sm text-muted-foreground" data-testid="pilotage-count">{lineCount} {lineCount > 1 ? "lignes" : "ligne"}</p>}
+        {model && <p className="text-sm text-muted-foreground" data-testid="pilotage-count">{workListCountText(lineCount)}</p>}
       </div>
 
       {!flagEnabled && (

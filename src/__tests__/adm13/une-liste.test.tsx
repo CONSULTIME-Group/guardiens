@@ -238,7 +238,7 @@ describe("vue d'ensemble rendue", () => {
     renderToday();
     expect(await screen.findByText("Répondre à 2 messages de contact")).toBeTruthy();
     const lines = screen.getAllByTestId("pilotage-line");
-    expect(screen.getByTestId("pilotage-count").textContent).toBe(`${lines.length} lignes`);
+    expect(screen.getByTestId("pilotage-count").textContent).toBe(`${lines.length} choses à faire`);
     expect(lines).toHaveLength(buildWorkList(RAW).items.length);
     expect(rpcSpy).toHaveBeenCalledTimes(1);
     expect(rpcSpy).toHaveBeenCalledWith("admin_work_list");
