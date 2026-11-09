@@ -17,6 +17,7 @@ const PAGE_SIZE = 50;
 const ACTION_LABELS: Record<string, string> = {
   force_verify_identity: "Vérification d'identité forcée",
   toggle_super_gardien: "Bascule Super Gardien",
+  resend_signup_confirmation: "Email de confirmation renvoyé",
   reject_competence_label: "Compétence refusée",
   coordinate_backfill: "Backfill coordonnées",
   prodirectory_approved: "Fiche Pro annuaire approuvée",

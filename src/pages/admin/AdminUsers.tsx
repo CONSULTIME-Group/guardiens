@@ -34,6 +34,16 @@ import { MemberActionsMenu, type MemberActionsHandlers, type MemberActionsTarget
 import { MemberCardSheet, fetchMemberCard } from "./_components/users/MemberCardSheet";
 import { MEMBER_PARAM } from "@/lib/admin/memberCard";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { NOT_DELETED_FILTER } from "./_components/dashboard/useDashboardData";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  MEMBER_STATUS_FILTERS,
+  DEFAULT_MEMBER_STATUS_FILTER,
+  applyMemberStatusFilter,
+  adminDeptLabel,
+  ADMIN_EXTRA_DEPT_NAMES,
+  type MemberStatusFilter,
+} from "@/lib/admin/memberList";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -65,10 +75,18 @@ const statusLabels: Record<string, { label: string; variant: "default" | "second
   deletion_pending: { label: "Suppression en cours", variant: "secondary" },
 };
 
-import { DEPT_NAMES, getDeptLabel } from "@/lib/departments";
+import { DEPT_NAMES } from "@/lib/departments";
 import { getCountryName } from "@/lib/countries";
 
 const PAGE_SIZE = 50;
+
+/** Lot ADM15 : liste en échec, dite et relançable. */
+const ListUnavailable = ({ onRetry }: { onRetry: () => void }) => (
+  <div role="status" className="flex flex-col items-center gap-2 py-8 text-center" data-testid="users-list-unavailable">
+    <p className="text-sm text-foreground">Lecture impossible pour le moment.</p>
+    <Button variant="outline" size="sm" onClick={onRetry}>Réessayer</Button>
+  </div>
+);
 
 const AdminUsers = () => {
   const geocodingRef = useRef(false);
@@ -82,7 +100,11 @@ const AdminUsers = () => {
   const [filterVerification, setFilterVerification] = useState("all");
   const [filterDept, setFilterDept] = useState("all");
   const [filterCountry, setFilterCountry] = useState("all");
+  // Lot ADM15 : les comptes supprimés quittent la liste par défaut.
+  const [filterStatus, setFilterStatus] = useState<MemberStatusFilter>(DEFAULT_MEMBER_STATUS_FILTER);
+  const [listError, setListError] = useState(false);
   const [page, setPage] = useState(0);
+  const isMobile = useIsMobile();
   // ?user= ou ?id= : filtre la liste sur ce membre (liens depuis les autres écrans).
   const [urlParams, setUrlParams] = useSearchParams();
   const focusUserId = urlParams.get("user") || urlParams.get("id");
@@ -93,9 +115,10 @@ const AdminUsers = () => {
     setUrlParams(next, { replace: true });
   };
   const usersSeq = useRef(createSeqGuard());
-  const [countryStats, setCountryStats] = useState<{ intl: number; codes: string[] }>({ intl: 0, codes: [] });
+  const [countryStats, setCountryStats] = useState<{ intl: number | null; codes: string[] }>({ intl: null, codes: [] });
+  const [countryError, setCountryError] = useState(false);
   const [kpisError, setKpisError] = useState(false);
-  const [kpis, setKpis] = useState<{ deleted: number; total: number; active: number; suspended: number; verified: number; newLast7d: number } | null>(null);
+  const [kpis, setKpis] = useState<{ deleted: number; members: number; suspended: number; verified: number; newLast7d: number } | null>(null);
   const [exporting, setExporting] = useState(false);
 
   // Modal states
@@ -139,6 +162,10 @@ const AdminUsers = () => {
     open: false, userId: "", userName: "", email: "",
   });
   const [reactivating, setReactivating] = useState(false);
+  const [resendModal, setResendModal] = useState<{ open: boolean; userId: string; email: string }>({
+    open: false, userId: "", email: "",
+  });
+  const [resending, setResending] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -203,6 +230,29 @@ const AdminUsers = () => {
     });
   };
 
+  /** Filtres de la liste, repris tels quels par l'export. */
+  const applyListFilters = (query: any) => {
+    if (focusUserId) return query.eq("id", focusUserId);
+    query = applyMemberStatusFilter(query, filterStatus);
+    if (filterRole !== "all") query = query.eq("role", filterRole as any);
+    // Lot A10 : un statut vide compte comme « Non vérifié ».
+    if (filterVerification === "not_submitted") query = query.or("identity_verification_status.eq.not_submitted,identity_verification_status.is.null");
+    else if (filterVerification !== "all") query = query.eq("identity_verification_status", filterVerification);
+    if (filterCountry === "FR") query = query.or("country.eq.FR,country.is.null");
+    else if (filterCountry === "INTL") query = query.not("country", "is", null).neq("country", "FR");
+    else if (filterCountry !== "all") query = query.eq("country", filterCountry);
+    if (filterDept !== "all") {
+      if (filterDept === "2A") query = query.gte("postal_code", "20000").lte("postal_code", "20199");
+      else if (filterDept === "2B") query = query.gte("postal_code", "20200").lte("postal_code", "20999");
+      else query = query.like("postal_code", `${filterDept}%`);
+    }
+    if (searchDebounced) {
+      const s = searchDebounced.replace(/[%,()]/g, "");
+      if (s) query = query.or(`first_name.ilike.%${s}%,last_name.ilike.%${s}%,email.ilike.%${s}%`);
+    }
+    return query;
+  };
+
   const fetchUsers = useCallback(async () => {
     const token = usersSeq.current.next();
     setLoading(true);
@@ -216,40 +266,19 @@ const AdminUsers = () => {
       )
       .order("created_at", { ascending: false });
 
-    if (focusUserId) query = query.eq("id", focusUserId);
-    if (filterRole !== "all") query = query.eq("role", filterRole as any);
-    // Lot A10 : un statut vide compte comme « Non vérifié ».
-    if (filterVerification === "not_submitted") query = query.or("identity_verification_status.eq.not_submitted,identity_verification_status.is.null");
-    else if (filterVerification !== "all") query = query.eq("identity_verification_status", filterVerification);
-
-    if (filterCountry === "FR") {
-      query = query.or("country.eq.FR,country.is.null");
-    } else if (filterCountry === "INTL") {
-      query = query.not("country", "is", null).neq("country", "FR");
-    } else if (filterCountry !== "all") {
-      query = query.eq("country", filterCountry);
-    }
-
-    if (filterDept !== "all") {
-      if (filterDept === "2A") query = query.gte("postal_code", "20000").lte("postal_code", "20199");
-      else if (filterDept === "2B") query = query.gte("postal_code", "20200").lte("postal_code", "20999");
-      else query = query.like("postal_code", `${filterDept}%`);
-    }
-
-    if (searchDebounced) {
-      const s = searchDebounced.replace(/[%,()]/g, "");
-      if (s) {
-        query = query.or(`first_name.ilike.%${s}%,last_name.ilike.%${s}%,email.ilike.%${s}%`);
-      }
-    }
+    query = applyListFilters(query);
 
     const { data, error, count } = await query.range(from, to);
     if (!usersSeq.current.isCurrent(token)) return;
     if (error) {
-      toast.error("Erreur de chargement");
+      // Lot ADM15 : une lecture en échec se dit, jamais « Aucun utilisateur ».
+      reportAdminReadError("Membres : liste", error);
+      setUsers([]);
+      setListError(true);
       setLoading(false);
       return;
     }
+    setListError(false);
     // Fetch auth emails (source of vérité) + notes/super via chunked queries
     const userIds = (data || []).map((u: any) => u.id);
     let emailMap = new Map<string, string>();
@@ -282,7 +311,7 @@ const AdminUsers = () => {
     setUsers(enriched);
     setTotal(count ?? 0);
     setLoading(false);
-  }, [filterRole, filterVerification, filterDept, filterCountry, searchDebounced, page, focusUserId]);
+  }, [filterRole, filterVerification, filterDept, filterCountry, filterStatus, searchDebounced, page, focusUserId]);
 
   // Debounce search 300ms
   useEffect(() => {
@@ -306,16 +335,25 @@ const AdminUsers = () => {
   // Charge une fois : liste des pays présents (hors FR) + total international pour le badge KPI
   useEffect(() => {
     (async () => {
-      const { rows: data } = await fetchAllRows<any>((from, to) =>
-        supabase
-          .from("profiles")
-          .select("country")
-          .not("country", "is", null)
-          .neq("country", "FR")
-          .order("created_at", { ascending: true })
-          .order("id", { ascending: true })
-          .range(from, to),
-      ).catch(() => ({ rows: [] as any[] }));
+      // Lot ADM15 : comptes supprimés exclus, et une lecture en échec se dit.
+      let data: any[];
+      try {
+        ({ rows: data } = await fetchAllRows<any>((from, to) =>
+          supabase
+            .from("profiles")
+            .select("country")
+            .not("country", "is", null)
+            .neq("country", "FR")
+            .or(NOT_DELETED_FILTER)
+            .order("created_at", { ascending: true })
+            .order("id", { ascending: true })
+            .range(from, to),
+        ));
+      } catch (error) {
+        reportAdminReadError("Membres : pays", error);
+        setCountryError(true);
+        return;
+      }
       const count = data.length;
       const codes = Array.from(
         new Set(data.map((r: any) => String(r.country || "").toUpperCase()).filter(Boolean)),
@@ -328,24 +366,24 @@ const AdminUsers = () => {
   useEffect(() => {
     (async () => {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      // Lot ADM15 : mêmes définitions que la vue d'ensemble (comptes supprimés
+      // exclus, nouveaux sur 7 jours glissants) ; les supprimés à part.
       const res = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("profiles").select("id", { count: "exact", head: true }).or("account_status.eq.active,account_status.is.null"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).or(NOT_DELETED_FILTER),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("account_status", "suspended"),
-        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "verified"),
-        supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "verified").or(NOT_DELETED_FILTER),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo).or(NOT_DELETED_FILTER),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("account_status", "deleted"),
       ]);
       const failed = res.find((r) => r.error);
       if (failed) { reportAdminReadError("Membres : indicateurs", failed.error); setKpisError(true); return; }
-      const [totalRes, activeRes, suspRes, verifRes, newRes, delRes] = res;
+      const [membersRes, suspRes, verifRes, newRes, delRes] = res;
       setKpis({
-        deleted: delRes.count ?? 0,
-        total: totalRes.count ?? 0,
-        active: activeRes.count ?? 0,
+        members: membersRes.count ?? 0,
         suspended: suspRes.count ?? 0,
         verified: verifRes.count ?? 0,
         newLast7d: newRes.count ?? 0,
+        deleted: delRes.count ?? 0,
       });
     })();
   }, []);
@@ -353,9 +391,9 @@ const AdminUsers = () => {
 
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const availableDepts = Object.keys(DEPT_NAMES).sort((a, b) => a.localeCompare(b, "fr"));
+  const deptNames: Record<string, string> = { ...DEPT_NAMES, ...ADMIN_EXTRA_DEPT_NAMES };
+  const availableDepts = Object.keys(deptNames).sort((a, b) => a.localeCompare(b, "fr"));
   const availableCountries = countryStats.codes;
-  const intlCount = countryStats.intl;
 
   const handleExportCsv = async () => {
     setExporting(true);
@@ -368,23 +406,7 @@ const AdminUsers = () => {
         .order("created_at", { ascending: false })
         .order("id", { ascending: true });
 
-      if (focusUserId) query = query.eq("id", focusUserId);
-      if (filterRole !== "all") query = query.eq("role", filterRole as any);
-      // Lot A10 : un statut vide compte comme « Non vérifié ».
-    if (filterVerification === "not_submitted") query = query.or("identity_verification_status.eq.not_submitted,identity_verification_status.is.null");
-    else if (filterVerification !== "all") query = query.eq("identity_verification_status", filterVerification);
-      if (filterCountry === "FR") query = query.or("country.eq.FR,country.is.null");
-      else if (filterCountry === "INTL") query = query.not("country", "is", null).neq("country", "FR");
-      else if (filterCountry !== "all") query = query.eq("country", filterCountry);
-      if (filterDept !== "all") {
-        if (filterDept === "2A") query = query.gte("postal_code", "20000").lte("postal_code", "20199");
-        else if (filterDept === "2B") query = query.gte("postal_code", "20200").lte("postal_code", "20999");
-        else query = query.like("postal_code", `${filterDept}%`);
-      }
-      if (searchDebounced) {
-        const s = searchDebounced.replace(/[%,()]/g, "");
-        if (s) query = query.or(`first_name.ilike.%${s}%,last_name.ilike.%${s}%,email.ilike.%${s}%`);
-      }
+      query = applyListFilters(query);
 
       let data: any[];
       let truncated = false;
@@ -415,7 +437,7 @@ const AdminUsers = () => {
           roleLabels[u.role] || u.role || "",
           u.city || "",
           u.postal_code || "",
-          getDeptLabel(u.postal_code) || "",
+          adminDeptLabel(u.postal_code),
           country === "FR" ? "France" : getCountryName(country),
           u.created_at ? format(new Date(u.created_at), "yyyy-MM-dd") : "",
           u.last_seen_at ? format(new Date(u.last_seen_at), "yyyy-MM-dd HH:mm") : "",
@@ -532,11 +554,14 @@ const AdminUsers = () => {
   };
 
 
-  const handleResendConfirmation = async (email: string | undefined | null) => {
+  // Lot ADM15 : le renvoi passe par une confirmation et laisse une ligne au journal.
+  const confirmResendConfirmation = async () => {
+    const { userId, email } = resendModal;
     if (!email) {
       toast.error("Aucune adresse e-mail connue pour ce compte");
       return;
     }
+    setResending(true);
     const { error } = await supabase.auth.resend({
       type: "signup",
       email,
@@ -549,9 +574,23 @@ const AdminUsers = () => {
         ? "Ce compte est déjà confirmé."
         : `Échec de l'envoi : ${error.message}`;
       toast.error(msg);
-    } else {
-      toast.success(`E-mail de confirmation renvoyé à ${email}`);
+      setResending(false);
+      return;
     }
+    const { data: userData } = await supabase.auth.getUser();
+    const adminId = userData.user?.id ?? null;
+    const { error: logError } = adminId
+      ? await supabase.from("admin_action_logs").insert({
+          admin_id: adminId,
+          action: "resend_signup_confirmation",
+          target_type: "profile",
+          target_id: userId,
+        })
+      : { error: new Error("admin inconnu") };
+    if (logError) toast.warning(`Email renvoyé à ${email}, journal à compléter.`);
+    else toast.success(`Email de confirmation renvoyé à ${email}`);
+    setResending(false);
+    setResendModal({ open: false, userId: "", email: "" });
   };
 
   // Écriture unique de la note interne, partagée par le dialogue et le panneau
@@ -627,7 +666,7 @@ const AdminUsers = () => {
     onWrite: () => setWriteTarget({ userId: u.id, userName: nameOf(u, "ce membre") }),
     onMessage: () => setMessageModal({ open: true, userId: u.id, userName: nameOf(u), content: "", step: "edit" }),
     onLastMessage: () => openLastMessage(u.id, nameOf(u)),
-    onResendConfirmation: () => handleResendConfirmation(u.email),
+    onResendConfirmation: () => setResendModal({ open: true, userId: u.id, email: u.email || "" }),
     onForceVerify: () => setVerifyModal({ open: true, userId: u.id, userName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || "Utilisateur", email: u.email || "" }),
     onChangeRole: () => setRoleModal({ open: true, userId: u.id, userName: nameOf(u), currentRole: u.role }),
     onToggleSuper: () => setSuperModal({ open: true, userId: u.id, userName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || "Utilisateur", email: u.email || "", newValue: !u.is_manual_super }),
@@ -734,47 +773,55 @@ const AdminUsers = () => {
         </div>
       </div>
 
-      {/* KPI banner */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+      {/* Lot ADM15 : compteurs sur les définitions de la vue d'ensemble. */}
+      <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
         {[
-          { label: "Total inscrits", value: kpis?.total },
-          { label: "Actifs", value: kpis?.active },
-          { label: "Suspendus", value: kpis?.suspended },
-          { label: "Supprimés", value: kpis?.deleted },
-          { label: "Vérifiés", value: kpis?.verified },
-          { label: "Hors France", value: intlCount },
-          { label: "Nouveaux 7 jours", value: kpis?.newLast7d },
+          { label: "Membres", value: kpis?.members, failed: kpisError },
+          { label: "Nouveaux 7 jours", value: kpis?.newLast7d, failed: kpisError },
+          { label: "Vérifiés", value: kpis?.verified, failed: kpisError },
+          { label: "Hors France", value: countryStats.intl ?? undefined, failed: countryError },
+          { label: "Suspendus", value: kpis?.suspended, failed: kpisError },
+          { label: "Supprimés", value: kpis?.deleted, failed: kpisError },
         ].map((k) => (
-          <Card key={k.label}>
-            <CardContent className="p-4">
+          <Card key={k.label} data-testid="users-kpi">
+            <CardContent className="p-3 sm:p-4">
               <p className="text-xs text-muted-foreground">{k.label}</p>
-              <p className="text-2xl font-bold text-foreground mt-1">
-                {kpisError && k.label !== "Hors France" ? UNAVAILABLE_LABEL : k.value === undefined ? "·" : k.value.toLocaleString("fr-FR")}
+              <p className="text-xl sm:text-2xl font-bold text-foreground mt-1">
+                {k.failed ? UNAVAILABLE_LABEL : k.value === undefined ? "…" : k.value.toLocaleString("fr-FR")}
               </p>
             </CardContent>
           </Card>
         ))}
       </div>
+      <p className="text-xs text-muted-foreground -mt-3">Comptes supprimés comptés à part. Nouveaux : 7 derniers jours glissants.</p>
 
 
       {focusUserId && (
         <UrlFilterNotice
           label="Filtré sur un membre"
-          notFound={!loading && users.length === 0}
+          notFound={!loading && !listError && users.length === 0}
           notFoundText="Aucun membre ne correspond à cet identifiant."
           onClear={clearFocus}
         />
       )}
 
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:flex-wrap sm:gap-3">
         <Input
           placeholder="Rechercher par nom ou email…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="max-w-xs"
+          className="col-span-2 sm:max-w-xs"
         />
+        <Select value={filterStatus} onValueChange={(v) => { setFilterStatus(v as MemberStatusFilter); setPage(0); }}>
+          <SelectTrigger className="w-full sm:w-[190px]" aria-label="Statut du compte"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {MEMBER_STATUS_FILTERS.map((f) => (
+              <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Select value={filterRole} onValueChange={(v) => { setFilterRole(v); setPage(0); }}>
-          <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[160px]" aria-label="Rôle"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous rôles</SelectItem>
             <SelectItem value="owner">Propriétaire</SelectItem>
@@ -783,7 +830,7 @@ const AdminUsers = () => {
           </SelectContent>
         </Select>
         <Select value={filterVerification} onValueChange={(v) => { setFilterVerification(v); setPage(0); }}>
-          <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[180px]" aria-label="Vérification"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Toutes vérifications</SelectItem>
             <SelectItem value="not_submitted">Non vérifié</SelectItem>
@@ -793,18 +840,18 @@ const AdminUsers = () => {
           </SelectContent>
         </Select>
         <Select value={filterDept} onValueChange={(v) => { setFilterDept(v); setPage(0); }}>
-          <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[200px]" aria-label="Département"><SelectValue /></SelectTrigger>
           <SelectContent className="max-h-60">
             <SelectItem value="all">Tous départements</SelectItem>
             {availableDepts.map((code) => (
               <SelectItem key={code} value={code}>
-                {code} {DEPT_NAMES[code] || ""}
+                {code} {deptNames[code] || ""}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Select value={filterCountry} onValueChange={(v) => { setFilterCountry(v); setPage(0); }}>
-          <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[200px]" aria-label="Pays"><SelectValue /></SelectTrigger>
           <SelectContent className="max-h-60">
             <SelectItem value="all">Tous pays</SelectItem>
             <SelectItem value="FR">France uniquement</SelectItem>
@@ -823,6 +870,47 @@ const AdminUsers = () => {
         </Select>
       </div>
 
+      {isMobile ? (
+        // Lot ADM15 : sur téléphone, une carte par membre, Actions à portée de pouce.
+        <div className="rounded-lg border bg-card divide-y" data-testid="users-cards">
+          {loading ? (
+            <p className="p-4 text-center text-sm text-muted-foreground">Chargement…</p>
+          ) : listError ? (
+            <ListUnavailable onRetry={fetchUsers} />
+          ) : users.length === 0 ? (
+            <p className="p-4 text-center text-sm text-muted-foreground">Liste vide pour ces filtres.</p>
+          ) : (
+            users.map((user) => {
+              const status = statusLabels[user.account_status || "active"] || statusLabels.active;
+              return (
+                <div key={user.id} className="flex items-center gap-3 p-3">
+                  <button
+                    type="button"
+                    onClick={() => openMember(user.id)}
+                    aria-label={`Ouvrir la fiche de ${nameOf(user)}`}
+                    className="flex min-w-0 flex-1 items-center gap-3 rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <Avatar className="h-9 w-9 shrink-0">
+                      <AvatarImage src={user.avatar_url || undefined} />
+                      <AvatarFallback className="text-xs">
+                        {(user.first_name?.[0] || "").toUpperCase()}
+                        {(user.last_name?.[0] || "").toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">{nameOf(user, "Membre")}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {roleLabels[user.role] || adminLabel(user.role)} · {status.label} · {format(new Date(user.created_at), "d MMM yyyy", { locale: fr })}
+                      </p>
+                    </div>
+                  </button>
+                  <MemberActionsMenu target={actionTargetOf(user)} handlers={actionsFor(user)} large />
+                </div>
+              );
+            })
+          )}
+        </div>
+      ) : (
       <div className="rounded-lg border bg-card">
         <Table>
           <TableHeader>
@@ -847,10 +935,16 @@ const AdminUsers = () => {
                   Chargement…
                 </TableCell>
               </TableRow>
+            ) : listError ? (
+              <TableRow>
+                <TableCell colSpan={11}>
+                  <ListUnavailable onRetry={fetchUsers} />
+                </TableCell>
+              </TableRow>
             ) : users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
-                  Aucun utilisateur trouvé
+                  Liste vide pour ces filtres.
                 </TableCell>
               </TableRow>
             ) : (
@@ -893,7 +987,7 @@ const AdminUsers = () => {
                       {user.postal_code || "Non renseigné"}
                     </TableCell>
                     <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
-                      {getDeptLabel(user.postal_code)}
+                      {adminDeptLabel(user.postal_code)}
                     </TableCell>
                     <TableCell className="hidden md:table-cell text-sm">
                       {(() => {
@@ -946,6 +1040,7 @@ const AdminUsers = () => {
           </TableBody>
         </Table>
       </div>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (
@@ -965,6 +1060,26 @@ const AdminUsers = () => {
       )}
 
       <MemberCardSheet userId={memberId} onClose={closeMember} handlers={panelHandlers} onSaveNote={persistNote} />
+
+      <AlertDialog open={resendModal.open} onOpenChange={(open) => { if (!open && !resending) setResendModal({ open: false, userId: "", email: "" }); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Renvoyer l'email de confirmation ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Un nouvel email de confirmation part vers {resendModal.email || "l'adresse du membre"}. Le renvoi est noté au journal d'audit.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={resending}>Garder</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={resending}
+              onClick={(e) => { e.preventDefault(); void confirmResendConfirmation(); }}
+            >
+              {resending ? "Envoi…" : "Renvoyer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AccountMeasureDialog
         target={measureModal.target}
