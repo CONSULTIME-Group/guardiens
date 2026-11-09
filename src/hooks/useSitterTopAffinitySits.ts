@@ -37,6 +37,8 @@ export interface AffinitySitCard {
   pet_species: string[];
   /** Lot L7 : noms déclarés des animaux (public_pets), cités par le récit gardien. */
   pet_names?: string[];
+  /** Lot L7b : commune de la garde, celle du propriétaire quand l'annonce n'en porte pas (même règle que sitLocation). */
+  place_city?: string | null;
   affinity: AffinityResult | null;
   distance_km: number | null;
   environments: string[];
@@ -281,6 +283,7 @@ export function useSitterTopAffinitySits(): Result {
           owner_first_name: ownerFirstName,
           pet_species: pets.map((p) => p.species ?? "").filter(Boolean),
           pet_names: pets.map((p) => (p.name ?? "").trim()).filter(Boolean),
+          place_city: (sit.city || "").trim() || (sit?.owner?.city || "").trim() || null,
           affinity: null,
           distance_km: null,
           environments: Array.isArray(sit.environments) ? sit.environments : [],
