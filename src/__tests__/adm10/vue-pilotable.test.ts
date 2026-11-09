@@ -83,7 +83,7 @@ describe("Rangement des signaux", () => {
   it("les relances automatiques loin du départ restent dans « le système s'en charge »", () => {
     expect(model.auto).toEqual([{ type: "pending_application", count: 2 }, { type: "stale_draft", count: 1 }]);
     expect(model.autoTotal).toBe(3);
-    expect(autoBreakdown(model.auto)).toBe("2 candidatures sans réponse, 1 brouillon");
+    expect(autoBreakdown(model.auto)).toBe("2 candidatures relancées auprès du propriétaire, 1 brouillon");
   });
 
   it("technique avec l'état du site, animation au lundi", () => {

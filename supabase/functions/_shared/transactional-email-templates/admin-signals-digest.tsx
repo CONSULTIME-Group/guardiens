@@ -16,6 +16,8 @@ export interface AdminSignalLine {
   link: string
   /** Lot ADM13 : éléments nommés de la ligne (annonces, membres), cinq au plus. */
   elements?: { label: string; link: string }[]
+  /** Éléments de la ligne au-delà des cinq nommés. */
+  moreCount?: number
 }
 
 interface Props {
@@ -93,6 +95,11 @@ const Email = ({
                   <Link href={e.link} style={link}>{e.label}</Link>
                 </Text>
               ))}
+              {(l.moreCount ?? 0) > 0 ? (
+                <Text style={itemDetail}>
+                  {`Et ${l.moreCount} autre${(l.moreCount ?? 0) > 1 ? 's' : ''} dans l'administration.`}
+                </Text>
+              ) : null}
               <Text style={itemDetail}>
                 <Link href={l.link} style={link}>Ouvrir dans l'administration</Link>
               </Text>
@@ -104,7 +111,7 @@ const Email = ({
 
         {coverageLine ? <Text style={text}>{coverageLine}</Text> : null}
         <Text style={text}>
-          Situations que le site relance seul, sans geste de votre part : {warningCount}.
+          Situations que le site relance seul : {warningCount}.
         </Text>
 
         <LegalFooter purpose="le suivi opérationnel de la plateforme" basis="6.1.f" />

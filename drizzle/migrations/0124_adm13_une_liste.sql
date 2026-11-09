@@ -41,6 +41,7 @@ DECLARE
   ok_queues boolean := true;
   ok_relances boolean := true;
   ok_health boolean := true;
+  v_errors jsonb := '{}'::jsonb;
 BEGIN
   IF NOT (public.has_role(auth.uid(), 'admin') OR coalesce(auth.jwt()->>'role', '') = 'service_role') THEN
     RAISE EXCEPTION 'Not authorized' USING ERRCODE = '42501';
@@ -64,6 +65,7 @@ BEGIN
       ) s;
   EXCEPTION WHEN OTHERS THEN
     ok_signals := false;
+    v_errors := v_errors || jsonb_build_object('signals', left(SQLERRM, 200));
     v_signals := '[]'::jsonb;
   END;
 
@@ -81,6 +83,7 @@ BEGIN
          FROM jsonb_array_elements(v_signals) x);
   EXCEPTION WHEN OTHERS THEN
     ok_sits := false;
+    v_errors := v_errors || jsonb_build_object('sits', left(SQLERRM, 200));
     v_sits := '[]'::jsonb;
   END;
 
@@ -89,6 +92,7 @@ BEGIN
     v_queues := coalesce(public.admin_human_queues(), '[]'::jsonb);
   EXCEPTION WHEN OTHERS THEN
     ok_queues := false;
+    v_errors := v_errors || jsonb_build_object('queues', left(SQLERRM, 200));
     v_queues := '[]'::jsonb;
   END;
 
@@ -102,6 +106,7 @@ BEGIN
        AND created_at >= now() - interval '7 days';
   EXCEPTION WHEN OTHERS THEN
     ok_relances := false;
+    v_errors := v_errors || jsonb_build_object('relances', left(SQLERRM, 200));
     v_relances := 0;
   END;
 
@@ -110,6 +115,7 @@ BEGIN
     v_health := coalesce(public.admin_site_health(), '[]'::jsonb);
   EXCEPTION WHEN OTHERS THEN
     ok_health := false;
+    v_errors := v_errors || jsonb_build_object('health', left(SQLERRM, 200));
     v_health := '[]'::jsonb;
   END;
 
@@ -118,6 +124,7 @@ BEGIN
     'sources', jsonb_build_object(
       'signals', ok_signals, 'sits', ok_sits, 'queues', ok_queues,
       'relances', ok_relances, 'health', ok_health),
+    'errors', v_errors,
     'signals', v_signals,
     'sits', v_sits,
     'queues', v_queues,

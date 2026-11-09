@@ -2,8 +2,9 @@
 // liste ») : la liste de travail des fondateurs, mise en forme une seule fois.
 // La base livre toutes les sources en une lecture (public.admin_work_list,
 // drizzle/migrations/0124_adm13_une_liste.sql) ; ce module pur en fait une
-// ligne par élément : famille, phrase qui commence par un verbe, lien, date
-// d'attente. La vue d'ensemble (src/pages/admin/_components/dashboard/
+// ligne par type d'élément à traiter (« Diffuser 3 annonces… ») : famille,
+// phrase qui commence par un verbe, lien vers la file, date d'attente, et les
+// éléments nommés (annonces, membres) que l'email cite sous la ligne. La vue d'ensemble (src/pages/admin/_components/dashboard/
 // PilotageBlocks.tsx) et l'email du matin (alert-admin-signals) lisent ce même
 // module : la liste à l'écran et les lignes de l'email ont la même longueur.
 // Reprend le rangement par nature du lot ADM10 (anciennement
@@ -43,6 +44,8 @@ export type WorkSource = 'signals' | 'sits' | 'queues' | 'relances' | 'health'
 export interface WorkListRaw {
   generated_at?: string
   sources?: Partial<Record<WorkSource, boolean>>
+  /** Message d'erreur de chaque source en échec (SQLERRM, 200 caractères). */
+  errors?: Partial<Record<WorkSource, string>>
   signals?: PilotageSignal[] | null
   sits?: PilotageSit[] | null
   queues?: HumanQueue[] | null
@@ -172,12 +175,12 @@ export const WORK_COPY: Record<string, WorkCopy> = {
   stale_draft: { title: (k) => `Écrire ${n(k, 'au propriétaire dont le brouillon attend', `aux ${k} propriétaires dont le brouillon attend`)}`, action: 'Écrire', link: L.preparing },
   // Seul un fondateur peut agir.
   no_applications: { title: (k) => `Diffuser ${k} ${n(k, 'annonce sans candidature', 'annonces sans candidature')} après 48 heures`, action: 'Diffuser', link: L.toStaff },
-  owner_missing_coordinates: { title: (k) => `Corriger le lieu de ${k} ${n(k, 'propriétaire', 'propriétaires')} sans coordonnées`, action: 'Corriger', link: L.users },
+  owner_missing_coordinates: { title: (k) => `Corriger le lieu de ${k} ${n(k, 'propriétaire', 'propriétaires')} à situer sur la carte`, action: 'Corriger', link: L.users },
   repeated_republish: { title: (k) => `Examiner ${k} ${n(k, 'annonce republiée', 'annonces republiées')} à répétition`, action: 'Examiner', link: L.listings },
   repeated_cancellations: { title: (k) => `Examiner ${k} ${n(k, 'membre qui annule', 'membres qui annulent')} à répétition`, action: 'Examiner', link: L.listings },
   dormant_top_sitter: { title: (k) => `Écrire ${n(k, 'au meilleur gardien endormi', `aux ${k} meilleurs gardiens endormis`)}`, action: 'Écrire', link: L.users },
   identity_needs_review: { title: (k) => `Contrôler ${k} ${n(k, 'vérification d\'identité', 'vérifications d\'identité')}`, action: 'Contrôler', link: L.verifications },
-  identity_orphan_documents: { title: (k) => `Contrôler ${k} ${n(k, 'pièce d\'identité sans dossier', 'pièces d\'identité sans dossier')}`, action: 'Contrôler', link: L.verifications },
+  identity_orphan_documents: { title: (k) => `Contrôler ${k} ${n(k, 'pièce d\'identité à rattacher à un dossier', 'pièces d\'identité à rattacher à un dossier')}`, action: 'Contrôler', link: L.verifications },
   stale_verification: { title: (k) => `Contrôler ${k} ${n(k, 'vérification d\'identité en retard', 'vérifications d\'identité en retard')}`, action: 'Contrôler', link: L.verifications },
   suspicious_account: { title: (k) => `Examiner ${k} ${n(k, 'compte suspect', 'comptes suspects')}`, action: 'Examiner', link: L.users },
   sit_like_mission: { title: (k) => `Vérifier ${k} ${n(k, 'coup de main qui ressemble à une garde', 'coups de main qui ressemblent à une garde')}`, action: 'Vérifier', link: L.missions },
@@ -193,7 +196,7 @@ export const WORK_COPY: Record<string, WorkCopy> = {
   alma_safety: { title: (k) => `Lire ${n(k, 'le sujet de sûreté confié', `les ${k} sujets de sûreté confiés`)} à Alma`, action: 'Lire', link: L.alma },
   // Technique : critiques seulement, et seulement sans voyant de l'état du site qui les porte déjà.
   sit_publish_error: { title: (k) => `Vérifier ${k} ${n(k, 'publication d\'annonce en échec', 'publications d\'annonce en échec')}`, action: 'Vérifier', link: L.listings },
-  sit_published_zero_reach: { title: (k) => `Vérifier ${k} ${n(k, 'annonce publiée sans gardien touché', 'annonces publiées sans gardien touché')}`, action: 'Vérifier', link: L.listings },
+  sit_published_zero_reach: { title: (k) => `Vérifier la diffusion de ${k} ${n(k, 'annonce publiée', 'annonces publiées')} : zéro gardien touché`, action: 'Vérifier', link: L.listings },
   listing_proximity_large_broadcast: { title: (k) => `Vérifier ${k} ${n(k, 'diffusion très large', 'diffusions très larges')}`, action: 'Vérifier', link: L.listings },
   sit_notification_claim_starvation: { title: () => 'Vérifier la diffusion des annonces aux gardiens', action: 'Vérifier', link: L.emails },
   digest_queue_stalled: { title: () => 'Vérifier la file des récapitulatifs gardiens', action: 'Vérifier', link: L.emails },
@@ -203,7 +206,7 @@ export const WORK_COPY: Record<string, WorkCopy> = {
   email_recipient_address_invalid: { title: (k) => `Corriger ${k} ${n(k, 'adresse email refusée', 'adresses email refusées')}`, action: 'Corriger', link: L.emails },
   email_abandon_high: { title: () => 'Vérifier les emails abandonnés', action: 'Vérifier', link: L.emails },
   email_destroyed: { title: () => 'Vérifier les emails détruits avant envoi', action: 'Vérifier', link: L.emails },
-  notification_delivery_failed: { title: (k) => `Vérifier ${k} ${n(k, 'notification non délivrée', 'notifications non délivrées')}`, action: 'Vérifier', link: L.emails },
+  notification_delivery_failed: { title: (k) => `Vérifier ${k} ${n(k, 'notification en échec d\'envoi', 'notifications en échec d\'envoi')}`, action: 'Vérifier', link: L.emails },
   nurturing_run_anomaly: { title: () => 'Vérifier le dernier passage des séquences email', action: 'Vérifier', link: L.nurturing },
   content_detector_broken: { title: () => 'Vérifier le détecteur de contenus : il est en panne', action: 'Vérifier', link: L.articles },
   content_defect_outside_freeze: { title: (k) => `Corriger ${k} ${n(k, 'contenu signalé', 'contenus signalés')}`, action: 'Corriger', link: L.articles },
@@ -248,8 +251,18 @@ export const QUEUE_COPY: Record<string, { title: (k: number) => string; link: st
   verifications: { title: (k) => `Contrôler ${k} ${n(k, 'pièce d\'identité', 'pièces d\'identité')}`, link: '/admin/verifications' },
 }
 
-/** Types dont la file humaine porte déjà les éléments : comptés une seule fois. */
-export const QUEUE_COVERED_TYPES = new Set(['identity_needs_review', 'stale_verification', 'identity_orphan_documents', 'alma_contact_request'])
+/**
+ * Types dont la file humaine porte déjà les éléments : comptés une seule fois,
+ * dans la ligne de la file, qui reprend leurs éléments (message cité, membre).
+ * identity_orphan_documents reste à part : la file des vérifications ne compte
+ * pas une pièce déposée sans dossier ouvert (statut refusé ou sans URL).
+ */
+export const QUEUE_COVERED_BY: Record<string, string> = {
+  identity_needs_review: 'verifications',
+  stale_verification: 'verifications',
+  alma_contact_request: 'contactMessages',
+}
+export const QUEUE_COVERED_TYPES = new Set(Object.keys(QUEUE_COVERED_BY))
 
 // ── Rangement par nature (lot ADM10) ─────────────────────────────────────────
 
@@ -423,11 +436,25 @@ function elementOf(s: PilotageSignal, sits: Map<string, PilotageSit>, link: stri
   return { label, link: own }
 }
 
+/** Éléments distincts d'une ligne (deux candidatures d'une annonce = une annonce). */
+function elementsOf(arr: PilotageSignal[], sits: Map<string, PilotageSit>, link: string): WorkElement[] {
+  const seen = new Set<string>()
+  const out: WorkElement[] = []
+  for (const s of arr) {
+    const e = elementOf(s, sits, link)
+    const k = `${e.label}|${e.link}`
+    if (seen.has(k)) continue
+    seen.add(k)
+    out.push(e)
+  }
+  return out
+}
+
 const minDate = (arr: (string | null | undefined)[]) =>
   arr.filter((x): x is string => typeof x === 'string' && x.length > 0).sort()[0] ?? null
 
 /**
- * Liste de travail : une ligne par élément à traiter, dans l'ordre des
+ * Liste de travail : une ligne par type d'élément à traiter, dans l'ordre des
  * familles (WORK_FAMILY_ORDER). Même résultat pour la vue d'ensemble et
  * pour l'email du matin.
  */
@@ -437,6 +464,8 @@ export function buildWorkList(raw: WorkListRaw | null | undefined, now: number =
   const signals = Array.isArray(raw?.signals) ? raw!.signals! : []
   const sits = new Map<string, PilotageSit>((Array.isArray(raw?.sits) ? raw!.sits! : []).map((s) => [s.id, s]))
   const queuesOk = sources.queues !== false
+  // Une couverture ne vaut que si sa source est lue : sinon la ligne du signal reste.
+  const healthOk = sources.health !== false
   const queues = Array.isArray(raw?.queues) ? raw!.queues! : []
 
   // Une file humaine qui porte déjà ces éléments les compte une seule fois.
@@ -458,7 +487,7 @@ export function buildWorkList(raw: WorkListRaw | null | undefined, now: number =
   }
   const techByType = new Map<string, PilotageSignal[]>()
   for (const s of pilotage.technique) {
-    if (s.severity !== 'critical' || HEALTH_COVERED_TYPES.has(s.signal_type) || !hasDestination(s.signal_type, 'daily_email')) continue
+    if (s.severity !== 'critical' || (healthOk && HEALTH_COVERED_TYPES.has(s.signal_type)) || !hasDestination(s.signal_type, 'daily_email')) continue
     techByType.set(s.signal_type, [...(techByType.get(s.signal_type) ?? []), s])
   }
   for (const [type, arr] of techByType) {
@@ -469,7 +498,7 @@ export function buildWorkList(raw: WorkListRaw | null | undefined, now: number =
       title: c.title(arr.length), detail: `Signal ouvert depuis le ${shortDate(oldest)}.`,
       deadline: 'Aujourd\'hui', tone: 'urgent', action: c.action, signals: arr,
       link: c.link, waitingSince: oldest, startDate: null, count: arr.length,
-      elements: arr.slice(0, 5).map((s) => elementOf(s, sits, c.link)),
+      elements: elementsOf(arr, sits, c.link),
     })
   }
 
@@ -484,7 +513,7 @@ export function buildWorkList(raw: WorkListRaw | null | undefined, now: number =
         return (id ? sits.get(id)?.start_date : null) ?? (s.metadata?.start_date as string | undefined) ?? null
       })),
       count: l.signals.length,
-      elements: l.signals.slice(0, 5).map((s) => elementOf(s, sits, c.link)),
+      elements: elementsOf(l.signals, sits, c.link),
     })
   }
 
@@ -493,12 +522,13 @@ export function buildWorkList(raw: WorkListRaw | null | undefined, now: number =
     const def = QUEUE_COPY[q?.key]
     const count = Number(q?.count ?? 0)
     if (!def || !Number.isFinite(count) || count <= 0) continue
+    const covered = signals.filter((x) => QUEUE_COVERED_BY[x.signal_type] === q.key)
     items.push({
       key: `membres:${q.key}`, family: 'membres', type: `queue:${q.key}`,
       title: def.title(count),
       detail: q.oldest ? `Le plus ancien attend depuis le ${shortDate(q.oldest)}.` : 'Un membre attend votre réponse.',
       deadline: 'Aujourd\'hui', tone: 'normal', action: 'Répondre', signals: [],
-      link: def.link, waitingSince: q.oldest ?? null, startDate: null, count, elements: [],
+      link: def.link, waitingSince: q.oldest ?? null, startDate: null, count, elements: elementsOf(covered, sits, def.link),
     })
   }
 
@@ -508,7 +538,7 @@ export function buildWorkList(raw: WorkListRaw | null | undefined, now: number =
     items.push({
       ...l, family: 'vous', link: c.link,
       waitingSince: oldestOfSignals(l.signals), startDate: null, count: l.signals.length,
-      elements: l.signals.slice(0, 5).map((s) => elementOf(s, sits, c.link)),
+      elements: elementsOf(l.signals, sits, c.link),
     })
   }
 
@@ -541,7 +571,7 @@ export const unavailableSentence = (u: WorkSource[]): string =>
 
 /** Libellés courts des situations suivies par les relances. */
 export const AUTO_LABELS: Record<string, { one: string; many: string }> = {
-  pending_application: { one: 'candidature sans réponse', many: 'candidatures sans réponse' },
+  pending_application: { one: 'candidature relancée auprès du propriétaire', many: 'candidatures relancées auprès du propriétaire' },
   stale_draft: { one: 'brouillon', many: 'brouillons' },
   stalled_discussion: { one: 'discussion à l\'arrêt', many: 'discussions à l\'arrêt' },
   owner_sit_unconfirmed: { one: 'garde à confirmer', many: 'gardes à confirmer' },

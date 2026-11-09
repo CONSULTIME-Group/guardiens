@@ -108,7 +108,7 @@ describe("une liste, mêmes lignes à l'écran et dans l'email", () => {
     ]);
   });
 
-  it("panne portée par un voyant, file humaine et relance seule : jamais deux fois", () => {
+  it("panne portée par un voyant lu, file humaine et relance seule : jamais deux fois", () => {
     expect(HEALTH_COVERED_TYPES.has("email_queue_failures")).toBe(true);
     expect(model.items.some((i) => i.type === "email_queue_failures")).toBe(false);
     expect(model.items.some((i) => i.type === "identity_needs_review")).toBe(false);
@@ -120,12 +120,52 @@ describe("une liste, mêmes lignes à l'écran et dans l'email", () => {
   it("longueur de la liste = lignes de l'email = somme des sources recalculée", () => {
     const lines = workListDigestLines(model, NOW);
     expect(lines).toHaveLength(model.items.length);
-    const redHealth = RAW.health!.filter((h) => h.state === "alert").length;
-    const queues = RAW.queues!.filter((q) => q.count > 0).length;
-    const relances = RAW.relances_failed_7d! > 0 ? 1 : 0;
-    const signalLines = model.items.filter((i) => i.signals.length > 0).length;
-    expect(lines).toHaveLength(redHealth + queues + relances + signalLines);
+    // Recalcul à la main sur RAW : 1 voyant rouge, 1 panne technique critique hors voyant
+    // (claim_starvation), 1 brouillon à 3 jours du départ, 2 files non vides (contact,
+    // vérifications), 4 types « seul vous » (annonces sans candidature, churn, bug, entraide),
+    // 1 ligne de relances en échec. L'identité à contrôler est comptée par sa file.
+    expect(lines).toHaveLength(1 + 1 + 1 + 2 + 4 + 1);
     expect(lines.every((l) => l.link.startsWith("https://guardiens.fr/admin"))).toBe(true);
+  });
+
+  it("le portage du test Deno : ordre « en retard » d'abord", () => {
+    const m = buildWorkList({ signals: [sig("suspicious_account", "warning"), sig("suspicious_account", "warning"), sig("alma_churn", "critical", { detected_at: "2026-11-04T08:00:00Z" })] }, NOW);
+    expect(m.items.map((i) => i.title)).toEqual(["Écrire au membre qui veut partir", "Examiner 2 comptes suspects"]);
+  });
+
+  it("une pièce d'identité orpheline garde sa ligne : la file des vérifications ne la compte pas", () => {
+    const m = buildWorkList({ ...RAW, signals: [sig("identity_orphan_documents", "warning")], queues: [{ key: "verifications", count: 0, oldest: null }] }, NOW);
+    expect(m.items.map((i) => i.type)).toContain("identity_orphan_documents");
+  });
+
+  it("état du site illisible : la panne d'envoi garde sa ligne", () => {
+    const m = buildWorkList({ ...RAW, sources: { ...RAW.sources, health: false }, health: [] }, NOW);
+    expect(m.items.some((i) => i.type === "email_queue_failures")).toBe(true);
+    expect(m.unavailable).toEqual(["health"]);
+  });
+
+  it("la file des messages de contact cite le message reçu depuis Alma (lot J1)", () => {
+    const m = buildWorkList({
+      signals: [sig("alma_contact_request", "critical", { metadata: { title: "Lucie, Nantes", messages: [{ text: "Je voudrais vous parler de ma garde" }] } })],
+      queues: [{ key: "contactMessages", count: 1, oldest: "2026-11-08T06:00:00Z" }],
+    }, NOW);
+    expect(m.items).toHaveLength(1);
+    expect(m.items[0].elements[0].label).toBe("Lucie, Nantes : « Je voudrais vous parler de ma garde »");
+  });
+
+  it("deux candidatures d'une annonce : un seul élément, au-delà de cinq « et N autres »", () => {
+    const sits = Array.from({ length: 7 }, (_, i) => ({ id: `s${i}`, title: `Garde ${i}`, city: "Gap", start_date: "2026-11-12" }));
+    const signals = [
+      sig("pending_application", "warning", { metadata: { sit_id: "s0" } }),
+      sig("pending_application", "warning", { metadata: { sit_id: "s0" } }),
+      ...sits.slice(1).map((x) => sig("no_applications", "warning", { entity_type: "sit", entity_id: x.id })),
+    ];
+    const m = buildWorkList({ signals, sits }, NOW);
+    const pending = m.items.find((i) => i.type === "pending_application")!;
+    expect(pending.elements).toHaveLength(1);
+    const diffuse = workListDigestLines(m, NOW).find((l) => l.signalTypes.includes("no_applications"))!;
+    expect(diffuse.elements).toHaveLength(5);
+    expect(diffuse.moreCount).toBe(1);
   });
 
   it("un élément porte son lien exact et le nom de l'annonce", () => {

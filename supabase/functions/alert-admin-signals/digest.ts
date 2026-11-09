@@ -25,6 +25,8 @@ export interface DigestLine {
   link: string
   /** Éléments nommés de la ligne (annonces, membres), cinq au plus. */
   elements: { label: string; link: string }[]
+  /** Éléments de la ligne au-delà des cinq nommés. */
+  moreCount: number
 }
 
 const ADMIN_ORIGIN = 'https://guardiens.fr'
@@ -48,6 +50,7 @@ export function workListDigestLines(model: WorkListModel, now: number = Date.now
         label: e.label,
         link: `${ADMIN_ORIGIN}${e.link.startsWith('/admin') ? e.link : '/admin'}`,
       })),
+      moreCount: Math.max(0, it.elements.length - 5),
     }
   })
 }

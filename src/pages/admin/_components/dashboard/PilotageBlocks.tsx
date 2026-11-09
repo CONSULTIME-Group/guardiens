@@ -1,11 +1,12 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { KpiTile } from "@/components/admin/ui";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { ADMIN_BADGES_REFRESH_EVENT } from "@/hooks/useAdminBadges";
 import { UNAVAILABLE_LABEL, reportAdminReadError } from "@/lib/admin/readError";
 import {
   autoBreakdown,
@@ -49,8 +50,17 @@ export function usePilotage() {
       return buildWorkList(data as unknown as WorkListRaw);
     },
     staleTime: 30_000,
-    refetchInterval: 60_000,
+    // admin_site_health compte les pages vues de 8 jours : relue toutes les 5 minutes.
+    refetchInterval: 300_000,
   });
+  // Une action dans une file des membres (contact, signalement, RGPD) rafraîchit
+  // aussi la liste, comme le menu.
+  const qc = useQueryClient();
+  useEffect(() => {
+    const onRefresh = () => { void qc.invalidateQueries({ queryKey: WORK_LIST_QUERY_KEY }); };
+    window.addEventListener(ADMIN_BADGES_REFRESH_EVENT, onRefresh);
+    return () => window.removeEventListener(ADMIN_BADGES_REFRESH_EVENT, onRefresh);
+  }, [qc]);
   const model = q.data ?? null;
   const sitMap = (model?.sits ?? new Map()) as unknown as Map<string, SitInfo>;
   return { flagEnabled, flagLoading, model, sitMap, loading: q.isLoading, error: q.error };

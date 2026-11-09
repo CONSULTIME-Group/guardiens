@@ -13,7 +13,8 @@ const sig = (type: string, severity: string, extra: Partial<PilotageSignal> = {}
 
 Deno.test('ADM13 : une ligne d\'email par ligne de la liste, liens absolus', () => {
   const model = buildWorkList({
-    signals: [sig('suspicious_account', 'warning'), sig('suspicious_account', 'warning'), sig('alma_churn', 'critical')],
+    // alma_churn détecté le 04/11 : plus de 3 jours d'attente, « en retard », en tête des lignes « seul vous ».
+    signals: [sig('suspicious_account', 'warning'), sig('suspicious_account', 'warning'), sig('alma_churn', 'critical', { detected_at: '2026-11-04T08:00:00Z' })],
     queues: [{ key: 'contactMessages', count: 2, oldest: '2026-11-07T06:00:00Z' }],
     relances_failed_7d: 1,
     health: [{ key: 'tasks', label: 'Tâches planifiées', state: 'alert', detail: 'Dernier passage en échec ou en retard : Récapitulatif', link: '/admin?plus=taches' }],
