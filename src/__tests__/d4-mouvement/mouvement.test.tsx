@@ -135,7 +135,7 @@ describe("D4, Guardiens aujourd'hui", () => {
 });
 
 describe("D4, base", () => {
-  const sql = readFileSync("drizzle/migrations/0123_d4_mouvement_accueil.sql", "utf8");
+  const sql = readFileSync("drizzle/migrations/0124_d4_mouvement_accueil.sql", "utf8");
   it("lecture seule, membre connecté seulement, compteurs internes", () => {
     expect(sql).toMatch(/get_dashboard_movement\(p_since timestamptz DEFAULT NULL\)[\s\S]*?STABLE/);
     expect(sql).not.toMatch(/\b(INSERT|UPDATE|DELETE)\b/);
@@ -145,10 +145,10 @@ describe("D4, base", () => {
     expect(sql).toContain("now() - interval '30 days'");
   });
   it("contrat de post-déploiement présent", () => {
-    expect(readFileSync("scripts/db/production-contracts.json", "utf8")).toContain("0123_d4_mouvement_accueil.sql");
+    expect(readFileSync("scripts/db/production-contracts.json", "utf8")).toContain("0124_d4_mouvement_accueil.sql");
   });
   it("aucun tiret long ni mot proscrit", () => {
-    for (const f of ["src/lib/dashboardMovement.ts", "src/components/dashboard/shared/MovementBand.tsx", "src/hooks/useDashboardMovement.ts", "drizzle/migrations/0123_d4_mouvement_accueil.sql"]) {
+    for (const f of ["src/lib/dashboardMovement.ts", "src/components/dashboard/shared/MovementBand.tsx", "src/hooks/useDashboardMovement.ts", "drizzle/migrations/0124_d4_mouvement_accueil.sql"]) {
       const src = readFileSync(f, "utf8");
       expect(src).not.toMatch(/[–—]/);
       expect(src).not.toMatch(/voisin/i);

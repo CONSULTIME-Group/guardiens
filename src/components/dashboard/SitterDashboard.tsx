@@ -65,6 +65,7 @@ import { lazyWithRetry } from "@/lib/lazyWithRetry";
 const PrepareSitSheet = lazyWithRetry(() => import("./story/PrepareSitSheet"), "PrepareSitSheet");
 import RoleSwitch from "./story/RoleSwitch";
 import EntraideLine from "./story/EntraideLine";
+import EntraideFollowUp from "./story/EntraideFollowUp";
 import { useCompactStory } from "./story/useCompactStory";
 import PublishedNotice from "./story/PublishedNotice";
 
@@ -409,16 +410,24 @@ const SitterDashboard = () => {
             )}
 
             {/* 4. Bandeau entraide (lot P1b : montage différé) */}
+            {/* Lot L10 : un seul bloc entraide sur téléphone. La ligne sous le récit en est l'entrée ;
+                le suivi n'apparaît qu'avec une réponse attendue ou des propositions à suivre. */}
             <DashboardBlock block="entraide" space="sitter" layout={blockLayout}>
-            <DeferredMount minHeight={160}>
-              <OwnerEntraideBand
-                helpersCount={nearbyHelpersCount}
-                helpersRadiusKm={helpersProximity?.radiusKm ?? 30}
-                activeMission={myActiveMission}
-                ctaTone={isDesktopRail ? "outline" : "primary"}
-                headline={SITTER_ENTRAIDE_HEADLINE}
-              />
-            </DeferredMount>
+            {isDesktopRail ? (
+              <DeferredMount minHeight={160}>
+                <OwnerEntraideBand
+                  helpersCount={nearbyHelpersCount}
+                  helpersRadiusKm={helpersProximity?.radiusKm ?? 30}
+                  activeMission={myActiveMission}
+                  ctaTone="outline"
+                  headline={SITTER_ENTRAIDE_HEADLINE}
+                />
+              </DeferredMount>
+            ) : (
+              <DeferredMount minHeight={0}>
+                <EntraideFollowUp />
+              </DeferredMount>
+            )}
             </DashboardBlock>
 
             {/* 5. Colonne de droite en mobile : après l'entraide. Lot P1b : une

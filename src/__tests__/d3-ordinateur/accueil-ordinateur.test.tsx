@@ -84,9 +84,9 @@ describe("D3, un seul pas par écran", () => {
     expect(sidebarPublishVariant("/sits")).toBe("default");
   });
 
-  it("bandeau entraide en contour sur ordinateur, inchangé sur téléphone", () => {
+  it("bandeau entraide en contour sur ordinateur (le téléphone a son suivi d'entraide depuis le lot L10)", () => {
     for (const f of ["src/components/dashboard/OwnerDashboard.tsx", "src/components/dashboard/SitterDashboard.tsx"]) {
-      expect(read(f)).toContain('ctaTone={isDesktopRail ? "outline" : "primary"}');
+      expect(read(f)).toMatch(/isDesktopRail \? \(\s*<DeferredMount minHeight=\{160\}>\s*<OwnerEntraideBand[^>]*ctaTone="outline"/);
     }
   });
 

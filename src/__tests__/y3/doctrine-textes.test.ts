@@ -51,7 +51,6 @@ const PUBLIC_FILES = [
   "src/components/missions/ExchangeHowItWorks.tsx",
   "src/components/dashboard/owner/SpotlightForYouPanel.tsx",
   "src/components/dashboard/owner/SpotlightNearbyPanel.tsx",
-  "src/components/dashboard/owner/NearbyOwnerSittersCard.tsx",
   "src/components/owner-profile/PhotoJourneyDialog.tsx",
   "src/data/cities.ts",
   "src/data/cityContent.ts",
@@ -267,7 +266,6 @@ describe("Y3 · voix et vocabulaire", () => {
     const j3 = read(T + "owner-no-sit-j3.tsx");
     expect(j3).toContain("gardiens à proximité de ${cityLabel}");
     expect(j3).not.toContain("habitent autour de");
-    expect(read("src/components/dashboard/owner/NearbyOwnerSittersCard.tsx")).toContain("Gardiens à proximité");
     expect(stripComments(read("src/components/dashboard/owner/SpotlightNearbyPanel.tsx"))).not.toContain("près de chez vous");
     expect(stripComments(read(T + "owner-noel-2026.tsx"))).not.toMatch(/près de chez vous|proches de chez vous/i);
   });
