@@ -20,6 +20,9 @@ import { useHelpsWithMissing } from "./HelpsWithReminder";
 import { useDashboardMovement } from "@/hooks/useDashboardMovement";
 import { buildMovementBand, nearestSitLine } from "@/lib/dashboardMovement";
 import { calendarDate } from "@/lib/calendarDate";
+import SitterAlertZoneCard from "./sitter/SitterAlertZoneCard";
+import { useAlertZoneOptions } from "@/hooks/useAlertZoneOptions";
+import { alertZonesFull, buildAlertZoneChoices, isFarFromSits } from "@/lib/alertZoneOptions";
 import DashboardBlock from "@/components/dashboard/shared/DashboardBlock";
 import MovementBand from "./shared/MovementBand";
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
@@ -131,6 +134,10 @@ const SitterDashboard = () => {
   // Lot D4 : ce qui a bougé depuis la dernière visite, sur ordinateur seulement
   // (remplace la ligne get_activity_since_last_visit, même nombre de lectures).
   const movement = useDashboardMovement(user?.id, isDesktopRail);
+  // Lot D7 (état G3) : gardien loin de tout (garde ouverte la plus proche au-delà de 50 km),
+  // ses zones d'alerte possibles, lues seulement dans cet état sur ordinateur.
+  const farFromSits = isDesktopRail && isFarFromSits(movement.data?.nearest_sit?.distance_km, !!nextGuard);
+  const alertZone = useAlertZoneOptions(user?.id, farFromSits);
 
   /* ── Lot L7 : récit gardien (aucune lecture de plus) ── */
   const compactStory = useCompactStory();
@@ -224,6 +231,8 @@ const SitterDashboard = () => {
       ? { text: farLine, link: { label: "Voir la garde", to: `/sits/${movement.data!.nearest_sit!.sit_id}` } }
       : null;
   const movementBand = buildMovementBand("sitter", movement.data, { previousVisit: movement.previousVisit });
+  const showAlertZone =
+    farFromSits && !openingVisible && !!alertZone && (buildAlertZoneChoices(alertZone).length > 0 || alertZonesFull(alertZone));
 
   // Rangée « À faire » : actions réelles en attente, 3 au plus, dans cet ordre.
   const todos: CockpitTodo[] = [];
@@ -368,6 +377,17 @@ const SitterDashboard = () => {
               </div>
             )}
 
+            {/* Lot D7 (état G3) : loin de toute garde, le pas du moment est la zone d'alerte. */}
+            {showAlertZone && user?.id && alertZone && (
+              <DashboardBlock block="alert_zone" space="sitter" layout={blockLayout}>
+                <SitterAlertZoneCard
+                  userId={user.id}
+                  data={alertZone}
+                  nearestKm={movement.data?.nearest_sit?.distance_km != null ? Math.round(Number(movement.data.nearest_sit.distance_km)) : null}
+                />
+              </DashboardBlock>
+            )}
+
             {/* 2. Nouveau gardien : la liste d'ouverture est la vedette tant qu'elle n'est pas terminée */}
             {openingVisible && (
               <DashboardBlock block="opening" space="sitter" layout={blockLayout}>
@@ -390,12 +410,12 @@ const SitterDashboard = () => {
                 isLoading={nbaLoading}
                 totalPublished={totalPublished}
                 // Lot L7 : sur téléphone, le récit porte la garde mise en avant, la liste suit en lignes.
-                layout={openingVisible || !isDesktopRail ? "rows" : "star"}
+                layout={openingVisible || !isDesktopRail || showAlertZone ? "rows" : "star"}
               />
               </DashboardBlock>
               <DashboardBlock block="missing" space="sitter" layout={blockLayout}>
                 <StagedMount testId="missing">
-                  <SitterMissingOpportunities fallbackTotalPublished={nbaLoading ? undefined : totalPublished} />
+                  <SitterMissingOpportunities fallbackTotalPublished={nbaLoading || showAlertZone ? undefined : totalPublished} />
                 </StagedMount>
               </DashboardBlock>
             </div>

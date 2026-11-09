@@ -3,7 +3,7 @@
  * et 3 réunis) : bandeau « Depuis votre dernière visite » de l'accueil
  * ordinateur, en logique pure.
  *
- * Source : get_dashboard_movement (drizzle/migrations/0123_d4_mouvement_accueil.sql),
+ * Source : get_dashboard_movement (drizzle/migrations/0124_d4_mouvement_accueil.sql),
  * lecture seule, deux fenêtres (depuis la dernière visite ordinateur, et
  * 7 jours). Règles :
  *  - une tuile à zéro ne s'affiche jamais ;

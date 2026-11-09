@@ -351,6 +351,7 @@ export const EVENT_LABELS: Dict = {
   dashboard_star_cta_clicked: "Bouton de la carte vedette cliqué",
   dashboard_block_seen: "Bloc de l'accueil vu",
   dashboard_block_clicked: "Bloc de l'accueil cliqué",
+  dashboard_alert_zone_seen: "Carte « Votre zone d'alerte » vue",
   movement_view: "Bandeau « ce qui a bougé » vu",
   movement_click: "Tuile « ce qui a bougé » cliquée",
   owner_publish_cta_clicked: "Bouton « Publier mon annonce de garde » cliqué",

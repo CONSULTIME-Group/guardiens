@@ -210,7 +210,7 @@ describe("Bandeau entraide, variante gardien", () => {
 describe("Lot D4, encart d'invitation pendant le chargement", () => {
   it("SitterDashboard ne transmet le compte qu'une fois le chargement terminé", () => {
     expect(src("components/dashboard/SitterDashboard.tsx")).toContain(
-      "fallbackTotalPublished={nbaLoading ? undefined : totalPublished}",
+      "fallbackTotalPublished={nbaLoading || showAlertZone ? undefined : totalPublished}",
     );
   });
   it("encart absent pendant le chargement (compte non transmis)", () => {
