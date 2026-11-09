@@ -23,8 +23,9 @@ const read = (p: string) => readFileSync(join(root, p), "utf8");
 const calls = vi.hoisted(() => ({ list: [] as Array<{ table: string; ops: Array<[string, unknown[]]> }> }));
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
+    // Lot ADM14 : les voyants arrivent dans la liste de travail (admin_work_list).
     rpc: vi.fn(async () => ({
-      data: [{ key: "seo", label: "Rendu SEO", state: "alert", detail: "Plafond mensuel atteint", link: "/admin/prerender" }],
+      data: { sources: { health: true }, signals: [], queues: [], health: [{ key: "seo", label: "Rendu SEO", state: "alert", detail: "Plafond mensuel atteint", link: "/admin/prerender" }] },
       error: null,
     })),
     from: (table: string) => {
@@ -47,6 +48,9 @@ vi.mock("@/integrations/supabase/client", () => ({
     },
   },
 }));
+
+vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => ({ user: { id: "admin-1" } }) }));
+vi.mock("@/hooks/useAdmin", () => ({ useAdmin: () => ({ isAdmin: true, loading: false }) }));
 
 import { SiteHealthStrip } from "@/pages/admin/_components/dashboard/SiteHealthStrip";
 

@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { SignalPriorityBadge } from "./PriorityBadge";
+import { IgnoreSignalsButton } from "./IgnoreSignalsButton";
 import { supabase } from "@/integrations/supabase/client";
 import { AccountMeasureDialog, type AccountMeasureTarget } from "@/components/admin/moderation/AccountMeasureDialog";
 
@@ -62,14 +62,6 @@ export const SuspiciousAccountCard = ({ signal }: Props) => {
     invalidate();
   };
 
-  const handleIgnore = async () => {
-    setBusy("ignore");
-    const { error } = await resolve("dismissed");
-    setBusy(null);
-    if (error) { toast.error("Impossible d'ignorer."); return; }
-    toast.success("Signal ignoré.");
-    invalidate();
-  };
 
   return (
     <Card className="border-destructive/30 bg-destructive/5">
@@ -81,7 +73,6 @@ export const SuspiciousAccountCard = ({ signal }: Props) => {
           <div className="flex-1 min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-sm font-semibold text-foreground">Compte à examiner</h3>
-              <SignalPriorityBadge severity={signal.severity} />
             </div>
             <div className="text-sm text-foreground">
               {first} ({email}) : {detail}
@@ -99,9 +90,7 @@ export const SuspiciousAccountCard = ({ signal }: Props) => {
               <Button size="sm" variant="ghost" onClick={handleVerify} disabled={busy !== null}>
                 Marquer vérifié
               </Button>
-              <Button size="sm" variant="ghost" onClick={handleIgnore} disabled={busy !== null}>
-                Ignorer
-              </Button>
+              <IgnoreSignalsButton ids={[signal.id]} />
             </div>
           </div>
         </div>

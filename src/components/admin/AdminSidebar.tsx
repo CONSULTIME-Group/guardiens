@@ -3,91 +3,71 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Users, Megaphone, CalendarCheck, Star, Flag,
   ShieldCheck, Mail, FileText, LogOut, ArrowLeft, MapPin, HelpCircle,
-  Compass, Handshake, Briefcase, CreditCard, MessageSquare, ScrollText, Settings,
+  Compass, Handshake, CreditCard, MessageSquare, ScrollText, Settings,
   Lightbulb, AlertTriangle, Bug, Stethoscope, Sprout, BarChart3, Send,
-  Sparkles, UserX, HeartHandshake, Hammer, Building2, Award, MailCheck, Inbox, SearchCheck, PawPrint, Scale,
+  Sparkles, UserX, HeartHandshake, Building2, Award, MailCheck, Inbox, PawPrint, Scale,
   ChevronLeft, ChevronRight, ChevronDown, ChevronUp,
-  Map as MapIcon, SlidersHorizontal,
+  Map as MapIcon, LineChart, Wrench,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-import { useAdminBadges } from "@/hooks/useAdminBadges";
-import { AdminBadgePill, resolveBadge } from "./AdminBadgePill";
+import { useWorkList, workListBadgeLabel, workListBadgeText } from "@/hooks/useWorkList";
+import { AdminBadgePill } from "./AdminBadgePill";
 import { PRICING_IS_ACTIVE } from "@/config/pricing";
 
-interface NavItem {
+export interface NavItem {
   to: string;
   icon: React.ElementType;
   label: string;
   end?: boolean;
-  badgeKey?: string;
-  /** Lot A9 : destination d'un clic sur la pastille elle-même. */
-  badgeTo?: string;
-  /** Valeur du paramètre `tab` que cette entrée représente, quand plusieurs
-   *  entrées pointent vers la même page. Sans cela les deux entrées seraient
-   *  actives en même temps, le paramètre de recherche étant ignoré. */
-  tabParam?: string;
-  /** Onglet affiché par la page quand le paramètre `tab` est absent. */
-  defaultTab?: string;
-  /** Entrée active sur sa page SAUF pour ces onglets, représentés par une
-   *  autre entrée du menu. */
-  excludeTabs?: string[];
+  /** Lot ADM14 : l'entrée porte la pastille unique, longueur de la liste de travail. */
+  workList?: boolean;
 }
 
-export const BADGE_TITLES: Record<string, string> = {
-  verifications: "vérifications d'identité en attente",
-  experiences: "expériences externes à vérifier",
-  skills: "compétences proposées à valider",
-  reviewsModeration: "avis en attente de modération",
-  reviewDisputes: "contestations d'avis à traiter",
-  reports: "signalements ouverts ou en cours",
-  contactMessages: "messages de contact à traiter",
-  adminMessageFailed: "échecs d'envoi sur 7 jours",
-  errors: "erreurs non résolues",
-  guideRequests: "demandes de guides en attente",
-  analysisRequests: "demandes d'analyse à traiter",
-  deletionRequests: "demandes de suppression en attente",
-  sitsToStaff: "annonces sans candidature depuis 48 h",
-};
-
-interface NavGroup {
+export interface NavGroup {
   label: string;
   items: NavItem[];
   /** Lot ADM4 : groupe rangé sous « Outils », replié par défaut. */
   tool?: boolean;
 }
 
-// Lot ADM4 (audit global du 18/10/2026) : 12 entrées au quotidien (files où
-// un membre attend, annonces, entraide, membres, Alma, trafic, erreurs), le
-// reste rangé sous « Outils », replié. Toutes les routes restent intactes.
+// Lot ADM14 (lot 3 du plan de l'arène admin du 09/11/2026, décision 1 validée
+// par Jérémie) : une seule pastille, sur la vue d'ensemble, égale au nombre de
+// lignes de la liste de travail ; « Chaque semaine » pour les écrans qu'on lit
+// sans file d'attente ; tout le reste rangé sous « Outils », replié, sans
+// pastille. Projets, Demandes d'analyse et Poids des hero quittent le menu,
+// leurs routes restent (Projets est un onglet d'Entraide, les demandes
+// d'analyse entrent dans la liste quand il y en a une).
 const adminNavGroups: NavGroup[] = [
   {
     label: "AU QUOTIDIEN",
     items: [
-      { to: "/admin", icon: LayoutDashboard, label: "Vue d'ensemble", end: true },
-      { to: "/admin/listings", icon: Megaphone, label: "Annonces", badgeKey: "sitsToStaff", badgeTo: "/admin/listings?filter=to_staff" },
-      { to: "/admin/small-missions", icon: Handshake, label: "Entraide", tabParam: "entraide", defaultTab: "entraide" },
-      { to: "/admin/contact-messages", icon: Mail, label: "Messages contact", badgeKey: "contactMessages" },
-      { to: "/admin/reports", icon: Flag, label: "Signalements", badgeKey: "reports" },
-      { to: "/admin/verifications", icon: ShieldCheck, label: "Vérifications ID", badgeKey: "verifications" },
-      { to: "/admin/reviews", icon: Star, label: "Avis", badgeKey: "reviewsModeration" },
-      { to: "/admin/demandes-suppression", icon: UserX, label: "Demandes RGPD", badgeKey: "deletionRequests" },
-      { to: "/admin/users", icon: Users, label: "Utilisateurs" },
-      { to: "/admin/alma", icon: Sparkles, label: "Alma" },
-      { to: "/admin/traffic", icon: BarChart3, label: "Trafic" },
-      { to: "/admin/errors", icon: Bug, label: "Erreurs", badgeKey: "errors" },
+      { to: "/admin", icon: LayoutDashboard, label: "Vue d'ensemble", end: true, workList: true },
     ],
   },
   {
-    label: "ACTIVITÉ",
+    label: "CHAQUE SEMAINE",
+    items: [
+      { to: "/admin/traffic", icon: BarChart3, label: "Trafic" },
+      { to: "/admin/alma", icon: Sparkles, label: "Alma" },
+      { to: "/admin/affinity", icon: HeartHandshake, label: "Affinité" },
+      { to: "/admin/pilotage-entraide", icon: LineChart, label: "Pilotage entraide" },
+    ],
+  },
+  {
+    label: "MEMBRES ET ANNONCES",
     tool: true,
     items: [
+      { to: "/admin/listings", icon: Megaphone, label: "Annonces" },
+      { to: "/admin/small-missions", icon: Handshake, label: "Entraide" },
       { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
-      { to: "/admin/small-missions?tab=projets", icon: Hammer, label: "Projets", tabParam: "projets", defaultTab: "entraide" },
-      // Pilotage produit de l'entraide, jusqu'ici accessible seulement depuis
-      // un onglet de la page Emails, donc introuvable.
-      { to: "/admin/pilotage-entraide", icon: BarChart3, label: "Pilotage entraide" },
-      { to: "/admin/affinity", icon: HeartHandshake, label: "Affinité" },
+      { to: "/admin/users", icon: Users, label: "Utilisateurs" },
+      { to: "/admin/contact-messages", icon: Mail, label: "Messages contact" },
+      { to: "/admin/reports", icon: Flag, label: "Signalements" },
+      { to: "/admin/verifications", icon: ShieldCheck, label: "Vérifications ID" },
+      { to: "/admin/reviews", icon: Star, label: "Avis" },
+      { to: "/admin/review-disputes", icon: AlertTriangle, label: "Contestations" },
+      { to: "/admin/demandes-suppression", icon: UserX, label: "Demandes RGPD" },
     ],
   },
   {
@@ -95,10 +75,8 @@ const adminNavGroups: NavGroup[] = [
     tool: true,
     items: [
       { to: "/admin/associations", icon: Building2, label: "Associations" },
-      { to: "/admin/experiences", icon: Award, label: "Expériences", badgeKey: "experiences" },
-      { to: "/admin/skills", icon: Lightbulb, label: "Compétences", badgeKey: "skills" },
-      { to: "/admin/review-disputes", icon: AlertTriangle, label: "Contestations", badgeKey: "reviewDisputes" },
-      // Lot ADM12 : plus de pastille, la page ne montre pas les échecs d'envoi (audit du 09/11/2026, lot-C ME1).
+      { to: "/admin/experiences", icon: Award, label: "Expériences" },
+      { to: "/admin/skills", icon: Lightbulb, label: "Compétences" },
       { to: "/admin/messages", icon: MessageSquare, label: "Messagerie" },
     ],
   },
@@ -121,43 +99,18 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/articles", icon: FileText, label: "Articles" },
       // Articles longue traîne : module verrouillé depuis le 11/07, hors menu, route conservée.
       { to: "/admin/faq", icon: HelpCircle, label: "FAQ" },
-      { to: "/admin/guides", icon: Compass, label: "Guides locaux", badgeKey: "guideRequests" },
-      { to: "/admin/analysis-requests", icon: SearchCheck, label: "Demandes d'analyse", badgeKey: "analysisRequests" },
+      { to: "/admin/guides", icon: Compass, label: "Guides locaux" },
       { to: "/admin/city-pages", icon: MapPin, label: "Pages villes" },
       { to: "/admin/departments", icon: MapIcon, label: "Départements" },
       { to: "/admin/breeds", icon: PawPrint, label: "Fiches de race" },
       { to: "/admin/legal", icon: Scale, label: "Pages légales" },
-      { to: "/admin/hero-weights", icon: SlidersHorizontal, label: "Poids des hero" },
       { to: "/admin/settings", icon: Settings, label: "Paramètres" },
       { to: "/admin/audit", icon: ScrollText, label: "Journal d'audit" },
+      { to: "/admin/errors", icon: Bug, label: "Erreurs" },
       { to: "/admin/diagnostics", icon: Stethoscope, label: "Diagnostic" },
     ],
   },
 ];
-
-/** Lot ADM4 : somme des pastilles d'une liste d'entrées (pastilles indisponibles ignorées). */
-export function sumBadges(items: NavItem[], badges: Record<string, number | undefined>): number {
-  return items.reduce((n, it) => n + (it.badgeKey ? Number(badges[it.badgeKey] ?? 0) || 0 : 0), 0);
-}
-
-/**
- * Lot ADM12 : texte du total d'un groupe de pastilles (bouton du menu mobile,
- * « Outils »). Une lecture en échec donne « ? », jamais 0 ni rien.
- */
-export function badgeTotalText(
-  items: NavItem[],
-  badges: Record<string, number | undefined>,
-  unavailable: boolean,
-): string | null {
-  if (unavailable && items.some((it) => it.badgeKey)) return "?";
-  const n = sumBadges(items, badges);
-  return n > 0 ? String(n) : null;
-}
-
-/** Lot ADM12 : une entrée dont la pastille est allumée mène tout entière à sa file filtrée. */
-export function navItemTarget(item: NavItem, badge: { show: boolean; text: string }): string {
-  return badge.show && badge.text !== "?" && item.badgeTo ? item.badgeTo : item.to;
-}
 
 /** Lot ADM4 : la page courante est-elle dans les Outils ? (ouvre le groupe replié) */
 export function isToolPath(pathname: string, groups: NavGroup[] = adminNavGroups): boolean {
@@ -178,30 +131,17 @@ if (PRICING_IS_ACTIVE) {
 const STORAGE_KEY = "admin.sidebar.collapsed";
 const TOOLS_KEY = "admin.sidebar.tools-open";
 
-/** Deux entrées peuvent viser la même page avec un onglet différent : l'état
- *  actif se lit alors sur le paramètre `tab` et non sur le seul chemin. */
-export function resolveNavActive(
-  item: NavItem,
-  location: { pathname: string; search: string },
-  navActive: boolean,
-): boolean {
-  if (item.excludeTabs) {
-    if (!navActive) return false;
-    const tab = new URLSearchParams(location.search).get("tab");
-    return !(tab && item.excludeTabs.includes(tab));
-  }
-  if (!item.tabParam) return navActive;
-  const path = item.to.split("?")[0];
-  if (location.pathname !== path) return false;
-  const current = new URLSearchParams(location.search).get("tab") || item.defaultTab || "";
-  return current === item.tabParam;
+/** Pastille de l'entrée : celle de la liste de travail, sinon rien. */
+export function navItemBadge(item: NavItem, workBadge: string | null): string | null {
+  return item.workList ? workBadge : null;
 }
 
 export const AdminSidebar = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { badges, unavailable } = useAdminBadges();
+  const { model, error } = useWorkList();
+  const workBadge = workListBadgeText(model, !!error);
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem(STORAGE_KEY) === "1";
@@ -221,23 +161,23 @@ export const AdminSidebar = () => {
   }, [toolsOpen]);
   const dailyGroups = adminNavGroups.filter((g) => !g.tool);
   const toolGroups = adminNavGroups.filter((g) => g.tool);
-  const showTools = toolsOpen || isToolPath(location.pathname);
-  const toolsBadge = badgeTotalText(toolGroups.flatMap((g) => g.items), badges as Record<string, number | undefined>, unavailable);
+  const onToolPage = isToolPath(location.pathname);
+  const showTools = toolsOpen || onToolPage;
 
   const renderItem = (item: NavItem) => {
-    const badge = resolveBadge(item.badgeKey, badges as Record<string, number | undefined>, unavailable, BADGE_TITLES);
-    const badgeLabel = badge.show ? badge.label : undefined;
+    const badge = navItemBadge(item, workBadge);
+    const badgeLabel = badge ? workListBadgeLabel(badge) : undefined;
     return (
       <NavLink
         key={item.to}
-        to={navItemTarget(item, badge)}
+        to={item.to}
         end={item.end}
         title={collapsed ? item.label : undefined}
         className={({ isActive }) =>
           cn(
             "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
             collapsed && "justify-center",
-            resolveNavActive(item, location, isActive)
+            isActive
               ? "bg-primary/10 text-primary"
               : "text-muted-foreground hover:bg-accent hover:text-foreground"
           )
@@ -246,14 +186,14 @@ export const AdminSidebar = () => {
       >
         <span className="relative shrink-0">
           <item.icon className="h-4 w-4" />
-          {collapsed && badge.show && (
-            <AdminBadgePill compact text={badge.text} label={badge.label} className="absolute -top-1.5 -right-2" />
+          {collapsed && badge && (
+            <AdminBadgePill compact text={badge} label={badgeLabel} className="absolute -top-1.5 -right-2" />
           )}
         </span>
         {!collapsed && (
           <>
             <span className="truncate flex-1">{item.label}</span>
-            {badge.show && <AdminBadgePill text={badge.text} label={badge.label} className="ml-auto" />}
+            {badge && <AdminBadgePill text={badge} label={badgeLabel} className="ml-auto" />}
           </>
         )}
       </NavLink>
@@ -299,24 +239,40 @@ export const AdminSidebar = () => {
 
       <nav className="flex-1 px-2 overflow-y-auto" aria-label="Sections d'administration">
         {dailyGroups.map((group, gi) => renderGroup(group, gi))}
-        {/* Lot ADM4 : Outils, replié ; ouvert sur une page d'outil, total des pastilles visible. */}
+        {/* Lot ADM4, puis ADM14 : Outils replié, sans pastille. Replié, une seule icône qui ouvre le menu sur les outils. */}
         <div className="mt-3">
           {collapsed ? (
-            <div className="my-2 border-t border-border/60" />
+            <>
+              <div className="my-2 border-t border-border/60" />
+              <button
+                type="button"
+                onClick={() => { setCollapsed(false); setToolsOpen(true); }}
+                title="Outils"
+                aria-label="Ouvrir les outils"
+                className={cn(
+                  "flex w-full items-center justify-center px-3 py-2 rounded-lg transition-colors",
+                  onToolPage ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                )}
+                data-testid="admin-tools-collapsed"
+              >
+                <Wrench className="h-4 w-4" aria-hidden />
+              </button>
+            </>
           ) : (
-            <button
-              type="button"
-              onClick={() => setToolsOpen((o) => !o)}
-              aria-expanded={showTools}
-              className="flex w-full items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-semibold tracking-widest text-muted-foreground/80 uppercase hover:bg-accent"
-              data-testid="admin-tools-toggle"
-            >
-              <span className="flex-1 text-left">Outils</span>
-              {toolsBadge && <AdminBadgePill text={toolsBadge} label={toolsBadge === "?" ? "Compteur indisponible" : `${toolsBadge} en attente dans les outils`} />}
-              {showTools ? <ChevronUp className="h-3 w-3" aria-hidden /> : <ChevronDown className="h-3 w-3" aria-hidden />}
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => setToolsOpen((o) => !o)}
+                aria-expanded={showTools}
+                className="flex w-full items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-semibold tracking-widest text-muted-foreground/80 uppercase hover:bg-accent"
+                data-testid="admin-tools-toggle"
+              >
+                <span className="flex-1 text-left">Outils</span>
+                {showTools ? <ChevronUp className="h-3 w-3" aria-hidden /> : <ChevronDown className="h-3 w-3" aria-hidden />}
+              </button>
+              {showTools && toolGroups.map((group, gi) => renderGroup(group, gi + 1))}
+            </>
           )}
-          {(showTools || collapsed) && toolGroups.map((group, gi) => renderGroup(group, gi + 1))}
         </div>
       </nav>
 

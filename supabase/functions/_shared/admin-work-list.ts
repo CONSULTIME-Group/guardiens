@@ -123,6 +123,8 @@ export interface WorkListModel extends PilotageModel {
   /** Sources en échec : la liste est incomplète et le dit. */
   unavailable: WorkSource[]
   sits: Map<string, PilotageSit>
+  /** Lot ADM14 : voyants lus dans la même lecture, affichés par l'état du site. */
+  health: HealthCheck[]
   generatedAt: string | null
 }
 
@@ -249,6 +251,12 @@ export const QUEUE_COPY: Record<string, { title: (k: number) => string; link: st
   deletionRequests: { title: (k) => `Traiter ${k} ${n(k, 'demande RGPD', 'demandes RGPD')} (délai légal d'un mois)`, link: '/admin/demandes-suppression' },
   reviewDisputes: { title: (k) => `Trancher ${k} ${n(k, 'contestation d\'avis', 'contestations d\'avis')}`, link: '/admin/review-disputes' },
   verifications: { title: (k) => `Contrôler ${k} ${n(k, 'pièce d\'identité', 'pièces d\'identité')}`, link: '/admin/verifications' },
+  // Lot ADM14 : files que seule une pastille du menu signalait (drizzle 0127).
+  reviewsModeration: { title: (k) => `Valider ${k} ${n(k, 'avis d\'annulation', 'avis d\'annulation')}`, link: '/admin/reviews' },
+  experiences: { title: (k) => `Vérifier ${k} ${n(k, 'expérience déclarée', 'expériences déclarées')}`, link: '/admin/experiences' },
+  skills: { title: (k) => `Valider ${k} ${n(k, 'compétence proposée', 'compétences proposées')}`, link: '/admin/skills' },
+  guideRequests: { title: (k) => `Traiter ${k} ${n(k, 'demande de guide', 'demandes de guide')}`, link: '/admin/guides' },
+  analysisRequests: { title: (k) => `Traiter ${k} ${n(k, 'demande d\'analyse', 'demandes d\'analyse')}`, link: '/admin/analysis-requests' },
 }
 
 /**
@@ -559,6 +567,7 @@ export function buildWorkList(raw: WorkListRaw | null | undefined, now: number =
     items: items.sort((a, b) => WORK_FAMILY_ORDER.indexOf(a.family) - WORK_FAMILY_ORDER.indexOf(b.family)),
     unavailable,
     sits,
+    health: Array.isArray(raw?.health) ? raw!.health! : [],
     generatedAt: typeof raw?.generated_at === 'string' ? raw.generated_at : null,
   }
 }

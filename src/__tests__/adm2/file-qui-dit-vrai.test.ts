@@ -4,7 +4,6 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { waitingQueueItems } from "@/pages/admin/_components/dashboard/SignalsSection";
 import { freshAiActions, AI_ACTIONS_MAX_AGE_MS } from "@/pages/admin/_components/dashboard/useActivityAnalysis";
 import { sitGroupOwner } from "@/components/admin/signals/SitSignalGroupCard";
 import type { AdminSignalBase } from "@/components/admin/signals/signalGrouping";
@@ -13,17 +12,19 @@ const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf8");
 const SIGNALS_DIR = "src/components/admin/signals";
 
 describe("File « À traiter » : une carte traitée disparaît", () => {
-  const section = read("src/pages/admin/_components/dashboard/SignalsSection.tsx");
+  // Lot ADM14 : la liste (useWorkList) remplace l'ancienne file (SignalsSection).
+  const hook = read("src/hooks/useWorkList.ts");
 
-  it("la file lit une clé rangée sous admin_dashboard_snapshot", () => {
-    expect(section).toContain('queryKey: ["admin_dashboard_snapshot", "open"]');
-    expect(section).not.toContain('"admin_open_signals"');
+  it("la liste lit une clé rangée sous admin_dashboard_snapshot", () => {
+    expect(hook).toContain('["admin_dashboard_snapshot", "work-list"]');
+    expect(hook).not.toContain('"admin_open_signals"');
   });
 
   it("chaque carte qui écrit dans admin_signals invalide le préfixe lu par la file", () => {
     const files = readdirSync(resolve(process.cwd(), SIGNALS_DIR)).filter((f) => f.endsWith(".tsx"));
     const writers = files.filter((f) => read(join(SIGNALS_DIR, f)).includes('from("admin_signals")'));
-    expect(writers.length).toBeGreaterThan(10);
+    expect(writers).toContain("IgnoreSignalsButton.tsx");
+    expect(writers.length).toBeGreaterThan(5);
     for (const f of writers) {
       expect(read(join(SIGNALS_DIR, f)), f).toContain('queryKey: ["admin_dashboard_snapshot"]');
     }
@@ -59,14 +60,6 @@ describe("Aucun bouton qui ferme sans agir", () => {
 });
 
 describe("Accueil", () => {
-  it("membres qui attendent : un lien par file non vide, libellés au pluriel juste", () => {
-    expect(waitingQueueItems({ contactMessages: 2, reports: 0, deletionRequests: 1, reviewDisputes: 0, verifications: 0 })).toEqual([
-      { to: "/admin/contact-messages", label: "2 messages de contact" },
-      { to: "/admin/demandes-suppression", label: "1 demande RGPD" },
-    ]);
-    expect(waitingQueueItems({})).toEqual([]);
-  });
-
   it("suggestions IA : écartées au-delà de 24 h", () => {
     const now = Date.parse("2026-10-18T09:00:00Z");
     const actions = [{ title: "t", why: "w", priority: "haute", link: "/admin" }] as never;
@@ -76,10 +69,9 @@ describe("Accueil", () => {
   });
 
   it("signaux désactivés : message explicite, jamais « Tout est calme »", () => {
-    const section = read("src/pages/admin/_components/dashboard/SignalsSection.tsx");
-    const i = section.indexOf("!flagEnabled ? (");
-    expect(i).toBeGreaterThan(0);
-    expect(section.indexOf("Tout est calme")).toBeGreaterThan(i);
+    const section = read("src/pages/admin/_components/dashboard/PilotageBlocks.tsx");
+    expect(section).toContain('data-testid="signals-disabled"');
+    expect(section).not.toContain("Tout est calme");
   });
 });
 

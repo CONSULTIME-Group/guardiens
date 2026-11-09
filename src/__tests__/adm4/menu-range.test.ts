@@ -9,7 +9,7 @@ import { join, resolve } from "node:path";
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
 vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => ({ user: null, logout: () => {} }) }));
 
-import { adminNavGroups_export, isToolPath, sumBadges } from "@/components/admin/AdminSidebar";
+import { adminNavGroups_export, isToolPath } from "@/components/admin/AdminSidebar";
 
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf8");
 const APP = read("src/App.tsx");
@@ -30,18 +30,20 @@ describe("Menu rangé", () => {
   const daily = adminNavGroups_export.filter((g) => !g.tool).flatMap((g) => g.items);
   const tools = adminNavGroups_export.filter((g) => g.tool).flatMap((g) => g.items);
 
-  it("12 entrées au quotidien, dans l'ordre", () => {
+  // Lot ADM14 : Vue d'ensemble seule au quotidien, puis « Chaque semaine ».
+  it("vue d'ensemble, puis les écrans de la semaine, dans l'ordre", () => {
     expect(daily.map((i) => i.label)).toEqual([
-      "Vue d'ensemble", "Annonces", "Entraide", "Messages contact", "Signalements", "Vérifications ID",
-      "Avis", "Demandes RGPD", "Utilisateurs", "Alma", "Trafic", "Erreurs",
+      "Vue d'ensemble", "Trafic", "Alma", "Affinité", "Pilotage entraide",
     ]);
   });
 
-  it("chaque entrée de l'ancien menu reste dans le menu, une seule fois", () => {
+  it("chaque entrée de l'ancien menu reste dans le menu, une seule fois, sauf les trois retirées par la décision 1", () => {
     const all = [...daily, ...tools].map((i) => i.to);
     expect(OLD_MENU).toHaveLength(38);
-    for (const to of OLD_MENU) expect(all.filter((x) => x === to), to).toHaveLength(1);
-    expect(all).toHaveLength(38);
+    const removed = ["/admin/small-missions?tab=projets", "/admin/analysis-requests", "/admin/hero-weights"];
+    for (const to of OLD_MENU.filter((x) => !removed.includes(x))) expect(all.filter((x) => x === to), to).toHaveLength(1);
+    for (const to of removed) expect(all, to).not.toContain(to);
+    expect(all).toHaveLength(35);
   });
 
   it("chaque entrée du menu correspond à une route", () => {
@@ -50,21 +52,17 @@ describe("Menu rangé", () => {
 
   it("Outils s'ouvre seul sur une page d'outil, jamais sur une page du quotidien", () => {
     expect(isToolPath("/admin/envois-groupes/stats")).toBe(true);
-    expect(isToolPath("/admin/hero-weights")).toBe(true);
+    expect(isToolPath("/admin/listings")).toBe(true);
+    expect(isToolPath("/admin/small-missions")).toBe(true);
     expect(isToolPath("/admin")).toBe(false);
-    expect(isToolPath("/admin/listings")).toBe(false);
-    expect(isToolPath("/admin/small-missions")).toBe(false);
+    expect(isToolPath("/admin/traffic")).toBe(false);
   });
 
-  it("somme des pastilles : indisponible ou absente comptée zéro", () => {
-    expect(sumBadges(daily, { sitsToStaff: 6, errors: 3, contactMessages: undefined })).toBe(9);
-  });
-
-  it("mobile : total des pastilles sur le bouton, Outils replié", () => {
+  it("mobile : pastille unique sur le bouton, Outils replié", () => {
     const layout = read("src/components/admin/AdminLayout.tsx");
     expect(layout).toContain('data-testid="admin-mobile-menu-button"');
-    // Lot ADM12 : total en texte, « ? » quand la lecture échoue (badgeTotalText).
-    expect(layout).toContain("badgeTotalText(allItems");
+    // Lot ADM14 : la pastille est la longueur de la liste de travail.
+    expect(layout).toContain("workListBadgeText(model, !!error)");
     expect(layout).toContain("!mobileMenuOpen && totalBadges && (");
     expect(layout).toContain('data-testid="admin-mobile-tools-toggle"');
   });

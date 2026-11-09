@@ -1,11 +1,12 @@
 /**
  * Lot ADM6 : encart « État du site » en tête de la vue d'ensemble. Six
- * voyants (tâches, emails, IA, SEO, erreurs, audience), une seule lecture
- * (admin_site_health). Vert : rien à lire. Rouge : une phrase et un lien.
+ * voyants (tâches, emails, IA, SEO, erreurs, audience). Lot ADM14 : lus dans
+ * la liste de travail (admin_work_list), chaque voyant est touchable et mène
+ * à sa page ; la phrase d'un voyant rouge est la ligne de la liste.
  */
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useWorkList } from "@/hooks/useWorkList";
 import { PrerenderResumeLine } from "./PrerenderResumeLine";
 
 export interface SiteHealthCheck {
@@ -15,8 +16,6 @@ export interface SiteHealthCheck {
   detail: string;
   link: string | null;
 }
-
-export const SITE_HEALTH_QUERY_KEY = ["admin_site_health"] as const;
 
 /** Garde les voyants bien formés ; un voyant illisible n'est jamais affiché vert. */
 export function parseSiteHealth(raw: unknown): SiteHealthCheck[] {
@@ -43,68 +42,63 @@ export function siteHealthHeadline(checks: SiteHealthCheck[]): string {
 }
 
 export function SiteHealthStrip() {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: SITE_HEALTH_QUERY_KEY,
-    queryFn: async () => {
-      const { data, error } = await (supabase as any).rpc("admin_site_health");
-      if (error) throw error;
-      return parseSiteHealth(data);
-    },
-    staleTime: 60_000,
-    refetchInterval: 5 * 60_000,
-  });
+  // Lot ADM14 : mêmes voyants que la liste de travail, dans la même lecture.
+  const { model, loading, error } = useWorkList();
 
-  if (isLoading) return null;
+  if (loading) {
+    return <Skeleton className="h-[52px] rounded-lg" data-testid="site-health-loading" />;
+  }
 
-  if (isError || !data || data.length === 0) {
+  const data = model && !model.unavailable.includes("health") ? parseSiteHealth(model.health) : [];
+  if (error || !model || data.length === 0) {
     return (
       <section aria-label="État du site" data-testid="site-health" className="rounded-lg border border-destructive/40 bg-destructive/5 p-3">
-        <p className="text-sm text-foreground">État du site : lecture impossible. Les voyants ne sont pas fiables tant qu'elle échoue.</p>
+        <p className="text-sm text-foreground">État du site : lecture impossible. Les voyants restent à vérifier tant qu'elle échoue.</p>
       </section>
     );
   }
 
   const alerts = data.filter((c) => c.state === "alert");
+  const seoAlert = alerts.some((c) => c.key === "seo");
 
   return (
     <section aria-label="État du site" data-testid="site-health" className="rounded-lg border border-border bg-card p-3">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <p className="text-sm font-semibold text-foreground">État du site : {siteHealthHeadline(data)}</p>
         <ul className="flex flex-wrap gap-1.5" aria-label="Voyants">
-          {data.map((c) => (
-            <li
-              key={c.key}
-              data-state={c.state}
-              title={c.detail}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs ${
-                c.state === "ok"
-                  ? "border-border text-muted-foreground"
-                  : "border-destructive/50 bg-destructive/10 font-medium text-destructive"
-              }`}
-            >
-              <span aria-hidden className={`h-2 w-2 rounded-full ${c.state === "ok" ? "bg-success" : "bg-destructive"}`} />
-              {c.label}
-              <span className="sr-only">{c.state === "ok" ? " : normal" : " : à regarder"}</span>
-            </li>
-          ))}
+          {data.map((c) => {
+            const cls = `inline-flex min-h-8 items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs ${
+              c.state === "ok"
+                ? "border-border text-muted-foreground"
+                : "border-destructive/50 bg-destructive/10 font-medium text-destructive"
+            }`;
+            const inner = (
+              <>
+                <span aria-hidden className={`h-2 w-2 rounded-full ${c.state === "ok" ? "bg-success" : "bg-destructive"}`} />
+                {c.label}
+                <span className="sr-only">{c.state === "ok" ? " : normal" : ` : à regarder. ${c.detail}`}</span>
+              </>
+            );
+            return (
+              <li key={c.key} data-state={c.state} title={c.detail}>
+                {c.link ? (
+                  <Link to={c.link} className={`${cls} hover:underline underline-offset-2`} data-testid="site-health-chip">{inner}</Link>
+                ) : (
+                  <span className={cls} data-testid="site-health-chip">{inner}</span>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
+      {/* Lot ADM14 : le détail d'un voyant rouge est la première ligne de la liste, une seule fois. */}
       {alerts.length > 0 && (
-        <ul className="mt-2 space-y-1" data-testid="site-health-alerts">
-          {alerts.map((c) => (
-            <li key={c.key} className="text-sm text-foreground">
-              <span className="font-medium">{c.label} : </span>
-              {c.detail}
-              {c.link && (
-                <>
-                  {" "}
-                  <Link to={c.link} className="text-primary underline underline-offset-2">Voir</Link>
-                </>
-              )}
-              {c.key === "seo" && <PrerenderResumeLine />}
-            </li>
-          ))}
-        </ul>
+        <div className="mt-2 space-y-1" data-testid="site-health-alerts">
+          <p className="text-sm text-foreground">
+            {alerts.length > 1 ? "Le détail de ces voyants ouvre la liste ci-dessous." : "Le détail de ce voyant ouvre la liste ci-dessous."}
+          </p>
+          {seoAlert && <PrerenderResumeLine />}
+        </div>
       )}
     </section>
   );

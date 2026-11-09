@@ -1,24 +1,9 @@
 import { cn } from "@/lib/utils";
 
-export const BADGE_UNAVAILABLE_TITLE = "Compteur indisponible";
-
-/** Résout le contenu d'une pastille : nombre, « ? » si indisponible, ou rien. */
-export function resolveBadge(
-  badgeKey: string | undefined,
-  badges: Record<string, number | undefined>,
-  unavailable: boolean,
-  titles: Record<string, string>,
-): { show: boolean; text: string; label?: string } {
-  if (!badgeKey) return { show: false, text: "" };
-  if (unavailable) return { show: true, text: "?", label: BADGE_UNAVAILABLE_TITLE };
-  const count = badges[badgeKey] || 0;
-  return {
-    show: count > 0,
-    text: String(count),
-    label: `${count} ${titles[badgeKey] ?? "à traiter"}`,
-  };
-}
-
+/**
+ * Pastille chiffrée du menu admin. Lot ADM14 : une seule pastille, sur la vue
+ * d'ensemble (workListBadgeText, src/hooks/useWorkList.ts).
+ */
 export const AdminBadgePill = ({
   text, label, compact = false, className,
 }: { text: string; label?: string; compact?: boolean; className?: string }) => {
@@ -32,6 +17,7 @@ export const AdminBadgePill = ({
       )}
       title={label}
       aria-label={label}
+      data-testid="admin-badge"
     >
       {shown}
     </span>

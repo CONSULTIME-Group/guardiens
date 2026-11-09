@@ -26,8 +26,8 @@ vi.mock("@/hooks/useHeroWeights", () => ({
 }));
 vi.mock("@/components/seo/Head", () => ({ default: () => null }));
 
-import { adminNavGroups_export, resolveNavActive } from "@/components/admin/AdminSidebar";
-import { useAdminBadges } from "@/hooks/useAdminBadges";
+import { adminNavGroups_export } from "@/components/admin/AdminSidebar";
+import { useWorkList } from "@/hooks/useWorkList";
 import { PRICING_IS_ACTIVE } from "@/config/pricing";
 import AdminHeroWeights from "@/pages/AdminHeroWeights";
 
@@ -45,13 +45,13 @@ describe("menu : groupe EMAILS", () => {
         expect(other.items.map((i) => i.label)).not.toContain(l);
       }
     }
-    const act = adminNavGroups_export.find((x) => x.label === "ACTIVITÉ")!;
-    expect(act.items.map((i) => i.label)).toContain("Pilotage entraide");
+    const week = adminNavGroups_export.find((x) => x.label === "CHAQUE SEMAINE")!;
+    expect(week.items.map((i) => i.label)).toContain("Pilotage entraide");
   });
 
-  it("Poids des hero dans CONTENU ET SYSTÈME", () => {
-    const g = adminNavGroups_export.find((x) => x.label === "CONTENU ET SYSTÈME")!;
-    expect(g.items.find((i) => i.label === "Poids des hero")?.to).toBe("/admin/hero-weights");
+  it("Poids des hero hors menu, route gardée (lot ADM14, décision 1)", () => {
+    expect(items.map((i) => i.to)).not.toContain("/admin/hero-weights");
+    expect(read("src/App.tsx")).toContain('path="/admin/hero-weights"');
   });
 
   it("Abonnements absent quand PRICING_IS_ACTIVE vaut false", () => {
@@ -65,13 +65,12 @@ describe("menu : groupe EMAILS", () => {
       return pathname === p || (!end && pathname.startsWith(p + "/"));
     };
     const actives = items
-      .filter((it) => resolveNavActive(it as any, { pathname: "/admin/envois-groupes/stats", search: "" }, navMatch(it.to, "/admin/envois-groupes/stats", (it as any).end)))
+      .filter((it) => navMatch(it.to, "/admin/envois-groupes/stats", it.end))
       .map((i) => i.label);
     expect(actives).toEqual(["Stats campagnes"]);
-    // Le menu mobile passe end et resolveNavActive au même NavLink.
+    // Le menu mobile passe end au même NavLink.
     const layout = read("src/components/admin/AdminLayout.tsx");
     expect(layout).toContain("end={item.end}");
-    expect(layout).toContain("resolveNavActive(item, location, isActive)");
   });
 });
 
@@ -144,19 +143,19 @@ import { Navigate } from "react-router-dom";
 const NavigateProbe = () => <Navigate to="/admin" replace />;
 
 
-describe("useAdminBadges : une seule lecture partagée", () => {
+describe("useWorkList : une seule lecture partagée (lot ADM14)", () => {
   it("deux montages (layout + sidebar) déclenchent un seul appel", async () => {
-    rpcSpy.mockResolvedValue({ data: { errors: 2 }, error: null });
+    rpcSpy.mockResolvedValue({ data: { sources: {}, signals: [], queues: [], health: [] }, error: null });
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <QueryClientProvider client={qc}>{children}</QueryClientProvider>
     );
-    const Both = () => { useAdminBadges(); useAdminBadges(); return null; };
+    const Both = () => { useWorkList(); useWorkList(); return null; };
     render(<Both />, { wrapper });
     await waitFor(() => expect(rpcSpy).toHaveBeenCalled());
     await new Promise((r) => setTimeout(r, 30));
     expect(rpcSpy).toHaveBeenCalledTimes(1);
-    expect(rpcSpy).toHaveBeenCalledWith("admin_menu_badges");
+    expect(rpcSpy).toHaveBeenCalledWith("admin_work_list");
     void renderHook; void fromSpy;
   });
 });

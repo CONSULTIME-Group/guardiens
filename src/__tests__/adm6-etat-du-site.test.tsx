@@ -8,6 +8,11 @@ import { resolve } from "node:path";
 
 const rpc = vi.hoisted(() => ({ result: { data: null as unknown, error: null as unknown } }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { rpc: vi.fn(async () => rpc.result) } }));
+// Lot ADM14 : les voyants sont lus dans la liste de travail (useWorkList), une fois l'admin connu.
+vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => ({ user: { id: "admin-1" } }) }));
+vi.mock("@/hooks/useAdmin", () => ({ useAdmin: () => ({ isAdmin: true, loading: false }) }));
+vi.mock("@/lib/admin/readError", async (orig) => ({ ...(await orig<Record<string, unknown>>()), reportAdminReadError: vi.fn() }));
+const asWorkList = (health: unknown) => ({ sources: { health: true }, signals: [], queues: [], health });
 
 import { SiteHealthStrip, parseSiteHealth, siteHealthHeadline } from "@/pages/admin/_components/dashboard/SiteHealthStrip";
 import { measureBreakNotice, PAGE_VIEW_MEASURE_CHANGE } from "@/lib/admin/measureBreak";
@@ -39,19 +44,20 @@ describe("État du site", () => {
     expect(siteHealthHeadline(parseSiteHealth(checks))).toBe("2 points à regarder");
   });
 
-  it("affiche les six voyants et une ligne par voyant rouge avec son lien", async () => {
-    rpc.result = { data: checks, error: null };
+  it("affiche les six voyants, chacun touchable vers sa page ; le détail d'un rouge est dans la liste (lot ADM14)", async () => {
+    rpc.result = { data: asWorkList(checks), error: null };
     renderStrip();
     expect(await screen.findByText("État du site : 2 points à regarder")).toBeInTheDocument();
     const alerts = screen.getByTestId("site-health-alerts");
-    expect(alerts.querySelectorAll("li")).toHaveLength(2);
-    expect(alerts.textContent).toContain("Aucune analyse quotidienne depuis 17/10");
-    expect(screen.getAllByRole("link", { name: "Voir" }).map((a) => a.getAttribute("href"))).toEqual(["/admin/alma", "/admin/prerender"]);
+    expect(alerts.textContent).toContain("ouvre la liste ci-dessous");
+    expect(alerts.textContent).not.toContain("Aucune analyse quotidienne depuis 17/10");
+    const hrefs = screen.getAllByTestId("site-health-chip").map((a) => a.getAttribute("href"));
+    expect(hrefs).toEqual([null, "/admin/emails", "/admin/alma", "/admin/prerender", "/admin/errors", "/admin/traffic?tab=interne"]);
     expect(document.querySelectorAll('[data-state="ok"]')).toHaveLength(4);
   });
 
   it("tout vert : aucune ligne à lire", async () => {
-    rpc.result = { data: checks.map((c) => ({ ...c, state: "ok" })), error: null };
+    rpc.result = { data: asWorkList(checks.map((c) => ({ ...c, state: "ok" }))), error: null };
     renderStrip();
     expect(await screen.findByText("État du site : Tout fonctionne")).toBeInTheDocument();
     expect(screen.queryByTestId("site-health-alerts")).toBeNull();
@@ -60,7 +66,7 @@ describe("État du site", () => {
   it("lecture en échec : le dit, jamais un faux vert", async () => {
     rpc.result = { data: null, error: { message: "boom" } };
     renderStrip();
-    expect(await screen.findByText(/lecture impossible/)).toBeInTheDocument();
+    expect(await screen.findByText(/lecture impossible/, undefined, { timeout: 4000 })).toBeInTheDocument();
   });
 });
 

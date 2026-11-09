@@ -64,7 +64,7 @@ const AdminOverview = () => {
     if (focusCrons) setMoreOpened(true);
   }, [focusCrons]);
   return (
-    <div className="mx-auto max-w-[1080px] space-y-10">
+    <div className="mx-auto max-w-[1080px] space-y-6 md:space-y-10">
       <AdminPageHeader
         title="Vue d'ensemble"
         description="Le site fonctionne, ce qui attend votre main, puis ce qui avance."

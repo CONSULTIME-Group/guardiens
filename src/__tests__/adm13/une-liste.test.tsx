@@ -218,6 +218,9 @@ vi.mock("@/integrations/supabase/client", () => ({
   supabase: { rpc: (...a: unknown[]) => rpcSpy(...a), from: vi.fn() },
 }));
 vi.mock("@/hooks/useFeatureFlag", () => ({ useFeatureFlag: () => ({ enabled: true, loading: false }) }));
+// Lot ADM14 : la liste est lue par useWorkList, une fois l'admin connu.
+vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => ({ user: { id: "admin-1" }, logout: vi.fn() }) }));
+vi.mock("@/hooks/useAdmin", () => ({ useAdmin: () => ({ isAdmin: true, loading: false }) }));
 vi.mock("@/lib/admin/readError", async (orig) => ({ ...(await orig<Record<string, unknown>>()), reportAdminReadError: vi.fn() }));
 
 import { TodaySection } from "@/pages/admin/_components/dashboard/PilotageBlocks";
@@ -253,7 +256,7 @@ describe("vue d'ensemble rendue", () => {
   it("lecture en échec : phrase d'erreur, jamais « tout est à jour »", async () => {
     rpcSpy.mockResolvedValue({ data: null, error: { message: "boom" } });
     renderToday();
-    expect(await screen.findByTestId("pilotage-error")).toBeTruthy();
+    expect(await screen.findByTestId("pilotage-error", undefined, { timeout: 4000 })).toBeTruthy();
     expect(screen.queryByText("Tout est à jour aujourd'hui.")).toBeNull();
   });
 });

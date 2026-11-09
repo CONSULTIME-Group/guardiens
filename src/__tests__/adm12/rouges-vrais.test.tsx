@@ -12,7 +12,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { isListingToStaff } from "@/lib/admin/listingToStaff";
 import { isNurturingFailure, nurturingOutcome, nurturingReasonLabel } from "@/lib/admin/nurturingOutcome";
-import { badgeTotalText, navItemTarget, adminNavGroups_export, BADGE_TITLES } from "@/components/admin/AdminSidebar";
+import { adminNavGroups_export } from "@/components/admin/AdminSidebar";
+import { workListBadgeText } from "@/hooks/useWorkList";
 import { buildPilotage, type PilotageSignal } from "@/lib/admin/pilotage";
 import { SIGNAL_TYPES, signalNature } from "../../../supabase/functions/_shared/admin-signal-config.ts";
 
@@ -60,8 +61,8 @@ describe("une seule définition des annonces sans candidature", () => {
     expect(m.vous.map((l) => l.type)).toContain("no_applications");
   });
   it("un libellé, sans anglicisme", () => {
-    expect(BADGE_TITLES.sitsToStaff).toBe("annonces sans candidature depuis 48 h");
-    expect(JSON.stringify(BADGE_TITLES)).not.toMatch(/staff/);
+    // Lot ADM14 : plus de pastille par file ; la ligne de la liste porte le libellé.
+    expect(read("src/components/admin/AdminSidebar.tsx")).not.toMatch(/staff/i);
   });
 });
 
@@ -107,21 +108,14 @@ describe("voyants : rouge tant que la cause est présente", () => {
 
 describe("pastilles du menu", () => {
   const items = adminNavGroups_export.flatMap((g) => g.items);
-  it("« ? » remonte au total quand la lecture échoue, jamais 0 ni rien", () => {
-    expect(badgeTotalText(items, {}, true)).toBe("?");
-    expect(badgeTotalText(items, { sitsToStaff: 6 }, false)).toBe("6");
-    expect(badgeTotalText(items, {}, false)).toBeNull();
+  // Lot ADM14 : une pastille, celle de la liste de travail (workListBadgeText).
+  it("« ? » quand la lecture échoue, jamais 0 ni rien", () => {
+    expect(workListBadgeText(null, true)).toBe("?");
+    expect(workListBadgeText(null, false)).toBeNull();
   });
   it("Messagerie n'a plus de pastille (la page ne montre pas les échecs)", () => {
     const msg = items.find((i) => i.to === "/admin/messages");
-    expect(msg?.badgeKey).toBeUndefined();
-    expect(badgeTotalText(items, { adminMessageFailed: 3 }, false)).toBeNull();
-  });
-  it("une entrée allumée mène tout entière à sa file filtrée", () => {
-    const annonces = items.find((i) => i.to === "/admin/listings")!;
-    expect(navItemTarget(annonces, { show: true, text: "6" })).toBe("/admin/listings?filter=to_staff");
-    expect(navItemTarget(annonces, { show: false, text: "0" })).toBe("/admin/listings");
-    expect(navItemTarget(annonces, { show: true, text: "?" })).toBe("/admin/listings");
+    expect(msg?.workList).toBeUndefined();
   });
   it("une seule marque par entrée sur téléphone", () => {
     expect(read("src/components/admin/AdminLayout.tsx")).not.toContain("h-2 w-2 rounded-full bg-destructive");

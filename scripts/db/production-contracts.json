@@ -181,6 +181,16 @@
           "sql": "SELECT NOT public.looks_like_pricing('3 sorties par jour') AND public.looks_like_pricing('20 euros la nuit') AS ok"
         }
       ]
+    },
+    {
+      "migration": "0127_adm14_files_completes.sql",
+      "description": "Admin : les files que seule une pastille du menu signalait entrent dans la liste de travail",
+      "checks": [
+        {
+          "name": "files_completes",
+          "sql": "SELECT position('adm14_files_completes' IN pg_get_functiondef('public.admin_human_queues()'::regprocedure)) > 0 AND jsonb_array_length(public.admin_human_queues()) = 10 AS ok"
+        }
+      ]
     }
   ]
 }

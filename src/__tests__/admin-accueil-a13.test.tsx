@@ -19,6 +19,9 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@/hooks/useFeatureFlag", () => ({ useFeatureFlag: () => ({ enabled: true, loading: false }) }));
+// Lot ADM14 : la liste est lue par useWorkList, une fois l'admin connu.
+vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => ({ user: { id: "admin-1" }, logout: vi.fn() }) }));
+vi.mock("@/hooks/useAdmin", () => ({ useAdmin: () => ({ isAdmin: true, loading: false }) }));
 
 vi.mock("@/integrations/supabase/client", () => {
   const builder = (table: string) => {
