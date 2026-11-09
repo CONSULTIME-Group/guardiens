@@ -10,6 +10,7 @@ import { ActivityAnalysisCard } from "./_components/dashboard/ActivityAnalysisCa
 import { CronHealthCard } from "./_components/dashboard/CronHealthCard";
 import { CollapsibleSection } from "./_components/dashboard/CollapsibleSection";
 import { AnimateCard } from "./_components/dashboard/AnimateCard";
+import { followCronsCard } from "@/lib/admin/followCronsCard";
 import { SiteHealthStrip } from "./_components/dashboard/SiteHealthStrip";
 import { ProgressSection, SystemSection, TechnicalSignalsLine, TodaySection } from "./_components/dashboard/PilotageBlocks";
 
@@ -21,9 +22,7 @@ const MoreContent = ({ focusCrons = false }: { focusCrons?: boolean }) => {
   const cronsRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!focusCrons) return;
-    // Après l'animation d'ouverture du bloc replié.
-    const t = window.setTimeout(() => cronsRef.current?.scrollIntoView?.({ block: "start", behavior: "smooth" }), 350);
-    return () => window.clearTimeout(t);
+    return followCronsCard(() => cronsRef.current);
   }, [focusCrons]);
   const keyFigures = useKeyFigures();
   const activity = useRecentActivity();
@@ -38,7 +37,7 @@ const MoreContent = ({ focusCrons = false }: { focusCrons?: boolean }) => {
       <Suspense fallback={<LoadingState label="Chargement des tendances…" />}>
         <TrendsPanel />
       </Suspense>
-      <div ref={cronsRef} id="taches-planifiees"><CronHealthCard /></div>
+      <div ref={cronsRef} id="taches-planifiees" className="scroll-mt-20"><CronHealthCard /></div>
       <ActivityAnalysisCard analysis={analysis} loading={loading} error={error} refreshing={refreshing} onRefresh={refresh} />
     </div>
   );
