@@ -1782,6 +1782,7 @@
   },
   "search_results": {
     "searching": "Recherche…",
+    "refreshing": "Recherche en cours",
     "count_available_near_one": "{{count}} annonce disponible près de vous",
     "count_available_near_other": "{{count}} annonces disponibles près de vous",
     "count_available_fr_one": "{{count}} annonce disponible en France",

@@ -97,6 +97,8 @@ import DestinationCountrySelect from "@/components/search/DestinationCountrySele
 import { profilePlacePoint } from "@/lib/sitPlacePoint";
 import { markMilestone, perfViewElapsed, setViewExtra, skipMilestones } from "@/lib/perfMarks";
 import { diffSearchInputs, formatTriggers, searchKey, triggerMotif, type SearchInputs } from "@/lib/searchTrigger";
+import { NEAREST_OUTSIDE_SHOWN, NEAREST_OUTSIDE_THRESHOLD, pickNearestOutside, type NearestTier } from "@/lib/nearestOutsideZone";
+import { NearestOutsideSection } from "@/components/search/listing/NearestOutsideSection";
 import { applyOpenSitFilter, checkGeocodedPoint, communeDeptFromCoords, pointUsable, fetchAllPages, fetchInChunks, isEndedSit, isFrancePlace, isOpenSit, isPastSit, isWithinRadius, parisTodayIso, resolveSitPlace, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -264,6 +266,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  // Lot H3 : annonces dont la carte attend ses coordonnées (recherche sans point).
  const deferredMapItemsRef = useRef<any[] | null>(null);
  const [loading, setLoading] = useState(false);
+ // Lot perf 19c : réserve des gardes ouvertes les plus proches hors du rayon.
+ const [nearestPool, setNearestPool] = useState<any[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
  // Vrai quand la requête serveur a atteint le plafond (jeu potentiellement tronqué → tri distance/affinité partiel).
  const [resultsTruncated, setResultsTruncated] = useState(false);
@@ -641,9 +645,10 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
 
  // Dérivé mémoïsé : applique tous les filtres CLIENTS + le tri + les démos sur
  // les jeux bruts (rawResults / rawAvailableMembers) sans refetch ni géocodage.
- const results = useMemo(() => {
-   if (tab === "sits") {
-     let final = rawResults.slice();
+ // Filtres du membre appliqués aux gardes (liste du rayon et section des
+ // gardes les plus proches, lot perf 19c).
+ const applySitClientFilters = (list: any[]) => {
+     let final = list.slice();
      if (housingTypes.length > 0) final = final.filter((s: any) => housingTypes.includes(s.property?.type));
      if (withPhotosOnly) final = final.filter((s: any) => sitHasPhotos(s));
      if (duration !== "all") {
@@ -672,10 +677,25 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
          return envs.some((e: string) => environments.includes(e));
        });
      }
+     return final;
+ };
+ const isInactiveSit = (r: any) => !!(r.isAssigned || r.isCompleted || r.isPast);
+ const nearestFiltered = useMemo(
+   () => (tab === "sits" && appliedZone === "radius" ? applySitClientFilters(nearestPool).filter((s: any) => !isInactiveSit(s)) : []),
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+   [tab, appliedZone, nearestPool, housingTypes, withPhotosOnly, duration, emergencyOnly, verifiedOnly, animalTypes, environments],
+ );
+ const results = useMemo(() => {
+   if (tab === "sits") {
+     let final = applySitClientFilters(rawResults);
      final = sortResults(final, sort);
      const realCount = final.length;
+     // Lot perf 19c : quand des gardes réelles proches s'affichent sous un
+     // rayon presque vide, aucune annonce d'exemple n'est mêlée à la liste.
+     const openInRadius = final.filter((s: any) => !isInactiveSit(s)).length;
+     const nearestComing = openInRadius < NEAREST_OUTSIDE_THRESHOLD && nearestFiltered.length > 0;
      const demoCadence = realCount === 0 ? 3 : realCount <= 3 ? 99 : 6;
-     const demoLimit = isPublic ? 0 : (realCount === 0 ? DEMO_SITS.length : realCount <= 3 ? 2 : DEMO_SITS.length);
+     const demoLimit = isPublic || nearestComing ? 0 : (realCount === 0 ? DEMO_SITS.length : realCount <= 3 ? 2 : DEMO_SITS.length);
      return interleaveDemos(final, DEMO_SITS.slice(0, demoLimit), demoCadence);
    }
    if (missionSubTab === "members") return [];
@@ -686,7 +706,14 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    if (sort === "closest") final.sort((a: any, b: any) => (a.distance ?? 9999) - (b.distance ?? 9999));
    else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
    return interleaveDemos(final, DEMO_MISSIONS, 3);
- }, [tab, missionSubTab, rawResults, housingTypes, withPhotosOnly, duration, emergencyOnly, verifiedOnly, animalTypes, isPublic, environments, sort, missionTypeFilter, missionCategoryFilter]);
+ }, [tab, missionSubTab, rawResults, housingTypes, withPhotosOnly, duration, emergencyOnly, verifiedOnly, animalTypes, isPublic, environments, sort, missionTypeFilter, missionCategoryFilter, nearestFiltered]);
+ // Lot perf 19c : section affichée sous un rayon de moins de 3 gardes ouvertes.
+ const nearestShown = useMemo(() => {
+   if (nearestFiltered.length === 0) return [];
+   const openInRadius = results.filter((r: any) => !r.is_demo && !isInactiveSit(r)).length;
+   return openInRadius < NEAREST_OUTSIDE_THRESHOLD ? nearestFiltered.slice(0, NEAREST_OUTSIDE_SHOWN) : [];
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [nearestFiltered, results]);
  const lastListKeyRef = useRef("");
  useEffect(() => {
    if (!onShownListChange) return;
@@ -716,9 +743,12 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    // Réponse sans carte à mesurer : la vue ne compte pas comme un abandon.
    if (searchError) { skipMilestones("error"); return; }
    if (tab !== "sits") { skipMilestones("other_tab"); return; }
-   const realCount = results.filter((r: any) => !r.is_demo).length;
+   const radiusCount = results.filter((r: any) => !r.is_demo).length;
+   // Lot perf 19c : sous un rayon vide, les gardes les plus proches affichées
+   // comptent comme cartes (card_source nearest).
+   const realCount = radiusCount > 0 ? radiusCount : nearestShown.length;
    const at = typeof performance !== "undefined" ? performance.now() : 0;
-   const extra = { with_point: !!(city || userCoords), sits_loaded: rawResults.length, searches: searchGenRef.current, ...searchPhasesRef.current };
+   const extra = { with_point: !!(city || userCoords), sits_loaded: rawResults.length, searches: searchGenRef.current, card_source: radiusCount > 0 ? "radius" : "nearest", ...searchPhasesRef.current };
    // Lot perf 19 : fin de la première recherche de la vue (le premier jalon
    // compte seul), avec son issue.
    markMilestone("FIRST_RESULT", extra, at, { attr: { outcome: realCount > 0 ? "cards" : "empty" } });
@@ -730,7 +760,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    }
    if (realCount === 0) { skipMilestones("empty"); return; }
    markMilestone("FIRST_CARD", extra, at);
- }, [tab, firstSearchSettled, loading, searchError, results, rawResults.length, city, userCoords]);
+ }, [tab, firstSearchSettled, loading, searchError, results, rawResults.length, city, userCoords, nearestShown]);
 
  const availableMembers = useMemo(() => {
    if (!(tab === "missions" && missionSubTab === "members")) return [];
@@ -760,6 +790,28 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  }, [tab, missionSubTab, rawAvailableMembers, missionCategoryFilter, sort]);
 
 
+ // Lot perf 19b : pendant une recherche suivante, la liste déjà affichée reste
+ // à l'écran (aria-busy, « Recherche en cours ») ; les squelettes ne servent
+ // qu'avant la première réponse de la vue.
+ const hasShownList = firstSearchSettled && !searchError && (
+   tab === "missions" && missionSubTab === "members" ? availableMembers.length > 0 : results.length > 0
+ );
+ const [keptList, setKeptList] = useState(false);
+ useEffect(() => {
+   if (!loading) setKeptList(hasShownList);
+ }, [loading, hasShownList]);
+ const refreshing = loading && keptList;
+ const listTopRef = useRef<HTMLDivElement | null>(null);
+ const scrollOnResultRef = useRef(false);
+ useEffect(() => {
+   if (loading || !scrollOnResultRef.current) return;
+   scrollOnResultRef.current = false;
+   const el = listTopRef.current;
+   if (el && typeof el.getBoundingClientRect === "function" && el.getBoundingClientRect().top < 0) {
+     el.scrollIntoView?.({ block: "start" });
+   }
+ }, [loading]);
+
   // Lot perf 5 : les lectures des annonces partent à l'ouverture de la page,
   // sans attendre la session ni le profil du membre ; les recherches des
   // 20 premières secondes aux mêmes dates les reprennent (la recherche avec le
@@ -781,6 +833,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    lastSearchKeyRef.current = searchKey(inputs);
    lastSearchInputsRef.current = inputs;
    triggersRef.current = [...triggersRef.current, `${triggersRef.current.length + 1}:${motif}`];
+   // Lot perf 19b : la liste gardée remonte en haut seulement pour un autre lieu.
+   scrollOnResultRef.current = /(^|\+)(city|radius|zone)(\+|$)/.test(motif);
    setViewExtra({ triggers: formatTriggers(triggersRef.current) });
   };
   const sitBaseKey = () => `${isPublic}|${startDate}|${endDate}`;
@@ -1097,7 +1151,14 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     const pl = placeOf(s);
     return { ...s, locationCity: pl.city, locationCountry: pl.country, locationDept: pl.dept, locationSource: pl.source };
   };
-  return { items: filtered.map(decorate), coordsOf, coordsByKey, late };
+  // Lot perf 19c : gardes ouvertes les plus proches hors du rayon, calculées
+  // sur les annonces et coordonnées déjà en mémoire (aucune lecture). Réserve
+  // de 30 avant les filtres du membre, 6 affichées au plus.
+  const nearest = applied === "radius" && searchCoords
+    ? pickNearestOutside(frenchOpen, coordsOf, (s: any) => placeOf(s).dept, searchCoords, radius[0], refDept, 30)
+        .map((n) => ({ ...decorate(n.sit), nearestTier: n.tier as NearestTier }))
+    : [];
+  return { items: filtered.map(decorate), coordsOf, coordsByKey, late, nearest };
  };
 
    /**
@@ -1316,7 +1377,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   });
 
   const coordsMap = new Map<string, { lat: number; lng: number }>();
-  const enriched = items.map((sit: any) => {
+  const enrichSit = (sit: any) => {
     const pets = petsByProperty.get(sit.property_id) || [];
     const agg = reviewAggByUser.get(sit.user_id);
     const avgRating = agg && agg.count > 0 ? (agg.sum / agg.count).toFixed(1) : null;
@@ -1334,11 +1395,15 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     const ownerEnvs: string[] = (ownerProf as any)?.environments || [];
     const resolvedEnvs = sitEnvs.length > 0 ? sitEnvs : ownerEnvs;
 
-    // Carte : centre approximatif de la commune de l'annonce, aucune adresse.
-    if (placeCoords) coordsMap.set(sit.id, placeCoords);
-
     return { ...sit, pets, avgRating, reviewCount: agg?.count || 0, topBadges, distance: dist, isNew, durationDays: days, environments: resolvedEnvs, ownerEnvironments: ownerEnvs, ownerMatch: ownerProf };
+  };
+  const enriched = items.map((sit: any) => {
+    // Carte : centre approximatif de la commune de l'annonce, aucune adresse.
+    const placeCoords = coordsOf(sit);
+    if (placeCoords) coordsMap.set(sit.id, placeCoords);
+    return enrichSit(sit);
   });
+  const nearestEnriched = located.nearest.map((sit: any) => enrichSit(sit));
 
   // Lot perf 2 : une recherche remplacée entre-temps n'écrase pas la suivante.
   if (searchGenRef.current !== gen) return;
@@ -1346,6 +1411,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   // Lot H3 : carte à situer à son ouverture quand la recherche n'avait pas de point.
   deferredMapItemsRef.current = !searchCoords && enriched.some((sit: any) => !coordsMap.has(sit.id) && sitCoordsKey(sit)) ? enriched : null;
   setRawResults(enriched);
+  setNearestPool(nearestEnriched);
   setRawAvailableMembers([]);
   // Seconde passe (lot perf 9) : le « Voir plus » déjà ouvert reste ouvert.
   if (!preLocated) setVisibleCount(12);
@@ -2013,7 +2079,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  {/* ─── Sort bar + view toggle (sticky avec les pills pour cohérence visuelle) ─── */}
  <div className="flex justify-between items-center gap-2 px-4 sm:px-6 py-2 border-t border-border/60 bg-background flex-nowrap">
  <div className="flex items-center gap-2 min-w-0 flex-1">
- <span className="text-xs sm:text-sm text-muted-foreground truncate flex-1 min-w-0" title={countLabel}>{loading ? t("search_results.searching") : countLabel}</span>
+ <span role="status" aria-live="polite" className="text-xs sm:text-sm text-muted-foreground truncate flex-1 min-w-0" title={countLabel}>{refreshing ? t("search_results.refreshing") : loading ? t("search_results.searching") : countLabel}</span>
  <Select value={sort} onValueChange={(v) => handleSortChange(v as SortOption)}>
  <SelectTrigger className="h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs shrink-0">
  <span className="text-muted-foreground hidden sm:inline">{t("search_results.sort_label")}&nbsp;</span>
@@ -2054,7 +2120,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     {(() => {
       // En vue carte, ce bandeau pousse la carte hors du viewport : il reste
       // réservé à la vue liste.
-      const showOutOfZone = !searchError && viewMode !== "map" && tab === "sits" && !loading && zoneMode !== "france" && appliedZone !== "france" && densityCounts.france > (zoneMode === "dept" ? densityCounts.dept : zoneMode === "region" ? densityCounts.region : densityCounts.radius);
+      const showOutOfZone = nearestShown.length === 0 && !searchError && viewMode !== "map" && tab === "sits" && !loading && zoneMode !== "france" && appliedZone !== "france" && densityCounts.france > (zoneMode === "dept" ? densityCounts.dept : zoneMode === "region" ? densityCounts.region : densityCounts.radius);
       return showOutOfZone ? (
         <OutOfZoneBanner
           zoneMode={zoneMode}
@@ -2412,10 +2478,15 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
 
  {/* ─── Content ─── */}
  {viewMode === "list" ? (
- <div className="p-6">
+ <div
+   ref={listTopRef}
+   className={refreshing ? "p-6 opacity-60 transition-opacity" : "p-6"}
+   aria-busy={refreshing ? true : undefined}
+   data-testid="search-list"
+ >
  {searchError ? (
    <SearchErrorAlert message={searchError} onRetry={() => { void doSearch(); }} />
- ) : loading ? (
+ ) : loading && !refreshing ? (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-6 sm:gap-y-10">
     {Array.from({ length: 6 }).map((_, i) => (
       <div key={i} className="space-y-3">
@@ -2584,6 +2655,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  })()
   ) : results.length === 0 ? (
     <>
+      {nearestShown.length === 0 && (
       <AlmaEmptySearchBubble
         hasFilters={hasActiveFilters}
         radius={radius[0]}
@@ -2618,6 +2690,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
           else if (filter === "duration") setDuration("all");
         }}
       />
+      )}
       <SearchEmptyState
         tab={tab}
         setTab={setTab}
@@ -2751,6 +2824,21 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
      )}
   </>
   )}
+ {tab === "sits" && !searchError && !(loading && !refreshing) && nearestShown.length > 0 && (
+   <NearestOutsideSection
+     items={nearestShown}
+     radiusKm={radius[0]}
+     franceCount={densityCounts.france}
+     // La photo de la première carte compte (FIRST_CARD_PHOTO) seulement quand
+     // le rayon n'en montre aucune.
+     renderCard={(item: any, idx: number) => renderCard(item, idx === 0 && results.filter((r: any) => !r.is_demo).length === 0 ? 0 : undefined)}
+     onSeeFrance={() => {
+       trackEvent("search_outofzone_click", { source: "nearest_outside", metadata: { action: "expand_zone", to: "france", previous_mode: zoneMode, count_radius: densityCounts.radius, count_france: densityCounts.france } });
+       setZoneModeByUser("france");
+     }}
+     trackEvent={trackEvent}
+   />
+ )}
  </div>
  ) : (
  /* ─── Map view ─── */
