@@ -31,6 +31,8 @@ interface OwnerCockpitProps {
   line?: string | null;
   /** Actions réelles en attente, 3 au plus. Vide : pas de rangée. */
   todos?: CockpitTodo[];
+  /** Lot D4 : tuiles « Depuis votre dernière visite » (ordinateur). */
+  movement?: React.ReactNode;
   /** Heure forcée (tests). */
   hour?: number;
   /** Conservés pour compatibilité des appels existants. */
@@ -39,7 +41,7 @@ interface OwnerCockpitProps {
   greeting?: string;
 }
 
-const OwnerCockpit = ({ userId, firstName, line, todos = [], hour, subtitle, greeting }: OwnerCockpitProps) => {
+const OwnerCockpit = ({ userId, firstName, line, todos = [], hour, subtitle, greeting, movement }: OwnerCockpitProps) => {
   const displayName = firstName ? capitalize(firstName) : "";
   const hello = greeting ?? greetingForHour(hour ?? new Date().getHours());
   const title = displayName ? `${hello}, ${displayName}.` : `${hello}.`;
@@ -70,6 +72,7 @@ const OwnerCockpit = ({ userId, firstName, line, todos = [], hour, subtitle, gre
               {contextLine}
             </p>
           )}
+          {movement}
           {shown.length > 0 && (
             <div className="mt-[22px]" data-testid="owner-cockpit-todos">
               <p className="text-muted-foreground uppercase text-[11px] font-bold tracking-[0.16em]">À faire</p>

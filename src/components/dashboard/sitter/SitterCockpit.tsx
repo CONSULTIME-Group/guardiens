@@ -30,11 +30,13 @@ interface SitterCockpitProps {
   greeting?: string;
   line?: SitterCockpitLine | null;
   todos?: CockpitTodo[];
+  /** Lot D4 : tuiles « Depuis votre dernière visite » (ordinateur). */
+  movement?: React.ReactNode;
   /** Heure forcée (tests). */
   hour?: number;
 }
 
-const SitterCockpit = ({ firstName, isAvailable, greeting, line, todos = [], hour }: SitterCockpitProps) => {
+const SitterCockpit = ({ firstName, isAvailable, greeting, line, todos = [], hour, movement }: SitterCockpitProps) => {
   const displayName = firstName ? capitalize(firstName) : "";
   const hello = greeting ?? greetingForHour(hour ?? new Date().getHours());
   const title = displayName ? `${hello}, ${displayName}.` : `${hello}.`;
@@ -83,6 +85,7 @@ const SitterCockpit = ({ firstName, isAvailable, greeting, line, todos = [], hou
             </p>
           )}
 
+          {movement}
           {shown.length > 0 && (
             <div className="mt-[22px]" data-testid="sitter-cockpit-todos">
               <p className="text-muted-foreground uppercase text-[11px] font-bold tracking-[0.16em]">À faire</p>

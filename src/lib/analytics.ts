@@ -148,6 +148,8 @@ export type EventType =
   | "application_page_reply"          // « Répondre à {prénom} » (application_id)
   | "application_page_declined"       // Déclin avec un mot aimable (application_id, kind_word : rang du mot proposé, -1 si réécrit)
   | "dashboard_prepare_sheet_opened"  // Lot L9 : feuille « Préparer votre arrivée » ouverte (chapter)
+  | "movement_view"                   // Lot D4 : tuiles « Depuis votre dernière visite » affichées (space, mode, keys)
+  | "movement_click"                  // Lot D4 : tuile cliquée (space, mode, key)
   | "dashboard_prepare_sheet_sent"    // Lot L9 : message de préparation envoyé (slot, meeting, edited)
   | "checklist_item_completed"        // Item checklist coché (item_name, order)
   | "checklist_all_completed"         // Checklist finalisée (user_role, time_seconds_since_signup)
