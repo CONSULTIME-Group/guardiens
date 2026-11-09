@@ -37,8 +37,8 @@
  * l'insertion anonyme (fitVitalPayload).
  *
  * Lot perf 19 (09/11/2026) : sur une liste, FIRST_RESULT (fin de la première
- * recherche, attr outcome) devient le jalon principal attendu ; une vue sans
- * première recherche aboutie compte comme abandonnée sur FIRST_RESULT.
+ * recherche, attr outcome) vaut réponse ; une vue sans première recherche
+ * aboutie reste comptée abandonnée sous FIRST_CARD (série continue).
  * GESTURE_CARD mesure la carte après un geste ; la ligne porte triggers
  * (motifs des recherches, « 1:init,2:radius », 6 au plus), same_key
  * (relances évitées) et gesture. fitVitalPayload retire triggers en premier.
@@ -198,12 +198,14 @@ export function milestoneRating(ms: number): "good" | "needs-improvement" | "poo
 }
 
 /**
- * Jalon principal : marqué « abandoned » si la vue se termine sans lui. Lot
- * perf 19 : FIRST_RESULT sur une liste (FIRST_CARD, toujours posé avec lui,
- * vaut aussi réponse). EXPECTED : jalons qui envoient la ligne sans attendre
+ * Jalon principal : nom sous lequel une vue sans réponse est marquée
+ * « abandoned » (FIRST_CARD gardé sur une liste pour que la série des
+ * abandons reste comparable aux semaines d'avant). Lot perf 19 : une liste a
+ * répondu dès FIRST_RESULT (première recherche aboutie, vide comprise) ou
+ * FIRST_CARD (ANSWERED). EXPECTED : jalons qui envoient la ligne sans attendre
  * la fin de la vue (une liste vide attend la fin, un geste peut suivre).
  */
-const PRIMARY: Record<"list" | "fiche", MilestoneMetric> = { list: "FIRST_RESULT", fiche: "SIT_HERO" };
+const PRIMARY: Record<"list" | "fiche", MilestoneMetric> = { list: "FIRST_CARD", fiche: "SIT_HERO" };
 const ANSWERED: Record<"list" | "fiche", MilestoneMetric[]> = { list: ["FIRST_RESULT", "FIRST_CARD"], fiche: ["SIT_HERO"] };
 const EXPECTED: Record<"list" | "fiche", MilestoneMetric[]> = { list: ["FIRST_CARD", "FIRST_CARD_PHOTO"], fiche: ["SIT_HERO"] };
 

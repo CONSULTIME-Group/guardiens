@@ -95,7 +95,8 @@ import { endBootListings, takeListingsPrefetch } from "@/lib/listingsPrefetch";
 import { fetchIntlOpenSits, intlCountryCounts, carryOverParams, DEST_WORLD, DEST_ABROAD } from "@/lib/intlSitSearch";
 import DestinationCountrySelect from "@/components/search/DestinationCountrySelect";
 import { profilePlacePoint } from "@/lib/sitPlacePoint";
-import { markMilestone, perfViewElapsed, skipMilestones } from "@/lib/perfMarks";
+import { markMilestone, perfViewElapsed, setViewExtra, skipMilestones } from "@/lib/perfMarks";
+import { diffSearchInputs, formatTriggers, searchKey, triggerMotif, type SearchInputs } from "@/lib/searchTrigger";
 import { applyOpenSitFilter, checkGeocodedPoint, communeDeptFromCoords, pointUsable, fetchAllPages, fetchInChunks, isEndedSit, isFrancePlace, isOpenSit, isPastSit, isWithinRadius, parisTodayIso, resolveSitPlace, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -183,8 +184,14 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  });
  const [densityCounts, setDensityCounts] = useState<{ radius: number; dept: number; region: number; france: number }>({ radius: 0, dept: 0, region: 0, france: 0 });
  // Zone et rayon ne changent que sur un geste du membre (aucun élargissement automatique).
- const setZoneModeByUser = (m: ZoneMode) => setZoneMode(m);
- const setRadiusByUser = (v: number[]) => setRadius(v);
+ // Lot perf 19 : un geste du membre qui change la zone, le rayon, le lieu ou
+ // les dates est noté avant la recherche qu'il déclenche (GESTURE_CARD).
+ const gestureRef = useRef<{ name: string; at: number } | null>(null);
+ const noteGesture = (name: string) => {
+  gestureRef.current = { name, at: typeof performance !== "undefined" ? performance.now() : 0 };
+ };
+ const setZoneModeByUser = (m: ZoneMode) => { noteGesture(`zone_${m}`); setZoneMode(m); };
+ const setRadiusByUser = (v: number[]) => { noteGesture("radius"); setRadius(v); };
  const [userPostalCode, setUserPostalCode] = useState<string | null>(null);
  const [startDate, setStartDate] = useState(() => searchParams.get("debut") || "");
  const [endDate, setEndDate] = useState(() => searchParams.get("fin") || "");
@@ -379,6 +386,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  };
 
  const handleCitySelect = (name: string, postalCode?: string) => {
+ noteGesture("city");
  cityTouchedRef.current = true;
  setCityInput(name);
  setCity(name);
@@ -461,6 +469,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  })();
 
  const handleDeptSelect = (deptCode: string) => {
+ noteGesture("dept");
  cityTouchedRef.current = true;
  const name = DEPT_NAMES[deptCode] || deptCode;
  const refCp = deptToRefPostalCode(deptCode);
@@ -473,6 +482,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  };
 
  const handleRegionSelect = (regionCode: string) => {
+ noteGesture("region");
  cityTouchedRef.current = true;
  const name = REGION_NAMES[regionCode] || regionCode;
  // CP de référence : premier département de la région
@@ -489,6 +499,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  const handleGeolocation = () => {
  if (!navigator.geolocation) return;
  navigator.geolocation.getCurrentPosition(async (pos) => {
+ noteGesture("geolocation");
  const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
  setUserCoords(coords);
  try {
@@ -573,6 +584,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    // un chargement infini ni une liste vide présentée comme un résultat.
    setSearchError("La recherche n'a pas abouti.");
  } finally {
+   // Lot perf 19 : dernière recherche aboutie (GESTURE_CARD attend la sienne).
+   if (searchGenRef.current === gen) settledGenRef.current = gen;
    setLoading(false);
    setFirstSearchSettled(true);
  }
@@ -581,10 +594,34 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  // sont appliqués par le useMemo `results`/`availableMembers` sans refetch.
  }, [tab, missionSubTab, city, radius, zoneMode, startDate, endDate, userCoords, userCity, userPostalCode]);
 
+ // Lot perf 19 : une recherche ne repart que si un paramètre réseau a changé
+ // depuis la dernière lancée (searchKey) ; chaque recherche note son motif.
  useEffect(() => {
  if (!initialLoadDone.current) return;
  if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
- searchTimeoutRef.current = setTimeout(() => doSearch(), 400);
+ searchTimeoutRef.current = setTimeout(() => {
+  const inputs = currentSearchInputs();
+  const key = searchKey(inputs);
+  const gesture = gestureRef.current;
+  gestureRef.current = null;
+  if (key === lastSearchKeyRef.current) {
+   sameKeyRef.current += 1;
+   setViewExtra({ same_key: sameKeyRef.current });
+   return;
+  }
+  const prev = lastSearchInputsRef.current;
+  let motif = prev ? triggerMotif(diffSearchInputs(prev, inputs)) : "";
+  if (firstSearchAsVisitorRef.current && user) {
+   firstSearchAsVisitorRef.current = false;
+   motif = motif ? `auth+${motif}` : "auth";
+  }
+  recordSearchLaunch(inputs, motif || "other");
+  if (gesture) {
+   pendingGestureRef.current = { name: gesture.name, at: gesture.at, gen: searchGenRef.current + 1 };
+   setViewExtra({ gesture: gesture.name });
+  }
+  doSearch();
+ }, 400);
  return () => { if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current); };
   }, [doSearch]);
 
@@ -680,8 +717,19 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    if (searchError) { skipMilestones("error"); return; }
    if (tab !== "sits") { skipMilestones("other_tab"); return; }
    const realCount = results.filter((r: any) => !r.is_demo).length;
+   const at = typeof performance !== "undefined" ? performance.now() : 0;
+   const extra = { with_point: !!(city || userCoords), sits_loaded: rawResults.length, searches: searchGenRef.current, ...searchPhasesRef.current };
+   // Lot perf 19 : fin de la première recherche de la vue (le premier jalon
+   // compte seul), avec son issue.
+   markMilestone("FIRST_RESULT", extra, at, { attr: { outcome: realCount > 0 ? "cards" : "empty" } });
+   // Carte après un geste : seulement une fois la recherche du geste aboutie.
+   const pending = pendingGestureRef.current;
+   if (pending && settledGenRef.current >= pending.gen) {
+     pendingGestureRef.current = null;
+     if (realCount > 0) markMilestone("GESTURE_CARD", { gesture: pending.name, sits_loaded: rawResults.length }, at, { since: pending.at });
+   }
    if (realCount === 0) { skipMilestones("empty"); return; }
-   markMilestone("FIRST_CARD", { with_point: !!(city || userCoords), sits_loaded: rawResults.length, searches: searchGenRef.current, ...searchPhasesRef.current });
+   markMilestone("FIRST_CARD", extra, at);
  }, [tab, firstSearchSettled, loading, searchError, results, rawResults.length, city, userCoords]);
 
  const availableMembers = useMemo(() => {
@@ -719,6 +767,22 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   const earlyBaseRef = useRef<{ key: string; at: number; p: Promise<SitBase> } | null>(null);
   // Lot perf 15 : phases de la première carte, envoyées avec FIRST_CARD.
   const searchPhasesRef = useRef<Record<string, number>>({});
+  // Lot perf 19 : clé et paramètres de la dernière recherche lancée, motifs
+  // des recherches de la vue, relances évitées, geste en attente de sa carte.
+  const lastSearchKeyRef = useRef<string | null>(null);
+  const lastSearchInputsRef = useRef<SearchInputs | null>(null);
+  const triggersRef = useRef<string[]>([]);
+  const sameKeyRef = useRef(0);
+  const firstSearchAsVisitorRef = useRef(false);
+  const settledGenRef = useRef(0);
+  const pendingGestureRef = useRef<{ name: string; at: number; gen: number } | null>(null);
+  const currentSearchInputs = (): SearchInputs => ({ tab, missionSubTab, city, radius, zoneMode, startDate, endDate, userCoords, userCity, userPostalCode });
+  const recordSearchLaunch = (inputs: SearchInputs, motif: string) => {
+   lastSearchKeyRef.current = searchKey(inputs);
+   lastSearchInputsRef.current = inputs;
+   triggersRef.current = [...triggersRef.current, `${triggersRef.current.length + 1}:${motif}`];
+   setViewExtra({ triggers: formatTriggers(triggersRef.current) });
+  };
   const sitBaseKey = () => `${isPublic}|${startDate}|${endDate}`;
   const takeOrLoadSitBase = (): Promise<SitBase> => {
    const early = earlyBaseRef.current;
@@ -746,6 +810,10 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   if (!user || userCoords || profileSettled) {
   initialLoadDone.current = true;
   searchPhasesRef.current.search_start_ms = perfViewElapsed();
+  // Lot perf 19 : première recherche de la vue ; partie sans membre connecté
+  // (repli d'authentification), la suivante portera le motif « auth ».
+  firstSearchAsVisitorRef.current = !user;
+  recordSearchLaunch(currentSearchInputs(), "init");
   doSearch();
   }
    }, [userCoords, user, profileSettled, authLoading]);
@@ -1568,6 +1636,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  };
 
  const resetFilters = () => {
+ noteGesture("reset_filters");
  setHousingTypes([]);
  setVerifiedOnly(false);
  setWithPhotosOnly(false);
@@ -1989,7 +2058,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
       return showOutOfZone ? (
         <OutOfZoneBanner
           zoneMode={zoneMode}
-          setZoneMode={setZoneMode}
+          setZoneMode={(m: ZoneMode) => { noteGesture(`outofzone_${m}`); setZoneMode(m); }}
           densityCounts={densityCounts}
           radius={radius}
           city={city}
@@ -2531,6 +2600,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
           duration,
         }}
         onExpandToRegion={() => {
+          noteGesture("alma_region");
           setZoneMode("region");
           setRadius([100]);
         }}
@@ -2552,7 +2622,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
         tab={tab}
         setTab={setTab}
         zoneMode={zoneMode}
-        setZoneMode={setZoneMode}
+        setZoneMode={(m: ZoneMode) => { noteGesture(`empty_${m}`); setZoneMode(m); }}
         densityCounts={densityCounts}
         nearbyRegions={nearbyRegions}
         nearbyZones={nearbyZones}
@@ -2590,6 +2660,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
               onActivateAvailable={handleActivateAvailable}
               onExpandToFrance={() => {
                 trackEvent("search_empty_action", { source: "discovery_banner", metadata: { action: "expand_to_france", from: zoneMode, radius_count: densityCounts.radius, france_count: densityCounts.france } });
+                noteGesture("discovery_france");
                 setZoneMode("france");
               }}
             />

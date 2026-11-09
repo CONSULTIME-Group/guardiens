@@ -21,8 +21,8 @@ export function measureBreakNotice(previousStart: Date, now: Date = new Date()):
  * /recherche et /annonces. Depuis la mise en ligne du 09/11/2026, une carte
  * arrivée après une première issue vide (rayon vide, puis « Élargir ») n'est
  * plus comptée comme première annonce : elle part en GESTURE_CARD (« Après un
- * geste »), et l'abandon d'une liste se compte sur FIRST_RESULT. Les lignes
- * d'avant ne portent pas FIRST_RESULT.
+ * geste ») ; une première issue vide n'est plus un abandon (FIRST_RESULT,
+ * outcome empty). Les lignes d'avant ne portent pas FIRST_RESULT.
  */
 export const FIRST_CARD_MEASURE_CHANGE = new Date("2026-11-09T12:00:00Z");
 
