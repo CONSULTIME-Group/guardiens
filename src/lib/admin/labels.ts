@@ -126,6 +126,19 @@ export const SURFACE_LABELS: Dict = {
   applications: "Candidatures reçues",
   public_profile: "Profil public",
   messages: "Messagerie",
+  // Lot ADM17 (lot C AF2) : surfaces lues en base le 09/11/2026.
+  public_sit_detail: "Fiche d'annonce publique",
+  owner_applications_list: "Liste des candidatures (propriétaire)",
+  application_modal: "Fenêtre de candidature",
+  public_sitter_profile_rail: "Profil public de gardien, colonne",
+  public_owner_profile_rail: "Profil public de propriétaire, colonne",
+  profile_sitter_section_missing: "Profil gardien, critères à compléter",
+  profile_owner_section_missing: "Profil propriétaire, critères à compléter",
+  search_owner_listing_missing: "Recherche de gardiens, critères à compléter",
+  search_listing_missing: "Recherche d'annonces, critères à compléter",
+  sits_list_sitter: "Mes gardes (gardien)",
+  favorites_sits: "Annonces favorites",
+  owner_dashboard_applications_featured: "Tableau de bord propriétaire, candidatures en avant",
 };
 
 export const CONVERSATION_CONTEXT_LABELS: Dict = {

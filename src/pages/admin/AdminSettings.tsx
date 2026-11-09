@@ -29,6 +29,8 @@ import {
   Info,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { NOT_DELETED_FILTER } from "./_components/dashboard/useDashboardData";
+import { UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { invalidateFeatureFlag } from "@/hooks/useFeatureFlag";
 import { toast } from "sonner";
 
@@ -50,6 +52,7 @@ function fromLocalInputValue(local: string): string | null {
 
 const AdminSettings = () => {
   const [stats, setStats] = useState({ totalUsers: 0, totalSits: 0, totalReviews: 0 });
+  const [statsError, setStatsError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [mandatoryOnboarding, setMandatoryOnboarding] = useState<boolean | null>(null);
   const [togglingFlag, setTogglingFlag] = useState(false);
@@ -75,15 +78,15 @@ const AdminSettings = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [
-          { count: totalUsers },
-          { count: totalSits },
-          { count: totalReviews },
-        ] = await Promise.all([
-          supabase.from("profiles").select("id", { count: "exact", head: true }),
+        // Lot ADM17 (lot E G5) : membres non supprimés, même définition que
+        // Utilisateurs et la vue d'ensemble ; une lecture en échec se dit.
+        const res = await Promise.all([
+          supabase.from("profiles").select("id", { count: "exact", head: true }).or(NOT_DELETED_FILTER),
           supabase.from("sits").select("id", { count: "exact", head: true }),
           supabase.from("reviews").select("id", { count: "exact", head: true }),
         ]);
+        if (res.some((r) => r.error)) { setStatsError(true); return; }
+        const [{ count: totalUsers }, { count: totalSits }, { count: totalReviews }] = res;
         setStats({
           totalUsers: totalUsers || 0,
           totalSits: totalSits || 0,
@@ -615,15 +618,15 @@ const AdminSettings = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center p-3 rounded-lg bg-muted/50">
-                  <div className="text-xl font-bold">{stats.totalUsers}</div>
-                  <div className="text-xs text-muted-foreground">Utilisateurs</div>
+                  <div className="text-xl font-bold">{statsError ? UNAVAILABLE_LABEL : stats.totalUsers}</div>
+                  <div className="text-xs text-muted-foreground">Membres (comptes supprimés exclus)</div>
                 </div>
                 <div className="text-center p-3 rounded-lg bg-muted/50">
-                  <div className="text-xl font-bold">{stats.totalSits}</div>
+                  <div className="text-xl font-bold">{statsError ? UNAVAILABLE_LABEL : stats.totalSits}</div>
                   <div className="text-xs text-muted-foreground">Gardes créées</div>
                 </div>
                 <div className="text-center p-3 rounded-lg bg-muted/50">
-                  <div className="text-xl font-bold">{stats.totalReviews}</div>
+                  <div className="text-xl font-bold">{statsError ? UNAVAILABLE_LABEL : stats.totalReviews}</div>
                   <div className="text-xs text-muted-foreground">Avis</div>
                 </div>
               </div>

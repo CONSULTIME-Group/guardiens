@@ -137,7 +137,8 @@ describe("A11b, rendu sans snake_case sur données simulées", () => {
     };
     const Page = (await import("@/components/admin/AdminSignupFunnelTab")).default;
     const { container } = wrap(<Page />);
-    await waitFor(() => expect(container.textContent).toMatch(/Email d'inscription confirmé|Email confirmé/));
+    // Lot ADM17 : l'entonnoir chiffré vit dans Activation interne ; l'onglet garde blocages et échecs.
+    await waitFor(() => expect(container.textContent).toMatch(/Raisons de blocage du formulaire/));
     expect(container.textContent).not.toMatch(SNAKE);
   });
 

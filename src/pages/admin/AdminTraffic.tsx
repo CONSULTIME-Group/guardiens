@@ -126,7 +126,7 @@ const AdminTraffic = () => {
             <MousePointerClick className="h-4 w-4 mr-2" /> Acquisition SEO
           </TabsTrigger>
           <TabsTrigger value="signup-funnel">
-            <Users className="h-4 w-4 mr-2" /> Entonnoir d'inscription
+            <Users className="h-4 w-4 mr-2" /> Formulaire d'inscription
           </TabsTrigger>
         </TabsList>
         </div>
