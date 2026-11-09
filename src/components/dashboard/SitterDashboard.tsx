@@ -56,6 +56,7 @@ import StoryHero from "./story/StoryHero";
 import RoleSwitch from "./story/RoleSwitch";
 import EntraideLine from "./story/EntraideLine";
 import { useCompactStory } from "./story/useCompactStory";
+import PublishedNotice from "./story/PublishedNotice";
 
 export const SITTER_ENTRAIDE_HEADLINE = "Entre deux gardes, un coup de main près de chez vous.";
 
@@ -258,6 +259,8 @@ const SitterDashboard = () => {
             ) : (
               /* Lot L7 : accueil téléphone, le récit d'abord (direction B de l'arène v2). */
               <div className="space-y-[14px] pt-3" data-testid="sitter-story-home">
+                {/* Lot L8 : retour calme après une candidature envoyée depuis l'annonce. */}
+                <PublishedNotice />
                 {!compactStory && <RoleSwitch />}
                 <StoryHero story={story} compact={compactStory} />
                 {compactStory && <RoleSwitch />}
