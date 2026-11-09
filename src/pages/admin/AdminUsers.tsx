@@ -437,7 +437,7 @@ const AdminUsers = () => {
           roleLabels[u.role] || u.role || "",
           u.city || "",
           u.postal_code || "",
-          adminDeptLabel(u.postal_code),
+          adminDeptLabel(u.postal_code).replace(/^·$/, ""),
           country === "FR" ? "France" : getCountryName(country),
           u.created_at ? format(new Date(u.created_at), "yyyy-MM-dd") : "",
           u.last_seen_at ? format(new Date(u.last_seen_at), "yyyy-MM-dd HH:mm") : "",
