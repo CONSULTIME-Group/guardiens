@@ -760,6 +760,28 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  }, [tab, missionSubTab, rawAvailableMembers, missionCategoryFilter, sort]);
 
 
+ // Lot perf 19b : pendant une recherche suivante, la liste déjà affichée reste
+ // à l'écran (aria-busy, « Recherche en cours ») ; les squelettes ne servent
+ // qu'avant la première réponse de la vue.
+ const hasShownList = firstSearchSettled && !searchError && (
+   tab === "missions" && missionSubTab === "members" ? availableMembers.length > 0 : results.length > 0
+ );
+ const [keptList, setKeptList] = useState(false);
+ useEffect(() => {
+   if (!loading) setKeptList(hasShownList);
+ }, [loading, hasShownList]);
+ const refreshing = loading && keptList;
+ const listTopRef = useRef<HTMLDivElement | null>(null);
+ const scrollOnResultRef = useRef(false);
+ useEffect(() => {
+   if (loading || !scrollOnResultRef.current) return;
+   scrollOnResultRef.current = false;
+   const el = listTopRef.current;
+   if (el && typeof el.getBoundingClientRect === "function" && el.getBoundingClientRect().top < 0) {
+     el.scrollIntoView?.({ block: "start" });
+   }
+ }, [loading]);
+
   // Lot perf 5 : les lectures des annonces partent à l'ouverture de la page,
   // sans attendre la session ni le profil du membre ; les recherches des
   // 20 premières secondes aux mêmes dates les reprennent (la recherche avec le
@@ -781,6 +803,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    lastSearchKeyRef.current = searchKey(inputs);
    lastSearchInputsRef.current = inputs;
    triggersRef.current = [...triggersRef.current, `${triggersRef.current.length + 1}:${motif}`];
+   // Lot perf 19b : la liste gardée remonte en haut seulement pour un autre lieu.
+   scrollOnResultRef.current = /(^|\+)(city|radius|zone)(\+|$)/.test(motif);
    setViewExtra({ triggers: formatTriggers(triggersRef.current) });
   };
   const sitBaseKey = () => `${isPublic}|${startDate}|${endDate}`;
@@ -2013,7 +2037,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  {/* ─── Sort bar + view toggle (sticky avec les pills pour cohérence visuelle) ─── */}
  <div className="flex justify-between items-center gap-2 px-4 sm:px-6 py-2 border-t border-border/60 bg-background flex-nowrap">
  <div className="flex items-center gap-2 min-w-0 flex-1">
- <span className="text-xs sm:text-sm text-muted-foreground truncate flex-1 min-w-0" title={countLabel}>{loading ? t("search_results.searching") : countLabel}</span>
+ <span role="status" aria-live="polite" className="text-xs sm:text-sm text-muted-foreground truncate flex-1 min-w-0" title={countLabel}>{refreshing ? t("search_results.refreshing") : loading ? t("search_results.searching") : countLabel}</span>
  <Select value={sort} onValueChange={(v) => handleSortChange(v as SortOption)}>
  <SelectTrigger className="h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs shrink-0">
  <span className="text-muted-foreground hidden sm:inline">{t("search_results.sort_label")}&nbsp;</span>
@@ -2412,10 +2436,15 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
 
  {/* ─── Content ─── */}
  {viewMode === "list" ? (
- <div className="p-6">
+ <div
+   ref={listTopRef}
+   className={refreshing ? "p-6 opacity-60 transition-opacity" : "p-6"}
+   aria-busy={refreshing ? true : undefined}
+   data-testid="search-list"
+ >
  {searchError ? (
    <SearchErrorAlert message={searchError} onRetry={() => { void doSearch(); }} />
- ) : loading ? (
+ ) : loading && !refreshing ? (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-6 sm:gap-y-10">
     {Array.from({ length: 6 }).map((_, i) => (
       <div key={i} className="space-y-3">
