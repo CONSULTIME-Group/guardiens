@@ -39,6 +39,7 @@ import CommunityPulseLine from "./shared/CommunityPulseLine";
 import { useSitterPriorityAction } from "@/hooks/useSitterPriorityAction";
 import NextStepRailCard from "./shared/NextStepRailCard";
 import RailReadingsCard from "./shared/RailReadingsCard";
+import ReassuranceRailCard from "./shared/ReassuranceRailCard";
 import DashboardRail from "./shared/DashboardRail";
 import { useRailReadings } from "@/hooks/useRailReadings";
 import { useProfileCompletionMissing } from "@/hooks/useProfileCompletionMissing";
@@ -182,6 +183,8 @@ const SitterDashboard = () => {
       nearbyListings: (nearbyListings ?? []) as any,
       nearbyMissions: (nearbyMissions ?? []) as any,
       starSitId: (topSits[0] ?? fallbackSits[0])?.id ?? null,
+      // Lot D3 : jamais une garde déjà visible dans la colonne principale.
+      shownSitIds: Array.from(new Set([...topSits, ...fallbackSits].map((s) => s.id))).slice(0, 3),
     },
   });
 
@@ -236,6 +239,7 @@ const SitterDashboard = () => {
           ? { variant: "newSitter" as const, openingCardVisible: openingVisible }
           : { checklistVisible: false })}
       />
+      {isDesktopRail && <ReassuranceRailCard />}
       {railReadings.length > 0 && <RailReadingsCard items={railReadings} />}
       {showAccessGate && (
         <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
@@ -380,6 +384,7 @@ const SitterDashboard = () => {
                   helpersCount={nearbyHelpersCount}
                   helpersRadiusKm={helpersProximity?.radiusKm ?? 30}
                   activeMission={myActiveMission}
+                  ctaTone="outline"
                   headline={SITTER_ENTRAIDE_HEADLINE}
                 />
               </DeferredMount>
@@ -397,10 +402,12 @@ const SitterDashboard = () => {
               </DeferredMount>
             )}
 
-            {/* 6. Pouls */}
-            <DeferredMount minHeight={40}>
-              <CommunityPulseLine testId="sitter-pulse-line" />
-            </DeferredMount>
+            {/* 6. Pouls. Lot D3 : sur ordinateur, les chiffres vivent dans « Guardiens aujourd'hui ». */}
+            {!isDesktopRail && (
+              <DeferredMount minHeight={40}>
+                <CommunityPulseLine testId="sitter-pulse-line" />
+              </DeferredMount>
+            )}
           </div>
 
           {/* Colonne de droite, desktop */}

@@ -2,7 +2,7 @@
  * Accueil propriétaire (lot D1, maquette validée le 27/09/2026).
  *
  * Carte papier (--hero-paper), rayon 20. Gouache owner-cockpit-home à
- * droite sur 210 px et toute la hauteur (mobile : en haut, pleine largeur,
+ * droite sur 150 px (lot D3, 210 px avant) et toute la hauteur (mobile : en haut, pleine largeur,
  * 150 px), object-cover, JAMAIS atténuée : ni opacité réduite, ni voile.
  * À gauche : eyebrow, H1 « Bonjour, {prénom}. » ou « Bonsoir, {prénom}. »,
  * lien « Mon profil public », ligne de contexte, rangée « À faire ».
@@ -52,9 +52,9 @@ const OwnerCockpit = ({ userId, firstName, line, todos = [], hour, subtitle, gre
         className="relative overflow-hidden flex flex-col-reverse md:flex-row"
         style={{ backgroundColor: "hsl(var(--hero-paper))", borderRadius: "20px" }}
       >
-        <div className="min-w-0 flex-1 p-[22px] md:p-[34px]">
+        <div className="min-w-0 flex-1 p-[22px] md:px-[28px] md:py-[24px]">
           <DashEyebrow>Espace propriétaire</DashEyebrow>
-          <h1 className="font-heading text-foreground mt-[14px] text-[34px] md:text-[44px] font-semibold leading-[1.08]">
+          <h1 className="font-heading text-foreground mt-[14px] text-[34px] md:text-[38px] font-semibold leading-[1.08]">
             {title}
           </h1>
           {userId && (
@@ -93,11 +93,11 @@ const OwnerCockpit = ({ userId, firstName, line, todos = [], hour, subtitle, gre
             </div>
           )}
         </div>
-        <div className="shrink-0 w-full h-[150px] md:w-[210px] md:h-auto md:self-stretch">
+        <div className="shrink-0 w-full h-[150px] md:w-[150px] md:h-auto md:self-stretch">
           <img
             src={ownerHome}
             alt=""
-            width={210}
+            width={150}
             height={260}
             loading="eager"
             fetchPriority="high"

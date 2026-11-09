@@ -57,14 +57,15 @@ describe("Lot J5, carte « Votre prochain pas »", () => {
     expect(only.ctaLabel).toBe("Proposer mon aide");
   });
 
-  it("propriétaire sans annonce active : Publier mon annonce de garde", () => {
+  it("propriétaire sans annonce active (lot D3) : la vedette porte la publication, la colonne de droite propose le profil ou rien", () => {
     const step = ownerNextStep({ profileCompletion: 94, action: { hasActiveSit: false, nearbySittersCount: 5 } })!;
-    expect(step.ctaLabel).toBe("Publier mon annonce de garde");
-    expect(step.progressPct).toBeUndefined();
+    expect(step.ctaLabel).toBe("Compléter mon profil");
+    expect(step.ctaLabel).not.toBe("Publier mon annonce de garde");
+    expect(ownerNextStep({ profileCompletion: 100, action: { hasActiveSit: false, nearbySittersCount: 5 } })).toBeNull();
   });
 
   it("propriétaire : pas de doublon avec la vedette, gardiens à proximité avec annonce active", () => {
-    expect(ownerNextStep({ profileCompletion: 94, action: { hasActiveSit: false, nearbySittersCount: 5, starVariant: "publish" } })!.ctaLabel).toBe("Demander un coup de main");
+    expect(ownerNextStep({ profileCompletion: 100, action: { hasActiveSit: false, nearbySittersCount: 5, starVariant: "publish" } })).toBeNull();
     expect(ownerNextStep({ profileCompletion: 94, action: { hasActiveSit: true, nearbySittersCount: 5 } })!.ctaLabel).toBe("Voir les gardiens à proximité");
     expect(ownerNextStep({ profileCompletion: 94, action: { hasActiveSit: true, nearbySittersCount: 0 } })!.ctaLabel).toBe("Demander un coup de main");
   });

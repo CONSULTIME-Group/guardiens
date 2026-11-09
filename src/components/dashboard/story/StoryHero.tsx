@@ -36,6 +36,11 @@ interface Props {
    * Sans ce rappel, le lien est suivi comme avant.
    */
   onAction?: (link: StoryLink) => void;
+  /**
+   * Lot D3 : sur ordinateur, le récit vit sous l'accueil (qui porte le h1) :
+   * titre en h2, bouton à sa largeur, mesure notée layout desktop.
+   */
+  layout?: "phone" | "desktop";
 }
 
 /** Vrai si le bas du bouton tient dans la fenêtre au premier affichage. */
@@ -46,7 +51,8 @@ export function ctaAboveFold(el: Element | null): boolean | null {
   return r.bottom <= window.innerHeight;
 }
 
-export default function StoryHero({ story, compact = false, periodPicker, track = true, onAction }: Props) {
+export default function StoryHero({ story, compact = false, periodPicker, track = true, onAction, layout = "phone" }: Props) {
+  const desktop = layout === "desktop";
   const ctaRef = useRef<HTMLAnchorElement & HTMLButtonElement>(null);
   const seenRef = useRef<string | null>(null);
 
@@ -62,21 +68,26 @@ export default function StoryHero({ story, compact = false, periodPicker, track 
         chapter: story.chapter,
         compact,
         above_fold: ctaAboveFold(ctaRef.current),
+        layout,
       },
     });
-  }, [story.space, story.chapter, compact, track]);
+  }, [story.space, story.chapter, compact, track, layout]);
 
   const onCta = () => {
     if (!track) return;
     trackEvent(STORY_EVENTS.ctaClicked, {
       source: "/dashboard",
-      metadata: { space: story.space, chapter: story.chapter, href: story.cta.href, action: story.cta.action ?? null },
+      metadata: { space: story.space, chapter: story.chapter, href: story.cta.href, action: story.cta.action ?? null, layout },
     });
   };
   const ctaAction = story.cta.action && onAction ? () => onAction(story.cta) : null;
   const secondaryAction = story.secondary?.action && onAction ? () => onAction(story.secondary!) : null;
-  const ctaClass = cn("flex min-h-[48px] w-full items-center justify-center rounded-full bg-primary px-[20px] text-center text-[16px] font-semibold text-primary-foreground transition-opacity hover:opacity-90", compact ? "mt-[14px]" : "mt-[18px]");
-  const secondaryClass = "mt-[6px] flex min-h-[44px] w-full items-center justify-center text-[15px] font-medium text-foreground underline underline-offset-4";
+  const ctaClass = desktop
+    ? "inline-flex min-h-[48px] items-center justify-center rounded-full bg-primary px-[22px] text-center text-[15px] font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+    : cn("flex min-h-[48px] w-full items-center justify-center rounded-full bg-primary px-[20px] text-center text-[16px] font-semibold text-primary-foreground transition-opacity hover:opacity-90", compact ? "mt-[14px]" : "mt-[18px]");
+  const secondaryClass = desktop
+    ? "ml-[18px] inline-flex min-h-[44px] items-center text-[14px] font-medium text-foreground underline underline-offset-4"
+    : "mt-[6px] flex min-h-[44px] w-full items-center justify-center text-[15px] font-medium text-foreground underline underline-offset-4";
 
   const art = STORY_ART[story.art];
   const actions = (
@@ -119,7 +130,8 @@ export default function StoryHero({ story, compact = false, periodPicker, track 
       data-testid="story-hero"
       data-chapter={story.chapter}
       data-compact={compact ? "true" : "false"}
-      className={cn("rounded-[20px]", compact ? "p-[16px]" : "p-[20px]")}
+      data-layout={layout}
+      className={cn("rounded-[20px]", desktop ? "px-[32px] py-[28px]" : compact ? "p-[16px]" : "p-[20px]")}
       style={{ backgroundColor: "hsl(var(--hero-paper))" }}
     >
       <div className="flex items-start justify-between gap-[12px]">
@@ -141,14 +153,18 @@ export default function StoryHero({ story, compact = false, periodPicker, track 
         )}
       </div>
 
-      <h1
-        className={cn(
-          "font-heading font-semibold text-foreground leading-[1.15]",
-          compact ? "mt-[8px] text-[22px]" : "mt-[2px] text-[25px]",
-        )}
-      >
-        {story.title}
-      </h1>
+      {desktop ? (
+        <h2 className="mt-[2px] font-heading text-[28px] font-semibold leading-[1.15] text-foreground">{story.title}</h2>
+      ) : (
+        <h1
+          className={cn(
+            "font-heading font-semibold text-foreground leading-[1.15]",
+            compact ? "mt-[8px] text-[22px]" : "mt-[2px] text-[25px]",
+          )}
+        >
+          {story.title}
+        </h1>
+      )}
       {compact && actions}
       {story.lead && (
         <p className={cn("leading-snug text-foreground/80", compact ? "mt-[12px] text-[14px]" : "mt-[8px] text-[15px]")}>{story.lead}</p>
@@ -179,7 +195,7 @@ export default function StoryHero({ story, compact = false, periodPicker, track 
         </div>
       )}
 
-      {!compact && actions}
+      {!compact && (desktop ? <div className="mt-[20px] flex flex-wrap items-center">{actions}</div> : actions)}
     </section>
   );
 }
