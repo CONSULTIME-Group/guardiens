@@ -1,5 +1,5 @@
 /**
- * Lot CRON1 (09/11/2026) : les tâches des récapitulatifs, écrites en UTC,
+ * Lot CRON2 (09/11/2026) : les tâches des récapitulatifs, écrites en UTC,
  * couvrent les heures de Paris visées en heure d'hiver (UTC+1) et d'été (UTC+2).
  */
 import { describe, it, expect } from "vitest";

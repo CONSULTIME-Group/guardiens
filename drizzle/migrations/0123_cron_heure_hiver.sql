@@ -1,4 +1,4 @@
--- Lot CRON1 (09/11/2026, recette NUR1, « suis tes reco je valide go » de Jérémie).
+-- Lot CRON2 (09/11/2026, recette NUR1, « suis tes reco je valide go » de Jérémie).
 -- Les tâches des récapitulatifs sont écrites en heure UTC ; les fonctions ne
 -- servent que l'heure de Paris visée (parisWindowVerdictForHours). Depuis le
 -- passage à l'heure d'hiver (26/10/2026), alert-digest-12h et -18h passaient à
