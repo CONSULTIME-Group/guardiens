@@ -32,7 +32,7 @@ const SCAN_PATHS = ["src", "public/llms.txt", "index.html"];
  * - ce fichier de test : il définit la liste d'interdits, il les contient donc.
  * - badge-definitions.ts : « Profil vérifié » est le libellé officiel d'un badge
  *   attribué à un profil qui l'a réellement obtenu, pas une promesse globale.
- * - VerifiedSitterRailCard.tsx / shouldShowVerifiedCard.ts / trustTier.ts :
+ * - shouldShowVerifiedCard.ts / trustTier.ts :
  *   ces fichiers parlent d'un gardien individuel dont l'identité est réellement
  *   validée, la carte n'est montée que dans ce cas.
  * - ProsListing.tsx : le contrôle manuel concerne le SIRET des professionnels,
@@ -46,7 +46,6 @@ const SCAN_PATHS = ["src", "public/llms.txt", "index.html"];
 const EXCLUDE_CLAIM = new Set([
   "src/test/no-verified-sitter-claim.test.ts",
   "src/components/badges/badge-definitions.ts",
-  "src/components/dashboard/sitter/VerifiedSitterRailCard.tsx",
   "src/lib/shouldShowVerifiedCard.ts",
   "src/lib/trustTier.ts",
   "src/pages/ProsListing.tsx",

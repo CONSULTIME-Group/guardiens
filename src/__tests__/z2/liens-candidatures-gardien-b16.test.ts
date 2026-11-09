@@ -22,10 +22,4 @@ describe("B-16, une seule adresse pour les candidatures du gardien", () => {
     expect(src).toContain('label: "Candidatures en attente de réponse", to: SITTER_APPLICATIONS_PATH');
     expect(src).not.toMatch(/key: "apps"[^}]*to: "\/sits"/);
   });
-
-  it("bouton fixe mobile « Mes candidatures »", () => {
-    const src = read("src/components/dashboard/sitter/SitterMobileStickyCTA.tsx");
-    expect(src).toContain("to = SITTER_APPLICATIONS_PATH;");
-    expect(src).not.toContain('to = "/sits";');
-  });
 });
