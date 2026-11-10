@@ -15173,6 +15173,7 @@ export type Database = {
           accessible: boolean | null
           bedrooms_count: number | null
           car_required: boolean | null
+          car_required_answered_at: string | null
           cover_photo_url: string | null
           created_at: string
           description: string | null
@@ -15191,6 +15192,7 @@ export type Database = {
           accessible?: boolean | null
           bedrooms_count?: number | null
           car_required?: boolean | null
+          car_required_answered_at?: string | null
           cover_photo_url?: string | null
           created_at?: string
           description?: string | null
@@ -15209,6 +15211,7 @@ export type Database = {
           accessible?: boolean | null
           bedrooms_count?: number | null
           car_required?: boolean | null
+          car_required_answered_at?: string | null
           cover_photo_url?: string | null
           created_at?: string
           description?: string | null
@@ -18899,6 +18902,7 @@ export type Database = {
           experience_years: string | null
           farm_animals_ok: boolean | null
           geographic_radius: number | null
+          guard_experience: string | null
           has_license: boolean | null
           has_vehicle: boolean | null
           interests: string[] | null
