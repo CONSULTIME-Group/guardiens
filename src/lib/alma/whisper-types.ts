@@ -24,7 +24,9 @@ export type AlmaWhisperType =
   // Pass 5, compagnon culturel (P3, ambiance)
   | "cultural_fact"
   // Étape 1, incitations contextuelles (P2, actionnables)
-  | "usage_nudge";
+  | "usage_nudge"
+  // Lot ALMA3, invitation à donner son avis sur Google (P2, une fois)
+  | "community_google_review";
 
 export type AlmaWhisperPriority = "P0" | "P1" | "P2" | "P3";
 
@@ -70,6 +72,7 @@ export const WHISPER_PRIORITY: Record<AlmaWhisperType, AlmaWhisperPriority> = {
   sitter_reactive_owner_context: "P2",
   owner_view_trend_up: "P2",
   usage_nudge: "P2",
+  community_google_review: "P2",
   cultural_fact: "P3",
 };
 

@@ -7,6 +7,7 @@ const AlmaDock = lazy(() =>
   import("@/components/ai/alma/AlmaDock").then((m) => ({ default: m.AlmaDock })),
 );
 import { AlmaProvider } from "@/contexts/AlmaContext";
+import { AlmaGoogleReviewWhisper } from "@/components/ai/alma/wiring/AlmaGoogleReviewWhisper";
 import { useAuth } from "@/contexts/AuthContext";
 import { useArrivalV2Account } from "@/hooks/useArrivalV2Account";
 const OnboardingModal = lazy(() => import("@/components/onboarding/OnboardingModal"));
@@ -149,6 +150,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
       {idleReady && (
         <Suspense fallback={null}>
           <AlmaDock />
+          <AlmaGoogleReviewWhisper />
         </Suspense>
       )}
       {/* DuplicateAccountGuard mont\u00e9 globalement dans App.tsx */}

@@ -229,6 +229,16 @@
           "sql": "SELECT position('alma1_tiroir_repare' IN pg_get_functiondef('public.get_alma_cultural_fact(uuid,text,jsonb,boolean,uuid[],boolean,text)'::regprocedure)) > 0 AS ok"
         }
       ]
+    },
+    {
+      "migration": "0133_alma3_invitation_avis_google.sql",
+      "description": "Invitation à donner son avis sur Google posée dans la cloche des membres qui ont utilisé Guardiens, lien égal à GOOGLE_REVIEW_URL",
+      "checks": [
+        {
+          "name": "invitation_avis_google",
+          "sql": "SELECT EXISTS (SELECT 1 FROM public.notifications WHERE type = 'google_review_invite' AND link = 'https://g.page/r/CcG68dHWYoHIEAE/review') AS ok"
+        }
+      ]
     }
   ]
 }

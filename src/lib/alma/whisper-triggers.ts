@@ -159,6 +159,36 @@ export function buildLongAbsenceReturnWhisper(params: {
   };
 }
 
+/* ---------------- Lot ALMA3, avis Google ---------------- */
+
+/**
+ * Invitation à donner son avis sur Google, une fois par membre actif.
+ * L'aperçu porte une ligne courte ; le panneau porte le message entier,
+ * le mot « avis » mène au formulaire Google (metadata.panel_message).
+ */
+export function buildGoogleReviewWhisper(params: {
+  audience: "owner" | "sitter";
+  surface: string;
+  peek: string;
+  panelMessage: string;
+}): AlmaWhisper {
+  return {
+    ...base("community_google_review"),
+    audience: params.audience,
+    surface: params.surface,
+    message: params.peek,
+    autoDismissMs: 25_000,
+    metadata: { panel_message: params.panelMessage },
+  };
+}
+
+/** Message du panneau : celui du murmure s'il en porte un, sinon son texte. */
+export function whisperPanelMessage(w: AlmaWhisper | null | undefined): string | null {
+  if (!w) return null;
+  const panel = (w.metadata as { panel_message?: unknown } | undefined)?.panel_message;
+  return typeof panel === "string" && panel.trim() ? panel : w.message;
+}
+
 /* ---------------- Pass 5, Compagnon culturel ---------------- */
 
 export interface CulturalFactPayload {

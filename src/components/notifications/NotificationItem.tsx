@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { notificationTone } from "@/lib/notificationKinds";
+import { isAllowedExternalLink, openGoogleReview } from "@/lib/alma/googleReview";
 
 export interface NotificationData {
   id: string;
@@ -115,6 +116,26 @@ export const NotificationItem = ({ notification: n, onMarkRead, onDelete }: Prop
       </div>
     </div>
   );
+
+  // Lot ALMA3 : lien externe de la liste fermée (avis Google), nouvel onglet.
+  if (isAllowedExternalLink(displayLink)) {
+    return (
+      <a
+        href={displayLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={(e) => {
+          e.preventDefault();
+          openGoogleReview("notification_page");
+          handleOpen();
+        }}
+        className="block"
+        aria-label={displayTitle}
+      >
+        {inner}
+      </a>
+    );
+  }
 
   return displayLink ? (
     <Link to={displayLink} onClick={handleOpen} className="block" aria-label={displayTitle}>

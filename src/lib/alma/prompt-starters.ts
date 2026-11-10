@@ -123,6 +123,7 @@ export const WHISPER_STARTERS: Record<AlmaWhisperType, string> = {
   long_absence_return: "Par où je reprends ?",
   cultural_fact: "Racontez m'en plus",
   usage_nudge: "Comment je m'y prends ?",
+  community_google_review: "Qu'est-ce que je raconte dans mon avis ?",
 };
 
 /** Amorces finales, whisper compris. Deux au maximum. */
@@ -243,6 +244,7 @@ export const WHISPER_STARTER_VARIANTS: Record<AlmaWhisperType, string[]> = {
   long_absence_return: [WHISPER_STARTERS.long_absence_return, "Qu'est-ce qui a changé ?"],
   cultural_fact: [WHISPER_STARTERS.cultural_fact, "Une autre !", "D'où ça vient ?"],
   usage_nudge: [WHISPER_STARTERS.usage_nudge, "Par quoi je commence ?", "Ça prend combien de temps ?"],
+  community_google_review: [WHISPER_STARTERS.community_google_review, "Comment aider la communauté à grandir ?"],
 };
 
 /** Première formulation du vivier tournée par la graine, hors amorces récentes. */
