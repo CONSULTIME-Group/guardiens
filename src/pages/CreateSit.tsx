@@ -25,6 +25,7 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { hasMedication } from "@/lib/medication";
 import { trackFirstAction, trackEvent } from "@/lib/analytics";
+import { trackCowrite } from "@/lib/alma/cowrite";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { COUNTRIES } from "@/lib/countries";
@@ -778,6 +779,7 @@ const CreateSit = () => {
     try {
       void trackEvent("sits_create_alma_bubble_seen", { source: "/sits/create" });
     } catch { /* silent */ }
+    trackCowrite("shown", "annonce");
   }, [showAlmaCreateBubble]);
 
   const [almaPromptOpen, setAlmaPromptOpen] = useState(false);
@@ -1976,6 +1978,8 @@ const CreateSit = () => {
             metadata: { sit_id: sitId, draft_id: draftId ?? null },
           });
         } catch {}
+        // Lot ALMA2 : mesure commune « agir avec Alma ».
+        trackCowrite("sent", "annonce", { sit_id: sitId, edited: hasUserEditedRef.current });
       }
       if (isRepublish && fromSitId && sitId) {
         try {

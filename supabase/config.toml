@@ -67,6 +67,8 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.draft-conversation-opener]
     verify_jwt = true
+  [functions.draft-mission-from-prompt]
+    verify_jwt = true
   [functions.draft-application-letter]
     verify_jwt = true
   [functions.explain-affinity-score]

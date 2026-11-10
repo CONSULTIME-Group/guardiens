@@ -29,6 +29,7 @@ import { readDigestAttribution, clearDigestAttribution } from "@/lib/digestAttri
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AlmaBubble from "@/components/ai/alma/AlmaBubble";
+import { cowriteEdited, trackCowrite } from "@/lib/alma/cowrite";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { detectRestrictionInText } from "@/lib/detectRestriction";
@@ -249,6 +250,7 @@ const ApplicationModal = ({
     if (open && !almaSeenRef.current) {
       almaSeenRef.current = true;
       void trackEvent("alma_application_bubble_seen", { metadata: { sit_id: sitId } });
+      trackCowrite("shown", "candidature", { sit_id: sitId });
     }
     if (!open) {
       almaSeenRef.current = false;
@@ -360,6 +362,8 @@ const ApplicationModal = ({
         metadata: { sit_id: sitId },
       });
     } catch {}
+    // Lot ALMA2 : mesure commune « agir avec Alma ».
+    if (almaUsed) trackCowrite("sent", "candidature", { sit_id: sitId, edited: cowriteEdited(almaDraftText, message) });
     try {
       await trackEvent("application_submitted", {
         source: "modal",
@@ -566,6 +570,7 @@ const ApplicationModal = ({
                           setAlmaUsed(true);
                           setAlmaDismissed(true);
                           await trackEvent("alma_application_letter_generated", { metadata: { sit_id: sitId } });
+                          trackCowrite("used", "candidature", { sit_id: sitId });
                           toast({ title: "Brouillon Alma prêt", description: "Vous pouvez relire et personnaliser avant d'envoyer." });
                         } catch (e: any) {
                           toast({ title: "Alma indisponible", description: e?.message || "Réessayez dans un instant.", variant: "destructive" });

@@ -31,6 +31,8 @@ import { appStatusBadge as appStatusLabels } from "@/lib/messageStatus";
 import { useAutoOpenConversation } from "@/hooks/useAutoOpenConversation";
 import { toast as toastSonner } from "sonner";
 import AlmaMessageOpener from "@/components/ai/alma/AlmaMessageOpener";
+import { cowriteEdited, trackCowrite, type CowriteMoment } from "@/lib/alma/cowrite";
+import { shouldOfferApplicationReply } from "@/lib/alma/applicationReply";
 import { AlmaStagnantConversationWhisper } from "@/components/ai/alma/wiring/AlmaStagnantConversationWhisper";
 import { latestVideoInviteId, videoInviteState, isVideoInvite } from "@/lib/videoInvite";
 import { useHideBottomNav, useHideTopBar } from "@/components/layout/ChromeVisibility";
@@ -119,6 +121,12 @@ const Messages = () => {
   const convListRef = useRef<HTMLDivElement | null>(null);
   const savedScrollRef = useRef<number>(0);
   const [messages, setMessages] = useState<Message[]>([]);
+  // Lot ALMA2 : fil dont les messages sont lus. Les aides d'Alma attendent
+  // cette lecture (la bulle « premier message » s'affichait pendant le
+  // chargement, sur des fils déjà garnis : 1 007 affichages, 0 fil vide).
+  const [messagesLoadedFor, setMessagesLoadedFor] = useState<string | null>(null);
+  // Brouillon d'Alma inséré dans le champ, pour mesurer l'envoi (alma_cowrite_sent).
+  const almaDraftRef = useRef<{ convId: string; text: string; moment: CowriteMoment } | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -411,6 +419,7 @@ const Messages = () => {
       .limit(MESSAGES_PAGE_SIZE);
     const ordered = ((data as Message[]) || []).slice().reverse();
     setMessages(ordered);
+    setMessagesLoadedFor(convId);
     setHasMoreMessages((count || 0) > ordered.length);
 
     const pending = pendingDraftRef.current;
@@ -595,6 +604,11 @@ const Messages = () => {
     }
     // last_message_at + first_message_sent gérés automatiquement par trigger DB
     try { await trackFirstAction("message_sent", { conversation_id: activeConv.id }); } catch {}
+    const almaDraft = almaDraftRef.current;
+    if (almaDraft && almaDraft.convId === activeConv.id) {
+      trackCowrite("sent", almaDraft.moment, { edited: cowriteEdited(almaDraft.text, trimmed) });
+      almaDraftRef.current = null;
+    }
     setNewMessage("");
     setSending(false);
     loadConversations();
@@ -1051,14 +1065,39 @@ const Messages = () => {
             </div>
           ) : (
             <>
-              {messages.length === 0 && user && activeConv.other_user?.id && (activeConv.sit_id || activeConv.small_mission_id) && (
+              {messagesLoadedFor === activeConv.id && messages.length === 0 && user && activeConv.other_user?.id && (activeConv.sit_id || activeConv.small_mission_id) && (
                 <AlmaMessageOpener
                   audience={activeConv.owner_id === user.id ? "owner" : "sitter"}
                   otherFirstName={activeConv.other_user?.first_name}
                   sitId={activeConv.sit_id}
                   missionId={activeConv.small_mission_id}
                   otherUserId={activeConv.other_user.id}
-                  onDraftReady={(text) => setNewMessage(text)}
+                  onDraftReady={(text) => {
+                    setNewMessage(text);
+                    almaDraftRef.current = { convId: activeConv.id, text, moment: "premier_message" };
+                  }}
+                />
+              )}
+              {/* Lot ALMA2 : réponse du propriétaire à une candidature reçue, tant qu'il n'a rien écrit. */}
+              {user && activeConv.other_user?.id && shouldOfferApplicationReply({
+                loaded: messagesLoadedFor === activeConv.id,
+                isOwner: activeConv.owner_id === user.id,
+                sitId: activeConv.sit_id,
+                applicationStatus: activeConv.application_status ?? null,
+                myMessages: messages.filter((m) => m.sender_id === user.id && !m.is_system).length,
+                theirMessages: messages.filter((m) => m.sender_id !== user.id && !m.is_system).length,
+              }) && (
+                <AlmaMessageOpener
+                  key={`reply-${activeConv.id}`}
+                  mode="reply_application"
+                  audience="owner"
+                  otherFirstName={activeConv.other_user?.first_name}
+                  sitId={activeConv.sit_id}
+                  otherUserId={activeConv.other_user.id}
+                  onDraftReady={(text) => {
+                    setNewMessage(text);
+                    almaDraftRef.current = { convId: activeConv.id, text, moment: "reponse_candidature" };
+                  }}
                 />
               )}
               {user && activeConv.owner_id === user.id && messages.length > 0 && (
