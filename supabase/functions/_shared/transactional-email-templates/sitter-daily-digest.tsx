@@ -61,6 +61,15 @@ interface Props {
    * que completionSentence). Le bouton y mène directement.
    */
   completionHref?: string
+  /**
+   * Lot SC6 : question sans réponse qui concerne le plus d'annonces en ligne
+   * (digestOpportunity), seulement quand le gardien peut candidater.
+   */
+  opportunitySentence?: string
+  /** Lien profond vers la question (/profile?section=…&focus=…). */
+  opportunityHref?: string
+  /** Libellé du lien (« Dire comment je me déplace », …). */
+  opportunityCta?: string
 }
 
 const buildCtaUrl = (sitId: string) =>
@@ -72,7 +81,7 @@ const buildProfileUrl = (href?: string) => {
   return `${SITE_URL}${path}${sep}utm_source=email&utm_campaign=sitter_daily_digest&utm_medium=daily`
 }
 
-const SitterDailyDigestEmail = ({ sitterFirstName, items = [], isCatchup, canApply = true, profileCompletion, completionSentence, completionSteps, completionHref }: Props) => (
+const SitterDailyDigestEmail = ({ sitterFirstName, items = [], isCatchup, canApply = true, profileCompletion, completionSentence, completionSteps, completionHref, opportunitySentence, opportunityHref, opportunityCta }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
     <Preview>
@@ -169,6 +178,15 @@ const SitterDailyDigestEmail = ({ sitterFirstName, items = [], isCatchup, canApp
           </Section>
         ))}
 
+        {canApply !== false && opportunitySentence && opportunityHref ? (
+          <Section style={opportunityBox}>
+            <Text style={opportunityText}>{opportunitySentence}</Text>
+            <Link href={buildProfileUrl(opportunityHref)} style={opportunityLink}>
+              {opportunityCta || 'Répondre sur mon profil'}
+            </Link>
+          </Section>
+        ) : null}
+
         <Hr style={hr} />
 
         <Text style={smallText}>
@@ -239,6 +257,9 @@ export const template = {
         distanceKm: 6.5,
       },
     ],
+    opportunitySentence: '8 des 23 annonces en ligne demandent un gardien véhiculé. Votre réponse compte double quand une voiture est nécessaire.',
+    opportunityHref: '/profile?section=profil&focus=trips',
+    opportunityCta: 'Dire comment je me déplace',
   },
 } satisfies TemplateEntry
 
@@ -282,3 +303,23 @@ const linkStyle = { color: '#2C6D50', textDecoration: 'underline' }
 const smallText = { fontSize: '12px', color: '#888277', lineHeight: '1.5', margin: '6px 0' }
 const baseline = { fontSize: '12px', color: '#2C6D50', fontWeight: '600' as const, margin: '14px 0 8px' }
 const hr = { borderColor: '#E9E4DD', margin: '22px 0 16px' }
+
+// Lot SC6 : encadré ciel, comme la phrase des trajets de nearby-sit-alert.
+const opportunityBox = {
+  backgroundColor: '#E6EEF5',
+  borderRadius: '16px',
+  padding: '14px 16px',
+  margin: '20px 0 0',
+}
+const opportunityText = {
+  color: '#24211C',
+  fontSize: '15px',
+  lineHeight: '1.5',
+  margin: '0 0 8px',
+}
+const opportunityLink = {
+  color: '#2E4F6B',
+  fontSize: '15px',
+  fontWeight: 600 as const,
+  textDecoration: 'underline',
+}

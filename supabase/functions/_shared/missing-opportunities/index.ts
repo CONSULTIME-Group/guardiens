@@ -9,8 +9,8 @@
  * Doctrine : un champ non renseigné est neutre dans le score d'affinité,
  * mais jamais silencieux à l'écran. Au maximum DEUX manques à la fois,
  * formulés en annonces réelles recalculées à l'affichage :
- * « 8 des 11 annonces en ligne demandent un gardien véhiculé, vous n'avez
- * pas répondu. »
+ * « 8 des 11 annonces en ligne demandent un gardien véhiculé. Votre réponse
+ * compte double quand une voiture est nécessaire. » (affirmatif depuis le lot SC6)
  *
  * Interdits : barre de progression en pourcentage, badge permanent,
  * formulation générique sans chiffre.
@@ -81,6 +81,10 @@ interface KeyWording {
   section: string;
   /** Champ à mettre en avant à l'ouverture (paramètre focus du profil). */
   focus?: string;
+  /** Ce que la réponse apporte, phrase affirmative (lot SC6). */
+  gain: string;
+  /** Libellé du lien dans un email (lot SC6). */
+  emailCta: string;
 }
 
 const WORDING: Record<MissingOpportunityKey, KeyWording> = {
@@ -89,6 +93,8 @@ const WORDING: Record<MissingOpportunityKey, KeyWording> = {
     verbPlural: "se trouvent",
     verbSingular: "se trouve",
     section: "mobilite",
+    gain: "Votre rayon dit jusqu'où vous allez.",
+    emailCta: "Régler mon rayon",
   },
   vehicle: {
     what: "un gardien véhiculé",
@@ -97,12 +103,16 @@ const WORDING: Record<MissingOpportunityKey, KeyWording> = {
     // Lot SC1 : la question des trajets vit dans « Pendant la garde ».
     section: "profil",
     focus: "trips",
+    gain: "Votre réponse compte double quand une voiture est nécessaire.",
+    emailCta: "Dire comment je me déplace",
   },
   species: {
     what: "les animaux confiés",
     verbPlural: "précisent",
     verbSingular: "précise",
     section: "experience",
+    gain: "Les animaux que vous acceptez comptent double dans l'affinité.",
+    emailCta: "Préciser les animaux que je garde",
   },
   work: {
     what: "une attente de présence pendant la garde",
@@ -110,24 +120,32 @@ const WORDING: Record<MissingOpportunityKey, KeyWording> = {
     verbSingular: "précise",
     section: "profil",
     focus: "presence",
+    gain: "Votre présence pendant la garde compte double dans l'affinité.",
+    emailCta: "Dire ma présence pendant la garde",
   },
   sitter_type: {
     what: "le type de gardien recherché",
     verbPlural: "indiquent",
     verbSingular: "indique",
     section: "profil",
+    gain: "Votre profil de gardien les aide à vous situer.",
+    emailCta: "Préciser mon profil de gardien",
   },
   pace: {
     what: "un rythme de vie",
     verbPlural: "décrivent",
     verbSingular: "décrit",
     section: "profil",
+    gain: "Votre rythme les aide à vous situer.",
+    emailCta: "Décrire mon rythme",
   },
   languages: {
     what: "des langues parlées",
     verbPlural: "mentionnent",
     verbSingular: "mentionne",
     section: "profil",
+    gain: "Vos langues les aident à vous situer.",
+    emailCta: "Ajouter mes langues",
   },
 };
 
@@ -142,17 +160,22 @@ export const missingOpportunitySentence = (
 ): string => {
   const w = WORDING[key];
   if (concerned <= 0 || total <= 0) return "";
+  // Lot SC6 (10/11/2026) : la phrase dit ce que la réponse apporte, sans
+  // tournure négative (règle éditoriale de Guardiens).
   if (total === 1) {
-    return `L'annonce en ligne ${w.verbSingular} ${w.what}, vous n'avez pas répondu.`;
+    return `L'annonce en ligne ${w.verbSingular} ${w.what}. ${w.gain}`;
   }
   if (concerned === 1) {
-    return `Une des ${total} annonces en ligne ${w.verbSingular} ${w.what}, vous n'avez pas répondu.`;
+    return `Une des ${total} annonces en ligne ${w.verbSingular} ${w.what}. ${w.gain}`;
   }
-  return `${concerned} des ${total} annonces en ligne ${w.verbPlural} ${w.what}, vous n'avez pas répondu.`;
+  return `${concerned} des ${total} annonces en ligne ${w.verbPlural} ${w.what}. ${w.gain}`;
 };
 
 const focusParam = (key: MissingOpportunityKey): string =>
   WORDING[key].focus ? `&focus=${WORDING[key].focus}` : "";
+
+/** Libellé du lien d'un email vers la question (lot SC6). */
+export const missingOpportunityEmailCta = (key: MissingOpportunityKey): string => WORDING[key].emailCta;
 
 /** Lien profond vers la question, sans écriture (aussi utilisé par les emails). */
 export const missingOpportunityHref = (key: MissingOpportunityKey): string =>
@@ -183,4 +206,30 @@ export const pickMissingOpportunities = (
       href: `/profile?section=${WORDING[i.key].section}${focusParam(i.key)}`,
       ctaLabel: "Répondre",
     }));
+};
+
+/** Un seul manque pour l'email quotidien (lot SC6) : phrase, lien, libellé. */
+export interface DigestOpportunity {
+  key: MissingOpportunityKey;
+  sentence: string;
+  href: string;
+  ctaLabel: string;
+}
+
+/**
+ * Le manque le plus utile pour le récapitulatif quotidien d'un gardien qui
+ * peut candidater (lot SC6) : même tri que le bloc du tableau de bord, un seul
+ * sujet, rien si les compteurs manquent ou si tout est répondu.
+ */
+export const digestOpportunity = (
+  stats: MissingOpportunitiesStats | null | undefined,
+): DigestOpportunity | null => {
+  const [first] = pickMissingOpportunities(stats, 1);
+  if (!first || !first.sentence) return null;
+  return {
+    key: first.key,
+    sentence: first.sentence,
+    href: first.href,
+    ctaLabel: missingOpportunityEmailCta(first.key),
+  };
 };

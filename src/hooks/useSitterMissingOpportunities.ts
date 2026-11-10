@@ -3,9 +3,9 @@
  * manquées » via la RPC `sitter_missing_opportunities` (compteurs recalculés
  * à chaque appel sur les annonces publiées).
  *
- * La base porte deux surcharges de cette fonction (sans paramètre, et avec
- * `_sitter_id uuid DEFAULT NULL`). Un appel sans argument est ambigu et
- * échoue en 42725. On vise donc explicitement la surcharge paramétrée.
+ * La fonction prend `_sitter_id uuid DEFAULT NULL` (la surcharge sans
+ * paramètre, ambiguë en 42725, est retirée par la migration 0135 du lot SC6).
+ * On passe l'identifiant explicitement.
  *
  * Le bloc reste silencieux à l'écran en cas d'erreur (null), mais l'erreur
  * est toujours tracée en console : un échec de base ne doit plus disparaître.
