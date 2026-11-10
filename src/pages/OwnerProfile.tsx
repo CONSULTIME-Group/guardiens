@@ -19,7 +19,8 @@ import VolunteerAvailabilityBlock from "@/components/profile/VolunteerAvailabili
 
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
 import ProfileSkeleton from "@/components/profile/ProfileSkeleton";
-import ScoreBreakdown, { type ScoreCriterion } from "@/components/profile/ScoreBreakdown";
+import { OWNER_SCORE_GROUP } from "@/lib/profileScoreGroups";
+import ScoreBreakdown, { SCORE_GROUP_ORDER, type MatchSignal, type ScoreCriterion, type ScoreGroup, type ScoreGroupId } from "@/components/profile/ScoreBreakdown";
 import ProfileProgressStrip from "@/components/profile/ProfileProgressStrip";
 import TrustProfile from "@/components/profile/TrustProfile";
 import { useOwnerProfile, sanitizeOwnerDraft, type OwnerProfileData } from "@/hooks/useOwnerProfile";
@@ -259,7 +260,11 @@ const OwnerProfilePage = () => {
   // Affinité côté Attentes & règles : ambiance du foyer, gardien idéal (édités dans Rules).
   const rulesAffinityOk = affinityChecks[3] && affinityChecks[4];
 
-  /** Habillage local : section du formulaire, nature et libellé traduit. */
+  /**
+   * Habillage local : section du formulaire, nature (pour la barre latérale),
+   * groupe du panneau (lot SC1 : rassure, affine vos matchs, entraide) et
+   * libellé traduit.
+   */
   const OWNER_ITEM_META: Record<string, { section: string; kind: "essential" | "bonus"; labelKey: string; hint?: string }> = {
     location: { section: "identity", kind: "essential", labelKey: "criteria.name_postal" },
     avatar: { section: "identity", kind: "essential", labelKey: "criteria.avatar", hint: tp("hints.tab_identity") },
@@ -274,26 +279,37 @@ const OwnerProfilePage = () => {
     identity: { section: "identity", kind: "bonus", labelKey: "criteria.identity_verified", hint: tp("hints.settings_verif") },
   };
 
-  const scoredCriteria: ScoredCriterion[] = [
+  const scoredCriteria: (ScoredCriterion & { group?: ScoreGroupId })[] = [
     ...completionResult.items.map(item => {
       const meta = OWNER_ITEM_META[item.key];
       return {
         section: meta.section,
         kind: meta.kind,
+        group: OWNER_SCORE_GROUP[item.key],
         label: tp(meta.labelKey),
         points: item.points,
         ok: item.ok,
         hint: meta.hint ?? item.hint,
       };
     }),
+    // Lignes à 0 point : attribution par section pour la barre latérale,
+    // absentes du panneau (le critère « affinity » porte déjà les points).
     { section: "identity", kind: "bonus" as const, label: tp("criteria.affinity_identity"), points: 0,
       ok: identityAffinityOk, hint: tp("hints.tab_identity") },
     { section: "rules", kind: "bonus" as const, label: tp("criteria.affinity_rules"), points: 0,
       ok: rulesAffinityOk },
   ];
 
-  const ownerEssentials = scoredCriteria.filter(c => c.kind === "essential");
   const ownerBonuses = scoredCriteria.filter(c => c.kind === "bonus");
+  const ownerGroups: ScoreGroup[] = SCORE_GROUP_ORDER.map(id => ({
+    id,
+    title: tp(`score_groups.${id}`),
+    criteria: scoredCriteria.filter(c => c.group === id),
+  }));
+  // Réponse hors jauge que le calcul d'affinité pèse double (score.ts, poids 2).
+  const ownerMatchSignals: MatchSignal[] = [
+    { label: tp("match_signals.presence_expected"), effect: tp("match_signals.weighs_double_owner"), ok: !!mergedData.presence_expected },
+  ];
   const liveScore = completionResult.score;
 
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => {
@@ -375,8 +391,9 @@ const OwnerProfilePage = () => {
                   setSaved(false);
                   if (draftKey) localStorage.removeItem(draftKey);
                 }}
-                essentials={ownerEssentials}
-                bonuses={ownerBonuses}
+                groups={ownerGroups}
+                matchSignals={ownerMatchSignals}
+                footnote={tp("score_footnote_owner")}
               />
             }
             trustSlot={

@@ -17,7 +17,11 @@ import VolunteerAvailabilityBlock from "@/components/profile/VolunteerAvailabili
 
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
 import ProfileSkeleton from "@/components/profile/ProfileSkeleton";
-import ScoreBreakdown, { type ScoreCriterion } from "@/components/profile/ScoreBreakdown";
+import ChipSelect from "@/components/profile/ChipSelect";
+import FieldRole from "@/components/profile/FieldRole";
+import { SPECIAL_ANIMAL_SKILLS_OPTIONS } from "@/lib/profileMatchingOptions";
+import { SITTER_SCORE_GROUP } from "@/lib/profileScoreGroups";
+import ScoreBreakdown, { SCORE_GROUP_ORDER, type MatchSignal, type ScoreCriterion, type ScoreGroup, type ScoreGroupId } from "@/components/profile/ScoreBreakdown";
 
 import { useSitterProfile, type SitterProfileData } from "@/hooks/useSitterProfile";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
@@ -326,23 +330,28 @@ const SitterProfile = () => {
     sitter_gallery_count: galleryCount,
   });
 
-  /** Habillage local : section du formulaire, nature et libellé traduit. */
+  /**
+   * Habillage local : section du formulaire, nature (pour la barre latérale),
+   * groupe du panneau (lot SC1 : rassure, affine vos matchs, entraide) et
+   * libellé traduit.
+   */
   const SITTER_ITEM_META: Record<string, { section: string; kind: "essential" | "bonus"; labelKey: string; hint?: string }> = {
     location: { section: "identity", kind: "essential", labelKey: "criteria.name_postal" },
     avatar: { section: "identity", kind: "essential", labelKey: "criteria.avatar", hint: tp("hints.add_avatar_identity") },
     competences: { section: "skills", kind: "essential", labelKey: "criteria.skill", hint: tp("hints.tab_skills") },
     lifestyle: { section: "sitter", kind: "essential", labelKey: "criteria.lifestyle", hint: tp("hints.tab_sitter") },
     bio: { section: "identity", kind: "bonus", labelKey: "criteria.bio_50", hint: tp("hints.chars_50", { count: mergedData.bio?.length ?? 0 }) },
-    affinity: { section: "sitter", kind: "bonus", labelKey: "criteria.affinity" },
+    affinity: { section: "sitter", kind: "bonus", labelKey: "criteria.affinity_sitter" },
     gallery: { section: "gallery", kind: "bonus", labelKey: "criteria.sitter_gallery_one", hint: tp("hints.tab_gallery") },
     identity: { section: "identity", kind: "bonus", labelKey: "criteria.identity_verified", hint: tp("hints.settings_verif") },
   };
 
-  const scoredCriteria: ScoredCriterion[] = completionResult.items.map(item => {
+  const scoredCriteria: (ScoredCriterion & { group: ScoreGroupId })[] = completionResult.items.map(item => {
     const meta = SITTER_ITEM_META[item.key];
     return {
       section: meta.section,
       kind: meta.kind,
+      group: SITTER_SCORE_GROUP[item.key],
       label: tp(meta.labelKey),
       points: item.points,
       ok: item.ok,
@@ -350,8 +359,17 @@ const SitterProfile = () => {
     };
   });
 
-  const sitterEssentials = scoredCriteria.filter(c => c.kind === "essential");
-  const sitterBonuses = scoredCriteria.filter(c => c.kind === "bonus");
+  const sitterGroups: ScoreGroup[] = SCORE_GROUP_ORDER.map(id => ({
+    id,
+    title: tp(`score_groups.${id}`),
+    criteria: scoredCriteria.filter(c => c.group === id),
+  }));
+  // Réponses hors jauge que le calcul d'affinité pèse double (score.ts :
+  // présence et véhicule, poids 2). Elles se lisent dans le groupe « match ».
+  const sitterMatchSignals: MatchSignal[] = [
+    { label: tp("match_signals.presence"), effect: tp("match_signals.weighs_double"), ok: !!mergedData.work_during_sit },
+    { label: tp("match_signals.trips"), effect: tp("match_signals.weighs_double_car"), ok: mergedData.has_vehicle === true || mergedData.has_vehicle === false },
+  ];
   const liveScore = completionResult.score;
 
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => {
@@ -435,8 +453,9 @@ const SitterProfile = () => {
                   setSaved(false);
                   if (draftKey) localStorage.removeItem(draftKey);
                 }}
-                essentials={sitterEssentials}
-                bonuses={sitterBonuses}
+                groups={sitterGroups}
+                matchSignals={sitterMatchSignals}
+                footnote={tp("score_footnote_sitter")}
               />
             }
             trustSlot={
@@ -492,6 +511,21 @@ const SitterProfile = () => {
                     certifications={mergedData.certifications || []}
                     onChange={(partial) => handleChange(partial as any)}
                   />
+                  {/* Lot SC1 : les compétences pointues avec les animaux
+                      rejoignent le Savoir-faire (venues de Profil gardien). */}
+                  <section className="mt-8 pt-8 border-t border-border space-y-2" aria-labelledby="lbl-special-animal-skills" data-block="competences-pointues">
+                    <h3 id="lbl-special-animal-skills" className="font-heading text-lg font-semibold">Compétences pointues avec les animaux</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Traitements, animaux âgés, comportements particuliers : ce qui rassure le propriétaire d'un animal qui demande un soin précis.
+                    </p>
+                    <ChipSelect
+                      options={SPECIAL_ANIMAL_SKILLS_OPTIONS}
+                      selected={mergedData.special_animal_skills}
+                      onChange={v => handleChange({ special_animal_skills: v })}
+                      ariaLabelledBy="lbl-special-animal-skills"
+                    />
+                    <FieldRole roles={["match", "public"]} />
+                  </section>
                   <VolunteerAvailabilityBlock
                     userId={user?.id}
                     postalCode={mergedData.postal_code}

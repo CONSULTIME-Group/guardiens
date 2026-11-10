@@ -1465,8 +1465,8 @@
         "subtitle": "Accueil & guide"
       },
       "skills": {
-        "label": "Compétences",
-        "subtitle": "Ce que vous pouvez offrir"
+        "label": "Savoir-faire",
+        "subtitle": "Ce que vous proposez aux gens du coin"
       },
       "gallery": {
         "label": "Galerie",
@@ -1480,7 +1480,7 @@
       },
       "sitter": {
         "label": "Profil gardien",
-        "subtitle": "Votre expérience"
+        "subtitle": "Pendant la garde, votre rythme"
       },
       "experience": {
         "label": "Animaux",
@@ -1499,39 +1499,54 @@
         "subtitle": "Expériences hors Guardiens"
       },
       "skills": {
-        "label": "Compétences",
-        "subtitle": "Ce que vous savez faire"
+        "label": "Savoir-faire",
+        "subtitle": "Coups de main, animaux, formations"
       }
     },
     "criteria": {
-      "name_postal": "Prénom + code postal (France) ou ville (hors France)",
+      "name_postal": "Prénom et code postal (ou ville hors de France)",
       "avatar": "Photo de profil",
-      "pet": "Au moins 1 animal renseigné",
-      "housing_desc": "Logement décrit (≥ 50 caractères)",
-      "gallery_one": "Au moins 1 photo dans la Galerie",
-      "bio_50": "Bio ≥ 50 caractères",
-      "owner_skill": "Au moins 1 compétence proprio",
+      "pet": "Au moins un animal présenté",
+      "housing_desc": "Logement décrit (50 caractères ou plus)",
+      "gallery_one": "Galerie : une photo de votre maison",
+      "bio_50": "Présentation de 50 caractères ou plus",
+      "owner_skill": "Savoir-faire à partager : au moins un",
       "identity_verified": "Identité vérifiée",
-      "skill": "Au moins 1 compétence",
-      "lifestyle": "Au moins 1 mode de vie",
-      "radius": "Rayon géographique défini",
-      "sitter_gallery_one": "Au moins 1 photo de galerie",
-      "affinity": "Affinités renseignées (intérêts, langues, rythme, ambiance, gardien idéal)",
+      "skill": "Savoir-faire : au moins un",
+      "lifestyle": "Vos habitudes : au moins une case",
+      "sitter_gallery_one": "Galerie : 3 photos (4 points dès la première)",
+      "affinity": "Affinités : 3 sur 5 (intérêts, langues, rythme, ambiance du foyer, gardien idéal)",
       "affinity_identity": "Vos affinités (intérêts, langues, rythme de vie)",
-      "affinity_rules": "Vos affinités avec les gardiens (ambiance du foyer, gardien idéal)"
+      "affinity_rules": "Vos affinités avec les gardiens (ambiance du foyer, gardien idéal)",
+      "affinity_sitter": "Affinités : 3 sur 4 (intérêts, langues, rythme, animaux que vous gardez)"
     },
     "hints": {
       "tab_identity": "Onglet Identité.",
       "tab_animals": "Onglet Animaux.",
       "tab_gallery": "Onglet Galerie.",
-      "tab_skills": "Onglet Compétences.",
+      "tab_skills": "Onglet Savoir-faire.",
       "tab_sitter": "Onglet Profil gardien.",
       "tab_mobility": "Onglet Mobilité & Rayon.",
-      "settings_verif": "Paramètres → Vérification.",
+      "settings_verif": "Envoyez vos documents depuis Paramètres, rubrique Vérification.",
       "chars_50": "{{count}}/50 caractères.",
       "add_avatar_identity": "Ajoutez une photo dans Identité.",
       "affinity_count": "{{count}}/5 renseignés (3 minimum pour le score max)."
-    }
+    },
+    "score_groups": {
+      "trust": "Ce qui rassure sur votre fiche",
+      "match": "Ce qui affine vos matchs",
+      "help": "Ce qui sert l'entraide"
+    },
+    "match_signals": {
+      "presence": "Votre présence pendant la garde",
+      "trips": "Vos trajets sur place",
+      "presence_expected": "La présence que vous attendez pendant la garde",
+      "weighs_double": "Compte double dans vos affinités avec chaque annonce.",
+      "weighs_double_car": "Compte double sur les annonces où une voiture est nécessaire.",
+      "weighs_double_owner": "Compte double dans vos affinités avec chaque gardien."
+    },
+    "score_footnote_sitter": "Hors jauge, et utilisés pour vos matchs : présence pendant la garde, trajets sur place, compétences pointues avec les animaux.",
+    "score_footnote_owner": "Hors jauge, et repris dans vos annonces et l'accord de garde : présence attendue, règles de la maison, accueil."
   },
   "live_listings": {
     "aria": "Annonces de garde disponibles maintenant",

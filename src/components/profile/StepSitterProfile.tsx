@@ -6,7 +6,9 @@ import ChipSelect from "./ChipSelect";
 import HintBubble from "./HintBubble";
 import YesNoChips from "./YesNoChips";
 import type { SitterProfileData } from "@/hooks/useSitterProfile";
-import { SITTER_TYPE_OPTIONS } from "@/lib/profileMatchingOptions";
+import { LIFE_PACE_OPTIONS, SITTER_TYPE_OPTIONS, WORK_DURING_SIT_OPTIONS } from "@/lib/profileMatchingOptions";
+import TripsQuestion from "./TripsQuestion";
+import FieldRole from "./FieldRole";
 
 const SITTER_TYPES = SITTER_TYPE_OPTIONS;
 const AVAILABILITY_OPTIONS = ["100% en congés", "En télétravail", "Flexible"];
@@ -24,6 +26,29 @@ const StepSitterProfile = ({ data, onChange }: Props) => {
 
   return (
     <div className="space-y-6">
+
+      {/* Lot SC1 : les deux réponses qui comptent double dans le calcul
+          d'affinité (présence, trajets) ouvrent la section. */}
+      <section className="space-y-5 rounded-xl border border-border bg-muted/30 p-4" aria-labelledby="lbl-during-sit" data-block="pendant-la-garde">
+        <h3 id="lbl-during-sit" className="font-heading text-lg font-semibold">Pendant la garde</h3>
+        <div className="space-y-2">
+          <Label htmlFor="work-during-sit-trigger">Votre présence pendant la garde</Label>
+          <Select value={data.work_during_sit} onValueChange={v => onChange({ work_during_sit: v })}>
+            <SelectTrigger id="work-during-sit-trigger" className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+            <SelectContent>
+              {WORK_DURING_SIT_OPTIONS.map(o => (
+                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FieldRole roles={["match_double", "public"]} />
+        </div>
+        <TripsQuestion
+          value={{ has_license: data.has_license, has_vehicle: data.has_vehicle }}
+          onChange={cols => onChange(cols)}
+          roleLine="Compte double sur les annonces où une voiture est nécessaire. Visible sur votre fiche."
+        />
+      </section>
 
       <div className="space-y-2">
         <Label htmlFor="sitter-type-trigger">Type de gardien</Label>
@@ -73,16 +98,33 @@ const StepSitterProfile = ({ data, onChange }: Props) => {
         <Switch id="is-available-switch" checked={data.is_available} onCheckedChange={v => onChange({ is_available: v })} />
       </div>
 
-      <div className="space-y-2">
-        <Label id="lbl-lifestyle">Style de vie / habitudes</Label>
-        <ChipSelect
-          options={LIFESTYLE_OPTIONS}
-          selected={data.lifestyle}
-          onChange={v => onChange({ lifestyle: v })}
-          ariaLabelledBy="lbl-lifestyle"
-        />
-        <HintBubble>Ces informations aident les propriétaires à vous choisir. Plus c'est précis, mieux c'est.</HintBubble>
-      </div>
+      <section className="space-y-4" aria-labelledby="lbl-rhythm">
+        <h3 id="lbl-rhythm" className="font-heading text-lg font-semibold">Votre rythme</h3>
+        <div className="space-y-2">
+          <Label htmlFor="life-pace-trigger">Rythme de vie</Label>
+          <Select value={data.life_pace} onValueChange={v => onChange({ life_pace: v })}>
+            <SelectTrigger id="life-pace-trigger" className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
+            <SelectContent>
+              {LIFE_PACE_OPTIONS.map(o => (
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label} · {o.description}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FieldRole roles={["match", "public"]} />
+        </div>
+        <div className="space-y-2">
+          <Label id="lbl-lifestyle">Vos habitudes</Label>
+          <ChipSelect
+            options={LIFESTYLE_OPTIONS}
+            selected={data.lifestyle}
+            onChange={v => onChange({ lifestyle: v })}
+            ariaLabelledBy="lbl-lifestyle"
+          />
+          <HintBubble>Ces informations aident les propriétaires à vous choisir. Plus c'est précis, mieux c'est.</HintBubble>
+        </div>
+      </section>
     </div>
   );
 };

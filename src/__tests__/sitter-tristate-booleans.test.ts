@@ -45,9 +45,17 @@ describe("booléens gardien tri-état", () => {
     }
   });
 
+  it("permis et véhicule passent par la question des trajets, qui garde le silence possible", () => {
+    // Lot SC1 (10/11/2026) : une question à trois réponses (RadioChipGroup,
+    // second toucher = réponse effacée, src/lib/trips.ts), jamais un Switch.
+    const src = readFileSync("src/components/profile/StepSitterProfile.tsx", "utf8");
+    expect(src).toContain("<TripsQuestion");
+    expect(/(checked|onCheckedChange)=[^\n]*has_(vehicle|license)/.test(src)).toBe(false);
+    expect(readFileSync("src/components/profile/TripsQuestion.tsx", "utf8")).toContain("RadioChipGroup");
+  });
+
   it("chaque formulaire pose la question via YesNoChips, jamais via un Switch", () => {
     const steps: Record<string, readonly string[]> = {
-      "src/components/profile/StepMobility.tsx": ["has_license", "has_vehicle"],
       "src/components/profile/StepPreferences.tsx": ["strict_rules_ok", "prefer_visitors", "farm_animals_ok"],
       "src/components/profile/StepSitterProfile.tsx": ["smoker"],
       "src/components/profile/StepExperience.tsx": [

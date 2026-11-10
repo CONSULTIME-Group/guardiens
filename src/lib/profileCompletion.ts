@@ -101,14 +101,14 @@ export function computeSitterCompletion(d: ProfileCompletionInput): CompletionRe
   // Le rayon d'intervention ne rapporte plus de points depuis le barème du
   // 30/08/2026. Le champ reste utilisé par la recherche et l'entraide.
   const items: CompletionItem[] = [
-    { key: "location", label: "Nom et localisation", points: 15, ok: locationOk(d), href: "/profile?section=identite" },
+    { key: "location", label: "Prénom et code postal", points: 15, ok: locationOk(d), href: "/profile?section=identite" },
     { key: "avatar", label: "Photo de profil", points: 20, ok: !!d.avatar_url, href: "/profile?section=identite" },
-    { key: "bio", label: "Bio d'au moins 50 caractères", points: 15, ok: (d.bio?.length ?? 0) >= 50, href: "/profile?section=identite" },
-    { key: "competences", label: "Compétences", points: 15, ok: (d.competences?.length ?? 0) > 0, href: "/profile?section=competences" },
-    { key: "lifestyle", label: "Style de vie", points: 10, ok: (d.lifestyle?.length ?? 0) > 0, href: "/profile?section=profil" },
-    { key: "gallery", label: "Galerie de 3 photos ou plus", points: 10, ok: galleryOk, hint: galleryCount > 0 && !galleryOk ? `${galleryCount} photo${galleryCount > 1 ? "s" : ""} pour l'instant.` : undefined, href: "/profile?section=galerie" },
-    { key: "identity", label: "Vérification d'identité", points: 5, ok: !!d.identity_verified, hint: "Traitée par notre équipe après envoi de vos documents.", href: "/profile?section=identite" },
-    { key: "affinity", label: "Profil d'affinité (au moins 3 signaux)", points: 10, ok: affinityOk, hint: `Complété à ${affinityCount}/4.`, href: "/profile?section=profil" },
+    { key: "bio", label: "Présentation de 50 caractères ou plus", points: 15, ok: (d.bio?.length ?? 0) >= 50, href: "/profile?section=identite" },
+    { key: "competences", label: "Savoir-faire", points: 15, ok: (d.competences?.length ?? 0) > 0, href: "/profile?section=competences" },
+    { key: "lifestyle", label: "Vos habitudes", points: 10, ok: (d.lifestyle?.length ?? 0) > 0, href: "/profile?section=profil" },
+    { key: "gallery", label: "Galerie de 3 photos", points: 10, ok: galleryOk, hint: galleryCount > 0 && !galleryOk ? `${galleryCount} photo${galleryCount > 1 ? "s" : ""} pour l'instant.` : undefined, href: "/profile?section=galerie" },
+    { key: "identity", label: "Identité vérifiée", points: 5, ok: !!d.identity_verified, hint: "Traitée par notre équipe après envoi de vos documents.", href: "/profile?section=identite" },
+    { key: "affinity", label: "Affinités (3 sur 4)", points: 10, ok: affinityOk, hint: `Complété à ${affinityCount}/4.`, href: "/profile?section=profil" },
   ];
 
   const baseScore = items.reduce((s, i) => s + (i.ok ? i.points : 0), 0);
@@ -138,15 +138,15 @@ export function computeOwnerCompletion(d: ProfileCompletionInput): CompletionRes
   const affinityOk = affinityCount >= 3;
 
   const items: CompletionItem[] = [
-    { key: "location", label: "Nom et localisation", points: 10, ok: locationOk(d), href: "/owner-profile?section=identity" },
+    { key: "location", label: "Prénom et code postal", points: 10, ok: locationOk(d), href: "/owner-profile?section=identity" },
     { key: "avatar", label: "Photo de profil", points: 10, ok: !!d.avatar_url, href: "/owner-profile?section=identity" },
-    { key: "bio", label: "Bio d'au moins 50 caractères", points: 10, ok: (d.bio?.length ?? 0) >= 50, href: "/owner-profile?section=identity" },
-    { key: "owner_competences", label: "Compétences propriétaire", points: 10, ok: (d.owner_competences?.length ?? 0) > 0, href: "/owner-profile?section=skills" },
-    { key: "pet", label: "Au moins un animal renseigné", points: 20, ok: !!d.has_pet, href: "/owner-profile?section=animals" },
-    { key: "property_desc", label: "Description du logement (>= 50 caractères)", points: 10, ok: (d.property_description?.length ?? 0) >= 50, href: "/owner-profile?section=housing" },
-    { key: "gallery", label: "Une photo de galerie", points: 15, ok: !!d.has_owner_gallery, href: "/owner-profile?section=gallery" },
-    { key: "identity", label: "Vérification d'identité", points: 5, ok: !!d.identity_verified, hint: "Traitée par notre équipe après envoi de vos documents.", href: "/owner-profile?section=identity" },
-    { key: "affinity", label: "Profil d'affinité (au moins 3 signaux)", points: 10, ok: affinityOk, hint: `Complété à ${affinityCount}/5.`, href: "/owner-profile?section=rules" },
+    { key: "bio", label: "Présentation de 50 caractères ou plus", points: 10, ok: (d.bio?.length ?? 0) >= 50, href: "/owner-profile?section=identity" },
+    { key: "owner_competences", label: "Savoir-faire à partager", points: 10, ok: (d.owner_competences?.length ?? 0) > 0, href: "/owner-profile?section=skills" },
+    { key: "pet", label: "Au moins un animal présenté", points: 20, ok: !!d.has_pet, href: "/owner-profile?section=animals" },
+    { key: "property_desc", label: "Logement décrit (50 caractères ou plus)", points: 10, ok: (d.property_description?.length ?? 0) >= 50, href: "/owner-profile?section=housing" },
+    { key: "gallery", label: "Une photo de votre maison", points: 15, ok: !!d.has_owner_gallery, href: "/owner-profile?section=gallery" },
+    { key: "identity", label: "Identité vérifiée", points: 5, ok: !!d.identity_verified, hint: "Traitée par notre équipe après envoi de vos documents.", href: "/owner-profile?section=identity" },
+    { key: "affinity", label: "Affinités (3 sur 5)", points: 10, ok: affinityOk, hint: `Complété à ${affinityCount}/5.`, href: "/owner-profile?section=rules" },
   ];
 
   const baseScore = items.reduce((s, i) => s + (i.ok ? i.points : 0), 0);

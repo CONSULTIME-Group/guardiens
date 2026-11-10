@@ -18,9 +18,13 @@ describe("vehicle_type : champ mort retiré du produit (23/08/2026)", () => {
     const step = read("src/components/profile/StepMobility.tsx");
     expect(step).not.toContain("vehicle_type");
     expect(step).not.toContain("VEHICLE_OPTIONS");
-    // Les entrées réellement scorées restent demandées.
-    expect(step).toContain("has_license");
-    expect(step).toContain("has_vehicle");
+    // Les entrées réellement scorées restent demandées, depuis le lot SC1
+    // (10/11/2026) par la question unique des trajets du bloc « Pendant la
+    // garde » (StepSitterProfile, TripsQuestion).
+    const sitter = read("src/components/profile/StepSitterProfile.tsx");
+    expect(sitter).toContain("<TripsQuestion");
+    expect(sitter).toContain("has_license");
+    expect(sitter).toContain("has_vehicle");
   });
 
   it("absent de la fiche publique (ni sélectionné, ni affiché)", () => {

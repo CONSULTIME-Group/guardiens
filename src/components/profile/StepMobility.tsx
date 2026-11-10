@@ -2,7 +2,6 @@ import { Label } from "@/components/ui/label";
 import HintBubble from "./HintBubble";
 import ChipSelect from "./ChipSelect";
 import RadioChipGroup from "./RadioChipGroup";
-import YesNoChips from "./YesNoChips";
 import {
   MIN_STAY_DURATION_OPTIONS,
   FREQUENCY_OPTIONS,
@@ -35,19 +34,9 @@ const StepMobility = ({ data, onChange }: Props) => {
     .map(km => ({ value: String(km), label: `${km} km` }));
   return (
     <div className="space-y-6">
-      {/* Le choix du type de véhicule a été retiré le 23/08/2026 (champ mort :
-          3 profils sur 1 037, jamais scoré). La mobilité se déclare via
-          Permis de conduire + Véhicule personnel, qui sont scorés. */}
-      <div className="space-y-2">
-        <Label id="lbl-has-license">Permis de conduire</Label>
-        <YesNoChips ariaLabelledBy="lbl-has-license" value={data.has_license} onChange={v => onChange({ has_license: v })} />
-      </div>
-
-      <div className="space-y-2">
-        <Label id="lbl-has-vehicle">Véhicule personnel</Label>
-        <YesNoChips ariaLabelledBy="lbl-has-vehicle" value={data.has_vehicle} onChange={v => onChange({ has_vehicle: v })} />
-      </div>
-
+      {/* Permis et véhicule se déclarent en une question, « Pour vos trajets
+          sur place », dans le bloc « Pendant la garde » de la section Profil
+          gardien (lot SC1, 10/11/2026). */}
       <div className="space-y-3">
         <Label id="lbl-radius">Jusqu'à quelle distance acceptez-vous de vous déplacer pour une garde ?</Label>
         <RadioChipGroup
