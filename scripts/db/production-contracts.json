@@ -209,6 +209,16 @@
           "sql": "SELECT EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'purge-cron-run-details' AND active AND command LIKE '%interval ''7 days''%') AS ok"
         }
       ]
+    },
+    {
+      "migration": "0129_perf_annonces_stats.sql",
+      "description": "Statistiques des annonces admin en lecture d'index seule",
+      "checks": [
+        {
+          "name": "index_vues_annonces",
+          "sql": "SELECT EXISTS (SELECT 1 FROM pg_index i JOIN pg_class c ON c.oid = i.indexrelid WHERE c.relname = 'analytics_events_page_view_source_cover_idx' AND i.indisvalid) AS ok"
+        }
+      ]
     }
   ]
 }
