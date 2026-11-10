@@ -698,18 +698,19 @@ function AlmaDockInner() {
     recent: starterRecent,
   });
   const starters = entryContext?.readyReplies?.slice(0, 2) ?? defaultStarters;
-  const startersKey = starters.join("|");
-  useEffect(() => {
-    if (!expanded || !startersKey) return;
-    try {
-      const raw = localStorage.getItem(starterRecentKey);
-      const parsed = raw ? JSON.parse(raw) : [];
-      const prev = Array.isArray(parsed) ? parsed.filter((s: unknown): s is string => typeof s === "string") : [];
-      localStorage.setItem(starterRecentKey, JSON.stringify(rememberStarters(prev, startersKey.split("|"))));
-    } catch {
-      /* stockage indisponible : la graine du jour varie seule */
-    }
-  }, [expanded, startersKey, starterRecentKey]);
+  const onStartersShown = useCallback(
+    (shown: string[]) => {
+      try {
+        const raw = localStorage.getItem(starterRecentKey);
+        const parsed = raw ? JSON.parse(raw) : [];
+        const prev = Array.isArray(parsed) ? parsed.filter((s: unknown): s is string => typeof s === "string") : [];
+        localStorage.setItem(starterRecentKey, JSON.stringify(rememberStarters(prev, shown)));
+      } catch {
+        /* stockage indisponible : la graine du jour varie seule */
+      }
+    },
+    [starterRecentKey],
+  );
   const conversationAction = whisper?.primaryAction
     ? {
         label: whisper.primaryAction.label,
@@ -911,6 +912,7 @@ function AlmaDockInner() {
           showIntro={showIntro}
           onIntroSeen={onIntroSeen}
           onStarterClick={onStarterClick}
+          onStartersShown={onStartersShown}
           onSeen={onComposerSeen}
           onFocus={onComposerFocused}
           onTyped={onComposerTyped}

@@ -91,7 +91,16 @@ describe("réponses proposées variées", () => {
     expect(dock).toContain("resolveVariedStarters({");
     expect(dock).toContain("seed: Math.floor(Date.now() / 86_400_000)");
     expect(dock).toContain("if (expanded) return;");
-    expect(dock).toContain("rememberStarters(prev, startersKey.split(\"|\"))");
+    expect(dock).toContain("rememberStarters(prev, shown)");
+    expect(dock).toContain("onStartersShown={onStartersShown}");
+  });
+
+  it("seules les amorces à l'écran comptent (ALMA2c : page du jour affichée, amorces masquées)", () => {
+    const conv = readFileSync("src/components/ai/alma/AlmaConversation.tsx", "utf8");
+    expect(conv).toContain("const shownStarters = open && !(journal?.invitation && !state.open) && starters && starters.length > 0");
+    expect(conv).toContain("onStartersShown?.(shownStartersKey.split(\"|\"))");
+    const dock = readFileSync("src/components/ai/alma/AlmaDock.tsx", "utf8");
+    expect(dock).not.toContain("if (!expanded || !startersKey) return;");
   });
 });
 
