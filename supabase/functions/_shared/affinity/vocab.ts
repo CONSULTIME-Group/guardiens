@@ -468,7 +468,10 @@ export const SPECIAL_NEED_SIGNALS: { skill: string; keywords: string[] }[] = [
     skill: "Animal âgé ou en fin de vie",
     keywords: ["age", "senior", "fin de vie", "vieux", "arthrose"],
   },
-  { skill: "Chiot / chaton non propre", keywords: ["propre", "chiot", "chaton"] },
+  // Lot SC6 (10/11/2026) : « propre » seul s'allumait sur « litière propre »
+  // (2 animaux sur 2 en base) ; on garde les tournures qui parlent de propreté
+  // à apprendre.
+  { skill: "Chiot / chaton non propre", keywords: ["pas propre", "pas encore propre", "non propre", "proprete", "chiot", "chaton"] },
   {
     skill: "Chien réactif ou peureux",
     keywords: ["reactif", "reactive", "peureux", "craintif", "anxieux", "peur", "agressif", "stress"],

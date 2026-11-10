@@ -38,6 +38,7 @@ import { digestBypassesGuards } from '../_shared/digest-manual.ts'
 import { computeAffinityResultFull } from '../_shared/affinity/score.ts'
 import { APPLY_COMPLETION_THRESHOLD, completionMessageFor, remainingCompletionSteps } from '../_shared/completion-steps/index.ts'
 import { requireCronCaller } from '../_shared/require-cron-caller.ts'
+import { digestOpportunity } from '../_shared/missing-opportunities/index.ts'
 
 
 // La plateforme coupe actuellement ce traitement vers 150 secondes. Le
@@ -629,6 +630,26 @@ Deno.serve(async (req) => {
           }
         }
 
+        // 2g ter. Lot SC6 (10/11/2026) : au-dessus du seuil, l'email porte la
+        // question sans réponse qui concerne le plus d'annonces en ligne, comme
+        // le bloc « occasions manquées » du tableau de bord (même RPC, même tri,
+        // un seul sujet). Lecture en échec : aucune phrase, l'envoi continue.
+        let opportunitySentence: string | undefined
+        let opportunityHref: string | undefined
+        let opportunityCta: string | undefined
+        if (canApply) {
+          const { data: oppData, error: oppError } = await supabase.rpc('sitter_missing_opportunities', { _sitter_id: sitterId })
+          if (oppError) {
+            console.error('[digest] occasions manquées illisibles', { sitter_id: sitterId, error: oppError.message })
+          } else {
+            const opportunity = digestOpportunity(oppData as any)
+            if (opportunity) {
+              opportunitySentence = opportunity.sentence
+              opportunityHref = opportunity.href
+              opportunityCta = opportunity.ctaLabel
+            }
+          }
+        }
 
         // 2h. Envoi digest
         const idemBase = body.catchup
@@ -650,6 +671,9 @@ Deno.serve(async (req) => {
             completionSentence,
             completionSteps,
             completionHref,
+            opportunitySentence,
+            opportunityHref,
+            opportunityCta,
           },
         })
 

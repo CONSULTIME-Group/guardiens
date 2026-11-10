@@ -12,33 +12,33 @@ const stats = (items: MissingOpportunitiesStats["items"], total = 11): MissingOp
 });
 
 describe("missingOpportunitySentence", () => {
-  it("formule la doctrine : « 8 des 11 annonces en ligne demandent un gardien véhiculé, vous n'avez pas répondu. »", () => {
+  it("formule la doctrine en affirmatif (lot SC6) : « 8 des 11 annonces en ligne demandent un gardien véhiculé. Votre réponse compte double quand une voiture est nécessaire. »", () => {
     expect(missingOpportunitySentence("vehicle", 8, 11)).toBe(
-      "8 des 11 annonces en ligne demandent un gardien véhiculé, vous n'avez pas répondu.",
+      "8 des 11 annonces en ligne demandent un gardien véhiculé. Votre réponse compte double quand une voiture est nécessaire.",
     );
   });
 
-  it("formule le rayon : « 8 des 11 annonces en ligne se trouvent entre 30 et 100 km de chez vous, vous n'avez pas répondu. »", () => {
+  it("formule le rayon : « 8 des 11 annonces en ligne se trouvent entre 30 et 100 km de chez vous. Votre rayon dit jusqu'où vous allez. »", () => {
     expect(missingOpportunitySentence("radius", 8, 11)).toBe(
-      "8 des 11 annonces en ligne se trouvent entre 30 et 100 km de chez vous, vous n'avez pas répondu.",
+      "8 des 11 annonces en ligne se trouvent entre 30 et 100 km de chez vous. Votre rayon dit jusqu'où vous allez.",
     );
   });
 
   it("accorde le rayon au singulier", () => {
     expect(missingOpportunitySentence("radius", 1, 11)).toBe(
-      "Une des 11 annonces en ligne se trouve entre 30 et 100 km de chez vous, vous n'avez pas répondu.",
+      "Une des 11 annonces en ligne se trouve entre 30 et 100 km de chez vous. Votre rayon dit jusqu'où vous allez.",
     );
   });
 
   it("accorde au singulier quand une seule annonce est concernée", () => {
     expect(missingOpportunitySentence("species", 1, 11)).toBe(
-      "Une des 11 annonces en ligne précise les animaux confiés, vous n'avez pas répondu.",
+      "Une des 11 annonces en ligne précise les animaux confiés. Les animaux que vous acceptez comptent double dans l'affinité.",
     );
   });
 
   it("gère le cas d'une seule annonce en ligne", () => {
     expect(missingOpportunitySentence("vehicle", 1, 1)).toBe(
-      "L'annonce en ligne demande un gardien véhiculé, vous n'avez pas répondu.",
+      "L'annonce en ligne demande un gardien véhiculé. Votre réponse compte double quand une voiture est nécessaire.",
     );
   });
 
