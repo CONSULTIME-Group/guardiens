@@ -60,7 +60,7 @@ describe("lot ALMA3, avis Google", () => {
   });
 
   it("la migration pose le même lien, le même type et le même texte", () => {
-    const sql = read("drizzle/migrations/0131_alma3_invitation_avis_google.sql");
+    const sql = read("drizzle/migrations/0133_alma3_invitation_avis_google.sql");
     expect(sql).toContain(`'${GOOGLE_REVIEW_URL}'`);
     expect(sql).toContain(`'${GOOGLE_REVIEW_NOTIFICATION_TYPE}'`);
     expect(sql).toContain(`'${GOOGLE_REVIEW_NOTIFICATION.title}'`);
