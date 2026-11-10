@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Car } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
@@ -57,6 +57,7 @@ const TripsPrompt = ({ userId, carRequired, columns, context, sitId, onAnswered 
   const [saved, setSaved] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
   const seenRef = useRef(false);
+  const titleId = useId();
 
   useEffect(() => {
     if (!saved) setVisible(shouldAskTrips(carRequired, columns, userId));
@@ -102,13 +103,18 @@ const TripsPrompt = ({ userId, carRequired, columns, context, sitId, onAnswered 
   return (
     <section
       className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2"
-      aria-labelledby="trips-prompt-title"
+      aria-labelledby={context === "application" ? titleId : undefined}
+      aria-label={context === "application" ? undefined : "Pour vos trajets sur place"}
       data-testid="trips-prompt"
     >
-      <p id="trips-prompt-title" className="flex items-center gap-2 text-sm font-medium text-foreground">
-        <Car className="h-4 w-4 text-primary shrink-0" aria-hidden />
-        Cette maison demande une voiture sur place.
-      </p>
+      {/* Sur la page d'annonce, l'étiquette « Voiture nécessaire sur place »
+          dit déjà le besoin : la phrase ne vient qu'à la candidature. */}
+      {context === "application" && (
+        <p id={titleId} className="flex items-center gap-2 text-sm font-medium text-foreground">
+          <Car className="h-4 w-4 text-primary shrink-0" aria-hidden />
+          Cette maison demande une voiture sur place.
+        </p>
+      )}
       <TripsQuestion
         value={columns ?? {}}
         onChange={answer}
