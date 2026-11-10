@@ -108,3 +108,13 @@ describe("lot SC5 : une autre passion", () => {
     expect(score).not.toContain("other_passions");
   });
 });
+
+describe("lot SC5 : puces en sauge", () => {
+  it("choix multiple et choix unique : réponse choisie en sauge avec une coche", () => {
+    for (const f of ["src/components/profile/ChipSelect.tsx", "src/components/profile/RadioChipGroup.tsx"]) {
+      const src = readFileSync(f, "utf8");
+      expect(src, f).toContain("bg-pastel-sage text-pastel-sage-ink border-primary");
+      expect(src, f).toContain('<Check className="h-4 w-4 shrink-0" aria-hidden />');
+    }
+  });
+});
