@@ -192,6 +192,8 @@ function useIsRadixModalOpen(): boolean {
 // Source unique : `src/lib/alma/surfaces.ts`, partagée avec le diagnostic admin.
 export { surfaceFromPath } from "@/lib/alma/surfaces";
 import { surfaceFromPath } from "@/lib/alma/surfaces";
+import { factSeenPayload, firstDisplayOf, isHumorFact } from "@/lib/alma/factDisplay";
+import { markHumorShown } from "@/lib/alma/factSurfaces";
 
 const FREQUENCY_CHOICES: { value: AlmaFrequency; label: string }[] = [
   { value: "silent", label: "Silencieuse" },
@@ -356,10 +358,9 @@ function AlmaDockInner() {
           },
         });
       } else if (arrival === "peek") {
+        // Lot ALMA1 : alma_whisper_peek_shown part au rendu réel de l'aperçu
+        // (effet « affichage réel » plus bas), plus à la décision d'arrivée.
         setPeekId(currentWhisper.id);
-        trackEvent("alma_whisper_peek_shown" as any, {
-          metadata: { surface: surfaceFromPath(location.pathname, activeRole), whisper_type: currentWhisper.type },
-        });
       }
     } else {
       setPeekId(null);
@@ -478,6 +479,28 @@ function AlmaDockInner() {
     }
     return currentWhisper;
   })();
+
+  // Lot ALMA1 : comptage à l'affichage réel. Un aperçu rendu, ou le panneau
+  // ouvert sur le murmure, compte une fois par murmure ; un fait compté vu
+  // porte son mode d'affichage, une blague montrée ferme l'humour de la visite.
+  const peekVisible = !pillHiddenHere && !!peekId && !!whisper && !expanded && peekId === whisper.id;
+  const panelShowsWhisper = expanded && !!whisper && !entryContext?.instantLine;
+  const peekTrackedRef = useRef<Set<string>>(new Set());
+  const factSeenRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!whisper) return;
+    if (peekVisible && firstDisplayOf(peekTrackedRef.current, whisper.id)) {
+      trackEvent("alma_whisper_peek_shown" as any, {
+        metadata: { surface: surfaceFromPath(location.pathname, activeRole), whisper_type: whisper.type },
+      });
+    }
+    const display = peekVisible ? "peek" : panelShowsWhisper ? "panel" : null;
+    if (!display) return;
+    const payload = factSeenPayload(whisper, display);
+    if (!payload || !firstDisplayOf(factSeenRef.current, whisper.id)) return;
+    trackEvent("alma_cultural_fact_seen", { metadata: { ...payload } });
+    if (isHumorFact(payload)) markHumorShown();
+  }, [peekVisible, panelShowsWhisper, whisper?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAction = (onClick: () => void, actionId: string) => {
     if (!whisper) return;
@@ -873,7 +896,9 @@ function AlmaDockInner() {
         />
       )}
 
-      {!hideCollapsedPill && !compactDock && peekId && whisper && !expanded && (
+      {/* Lot ALMA1 : l'aperçu se rend aussi sur /search et /annonces (dock
+          compact), une ligne au-dessus de la pastille réduite. */}
+      {peekVisible && whisper && (
         <button
           type="button"
           data-testid="alma-whisper-peek"

@@ -219,6 +219,16 @@
           "sql": "SELECT EXISTS (SELECT 1 FROM pg_index i JOIN pg_class c ON c.oid = i.indexrelid WHERE c.relname = 'analytics_events_page_view_source_cover_idx' AND i.indisvalid) AS ok"
         }
       ]
+    },
+    {
+      "migration": "0130_alma1_tiroir_repare.sql",
+      "description": "Alma : faits lus avec les deux noms de surface, humour sur les écrans de découverte une fois par visite, rotation sur 30 jours, relance d'usage une fois sur trois",
+      "checks": [
+        {
+          "name": "tiroir_repare",
+          "sql": "SELECT position('alma1_tiroir_repare' IN pg_get_functiondef('public.get_alma_cultural_fact(uuid,text,jsonb,boolean,uuid[],boolean,text)'::regprocedure)) > 0 AS ok"
+        }
+      ]
     }
   ]
 }

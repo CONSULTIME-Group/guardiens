@@ -22,6 +22,7 @@ import {
   type CulturalFactPayload,
 } from "@/lib/alma/whisper-triggers";
 import { CULTURAL_FACT_LIMITS, type AlmaAudience } from "@/lib/alma/whisper-types";
+import { humorShownThisVisit } from "@/lib/alma/factSurfaces";
 
 
 const SESSION_QUEUED_KEY = "alma_cultural_fact_queued";
@@ -76,7 +77,12 @@ export function useAlmaCulturalFact({
             p_user_id: user.id,
             p_surface: surface,
             // Lot A1 : l'espace actif choisit le public du fait (target_role).
-            p_context: { ...(context ?? {}), active_role: activeRole === "owner" ? "owner" : "sitter" } as any,
+            p_context: {
+              ...(context ?? {}),
+              active_role: activeRole === "owner" ? "owner" : "sitter",
+              // Lot ALMA1 : une blague au plus par visite.
+              humor_seen_this_visit: humorShownThisVisit(),
+            } as any,
             p_frequency: frequency,
           },
         );
@@ -123,17 +129,11 @@ export function useAlmaCulturalFact({
               });
 
 
+        // Lot ALMA1 : alma_cultural_fact_seen part quand le fait est
+        // réellement à l'écran (AlmaDock, factSeenPayload), plus à la mise
+        // en file : 475 faits « vus » sur /search en 30 jours n'y étaient
+        // jamais affichés.
         queueWhisper(whisper);
-
-        try {
-          void trackEvent("alma_cultural_fact_seen", {
-            metadata: {
-              fact_id: fact.id,
-              fact_type: fact.type,
-              surface,
-            },
-          });
-        } catch { /* silent */ }
 
         try {
           sessionStorage.setItem(`${SESSION_QUEUED_KEY}:${surface}`, "1");
