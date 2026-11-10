@@ -110,6 +110,8 @@ const SitDetail = () => {
   const [sit, setSit] = useState<SitData | null>(null);
   const [owner, setOwner] = useState<any>(null);
   const [property, setProperty] = useState<any>(null);
+  /** Lot SC4 : la question voiture vient d'être répondue sur cette page. */
+  const [carAnsweredHere, setCarAnsweredHere] = useState(false);
   const [pets, setPets] = useState<any[]>([]);
   const [ownerProfile, setOwnerProfile] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
@@ -433,13 +435,15 @@ const SitDetail = () => {
         </div>
       )}
 
-      {isOwner && property?.id && shouldAskOwnerCar(property, sit.status) && (
+      {isOwner && property?.id && (carAnsweredHere || shouldAskOwnerCar(property, sit.status)) && (
         <OwnerCarQuestion
           propertyId={property.id}
           sitId={sit.id}
-          onAnswered={(car_required, car_required_answered_at) =>
-            setProperty((p: any) => (p ? { ...p, car_required, car_required_answered_at } : p))
-          }
+          onAnswered={(car_required, car_required_answered_at) => {
+            // La carte reste affichée pour dire « Merci, c'est noté ».
+            setCarAnsweredHere(true);
+            setProperty((p: any) => (p ? { ...p, car_required, car_required_answered_at } : p));
+          }}
         />
       )}
 

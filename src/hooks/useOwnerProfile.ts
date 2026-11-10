@@ -387,6 +387,13 @@ export function useOwnerProfile() {
           invalidateMyProperties(user.id!);
           if (error) throw error;
           if (newProp) setPropertyId(newProp.id);
+          // Lot SC4 : heure de la réponse « voiture nécessaire », comme à la mise à jour.
+          if (newProp && "car_required_answered_at" in stepData) {
+            await supabase
+              .from("properties")
+              .update({ car_required_answered_at: (stepData as any).car_required_answered_at } as any)
+              .eq("id", newProp.id);
+          }
         }
       }
 

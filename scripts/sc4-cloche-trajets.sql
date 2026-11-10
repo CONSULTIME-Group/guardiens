@@ -23,7 +23,7 @@ INSERT INTO public.notifications (user_id, type, title, body, link, actor_name)
 SELECT p.id,
        'info',
        'Comment vous déplacez-vous pendant une garde ?',
-       'Une réponse en un toucher, et les annonces qui demandent une voiture savent ce que vous proposez.',
+       'Votre réponse rejoint votre profil, et les annonces qui demandent une voiture savent ce que vous proposez.',
        '/profile?section=profil&focus=trips',
        'Jérémie et Elisa'
 FROM public.profiles p

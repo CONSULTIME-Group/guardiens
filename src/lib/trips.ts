@@ -36,8 +36,8 @@ export function tripsColumns(answer: TripsAnswer | null): TripsColumns {
  * Réponse lue depuis les colonnes existantes. Les combinaisons anciennes se
  * rattachent à la réponse la plus proche :
  *  - véhicule oui, permis inconnu (accueil /arrivee) : « J'ai mon véhicule » ;
- *  - véhicule non, permis inconnu (accueil /arrivee) : aucune présélection,
- *    la personne a dit « pas de véhicule » sans dire si elle conduit ;
+ *  - véhicule non, permis inconnu (ancien « Non » de /arrivee) : « Je me
+ *    déplace autrement », comme la phrase lue par le propriétaire ;
  *  - permis oui, véhicule inconnu : aucune présélection.
  */
 export function tripsAnswerOf(c: Partial<TripsColumns>): TripsAnswer | null {
@@ -45,7 +45,7 @@ export function tripsAnswerOf(c: Partial<TripsColumns>): TripsAnswer | null {
   const vehicle = c.has_vehicle ?? null;
   if (vehicle === true) return "own_vehicle";
   if (vehicle === false && license === true) return "license_only";
-  if (vehicle === false && license === false) return "other_means";
+  if (vehicle === false) return "other_means";
   return null;
 }
 

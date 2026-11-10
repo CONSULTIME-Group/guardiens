@@ -15,7 +15,7 @@ import RadioChipGroup from "@/components/profile/RadioChipGroup";
  */
 export const CAR_OPTIONS = [
   { value: "yes", label: "Une voiture est nécessaire sur place" },
-  { value: "no", label: "Tout se fait sans voiture" },
+  { value: "no", label: "Tout est accessible à pied, à vélo ou en transports" },
 ];
 
 /**
@@ -47,12 +47,13 @@ const OwnerCarQuestion = ({ propertyId, sitId, onAnswered }: Props) => {
     setFailed(false);
     const carRequired = v === "yes";
     const answeredAt = new Date().toISOString();
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("properties")
       .update({ car_required: carRequired, car_required_answered_at: answeredAt } as any)
-      .eq("id", propertyId);
+      .eq("id", propertyId)
+      .select("id");
     // La colonne existe dès que la question s'affiche (shouldAskOwnerCar).
-    if (error) { setFailed(true); return; }
+    if (error || !data || data.length === 0) { setFailed(true); return; }
     void trackEvent("owner_car_question_answered", { metadata: { sit_id: sitId, car_required: carRequired } });
     setDone(true);
     onAnswered?.(carRequired, answeredAt);

@@ -81,11 +81,13 @@ const TripsPrompt = ({ userId, carRequired, columns, context, sitId, onAnswered 
   const answer = async (cols: TripsColumns) => {
     if (cols.has_vehicle === null) return;
     setFailed(false);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("sitter_profiles")
       .update({ has_license: cols.has_license, has_vehicle: cols.has_vehicle } as any)
-      .eq("user_id", userId);
-    if (error) {
+      .eq("user_id", userId)
+      .select("user_id");
+    // Aucune ligne écrite (pas de fiche gardien) : échec dit, jamais un « merci ».
+    if (error || !data || data.length === 0) {
       setFailed(true);
       return;
     }
@@ -136,10 +138,12 @@ export default TripsPrompt;
  * gardien n'a jamais répondu. Lecture du profil seulement quand la voiture
  * est nécessaire (cache partagé de src/lib/myProfile.ts).
  */
-export const SitCarNeed = ({ carRequired, userId, sitId }: { carRequired: boolean | null | undefined; userId: string | null | undefined; sitId: string }) => {
+export const SitCarNeed = ({ carRequired, userId, userRole, sitId }: { carRequired: boolean | null | undefined; userId: string | null | undefined; userRole?: string | null; sitId: string }) => {
+  // La question ne vise que les gardiens (rôle sitter ou both).
+  const asksTrips = userRole === "sitter" || userRole === "both";
   const [cols, setCols] = useState<TripsColumns | null>(null);
   useEffect(() => {
-    if (carRequired !== true || !userId) return;
+    if (carRequired !== true || !userId || !asksTrips) return;
     let cancelled = false;
     fetchMySitterProfile(userId)
       .then(({ data }) => {
@@ -152,7 +156,7 @@ export const SitCarNeed = ({ carRequired, userId, sitId }: { carRequired: boolea
       })
       .catch(() => { /* lecture en échec : l'étiquette reste, la question attend */ });
     return () => { cancelled = true; };
-  }, [carRequired, userId]);
+  }, [carRequired, userId, asksTrips]);
 
   if (carRequired !== true) return null;
   return (
@@ -161,7 +165,7 @@ export const SitCarNeed = ({ carRequired, userId, sitId }: { carRequired: boolea
         <Car className="h-4 w-4" aria-hidden />
         Voiture nécessaire sur place
       </span>
-      {userId && cols && (
+      {userId && asksTrips && cols && (
         <TripsPrompt userId={userId} carRequired columns={cols} context="sit_view" sitId={sitId} onAnswered={setCols} />
       )}
     </div>

@@ -1756,7 +1756,7 @@ export default function PublicSitterProfile() {
           { label: "Langues", value: listLabel(sitterLanguages, ["Autre"]) },
           { label: "Centres d'intérêt", value: listLabel(sitterInterests) },
           { label: "À la maison", value: homeFactLabel(sitterProfile?.own_animals, sitterProfile?.life_pace) },
-          { label: "Gardes réalisées", value: guardExperienceLabel(sitterProfile?.guard_experience) },
+          { label: "Expérience de garde", value: guardExperienceLabel(sitterProfile?.guard_experience) },
           { label: "Atouts", value: assetsLabel(declaredCertifications, sitterProfile?.has_license, sitterProfile?.has_vehicle) },
           // L5 : faits de l'ancien bloc pratique, jamais présentés ailleurs.
           { label: "Accompagnants", value: companionsLabel(sitterProfile) },
