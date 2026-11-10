@@ -21385,9 +21385,10 @@ export type Database = {
         Returns: boolean
       }
       sitter_health_visible: { Args: { _sitter: string }; Returns: boolean }
-      sitter_missing_opportunities:
-        | { Args: never; Returns: Json }
-        | { Args: { _sitter_id?: string }; Returns: Json }
+      sitter_missing_opportunities: {
+        Args: { _sitter_id?: string }
+        Returns: Json
+      }
       sitters_awaiting_gallery_photo: {
         Args: { p_limit?: number }
         Returns: {
