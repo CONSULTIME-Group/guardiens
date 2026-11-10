@@ -20,11 +20,10 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, EyeOff, Trash2, Search, Sparkles, Share2, Link2, Mail, BarChart3, MessageSquare, Download, ChevronLeft, ChevronRight, Send, Loader2, Image as ImageIcon, MoreHorizontal, Info, ExternalLink } from "lucide-react";
+import { Eye, EyeOff, Trash2, Search, Sparkles, Share2, Link2, Mail, BarChart3, MessageSquare, Download, ChevronLeft, ChevronRight, Send, Loader2, Image as ImageIcon, MoreHorizontal, ExternalLink, UserRound } from "lucide-react";
 import { listingLiveUrl } from "@/lib/admin/listingRowLinks";
 import { buildCsv, downloadCsv } from "@/lib/admin/csv";
 import { ErrorState } from "@/components/admin/ui";
-import DossierDetailSheet from "@/components/admin/DossierDetailSheet";
 import { loadDraftFollowups, draftReminderLabel, type DraftFollowup } from "@/lib/admin/draftFollowup";
 import { draftReadiness, loadOwnerDraftContexts, parisToday, type OwnerDraftContext } from "@/lib/admin/draftReadiness";
 import { LISTING_FILTERS, LISTING_FILTER_LABELS, listingCity, listingFilterScope, sitDistribution, sitSituation, SIT_BUCKETS_PRIMARY, SIT_BUCKETS_SECONDARY, type ListingFilter, type SitBucket } from "@/lib/admin/listingSituation";
@@ -51,6 +50,8 @@ import { resolveSitStatusBadge, type SitStatusBadgeVariant } from "@/lib/sitStat
 import { unpublishReasonAdminLabel } from "@/lib/unpublishReason";
 import { calendarDate } from "@/lib/calendarDate";
 import { isListingToStaff } from "@/lib/admin/listingToStaff";
+import { useAuth } from "@/contexts/AuthContext";
+import { isNewListing, readNewsVisitSince } from "@/hooks/useAdminNews";
 
 
 type BadgeVariant = SitStatusBadgeVariant;
@@ -115,7 +116,9 @@ const AdminListings = () => {
   const [kpisError, setKpisError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [statsNonce, setStatsNonce] = useState(0);
-  const [detailListing, setDetailListing] = useState<any | null>(null);
+  // Lot ADM19 : date depuis laquelle une annonce compte comme « Nouvelle » (fin de la visite précédente), lue avant que l'ouverture de la page ne pose le repère.
+  const { user: adminUser } = useAuth();
+  const [newSince] = useState<string | null>(() => (adminUser?.id ? readNewsVisitSince("listings", adminUser.id) : null));
 
   // Pagination client-side
   const PAGE_SIZE = 25;
@@ -768,10 +771,10 @@ const AdminListings = () => {
       </div>
 
       <div className="rounded-lg border bg-card overflow-x-auto">
-        <Table className="table-fixed min-w-[900px]">
+        <Table className="table-fixed min-w-[980px]">
           <colgroup>
-            <col className="w-[30%]" /><col className="w-[17%]" /><col className="w-[19%]" />
-            <col className="w-[9%]" /><col className="w-[6%]" /><col className="w-[260px]" />
+            <col className="w-[26%]" /><col className="w-[15%]" /><col className="w-[17%]" />
+            <col className="w-[8%]" /><col className="w-[8%]" /><col className="w-[6%]" /><col className="w-[300px]" />
           </colgroup>
           <TableHeader>
             <TableRow>
@@ -779,21 +782,22 @@ const AdminListings = () => {
               <TableHead>Lieu et dates</TableHead>
               <TableHead>Situation</TableHead>
               <TableHead className="text-right">Candidatures</TableHead>
+              <TableHead className="text-right" title="Messages échangés dans les conversations liées à l'annonce">Messages</TableHead>
               <TableHead className="text-right" title="Vues totales (public + membres)">Vues</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : loadError ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-destructive">Indisponible</TableCell></TableRow>
+              <TableRow><TableCell colSpan={7} className="text-center py-8 text-destructive">Indisponible</TableCell></TableRow>
             ) : countUnknown ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{statsError ? "Indisponible, candidatures non lues" : "Chargement des candidatures…"}</TableCell></TableRow>
+              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{statsError ? "Indisponible, candidatures non lues" : "Chargement des candidatures…"}</TableCell></TableRow>
             ) : filterStatus === "ready" && !focusSitId && !focusOwnerId && (draftCtxError || !draftCtx) ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{draftCtxError ? "Indisponible, contexte du brouillon non lu" : "Lecture des informations du brouillon…"}</TableCell></TableRow>
+              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{draftCtxError ? "Indisponible, contexte du brouillon non lu" : "Lecture des informations du brouillon…"}</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
+              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
             ) : paginated.map((listing) => {
               const sit = sitSituation(listing);
               const st = stats[listing.id];
@@ -822,13 +826,6 @@ const AdminListings = () => {
                       <span className="truncate">{ownerName || "Propriétaire non renseigné"}</span>
                     </div>
                     <OwnerAbsenceBadge lastSeenAt={listing.owner?.last_seen_at} className="mt-1" />
-                    {st && !statsError ? (
-                      <Button variant="link" onClick={() => openDrill(listing, "conversations")} className="h-auto justify-start p-0 mt-1 text-xs">
-                        {st.messages} message{st.messages !== 1 ? "s" : ""}
-                      </Button>
-                    ) : (
-                      <p className="mt-1 text-xs text-muted-foreground">{statsError ? "Messages indisponibles" : "Lecture des messages en cours…"}</p>
-                    )}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground min-w-0">
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -843,6 +840,14 @@ const AdminListings = () => {
                     {" au "}
                     {listing.end_date ? format(calendarDate(listing.end_date), "d MMM yy", { locale: fr }) : "·"}
                     </div>
+                    {listing.published_at && (
+                      <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px]">
+                        <span>publiée {formatDistanceToNow(new Date(listing.published_at), { addSuffix: true, locale: fr })}</span>
+                        {isNewListing(listing, newSince) && (
+                          <Badge className="px-1.5 py-0 text-[10px]" data-testid="row-new" title="Publiée depuis votre dernière visite">Nouvelle</Badge>
+                        )}
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant={sit.tone}>{sit.label}</Badge>
@@ -871,6 +876,24 @@ const AdminListings = () => {
                       <span className="text-muted-foreground">{st ? st.applications : statsError ? "Indisponible" : "·"}</span>
                     )}
                   </TableCell>
+                  <TableCell className="text-right text-sm tabular-nums" data-testid="row-messages">
+                    {st && !statsError ? (
+                      <>
+                        {st.messages > 0 ? (
+                          <button onClick={() => openDrill(listing, "conversations")} className="font-medium text-foreground hover:text-primary hover:underline" title="Voir les conversations">
+                            {st.messages}
+                          </button>
+                        ) : (
+                          <span className="text-muted-foreground">0</span>
+                        )}
+                        {st.conversations > 0 && (
+                          <p className="text-[11px] text-muted-foreground">{st.conversations} conversation{st.conversations > 1 ? "s" : ""}</p>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">{statsError ? "Indisponible" : "·"}</span>
+                    )}
+                  </TableCell>
                   <TableCell className="text-right text-sm tabular-nums">{st?.views ?? "·"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end items-center gap-1 whitespace-nowrap">
@@ -879,14 +902,11 @@ const AdminListings = () => {
                           <Send className="h-4 w-4 mr-1" /> Publier à sa place
                         </Button>
                       )}
-                      {listing.status === "published" && (filterStatus === "to_staff" || focusSitId) && (
+                      {listing.status === "published" && (filterStatus === "to_staff" || focusSitId || (st && !statsError && isListingToStaff({ ...listing, activeApplications: st.applications }))) && (
                         <Button size="sm" onClick={() => setProximityListing(listing)} data-testid="row-broadcast">
                           <Send className="h-4 w-4 mr-1" /> Diffuser
                         </Button>
                       )}
-                      <Button variant="outline" size="sm" onClick={() => setDetailListing(listing)}>
-                        <Info className="h-4 w-4 mr-1" /> Détails
-                      </Button>
                       <Button variant="ghost" size="sm" disabled={!listing.user_id} onClick={contact}>
                         <Mail className="h-4 w-4 mr-1" /> Contacter
                       </Button>
@@ -912,6 +932,9 @@ const AdminListings = () => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-60">
                           <DropdownMenuItem onSelect={() => navigate(`/sits/${listing.id}`)}><Eye className="h-4 w-4 mr-2" /> Vue complète (admin)</DropdownMenuItem>
+                          {listing.user_id && (
+                            <DropdownMenuItem onSelect={() => navigate(`/admin/users?user=${listing.user_id}`)}><UserRound className="h-4 w-4 mr-2" /> Fiche du membre</DropdownMenuItem>
+                          )}
                           <DropdownMenuItem onSelect={() => openTraffic(listing)}><BarChart3 className="h-4 w-4 mr-2" /> Sources de trafic</DropdownMenuItem>
                           {st && st.messages > 0 && (
                             <DropdownMenuItem onSelect={() => openDrill(listing, "conversations")}><MessageSquare className="h-4 w-4 mr-2" /> Conversations ({st.messages} messages)</DropdownMenuItem>
@@ -949,40 +972,6 @@ const AdminListings = () => {
           </TableBody>
         </Table>
       </div>
-
-      <DossierDetailSheet
-        kind="sit"
-        item={detailListing}
-        open={!!detailListing}
-        onOpenChange={(o) => { if (!o) setDetailListing(null); }}
-        extra={detailListing ? (
-          <p className="text-sm text-muted-foreground">
-            {stats[detailListing.id]
-              ? `${stats[detailListing.id].views} vues, ${stats[detailListing.id].uniqueViews} membres connectés distincts, ${stats[detailListing.id].messages} messages dans ${stats[detailListing.id].conversations} conversations.`
-              : "Statistiques de trafic indisponibles."}
-          </p>
-        ) : null}
-        footer={detailListing ? (
-          <div className="flex flex-wrap gap-2">
-            {detailListing.status === "published" && (
-              <Button size="sm" onClick={() => { const l = detailListing; setDetailListing(null); setProximityListing(l); }}>
-                <Send className="h-4 w-4 mr-1" /> Diffuser
-              </Button>
-            )}
-            {detailListing.user_id && (
-              <Button size="sm" variant="outline" onClick={() => {
-                const l = detailListing;
-                setDetailListing(null);
-                setWriteTarget({ userId: l.user_id, userName: [l.owner?.first_name, l.owner?.last_name].filter(Boolean).join(" ") || "ce membre", sitId: l.id });
-              }}>
-                <Mail className="h-4 w-4 mr-1" /> Contacter
-              </Button>
-            )}
-            <Button size="sm" variant="outline" onClick={() => navigate(`/sits/${detailListing.id}`)}>Voir l'annonce publique</Button>
-            {detailListing.user_id && <Button size="sm" variant="ghost" onClick={() => navigate(`/admin/users?user=${detailListing.user_id}`)}>Fiche du membre</Button>}
-          </div>
-        ) : null}
-      />
 
       {/* Pagination */}
       {filtered.length > 0 && (

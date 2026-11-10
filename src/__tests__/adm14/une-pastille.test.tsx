@@ -223,13 +223,15 @@ describe("nouveautés : compteur gris sur Annonces et Entraide", () => {
     expect(missions.ops).toContainEqual(["is", ["moderation_hidden_at", null]]);
   });
 
-  it("le bouton du menu mobile ne compte que les choses à faire", async () => {
+  it("le bouton du menu mobile : la pastille rouge ne compte que les choses à faire, les nouveautés ont leur compteur gris à part (lot ADM19)", async () => {
     newsCounts.sits = 4;
     rpcSpy.mockResolvedValue({ data: RAW, error: null });
     wrap(<AdminLayout />, "/admin/traffic");
     const btn = await screen.findByTestId("admin-mobile-menu-button");
     await waitFor(() => expect(within(btn).getByTestId("admin-badge").textContent).toBe(String(LINES)));
-    expect(within(btn).queryByTestId("admin-news")).toBeNull();
+    // Lot ADM19 : la pastille rouge reste égale à la liste de travail, le gris vient en plus.
+    await waitFor(() => expect(within(btn).getByTestId("admin-news").textContent).toBe("4"));
+    expect(within(btn).getAllByTestId("admin-badge")).toHaveLength(1);
   });
 
   it("ouvrir Annonces efface son compteur", async () => {

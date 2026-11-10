@@ -81,9 +81,9 @@ describe("A10 fin, vues d'annonce identiques tableau et fiche", () => {
       expect(paths).toContain(p);
     }
   });
-  it("« Membres uniques » exposé dans Détails et Trafic avec sa définition", () => {
+  it("« Membres uniques » exposé dans Trafic avec sa définition (la fiche Détails a été retirée au lot ADM19)", () => {
     const s = read("src/pages/admin/AdminListings.tsx");
-    expect(s).toContain("${stats[detailListing.id].uniqueViews} membres connectés distincts");
+    expect(s).not.toContain("detailListing");
     expect(s).toContain("{stats[trafficListing.id].uniqueViews}</div>");
     expect(s).toMatch(/title="Nombre de membres connectés distincts[^"]*">Membres uniques</);
     expect(s).toContain("Les visiteurs non connectés ne sont pas comptés");

@@ -2,7 +2,7 @@ import { Fragment, useEffect, useState } from "react";
 import { Outlet, Navigate, NavLink, useNavigate, useLocation } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
 import { AdminSidebar, adminNavGroups_export, isToolPath, navItemBadge, navItemNews } from "./AdminSidebar";
-import { markAdminNewsSeen, useAdminNews } from "@/hooks/useAdminNews";
+import { markAdminNewsSeen, newsText, newsTotalLabel, useAdminNews } from "@/hooks/useAdminNews";
 import { useWorkList, workListBadgeLabel, workListBadgeText } from "@/hooks/useWorkList";
 import { AdminBadgePill, AdminNewsPill } from "./AdminBadgePill";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -56,6 +56,9 @@ export const AdminLayout = () => {
     if (isAdmin) markAdminNewsSeen(location.pathname, user?.id);
   }, [location.pathname, isAdmin, user?.id]);
   const mobileToolsShown = mobileToolsOpen || isToolPath(location.pathname);
+  // Lot ADM19 : les nouveautés se voient aussi sur le bouton du menu mobile, sans attendre l'ouverture du tiroir.
+  const newsAll = newsText((news.listings ?? 0) + (news.entraide ?? 0));
+  const newsAllLabel = newsTotalLabel(news);
 
   if (authLoading || adminLoading) {
     return (
@@ -90,7 +93,11 @@ export const AdminLayout = () => {
         </div>
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label={mobileMenuOpen ? "Fermer le menu" : totalBadges ? `Ouvrir le menu, ${workListBadgeLabel(totalBadges)}` : "Ouvrir le menu"}
+          aria-label={mobileMenuOpen ? "Fermer le menu" : [
+            "Ouvrir le menu",
+            totalBadges ? workListBadgeLabel(totalBadges) : null,
+            newsAllLabel,
+          ].filter(Boolean).join(", ")}
           aria-expanded={mobileMenuOpen}
           className="relative p-1.5 rounded-lg hover:bg-accent transition-colors"
           data-testid="admin-mobile-menu-button"
@@ -99,6 +106,10 @@ export const AdminLayout = () => {
           {/* Lot ADM4 : total des pastilles sur le bouton du menu mobile. */}
           {!mobileMenuOpen && totalBadges && (
             <AdminBadgePill compact text={totalBadges} label={workListBadgeLabel(totalBadges)} className="absolute -top-1 -right-1" />
+          )}
+          {/* Lot ADM19 : compteur gris des nouveautés, en bas à droite, séparé de la pastille rouge. */}
+          {!mobileMenuOpen && newsAll && newsAllLabel && (
+            <AdminNewsPill compact text={newsAll} label={newsAllLabel} className="absolute -bottom-1 -right-1" />
           )}
         </button>
       </div>
