@@ -196,6 +196,8 @@ export { surfaceFromPath } from "@/lib/alma/surfaces";
 import { surfaceFromPath } from "@/lib/alma/surfaces";
 import { factSeenPayload, firstDisplayOf, isHumorFact } from "@/lib/alma/factDisplay";
 import { markHumorShown } from "@/lib/alma/factSurfaces";
+import { whisperPanelMessage } from "@/lib/alma/whisper-triggers";
+import { markGoogleReviewInviteRead } from "@/lib/alma/googleReview";
 
 const FREQUENCY_CHOICES: { value: AlmaFrequency; label: string }[] = [
   { value: "silent", label: "Silencieuse" },
@@ -587,7 +589,7 @@ function AlmaDockInner() {
   // Une seule ligne de texte dans le panneau : le whisper prime, puis la
   // proposition contextuelle, puis l'humeur du jour.
   const panelLine = resolvePanelLine({
-    whisperMessage: entryContext?.instantLine ?? whisper?.message ?? null,
+    whisperMessage: entryContext?.instantLine ?? whisperPanelMessage(whisper),
     propositionMessage: proposition?.message ?? null,
     moodLine: isSilent ? null : almaMood.line,
   });
@@ -740,6 +742,9 @@ function AlmaDockInner() {
   }, [introKey]);
 
   // Page du jour d'Alma (lot Y) : entrées déterministes lues à l'ouverture.
+  // Lot ALMA3 : un murmure qui porte son message de panneau (lien dans un mot)
+  // passe avant la page du jour, sinon le message ne s'afficherait pas.
+  const whisperOwnsPanel = !!whisper && whisperPanelMessage(whisper) !== whisper.message;
   const { page: journal, markActed } = useAlmaJournal(
     userId ?? undefined,
     activeRole === "owner" ? "owner" : "sitter",
@@ -913,11 +918,17 @@ function AlmaDockInner() {
           onIntroSeen={onIntroSeen}
           onStarterClick={onStarterClick}
           onStartersShown={onStartersShown}
+          onExternalLinkFollowed={() => {
+            if (whisper?.type !== "community_google_review") return;
+            handleAction(() => {
+              if (userId) void markGoogleReviewInviteRead(userId);
+            }, "google_review");
+          }}
           onSeen={onComposerSeen}
           onFocus={onComposerFocused}
           onTyped={onComposerTyped}
           action={conversationAction}
-          journal={journal}
+          journal={whisperOwnsPanel ? null : journal}
           onJournalAction={onJournalAction}
           onJournalReply={onJournalReply}
         />

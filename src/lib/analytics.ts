@@ -377,6 +377,7 @@ export type EventType =
   | "alma_cowrite_shown"                        // Lot ALMA2 : aide « Écrire avec Alma » à l'écran (moment)
   | "alma_cowrite_used"                         // Lot ALMA2 : brouillon d'Alma inséré (moment)
   | "alma_cowrite_sent"                         // Lot ALMA2 : texte écrit avec Alma envoyé ou publié (moment, edited)
+  | "google_review_link_clicked"                // Lot ALMA3 : lien vers le formulaire d'avis Google (source)
   | "alma_cultural_fact_action_clicked"         // Clic action "En savoir plus" (fact_id, source_url)
   | "alma_cultural_fact_dismissed"              // Fait culturel fermé (fact_id, reason)
   | "admin_alma_cultural_facts_tab_seen"        // Onglet admin cultural facts affiché

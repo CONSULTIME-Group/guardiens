@@ -19,6 +19,7 @@ import {
 } from "@/lib/alma/conversation-store";
 import { ALMA_HUMAN_CONTACT_LABEL, AlmaHumanContactForm } from "./AlmaHumanContact";
 import { trackEvent } from "@/lib/analytics";
+import { isAllowedExternalLink, openGoogleReview } from "@/lib/alma/googleReview";
 import { ALMA_PAGE_LABELS, almaPageKindLabel, almaPageLabel } from "../../../../supabase/functions/_shared/alma-page-labels";
 
 export const ALMA_THINKING_LINES = [
@@ -78,7 +79,7 @@ export function trackAlmaActionClick(path: string, click: AlmaLinkClick, surface
 
 export type AlmaMessageSegment =
   | { type: "text"; value: string }
-  | { type: "link"; href: string; title: string };
+  | { type: "link"; href: string; title: string; external?: true };
 
 interface ParsedMessage {
   /** Texte lisible, chaque chemin remplacé par le nom de sa page. */
@@ -169,8 +170,8 @@ function stripTechnicalLines(content: string): string {
 export function parseAlmaMessage(content: string): ParsedMessage {
   const links: ExtractedLink[] = [];
   const found: AlmaMessageSegment[] = [];
-  const mark = (href: string, title: string) => {
-    found.push({ type: "link", href, title });
+  const mark = (href: string, title: string, external = false) => {
+    found.push(external ? { type: "link", href, title, external: true } : { type: "link", href, title });
     return `\u0000${found.length - 1}\u0000`;
   };
   const remember = (link: ExtractedLink) => {
@@ -179,6 +180,8 @@ export function parseAlmaMessage(content: string): ParsedMessage {
 
   const markdownPattern = /\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/[^\s)]+)\)/g;
   let text = stripTechnicalLines(content).replace(markdownPattern, (_match, title: string, href: string) => {
+    // Lot ALMA3 : un lien externe de la liste fermée (avis Google) reste un lien dans le mot.
+    if (isAllowedExternalLink(href)) return mark(href.trim(), title.trim(), true);
     const path = normalizeInternalPath(href);
     if (!path) return title;
     const link = extractedLink(path);
@@ -271,6 +274,8 @@ interface AlmaConversationProps {
   showIntro?: boolean;
   onIntroSeen?: () => void;
   onStarterClick?: (label: string) => void;
+  /** Lot ALMA3 : un lien externe de la liste fermée a été suivi (avis Google). */
+  onExternalLinkFollowed?: (href: string) => void;
   /** Lot ALMA2c : amorces réellement à l'écran (rotation des réponses proposées). */
   onStartersShown?: (shown: string[]) => void;
   onSeen?: () => void;
@@ -307,6 +312,7 @@ export function AlmaConversation({
   onIntroSeen,
   onStarterClick,
   onStartersShown,
+  onExternalLinkFollowed,
   onSeen,
   onFocus,
   onTyped,
@@ -400,6 +406,11 @@ export function AlmaConversation({
   // Lot A3 : chaque lien suivi depuis la conversation est mesuré
   // (alma_action_clicked), chemin sans paramètres.
   const followLink = (href: string, click: AlmaLinkClick) => {
+    if (isAllowedExternalLink(href)) {
+      openGoogleReview("alma_panel");
+      onExternalLinkFollowed?.(href);
+      return;
+    }
     const path = normalizeInternalPath(href);
     if (!path) return;
     trackAlmaActionClick(path, click, surface);

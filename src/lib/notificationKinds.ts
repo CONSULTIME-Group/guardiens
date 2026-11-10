@@ -102,6 +102,7 @@ export const NOTIFICATION_KINDS: Readonly<Record<string, NotificationKind>> = {
   mission_thanks_received: { tone: "success", category: "social" },
   mission_first_help_badge: { tone: "success", category: "social" },
   identity_verified: { tone: "success", category: "social" },
+  google_review_invite: { tone: "info", category: "social" },
   experience_verified: { tone: "success", category: "social" },
 
   // Compte, modération, équipe

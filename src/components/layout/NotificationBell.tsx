@@ -12,6 +12,7 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { safeUUID } from "@/lib/uuid";
 import { markAllNotificationsRead, markNotificationRead } from "@/lib/notificationsRead";
+import { isAllowedExternalLink, openGoogleReview } from "@/lib/alma/googleReview";
 
 interface Notification {
   id: string;
@@ -209,6 +210,26 @@ const NotificationBell = ({ onUnreadChange }: NotificationBellProps = {}) => {
                 );
                 setUnreadCount((prev) => Math.max(0, prev - 1));
               };
+
+              // Lot ALMA3 : lien externe de la liste fermée (avis Google), nouvel onglet.
+              if (isAllowedExternalLink(n.link)) {
+                return (
+                  <a
+                    key={n.id}
+                    href={n.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      openGoogleReview("notification_bell");
+                      void handleClick();
+                    }}
+                    className="block"
+                  >
+                    {inner}
+                  </a>
+                );
+              }
 
               return n.link ? (
                 <Link
