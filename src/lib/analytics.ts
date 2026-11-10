@@ -13,6 +13,8 @@ export type EventType =
   | "trips_prompt_seen"
   | "trips_prompt_answered"
   | "trips_prompt_snoozed"
+  // Lot SC4 : question « voiture nécessaire » posée au propriétaire après publication.
+  | "owner_car_question_answered"
   | "local_useful_action_clicked"   // Tableau de bord : type, identifiant et rayon, sans coordonnées.
   // Lot V1, email de Noël v3 : écran affiché et clic sur « Publier mon annonce ».
   | "noel_v3_page_step"

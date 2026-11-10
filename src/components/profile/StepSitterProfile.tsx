@@ -31,7 +31,7 @@ const StepSitterProfile = ({ data, onChange }: Props) => {
           d'affinité (présence, trajets) ouvrent la section. */}
       <section className="space-y-5 rounded-xl border border-border bg-muted/30 p-4" aria-labelledby="lbl-during-sit" data-block="pendant-la-garde">
         <h3 id="lbl-during-sit" className="font-heading text-lg font-semibold">Pendant la garde</h3>
-        <div className="space-y-2">
+        <div className="space-y-2" data-field="presence">
           <Label htmlFor="work-during-sit-trigger">Votre présence pendant la garde</Label>
           <Select value={data.work_during_sit} onValueChange={v => onChange({ work_during_sit: v })}>
             <SelectTrigger id="work-during-sit-trigger" className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>

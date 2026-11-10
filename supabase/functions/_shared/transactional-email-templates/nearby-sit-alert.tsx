@@ -34,6 +34,11 @@ interface Props {
   /** Ancre du profil qui porte le geste nomme dans la phrase. */
   completionHref?: string
   /**
+   * Lot SC4 : l'annonce demande une voiture et le gardien n'a jamais dit
+   * comment il se déplace. Lien profond vers la question, qui n'écrit rien.
+   */
+  tripsQuestionHref?: string
+  /**
    * Lot Q1 : garde lointaine (plus de 200 km, ou lieu du gardien inconnu
    * pour une garde hors de France). Deduit de distanceKm quand absent.
    */
@@ -64,6 +69,7 @@ const NearbySitAlertEmail = ({
   completionSentence,
   completionSteps,
   completionHref,
+  tripsQuestionHref,
   farAway,
 }: Props) => {
   const ctaHref = sitId ? `${SITE_URL}/sits/${sitId}` : `${SITE_URL}/sits`
@@ -135,6 +141,17 @@ const NearbySitAlertEmail = ({
 
           {canApply === false && completionSentence ? (
             <Text style={text}>{completionSentence}</Text>
+          ) : null}
+
+          {canApply !== false && tripsQuestionHref ? (
+            <Text style={text}>
+              Cette maison demande une voiture sur place. Dites-nous comment vous
+              vous déplacez : votre réponse rejoint votre profil et compte double
+              sur ces annonces.{' '}
+              <Link href={buildProfileUrl(tripsQuestionHref)} style={linkStyle}>
+                Répondre sur mon profil
+              </Link>
+            </Text>
           ) : null}
 
           <Section style={{ textAlign: 'center', margin: '20px 0' }}>

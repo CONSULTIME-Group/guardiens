@@ -82,6 +82,8 @@ export const MIGRATED_ALERT_SOURCE = "migration_email_preferences_2026_07_31";
  * jamais avale.
  */
 const IN_BATCH_SIZE = 200;
+/** Lot SC4 : lien profond vers la question des trajets du profil gardien. */
+const TRIPS_QUESTION_HREF = "/profile?section=profil&focus=trips";
 // Taille de page de la lecture sitter_gallery, paginee explicitement pour
 // echapper au plafond de lignes PostgREST (N lignes par gardien).
 const GALLERY_PAGE_SIZE = 1000;
@@ -328,17 +330,22 @@ Deno.serve(async (req) => {
 
       // Animaux et photo, pour un email qui dit quelque chose.
       let coverPhotoUrl: string | null = (sit.cover_photo_url || "").trim() || null;
-      if (!coverPhotoUrl && sit.property_id) {
+      // Lot SC3/SC4 : voiture nécessaire sur place, lue avec la photo du logement.
+      let carRequired = false;
+      if (sit.property_id) {
         const { data: prop, error: propErr } = await supabase
           .from("properties")
-          .select("cover_photo_url, photos")
+          .select("cover_photo_url, photos, car_required")
           .eq("id", sit.property_id)
           .maybeSingle();
         if (propErr) console.error("property cover lookup failed", sit.property_id, propErr);
-        const photos = (prop as any)?.photos as string[] | null;
-        coverPhotoUrl =
-          ((prop as any)?.cover_photo_url || "").trim() ||
-          (Array.isArray(photos) ? photos.find((p) => typeof p === "string" && p.trim()) ?? null : null);
+        carRequired = (prop as any)?.car_required === true;
+        if (!coverPhotoUrl) {
+          const photos = (prop as any)?.photos as string[] | null;
+          coverPhotoUrl =
+            ((prop as any)?.cover_photo_url || "").trim() ||
+            (Array.isArray(photos) ? photos.find((p) => typeof p === "string" && p.trim()) ?? null : null);
+        }
       }
 
       const candidateIds = [...new Set(zones.map((z: any) => z.user_id as string))].filter(
@@ -540,6 +547,36 @@ Deno.serve(async (req) => {
         }
       }
 
+      // Lot SC4 (10/11/2026, arène claude/arene/2026-11-10-score-completion) :
+      // sur une annonce qui demande une voiture, un gardien qui peut
+      // candidater et n'a jamais répondu sur ses trajets reçoit la question,
+      // par un lien qui ouvre son profil (aucun lien n'écrit en base : les
+      // scanners de messagerie cliquent sur les liens). Lecture groupée ; en
+      // échec, aucune phrase plutôt qu'une phrase fausse.
+      const tripsAskIds = new Set<string>();
+      if (carRequired) {
+        const eligibleIds = selected
+          .filter((t) => (sitterById.get(t.user_id)?.profile_completion ?? 0) >= APPLY_COMPLETION_THRESHOLD)
+          .map((t) => t.user_id);
+        let tripsReadOk = true;
+        const answered = new Set<string>();
+        for (let i = 0; i < eligibleIds.length; i += IN_BATCH_SIZE) {
+          const { data: vrows, error: vErr } = await supabase
+            .from("sitter_profiles")
+            .select("user_id, has_vehicle")
+            .in("user_id", eligibleIds.slice(i, i + IN_BATCH_SIZE));
+          if (vErr) {
+            console.error("[publish-alert] lecture des trajets impossible", vErr.message);
+            tripsReadOk = false;
+            break;
+          }
+          for (const r of (vrows ?? []) as any[]) {
+            if (r.has_vehicle === true || r.has_vehicle === false) answered.add(r.user_id);
+          }
+        }
+        if (tripsReadOk) for (const id of eligibleIds) if (!answered.has(id)) tripsAskIds.add(id);
+      }
+
       for (const t of selected) {
         if (stopForRateLimit) break;
         const idempotencyKey = `publish-alert-${sit.id}-${t.user_id}`;
@@ -667,6 +704,7 @@ Deno.serve(async (req) => {
               completionSentence: completionByUser.get(t.user_id)?.sentence,
               completionSteps: completionByUser.get(t.user_id)?.steps ?? 0,
               completionHref: completionByUser.get(t.user_id)?.href,
+              tripsQuestionHref: tripsAskIds.has(t.user_id) ? TRIPS_QUESTION_HREF : undefined,
             },
         });
         const outcome = await sendWithinRateLimit(async () => {

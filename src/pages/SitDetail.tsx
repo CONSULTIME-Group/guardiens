@@ -17,6 +17,7 @@ import { geocodeCity } from "@/lib/geocode";
 import { loadSitLocationLabel } from "@/lib/sitLocationLoad";
 import SitDetailSkeleton from "@/components/skeletons/SitDetailSkeleton";
 import { IncompleteProfileBadge } from "@/components/sits/IncompleteProfileBadge";
+import OwnerCarQuestion, { shouldAskOwnerCar } from "@/components/sits/OwnerCarQuestion";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 
 // Lot perf 6 : vue propriétaire et vue gardien dans deux fichiers ; chacun ne
@@ -430,6 +431,16 @@ const SitDetail = () => {
             isOwnerViewer={isOwner}
           />
         </div>
+      )}
+
+      {isOwner && property?.id && shouldAskOwnerCar(property, sit.status) && (
+        <OwnerCarQuestion
+          propertyId={property.id}
+          sitId={sit.id}
+          onAnswered={(car_required, car_required_answered_at) =>
+            setProperty((p: any) => (p ? { ...p, car_required, car_required_answered_at } : p))
+          }
+        />
       )}
 
       <Suspense fallback={<SitDetailSkeleton />}>

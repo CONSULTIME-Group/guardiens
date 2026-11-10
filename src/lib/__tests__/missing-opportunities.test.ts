@@ -102,7 +102,8 @@ describe("pickMissingOpportunities", () => {
         { key: "species", concerned: 9, answered: false },
       ]),
     );
-    expect(result.find((r) => r.key === "vehicle")?.href).toBe("/profile?section=mobilite");
+    // Lot SC1/SC4 : la question des trajets vit dans « Pendant la garde ».
+    expect(result.find((r) => r.key === "vehicle")?.href).toBe("/profile?section=profil&focus=trips");
     expect(result.find((r) => r.key === "species")?.href).toBe("/profile?section=experience");
   });
 });
