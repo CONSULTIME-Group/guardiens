@@ -525,7 +525,9 @@ describe("règles lot affinité 20/08/2026", () => {
     // et l'explication reste affichée (c'est elle qui porte l'info).
     expect(withoutCar.score).toBe(withCar.score);
     expect(withoutCar.sortScore).toBeLessThan(withCar.sortScore);
-    expect(withoutCar.explanation.some((e) => /véhicule/i.test(e))).toBe(true);
+    // Lot SC3 : « Je me déplace autrement » (permis et véhicule à false) est
+    // une réponse, la phrase dit ce que le gardien a déclaré.
+    expect(withoutCar.explanation).toContain("Se déplace sans voiture, alors qu'une voiture est nécessaire sur place");
     // Permis SEUL sans véhicule déclaré (17 gardiens mesurés le 23/08/2026) :
     // demi-portion 1/2, phrase honnête en frein, JAMAIS la chip « Véhiculé »
     // qui serait factuellement fausse quand la voiture est nécessaire sur place.

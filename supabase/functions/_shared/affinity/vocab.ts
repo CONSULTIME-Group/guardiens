@@ -372,6 +372,21 @@ export function normalizeFreeText(value?: string | null): string {
 }
 
 /**
+ * Un mot-clé de besoin particulier se cherche en début de mot, et en mot
+ * entier (pluriel ou féminin admis) quand il fait 3 lettres ou moins
+ * (lot SC3, 10/11/2026). Avant, « age » s'allumait sur « cage », « garage »,
+ * « image » : 11 faux positifs sur 13 textes en base. Le mot-clé passe par
+ * la même normalisation que le texte (« piqûre », « post-op »).
+ */
+export function matchesNeedKeyword(text: string, keyword: string): boolean {
+  const k = normalizeFreeText(keyword);
+  if (!text || !k) return false;
+  const escaped = k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const tail = k.length <= 3 ? "(?:e|s|es)?(?![a-z0-9])" : "";
+  return new RegExp(`(?:^|[^a-z0-9])${escaped}${tail}`).test(text);
+}
+
+/**
  * Races géantes / très grandes (« Pas de très grands chiens »).
  * Liste curée, normalisée (minuscules, sans accents). Le croisement se fait
  * par inclusion de sous-chaîne sur la race normalisée déclarée par l'owner.

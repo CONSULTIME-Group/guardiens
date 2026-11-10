@@ -100,6 +100,7 @@ import {
   LARGE_DOG_BREEDS,
   CATEGORIZED_DOG_BREEDS,
   SPECIAL_NEED_SIGNALS,
+  matchesNeedKeyword,
   normalizeFreeText,
   LANGUAGE_FRENCH_NORMALIZED,
   canonicalAmbianceTag,
@@ -524,6 +525,11 @@ function evalVehicle(
     };
   }
   if (sitter.has_license === true) {
+    // Lot SC3 : après la question « Pour vos trajets sur place », un « non »
+    // au véhicule est une réponse ; la phrase le dit tel quel.
+    const licenseOnlyLine = sitter.has_vehicle === false
+      ? "A le permis, sans véhicule"
+      : "A le permis, sans véhicule déclaré";
     // Demi-portion honnête : la phrase part dans les freins, JAMAIS en chip
     // positive. Dire « Véhiculé » à un propriétaire dont la garde exige une
     // voiture serait un mensonge produit.
@@ -532,7 +538,7 @@ function evalVehicle(
         weight: 2,
         points: 1,
         matched: [],
-        explanation: ["A le permis, sans véhicule déclaré"],
+        explanation: [licenseOnlyLine],
       },
       explanation: [],
     };
@@ -541,6 +547,12 @@ function evalVehicle(
   // aligné sur evalAnimals : rien de déclaré ⇒ le critère sort du
   // dénominateur, AUCUNE pénalité. L'explication reste affichée, c'est
   // elle qui porte l'information, pas le score.
+  // Lot SC3 (10/11/2026) : « Je me déplace autrement » (has_vehicle false)
+  // est une réponse ; le propriétaire lit ce que le gardien a dit. Le critère
+  // reste hors dénominateur, comme le silence (doctrine du 20/08/2026).
+  if (sitter.has_vehicle === false) {
+    return { crit: null, explanation: ["Se déplace sans voiture, alors qu'une voiture est nécessaire sur place"] };
+  }
   return {
     crit: null,
     explanation: ["N'a pas déclaré de véhicule, alors qu'une voiture est nécessaire sur place"],
@@ -880,7 +892,7 @@ function evalSpecialNeeds(owner: AffinityOwnerInput, sitter: AffinitySitterInput
   const skillSet = new Set(skills);
   const needed: typeof SPECIAL_NEED_SIGNALS = [];
   for (const sig of SPECIAL_NEED_SIGNALS) {
-    if (sig.keywords.some((k) => text.includes(k))) needed.push(sig);
+    if (sig.keywords.some((k) => matchesNeedKeyword(text, k))) needed.push(sig);
   }
   if (needed.length === 0) return null;
 
@@ -963,7 +975,7 @@ export function maxPossibleWeight(owner: AffinityOwnerInput): number {
   const needsText = toArray(owner.pets).map((p) => p.special_needs).filter(Boolean).join(" ; ");
   if (needsText) {
     const text = normalizeFreeText(needsText);
-    if (SPECIAL_NEED_SIGNALS.some((sig) => sig.keywords.some((k) => text.includes(k)))) w += 1;
+    if (SPECIAL_NEED_SIGNALS.some((sig) => sig.keywords.some((k) => matchesNeedKeyword(text, k)))) w += 1;
   }
   // Distance : 1 si la distance du couple est connue (miroir d'evalDistance).
   const km = owner.distance_km;

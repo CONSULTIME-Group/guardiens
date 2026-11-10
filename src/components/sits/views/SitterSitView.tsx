@@ -42,6 +42,7 @@ import { useSitDerived } from "./useSitDerived";
 import ReviewsTab from "./tabs/ReviewsTab";
 import SitImmersiveHero from "./SitImmersiveHero";
 import SitImmersiveBody from "./SitImmersiveBody";
+import { SitCarNeed } from "@/components/sits/TripsPrompt";
 import SitterAffinitySection from "./SitterAffinitySection";
 import { AlmaPopularSitWhisper } from "@/components/ai/alma/wiring/AlmaPopularSitWhisper";
 import { AlmaReactiveOwnerWhisper } from "@/components/ai/alma/wiring/AlmaReactiveOwnerWhisper";
@@ -513,6 +514,10 @@ const SitterSitView = ({
           />
         </div>
       )}
+
+      {/* Lot SC3 : voiture nécessaire, puis la question des trajets si le
+          gardien n'a jamais répondu. */}
+      <SitCarNeed carRequired={(property as any)?.car_required} userId={user?.id} sitId={sit.id} />
 
       {/* Contenu immersif (quick facts, animaux+fiches race, journée type, mot de l'hôte, sidebar) */}
       <SitImmersiveBody

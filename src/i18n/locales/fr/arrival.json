@@ -164,10 +164,8 @@
     "animals": "Quels animaux acceptez-vous ?",
     "work": "Pendant une garde, vous êtes plutôt",
     "type": "Vous gardez",
-    "vehicle": "Avez-vous un véhicule ?",
-    "vehicle_help": "Utile pour les maisons à la campagne et les gardes avec un chien à emmener.",
-    "yes": "Oui",
-    "no": "Non"
+    "vehicle": "Pour vos trajets sur place",
+    "vehicle_help": "Utile pour les maisons à la campagne et les gardes avec un chien à emmener."
   },
   "g3": {
     "header": "Affinités · 2 sur 2",

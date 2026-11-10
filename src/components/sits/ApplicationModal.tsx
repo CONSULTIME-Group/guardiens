@@ -35,6 +35,8 @@ import { AlertTriangle } from "lucide-react";
 import { detectRestrictionInText } from "@/lib/detectRestriction";
 import { publicFirstName } from "@/lib/displayName";
 import AffinityBadge from "@/components/matching/AffinityBadge";
+import TripsPrompt from "@/components/sits/TripsPrompt";
+import type { TripsColumns } from "@/lib/trips";
 import { computeAffinityResultFull, type AffinityOwnerInput, type AffinitySitterInput, type AffinityResult } from "@/lib/affinityScore";
 import { describeSitClosedError, SIT_CLOSED_NOTICE, type SitClosedNotice } from "@/lib/applicationCap";
 
@@ -102,6 +104,8 @@ const ApplicationModal = ({
   } | null>(null);
   const prefillAppliedRef = useRef(false);
   const [affinity, setAffinity] = useState<AffinityResult | null>(null);
+  /** Lot SC3 : voiture requise et réponse du gardien, pour la question des trajets. */
+  const [tripsCtx, setTripsCtx] = useState<{ carRequired: boolean | null; cols: TripsColumns } | null>(null);
 
 
   // Load current user's sitter profile info for preview
@@ -221,6 +225,10 @@ const ApplicationModal = ({
           pets = petsData || [];
           carRequired = (propertyRow as any)?.car_required ?? null;
         }
+        setTripsCtx({
+          carRequired,
+          cols: { has_license: (sp as any).has_license ?? null, has_vehicle: (sp as any).has_vehicle ?? null },
+        });
         if (ownerAff && sitterRes.data) {
           const ownerInput: AffinityOwnerInput = {
             ...ownerAff,
@@ -507,6 +515,20 @@ const ApplicationModal = ({
           </div>
         )}
 
+
+        {user && tripsCtx && (
+          <TripsPrompt
+            userId={user.id}
+            carRequired={tripsCtx.carRequired}
+            columns={tripsCtx.cols}
+            context="application"
+            sitId={sitId}
+            // Le badge d'affinité garde sa valeur jusqu'à la prochaine
+            // ouverture : la réponse se confirme en mots, jamais par un
+            // chiffre qui bouge sous les yeux du gardien.
+            onAnswered={(cols) => setTripsCtx((cur) => (cur ? { ...cur, cols } : cur))}
+          />
+        )}
 
         {companionWarning && (
           <Alert className="mt-1 border-warning/40 bg-warning/10 text-foreground">
