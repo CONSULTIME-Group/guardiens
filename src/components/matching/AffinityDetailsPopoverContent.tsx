@@ -5,7 +5,7 @@
  *
  * DOCTRINE : le popover dit la vérité, toujours en voix produit.
  *  - raisons positives : result.matched ;
- *  - freins déclarés : result.explanation (« N'accepte pas les chats »,
+ *  - freins déclarés : result.explanation (« Préfère éviter les chats »,
  *    « Ne déclare pas d'expérience avec vos animaux »…) ;
  *  - sujets à discuter : result.notes.
  * Jamais d'identifiant technique à l'écran.

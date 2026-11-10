@@ -61,6 +61,8 @@ export interface SitterProfileData {
   handover_preference: string;
   languages: string[];
   interests: string[];
+  /** Autres passions en texte libre (lot SC5), écrites par OtherPassionsField. */
+  other_passions: string[];
   // À propos de moi (matching)
   life_pace: string;
   household_composition: string[];
@@ -102,7 +104,7 @@ const defaultData: SitterProfileData = {
   has_license: null, has_vehicle: null, vehicle_type: "", geographic_radius: null, travel_zones: null, /* jamais pré-écrit : la question attend une vraie réponse */ min_duration: 3, max_duration: 21, availability_dates: [], is_available: false,
   min_stay_duration: "flexible", preferred_frequency: "flexible", min_notice: "asap", preferred_periods: [], preferred_environments: [],
   strict_rules_ok: null, prefer_visitors: null, farm_animals_ok: null, preferences_notes: "",
-  meeting_preference: [], handover_preference: "", languages: [], interests: [],
+  meeting_preference: [], handover_preference: "", languages: [], interests: [], other_passions: [],
   life_pace: "", household_composition: [],
   special_animal_skills: [], work_during_sit: "", sensitivities: [],
   skill_categories: [], available_for_help: false, helps_with: "",
@@ -195,6 +197,7 @@ export function useSitterProfile() {
       handover_preference: s?.handover_preference || "",
       languages: s?.languages || [],
       interests: s?.interests || [],
+      other_passions: (s as any)?.other_passions || [],
       life_pace: (s as any)?.life_pace || "",
       household_composition: (s as any)?.household_composition || [],
       special_animal_skills: (s as any)?.special_animal_skills || [],

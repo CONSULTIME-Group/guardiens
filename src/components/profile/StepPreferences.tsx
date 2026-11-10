@@ -9,9 +9,11 @@ import {
   LANGUAGE_OPTIONS,
   INTEREST_OPTIONS,
   SENSITIVITIES_OPTIONS,
+  SENSITIVITY_LABELS,
 } from "@/lib/profileMatchingOptions";
 import MatchingExplainer from "@/components/matching/MatchingExplainer";
 import FieldRole from "./FieldRole";
+import OtherPassionsField from "./OtherPassionsField";
 
 const MEETING_OPTIONS = [
   "Dîner/apéro avant", "Visite la veille", "Passage le jour même",
@@ -146,14 +148,19 @@ const StepPreferences = ({ data, onChange }: Props) => (
       </div>
     </div>
 
+    <OtherPassionsField table="sitter_profiles" initial={data.other_passions ?? []} />
+
     <h3 className="font-heading text-lg font-semibold mt-4">Mes limites</h3>
 
     <div className="space-y-2">
-      <Label>Sensibilités ou gardes que je n'accepte pas</Label>
+      <Label id="lbl-sensitivities" className="text-base">Je préfère éviter</Label>
+      <p className="text-sm text-muted-foreground">Les annonces concernées restent visibles, plus bas dans vos suggestions.</p>
       <ChipSelect
         options={SENSITIVITIES_OPTIONS}
+        labels={SENSITIVITY_LABELS}
         selected={data.sensitivities}
         onChange={v => onChange({ sensitivities: v })}
+        ariaLabelledBy="lbl-sensitivities"
       />
       <FieldRole roles={["match"]} />
     </div>

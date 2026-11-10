@@ -167,3 +167,13 @@ export function noticeDelayLabel(optionLabel: string | null | undefined): string
   const v = (optionLabel ?? "").trim();
   return v ? `${v} avant la garde, idéalement` : "";
 }
+
+/**
+ * Autres passions en texte libre (lot SC5) lues sur une ligne de vue publique :
+ * tableau de chaînes non vides, jamais plus de deux, rien si la colonne manque.
+ */
+export function passionsOf(row: unknown): string[] {
+  const raw = (row as { other_passions?: unknown } | null | undefined)?.other_passions;
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((x): x is string => typeof x === "string" && x.trim().length > 0).slice(0, 2);
+}

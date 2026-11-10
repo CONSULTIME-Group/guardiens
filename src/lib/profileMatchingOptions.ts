@@ -12,6 +12,22 @@ export const PRESENCE_EXPECTED_OPTIONS = [
   "Absences courtes OK",
 ];
 
+/**
+ * Libellés affichés de la présence attendue (lot SC5) : mêmes mots que
+ * l'arrivée sur le site (/arrivee), proches de ceux du gardien. Les valeurs
+ * enregistrées ne changent pas.
+ */
+export const PRESENCE_EXPECTED_LABELS: Record<string, string> = {
+  "100% sur place": "Sur place toute la journée",
+  "Télétravail OK": "En télétravail chez vous",
+  "Absences courtes OK": "Libre de s'absenter quelques heures",
+};
+
+export function presenceExpectedLabel(value: string | null | undefined): string {
+  if (!value) return "";
+  return PRESENCE_EXPECTED_LABELS[value] ?? value;
+}
+
 /** Types d'animaux acceptés par le gardien (multi). */
 export const SITTER_ANIMAL_TYPES_OPTIONS = [
   "Tous",
@@ -45,7 +61,6 @@ export const LANGUAGE_OPTIONS = [
   "Arabe",
   "Russe",
   "Mandarin",
-  "Autre",
 ];
 
 export const INTEREST_OPTIONS = [
@@ -66,7 +81,24 @@ export const INTEREST_OPTIONS = [
   "Cinéma",
   "Art",
   "Bénévolat",
+  // Lot SC5 (10/11/2026) : huit centres d'intérêt de plus, ceux de l'entraide
+  // d'abord (jeux de société, potager), ajoutés à la suite.
+  "Jeux de société",
+  "Potager",
+  "Nature et oiseaux",
+  "Pêche",
+  "Équitation",
+  "Couture et tricot",
+  "Danse",
+  "Escalade",
 ];
+
+/**
+ * Autres passions en texte libre (lot SC5) : deux au plus, 30 caractères
+ * chacune, affichées sur la fiche, hors calcul d'affinité.
+ */
+export const OTHER_PASSIONS_MAX = 2;
+export const OTHER_PASSION_MAX_LENGTH = 30;
 
 /** Rythme de vie au quotidien (single choice). Aide à matcher avec l'énergie de l'animal. */
 export const LIFE_PACE_OPTIONS: { value: string; label: string; description: string }[] = [
@@ -131,6 +163,23 @@ export const SENSITIVITIES_OPTIONS = [
   "Pas de chiens catégorisés",
   "Pas de garde sans jardin",
 ];
+
+/**
+ * Libellés affichés de « Mes limites » (lot SC5), sous le titre « Je préfère
+ * éviter » : seul l'affichage change, les valeurs enregistrées et le calcul
+ * d'affinité restent les mêmes.
+ */
+export const SENSITIVITY_LABELS: Record<string, string> = {
+  "Allergie aux chats": "Allergie aux chats",
+  "Allergie aux chiens": "Allergie aux chiens",
+  "Pas de reptiles": "Reptiles",
+  "Pas de NAC": "NAC",
+  "Pas de chevaux ou animaux de ferme": "Chevaux ou animaux de ferme",
+  "Pas plus de 2 animaux": "Plus de 2 animaux",
+  "Pas de très grands chiens": "Très grands chiens",
+  "Pas de chiens catégorisés": "Chiens catégorisés",
+  "Pas de garde sans jardin": "Une maison sans jardin",
+};
 
 /**
  * Profil de gardien idéal vu côté propriétaire (multi).

@@ -10,9 +10,11 @@ interface ChipSelectProps {
   ariaLabel?: string;
   /** Désactive tous les chips (état lecture seule). */
   disabled?: boolean;
+  /** Libellé affiché par valeur (la valeur enregistrée ne change pas). */
+  labels?: Record<string, string>;
 }
 
-const ChipSelect = ({ options, selected, onChange, className, ariaLabelledBy, ariaLabel, disabled = false }: ChipSelectProps) => {
+const ChipSelect = ({ options, selected, onChange, className, ariaLabelledBy, ariaLabel, disabled = false, labels }: ChipSelectProps) => {
   const toggle = (option: string) => {
     onChange(
       selected.includes(option)
@@ -46,7 +48,7 @@ const ChipSelect = ({ options, selected, onChange, className, ariaLabelledBy, ar
                 : "bg-background text-foreground border-border hover:border-primary/50"
             )}
           >
-            {option}
+            {labels?.[option] ?? option}
           </button>
         );
       })}

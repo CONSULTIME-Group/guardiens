@@ -1,3 +1,4 @@
+import { presenceExpectedLabel } from "@/lib/profileMatchingOptions";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { invalidateMySits } from "@/lib/dashboardShared";
 import { getAppQueryClient } from "@/lib/appQueryClient";
@@ -2920,7 +2921,7 @@ const CreateSit = () => {
                 {(() => {
                   const parts: string[] = [];
                   if (ownerProfile?.rules_notes) parts.push(`Règles de la maison : ${ownerProfile.rules_notes}`);
-                  if (ownerProfile?.presence_expected) parts.push(`Présence prévue : ${ownerProfile.presence_expected}`);
+                  if (ownerProfile?.presence_expected) parts.push(`Présence prévue : ${presenceExpectedLabel(ownerProfile.presence_expected)}`);
                   if (ownerProfile?.visits_allowed) parts.push(`Visites pendant la garde : ${ownerProfile.visits_allowed}`);
                   const seed = parts.join("\n\n");
                   if (!seed) return null;
@@ -3445,7 +3446,7 @@ const CreateSit = () => {
               <SummaryCard icon={ShieldCheck} title="Règles de la maison" editLink="/profile">
                 {ownerProfile ? (
                   <div className="text-sm space-y-1">
-                    {ownerProfile.presence_expected && <p>Présence : {ownerProfile.presence_expected}</p>}
+                    {ownerProfile.presence_expected && <p>Présence : {presenceExpectedLabel(ownerProfile.presence_expected)}</p>}
                     {ownerProfile.visits_allowed && <p>Visites : {ownerProfile.visits_allowed}</p>}
                     {ownerProfile.overnight_guest && <p>Invités : {ownerProfile.overnight_guest}</p>}
                     {ownerProfile.rules_notes && <p className="text-muted-foreground">{ownerProfile.rules_notes}</p>}

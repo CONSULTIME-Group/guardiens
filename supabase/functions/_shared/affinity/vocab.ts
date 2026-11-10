@@ -167,10 +167,19 @@ export const OUTDOOR_SPORT_INTERESTS = [
   "Vélo",
   "Ski",
   "Sports nautiques",
+  "Escalade",
 ] as const;
 
 /** Intérêts "campagne" utilisés par le matching d'ambiance. */
-export const RURAL_INTERESTS = ["Randonnée", "Jardinage"] as const;
+export const RURAL_INTERESTS = [
+  "Randonnée",
+  "Jardinage",
+  // Lot SC5 (10/11/2026) : nouveaux centres d'intérêt tournés vers la campagne.
+  "Potager",
+  "Nature et oiseaux",
+  "Pêche",
+  "Équitation",
+] as const;
 
 // -------------------- Espèces animales --------------------
 
@@ -346,15 +355,17 @@ export const ALL_BLOCKING_SENSITIVITIES = Array.from(
 export const SENSITIVITY_EXPLANATION: Record<string, string> = {
   // Lot Y2 : une allergie est une donnée de santé, la phrase dit seulement
   // l'espèce refusée, quel que soit le lecteur.
-  [SENS_ALLERGIE_CHAT]: "N'accepte pas les chats",
-  [SENS_ALLERGIE_CHIEN]: "N'accepte pas les chiens",
-  [SENS_PAS_DE_CHATS]: "N'accepte pas les chats",
-  [SENS_PAS_DE_CHIENS]: "N'accepte pas les chiens",
-  [SENS_GRANDS_CHIENS]: "N'accepte pas les très grands chiens",
-  [SENS_CHIENS_CATEGORISES]: "N'accepte pas les chiens catégorisés",
-  [SENS_REPTILES]: "N'accepte pas les reptiles",
-  [SENS_NAC]: "N'accepte pas les NAC",
-  [SENS_CHEVAUX_FERME]: "N'accepte pas les chevaux ni les animaux de ferme",
+  // Lot SC5 (10/11/2026) : phrase affirmative, comme « Je préfère éviter »
+  // du formulaire.
+  [SENS_ALLERGIE_CHAT]: "Préfère éviter les chats",
+  [SENS_ALLERGIE_CHIEN]: "Préfère éviter les chiens",
+  [SENS_PAS_DE_CHATS]: "Préfère éviter les chats",
+  [SENS_PAS_DE_CHIENS]: "Préfère éviter les chiens",
+  [SENS_GRANDS_CHIENS]: "Préfère éviter les très grands chiens",
+  [SENS_CHIENS_CATEGORISES]: "Préfère éviter les chiens catégorisés",
+  [SENS_REPTILES]: "Préfère éviter les reptiles",
+  [SENS_NAC]: "Préfère éviter les NAC",
+  [SENS_CHEVAUX_FERME]: "Préfère éviter les chevaux et les animaux de ferme",
 };
 
 // -------------------- Races de chiens (croisement sensibilités) --------------------
@@ -514,6 +525,10 @@ export const SITTER_PUBLIC_DESCRIPTIVE_COLUMNS = [
   "reply_median_minutes",
   // Fiche gardien F1 (27/09/2026) : ligne « Avant la garde » de la carte contact.
   "meeting_preference",
+  // Lot SC2 (10/11/2026) : « Expérience de garde » sur la fiche.
+  "guard_experience",
+  // Lot SC5 (10/11/2026) : « Autres passions », texte libre, jamais scoré.
+  "other_passions",
 ] as const;
 
 export const OWNER_PUBLIC_DESCRIPTIVE_COLUMNS = [
@@ -522,4 +537,6 @@ export const OWNER_PUBLIC_DESCRIPTIVE_COLUMNS = [
   "competences",
   "competences_disponible",
   "created_at",
+  // Lot SC5 (10/11/2026) : « Autres passions », texte libre, jamais scoré.
+  "other_passions",
 ] as const;

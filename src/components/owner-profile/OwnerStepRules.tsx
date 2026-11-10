@@ -9,7 +9,7 @@ import RadioChipGroup from "../profile/RadioChipGroup";
 import HintBubble from "../profile/HintBubble";
 import AiSuggestButton from "../profile/AiSuggestButton";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
-import { IDEAL_SITTER_SCORED_OPTIONS, IDEAL_SITTER_DESCRIPTIVE_OPTIONS, HOME_AMBIANCE_SCORED_OPTIONS, HOME_AMBIANCE_ENVIRONMENT_OPTIONS, PRESENCE_EXPECTED_OPTIONS, resolveAmbianceConflicts } from "@/lib/profileMatchingOptions";
+import { IDEAL_SITTER_SCORED_OPTIONS, IDEAL_SITTER_DESCRIPTIVE_OPTIONS, HOME_AMBIANCE_SCORED_OPTIONS, HOME_AMBIANCE_ENVIRONMENT_OPTIONS, PRESENCE_EXPECTED_OPTIONS, resolveAmbianceConflicts, presenceExpectedLabel } from "@/lib/profileMatchingOptions";
 import MatchingExplainer from "@/components/matching/MatchingExplainer";
 
 const SITTER_TYPES = IDEAL_SITTER_SCORED_OPTIONS;
@@ -110,7 +110,7 @@ const OwnerStepRules = ({ data, onChange }: Props) => {
         <Label htmlFor={presenceId}>Présence attendue</Label>
         <Select value={data.presence_expected} onValueChange={v => onChange({ presence_expected: v })}>
           <SelectTrigger id={presenceId} className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
-          <SelectContent>{PRESENCE.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
+          <SelectContent>{PRESENCE.map(p => <SelectItem key={p} value={p}>{presenceExpectedLabel(p)}</SelectItem>)}</SelectContent>
         </Select>
       </div>
 
