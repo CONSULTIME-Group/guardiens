@@ -10,7 +10,7 @@ import { matchesNeedKeyword, normalizeFreeText, SPECIAL_NEED_SIGNALS } from "../
 import { computeAffinityResultFull } from "@/lib/affinityScore";
 
 vi.mock("@/integrations/supabase/client", () => ({
-  supabase: { from: () => ({ update: () => ({ eq: async () => ({ error: null }) }) }) },
+  supabase: { from: () => ({ update: () => ({ eq: () => ({ select: async () => ({ data: [{ user_id: "u1" }], error: null }) }) }) }) },
 }));
 vi.mock("@/lib/analytics", () => ({ trackEvent: vi.fn() }));
 vi.mock("@/lib/myProfile", () => ({ fetchMySitterProfile: vi.fn(), patchMyProfileCache: vi.fn() }));

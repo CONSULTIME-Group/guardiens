@@ -1,6 +1,8 @@
 import { useId } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import OptionCards from "@/components/profile/OptionCards";
+import { CAR_CARDS } from "@/components/sits/OwnerCarQuestion";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -101,9 +103,19 @@ const OwnerStepHousing = ({ data, onChange }: Props) => {
         </div>
       </div>
 
-      <div className="flex items-center justify-between py-2">
-        <Label htmlFor={carRequiredId}>Accès voiture nécessaire</Label>
-        <Switch id={carRequiredId} checked={data.car_required} onCheckedChange={v => onChange({ car_required: v })} />
+      {/* Lot SC4 : deux réponses explicites, datées ; un logement jamais
+          répondu reste neutre pour le calcul d'affinité. */}
+      <div className="space-y-2 py-2">
+        <Label id={carRequiredId} className="text-base">Pour la garde chez vous, une voiture est-elle nécessaire ?</Label>
+        <OptionCards
+          ariaLabelledBy={carRequiredId}
+          options={CAR_CARDS}
+          value={data.car_required ? "yes" : data.car_required_answered_at ? "no" : ""}
+          onChange={v => onChange(v
+            ? { car_required: v === "yes", car_required_answered_at: new Date().toISOString() }
+            : { car_required: false, car_required_answered_at: null })}
+        />
+        <p className="text-sm text-muted-foreground">Les gardiens véhiculés passent devant quand la voiture compte. Repris dans vos annonces.</p>
       </div>
       <div className="flex items-center justify-between py-2">
         <Label htmlFor={accessibleId}>Accessible PMR</Label>

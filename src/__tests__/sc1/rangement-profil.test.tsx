@@ -81,7 +81,7 @@ describe("lot SC1 : une question pour les trajets", () => {
     expect(tripsAnswerOf({ has_license: null, has_vehicle: true })).toBe("own_vehicle");
     expect(tripsAnswerOf({ has_license: true, has_vehicle: false })).toBe("license_only");
     expect(tripsAnswerOf({ has_license: false, has_vehicle: false })).toBe("other_means");
-    expect(tripsAnswerOf({ has_license: null, has_vehicle: false })).toBeNull();
+    expect(tripsAnswerOf({ has_license: null, has_vehicle: false })).toBe("other_means");
     expect(tripsAnswerOf({ has_license: true, has_vehicle: null })).toBeNull();
     expect(hasTripsAnswer({ has_vehicle: false })).toBe(true);
     expect(hasTripsAnswer({ has_vehicle: null })).toBe(false);

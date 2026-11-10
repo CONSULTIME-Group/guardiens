@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Car } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
@@ -57,6 +57,7 @@ const TripsPrompt = ({ userId, carRequired, columns, context, sitId, onAnswered 
   const [saved, setSaved] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
   const seenRef = useRef(false);
+  const titleId = useId();
 
   useEffect(() => {
     if (!saved) setVisible(shouldAskTrips(carRequired, columns, userId));
@@ -71,7 +72,7 @@ const TripsPrompt = ({ userId, carRequired, columns, context, sitId, onAnswered 
 
   if (saved) {
     return (
-      <p role="status" className="text-xs text-muted-foreground" data-testid="trips-prompt-saved">
+      <p role="status" className="text-sm text-muted-foreground" data-testid="trips-prompt-saved">
         {saved}
       </p>
     );
@@ -81,11 +82,13 @@ const TripsPrompt = ({ userId, carRequired, columns, context, sitId, onAnswered 
   const answer = async (cols: TripsColumns) => {
     if (cols.has_vehicle === null) return;
     setFailed(false);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("sitter_profiles")
       .update({ has_license: cols.has_license, has_vehicle: cols.has_vehicle } as any)
-      .eq("user_id", userId);
-    if (error) {
+      .eq("user_id", userId)
+      .select("user_id");
+    // Aucune ligne écrite (pas de fiche gardien) : échec dit, jamais un « merci ».
+    if (error || !data || data.length === 0) {
       setFailed(true);
       return;
     }
@@ -99,23 +102,30 @@ const TripsPrompt = ({ userId, carRequired, columns, context, sitId, onAnswered 
 
   return (
     <section
-      className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2"
-      aria-labelledby="trips-prompt-title"
+      className="rounded-[18px] bg-pastel-sky p-4 space-y-3"
+      aria-labelledby={context === "application" ? titleId : undefined}
+      aria-label={context === "application" ? undefined : "Pour vos trajets sur place"}
       data-testid="trips-prompt"
     >
-      <p id="trips-prompt-title" className="flex items-center gap-2 text-sm font-medium text-foreground">
-        <Car className="h-4 w-4 text-primary shrink-0" aria-hidden />
-        Cette maison demande une voiture sur place.
-      </p>
+      {/* Sur la page d'annonce, l'étiquette « Voiture nécessaire sur place »
+          dit déjà le besoin : la phrase ne vient qu'à la candidature. */}
+      {context === "application" && (
+        <p id={titleId} className="flex items-center gap-2.5 text-base font-semibold text-pastel-sky-ink">
+          <span aria-hidden className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-card">
+            <Car className="h-[18px] w-[18px]" />
+          </span>
+          Cette maison demande une voiture sur place.
+        </p>
+      )}
       <TripsQuestion
         value={columns ?? {}}
         onChange={answer}
         roleLine="Votre réponse rejoint votre profil et compte double sur les annonces où une voiture est nécessaire."
       />
-      {failed && <p className="text-xs text-destructive">Enregistrement impossible pour le moment. Réessayez.</p>}
+      {failed && <p className="text-sm text-destructive">Enregistrement impossible pour le moment. Réessayez.</p>}
       <button
         type="button"
-        className="text-xs text-muted-foreground underline underline-offset-2 min-h-11"
+        className="block mx-auto text-sm text-muted-foreground underline underline-offset-2 min-h-11"
         onClick={() => {
           snoozeTrips(userId);
           setVisible(false);
@@ -136,10 +146,12 @@ export default TripsPrompt;
  * gardien n'a jamais répondu. Lecture du profil seulement quand la voiture
  * est nécessaire (cache partagé de src/lib/myProfile.ts).
  */
-export const SitCarNeed = ({ carRequired, userId, sitId }: { carRequired: boolean | null | undefined; userId: string | null | undefined; sitId: string }) => {
+export const SitCarNeed = ({ carRequired, userId, userRole, sitId }: { carRequired: boolean | null | undefined; userId: string | null | undefined; userRole?: string | null; sitId: string }) => {
+  // La question ne vise que les gardiens (rôle sitter ou both).
+  const asksTrips = userRole === "sitter" || userRole === "both";
   const [cols, setCols] = useState<TripsColumns | null>(null);
   useEffect(() => {
-    if (carRequired !== true || !userId) return;
+    if (carRequired !== true || !userId || !asksTrips) return;
     let cancelled = false;
     fetchMySitterProfile(userId)
       .then(({ data }) => {
@@ -152,16 +164,16 @@ export const SitCarNeed = ({ carRequired, userId, sitId }: { carRequired: boolea
       })
       .catch(() => { /* lecture en échec : l'étiquette reste, la question attend */ });
     return () => { cancelled = true; };
-  }, [carRequired, userId]);
+  }, [carRequired, userId, asksTrips]);
 
   if (carRequired !== true) return null;
   return (
     <div className="mt-6 space-y-3" data-testid="sit-car-need">
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary/20 px-3 py-1.5 text-sm text-foreground">
+      <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-pastel-sky px-3 py-1.5 text-sm font-medium text-pastel-sky-ink">
         <Car className="h-4 w-4" aria-hidden />
         Voiture nécessaire sur place
       </span>
-      {userId && cols && (
+      {userId && asksTrips && cols && (
         <TripsPrompt userId={userId} carRequired columns={cols} context="sit_view" sitId={sitId} onAnswered={setCols} />
       )}
     </div>

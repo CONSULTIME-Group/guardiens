@@ -54,12 +54,16 @@ export interface MissingOpportunity {
   ctaLabel: string;
 }
 
-/** Ordre fixe de départage à compteur égal. */
+/**
+ * Ordre fixe de départage à compteur égal : poids du calcul d'affinité
+ * d'abord (véhicule, espèces, présence pèsent 2), puis le rayon, puis les
+ * critères de poids 1 (lot SC4, 10/11/2026).
+ */
 const PRIORITY: readonly MissingOpportunityKey[] = [
-  "radius",
   "vehicle",
   "species",
   "work",
+  "radius",
   "sitter_type",
   "pace",
   "languages",
@@ -75,6 +79,8 @@ interface KeyWording {
   verbSingular: string;
   /** Section du profil gardien qui pose la question. */
   section: string;
+  /** Champ à mettre en avant à l'ouverture (paramètre focus du profil). */
+  focus?: string;
 }
 
 const WORDING: Record<MissingOpportunityKey, KeyWording> = {
@@ -88,7 +94,9 @@ const WORDING: Record<MissingOpportunityKey, KeyWording> = {
     what: "un gardien véhiculé",
     verbPlural: "demandent",
     verbSingular: "demande",
-    section: "mobilite",
+    // Lot SC1 : la question des trajets vit dans « Pendant la garde ».
+    section: "profil",
+    focus: "trips",
   },
   species: {
     what: "les animaux confiés",
@@ -101,6 +109,7 @@ const WORDING: Record<MissingOpportunityKey, KeyWording> = {
     verbPlural: "précisent",
     verbSingular: "précise",
     section: "profil",
+    focus: "presence",
   },
   sitter_type: {
     what: "le type de gardien recherché",
@@ -142,10 +151,17 @@ export const missingOpportunitySentence = (
   return `${concerned} des ${total} annonces en ligne ${w.verbPlural} ${w.what}, vous n'avez pas répondu.`;
 };
 
+const focusParam = (key: MissingOpportunityKey): string =>
+  WORDING[key].focus ? `&focus=${WORDING[key].focus}` : "";
+
+/** Lien profond vers la question, sans écriture (aussi utilisé par les emails). */
+export const missingOpportunityHref = (key: MissingOpportunityKey): string =>
+  `/profile?section=${WORDING[key].section}${focusParam(key)}`;
+
 /**
  * Choisit les manques à afficher : uniquement les questions sans réponse qui
  * concernent au moins une annonce en ligne, triées par nombre d'annonces
- * concernées (départage : ordre fixe rayon > véhicule > espèces > présence >
+ * concernées (départage : ordre fixe véhicule > espèces > présence > rayon >
  * type > rythme > langues), au maximum `max` (deux par défaut).
  */
 export const pickMissingOpportunities = (
@@ -164,7 +180,7 @@ export const pickMissingOpportunities = (
     .map((i) => ({
       key: i.key,
       sentence: missingOpportunitySentence(i.key, i.concerned, stats.total_sits),
-      href: `/profile?section=${WORDING[i.key].section}`,
+      href: `/profile?section=${WORDING[i.key].section}${focusParam(i.key)}`,
       ctaLabel: "Répondre",
     }));
 };

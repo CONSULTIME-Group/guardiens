@@ -17,8 +17,9 @@
 --                                  compétence de jardin (motifs de
 --                                  src/lib/skills/categories.ts)
 --      Premiers secours animaux -> special_animal_skills
---    skill_categories reçoit la catégorie dérivée (coups_de_main, competences,
---    jardin), comme le fait le formulaire à chaque enregistrement.
+--    profiles.skill_categories reçoit la catégorie dérivée (coups_de_main,
+--    competences, jardin), comme le fait le formulaire à chaque enregistrement.
+--    competences reste sous son plafond de 10 valeurs (contrainte max_competences).
 --    La colonne bonus_skills reste en place, valeurs conservées.
 -- 2. Garde-fou : aucun score de complétion ne baisse. La transaction échoue au
 --    premier score en baisse (contrainte de Jérémie : aucun gardien sous 40).
@@ -35,13 +36,17 @@ BEGIN;
 CREATE TEMP TABLE _sc2_before ON COMMIT DROP AS
   SELECT id, profile_completion FROM public.profiles;
 
+CREATE TEMP TABLE _sc2_changed (user_id uuid PRIMARY KEY) ON COMMIT DROP;
+
+-- competences est plafonné à 10 valeurs (contrainte max_competences) : les
+-- ajouts s'arrêtent au plafond, dans l'ordre Ménage, Cuisine, Bricolage,
+-- Jardinage. skill_categories vit dans profiles.
 WITH src AS (
   SELECT
     s.user_id,
     s.bonus_skills,
     coalesce(s.competences, '{}'::text[]) AS comp,
     coalesce(s.special_animal_skills, '{}'::text[]) AS special,
-    coalesce(s.skill_categories, '{}'::text[]) AS cats,
     EXISTS (
       SELECT 1 FROM unnest(coalesce(s.competences, '{}'::text[])) c
       WHERE c ~* '(jardin|potager|horticulture|tonte|gazon|pelouse|haie|taille|[ée]lagage|arrosage|plante|fleur|massif|arbuste|piscine)'
@@ -51,7 +56,7 @@ WITH src AS (
 ),
 adds AS (
   SELECT
-    user_id, comp, special, cats,
+    user_id, comp, special,
     array_remove(ARRAY[
       CASE WHEN 'Ménage' = ANY(bonus_skills) THEN 'Ménage occasionnel' END,
       CASE WHEN 'Cuisine' = ANY(bonus_skills) THEN 'Cuisine' END,
@@ -63,42 +68,44 @@ adds AS (
          THEN ARRAY['Premiers secours animaux'] ELSE '{}'::text[] END AS special_add
   FROM src
 ),
-merged AS (
-  SELECT
-    a.user_id,
-    a.comp || ARRAY(
-      SELECT x FROM unnest(a.comp_add) x
-      WHERE NOT EXISTS (SELECT 1 FROM unnest(a.comp) c WHERE lower(c) = lower(x))
-    ) AS new_comp,
-    a.special || a.special_add AS new_special,
-    a.cats
-  FROM adds a
-),
 final AS (
   SELECT
-    m.user_id, m.new_comp, m.new_special,
-    ARRAY(
-      SELECT DISTINCT k FROM (
-        SELECT unnest(m.cats) AS k
-        UNION ALL
-        SELECT 'coups_de_main' WHERE EXISTS (SELECT 1 FROM unnest(m.new_comp) c WHERE c ~* '(m[ée]nage|bricolage)')
-        UNION ALL
-        SELECT 'competences' WHERE EXISTS (SELECT 1 FROM unnest(m.new_comp) c WHERE c ~* 'cuisine')
-        UNION ALL
-        SELECT 'jardin' WHERE EXISTS (SELECT 1 FROM unnest(m.new_comp) c WHERE c ~* '(jardin|tonte)')
-      ) u ORDER BY k
-    ) AS new_cats
-  FROM merged m
+    a.user_id,
+    a.comp || (ARRAY(
+      SELECT x FROM unnest(a.comp_add) WITH ORDINALITY AS t(x, n)
+      WHERE NOT EXISTS (SELECT 1 FROM unnest(a.comp) c WHERE lower(c) = lower(t.x))
+      ORDER BY t.n
+    ))[1:greatest(10 - cardinality(a.comp), 0)] AS new_comp,
+    a.special || a.special_add AS new_special
+  FROM adds a
+),
+upd AS (
+  UPDATE public.sitter_profiles s
+  SET competences = f.new_comp,
+      special_animal_skills = f.new_special
+  FROM final f
+  WHERE s.user_id = f.user_id
+    AND (s.competences IS DISTINCT FROM f.new_comp
+         OR s.special_animal_skills IS DISTINCT FROM f.new_special)
+  RETURNING s.user_id
 )
-UPDATE public.sitter_profiles s
-SET competences = f.new_comp,
-    special_animal_skills = f.new_special,
-    skill_categories = f.new_cats
-FROM final f
-WHERE s.user_id = f.user_id
-  AND (s.competences IS DISTINCT FROM f.new_comp
-       OR s.special_animal_skills IS DISTINCT FROM f.new_special
-       OR s.skill_categories IS DISTINCT FROM f.new_cats);
+INSERT INTO _sc2_changed SELECT user_id FROM upd;
+
+-- Catégories dérivées, comme le fait le formulaire à chaque enregistrement.
+UPDATE public.profiles p
+SET skill_categories = ARRAY(
+  SELECT DISTINCT k FROM (
+    SELECT unnest(coalesce(p.skill_categories, '{}'::text[])) AS k
+    UNION ALL
+    SELECT 'coups_de_main' WHERE EXISTS (SELECT 1 FROM unnest(s.competences) c WHERE c ~* '(m[ée]nage|bricolage)')
+    UNION ALL
+    SELECT 'competences' WHERE EXISTS (SELECT 1 FROM unnest(s.competences) c WHERE c ~* 'cuisine')
+    UNION ALL
+    SELECT 'jardin' WHERE EXISTS (SELECT 1 FROM unnest(s.competences) c WHERE c ~* '(jardin|tonte)')
+  ) u ORDER BY k
+)
+FROM public.sitter_profiles s, _sc2_changed ch
+WHERE s.user_id = p.id AND ch.user_id = p.id;
 
 -- Le déclencheur trg_recalc_completion_sitter_profiles recalcule le score de
 -- chaque fiche modifiée ; le contrôle porte sur l'ensemble des profils.
@@ -157,6 +164,6 @@ CREATE OR REPLACE VIEW public.public_sitter_profiles AS
         END);
 
 COMMENT ON VIEW public.public_sitter_profiles IS
-  'Fiche publique gardien : compte actif et prénom renseigné, sans seuil de complétion (décision 10/10/2026). Aucune donnée de santé, coordonnées exactes, email ou téléphone. Gardes réalisées (guard_experience) ajoutées le 10/11/2026 (lot SC2). Repère : sc2_competences_bonus.';
+  'Fiche publique gardien : compte actif et prénom renseigné, sans seuil de complétion (décision 10/10/2026). Aucune donnée de santé, coordonnées exactes, email ou téléphone. Expérience de garde (guard_experience) ajoutée le 10/11/2026 (lot SC2). Repère : sc2_competences_bonus.';
 
 COMMIT;

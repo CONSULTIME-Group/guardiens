@@ -1526,11 +1526,9 @@
       "tab_gallery": "Onglet Galerie.",
       "tab_skills": "Onglet Savoir-faire.",
       "tab_sitter": "Onglet Profil gardien.",
-      "tab_mobility": "Onglet Mobilité & Rayon.",
       "settings_verif": "Envoyez vos documents depuis Paramètres, rubrique Vérification.",
       "chars_50": "{{count}}/50 caractères.",
-      "add_avatar_identity": "Ajoutez une photo dans Identité.",
-      "affinity_count": "{{count}}/5 renseignés (3 minimum pour le score max)."
+      "add_avatar_identity": "Ajoutez une photo dans Identité."
     },
     "score_groups": {
       "trust": "Ce qui rassure sur votre fiche",

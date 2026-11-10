@@ -82,6 +82,12 @@ export default {
           soft: "hsl(var(--info-soft))",
           border: "hsl(var(--info-border))",
         },
+        pastel: {
+          sage: { DEFAULT: "hsl(var(--pastel-sage))", ink: "hsl(var(--pastel-sage-ink))", mid: "hsl(var(--pastel-sage-mid))" },
+          peach: { DEFAULT: "hsl(var(--pastel-peach))", ink: "hsl(var(--pastel-peach-ink))", mid: "hsl(var(--pastel-peach-mid))" },
+          honey: { DEFAULT: "hsl(var(--pastel-honey))", ink: "hsl(var(--pastel-honey-ink))", mid: "hsl(var(--pastel-honey-mid))" },
+          sky: { DEFAULT: "hsl(var(--pastel-sky))", ink: "hsl(var(--pastel-sky-ink))" },
+        },
         "strength-weak": "hsl(var(--strength-weak))",
         "strength-medium": "hsl(var(--strength-medium))",
         "strength-good": "hsl(var(--strength-good))",

@@ -146,6 +146,19 @@ const SitterProfile = () => {
           setTimeout(() => el.classList.remove("ring-2", "ring-primary", "rounded-xl"), 3000);
         }
       }, 500);
+    } else if ((focus === "trips" || focus === "presence") && lastAppliedFocusRef.current !== focus) {
+      // Lot SC4 : liens des relances (tableau de bord, emails) vers une
+      // question du bloc « Pendant la garde ».
+      lastAppliedFocusRef.current = focus;
+      setActiveSection("sitter");
+      setTimeout(() => {
+        const el = document.querySelector<HTMLElement>(`[data-field="${focus}"]`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          el.classList.add("ring-2", "ring-primary", "rounded-xl");
+          setTimeout(() => el.classList.remove("ring-2", "ring-primary", "rounded-xl"), 3000);
+        }
+      }, 500);
     } else if (focus === "availability" && lastAppliedFocusRef.current !== focus) {
       // Lot M2 : bouton « Dispo » de la barre basse, interrupteur « Je suis disponible ».
       lastAppliedFocusRef.current = focus;

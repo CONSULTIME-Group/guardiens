@@ -28,6 +28,8 @@ export interface OwnerProfileData {
   rooms_count: number;
   bedrooms_count: number;
   car_required: boolean;
+  /** Lot SC4 : heure de la réponse explicite à « voiture nécessaire » (null = jamais répondu). */
+  car_required_answered_at: string | null;
   accessible: boolean;
   equipments: string[];
   photos: string[];
@@ -90,7 +92,7 @@ export interface Pet {
 
 const defaultData: OwnerProfileData = {
   first_name: "", last_name: "", city: "", postal_code: "", country: "FR", bio: "", avatar_url: "",
-  property_type: "", environment: "", rooms_count: 0, bedrooms_count: 0, car_required: false,
+  property_type: "", environment: "", rooms_count: 0, bedrooms_count: 0, car_required: false, car_required_answered_at: null,
   accessible: false, equipments: [], photos: [], description: "", region_highlights: "",
   environments: [],
   preferred_sitter_types: [], presence_expected: "", experience_required: false,
@@ -233,7 +235,7 @@ export function useOwnerProfile() {
       bio: p?.bio || "", avatar_url: p?.avatar_url || "",
       property_type: prop?.type || "", environment: prop?.environment || "",
       rooms_count: prop?.rooms_count || 0, bedrooms_count: prop?.bedrooms_count || 0,
-      car_required: prop?.car_required || false, accessible: prop?.accessible || false,
+      car_required: prop?.car_required || false, car_required_answered_at: (prop as any)?.car_required_answered_at ?? null, accessible: prop?.accessible || false,
       equipments: (prop as any)?.equipments || [], photos: (prop as any)?.photos || [],
       description: prop?.description || "", region_highlights: prop?.region_highlights || "",
       environments: (o as any)?.environments || [],
@@ -370,12 +372,28 @@ export function useOwnerProfile() {
           const { error } = await supabase.from("properties").update(propUpdate).eq("id", propertyId);
           invalidateMyProperties(user.id!);
           if (error) throw error;
+          // Lot SC4 : heure de la réponse « voiture nécessaire », écrite à
+          // part. Avant la migration 0132 la colonne manque : l'écriture
+          // échoue sans jamais bloquer l'enregistrement du logement.
+          if ("car_required_answered_at" in stepData) {
+            await supabase
+              .from("properties")
+              .update({ car_required_answered_at: (stepData as any).car_required_answered_at } as any)
+              .eq("id", propertyId);
+          }
         } else {
           const { data: newProp, error } = await supabase
             .from("properties").insert({ ...propUpdate, user_id: user.id }).select("id").single();
           invalidateMyProperties(user.id!);
           if (error) throw error;
           if (newProp) setPropertyId(newProp.id);
+          // Lot SC4 : heure de la réponse « voiture nécessaire », comme à la mise à jour.
+          if (newProp && "car_required_answered_at" in stepData) {
+            await supabase
+              .from("properties")
+              .update({ car_required_answered_at: (stepData as any).car_required_answered_at } as any)
+              .eq("id", newProp.id);
+          }
         }
       }
 

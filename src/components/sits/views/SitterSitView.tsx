@@ -517,7 +517,7 @@ const SitterSitView = ({
 
       {/* Lot SC3 : voiture nécessaire, puis la question des trajets si le
           gardien n'a jamais répondu. */}
-      <SitCarNeed carRequired={(property as any)?.car_required} userId={user?.id} sitId={sit.id} />
+      <SitCarNeed carRequired={(property as any)?.car_required} userId={user?.id} userRole={user?.role ?? null} sitId={sit.id} />
 
       {/* Contenu immersif (quick facts, animaux+fiches race, journée type, mot de l'hôte, sidebar) */}
       <SitImmersiveBody
