@@ -271,6 +271,8 @@ interface AlmaConversationProps {
   showIntro?: boolean;
   onIntroSeen?: () => void;
   onStarterClick?: (label: string) => void;
+  /** Lot ALMA2c : amorces réellement à l'écran (rotation des réponses proposées). */
+  onStartersShown?: (shown: string[]) => void;
   onSeen?: () => void;
   onFocus?: () => void;
   onTyped?: () => void;
@@ -304,6 +306,7 @@ export function AlmaConversation({
   showIntro,
   onIntroSeen,
   onStarterClick,
+  onStartersShown,
   onSeen,
   onFocus,
   onTyped,
@@ -315,6 +318,13 @@ export function AlmaConversation({
   autoFocusInput = true,
 }: AlmaConversationProps) {
   const state = useSyncExternalStore(subscribeAlmaConversation, getAlmaConversationState);
+  const shownStarters = open && !(journal?.invitation && !state.open) && starters && starters.length > 0
+    ? starters.slice(0, 2)
+    : [];
+  const shownStartersKey = shownStarters.join("|");
+  useEffect(() => {
+    if (shownStartersKey) onStartersShown?.(shownStartersKey.split("|"));
+  }, [shownStartersKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const [draft, setDraft] = useState("");
   const [compactHeader, setCompactHeader] = useState(false);
   const [thinkingLine, setThinkingLine] = useState<string>(ALMA_THINKING_LINES[0]);
