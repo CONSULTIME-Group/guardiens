@@ -1,6 +1,8 @@
 // Alma Pass 1 — Chantier 8.1 (patch P0 : colonnes inexistantes → contexte null → refus IA)
 // Génère un premier message (brise-glace) pour un thread vide avec contexte sit ou mission.
-// Entrée : { thread_context: { sit_id?, mission_id?, other_user_id } }
+// Entrée : { thread_context: { sit_id?, mission_id?, other_user_id, mode? } }
+// mode « reply_application » (lot ALMA2, 10/11/2026) : réponse du propriétaire
+// à une candidature reçue, à partir du mot du candidat.
 // Sortie : { draft: string, warnings: string[] } ou { available: false, reason, message }
 // Rate limit : 5/h. Vouvoiement absolu, quelle que soit l'audience.
 //
@@ -143,6 +145,29 @@ Deno.serve(async (req) => {
       return json({ error: "Forbidden: aucun lien avec cette annonce ou mission" }, 403);
     }
 
+    // Lot ALMA2 : réponse du propriétaire à une candidature. Seul l'auteur de
+    // l'annonce y a droit, et la candidature doit exister.
+    const replyMode = ctx.mode === "reply_application";
+    let candidature: { message: string | null; status: string | null } | null = null;
+    if (replyMode) {
+      if (!ctx.sit_id || posterId !== userId) {
+        return json({ error: "Forbidden: réponse réservée à l'auteur de l'annonce" }, 403);
+      }
+      const { data: app } = await adminClient
+        .from("applications")
+        .select("message, status")
+        .eq("sit_id", ctx.sit_id)
+        .eq("sitter_id", ctx.other_user_id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!app) return json({ error: "Candidature introuvable" }, 404);
+      candidature = {
+        message: typeof (app as any).message === "string" ? String((app as any).message).slice(0, 1500) : null,
+        status: (app as any).status ?? null,
+      };
+    }
+
     // Profils (lecture autorisée seulement après la vérification du lien)
     const [meRes, otherRes, mySitterRes] = await Promise.all([
       adminClient.from("profiles").select("first_name, bio, city").eq("id", userId).maybeSingle(),
@@ -154,7 +179,23 @@ Deno.serve(async (req) => {
     const meFirstName = (meRes.data as any)?.first_name ?? null;
     const otherFirstName = (otherRes.data as any)?.first_name ?? null;
     const register = "vouvoiement";
-    const system = `Vous êtes Alma, narratrice IA de Guardiens.fr. Vous rédigez UN PREMIER MESSAGE court (60 à 120 mots) pour engager la conversation avec ${otherFirstName ?? "l'autre membre"}. Utilisez le vouvoiement, quelle que soit l'audience (jamais de tutoiement, même pour un sitter).
+    const replySystem = `Vous êtes Alma, compagne IA de Guardiens.fr. Le propriétaire d'une annonce de garde répond à la candidature de ${otherFirstName ?? "la personne"}. Vous rédigez SA RÉPONSE, courte (50 à 110 mots), au vouvoiement.
+
+${STYLE_GUARDRAILS}
+
+${DECLARED_FACTS_RULE}
+
+RÈGLE ABSOLUE : vous produisez TOUJOURS une réponse exploitable, sans refus ni demande d'informations.
+
+Contraintes :
+- Remercier ${otherFirstName ?? "la personne"} par son prénom pour son message.
+- Reprendre UN élément concret de son message ou de son profil.
+- Proposer la suite : une question ouverte, ou un échange par téléphone ou en visio pour faire connaissance. Une rencontre en personne reste facultative : vous pouvez la proposer, jamais l'exiger.
+- Ne promettre ni accord ni refus : la décision reste au propriétaire.
+- Ton chaleureux, simple, sans superlatif.
+- Ne signez pas "Alma" ni "L'IA" : c'est le message que le propriétaire enverra lui-même.`;
+
+    const openerSystem = `Vous êtes Alma, narratrice IA de Guardiens.fr. Vous rédigez UN PREMIER MESSAGE court (60 à 120 mots) pour engager la conversation avec ${otherFirstName ?? "l'autre membre"}. Utilisez le vouvoiement, quelle que soit l'audience (jamais de tutoiement, même pour un sitter).
 
 ${STYLE_GUARDRAILS}
 
@@ -167,6 +208,7 @@ Contraintes :
 - Se présenter en 1 phrase, mentionner UN élément concret vu dans l'annonce/mission ou le profil de l'autre partie.
 - Poser 1 question ouverte.
 - Ne signez pas "Alma" ni "L'IA" : c'est le message que la personne enverra elle-même.`;
+    const system = replyMode ? replySystem : openerSystem;
 
     const userPayload = {
       audience,
@@ -182,12 +224,13 @@ Contraintes :
       },
       annonce: sitCtx,
       mission: missionCtx,
+      ...(candidature ? { candidature } : {}),
     };
 
     const r = await callLovableAI({
       messages: [
         { role: "system", content: system },
-        { role: "user", content: `Contexte (certains champs peuvent être null, ignorez-les) :\n${JSON.stringify(userPayload, null, 2)}\n\nRédigez le premier message. Vous ne demandez rien, vous produisez directement le message.` },
+        { role: "user", content: `Contexte (certains champs peuvent être null, ignorez-les) :\n${JSON.stringify(userPayload, null, 2)}\n\n${replyMode ? "Rédigez la réponse à cette candidature." : "Rédigez le premier message."} Vous ne demandez rien, vous produisez directement le message.` },
       ],
       tools: [{
         type: "function",
@@ -197,7 +240,7 @@ Contraintes :
           parameters: {
             type: "object",
             properties: {
-              draft: { type: "string", minLength: 60, maxLength: 900 },
+              draft: { type: "string", minLength: 50, maxLength: 900 },
             },
             required: ["draft"],
             additionalProperties: false,
@@ -237,7 +280,7 @@ Contraintes :
         user_id: userId,
         surface: "alma_message_opener",
         reason: "llm_refusal",
-        extra: { audience, has_sit: !!ctx.sit_id, has_mission: !!ctx.mission_id, raw_preview: draft.slice(0, 200) },
+        extra: { audience, mode: replyMode ? "reply_application" : "opener", has_sit: !!ctx.sit_id, has_mission: !!ctx.mission_id, raw_preview: draft.slice(0, 200) },
       });
       return unavailable("llm_refusal");
     }

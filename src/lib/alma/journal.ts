@@ -190,43 +190,48 @@ const TYPE_LABELS: Record<AlmaJournalRuleKey, string> = {
   envie_benevolat: "UNE ENVIE D'ALMA",
 };
 
-const INVITATIONS: Record<AlmaJournalRuleKey, AlmaJournalInvitation> = {
-  candidatures_non_lues: {
-    question: "Vous voulez que je vous dise qui a écrit ?",
-    replies: ["Oui, résumez moi", "J'y vais moi même"],
-  },
-  photos_logement: {
-    question: "Vous avez des photos quelque part, ou il faut les faire ?",
-    replies: ["J'en ai, je les ajoute", "Il faut que je les prenne", "Montrez moi ce qui manque"],
-  },
-  annonce_sans_candidature: {
-    question: "Vous voulez qu'on regarde ensemble ce qui retient les candidats ?",
-    replies: ["Oui, regardons", "Relisez mon annonce", "Je préfère attendre"],
-  },
-  alentours: {
-    question: "Vous me racontez vos alentours, et j'en fais deux lignes ?",
-    replies: ["Je vous raconte", "Proposez moi un texte", "Je l'écris moi même"],
-  },
-  annonce_brouillon: {
-    question: "On reprend ce brouillon ensemble ?",
-    replies: ["Oui, reprenons", "Dites moi ce qui manque", "Plus tard"],
-  },
-  profil: {
-    question: "On regarde les deux éléments qui comptent le plus ?",
-    replies: ["Qu'est-ce qui manque à mon profil ?", "Un coup de main près de chez moi"],
-  },
-  profil_gardien: {
-    question: "On regarde les deux éléments qui comptent le plus ?",
-    replies: ["Qu'est-ce qui manque à mon profil ?", "Un coup de main près de chez moi"],
-  },
-  candidature_en_attente: {
-    question: "Vous voulez que je vous aide à relancer ?",
-    replies: ["Aidez moi à relancer", "Je patiente encore"],
-  },
-  envie_benevolat: {
-    question: "Cela vous dit d'en savoir plus sur ce refuge ?",
-    replies: ["Racontez moi", "Une autre fois"],
-  },
+/**
+ * Lot ALMA2b (10/11/2026, demande de Jérémie : les réponses proposées varient) :
+ * chaque règle porte deux invitations ; la première est la formulation
+ * historique, la graine du jour choisit.
+ */
+const INVITATIONS: Record<AlmaJournalRuleKey, AlmaJournalInvitation[]> = {
+  candidatures_non_lues: [
+    { question: "Vous voulez que je vous dise qui a écrit ?", replies: ["Oui, résumez moi", "J'y vais moi même"] },
+    { question: "Je vous présente les personnes qui ont écrit ?", replies: ["Oui, présentez-les moi", "Je les lis moi même"] },
+  ],
+  photos_logement: [
+    { question: "Vous avez des photos quelque part, ou il faut les faire ?", replies: ["J'en ai, je les ajoute", "Il faut que je les prenne", "Montrez moi ce qui manque"] },
+    { question: "Quelles pièces montrer en premier, d'après vous ?", replies: ["Dites-moi lesquelles", "Je les ajoute maintenant", "Quelle lumière choisir ?"] },
+  ],
+  annonce_sans_candidature: [
+    { question: "Vous voulez qu'on regarde ensemble ce qui retient les candidats ?", replies: ["Oui, regardons", "Relisez mon annonce", "Je préfère attendre"] },
+    { question: "On cherche ensemble ce qui fera venir les gardiens ?", replies: ["Oui, cherchons", "Que changer en premier ?", "J'attends encore un peu"] },
+  ],
+  alentours: [
+    { question: "Vous me racontez vos alentours, et j'en fais deux lignes ?", replies: ["Je vous raconte", "Proposez moi un texte", "Je l'écris moi même"] },
+    { question: "Qu'est-ce qu'on trouve à deux pas de chez vous ?", replies: ["Je vous dis tout", "Écrivez-le avec moi", "Je m'en occupe"] },
+  ],
+  annonce_brouillon: [
+    { question: "On reprend ce brouillon ensemble ?", replies: ["Oui, reprenons", "Dites moi ce qui manque", "Plus tard"] },
+    { question: "Il reste peu de chose pour le publier, on regarde ?", replies: ["Oui, regardons", "Qu'est-ce qui reste ?", "Ce soir"] },
+  ],
+  profil: [
+    { question: "On regarde les deux éléments qui comptent le plus ?", replies: ["Qu'est-ce qui manque à mon profil ?", "Un coup de main près de chez moi"] },
+    { question: "On complète votre profil en deux gestes ?", replies: ["Par quoi je commence ?", "Quelle photo choisir ?"] },
+  ],
+  profil_gardien: [
+    { question: "On regarde les deux éléments qui comptent le plus ?", replies: ["Qu'est-ce qui manque à mon profil ?", "Un coup de main près de chez moi"] },
+    { question: "On rend votre profil rassurant pour les propriétaires ?", replies: ["Par quoi je commence ?", "Quels savoir-faire ajouter ?"] },
+  ],
+  candidature_en_attente: [
+    { question: "Vous voulez que je vous aide à relancer ?", replies: ["Aidez moi à relancer", "Je patiente encore"] },
+    { question: "Un petit mot au propriétaire, on l'écrit ensemble ?", replies: ["Oui, écrivons-le", "J'attends sa réponse"] },
+  ],
+  envie_benevolat: [
+    { question: "Cela vous dit d'en savoir plus sur ce refuge ?", replies: ["Racontez moi", "Une autre fois"] },
+    { question: "Je vous présente ce refuge près de chez vous ?", replies: ["Oui, présentez-le moi", "Plus tard"] },
+  ],
 };
 
 const OWNER_ORDER: AlmaJournalRuleKey[] = [
@@ -329,6 +334,8 @@ export function buildAlmaJournal(facts: AlmaJournalFacts): AlmaJournalPage {
   }
 
   const entries = keys.map((key) => buildEntry(key, facts));
-  const invitation = entries.length > 0 ? INVITATIONS[entries[0].ruleKey] : null;
+  const seed = Math.abs(Math.trunc(facts.variantSeed ?? 0));
+  const variants = entries.length > 0 ? INVITATIONS[entries[0].ruleKey] : null;
+  const invitation = variants ? variants[seed % variants.length] : null;
   return { entries, invitation };
 }

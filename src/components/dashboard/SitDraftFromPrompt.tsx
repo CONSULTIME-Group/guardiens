@@ -17,6 +17,7 @@ import { useAlmaEvolution } from "@/hooks/useAlmaEvolution";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
+import { trackCowrite } from "@/lib/alma/cowrite";
 import type { OwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
 
 const PLACEHOLDER =
@@ -95,6 +96,7 @@ export default function SitDraftFromPrompt({ secondary = false, demoted = false,
       }
       setAlmaMood("happy");
       window.setTimeout(() => setAlmaMood("attentive"), 1200);
+      trackCowrite("used", "annonce", { draft_id: data.draftId });
       void trackEvent("owner_draft_from_prompt_generated", {
         metadata: {
           prompt_length: clean.length,

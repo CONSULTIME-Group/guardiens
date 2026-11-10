@@ -374,6 +374,9 @@ export type EventType =
   | "admin_alma_export_csv_clicked"             // Export CSV depuis dashboard admin Alma
   // Alma Pass 5, compagnon culturel -----------------------------------------
   | "alma_cultural_fact_seen"                   // Fait culturel affiché (fact_id, fact_type, surface)
+  | "alma_cowrite_shown"                        // Lot ALMA2 : aide « Écrire avec Alma » à l'écran (moment)
+  | "alma_cowrite_used"                         // Lot ALMA2 : brouillon d'Alma inséré (moment)
+  | "alma_cowrite_sent"                         // Lot ALMA2 : texte écrit avec Alma envoyé ou publié (moment, edited)
   | "alma_cultural_fact_action_clicked"         // Clic action "En savoir plus" (fact_id, source_url)
   | "alma_cultural_fact_dismissed"              // Fait culturel fermé (fact_id, reason)
   | "admin_alma_cultural_facts_tab_seen"        // Onglet admin cultural facts affiché

@@ -37,7 +37,9 @@ import { resolvePanelLine } from "@/lib/alma/dock-panel";
 import {
   ALMA_COMPOSER_INTRO_STORAGE_KEY,
   promptSurfaceFromPath,
-  resolvePromptStarters,
+  resolveVariedStarters,
+  rememberStarters,
+  ALMA_STARTERS_RECENT_KEY,
   shouldShowComposerIntro,
 } from "@/lib/alma/prompt-starters";
 
@@ -483,8 +485,12 @@ function AlmaDockInner() {
   // Lot ALMA1 : comptage à l'affichage réel. Un aperçu rendu, ou le panneau
   // ouvert sur le murmure, compte une fois par murmure ; un fait compté vu
   // porte son mode d'affichage, une blague montrée ferme l'humour de la visite.
-  const peekVisible = !pillHiddenHere && !!peekId && !!whisper && !expanded && peekId === whisper.id;
-  const panelShowsWhisper = expanded && !!whisper && !entryContext?.instantLine;
+  // Lot ALMA2 : Alma masquée par le membre ou fenêtre ouverte, le dock ne
+  // rend rien (retours plus bas) : rien n'est compté vu (126 membres
+  // masquent Alma au 10/11/2026, leurs faits partaient comptés).
+  const dockRendered = !hidden && !hiddenLoading && !isModalOpen;
+  const peekVisible = dockRendered && !pillHiddenHere && !!peekId && !!whisper && !expanded && peekId === whisper.id;
+  const panelShowsWhisper = dockRendered && expanded && !!whisper && !entryContext?.instantLine;
   const peekTrackedRef = useRef<Set<string>>(new Set());
   const factSeenRef = useRef<Set<string>>(new Set());
   useEffect(() => {
@@ -662,7 +668,25 @@ function AlmaDockInner() {
   }, [userId, expanded, promptSurface, activeRole]);
 
 
-  const defaultStarters = resolvePromptStarters({
+  // Lot ALMA2b : réponses proposées variées. Les amorces montrées aux
+  // dernières ouvertures (6 au plus, par membre) sont lues à l'ouverture du
+  // panneau et écartées tant que le vivier le permet ; la graine change
+  // chaque jour. L'affichage reste stable pendant une ouverture.
+  const starterRecentKey = `${ALMA_STARTERS_RECENT_KEY}:${userId ?? "anon"}`;
+  const [starterRecent, setStarterRecent] = useState<string[]>([]);
+  // Lu au montage et à chaque fermeture, jamais panneau ouvert : les amorces
+  // ne changent pas sous les yeux du membre.
+  useEffect(() => {
+    if (expanded) return;
+    try {
+      const raw = localStorage.getItem(starterRecentKey);
+      const parsed = raw ? JSON.parse(raw) : [];
+      setStarterRecent(Array.isArray(parsed) ? parsed.filter((s: unknown): s is string => typeof s === "string") : []);
+    } catch {
+      setStarterRecent([]);
+    }
+  }, [expanded, starterRecentKey]);
+  const defaultStarters = resolveVariedStarters({
     surface: promptSurface,
     ctx: {
       hasDraftSit: evolution?.signals.hasDraftSit ?? false,
@@ -670,8 +694,22 @@ function AlmaDockInner() {
       activeRole: activeRole === "owner" ? "owner" : "sitter",
     },
     whisperType: currentWhisper?.type ?? null,
+    seed: Math.floor(Date.now() / 86_400_000),
+    recent: starterRecent,
   });
   const starters = entryContext?.readyReplies?.slice(0, 2) ?? defaultStarters;
+  const startersKey = starters.join("|");
+  useEffect(() => {
+    if (!expanded || !startersKey) return;
+    try {
+      const raw = localStorage.getItem(starterRecentKey);
+      const parsed = raw ? JSON.parse(raw) : [];
+      const prev = Array.isArray(parsed) ? parsed.filter((s: unknown): s is string => typeof s === "string") : [];
+      localStorage.setItem(starterRecentKey, JSON.stringify(rememberStarters(prev, startersKey.split("|"))));
+    } catch {
+      /* stockage indisponible : la graine du jour varie seule */
+    }
+  }, [expanded, startersKey, starterRecentKey]);
   const conversationAction = whisper?.primaryAction
     ? {
         label: whisper.primaryAction.label,

@@ -20,6 +20,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { detectContactDetails, contactDetailsMessage } from "@/lib/contactDetails";
 import { useToast } from "@/hooks/use-toast";
+import AlmaCoWrite from "@/components/ai/alma/AlmaCoWrite";
+import { draftMissionFromPhrase } from "@/lib/alma/missionDraft";
+import { cowriteEdited, trackCowrite } from "@/lib/alma/cowrite";
 import { useQueryClient } from "@tanstack/react-query";
 import PageMeta from "@/components/PageMeta";
 import { useAccessLevel, MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
@@ -167,6 +170,8 @@ const CreateSmallMission = () => {
   const [title, setTitle] = useState(() => prefill.title);
   const [titleTouched, setTitleTouched] = useState(false);
   const [description, setDescription] = useState(() => prefill.description);
+  // Lot ALMA2 : brouillon d'Alma posé dans le formulaire, pour mesurer la publication.
+  const almaMissionDraftRef = useRef<{ title: string; description: string } | null>(null);
   const category = useMemo(() => inferMissionCategory(title, description), [title, description]);
   const [descTouched, setDescTouched] = useState(false);
   // Lot E18 (décision de Jérémie du 25/10/2026) : ligne facultative
@@ -606,6 +611,14 @@ const CreateSmallMission = () => {
       return;
     }
     try { await trackFirstAction("mission_created", { category, mission_type: missionType }); } catch {}
+    const almaMissionDraft = almaMissionDraftRef.current;
+    if (almaMissionDraft) {
+      trackCowrite("sent", "besoin", {
+        mission_id: inserted?.id ?? null,
+        edited: cowriteEdited(almaMissionDraft.title, title) || cowriteEdited(almaMissionDraft.description, description),
+      });
+      almaMissionDraftRef.current = null;
+    }
     if (typeof profileCompletion === "number" && profileCompletion < MIN_COMPLETION_TO_APPLY) {
       try { await trackEvent("mission_created_incomplete_profile", { metadata: { profile_completion: profileCompletion, mission_id: inserted?.id ?? null } }); } catch {}
     }
@@ -737,6 +750,26 @@ const CreateSmallMission = () => {
                     </p>
                   )}
                 </div>
+
+                {/* Lot ALMA2 : écrire le besoin avec Alma, sous la question. */}
+                <AlmaCoWrite
+                  moment="besoin"
+                  intro="Un coup de main au potager, un trajet, une partie de jeu de société ? Dites-le simplement, je le mets en forme."
+                  placeholder="Ex : besoin d'aide pour tailler la haie samedi"
+                  onDraft={async (phrase) => {
+                    const res = await draftMissionFromPhrase(phrase);
+                    if ("message" in res) {
+                      toast({ title: "Alma", description: res.message });
+                      return false;
+                    }
+                    setTitle(res.title.slice(0, 120));
+                    setDescription(res.description);
+                    setTitleTouched(true);
+                    almaMissionDraftRef.current = { title: res.title, description: res.description };
+                    if (res.warnings.length > 0) toast({ title: "Brouillon prêt", description: res.warnings[0] });
+                    return true;
+                  }}
+                />
               </>
             )}
 

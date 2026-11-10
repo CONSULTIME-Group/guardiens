@@ -2,11 +2,15 @@
  * Alma Pass 1, Chantier 2 : brise-glace Messages.
  * S'affiche quand un thread est vide et qu'il y a un contexte sit ou mission.
  * Vouvoiement/tutoiement selon l'audience.
+ * Lot ALMA2 (10/11/2026) : mode « reply_application », réponse du propriétaire
+ * à une candidature reçue ; mesure commune alma_cowrite_* (src/lib/alma/cowrite.ts).
+ * Le parent monte ce composant une fois les messages du fil lus.
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
+import { trackCowrite, type CowriteMoment } from "@/lib/alma/cowrite";
 
 interface AlmaMessageOpenerProps {
   audience: "owner" | "sitter";
@@ -15,6 +19,8 @@ interface AlmaMessageOpenerProps {
   missionId?: string | null;
   otherUserId: string;
   onDraftReady: (text: string) => void;
+  /** « reply_application » : réponse du propriétaire à une candidature. */
+  mode?: "opener" | "reply_application";
 }
 
 export function AlmaMessageOpener({
@@ -24,7 +30,10 @@ export function AlmaMessageOpener({
   missionId,
   otherUserId,
   onDraftReady,
+  mode = "opener",
 }: AlmaMessageOpenerProps) {
+  const replyMode = mode === "reply_application";
+  const moment: CowriteMoment = replyMode ? "reponse_candidature" : "premier_message";
   const [dismissed, setDismissed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
@@ -32,14 +41,17 @@ export function AlmaMessageOpener({
 
   useEffect(() => {
     void trackEvent("alma_message_opener_seen", {
-      metadata: { audience, has_sit: !!sitId, has_mission: !!missionId },
+      metadata: { audience, has_sit: !!sitId, has_mission: !!missionId, mode },
     });
-  }, [audience, sitId, missionId]);
+    trackCowrite("shown", moment, { has_sit: !!sitId, has_mission: !!missionId });
+  }, [audience, sitId, missionId, mode, moment]);
 
   if (dismissed) return null;
 
   const message = unavailable
     ? "Je n'arrive pas à vous aider à rédiger là tout de suite. Écrivez-lui avec vos mots, c'est ce qui marche le mieux."
+    : replyMode
+    ? `Je vous prépare une réponse à ${prenom} à partir de son message ? Vous relisez avant d'envoyer.`
     : audience === "owner"
     ? `Vous voulez que je vous prépare un premier message à partir de votre annonce et du profil de ${prenom} ? Vous relisez avant d'envoyer.`
     : `Voulez-vous que je vous prépare un premier message à partir de cette annonce et de votre bio ? Vous gardez le contrôle.`;
@@ -53,6 +65,7 @@ export function AlmaMessageOpener({
             sit_id: sitId ?? undefined,
             mission_id: missionId ?? undefined,
             other_user_id: otherUserId,
+            ...(replyMode ? { mode: "reply_application" } : {}),
           },
         },
       });
@@ -68,8 +81,9 @@ export function AlmaMessageOpener({
       if (!draft) throw new Error("Aucun brouillon reçu");
       onDraftReady(draft);
       void trackEvent("alma_message_opener_generated", {
-        metadata: { audience, has_sit: !!sitId, has_mission: !!missionId },
+        metadata: { audience, has_sit: !!sitId, has_mission: !!missionId, mode },
       });
+      trackCowrite("used", moment, { has_sit: !!sitId, has_mission: !!missionId });
       setDismissed(true);
       toast({
         title: "Brouillon Alma prêt",

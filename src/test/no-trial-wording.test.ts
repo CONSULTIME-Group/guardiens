@@ -64,6 +64,8 @@ const ALLOWED_FILES = new Set<string>([
   // motif d'interdiction, jamais une copy servie à l'utilisateur.
   "supabase/functions/draft-application-letter/index.ts",
   "supabase/functions/draft-conversation-opener/index.ts",
+  // Lot ALMA2 (10/11/2026) : même regex PROSCRIBED, motif d'interdiction.
+  "supabase/functions/draft-mission-from-prompt/index.ts",
   "supabase/functions/draft-review/index.ts",
   "supabase/functions/explain-affinity-score/index.ts",
   "supabase/functions/generate-house-guide/index.ts",
