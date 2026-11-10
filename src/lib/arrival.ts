@@ -3,6 +3,7 @@
  * C1 à C4 et P1 à P4. Aucune lecture réseau ici, tout est testable.
  */
 import { finishUrl, type DeparturePeriod } from "../../supabase/functions/_shared/owner-departure-logic.ts";
+import { PRESENCE_EXPECTED_OPTIONS, PRESENCE_EXPECTED_LABELS } from "./profileMatchingOptions";
 
 export type ArrivalStep = "C1" | "C2" | "C3" | "C4" | "P1" | "P2" | "P3" | "P4" | "G1" | "G2" | "G3" | "G4" | "G5" | "N1" | "E1";
 
@@ -81,11 +82,9 @@ export async function resolveProximity(
 
 // ── P3 : présence attendue ───────────────────────────────────────────────
 /** Libellés de la maquette → valeurs existantes de PRESENCE_EXPECTED_OPTIONS. */
-export const ARRIVAL_PRESENCE_OPTIONS: { value: string; label: string }[] = [
-  { value: "100% sur place", label: "Sur place toute la journée" },
-  { value: "Télétravail OK", label: "En télétravail chez vous" },
-  { value: "Absences courtes OK", label: "Libre de s'absenter quelques heures" },
-];
+export const ARRIVAL_PRESENCE_OPTIONS: { value: string; label: string }[] = PRESENCE_EXPECTED_OPTIONS.map(
+  (value) => ({ value, label: PRESENCE_EXPECTED_LABELS[value] }),
+);
 
 export const ARRIVAL_MAIN_LANGUAGES = ["Français", "Anglais", "Espagnol"];
 

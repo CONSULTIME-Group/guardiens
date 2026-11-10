@@ -101,7 +101,7 @@ import { declaredHelpOffer, hasEntraideFacet, entraideOfferBandText, lastVisitLa
 import {
   meetingPreferenceLabel,
   homeFactLabel,
-  assetsLabel, guardExperienceLabel,
+  assetsLabel, guardExperienceLabel, passionsOf,
   listLabel,
   companionsLabel,
   ownerHostedSitsCount,
@@ -554,7 +554,7 @@ export default function PublicSitterProfile() {
       // du 23/08/2026), sauf sensitivities (donnée de santé, jamais exposée).
       const PUBLIC_SITTER_COLS =
         "user_id, motivation, sitter_type, accompanied_by, lifestyle, animal_types, has_vehicle, has_license, geographic_radius, min_stay_duration, is_available, competences, special_animal_skills, preferred_frequency, min_notice, preferred_environments, farm_animals_ok, own_animals, reply_median_minutes, travels_with_children, travels_with_own_animals, work_during_sit, availability_during, experience_years, languages, interests, life_pace, meeting_preference, travel_zones";
-      const [profileRes, baseProfileRes, sitterRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes, guardExpRes] =
+      const [profileRes, baseProfileRes, sitterRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes, guardExpRes, sitterPassionsRes, ownerPassionsRes] =
         await Promise.all([
           supabase.from("public_profiles").select(PUBLIC_PROFILE_COLS).eq("id", id).maybeSingle(),
           // Lot Y2 (P3-12) : profiles n'est lisible que du titulaire. Un
@@ -601,6 +601,10 @@ export default function PublicSitterProfile() {
           // Lot SC2 : gardes réalisées, lues à part. Avant l'application de
           // la migration 0131, la colonne manque et la fiche reste entière.
           (supabase as any).from("public_sitter_profiles").select("guard_experience").eq("user_id", id).maybeSingle(),
+          // Lot SC5 : autres passions, lues à part. Avant l'application de la
+          // migration 0134, la colonne manque et la fiche reste entière.
+          (supabase as any).from("public_sitter_profiles").select("other_passions").eq("user_id", id).maybeSingle(),
+          (supabase as any).from("public_owner_profiles").select("other_passions").eq("user_id", id).maybeSingle(),
         ]);
 
       if (!active) return;
@@ -622,9 +626,15 @@ export default function PublicSitterProfile() {
       if (!fetchedPublicProfile) return;
 
       const fetchedSitterProfile = sitterRes?.data
-        ? { ...sitterRes.data, guard_experience: guardExpRes?.data?.guard_experience ?? null }
+        ? {
+            ...sitterRes.data,
+            guard_experience: guardExpRes?.data?.guard_experience ?? null,
+            other_passions: passionsOf(sitterPassionsRes?.data),
+          }
         : null;
-      const fetchedOwnerProfile = (ownerRes?.data as OwnerProfileData | null) ?? null;
+      const fetchedOwnerProfile = ownerRes?.data
+        ? ({ ...ownerRes.data, other_passions: passionsOf(ownerPassionsRes?.data) } as OwnerProfileData)
+        : null;
       const fetchedEmergencyProfile = emergencyRes?.data ?? null;
       const fetchedMissionCount = missionsRes?.count ?? 0;
 
@@ -1755,6 +1765,7 @@ export default function PublicSitterProfile() {
         const aboutFacts = [
           { label: "Langues", value: listLabel(sitterLanguages, ["Autre"]) },
           { label: "Centres d'intérêt", value: listLabel(sitterInterests) },
+          { label: "Autres passions", value: listLabel(passionsOf(sitterProfile)) },
           { label: "À la maison", value: homeFactLabel(sitterProfile?.own_animals, sitterProfile?.life_pace) },
           { label: "Expérience de garde", value: guardExperienceLabel(sitterProfile?.guard_experience) },
           { label: "Atouts", value: assetsLabel(declaredCertifications, sitterProfile?.has_license, sitterProfile?.has_vehicle) },
@@ -2139,6 +2150,11 @@ export default function PublicSitterProfile() {
             detail: speciesLabel || null,
           });
         }
+        // Lot SC5 : centres d'intérêt et autres passions du propriétaire.
+        const ownerAnimates: string[] = [
+          ...((ownerProfile as any)?.interests ?? []),
+          ...passionsOf(ownerProfile),
+        ].filter(Boolean);
         const envLabel = (ownerProfile?.environments ?? [])
           .map((e) => ENV_LABELS[e] || e)
           .join(', ');
@@ -2169,7 +2185,7 @@ export default function PublicSitterProfile() {
               <StoryTiles tiles={tiles} />
 
               {/* Son mot d'accueil */}
-              {(ownerProfile?.welcome_notes || bio || (ownerProfile?.competences?.length ?? 0) > 0) && (
+              {(ownerProfile?.welcome_notes || bio || (ownerProfile?.competences?.length ?? 0) > 0 || ownerAnimates.length > 0) && (
               <section aria-label={`Mot d'accueil de ${firstName}`} className="scroll-mt-20">
                 <div className="mb-5">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
@@ -2199,6 +2215,16 @@ export default function PublicSitterProfile() {
                     <div className="flex flex-wrap gap-1.5">
                       {ownerProfile?.competences?.map((c: string) => (
                         <span key={c} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground/80 font-body">{c}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {ownerAnimates.length > 0 && (
+                  <div className="mt-6 space-y-2" data-testid="owner-animates">
+                    <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">Ce qui l'anime</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {ownerAnimates.map((c) => (
+                        <span key={c} className="bg-pastel-sage text-pastel-sage-ink rounded-full text-[13px] px-2.5 py-1 font-body">{c}</span>
                       ))}
                     </div>
                   </div>

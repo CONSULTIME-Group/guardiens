@@ -1,3 +1,4 @@
+import OtherPassionsField from "@/components/profile/OtherPassionsField";
 import { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -185,6 +186,7 @@ const OwnerStepIdentity = ({ data, onChange, onUploadPhoto }: Props) => {
           />
         </div>
       </div>
+      <OtherPassionsField table="owner_profiles" initial={data.other_passions ?? []} />
     </div>
   );
 };

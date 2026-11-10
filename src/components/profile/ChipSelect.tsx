@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ChipSelectProps {
@@ -10,9 +11,11 @@ interface ChipSelectProps {
   ariaLabel?: string;
   /** Désactive tous les chips (état lecture seule). */
   disabled?: boolean;
+  /** Libellé affiché par valeur (la valeur enregistrée ne change pas). */
+  labels?: Record<string, string>;
 }
 
-const ChipSelect = ({ options, selected, onChange, className, ariaLabelledBy, ariaLabel, disabled = false }: ChipSelectProps) => {
+const ChipSelect = ({ options, selected, onChange, className, ariaLabelledBy, ariaLabel, disabled = false, labels }: ChipSelectProps) => {
   const toggle = (option: string) => {
     onChange(
       selected.includes(option)
@@ -41,12 +44,14 @@ const ChipSelect = ({ options, selected, onChange, className, ariaLabelledBy, ar
               "inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-full text-sm font-medium transition-all border",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               disabled && "opacity-50 cursor-not-allowed",
+              // Design pastel (10/11/2026) : réponse choisie en sauge, coche visible.
               isSelected
-                ? "bg-primary text-primary-foreground border-primary"
+                ? "bg-pastel-sage text-pastel-sage-ink border-primary gap-1.5"
                 : "bg-background text-foreground border-border hover:border-primary/50"
             )}
           >
-            {option}
+            {isSelected && <Check className="h-4 w-4 shrink-0" aria-hidden />}
+            {labels?.[option] ?? option}
           </button>
         );
       })}

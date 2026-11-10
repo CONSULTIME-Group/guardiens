@@ -39,6 +39,7 @@ import {
   SITTER_TYPE_OPTIONS,
   WORK_DURING_SIT_OPTIONS,
   PRESENCE_EXPECTED_OPTIONS,
+  presenceExpectedLabel,
   IDEAL_SITTER_SCORED_OPTIONS,
   IDEAL_SITTER_DESCRIPTIVE_OPTIONS,
   LIFE_PACE_OPTIONS,
@@ -509,7 +510,7 @@ const OnboardingAffinity = () => {
                     <SelectTrigger id="presence-expected" className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
                     <SelectContent>
                       {PRESENCE_EXPECTED_OPTIONS.map((p) => (
-                        <SelectItem key={p} value={p}>{p}</SelectItem>
+                        <SelectItem key={p} value={p}>{presenceExpectedLabel(p)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

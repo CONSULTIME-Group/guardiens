@@ -65,6 +65,8 @@ export interface OwnerProfileData {
   // À propos de moi (matching), owner_profiles
   languages: string[];
   interests: string[];
+  /** Autres passions en texte libre (lot SC5), écrites par OtherPassionsField. */
+  other_passions: string[];
   life_pace: string;
   household_composition: string[];
   // Matching côté propriétaire
@@ -102,7 +104,7 @@ const defaultData: OwnerProfileData = {
   news_frequency: "", news_format: [], preferred_time: "", communication_notes: "",
   skill_categories: [], available_for_help: false,
   owner_competences: [], owner_competences_disponible: false, owner_skill_categories: [],
-  languages: [], interests: [], life_pace: "", household_composition: [], home_ambiance: [],
+  languages: [], interests: [], other_passions: [], life_pace: "", household_composition: [], home_ambiance: [],
 };
 
 /** Champs owner_profiles stockés en tableau de chaînes (colonnes NOT NULL côté base). */
@@ -262,6 +264,7 @@ export function useOwnerProfile() {
       owner_skill_categories: (p as any)?.skill_categories || [],
       languages: (o as any)?.languages || [],
       interests: (o as any)?.interests || [],
+      other_passions: (o as any)?.other_passions || [],
       life_pace: (o as any)?.life_pace || "",
       household_composition: (o as any)?.household_composition || [],
       home_ambiance: (o as any)?.home_ambiance || [],
