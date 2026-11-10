@@ -14556,6 +14556,7 @@ export type Database = {
           meeting_preference: string[] | null
           news_format: string[] | null
           news_frequency: string | null
+          other_passions: string[]
           overnight_guest: string | null
           preferred_sitter_types: string[] | null
           preferred_time: string | null
@@ -14587,6 +14588,7 @@ export type Database = {
           meeting_preference?: string[] | null
           news_format?: string[] | null
           news_frequency?: string | null
+          other_passions?: string[]
           overnight_guest?: string | null
           preferred_sitter_types?: string[] | null
           preferred_time?: string | null
@@ -14618,6 +14620,7 @@ export type Database = {
           meeting_preference?: string[] | null
           news_format?: string[] | null
           news_frequency?: string | null
+          other_passions?: string[]
           overnight_guest?: string | null
           preferred_sitter_types?: string[] | null
           preferred_time?: string | null
@@ -16935,6 +16938,7 @@ export type Database = {
           min_notice: string | null
           min_stay_duration: string | null
           motivation: string | null
+          other_passions: string[]
           own_animals: string[]
           prefer_visitors: boolean | null
           preferences_notes: string | null
@@ -16988,6 +16992,7 @@ export type Database = {
           min_notice?: string | null
           min_stay_duration?: string | null
           motivation?: string | null
+          other_passions?: string[]
           own_animals?: string[]
           prefer_visitors?: boolean | null
           preferences_notes?: string | null
@@ -17041,6 +17046,7 @@ export type Database = {
           min_notice?: string | null
           min_stay_duration?: string | null
           motivation?: string | null
+          other_passions?: string[]
           own_animals?: string[]
           prefer_visitors?: boolean | null
           preferences_notes?: string | null
@@ -18719,6 +18725,7 @@ export type Database = {
           interests: string[] | null
           languages: string[] | null
           life_pace: string | null
+          other_passions: string[] | null
           preferred_sitter_types: string[] | null
           presence_expected: string | null
           user_id: string | null
@@ -18914,6 +18921,7 @@ export type Database = {
           min_notice: string | null
           min_stay_duration: string | null
           motivation: string | null
+          other_passions: string[] | null
           own_animals: string[] | null
           preferred_environments: string[] | null
           preferred_frequency: string | null
@@ -21453,6 +21461,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      valid_other_passions: { Args: { p: string[] }; Returns: boolean }
       valid_travel_zones: { Args: { z: string[] }; Returns: boolean }
     }
     Enums: {
