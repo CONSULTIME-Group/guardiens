@@ -117,9 +117,13 @@ const PageMeta = ({
   // seule fois, donc jamais dupliqué si la page le portait déjà.
   const fullTitle = `${titleWithoutSuffix} | ${SITE_NAME}`;
 
-  // Le domaine de preview reste hors index : index.html pose déjà
-  // « noindex, nofollow » sur googlebot, on ne le contredit pas en écrivant
-  // « index, follow » dans la meta robots générique.
+  // Le domaine de preview reste hors index : index.html y pose robots,
+  // googlebot et canonical. PageMeta réécrit les trois (lot SEO-GB1) : sur
+  // le domaine de preview, googlebot reste « noindex, nofollow » ; ailleurs,
+  // toute balise googlebot est retirée. Sans ce retrait, une copie Prerender
+  // gardait la googlebot du script de preview avec robots « index, follow »
+  // (291 pages sur 784, audit du 10/11/2026), et Google applique la plus
+  // restrictive.
   const isPreviewHost =
     typeof window !== "undefined" && /\.lovable\.app$/i.test(window.location.hostname);
   const jsonLdKey = jsonLd ? JSON.stringify(jsonLd) : "";
@@ -191,6 +195,13 @@ const PageMeta = ({
             ? "noindex, follow"
             : "index, follow",
     });
+
+    // Lot SEO-GB1 : googlebot ne contredit jamais robots hors preview.
+    if (isPreviewHost) {
+      upsertMetaTag({ attr: "name", key: "googlebot", content: "noindex, nofollow" });
+    } else {
+      removeMetaTag({ attr: "name", key: "googlebot" });
+    }
 
     // Écrase la meta description statique (index.html) qui sinon reste en
     // premier dans le DOM et est lue par les crawlers avant la nôtre.
