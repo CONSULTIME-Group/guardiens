@@ -156,6 +156,22 @@
     --info-soft: 210 60% 96%;
     --info-border: 210 60% 80%;
 
+    /* Pastels (lot SC1, 10/11/2026) : un fond doux et une encre lisible par
+       famille. Sauge = affinités, pêche = fiche publique, miel = entraide,
+       ciel = trajets. Contraste encre sur fond supérieur à 6:1. */
+    --pastel-sage: 140 27% 91%;
+    --pastel-sage-ink: 154 44% 22%;
+    --pastel-peach: 23 79% 92%;
+    --pastel-peach-ink: 21 53% 35%;
+    --pastel-honey: 43 78% 91%;
+    --pastel-honey-ink: 42 75% 25%;
+    --pastel-sky: 208 43% 93%;
+    --pastel-sky-ink: 208 40% 30%;
+    /* Teintes moyennes pour la barre du score. */
+    --pastel-peach-mid: 22 68% 74%;
+    --pastel-sage-mid: 146 27% 60%;
+    --pastel-honey-mid: 44 68% 65%;
+
     /* Password strength meter (4 niveaux progressifs cohérents avec la palette) */
     --strength-weak: 0 72% 50%;
     --strength-medium: 25 90% 55%;
@@ -250,6 +266,18 @@
     --info-foreground: 160 10% 8%;
     --info-soft: 210 30% 20%;
     --info-border: 210 40% 35%;
+
+    --pastel-sage: 153 20% 18%;
+    --pastel-sage-ink: 140 40% 80%;
+    --pastel-peach: 21 25% 18%;
+    --pastel-peach-ink: 24 70% 82%;
+    --pastel-honey: 42 25% 17%;
+    --pastel-honey-ink: 43 70% 78%;
+    --pastel-sky: 208 25% 18%;
+    --pastel-sky-ink: 208 50% 82%;
+    --pastel-peach-mid: 22 50% 55%;
+    --pastel-sage-mid: 146 25% 45%;
+    --pastel-honey-mid: 44 50% 50%;
 
     --strength-weak: 0 65% 55%;
     --strength-medium: 25 80% 55%;

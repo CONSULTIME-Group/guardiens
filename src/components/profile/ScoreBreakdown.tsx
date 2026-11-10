@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ChevronDown, Check, X, Info, Sparkles, RotateCcw } from "lucide-react";
+import { ChevronDown, Check, Info, Sparkles, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import SectionBadge from "./SectionBadge";
 
 export interface ScoreCriterion {
   label: string;
@@ -55,52 +56,54 @@ interface ScoreBreakdownProps {
   onReset?: () => void;
 }
 
-const Row = ({ c }: { c: ScoreCriterion }) => (
-  <li className="flex items-start gap-2 py-1.5">
-    <span
-      className={cn(
-        "mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full",
-        c.ok ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
-      )}
-      aria-hidden
-    >
-      {c.ok ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+/** Couleur de chaque groupe (design pastel du 10/11/2026). */
+export const SCORE_GROUP_TONE: Record<ScoreGroupId, { box: string; ink: string; bar: string; icon: "heart" | "paw" | "hand" }> = {
+  trust: { box: "bg-pastel-peach", ink: "text-pastel-peach-ink", bar: "bg-pastel-peach-mid", icon: "heart" },
+  match: { box: "bg-pastel-sage", ink: "text-pastel-sage-ink", bar: "bg-pastel-sage-mid", icon: "paw" },
+  help: { box: "bg-pastel-honey", ink: "text-pastel-honey-ink", bar: "bg-pastel-honey-mid", icon: "hand" },
+};
+
+const Mark = ({ ok }: { ok: boolean }) =>
+  ok ? (
+    <span aria-hidden className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+      <Check className="h-3.5 w-3.5" />
     </span>
+  ) : (
+    <span aria-hidden className="mt-0.5 inline-block h-6 w-6 shrink-0 rounded-full border-2 border-dashed border-muted-foreground/40" />
+  );
+
+const Row = ({ c }: { c: ScoreCriterion }) => (
+  <li className="flex items-start gap-3 py-2">
+    <Mark ok={c.ok} />
     <div className="flex-1 min-w-0">
       <div className="flex items-baseline justify-between gap-2">
-        <p className={cn("text-xs leading-snug", c.ok ? "text-foreground" : "text-muted-foreground")}>
+        <p className="text-[15px] leading-snug text-foreground">
           {c.label}
+          <span className="sr-only">{c.ok ? ", fait" : ", à compléter"}</span>
         </p>
         <span
           className={cn(
-            "text-[11px] tabular-nums shrink-0",
-            c.ok ? "text-primary font-medium" : "text-muted-foreground"
+            "text-sm tabular-nums shrink-0",
+            c.ok ? "text-primary font-semibold" : "text-muted-foreground"
           )}
         >
           {c.ok ? `+${c.points}` : `${c.points} pts`}
         </span>
       </div>
-      {c.hint && !c.ok && <p className="text-[11px] text-muted-foreground/80 mt-0.5">{c.hint}</p>}
+      {c.hint && !c.ok && <p className="text-[13px] text-muted-foreground mt-0.5">{c.hint}</p>}
     </div>
   </li>
 );
 
 const SignalRow = ({ s }: { s: MatchSignal }) => (
-  <li className="flex items-start gap-2 py-1.5" data-testid="match-signal">
-    <span
-      className={cn(
-        "mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full",
-        s.ok ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
-      )}
-      aria-hidden
-    >
-      {s.ok ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
-    </span>
+  <li className="flex items-start gap-3 py-2" data-testid="match-signal">
+    <Mark ok={s.ok} />
     <div className="flex-1 min-w-0">
-      <p className={cn("text-xs leading-snug", s.ok ? "text-foreground" : "text-muted-foreground")}>
+      <p className="text-[15px] leading-snug text-foreground">
         {s.label}
+        <span className="sr-only">{s.ok ? ", répondu" : ", à compléter"}</span>
       </p>
-      <p className="text-[11px] text-muted-foreground/80 mt-0.5">{s.effect}</p>
+      <p className="text-[13px] text-muted-foreground mt-0.5">{s.effect}</p>
     </div>
   </li>
 );
@@ -136,7 +139,7 @@ const ScoreBreakdown = ({
   return (
     <div
       className={cn(
-        "rounded-lg border bg-card/50 overflow-hidden transition-colors",
+        "rounded-[20px] border bg-card overflow-hidden transition-colors",
         showPreview ? "border-primary/40 shadow-sm" : "border-border"
       )}
     >
@@ -189,8 +192,8 @@ const ScoreBreakdown = ({
         aria-expanded={open}
       >
         <div className="flex items-center gap-2 min-w-0">
-          <Info className="h-3.5 w-3.5 text-primary shrink-0" />
-          <p className="text-xs font-medium text-foreground truncate">
+          <Info className="h-4 w-4 text-primary shrink-0" aria-hidden />
+          <p className="text-sm font-medium text-foreground truncate">
             Ce que mesure votre score
           </p>
         </div>
@@ -203,8 +206,8 @@ const ScoreBreakdown = ({
       </button>
 
       {open && (
-        <div className="px-3 pb-3 pt-1 space-y-3 border-t border-border">
-          <p className="text-[11px] text-muted-foreground leading-snug pt-2">
+        <div className="px-3 pb-3 pt-1 space-y-3.5 border-t border-border">
+          <p className="text-sm text-muted-foreground leading-snug pt-2">
             {showPreview ? (
               <>
                 Aperçu du score si vous sauvegardez maintenant&nbsp;:
@@ -228,28 +231,41 @@ const ScoreBreakdown = ({
             )}
           </p>
 
-          {ordered.map(g => (
-            <div key={g.id} data-testid={`score-group-${g.id}`}>
-              <div className="flex items-baseline justify-between mb-1 gap-2">
-                <p className="text-[11px] uppercase tracking-wide font-semibold text-foreground">
-                  {g.title}
-                </p>
-                <span className="text-[11px] tabular-nums text-muted-foreground shrink-0">
-                  {sumOf(g.criteria, true)}/{sumOf(g.criteria, false)} pts
-                </span>
-              </div>
-              <ul className="space-y-0">
-                {g.criteria.map((c) => (
-                  <Row key={c.label} c={c} />
-                ))}
-                {g.id === "match" && matchSignals.map(s => (
-                  <SignalRow key={s.label} s={s} />
-                ))}
-              </ul>
-            </div>
-          ))}
+          <div
+            role="img"
+            aria-label={ordered.map(g => `${g.title} ${sumOf(g.criteria, true)} sur ${sumOf(g.criteria, false)}`).join(", ")}
+            className="flex h-3 gap-0.5 overflow-hidden rounded-full bg-muted"
+            data-testid="score-bar"
+          >
+            {ordered.map(g => (
+              <div key={g.id} className={SCORE_GROUP_TONE[g.id].bar} style={{ width: `${sumOf(g.criteria, true)}%` }} />
+            ))}
+          </div>
 
-          <p className="text-[11px] text-muted-foreground/80 leading-snug pt-1 border-t border-border/60">
+          {ordered.map(g => {
+            const tone = SCORE_GROUP_TONE[g.id];
+            return (
+              <section key={g.id} data-testid={`score-group-${g.id}`} className={cn("rounded-[18px] px-3 pt-3 pb-1.5", tone.box)}>
+                <div className="flex items-center gap-2.5 pb-2">
+                  <SectionBadge icon={tone.icon} tone={g.id === "trust" ? "peach" : g.id === "match" ? "sage" : "honey"} size={32} className="bg-card" />
+                  <p className={cn("flex-1 text-[15px] font-semibold leading-snug", tone.ink)}>{g.title}</p>
+                  <span className={cn("text-sm font-semibold tabular-nums shrink-0", tone.ink)}>
+                    {sumOf(g.criteria, true)}/{sumOf(g.criteria, false)}
+                  </span>
+                </div>
+                <ul className="mb-1.5 rounded-[14px] bg-card px-3 py-1">
+                  {g.criteria.map((c) => (
+                    <Row key={c.label} c={c} />
+                  ))}
+                  {g.id === "match" && matchSignals.map(s => (
+                    <SignalRow key={s.label} s={s} />
+                  ))}
+                </ul>
+              </section>
+            );
+          })}
+
+          <p className="text-[13px] text-muted-foreground leading-snug pt-1">
             {footnote}
           </p>
         </div>

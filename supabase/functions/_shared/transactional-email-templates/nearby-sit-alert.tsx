@@ -144,14 +144,16 @@ const NearbySitAlertEmail = ({
           ) : null}
 
           {canApply !== false && tripsQuestionHref ? (
-            <Text style={text}>
-              Cette maison demande une voiture sur place. Dites-nous comment vous
-              vous déplacez : votre réponse rejoint votre profil et compte double
-              sur ces annonces.{' '}
-              <Link href={buildProfileUrl(tripsQuestionHref)} style={linkStyle}>
+            <Section style={tripsBox}>
+              <Text style={tripsTitle}>Cette maison demande une voiture sur place.</Text>
+              <Text style={tripsText}>
+                Dites-nous comment vous vous déplacez : votre réponse rejoint votre
+                profil et compte double sur ces annonces.
+              </Text>
+              <Link href={buildProfileUrl(tripsQuestionHref)} style={tripsLink}>
                 Répondre sur mon profil
               </Link>
-            </Text>
+            </Section>
           ) : null}
 
           <Section style={{ textAlign: 'center', margin: '20px 0' }}>
@@ -231,3 +233,30 @@ const cardTitle = { fontSize: '16px', fontWeight: '600' as const, color: '#255B4
 const cardLine = { fontSize: '13px', color: '#5F5B53', margin: '4px 0' }
 const linkStyle = { color: '#2C6D50', textDecoration: 'underline' }
 const button = { backgroundColor: '#2C6D50', color: '#ffffff', padding: '12px 28px', borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const, textDecoration: 'none', display: 'inline-block' }
+
+// Encadré trajets (design pastel du 10/11/2026) : ciel doux, encre lisible.
+const tripsBox = {
+  backgroundColor: '#E6EEF5',
+  borderRadius: '16px',
+  padding: '14px 16px',
+  margin: '16px 0',
+}
+const tripsTitle = {
+  color: '#2E4F6B',
+  fontSize: '16px',
+  fontWeight: 600 as const,
+  lineHeight: '1.4',
+  margin: '0 0 6px',
+}
+const tripsText = {
+  color: '#24211C',
+  fontSize: '15px',
+  lineHeight: '1.5',
+  margin: '0 0 8px',
+}
+const tripsLink = {
+  color: '#2E4F6B',
+  fontSize: '15px',
+  fontWeight: 600 as const,
+  textDecoration: 'underline',
+}

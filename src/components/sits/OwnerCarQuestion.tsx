@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Car } from "lucide-react";
+import { Car, Footprints } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
-import RadioChipGroup from "@/components/profile/RadioChipGroup";
+import OptionCards from "@/components/profile/OptionCards";
 
 /**
  * Lot SC4 (10/11/2026, arène claude/arene/2026-11-10-score-completion) :
@@ -16,6 +16,11 @@ import RadioChipGroup from "@/components/profile/RadioChipGroup";
 export const CAR_OPTIONS = [
   { value: "yes", label: "Une voiture est nécessaire sur place" },
   { value: "no", label: "Tout est accessible à pied, à vélo ou en transports" },
+];
+
+export const CAR_CARDS = [
+  { ...CAR_OPTIONS[0], icon: Car },
+  { ...CAR_OPTIONS[1], icon: Footprints },
 ];
 
 /**
@@ -40,7 +45,7 @@ const OwnerCarQuestion = ({ propertyId, sitId, onAnswered }: Props) => {
   const [done, setDone] = useState(false);
   const [failed, setFailed] = useState(false);
   if (done) {
-    return <p role="status" className="text-xs text-muted-foreground mb-3">Merci, c'est noté pour vos gardiens.</p>;
+    return <p role="status" className="text-sm text-muted-foreground mb-3">Merci, c'est noté pour vos gardiens.</p>;
   }
   const answer = async (v: string) => {
     if (!v) return;
@@ -59,16 +64,18 @@ const OwnerCarQuestion = ({ propertyId, sitId, onAnswered }: Props) => {
     onAnswered?.(carRequired, answeredAt);
   };
   return (
-    <section className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2" aria-labelledby="owner-car-q" data-testid="owner-car-question">
-      <p id="owner-car-q" className="flex items-center gap-2 text-sm font-medium text-foreground">
-        <Car className="h-4 w-4 text-primary shrink-0" aria-hidden />
+    <section className="mb-4 rounded-[18px] bg-pastel-sky p-4 space-y-3" aria-labelledby="owner-car-q" data-testid="owner-car-question">
+      <p id="owner-car-q" className="flex items-center gap-2.5 text-base font-semibold leading-snug text-pastel-sky-ink">
+        <span aria-hidden className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-card">
+          <Car className="h-[18px] w-[18px]" />
+        </span>
         Pour la garde chez vous, une voiture est-elle nécessaire ?
       </p>
-      <RadioChipGroup ariaLabelledBy="owner-car-q" options={CAR_OPTIONS} value="" onChange={answer} />
-      <p className="text-xs text-muted-foreground">
+      <OptionCards ariaLabelledBy="owner-car-q" options={CAR_CARDS} value="" onChange={answer} />
+      <p className="text-sm text-muted-foreground">
         Les gardiens véhiculés passent devant quand la voiture compte. Votre réponse rejoint votre logement.
       </p>
-      {failed && <p className="text-xs text-destructive">Enregistrement impossible pour le moment. Réessayez.</p>}
+      {failed && <p className="text-sm text-destructive">Enregistrement impossible pour le moment. Réessayez.</p>}
     </section>
   );
 };

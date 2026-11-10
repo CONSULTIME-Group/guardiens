@@ -9,6 +9,7 @@ import type { SitterProfileData } from "@/hooks/useSitterProfile";
 import { LIFE_PACE_OPTIONS, SITTER_TYPE_OPTIONS, WORK_DURING_SIT_OPTIONS } from "@/lib/profileMatchingOptions";
 import TripsQuestion from "./TripsQuestion";
 import FieldRole from "./FieldRole";
+import SectionBadge from "./SectionBadge";
 
 const SITTER_TYPES = SITTER_TYPE_OPTIONS;
 const AVAILABILITY_OPTIONS = ["100% en congés", "En télétravail", "Flexible"];
@@ -29,10 +30,13 @@ const StepSitterProfile = ({ data, onChange }: Props) => {
 
       {/* Lot SC1 : les deux réponses qui comptent double dans le calcul
           d'affinité (présence, trajets) ouvrent la section. */}
-      <section className="space-y-5 rounded-xl border border-border bg-muted/30 p-4" aria-labelledby="lbl-during-sit" data-block="pendant-la-garde">
-        <h3 id="lbl-during-sit" className="font-heading text-lg font-semibold">Pendant la garde</h3>
+      <section className="space-y-5 rounded-[20px] border border-border bg-card p-4 shadow-sm" aria-labelledby="lbl-during-sit" data-block="pendant-la-garde">
+        <div className="flex items-center gap-3">
+          <SectionBadge icon="home" tone="sky" />
+          <h3 id="lbl-during-sit" className="font-heading text-xl font-semibold">Pendant la garde</h3>
+        </div>
         <div className="space-y-2" data-field="presence">
-          <Label htmlFor="work-during-sit-trigger">Votre présence pendant la garde</Label>
+          <Label htmlFor="work-during-sit-trigger" className="text-base">Votre présence pendant la garde</Label>
           <Select value={data.work_during_sit} onValueChange={v => onChange({ work_during_sit: v })}>
             <SelectTrigger id="work-during-sit-trigger" className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
             <SelectContent>
@@ -46,7 +50,8 @@ const StepSitterProfile = ({ data, onChange }: Props) => {
         <TripsQuestion
           value={{ has_license: data.has_license, has_vehicle: data.has_vehicle }}
           onChange={cols => onChange(cols)}
-          roleLine="Compte double sur les annonces où une voiture est nécessaire. Visible sur votre fiche."
+          roleLine="Compte double sur les annonces où une voiture est nécessaire."
+          roles={["public"]}
         />
       </section>
 
@@ -98,10 +103,13 @@ const StepSitterProfile = ({ data, onChange }: Props) => {
         <Switch id="is-available-switch" checked={data.is_available} onCheckedChange={v => onChange({ is_available: v })} />
       </div>
 
-      <section className="space-y-4" aria-labelledby="lbl-rhythm">
-        <h3 id="lbl-rhythm" className="font-heading text-lg font-semibold">Votre rythme</h3>
+      <section className="space-y-4 rounded-[20px] border border-border bg-card p-4 shadow-sm" aria-labelledby="lbl-rhythm">
+        <div className="flex items-center gap-3">
+          <SectionBadge icon="clock" tone="honey" />
+          <h3 id="lbl-rhythm" className="font-heading text-xl font-semibold">Votre rythme</h3>
+        </div>
         <div className="space-y-2">
-          <Label htmlFor="life-pace-trigger">Rythme de vie</Label>
+          <Label htmlFor="life-pace-trigger" className="text-base">Rythme de vie</Label>
           <Select value={data.life_pace} onValueChange={v => onChange({ life_pace: v })}>
             <SelectTrigger id="life-pace-trigger" className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
             <SelectContent>
@@ -115,7 +123,7 @@ const StepSitterProfile = ({ data, onChange }: Props) => {
           <FieldRole roles={["match", "public"]} />
         </div>
         <div className="space-y-2">
-          <Label id="lbl-lifestyle">Vos habitudes</Label>
+          <Label id="lbl-lifestyle" className="text-base">Vos habitudes</Label>
           <ChipSelect
             options={LIFESTYLE_OPTIONS}
             selected={data.lifestyle}

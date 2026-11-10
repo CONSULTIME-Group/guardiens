@@ -68,7 +68,7 @@ describe("lot SC4 : voiture nécessaire, côté propriétaire", () => {
 
   it("le formulaire Logement pose deux réponses datées, sans interrupteur", () => {
     const housing = readFileSync("src/components/owner-profile/OwnerStepHousing.tsx", "utf8");
-    expect(housing).toContain("CAR_OPTIONS");
+    expect(housing).toContain("CAR_CARDS");
     expect(housing).not.toMatch(/checked=\{data\.car_required\}/);
     const hook = readFileSync("src/hooks/useOwnerProfile.ts", "utf8");
     expect(hook).toContain('if ("car_required_answered_at" in stepData)');
