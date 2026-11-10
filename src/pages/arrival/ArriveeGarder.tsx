@@ -12,9 +12,10 @@ import { buildAffinityWrites } from "@/lib/affinityOnboardingWrites";
 import {
   ARRIVAL_ANIMALS, ARRIVAL_SITTER_TYPE_OPTIONS, ARRIVAL_WORK_OPTIONS, arrivalUrl, readCarry, toggleAnimals,
 } from "@/lib/arrival";
+import { TRIPS_OPTIONS, tripsAnswerOf, tripsColumns, type TripsAnswer, type TripsColumns } from "@/lib/trips";
 import { ArrivalShell, Eyebrow, MultiChoice, SaveError, SingleChoice, trackArrival, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
 
-export interface G2Input { userId: string; role: string | null; animals: string[]; work: string; sitterType: string; vehicle: boolean | null }
+export interface G2Input { userId: string; role: string | null; animals: string[]; work: string; sitterType: string; vehicle: boolean | null; license?: boolean | null }
 
 /** Écritures de G2 (sitter_profiles seulement). */
 export function buildG2Writes(i: G2Input) {
@@ -23,7 +24,7 @@ export function buildG2Writes(i: G2Input) {
     userId: i.userId, currentRole: role, chosenRole: role ?? "sitter",
     needsPostal: false, postalCode: "", departementCode: null,
     showSitterBlock: true, showOwnerBlock: false,
-    animalTypes: i.animals, workDuringSit: i.work, sitterType: i.sitterType, hasVehicle: i.vehicle,
+    animalTypes: i.animals, workDuringSit: i.work, sitterType: i.sitterType, hasVehicle: i.vehicle, hasLicense: i.license ?? null,
     presenceExpected: "", preferredSitterTypes: [], homeAmbiance: [], lifePace: "", interests: [], languages: [],
   }).sitter;
 }
@@ -38,7 +39,9 @@ const ArriveeGarder = () => {
   const [animals, setAnimals] = useState<string[]>([]);
   const [work, setWork] = useState("");
   const [sitterType, setSitterType] = useState("");
-  const [vehicle, setVehicle] = useState<boolean | null>(null);
+  // Lot SC3 : la question des trajets à trois réponses (src/lib/trips.ts),
+  // la même que dans le profil et à la candidature.
+  const [trips, setTrips] = useState<TripsColumns>({ has_license: null, has_vehicle: null });
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -51,7 +54,10 @@ const ArriveeGarder = () => {
       setAnimals(Array.isArray(sp.animal_types) ? sp.animal_types : []);
       setWork(sp.work_during_sit || "");
       setSitterType(sp.sitter_type || "");
-      setVehicle(typeof sp.has_vehicle === "boolean" ? sp.has_vehicle : null);
+      setTrips({
+        has_license: typeof sp.has_license === "boolean" ? sp.has_license : null,
+        has_vehicle: typeof sp.has_vehicle === "boolean" ? sp.has_vehicle : null,
+      });
       setLoading(false);
     }).catch(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
@@ -64,7 +70,7 @@ const ArriveeGarder = () => {
     if (!user || !valid) return;
     setSaving(true);
     setFailed(false);
-    const row = buildG2Writes({ userId: user.id, role: user.role ?? null, animals, work, sitterType, vehicle });
+    const row = buildG2Writes({ userId: user.id, role: user.role ?? null, animals, work, sitterType, vehicle: trips.has_vehicle, license: trips.has_license });
     if (row) {
       const { error } = await supabase.from("sitter_profiles").upsert(row as any, { onConflict: "user_id" });
       if (error) { setSaving(false); setFailed(true); return; }
@@ -112,9 +118,9 @@ const ArriveeGarder = () => {
       <SingleChoice id="g2-work" label={t("arrival.g2.work")} value={work} onChange={setWork} options={ARRIVAL_WORK_OPTIONS} />
       <SingleChoice id="g2-type" label={t("arrival.g2.type")} value={sitterType} onChange={setSitterType} options={ARRIVAL_SITTER_TYPE_OPTIONS} />
       <div className="space-y-1">
-        <SingleChoice id="g2-vehicle" label={t("arrival.g2.vehicle")} value={vehicle === null ? "" : vehicle ? "yes" : "no"}
-          onChange={(v) => setVehicle(v === "yes")}
-          options={[{ value: "yes", label: t("arrival.g2.yes") }, { value: "no", label: t("arrival.g2.no") }]} />
+        <SingleChoice id="g2-vehicle" label={t("arrival.g2.vehicle")} value={tripsAnswerOf(trips) ?? ""}
+          onChange={(v) => setTrips(tripsColumns((v || null) as TripsAnswer | null))}
+          options={TRIPS_OPTIONS} />
         <p className="text-sm text-muted-foreground">{t("arrival.g2.vehicle_help")}</p>
       </div>
       <SaveError show={failed} />

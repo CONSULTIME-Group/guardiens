@@ -150,11 +150,12 @@ describe("Parcours gardien v2", () => {
     expect((await screen.findByRole("button", { name: "Chats" })).getAttribute("aria-pressed")).toBe("true");
     expect(screen.getByTestId("g2-example")).toBeTruthy();
     expect(screen.getByRole("radio", { name: "Sur place et disponible toute la journée" }).getAttribute("aria-checked")).toBe("true");
-    fireEvent.click(screen.getByRole("radio", { name: "Oui" }));
+    // Lot SC3 : la question des trajets a trois réponses.
+    fireEvent.click(screen.getByRole("radio", { name: "J'ai mon véhicule" }));
     fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
     await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/arrivee/vous-connaitre?flow=sitter"));
     const row = writes.find((w) => w.table === "sitter_profiles")?.row as Record<string, unknown>;
-    expect(row).toMatchObject({ animal_types: ["Chats", "Chiens"], work_during_sit: "on_site", sitter_type: "Couple", has_vehicle: true });
+    expect(row).toMatchObject({ animal_types: ["Chats", "Chiens"], work_during_sit: "on_site", sitter_type: "Couple", has_vehicle: true, has_license: true });
     expect(row).not.toHaveProperty("languages");
   });
 

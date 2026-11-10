@@ -26,6 +26,8 @@ export interface AffinityWriteInput {
   languages: string[];
   /** Lot 2 (G2) : véhicule déclaré, facultatif ; null ou absent = non répondu, rien n'est écrit. */
   hasVehicle?: boolean | null;
+  /** Lot SC3 : permis déclaré par la question des trajets ; null ou absent = rien n'est écrit. */
+  hasLicense?: boolean | null;
 }
 
 type Row = Record<string, unknown>;
@@ -51,6 +53,7 @@ export function buildAffinityWrites(i: AffinityWriteInput): { profile: Row | nul
         work_during_sit: i.workDuringSit,
         sitter_type: i.sitterType,
         has_vehicle: i.hasVehicle ?? null,
+        has_license: i.hasLicense ?? null,
         ...shared,
       })
     : null;
