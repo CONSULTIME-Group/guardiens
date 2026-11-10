@@ -54,6 +54,23 @@ export function homeFactLabel(ownAnimals: string[] | null | undefined, lifePace:
   return cap(parts.join(", "));
 }
 
+/**
+ * « Gardes réalisées » (lot SC2, 10/11/2026) : valeur de
+ * sitter_profiles.guard_experience telle que la saisit le formulaire.
+ */
+const GUARD_EXPERIENCE_LABELS: Record<string, string> = {
+  "première fois": "Première garde à venir",
+  "1-5 gardes": "De 1 à 5 gardes",
+  "5-20 gardes": "De 5 à 20 gardes",
+  "20+ gardes": "Plus de 20 gardes",
+};
+
+export function guardExperienceLabel(value: string | null | undefined): string {
+  const v = String(value ?? "").trim();
+  if (!v) return "";
+  return GUARD_EXPERIENCE_LABELS[v.toLowerCase()] ?? cap(v);
+}
+
 /** « Atouts » : formations déclarées puis véhicule. */
 export function assetsLabel(certifications: string[], hasLicense: boolean | null | undefined, hasVehicle: boolean | null | undefined): string {
   const parts = [...certifications];

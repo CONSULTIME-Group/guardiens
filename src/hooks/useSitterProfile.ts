@@ -60,7 +60,6 @@ export interface SitterProfileData {
   meeting_preference: string[];
   handover_preference: string;
   languages: string[];
-  bonus_skills: string[];
   interests: string[];
   // À propos de moi (matching)
   life_pace: string;
@@ -103,7 +102,7 @@ const defaultData: SitterProfileData = {
   has_license: null, has_vehicle: null, vehicle_type: "", geographic_radius: null, travel_zones: null, /* jamais pré-écrit : la question attend une vraie réponse */ min_duration: 3, max_duration: 21, availability_dates: [], is_available: false,
   min_stay_duration: "flexible", preferred_frequency: "flexible", min_notice: "asap", preferred_periods: [], preferred_environments: [],
   strict_rules_ok: null, prefer_visitors: null, farm_animals_ok: null, preferences_notes: "",
-  meeting_preference: [], handover_preference: "", languages: [], bonus_skills: [], interests: [],
+  meeting_preference: [], handover_preference: "", languages: [], interests: [],
   life_pace: "", household_composition: [],
   special_animal_skills: [], work_during_sit: "", sensitivities: [],
   skill_categories: [], available_for_help: false, helps_with: "",
@@ -195,7 +194,6 @@ export function useSitterProfile() {
       meeting_preference: s?.meeting_preference || [],
       handover_preference: s?.handover_preference || "",
       languages: s?.languages || [],
-      bonus_skills: s?.bonus_skills || [],
       interests: s?.interests || [],
       life_pace: (s as any)?.life_pace || "",
       household_composition: (s as any)?.household_composition || [],
@@ -342,7 +340,7 @@ export function useSitterProfile() {
         "has_license", "has_vehicle", "vehicle_type", "geographic_radius", "travel_zones", "min_duration", "max_duration",
         "availability_dates", "is_available", "strict_rules_ok", "prefer_visitors", "farm_animals_ok",
         "preferences_notes", "meeting_preference", "handover_preference",
-        "languages", "bonus_skills", "interests", "competences",
+        "languages", "interests", "competences",
         "life_pace", "household_composition",
         "special_animal_skills", "work_during_sit", "sensitivities",
         "min_stay_duration", "preferred_frequency", "min_notice", "preferred_periods", "preferred_environments",

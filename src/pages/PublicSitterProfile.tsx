@@ -101,7 +101,7 @@ import { declaredHelpOffer, hasEntraideFacet, entraideOfferBandText, lastVisitLa
 import {
   meetingPreferenceLabel,
   homeFactLabel,
-  assetsLabel,
+  assetsLabel, guardExperienceLabel,
   listLabel,
   companionsLabel,
   ownerHostedSitsCount,
@@ -554,7 +554,7 @@ export default function PublicSitterProfile() {
       // du 23/08/2026), sauf sensitivities (donnée de santé, jamais exposée).
       const PUBLIC_SITTER_COLS =
         "user_id, motivation, sitter_type, accompanied_by, lifestyle, animal_types, has_vehicle, has_license, geographic_radius, min_stay_duration, is_available, competences, special_animal_skills, preferred_frequency, min_notice, preferred_environments, farm_animals_ok, own_animals, reply_median_minutes, travels_with_children, travels_with_own_animals, work_during_sit, availability_during, experience_years, languages, interests, life_pace, meeting_preference, travel_zones";
-      const [profileRes, baseProfileRes, sitterRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes] =
+      const [profileRes, baseProfileRes, sitterRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes, guardExpRes] =
         await Promise.all([
           supabase.from("public_profiles").select(PUBLIC_PROFILE_COLS).eq("id", id).maybeSingle(),
           // Lot Y2 (P3-12) : profiles n'est lisible que du titulaire. Un
@@ -598,6 +598,9 @@ export default function PublicSitterProfile() {
             .select("id, platform_name, summary, animal_types, city, country, duration, experience_date, verification_status")
             .eq("user_id", id)
             .eq("verification_status", "verified"),
+          // Lot SC2 : gardes réalisées, lues à part. Avant l'application de
+          // la migration 0131, la colonne manque et la fiche reste entière.
+          (supabase as any).from("public_sitter_profiles").select("guard_experience").eq("user_id", id).maybeSingle(),
         ]);
 
       if (!active) return;
@@ -618,7 +621,9 @@ export default function PublicSitterProfile() {
 
       if (!fetchedPublicProfile) return;
 
-      const fetchedSitterProfile = sitterRes?.data ?? null;
+      const fetchedSitterProfile = sitterRes?.data
+        ? { ...sitterRes.data, guard_experience: guardExpRes?.data?.guard_experience ?? null }
+        : null;
       const fetchedOwnerProfile = (ownerRes?.data as OwnerProfileData | null) ?? null;
       const fetchedEmergencyProfile = emergencyRes?.data ?? null;
       const fetchedMissionCount = missionsRes?.count ?? 0;
@@ -1751,6 +1756,7 @@ export default function PublicSitterProfile() {
           { label: "Langues", value: listLabel(sitterLanguages, ["Autre"]) },
           { label: "Centres d'intérêt", value: listLabel(sitterInterests) },
           { label: "À la maison", value: homeFactLabel(sitterProfile?.own_animals, sitterProfile?.life_pace) },
+          { label: "Gardes réalisées", value: guardExperienceLabel(sitterProfile?.guard_experience) },
           { label: "Atouts", value: assetsLabel(declaredCertifications, sitterProfile?.has_license, sitterProfile?.has_vehicle) },
           // L5 : faits de l'ancien bloc pratique, jamais présentés ailleurs.
           { label: "Accompagnants", value: companionsLabel(sitterProfile) },

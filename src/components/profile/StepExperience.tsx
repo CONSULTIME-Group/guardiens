@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import ChipSelect from "./ChipSelect";
 import RadioChipGroup from "./RadioChipGroup";
 import YesNoChips from "./YesNoChips";
+import FieldRole from "./FieldRole";
 import HintBubble from "./HintBubble";
 import type { SitterProfileData, PastAnimal } from "@/hooks/useSitterProfile";
 import { safeUUID } from "@/lib/uuid";
@@ -23,7 +24,6 @@ import { useTranslation } from "@/i18n/react";
 const ANIMAL_TYPES = SITTER_ANIMAL_TYPES_OPTIONS;
 const EXPERIENCE_OPTIONS = ["Débutant", "1-3 ans", "3-5 ans", "5+ ans"];
 const SPECIES_OPTIONS = ["Chien", "Chat", "Cheval", "Oiseau", "Animal de ferme", "NAC"];
-const DOG_SIZES = ["Petit (< 10kg)", "Moyen (10-25kg)", "Grand (> 25kg)", "Toutes tailles"];
 const OWN_ANIMALS = ["Oui, chien", "Oui, chat", "Oui, autre", "Non"];
 const GUARD_EXPERIENCE = ["Première fois", "1-5 gardes", "5-20 gardes", "20+ gardes"];
 
@@ -46,8 +46,6 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
   const [adding, setAdding] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const hasDogs = data.animal_types.includes("Chiens");
-  const hasCats = data.animal_types.includes("Chats");
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -112,46 +110,9 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
         }} />
       </div>
 
-      {/* Dog-specific */}
-      {hasDogs && (
-        <>
-          <div className="space-y-2">
-            <Label id="lbl-dog-sizes">Taille de chien acceptée</Label>
-            <ChipSelect
-              options={DOG_SIZES}
-              selected={(data as any).dog_sizes_accepted || []}
-              onChange={v => onChange({ dog_sizes_accepted: v } as any)}
-              ariaLabelledBy="lbl-dog-sizes"
-            />
-          </div>
-          <div className="space-y-1">
-            <Label>Races exigeantes acceptées</Label>
-            <p className="text-xs text-muted-foreground mb-2">
-              Certaines races demandent plus d'expérience (Malinois, Husky, Border Collie...)
-            </p>
-            <div className="space-y-2 py-2">
-              <Label id="lbl-demanding-breeds" className="text-sm">J'accepte les races exigeantes</Label>
-              <YesNoChips
-                ariaLabelledBy="lbl-demanding-breeds"
-                value={data.demanding_breeds_ok}
-                onChange={v => onChange({ demanding_breeds_ok: v })}
-              />
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Cat-specific */}
-      {hasCats && (
-        <div className="space-y-2 py-2">
-          <Label id="lbl-indoor-cats" className="text-sm">J'accepte les chats d'intérieur uniquement</Label>
-          <YesNoChips
-            ariaLabelledBy="lbl-indoor-cats"
-            value={data.indoor_cats_only}
-            onChange={v => onChange({ indoor_cats_only: v })}
-          />
-        </div>
-      )}
+      {/* Lot SC2 (10/11/2026) : taille de chien, races exigeantes et chats
+          d'intérieur quittent le formulaire, lus par aucun écran ni par le
+          calcul d'affinité. Colonnes et valeurs conservées en base. */}
 
       {/* Experience with animals */}
       <div className="space-y-2">
@@ -199,6 +160,7 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
           onChange={v => onChange({ guard_experience: v } as any)}
           ariaLabelledBy="lbl-guard-exp"
         />
+        <FieldRole roles={["public"]} />
       </div>
 
       <div className="space-y-2">

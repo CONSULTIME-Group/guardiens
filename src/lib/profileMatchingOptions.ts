@@ -75,21 +75,6 @@ export const LIFE_PACE_OPTIONS: { value: string; label: string; description: str
   { value: "actif", label: "Actif", description: "Souvent dehors, sportif·ve" },
 ];
 
-/**
- * Composition du foyer présent pendant la garde (multi-select).
- * Important pour les animaux craintifs des enfants, les chats territoriaux, etc.
- */
-export const HOUSEHOLD_COMPOSITION_OPTIONS = [
-  "Seul·e",
-  "En couple",
-  "Avec enfants en bas âge",
-  "Avec enfants",
-  "Avec adolescents",
-  "Avec un chien",
-  "Avec un chat",
-  "Avec d'autres animaux",
-];
-
 export function lifePaceLabel(value: string | null | undefined): string {
   if (!value) return "";
   return LIFE_PACE_OPTIONS.find((o) => o.value === value)?.label ?? value;

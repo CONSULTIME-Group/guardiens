@@ -8,7 +8,6 @@ import { trackEvent } from "@/lib/analytics";
 import {
   LANGUAGE_OPTIONS,
   INTEREST_OPTIONS,
-  HOUSEHOLD_COMPOSITION_OPTIONS,
   SENSITIVITIES_OPTIONS,
 } from "@/lib/profileMatchingOptions";
 import MatchingExplainer from "@/components/matching/MatchingExplainer";
@@ -19,7 +18,6 @@ const MEETING_OPTIONS = [
   "Visio avant", "Échange messagerie suffit", "S'adapte au propriétaire"
 ];
 const HANDOVER_OPTIONS = ["La veille avec nuit commune", "Le jour du départ", "À distance OK", "S'adapte"];
-const SKILL_OPTIONS = ["Jardinage", "Bricolage", "Ménage", "Cuisine", "Premiers secours animaux"];
 
 /**
  * Indicateur de progression pour les centres d'intérêt.
@@ -91,11 +89,6 @@ const StepPreferences = ({ data, onChange }: Props) => (
 
 
     <div className="space-y-2">
-      <Label id="lbl-strict-rules">J'accepte les maisons où les visites et invités ne sont pas autorisés</Label>
-      <YesNoChips ariaLabelledBy="lbl-strict-rules" value={data.strict_rules_ok} onChange={v => onChange({ strict_rules_ok: v })} />
-    </div>
-
-    <div className="space-y-2">
       <Label id="lbl-prefer-visitors">Je préfère les propriétaires qui autorisent les visites</Label>
       <YesNoChips ariaLabelledBy="lbl-prefer-visitors" value={data.prefer_visitors} onChange={v => onChange({ prefer_visitors: v })} />
     </div>
@@ -139,15 +132,6 @@ const StepPreferences = ({ data, onChange }: Props) => (
     </p>
 
     <div className="space-y-2">
-      <Label>Composition du foyer pendant la garde</Label>
-      <ChipSelect
-        options={HOUSEHOLD_COMPOSITION_OPTIONS}
-        selected={data.household_composition}
-        onChange={v => onChange({ household_composition: v })}
-      />
-    </div>
-
-    <div className="space-y-2">
       <Label>Langues parlées</Label>
       <ChipSelect options={LANGUAGE_OPTIONS} selected={data.languages} onChange={v => onChange({ languages: v })} />
     </div>
@@ -160,11 +144,6 @@ const StepPreferences = ({ data, onChange }: Props) => (
       <div id="interests-chips">
         <ChipSelect options={INTEREST_OPTIONS} selected={data.interests} onChange={v => onChange({ interests: v })} />
       </div>
-    </div>
-
-    <div className="space-y-2">
-      <Label>Compétences bonus</Label>
-      <ChipSelect options={SKILL_OPTIONS} selected={data.bonus_skills} onChange={v => onChange({ bonus_skills: v })} />
     </div>
 
     <h3 className="font-heading text-lg font-semibold mt-4">Mes limites</h3>
