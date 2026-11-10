@@ -27,7 +27,7 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Search, Archive, Trash2, Eye, RotateCcw, Mail, AlertTriangle, ArrowUpDown, Download, Send, Info, MoreHorizontal } from "lucide-react";
+import { Search, Archive, Trash2, Eye, RotateCcw, Mail, AlertTriangle, ArrowUpDown, Download, Send, MoreHorizontal, UserRound } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ErrorState } from "@/components/admin/ui";
 import { UrlFilterNotice } from "@/components/admin/UrlFilterNotice";
@@ -35,13 +35,14 @@ import { reportAdminReadError } from "@/lib/admin/readError";
 import { logAdminAction as logAdminJournal } from "@/lib/admin/adminJournal";
 import { logAdminMessageFailure } from "@/lib/admin/adminMessageFailure";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
-import DossierDetailSheet from "@/components/admin/DossierDetailSheet";
 import { missionSituation } from "@/lib/admin/listingSituation";
 import { proximityBlockReason } from "@/lib/admin/missionDiffusion";
 import { loadNotifiedCounts, NOTIFIED_SCOPE } from "@/lib/admin/missionNotified";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ProximityCampaignCard from "@/components/admin/mass-email/ProximityCampaignCard";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { useAuth } from "@/contexts/AuthContext";
+import { isNewMission, readNewsVisitSince } from "@/hooks/useAdminNews";
 
 // Audit du 10/10/2026 : situation humaine, clôtures équipe et automatiques distinguées.
 function resolveStatusBadge(m: any) {
@@ -112,7 +113,9 @@ const AdminSmallMissions = () => {
   const [notifiedError, setNotifiedError] = useState<string | null>(null);
   const [notifiedNonce, setNotifiedNonce] = useState(0);
   const [responseNonce, setResponseNonce] = useState(0);
-  const [detailMission, setDetailMission] = useState<any | null>(null);
+  // Lot ADM19 : date depuis laquelle un besoin compte comme « Nouveau » (fin de la visite précédente), lue avant que l'ouverture de la page ne pose le repère.
+  const { user: adminUser } = useAuth();
+  const [newSince] = useState<string | null>(() => (adminUser?.id ? readNewsVisitSince("entraide", adminUser.id) : null));
   // Onglet courant, lu dans l'URL pour que le menu latéral puisse pointer
   // directement sur les projets. Les projets participatifs ont leurs propres
   // indicateurs, et la liste est la même, filtrée sur la catégorie côté serveur.
@@ -303,14 +306,6 @@ const AdminSmallMissions = () => {
     }
     return list;
   }, [missions, search, sortBy, sortDir, responseCounts, filterStatus, responseCountsReady, responseError, focusMissionId]);
-
-  // La fiche du besoin cité par l'adresse s'ouvre une fois la liste lue.
-  const openedFocusRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!focusMissionId || loading || openedFocusRef.current === focusMissionId) return;
-    const m = missions.find((x) => x.id === focusMissionId);
-    if (m) { openedFocusRef.current = focusMissionId; setDetailMission(m); }
-  }, [focusMissionId, missions, loading]);
 
   const paginated = useMemo(() => filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE), [filtered, page]);
 
@@ -772,7 +767,12 @@ const AdminSmallMissions = () => {
                   <TableCell className="text-sm text-muted-foreground min-w-0">
                     <div className="truncate">{m.city || "·"}</div>
                     <div className="text-xs">{missionDateLine(m)}</div>
-                    <div className="text-[11px]">publiée le {format(new Date(m.created_at), "d MMM yyyy", { locale: fr })}</div>
+                    <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                      <span>publiée le {format(new Date(m.created_at), "d MMM yyyy", { locale: fr })}</span>
+                      {isNewMission(m, newSince) && (
+                        <Badge className="px-1.5 py-0 text-[10px]" data-testid="row-new" title="Déposé depuis votre dernière visite">Nouveau</Badge>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <Badge variant={status.variant}>{status.label}</Badge>
@@ -782,9 +782,15 @@ const AdminSmallMissions = () => {
                   <TableCell className="text-sm font-medium tabular-nums">{responseError ? "Indisponible" : !responseCountsReady ? "·" : responseCounts[m.id] || 0}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end items-center gap-1 whitespace-nowrap">
-                      <Button variant="outline" size="sm" onClick={() => setDetailMission(m)}>
-                        <Info className="h-4 w-4 mr-1" /> Détails
-                      </Button>
+                      {m.status === "open" && notified === 0 && !blocked ? (
+                        <Button size="sm" onClick={() => setProximityMission({ id: m.id, title: m.title })} data-testid="row-broadcast-mission">
+                          <Send className="h-4 w-4 mr-1" /> Diffuser
+                        </Button>
+                      ) : (
+                        <Button variant="outline" size="sm" onClick={() => navigate(`/petites-missions/${(m as any).slug || m.id}`)} data-testid="row-view-mission">
+                          <Eye className="h-4 w-4 mr-1" /> Voir
+                        </Button>
+                      )}
                       <Button variant="ghost" size="sm" onClick={() => openContact(m)}>
                         <Mail className="h-4 w-4 mr-1" /> Contacter
                       </Button>
@@ -796,6 +802,9 @@ const AdminSmallMissions = () => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-64">
                           <DropdownMenuItem onSelect={() => navigate(`/petites-missions/${(m as any).slug || m.id}`)}><Eye className="h-4 w-4 mr-2" /> Voir la publication</DropdownMenuItem>
+                          {m.user_id && (
+                            <DropdownMenuItem onSelect={() => navigate(`/admin/users?user=${m.user_id}`)}><UserRound className="h-4 w-4 mr-2" /> Fiche de l'auteur</DropdownMenuItem>
+                          )}
                           <DropdownMenuItem disabled={!!blocked} onSelect={() => { if (!blocked) setProximityMission({ id: m.id, title: m.title }); }}>
                             <Send className="h-4 w-4 mr-2" />
                             <span className="flex flex-col">
@@ -822,27 +831,6 @@ const AdminSmallMissions = () => {
           </TableBody>
         </Table>
       </div>
-
-      <DossierDetailSheet
-        kind="mission"
-        item={detailMission}
-        open={!!detailMission}
-        onOpenChange={(o) => { if (!o) setDetailMission(null); }}
-        extra={detailMission ? (
-          <div className="text-sm space-y-1">
-            <p>
-              <span className="text-muted-foreground">Notifiés : </span>
-              {notifiedCounts ? `${notifiedCounts[detailMission.id] || 0} personne${(notifiedCounts[detailMission.id] || 0) > 1 ? "s" : ""}` : "Indisponible"}
-            </p>
-            <p className="text-xs text-muted-foreground">{NOTIFIED_SCOPE}</p>
-            <p><span className="text-muted-foreground">{VIEWS_LABEL} : </span>{detailMission.view_count ?? 0}</p>
-            {proximityBlockReason(detailMission) && <p className="text-xs text-muted-foreground">Diffusion : {proximityBlockReason(detailMission)}</p>}
-          </div>
-        ) : null}
-        footer={detailMission ? (
-          <Button size="sm" variant="outline" onClick={() => navigate(`/petites-missions/${detailMission.slug || detailMission.id}`)}>Voir la publication</Button>
-        ) : null}
-      />
 
       {/* Pagination */}
       <div className="flex items-center justify-between gap-3">

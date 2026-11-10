@@ -53,12 +53,71 @@ export function newsKeyForPath(pathname: string): AdminNewsKey | null {
   return null;
 }
 
+/**
+ * Lot ADM19 : une visite = les ouvertures de la page séparées de moins de
+ * dix minutes. Au-delà, c'est une nouvelle visite et le repère de la
+ * précédente devient le point de départ des lignes « Nouvelle ».
+ */
+export const NEWS_VISIT_GAP_MS = 10 * 60_000;
+const prevKey = (k: AdminNewsKey, userId: string) => `admin.news.prev.${k}:${userId}`;
+
 /** Ouvrir la page pose le repère : le compteur s'efface. */
 export function markAdminNewsSeen(pathname: string, userId: string | undefined, now: number = Date.now()): void {
   const k = newsKeyForPath(pathname);
   if (!k || !userId) return;
-  try { localStorage.setItem(storageKey(k, userId), new Date(now).toISOString()); } catch { /* stockage indisponible */ }
+  try {
+    const last = localStorage.getItem(storageKey(k, userId));
+    // Nouvelle visite : le repère d'avant devient la limite de « Nouvelle ».
+    if (last && !Number.isNaN(Date.parse(last)) && now - Date.parse(last) > NEWS_VISIT_GAP_MS) {
+      localStorage.setItem(prevKey(k, userId), last);
+    }
+    localStorage.setItem(storageKey(k, userId), new Date(now).toISOString());
+  } catch { /* stockage indisponible */ }
   if (typeof window !== "undefined") window.dispatchEvent(new Event(ADMIN_NEWS_SEEN_EVENT));
+}
+
+/**
+ * Lot ADM19 : à lire au premier rendu de la page, avant que son ouverture ne
+ * pose le repère. Donne la date depuis laquelle une ligne compte comme
+ * « Nouvelle » : la fin de la visite précédente, stable pendant toute la
+ * visite en cours (même en quittant la page et en y revenant).
+ */
+export function readNewsVisitSince(k: AdminNewsKey, userId: string, now: number = Date.now()): string {
+  const seen = readNewsSince(k, userId, now);
+  try {
+    const prev = localStorage.getItem(prevKey(k, userId));
+    const freshVisit = now - Date.parse(seen) > NEWS_VISIT_GAP_MS;
+    if (!freshVisit && prev && !Number.isNaN(Date.parse(prev))) return prev;
+  } catch { /* stockage indisponible */ }
+  return seen;
+}
+
+/** Une annonce de garde mise en ligne depuis la date donnée (même règle que le compteur). */
+export function isNewListing(
+  l: { published_at?: string | null; status?: string | null },
+  since: string | null,
+): boolean {
+  if (!since || !l.published_at) return false;
+  if (!["published", "confirmed", "in_progress"].includes(l.status ?? "")) return false;
+  return Date.parse(l.published_at) >= Date.parse(since);
+}
+
+/** Un besoin d'entraide déposé depuis la date donnée (même règle que le compteur). */
+export function isNewMission(
+  m: { created_at?: string | null; mission_type?: string | null; status?: string | null; hidden_at?: string | null; moderation_hidden_at?: string | null },
+  since: string | null,
+): boolean {
+  if (!since || !m.created_at) return false;
+  if (m.mission_type !== "besoin" || m.status === "cancelled" || m.hidden_at || m.moderation_hidden_at) return false;
+  return Date.parse(m.created_at) >= Date.parse(since);
+}
+
+/** Texte lu pour le total des nouveautés (bouton du menu mobile). */
+export function newsTotalLabel(n: Partial<AdminNews>): string | null {
+  const parts: string[] = [];
+  if (n.listings && n.listings > 0) parts.push(n.listings > 1 ? `${n.listings} nouvelles annonces` : "1 nouvelle annonce");
+  if (n.entraide && n.entraide > 0) parts.push(n.entraide > 1 ? `${n.entraide} nouveaux besoins d'entraide` : "1 nouveau besoin d'entraide");
+  return parts.length ? `${parts.join(", ")} depuis votre dernière visite` : null;
 }
 
 export interface AdminNews { listings: number; entraide: number }
