@@ -9,7 +9,7 @@
 
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "../_shared/ai-gateway.ts";
 import { DECLARED_FACTS_RULE, stripUndeclaredSlots } from "../_shared/alma-declared-facts.ts";
-import { isLlmRefusal } from "../_shared/refusal-guard.ts";
+import { DESCRIPTION_MIN, isRefusedMissionDraft } from "./guard.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const RATE_LIMIT_PER_HOUR = 5;
@@ -155,8 +155,8 @@ RÈGLE ABSOLUE : vous produisez TOUJOURS un titre et une description exploitable
       warnings.push("Une précision de jour ou d'heure a été retirée : ajoutez la vôtre si vous le souhaitez.");
     }
 
-    if (!title || description.length < 40) return unavailable("empty_draft");
-    if (isLlmRefusal(title) || isLlmRefusal(description)) return unavailable("llm_refusal");
+    if (!title || description.length < DESCRIPTION_MIN) return unavailable("empty_draft");
+    if (isRefusedMissionDraft(title, description)) return unavailable("llm_refusal");
 
     return json({ title, description, warnings });
   } catch (e) {

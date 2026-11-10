@@ -21,6 +21,7 @@ import { cowriteEdited, cowriteEventName, COWRITE_MOMENTS, trackCowrite } from "
 import { shouldOfferApplicationReply } from "@/lib/alma/applicationReply";
 import { readMissionDraft } from "@/lib/alma/missionDraft";
 import AlmaCoWrite from "@/components/ai/alma/AlmaCoWrite";
+import { isRefusedMissionDraft } from "../../../supabase/functions/draft-mission-from-prompt/guard.ts";
 
 const read = (p: string) => readFileSync(p, "utf8");
 
@@ -105,6 +106,16 @@ describe("besoin écrit avec Alma", () => {
     expect(readMissionDraft({ available: false, message: "Plus tard." }, null)).toEqual({ ok: false, message: "Plus tard." });
     expect(readMissionDraft({ error: "Limite atteinte" }, new Error("429"))).toEqual({ ok: false, message: "Limite atteinte" });
     expect(readMissionDraft({ title: "", description: "" }, null).ok).toBe(false);
+  });
+
+  it("un brouillon court et correct passe le contrôle de refus (ALMA2c)", () => {
+    const description = "Je cherche un coup de main pour tailler la haie de mon jardin. Je fournis le matériel, un café vous attend.";
+    expect(isRefusedMissionDraft("Tailler la haie du jardin", description)).toBe(false);
+    expect(isRefusedMissionDraft("Aide", description)).toBe(true);
+    expect(isRefusedMissionDraft("Tailler la haie", "Je suis désolé, mais je ne peux pas rédiger ce besoin pour vous.")).toBe(true);
+    const fn = read("supabase/functions/draft-mission-from-prompt/index.ts");
+    expect(fn).toContain("isRefusedMissionDraft(title, description)");
+    expect(fn).not.toMatch(/isLlmRefusal\(title\)/);
   });
 
   it("formulaire, fonction et configuration", () => {
