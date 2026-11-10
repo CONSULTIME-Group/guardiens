@@ -13,7 +13,6 @@ import {
   LANGUAGE_OPTIONS,
   INTEREST_OPTIONS,
   LIFE_PACE_OPTIONS,
-  HOUSEHOLD_COMPOSITION_OPTIONS,
 } from "@/lib/profileMatchingOptions";
 import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
 import { trackEvent } from "@/lib/analytics";
@@ -162,15 +161,6 @@ const OwnerStepIdentity = ({ data, onChange, onUploadPhoto }: Props) => {
             ))}
           </SelectContent>
         </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Composition du foyer</Label>
-        <ChipSelect
-          options={HOUSEHOLD_COMPOSITION_OPTIONS}
-          selected={data.household_composition}
-          onChange={v => onChange({ household_composition: v })}
-        />
       </div>
 
       <div className="space-y-2">
