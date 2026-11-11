@@ -9,6 +9,7 @@ import { describe, expect, it, vi } from "vitest";
 import * as parisHour from "../../supabase/functions/_shared/paris-hour";
 import * as publicationWindow from "../../supabase/functions/_shared/sit-publication-window";
 import * as cronTrace from "../../supabase/functions/_shared/cron-trace";
+import * as readAllRowsModule from "../../supabase/functions/_shared/read-all-rows";
 import * as outboundRateLimit from "../../supabase/functions/_shared/outbound-rate-limit";
 import * as nearbyPreferences from "../../supabase/functions/send-nearby-daily-digest/preferences";
 import * as publishAlertedSits from "../../supabase/functions/_shared/publish-alerted-sits";
@@ -63,6 +64,8 @@ function loadHandler(path: string, rows: Rows) {
       if (specifier.includes("paris-hour")) return parisHour;
       if (specifier.includes("sit-publication-window")) return publicationWindow;
       if (specifier.includes("cron-trace")) return cronTrace;
+      // Lot LECT1 : lecture par pages, module pur réel.
+      if (specifier.includes("read-all-rows")) return readAllRowsModule;
       // Lot NUR1 : limite de débit et lecture paginée, modules purs réels.
       if (specifier.includes("outbound-rate-limit")) return outboundRateLimit;
       if (specifier.includes("/preferences")) return nearbyPreferences;

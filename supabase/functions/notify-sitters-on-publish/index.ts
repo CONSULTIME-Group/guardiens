@@ -44,6 +44,7 @@ import {
   completionMessageFor,
   remainingCompletionSteps,
 } from "../_shared/completion-steps/index.ts";
+import { readAllRows } from "../_shared/read-all-rows.ts";
 
 
 const corsHeaders = {
@@ -282,11 +283,15 @@ Deno.serve(async (req) => {
     metrics.sits_considered = allSits.length;
 
     // Zones d'alerte actives portant sur les gardes, chargees une fois.
-    const { data: prefs, error: prefsErr } = await supabase
-      .from("alert_preferences")
-      .select("user_id, zone_type, radius_km, departement, alert_types, active, source")
-      .eq("active", true);
-    if (prefsErr) throw prefsErr;
+    // Lot LECT1 : lecture par pages, avant que la table dépasse 1 000 zones.
+    const prefs = await readAllRows<any>((from, to) =>
+      supabase
+        .from("alert_preferences")
+        .select("user_id, zone_type, radius_km, departement, alert_types, active, source")
+        .eq("active", true)
+        .order("id", { ascending: true })
+        .range(from, to)
+    );
     // Ordre deterministe, alertes faites main (source NULL) evaluees avant
     // les migrees a gardien egal : la deduplication `seen` retient la
     // premiere zone rencontree, un gardien ayant configure une alerte a la
