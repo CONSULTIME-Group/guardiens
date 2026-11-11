@@ -43,6 +43,7 @@ import InlinePhotoUpload from "@/components/sits/create/InlinePhotoUpload";
 import CreateSitSetupStep from "@/components/sits/create/CreateSitSetupStep";
 import CreateSitExpress from "@/components/sits/create/CreateSitExpress";
 import SitCreateWelcome from "@/components/sits/create/SitCreateWelcome";
+import { useHideBottomNav } from "@/components/layout/ChromeVisibility";
 import { readExpressParams, isExpressActive, proposeExpressTexts, mergeExpressTexts, firstValidPreset } from "@/lib/sitExpress";
 import { computeReadiness } from "@/lib/ownerDeparture";
 import { photoUploadErrorMessage, uploadOwnerGalleryPhoto } from "@/lib/uploadOwnerGalleryPhoto";
@@ -788,6 +789,11 @@ const CreateSit = () => {
   const welcomeEligible =
     !draftIdParam && !fromSitId && !republishMode && nothingWritten && currentStep === 0;
   const [welcomeOn, setWelcomeOn] = useState(false);
+  // Lot ANN1e : sur /sits/create, la barre de navigation basse est masquée,
+  // comme sur le formulaire express et le parcours d'arrivée. La barre
+  // « Enregistrer / Suivant » descend au bas de l'écran (--bottom-nav-h à 0)
+  // et le micro d'Alma tient dans le premier écran d'un téléphone de 700 px.
+  useHideBottomNav(true);
   // Lot ANN1c : décidé une seule fois, à la fin du chargement. Le repère
   // hasUserEditedRef passe à vrai dès que le profil préremplit un champ et ne
   // dit donc rien de la saisie du membre ; l'écran ne revient jamais ensuite
