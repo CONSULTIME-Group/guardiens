@@ -249,6 +249,46 @@
           "sql": "SELECT count(*) = 0 AS ok FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace CROSS JOIN LATERAL aclexplode(c.relacl) a WHERE n.nspname = 'public' AND c.relkind IN ('v', 'm') AND a.privilege_type NOT IN ('SELECT', 'MAINTAIN') AND (a.grantee = 0 OR a.grantee IN (SELECT oid FROM pg_roles WHERE rolname IN ('anon', 'authenticated')))"
         }
       ]
+    },
+    {
+      "migration": "0131_sc2_competences_bonus.sql",
+      "description": "Compétences bonus rangées dans le savoir-faire, vue public_sitter_profiles alignée sur la production avec guard_experience",
+      "checks": [
+        {
+          "name": "vue_sc2",
+          "sql": "SELECT position('sc2_competences_bonus' IN coalesce(obj_description('public.public_sitter_profiles'::regclass, 'pg_class'), '')) > 0 AS ok"
+        }
+      ]
+    },
+    {
+      "migration": "0132_sc4_voiture_repondue.sql",
+      "description": "Réponse datée du propriétaire sur la voiture nécessaire (properties.car_required_answered_at)",
+      "checks": [
+        {
+          "name": "colonne_sc4",
+          "sql": "SELECT position('sc4_voiture_repondue' IN coalesce(col_description('public.properties'::regclass, (SELECT attnum FROM pg_attribute WHERE attrelid = 'public.properties'::regclass AND attname = 'car_required_answered_at')), '')) > 0 AS ok"
+        }
+      ]
+    },
+    {
+      "migration": "0134_sc5_autres_passions.sql",
+      "description": "Colonnes other_passions des profils gardien et propriétaire",
+      "checks": [
+        {
+          "name": "colonnes_sc5",
+          "sql": "SELECT count(*) = 2 AS ok FROM pg_attribute a WHERE a.attname = 'other_passions' AND a.attrelid IN ('public.sitter_profiles'::regclass, 'public.owner_profiles'::regclass) AND position('sc5_autres_passions' IN coalesce(col_description(a.attrelid, a.attnum), '')) > 0"
+        }
+      ]
+    },
+    {
+      "migration": "0135_sc6_compteur_vehicule.sql",
+      "description": "sitter_missing_opportunities compte une réponse véhicule sur has_vehicle non nul, surcharge sans paramètre retirée",
+      "checks": [
+        {
+          "name": "fonction_sc6",
+          "sql": "SELECT position('sc6_compteur_vehicule' IN pg_get_functiondef('public.sitter_missing_opportunities(uuid)'::regprocedure)) > 0 AS ok"
+        }
+      ]
     }
   ]
 }
