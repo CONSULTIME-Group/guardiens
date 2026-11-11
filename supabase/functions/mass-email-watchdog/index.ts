@@ -6,6 +6,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
+import { withCronFailureLog } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,7 +16,8 @@ const corsHeaders = {
 
 const STALE_MINUTES = 5;
 
-Deno.serve(async (req) => {
+// Lot JOURN1 : chaque échec journalisé, un succès par heure comme battement.
+Deno.serve(withCronFailureLog("mass-email-watchdog", async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -72,4 +74,4 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+}, 5));

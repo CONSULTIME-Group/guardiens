@@ -177,3 +177,66 @@ export function withCronRunLog(
     return res;
   };
 }
+
+/**
+ * Lot JOURN1 (11/11/2026) : repère horaire d'une tâche très fréquente.
+ * Vrai pendant les `windowMinutes` premières minutes de chaque heure : une
+ * tâche lancée toutes les `windowMinutes` minutes y passe une fois par heure.
+ */
+export function isHeartbeatMinute(now: Date, windowMinutes: number): boolean {
+  const width = Math.min(60, Math.max(1, Math.floor(windowMinutes)));
+  return now.getUTCMinutes() < width;
+}
+
+/**
+ * Lot JOURN1 : journal d'une tâche lancée chaque minute ou toutes les cinq
+ * minutes, sans écrire une ligne à chaque passage. Chaque échec est écrit
+ * (réponse 4xx ou 5xx, champ « error », exception). Un succès est écrit une
+ * fois par heure, comme battement : son absence signale une tâche arrêtée.
+ * Seuls les appels avec la clé de service comptent. L'écriture du journal ne
+ * change jamais la réponse de la fonction.
+ */
+export function withCronFailureLog(
+  edgeName: string,
+  handler: (req: Request) => Promise<Response>,
+  windowMinutes: number,
+): (req: Request) => Promise<Response> {
+  return async (req: Request): Promise<Response> => {
+    if (req.method === "OPTIONS" || !isServiceRoleCall(req)) return handler(req);
+    const name = typeof edgeName === "string" && /^[a-z0-9-]+$/.test(edgeName) ? edgeName : "invalid-edge-name";
+    const startedAt = new Date();
+    const write = async (status: "success" | "failed", metrics: Record<string, unknown>, errorMessage?: string) => {
+      try {
+        const client = getServiceClient();
+        if (!client) return;
+        await client.from("cron_run_log").insert({
+          edge_name: name,
+          started_at: startedAt.toISOString(),
+          finished_at: new Date().toISOString(),
+          status,
+          metrics,
+          ...(errorMessage ? { error_message: errorMessage.slice(0, 2000) } : {}),
+        });
+      } catch { /* le journal ne masque jamais le résultat */ }
+    };
+    let res: Response;
+    try {
+      res = await handler(req);
+    } catch (e) {
+      await write("failed", {}, describeError(e));
+      throw e;
+    }
+    let body: unknown = null;
+    try { body = await res.clone().json(); } catch { /* corps non JSON */ }
+    const metrics = runMetricsFromBody(body, res.status);
+    const bodyError = body && typeof body === "object" && !Array.isArray(body)
+      ? (body as Record<string, unknown>).error
+      : null;
+    if (res.status >= 400 || bodyError) {
+      await write("failed", metrics, bodyError ? String(bodyError) : `HTTP ${res.status}`);
+    } else if (isHeartbeatMinute(startedAt, windowMinutes)) {
+      await write("success", { ...metrics, heartbeat: true });
+    }
+    return res;
+  };
+}

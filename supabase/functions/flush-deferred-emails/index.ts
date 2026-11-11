@@ -7,6 +7,7 @@
 // Designed to be triggered by pg_cron every minute.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { withCronFailureLog } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -77,7 +78,8 @@ async function markMirrorFlushed(
 }
 
 
-Deno.serve(async (req) => {
+// Lot JOURN1 : chaque échec journalisé, un succès par heure comme battement.
+Deno.serve(withCronFailureLog("flush-deferred-emails", async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -368,4 +370,4 @@ Deno.serve(async (req) => {
     JSON.stringify({ ok: true, processed: (due ?? []).length, sent, failed, redeferred, abandoned, closed, skipped_locked: skippedLocked, failed_24h: failedRecent }),
     { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
-});
+}, 1));

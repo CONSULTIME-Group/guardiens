@@ -299,6 +299,16 @@
           "sql": "SELECT (has_function_privilege('service_role', 'public.consume_application_action_token(text,text)', 'EXECUTE') AND NOT has_function_privilege('anon', 'public.consume_application_action_token(text,text)', 'EXECUTE') AND NOT has_function_privilege('authenticated', 'public.consume_application_action_token(text,text)', 'EXECUTE')) AS ok"
         }
       ]
+    },
+    {
+      "migration": "0138_journ1_tuyaux_emails_suivis.sql",
+      "description": "Tuyaux d'envoi et veilleurs d'emails suivis par admin_cron_health (battement horaire)",
+      "checks": [
+        {
+          "name": "tuyaux_suivis",
+          "sql": "SELECT position('journ1_tuyaux_suivis' IN pg_get_functiondef('public.admin_cron_health()'::regprocedure)) > 0 AS ok"
+        }
+      ]
     }
   ]
 }

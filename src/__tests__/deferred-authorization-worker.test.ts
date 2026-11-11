@@ -32,7 +32,7 @@ function worker(result: Record<string, unknown>, httpStatus = 200) {
     exports: {}, Request, Response, Date, Error, fetch,
     console: { log: vi.fn(), warn: vi.fn(), error: vi.fn() },
     Deno: { env: { get: (name: string) => env[name] }, serve: (fn: typeof handler) => { handler = fn; } },
-    require: (name: string) => { if (name.includes('supabase-js')) return { createClient: () => ({ from }) }; throw new Error(name); },
+    require: (name: string) => { if (name.includes('supabase-js')) return { createClient: () => ({ from }) }; if (name.includes('cron-run-log')) return { withCronFailureLog: (_name: string, fn: unknown) => fn }; throw new Error(name); },
   });
   return { writes, fetch, invoke: () => handler(new Request('https://fixture.invalid', { method: 'POST', headers: { authorization: 'Bearer fixture-service' } })) };
 }

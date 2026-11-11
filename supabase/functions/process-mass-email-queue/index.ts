@@ -20,6 +20,7 @@ import {
 } from "../_shared/worker-lock.ts";
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
 import { isAccountBlockedForMarketing } from "../_shared/account-email-block.ts";
+import { withCronFailureLog } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -88,7 +89,8 @@ ${ctaBlock}
 </body></html>`;
 }
 
-Deno.serve(async (req) => {
+// Lot JOURN1 : chaque échec journalisé, un succès par heure comme battement.
+Deno.serve(withCronFailureLog("process-mass-email-queue", async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -556,4 +558,4 @@ Deno.serve(async (req) => {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+}, 1));
