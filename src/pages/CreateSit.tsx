@@ -798,7 +798,6 @@ const CreateSit = () => {
     if (welcomeEligible) setWelcomeOn(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
-  const showWelcome = welcomeOn && currentStep === 0 && !draftIdParam && !fromSitId && !republishMode && !remoteDraftResumed && !localDraftRestored;
 
   const [almaPromptOpen, setAlmaPromptOpen] = useState(false);
   // Brouillon préparé par Alma : l'adresse change (?draftId=), la fenêtre se ferme.
@@ -909,6 +908,8 @@ const CreateSit = () => {
   }, []);
   const [localDraftRestored, setLocalDraftRestored] = useState(false);
   const [remoteDraftResumed, setRemoteDraftResumed] = useState(false);
+  // Lot ANN1 : premier écran, retiré dès qu'un brouillon est repris.
+  const showWelcome = welcomeOn && currentStep === 0 && !draftIdParam && !fromSitId && !republishMode && !remoteDraftResumed && !localDraftRestored;
   // Lot L3 : « Reprendre ce brouillon avec de nouvelles dates » (Alma) ouvre
   // le brouillon à l'étape des dates, après la reprise du brouillon.
   const resumeAtDates = searchParams.get("etape") === "dates";
