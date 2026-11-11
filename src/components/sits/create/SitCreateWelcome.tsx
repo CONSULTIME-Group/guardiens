@@ -133,7 +133,7 @@ export default function SitCreateWelcome({ userId, onLeaveForEntraide }: SitCrea
   return (
     <section
       data-testid="sit-create-welcome"
-      className="px-4 max-w-3xl mx-auto mb-8 grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2 md:gap-x-10 md:gap-y-5 md:items-start"
+      className="px-4 max-w-3xl mx-auto mb-8 grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-x-10 md:gap-y-5 md:items-start"
     >
       <div className="flex flex-col items-center text-center md:items-start md:text-left">
         <img
@@ -141,9 +141,9 @@ export default function SitCreateWelcome({ userId, onLeaveForEntraide }: SitCrea
           alt="Aquarelle : un chien assis devant une porte verte, un chat à la fenêtre"
           width={220}
           height={220}
-          className="h-[200px] w-[200px] md:h-[220px] md:w-[220px] object-cover -mt-4 -mb-6 md:-ml-5"
+          className="h-[124px] w-[124px] md:h-[220px] md:w-[220px] object-cover -mt-3 -mb-3 md:-mt-4 md:-mb-6 md:-ml-5"
         />
-        <h1 className="font-heading text-[28px] leading-[34px] md:text-[34px] md:leading-[42px] font-bold text-foreground">
+        <h1 className="font-heading text-[26px] leading-[32px] md:text-[34px] md:leading-[42px] font-bold text-foreground">
           Votre annonce, en trois étapes
         </h1>
         <p className="mt-2 text-base leading-6 text-foreground/80">
@@ -154,7 +154,7 @@ export default function SitCreateWelcome({ userId, onLeaveForEntraide }: SitCrea
       <div
         aria-label="Alma prépare votre annonce"
         role="group"
-        className="md:row-span-2 rounded-[20px] border-[1.5px] border-primary bg-card px-4 py-5 md:px-6 flex flex-col items-center gap-3"
+        className="md:row-span-2 rounded-[20px] border-[1.5px] border-primary bg-card px-4 py-4 md:py-5 md:px-6 flex flex-col items-center gap-2.5 md:gap-3"
       >
         <p className="text-xs font-semibold text-muted-foreground">Alma · Compagne IA de Guardiens</p>
 
