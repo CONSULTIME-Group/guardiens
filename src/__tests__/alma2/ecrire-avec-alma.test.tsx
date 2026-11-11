@@ -133,7 +133,11 @@ describe("besoin écrit avec Alma", () => {
 describe("annonce et candidature mesurées", () => {
   it("les trois étapes sont posées", () => {
     const sit = read("src/pages/CreateSit.tsx");
-    expect(sit).toContain('trackCowrite("shown", "annonce")');
+    // Lot ANN1 : le premier écran de /sits/create porte l'affichage et l'usage.
+    const welcome = read("src/components/sits/create/SitCreateWelcome.tsx");
+    expect(sit).toContain("<SitCreateWelcome");
+    expect(welcome).toContain('trackCowrite("shown", "annonce")');
+    expect(welcome).toContain('trackCowrite("used", "annonce"');
     expect(sit).toContain('trackCowrite("sent", "annonce"');
     expect(read("src/components/dashboard/SitDraftFromPrompt.tsx")).toContain('trackCowrite("used", "annonce"');
     const modal = read("src/components/sits/ApplicationModal.tsx");
