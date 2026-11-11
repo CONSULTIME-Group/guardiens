@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { cleanProfileField, parseLocationInput } from "../_shared/location-profile-input.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -49,13 +50,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { city, postal_code } = await req.json();
-    if (!city || !postal_code) {
-      return new Response(JSON.stringify({ error: "city and postal_code required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const body = await req.json().catch(() => ({}));
+    // Lot SEC3 : ville et code postal bornés avant le prompt et avant le cache.
+    const input = parseLocationInput(body?.city, body?.postal_code);
+    if (!input) {
+      // Réponse douce : la carte se masque, sans erreur réseau au journal.
+      return softError("Localité non reconnue", "bad_input");
     }
+    const city = input.city;
+    const postal_code = input.postalCode;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -143,12 +146,12 @@ Si tu ne connais pas précisément cette localité, base-toi sur le département
     const record = {
       city: city.trim(),
       postal_code: postal_code.trim(),
-      neighborhood_type: profile.neighborhood_type || "",
-      nature_access: profile.nature_access || "",
-      amenities: profile.amenities || "",
-      transport: profile.transport || "",
-      activities: profile.activities || "",
-      ideal_for: profile.ideal_for || "",
+      neighborhood_type: cleanProfileField(profile.neighborhood_type),
+      nature_access: cleanProfileField(profile.nature_access),
+      amenities: cleanProfileField(profile.amenities),
+      transport: cleanProfileField(profile.transport),
+      activities: cleanProfileField(profile.activities),
+      ideal_for: cleanProfileField(profile.ideal_for),
     };
 
     const { data: inserted, error: insertError } = await supabase
