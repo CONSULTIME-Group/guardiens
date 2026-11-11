@@ -108,6 +108,9 @@ describe("écran", () => {
     expect(block).not.toContain("coverPhotoUrl");
     expect(block).not.toContain("openTo");
     expect(page).toContain("&& nothingWritten && currentStep === 0");
+    // Lot ANN1c : le repère de saisie, posé par le préremplissage du profil, ne décide plus.
+    const j = page.indexOf("const welcomeEligible =");
+    expect(page.slice(j, page.indexOf(";", j))).not.toContain("hasUserEditedRef");
   });
   it("« À mon domicile » est choisi d'office", () => {
     expect(page).toContain('useState<"home" | "away" | null>("home")');

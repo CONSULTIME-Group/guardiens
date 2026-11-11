@@ -786,15 +786,19 @@ const CreateSit = () => {
     !title && !startDate && !endDate && !ownerMessage && !dailyRoutine
     && !specificExpectations && !flexibleNotes && !isUrgent && !flexibleDates;
   const welcomeEligible =
-    !draftIdParam && !fromSitId && !republishMode && !hasUserEditedRef.current && nothingWritten && currentStep === 0;
+    !draftIdParam && !fromSitId && !republishMode && nothingWritten && currentStep === 0;
   const [welcomeOn, setWelcomeOn] = useState(false);
+  // Lot ANN1c : décidé une seule fois, à la fin du chargement. Le repère
+  // hasUserEditedRef passe à vrai dès que le profil préremplit un champ et ne
+  // dit donc rien de la saisie du membre ; l'écran ne revient jamais ensuite
+  // (un titre effacé garde le formulaire en place).
   useEffect(() => {
-    if (welcomeEligible && !loading && !almaBubbleSeenRef.current) {
-      almaBubbleSeenRef.current = true;
-      setWelcomeOn(true);
-    }
-  }, [welcomeEligible, loading]);
-  const showWelcome = welcomeOn && currentStep === 0 && !draftIdParam && !fromSitId && !republishMode;
+    if (loading || almaBubbleSeenRef.current) return;
+    almaBubbleSeenRef.current = true;
+    if (welcomeEligible) setWelcomeOn(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
+  const showWelcome = welcomeOn && currentStep === 0 && !draftIdParam && !fromSitId && !republishMode && !remoteDraftResumed && !localDraftRestored;
 
   const [almaPromptOpen, setAlmaPromptOpen] = useState(false);
   // Brouillon préparé par Alma : l'adresse change (?draftId=), la fenêtre se ferme.
