@@ -38,6 +38,7 @@ import { useAlmaFrequency, type AlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { useAlmaHidden } from "@/hooks/useAlmaHidden";
 import InstallAppSection from "@/components/settings/InstallAppSection";
 import PushNotificationsSection from "@/components/settings/PushNotificationsSection";
+import AdminTeamAlertsSection from "@/components/settings/AdminTeamAlertsSection";
 
 
 interface NotifPrefs {
@@ -753,6 +754,7 @@ const SecuritySection = ({
 
 const NotificationsSection = ({ prefs, savingKey, allNotifsOn, onMasterToggle, onSave }: any) => (
   <section>
+    <AdminTeamAlertsSection />
     <PushNotificationsSection />
     <SectionHeader icon={Bell} title="Notifications email" description="Choisissez les emails que vous souhaitez recevoir." />
 
