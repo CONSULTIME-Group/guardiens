@@ -12,6 +12,7 @@ import { resendFetch } from "../_shared/resend-guard.ts";
 import { EMAIL_CATEGORY_MAP } from "../_shared/email-categories.ts";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 import { repairMirrorDrift } from "./mirror-drift.ts";
+import { withCronFailureLog } from "../_shared/cron-run-log.ts";
 
 // Liste des templates transactionnels, transmise en SQL pour que le compteur
 // transactionnel en retard soit calcule sur toute la file, pas sur la liste
@@ -43,7 +44,8 @@ type Anomaly = {
   detail: string;
 };
 
-Deno.serve(async (req) => {
+// Lot JOURN1 : chaque échec journalisé, un succès par heure comme battement.
+Deno.serve(withCronFailureLog("email-pipeline-watchdog", async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -342,7 +344,7 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+}, 5));
 
 function escape(s: string): string {
   return s

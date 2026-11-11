@@ -53,6 +53,8 @@ function harness(options: { admin?: boolean; anomaly?: boolean; recent?: boolean
   load("supabase/functions/email-pipeline-watchdog/index.ts", (specifier) => {
     if (specifier.includes("member-email-claim-monitor")) return monitor;
     if (specifier.includes("require-admin")) return auth;
+    // Lot JOURN1 : journal neutre ici, le contrôle d'accès seul est testé.
+    if (specifier.includes("cron-run-log")) return { withCronFailureLog: (_name: string, handler: unknown) => handler };
     if (specifier.includes("supabase-js")) return { createClient };
     if (specifier.includes("resend-guard")) return { resendFetch };
     // Réparation du miroir (lot F) testée à part dans email-mirror-drift : ici, aucune dérive.

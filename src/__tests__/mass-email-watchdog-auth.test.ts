@@ -50,6 +50,8 @@ function harness(options: { admin?: boolean; stalled?: boolean; selectError?: bo
   const auth = load("supabase/functions/_shared/require-admin.ts", () => ({ createClient }));
   load("supabase/functions/mass-email-watchdog/index.ts", (specifier) => {
     if (specifier.includes("require-admin")) return auth;
+    // Lot JOURN1 : journal neutre ici, le contrôle d'accès seul est testé.
+    if (specifier.includes("cron-run-log")) return { withCronFailureLog: (_name: string, handler: unknown) => handler };
     if (specifier.includes("supabase-js")) return { createClient };
     throw new Error(`Unexpected import ${specifier}`);
   });
