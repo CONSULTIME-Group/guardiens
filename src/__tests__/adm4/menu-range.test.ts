@@ -33,7 +33,7 @@ describe("Menu rangé", () => {
   // Lot ADM14 : au quotidien la vue d'ensemble et les annonces, puis « Chaque semaine ».
   it("vue d'ensemble, annonces, entraide, utilisateurs, puis les écrans de la semaine", () => {
     expect(daily.map((i) => i.label)).toEqual([
-      "Vue d'ensemble", "Annonces", "Entraide", "Utilisateurs", "Trafic", "Alma", "Affinité", "Pilotage entraide",
+      "Vue d'ensemble", "Annonces", "Entraide", "Utilisateurs", "Messages contact", "Erreurs", "Trafic", "Alma", "Pilotage entraide",
     ]);
   });
 
@@ -54,7 +54,8 @@ describe("Menu rangé", () => {
     expect(isToolPath("/admin/envois-groupes/stats")).toBe(true);
     expect(isToolPath("/admin/listings")).toBe(false);
     expect(isToolPath("/admin/small-missions")).toBe(false);
-    expect(isToolPath("/admin/contact-messages")).toBe(true);
+    expect(isToolPath("/admin/contact-messages")).toBe(false); // lot ADM20 : au quotidien
+    expect(isToolPath("/admin/affinity")).toBe(true);
     expect(isToolPath("/admin")).toBe(false);
     expect(isToolPath("/admin/traffic")).toBe(false);
   });

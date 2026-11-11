@@ -251,6 +251,8 @@ export const QUEUE_COPY: Record<string, { title: (k: number) => string; link: st
   deletionRequests: { title: (k) => `Traiter ${k} ${n(k, 'demande RGPD', 'demandes RGPD')} (délai légal d'un mois)`, link: '/admin/demandes-suppression' },
   reviewDisputes: { title: (k) => `Trancher ${k} ${n(k, 'contestation d\'avis', 'contestations d\'avis')}`, link: '/admin/review-disputes' },
   verifications: { title: (k) => `Contrôler ${k} ${n(k, 'pièce d\'identité', 'pièces d\'identité')}`, link: '/admin/verifications' },
+  // Lot ADM20 : annonce encore publiée, garde commencée, candidats en attente (drizzle 0139).
+  startedWaiting: { title: (k) => `Décider du sort de ${k} ${n(k, 'annonce commencée', 'annonces commencées')} dont les candidats attendent`, link: '/admin/listings?filter=started_waiting' },
   // Lot ADM14 : files que seule une pastille du menu signalait (drizzle 0127).
   reviewsModeration: { title: (k) => `Valider ${k} ${n(k, 'avis d\'annulation', 'avis d\'annulation')}`, link: '/admin/reviews' },
   experiences: { title: (k) => `Vérifier ${k} ${n(k, 'expérience déclarée', 'expériences déclarées')}`, link: '/admin/experiences' },
