@@ -255,6 +255,9 @@ export type EventType =
   | "sits_create_alma_bubble_seen"              // Bulle Alma inline vue sur /sits/create (formulaire vierge)
   | "sits_create_alma_intent_clicked"           // Clic "Décrire en une phrase" sur /sits/create
   | "sits_create_alma_dismissed"                // Dismiss définitif de la bulle Alma sur /sits/create
+  | "sits_create_welcome_seen"                  // Lot ANN1 : premier écran rassurant vu (proof local|national|none, count)
+  | "sits_create_need_sorted"                   // Lot ANN1 : Alma a trié le besoin (kind coup_de_main|incertain)
+  | "sits_create_need_choice"                   // Lot ANN1 : choix du membre après le tri (choice garde|entraide, from)
   // EntraideHub Pass 1 (UX + fixes workflow) --------------------------------
   | "mission_created_incomplete_profile"        // Mission publiée avec profil < 40 % (profile_completion)
   | "entraide_empty_state_template_clicked"     // Exemple cliquable empty state (tab, template_key)

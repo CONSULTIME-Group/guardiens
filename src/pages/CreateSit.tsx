@@ -42,6 +42,7 @@ import {
 import InlinePhotoUpload from "@/components/sits/create/InlinePhotoUpload";
 import CreateSitSetupStep from "@/components/sits/create/CreateSitSetupStep";
 import CreateSitExpress from "@/components/sits/create/CreateSitExpress";
+import SitCreateWelcome from "@/components/sits/create/SitCreateWelcome";
 import { readExpressParams, isExpressActive, proposeExpressTexts, mergeExpressTexts, firstValidPreset } from "@/lib/sitExpress";
 import { computeReadiness } from "@/lib/ownerDeparture";
 import { photoUploadErrorMessage, uploadOwnerGalleryPhoto } from "@/lib/uploadOwnerGalleryPhoto";
@@ -479,7 +480,8 @@ const CreateSit = () => {
   // Lot PREF1 : étape affichée, lue par le nettoyage de l'effet d'analytics.
   const currentStepRef = useRef(0);
   currentStepRef.current = currentStep;
-  const [sitLocation, setSitLocation] = useState<"home" | "away" | null>(null);
+  // Lot ANN1 : « À mon domicile » choisi d'office, le tri du besoin se fait par Alma ou par ce choix.
+  const [sitLocation, setSitLocation] = useState<"home" | "away" | null>("home");
   const stepStartedAtRef = useRef<number>(Date.now());
   const publishedRef = useRef(false);
   const lastStepRef = useRef<number>(0);
@@ -774,14 +776,19 @@ const CreateSit = () => {
     && isFormEmpty
     && currentStep === 0;
 
+  // Lot ANN1 : premier écran rassurant sur un formulaire vierge. Une fois
+  // affiché, il reste en place pendant la saisie de l'étape 1 (aucun saut de
+  // page à la première frappe) ; un brouillon repris ne le montre pas.
+  const welcomeEligible =
+    !draftIdParam && !fromSitId && !republishMode && !hasUserEditedRef.current && isFormEmpty && currentStep === 0;
+  const [welcomeOn, setWelcomeOn] = useState(false);
   useEffect(() => {
-    if (!showAlmaCreateBubble || almaBubbleSeenRef.current) return;
-    almaBubbleSeenRef.current = true;
-    try {
-      void trackEvent("sits_create_alma_bubble_seen", { source: "/sits/create" });
-    } catch { /* silent */ }
-    trackCowrite("shown", "annonce");
-  }, [showAlmaCreateBubble]);
+    if (welcomeEligible && !loading && !almaBubbleSeenRef.current) {
+      almaBubbleSeenRef.current = true;
+      setWelcomeOn(true);
+    }
+  }, [welcomeEligible, loading]);
+  const showWelcome = welcomeOn && currentStep === 0 && !draftIdParam && !fromSitId && !republishMode;
 
   const [almaPromptOpen, setAlmaPromptOpen] = useState(false);
   // Brouillon préparé par Alma : l'adresse change (?draftId=), la fenêtre se ferme.
@@ -2638,6 +2645,8 @@ const CreateSit = () => {
           <ArrowLeft className="h-4 w-4" /> Retour à mes annonces
         </Link>
 
+        {!showWelcome && (
+          <>
         <h1 className="font-heading text-2xl md:text-3xl font-bold mb-1">
           {isRepublish ? "Republier une annonce" : "Publier une annonce"}
         </h1>
@@ -2646,6 +2655,8 @@ const CreateSit = () => {
             ? "Les informations de votre précédente annonce sont pré-remplies. Ajustez les dates et détails si besoin."
             : "Les informations de votre profil sont pré-remplies. Ajoutez les détails spécifiques à cette garde."}
         </p>
+          </>
+        )}
 
         {isRepublish && (
           <div className="mb-4">
@@ -2702,32 +2713,18 @@ const CreateSit = () => {
 
 
 
-        {showAlmaCreateBubble && (
-          <div className="mb-4">
-            <AlmaBubble
-              audience="owner"
-              variant="inline"
-              title="Décrivez votre absence, je remplis le formulaire"
-              onDismiss={handleAlmaCreateDismiss}
-              actions={
-                <>
-                  <Button size="sm" onClick={handleAlmaCreateIntent}>
-                    Décrire en une phrase
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={handleAlmaCreateDismiss}>
-                    Non merci, je remplis manuellement
-                  </Button>
-                </>
-              }
-            >
-              Vous préférez décrire votre besoin en une phrase et laisser Alma préparer le brouillon ? Je remplis les champs pour vous, vous relisez et publiez.
-            </AlmaBubble>
-          </div>
-        )}
-
-        {!isRepublish && <FirstAnnonceTip />}
+        {!isRepublish && !showWelcome && <FirstAnnonceTip />}
 
       </div>
+
+      {showWelcome && (
+        <>
+          <SitCreateWelcome userId={user?.id} onLeaveForEntraide={() => markExit("mutual_aid")} />
+          <div className="px-4 max-w-3xl mx-auto mb-5 border-t border-border pt-6">
+            <h2 className="font-heading text-xl md:text-[22px] font-semibold text-foreground">Ou remplissez vous-même</h2>
+          </div>
+        </>
+      )}
 
       {/* ===================== STEP 0 : L'ESSENTIEL ===================== */}
       {currentStep === 0 && (
@@ -2770,7 +2767,7 @@ const CreateSit = () => {
                 )}
               >
                 <p className="font-medium text-sm text-foreground">Visite, balade ou pension</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Le gardien ne reste pas chez vous : passages, promenades, ou garde chez lui</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Un service ponctuel, à publier dans l'Entraide</p>
               </button>
             </div>
 

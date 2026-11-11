@@ -1,6 +1,8 @@
 // Owner Pass 3 — Concierge IA : génère un brouillon d'annonce depuis une phrase libre.
 // Entrée : { prompt: string }
+// Entrée (lot ANN1) : confirmHome: true quand le propriétaire a confirmé une garde à son domicile.
 // Sortie : { draftId: string, warnings: string[], confidence: number }
+//       ou { needKind: "coup_de_main" | "incertain" } sans rien enregistrer (lot ANN1).
 //
 // Comportement :
 //  1. Auth JWT obligatoire.
@@ -14,6 +16,7 @@ import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, CORS_HEADERS } from "
 import { DECLARED_FACTS_RULE } from "../_shared/alma-declared-facts.ts";
 import { isLlmRefusal } from "../_shared/refusal-guard.ts";
 import { frenchifyTitleDates } from "./frenchify-title-dates.ts";
+import { CONFIRMED_HOME_RULE, NEED_KIND_RULE, hasSitDraftFields, resolveNeedKind } from "./need-kind.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const RATE_LIMIT_PER_HOUR = 3;
@@ -24,7 +27,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS_HEADERS });
 
   try {
-    const { prompt } = await req.json().catch(() => ({}));
+    const { prompt, confirmHome } = await req.json().catch(() => ({}));
+    const confirmedHome = confirmHome === true;
     if (typeof prompt !== "string" || prompt.trim().length < 10) {
       return json({ error: "Décrivez votre absence en au moins 10 caractères." }, 400);
     }
@@ -101,7 +105,9 @@ ${STYLE_GUARDRAILS}
 
 ${DECLARED_FACTS_RULE}
 
-RÈGLE ABSOLUE : vous produisez TOUJOURS un brouillon complet. Vous ne refusez jamais, vous ne demandez jamais d'informations supplémentaires. Si un point manque, appuyez-vous sur le contexte propriétaire fourni ci-dessous et sur des formulations neutres.
+${confirmedHome ? CONFIRMED_HOME_RULE : NEED_KIND_RULE}
+
+RÈGLE ABSOLUE : pour une garde, vous produisez TOUJOURS un brouillon complet. Vous ne refusez jamais, vous ne demandez jamais d'informations supplémentaires. Si un point manque, appuyez-vous sur le contexte propriétaire fourni ci-dessous et sur des formulations neutres.
 
 
 Règle absolue sur les dates (aujourd'hui = ${todayIso}, année en cours = ${currentYear}) :
@@ -151,19 +157,20 @@ Si le prompt mentionne un prix ou une transaction financière, ignorez-le : Guar
           parameters: {
             type: "object",
             properties: {
-              title: { type: "string", minLength: 20, maxLength: 90 },
+              need_kind: { type: "string", enum: ["garde", "coup_de_main", "incertain"] },
+              title: { type: "string", maxLength: 90 },
               start_date: { type: "string", description: "YYYY-MM-DD, vide si inconnue" },
               end_date: { type: "string", description: "YYYY-MM-DD, vide si inconnue" },
               flexible_dates: { type: "boolean" },
               city: { type: "string" },
               environments: { type: "array", items: { type: "string", enum: ["ville", "campagne", "montagne", "lac", "mer", "vignes", "foret"] }, minItems: 0, maxItems: 3 },
               open_to: { type: "array", items: { type: "string" }, minItems: 0, maxItems: 4 },
-              specific_expectations: { type: "string", minLength: 60, maxLength: 900 },
-              daily_routine: { type: "string", minLength: 60, maxLength: 900 },
-              owner_message: { type: "string", minLength: 60, maxLength: 700 },
+              specific_expectations: { type: "string", maxLength: 900 },
+              daily_routine: { type: "string", maxLength: 900 },
+              owner_message: { type: "string", maxLength: 700 },
               confidence: { type: "number", minimum: 0, maximum: 1 },
             },
-            required: ["title", "flexible_dates", "specific_expectations", "daily_routine", "owner_message", "confidence"],
+            required: ["need_kind"],
             additionalProperties: false,
           },
         },
@@ -177,6 +184,14 @@ Si le prompt mentionne un prix ou une transaction financière, ignorez-le : Guar
 
     const parsed = extractToolArgs(r.data);
     if (!parsed) return json({ error: "Nous n'avons pas pu générer votre brouillon automatiquement, vous pouvez le remplir manuellement." }, 502);
+
+    // Lot ANN1 : un coup de main ou une phrase ambiguë ne devient jamais un
+    // brouillon de garde. Rien n'est enregistré, le site propose la suite.
+    const needKind = resolveNeedKind(parsed.need_kind, confirmedHome);
+    if (needKind !== "garde") return json({ needKind }, 200);
+    if (!hasSitDraftFields(parsed)) {
+      return json({ error: "Nous n'avons pas pu générer votre brouillon automatiquement, vous pouvez le remplir manuellement." }, 502);
+    }
 
     // Nettoyage : tiret cadratin résiduel
     const clean = (s: unknown) => String(s ?? "").replaceAll("\u2014", ",").replaceAll("\u2013", ",");
