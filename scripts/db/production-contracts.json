@@ -239,6 +239,16 @@
           "sql": "SELECT EXISTS (SELECT 1 FROM public.notifications WHERE type = 'google_review_invite' AND link = 'https://g.page/r/CcG68dHWYoHIEAE/review') AS ok"
         }
       ]
+    },
+    {
+      "migration": "0136_sec_vues_lecture_seule.sql",
+      "description": "Vues du schéma public en lecture seule pour anon, authenticated et PUBLIC (MAINTAIN, sans effet sur une vue, toléré)",
+      "checks": [
+        {
+          "name": "vues_lecture_seule",
+          "sql": "SELECT count(*) = 0 AS ok FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace CROSS JOIN LATERAL aclexplode(c.relacl) a WHERE n.nspname = 'public' AND c.relkind IN ('v', 'm') AND a.privilege_type NOT IN ('SELECT', 'MAINTAIN') AND (a.grantee = 0 OR a.grantee IN (SELECT oid FROM pg_roles WHERE rolname IN ('anon', 'authenticated')))"
+        }
+      ]
     }
   ]
 }
