@@ -289,6 +289,16 @@
           "sql": "SELECT position('sc6_compteur_vehicule' IN pg_get_functiondef('public.sitter_missing_opportunities(uuid)'::regprocedure)) > 0 AS ok"
         }
       ]
+    },
+    {
+      "migration": "0137_sec2_jeton_candidature_service.sql",
+      "description": "consume_application_action_token réservée au rôle service",
+      "checks": [
+        {
+          "name": "jeton_candidature_service",
+          "sql": "SELECT (has_function_privilege('service_role', 'public.consume_application_action_token(text,text)', 'EXECUTE') AND NOT has_function_privilege('anon', 'public.consume_application_action_token(text,text)', 'EXECUTE') AND NOT has_function_privilege('authenticated', 'public.consume_application_action_token(text,text)', 'EXECUTE')) AS ok"
+        }
+      ]
     }
   ]
 }
