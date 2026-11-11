@@ -401,7 +401,7 @@ export default function AdminEmailHealth() {
       {/* 2. Envois */}
       <section className="space-y-3">
         <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-          Envois (email_send_log)
+          Envois
         </h2>
         <Card>
           <CardContent className="pt-4">

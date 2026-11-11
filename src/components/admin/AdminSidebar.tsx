@@ -51,6 +51,9 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/listings", icon: Megaphone, label: "Annonces", news: "listings" },
       { to: "/admin/small-missions", icon: Handshake, label: "Entraide", news: "entraide" },
       { to: "/admin/users", icon: Users, label: "Utilisateurs" },
+      // Lot ADM20 : ouverts presque chaque jour (25 et 15 vues en 14 jours, audit du 11/11/2026).
+      { to: "/admin/contact-messages", icon: Mail, label: "Messages contact" },
+      { to: "/admin/errors", icon: Bug, label: "Erreurs" },
     ],
   },
   {
@@ -58,7 +61,6 @@ const adminNavGroups: NavGroup[] = [
     items: [
       { to: "/admin/traffic", icon: BarChart3, label: "Trafic" },
       { to: "/admin/alma", icon: Sparkles, label: "Alma" },
-      { to: "/admin/affinity", icon: HeartHandshake, label: "Affinité" },
       { to: "/admin/pilotage-entraide", icon: LineChart, label: "Pilotage entraide" },
     ],
   },
@@ -67,7 +69,6 @@ const adminNavGroups: NavGroup[] = [
     tool: true,
     items: [
       { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
-      { to: "/admin/contact-messages", icon: Mail, label: "Messages contact" },
       { to: "/admin/reports", icon: Flag, label: "Signalements" },
       { to: "/admin/verifications", icon: ShieldCheck, label: "Vérifications ID" },
       { to: "/admin/reviews", icon: Star, label: "Avis" },
@@ -111,7 +112,8 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/legal", icon: Scale, label: "Pages légales" },
       { to: "/admin/settings", icon: Settings, label: "Paramètres" },
       { to: "/admin/audit", icon: ScrollText, label: "Journal d'audit" },
-      { to: "/admin/errors", icon: Bug, label: "Erreurs" },
+      // Lot ADM20 : Affinité passe aux outils (6 vues en 14 jours).
+      { to: "/admin/affinity", icon: HeartHandshake, label: "Affinité" },
       { to: "/admin/diagnostics", icon: Stethoscope, label: "Diagnostic" },
     ],
   },

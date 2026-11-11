@@ -50,6 +50,7 @@ import { resolveSitStatusBadge, type SitStatusBadgeVariant } from "@/lib/sitStat
 import { unpublishReasonAdminLabel } from "@/lib/unpublishReason";
 import { calendarDate } from "@/lib/calendarDate";
 import { isListingToStaff } from "@/lib/admin/listingToStaff";
+import { isListingStartedWaiting } from "@/lib/admin/listingStartedWaiting";
 import { useAuth } from "@/contexts/AuthContext";
 import { isNewListing, readNewsVisitSince } from "@/hooks/useAdminNews";
 
@@ -506,6 +507,11 @@ const AdminListings = () => {
       // (detect_stale_sits) : en ligne depuis 48 h, départ à venir, aucune
       // candidature active.
       if (!isListingToStaff({ ...l, activeApplications: stats[l.id].applications })) return false;
+    }
+    // Lot ADM20 : garde commencée, candidats toujours en attente (même règle que la liste de travail).
+    if (filterStatus === "started_waiting" && !focusSitId && !focusOwnerId) {
+      if (!stats[l.id]) return false;
+      if (!isListingStartedWaiting({ ...l, activeApplications: stats[l.id].applications })) return false;
     }
     return true;
   });

@@ -394,7 +394,7 @@ const AdminErrors = () => {
       </div>
 
       <p className="text-sm text-muted-foreground">
-        {loadError ? "Indisponible" : loading ? "Chargement…" : `${filtered.length} dossiers dans la vue filtrée : ${stats.app} application, ${stats.network} réseau. ${stats.expected} refus attendus, ${stats.hosting} hors du site.`}
+        {loadError ? "Indisponible" : loading ? "Chargement…" : `${filtered.length} ${filtered.length > 1 ? "dossiers" : "dossier"} dans la vue filtrée : ${stats.app} application, ${stats.network} réseau. ${stats.expected} refus attendus, ${stats.hosting} hors du site.`}
         {!loading && !loadError && pendingFix > 0 && ` ${pendingFix} confié${pendingFix > 1 ? "s" : ""} à Claude, reprise ${FIX_TASK_SCHEDULE_LABEL}.`}
         {truncated && " Données partielles : plafond de lecture atteint."}
         {" Les sessions anonymes ne sont pas comptées parmi les comptes identifiés."}
@@ -410,7 +410,7 @@ const AdminErrors = () => {
           ) : appErrors.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
               <CheckCircle2 className="h-10 w-10 mx-auto mb-2 text-primary" />
-              {loadError ? "Liste indisponible, la lecture a échoué." : "Aucune erreur à afficher."}
+              {loadError ? "Liste indisponible, la lecture a échoué." : "Aucune erreur d'application dans cette vue."}
             </div>
           ) : (
             <ul className="divide-y divide-border">

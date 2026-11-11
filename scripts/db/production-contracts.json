@@ -309,6 +309,20 @@
           "sql": "SELECT position('journ1_tuyaux_suivis' IN pg_get_functiondef('public.admin_cron_health()'::regprocedure)) > 0 AS ok"
         }
       ]
+    },
+    {
+      "migration": "0139_adm20_annonces_commencees.sql",
+      "description": "File des annonces commencées dont les candidats attendent, et relance des candidatures limitée aux gardes à venir",
+      "checks": [
+        {
+          "name": "file_annonces_commencees",
+          "sql": "SELECT position('adm20_annonces_commencees' IN pg_get_functiondef('public.admin_human_queues()'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "relance_gardes_a_venir",
+          "sql": "SELECT position('adm20_garde_a_venir' IN pg_get_functiondef('public.detect_pending_applications()'::regprocedure)) > 0 AS ok"
+        }
+      ]
     }
   ]
 }
