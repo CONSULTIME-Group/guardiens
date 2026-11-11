@@ -12,6 +12,8 @@ import { CollapsibleSection } from "./_components/dashboard/CollapsibleSection";
 import { AnimateCard } from "./_components/dashboard/AnimateCard";
 import { followCronsCard } from "@/lib/admin/followCronsCard";
 import { SiteHealthStrip } from "./_components/dashboard/SiteHealthStrip";
+import { useWorkList } from "@/hooks/useWorkList";
+import { isListFirstOnPhone } from "@/lib/admin/overviewOrder";
 import { ProgressSection, SystemSection, TechnicalSignalsLine, TodaySection } from "./_components/dashboard/PilotageBlocks";
 
 // Import différé : recharts ne se charge qu'à l'ouverture de Tendances.
@@ -57,6 +59,12 @@ const MoreContent = ({ focusCrons = false }: { focusCrons?: boolean }) => {
 export const OVERVIEW_CRONS_PARAM = "taches";
 
 const AdminOverview = () => {
+  // Lot ADM21 : sur téléphone, quand tous les voyants sont verts, la liste de
+  // travail passe avant l'état du site (même lecture que la pastille, aucune
+  // lecture ajoutée). Un voyant rouge, une lecture en échec ou en cours
+  // gardent l'état du site en tête.
+  const { model: workList, loading: workListLoading, error: workListError } = useWorkList();
+  const listFirst = isListFirstOnPhone(workList?.health ?? null, workListLoading, workListError);
   const [searchParams] = useSearchParams();
   const focusCrons = searchParams.get("plus") === OVERVIEW_CRONS_PARAM;
   const [moreOpened, setMoreOpened] = useState(focusCrons);
@@ -64,13 +72,13 @@ const AdminOverview = () => {
     if (focusCrons) setMoreOpened(true);
   }, [focusCrons]);
   return (
-    <div className="mx-auto max-w-[1080px] space-y-6 md:space-y-10">
+    <div className="mx-auto max-w-[1080px] flex flex-col gap-6 md:gap-10" data-list-first={listFirst ? "true" : "false"}>
       <AdminPageHeader
         title="Vue d'ensemble"
         description="Le site fonctionne, ce qui attend votre main, puis ce qui avance."
       />
 
-      <section data-block="site" aria-labelledby="pilotage-site" className="space-y-2">
+      <section data-block="site" aria-labelledby="pilotage-site" className={`space-y-2 ${listFirst ? "order-1 md:order-none" : ""}`}>
         <h2 id="pilotage-site" className="text-[13px] font-semibold text-muted-foreground">Le site fonctionne ?</h2>
         <SiteHealthStrip />
         <TechnicalSignalsLine />
@@ -78,11 +86,11 @@ const AdminOverview = () => {
 
       <div data-block="a-faire"><TodaySection /></div>
 
-      <div data-block="avance"><ProgressSection /></div>
+      <div data-block="avance" className={listFirst ? "order-2 md:order-none" : ""}><ProgressSection /></div>
 
-      <div data-block="systeme"><SystemSection /></div>
+      <div data-block="systeme" className={listFirst ? "order-2 md:order-none" : ""}><SystemSection /></div>
 
-      <div data-block="plus">
+      <div data-block="plus" className={listFirst ? "order-2 md:order-none" : ""}>
         <CollapsibleSection
           key={focusCrons ? "plus-ouvert" : "plus"}
           title="Pour aller plus loin : activité récente, animation, tendances, tâches planifiées, analyse IA"

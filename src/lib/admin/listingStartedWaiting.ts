@@ -11,15 +11,24 @@
  */
 import { isPastDay } from "@/lib/calendarDate";
 
+/** Lot ADM21 : seules les gardes qui se terminent sous 30 jours occupent la liste. */
+export const STARTED_WAITING_END_WITHIN_DAYS = 30;
+
 export interface StartedWaitingInput {
   status?: string | null;
   start_date?: string | null;
+  end_date?: string | null;
   activeApplications: number | null | undefined;
 }
 
 export function isListingStartedWaiting(l: StartedWaitingInput, now: Date = new Date()): boolean {
   if (l.status !== "published") return false;
   if (!l.start_date || !isPastDay(l.start_date, now)) return false;
+  if (l.end_date) {
+    const limit = new Date(now.getFullYear(), now.getMonth(), now.getDate() + STARTED_WAITING_END_WITHIN_DAYS);
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(l.end_date);
+    if (m && new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) > limit) return false;
+  }
   return typeof l.activeApplications === "number" && l.activeApplications > 0;
 }
 

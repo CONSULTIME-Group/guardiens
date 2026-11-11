@@ -1391,3 +1391,16 @@ html[data-keyboard-open] [data-guardiens-sheet="top"] {
   height: var(--vv-height, 100dvh) !important;
   max-height: var(--vv-height, 100dvh) !important;
 }
+
+/* Admin sur téléphone (lot ADM21, 11/11/2026, audit de l'espace admin).
+   Boutons, liens d'action, onglets et listes déroulantes des écrans /admin
+   mesurent 44 px de haut au moins sous 768 px. Interrupteurs, cases et
+   boutons radio gardent leur taille. Mesure du 11/11 à 390 px : 62 contrôles
+   sur 134 sous 40 px sur Annonces, 48 sur 48 sur Messages contact. */
+@media (max-width: 767px) {
+  [data-admin-main] button:not([role="switch"]):not([role="checkbox"]):not([role="radio"]),
+  [data-admin-main] [role="tab"],
+  [data-admin-main] a[role="button"] {
+    min-height: 44px;
+  }
+}
