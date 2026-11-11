@@ -323,6 +323,16 @@
           "sql": "SELECT position('adm20_garde_a_venir' IN pg_get_functiondef('public.detect_pending_applications()'::regprocedure)) > 0 AS ok"
         }
       ]
+    },
+    {
+      "migration": "0140_adm21_annonces_commencees_proches.sql",
+      "description": "File des annonces commencées limitée aux gardes qui se terminent dans les 30 jours",
+      "checks": [
+        {
+          "name": "fin_sous_30_jours",
+          "sql": "SELECT position('adm21_fin_sous_30_jours' IN pg_get_functiondef('public.admin_human_queues()'::regprocedure)) > 0 AS ok"
+        }
+      ]
     }
   ]
 }

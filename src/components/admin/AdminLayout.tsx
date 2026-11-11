@@ -198,7 +198,7 @@ export const AdminLayout = () => {
         </div>
       )}
 
-      <main className="flex-1 min-w-0 p-6 lg:p-8 overflow-x-clip pt-20 md:pt-6">
+      <main data-admin-main className="flex-1 min-w-0 p-6 lg:p-8 overflow-x-clip pt-20 md:pt-6">
         <Outlet />
       </main>
     </div>
