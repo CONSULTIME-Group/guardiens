@@ -22,6 +22,7 @@ import { startCronRun, type CronRun } from "../_shared/cron-run-log.ts";
 import { ALERT_DIGEST_CRON_JOB_IDS, digestRunStatus, readCronJobId, readCronTraceId } from "../_shared/cron-trace.ts";
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
 import { loadPublishAlertedSits, withoutPublishAlerted } from "../_shared/publish-alerted-sits.ts";
+import { readAllRows } from "../_shared/read-all-rows.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -190,21 +191,22 @@ Deno.serve(async (req) => {
     const currentParisDate = parisDateKey(now);
     const dayOfWeek = now.getDay();
 
-    let prefsQuery = supabase
-      .from("alert_preferences")
-      .select(`
+    // Lot LECT1 : lecture par pages, avant que la table dépasse 1 000 zones.
+    const prefs = await readAllRows<any>((from, to) => {
+      let prefsQuery = supabase
+        .from("alert_preferences")
+        .select(`
         *,
         profiles:user_id (
           id, first_name, email, city, postal_code, departement_code, role
         )
       `)
-      .eq("active", true);
-    if (userId) prefsQuery = prefsQuery.eq("user_id", userId);
-    // En dry run, on mesure toute la population active, tous créneaux confondus.
-    if (!forceMode && !dryRun) prefsQuery = prefsQuery.eq("heure_envoi", currentHourStr);
-
-    const { data: prefs, error: prefsError } = await prefsQuery;
-    if (prefsError) throw prefsError;
+        .eq("active", true);
+      if (userId) prefsQuery = prefsQuery.eq("user_id", userId);
+      // En dry run, on mesure toute la population active, tous créneaux confondus.
+      if (!forceMode && !dryRun) prefsQuery = prefsQuery.eq("heure_envoi", currentHourStr);
+      return prefsQuery.order("id", { ascending: true }).range(from, to);
+    });
     if (!prefs || prefs.length === 0) {
       await nominalRun?.finish("success", {
         reason: "no_prefs",

@@ -26,6 +26,7 @@ import {
   shouldSendDigest,
   wideningSentence,
 } from "../_shared/weekly-digest-rules.ts";
+import { readAllRows } from "../_shared/read-all-rows.ts";
 
 const TARGET_PARIS_HOUR = 10;
 const DEFAULT_RADIUS_KM = 30;
@@ -106,13 +107,15 @@ Deno.serve(async (req) => {
     const todayIso = new Date().toISOString().slice(0, 10);
 
     // 1. Reglages : au moins un flux en hebdomadaire.
-    let prefsQ = supabase
-      .from("email_preferences")
-      .select("user_id, sit_alert_frequency, mutual_aid_frequency, nearby_daily_radius_km")
-      .or("sit_alert_frequency.eq.weekly,mutual_aid_frequency.eq.weekly");
-    if (body.user_id) prefsQ = prefsQ.eq("user_id", body.user_id);
-    const { data: prefs, error: prefsErr } = await prefsQ;
-    if (prefsErr) throw prefsErr;
+    // Lot LECT1 : lecture par pages, la population dépasse 1 000 membres.
+    const prefs = await readAllRows<any>((from, to) => {
+      let prefsQ = supabase
+        .from("email_preferences")
+        .select("user_id, sit_alert_frequency, mutual_aid_frequency, nearby_daily_radius_km")
+        .or("sit_alert_frequency.eq.weekly,mutual_aid_frequency.eq.weekly");
+      if (body.user_id) prefsQ = prefsQ.eq("user_id", body.user_id);
+      return prefsQ.order("user_id", { ascending: true }).range(from, to);
+    });
     metrics.recipients_considered = (prefs ?? []).length;
     if ((prefs ?? []).length === 0) {
       await run.finish("success", metrics);
