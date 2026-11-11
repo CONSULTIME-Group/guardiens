@@ -100,6 +100,15 @@ describe("écran", () => {
     expect(page).not.toContain("Non merci, je remplis manuellement");
     expect(page).toContain("const [welcomeOn, setWelcomeOn] = useState(false);");
   });
+  it("un profil qui préremplit l'environnement ou la photo garde l'écran (lot ANN1b)", () => {
+    const i = page.indexOf("const nothingWritten =");
+    const block = page.slice(i, page.indexOf("const welcomeEligible =", i));
+    expect(i).toBeGreaterThan(-1);
+    expect(block).not.toContain("sitEnvironments");
+    expect(block).not.toContain("coverPhotoUrl");
+    expect(block).not.toContain("openTo");
+    expect(page).toContain("&& nothingWritten && currentStep === 0");
+  });
   it("« À mon domicile » est choisi d'office", () => {
     expect(page).toContain('useState<"home" | "away" | null>("home")');
   });

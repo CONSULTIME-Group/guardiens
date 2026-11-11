@@ -779,8 +779,14 @@ const CreateSit = () => {
   // Lot ANN1 : premier écran rassurant sur un formulaire vierge. Une fois
   // affiché, il reste en place pendant la saisie de l'étape 1 (aucun saut de
   // page à la première frappe) ; un brouillon repris ne le montre pas.
+  // Lot ANN1b : « vierge » se juge sur ce que le membre écrit pour cette
+  // annonce. Les champs repris du profil (environnement du logement, photo de
+  // couverture, ouverture aux profils) ne comptent pas.
+  const nothingWritten =
+    !title && !startDate && !endDate && !ownerMessage && !dailyRoutine
+    && !specificExpectations && !flexibleNotes && !isUrgent && !flexibleDates;
   const welcomeEligible =
-    !draftIdParam && !fromSitId && !republishMode && !hasUserEditedRef.current && isFormEmpty && currentStep === 0;
+    !draftIdParam && !fromSitId && !republishMode && !hasUserEditedRef.current && nothingWritten && currentStep === 0;
   const [welcomeOn, setWelcomeOn] = useState(false);
   useEffect(() => {
     if (welcomeEligible && !loading && !almaBubbleSeenRef.current) {
