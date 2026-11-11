@@ -9208,6 +9208,30 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_alert_preferences: {
+        Row: {
+          contact_email: boolean
+          health_email: boolean
+          suspicious_email: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contact_email?: boolean
+          health_email?: boolean
+          suspicious_email?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contact_email?: boolean
+          health_email?: boolean
+          suspicious_email?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_message_logs: {
         Row: {
           admin_id: string
@@ -19364,6 +19388,17 @@ export type Database = {
           n: number
           step: string
         }[]
+      }
+      admin_alert_enqueue: {
+        Args: {
+          p_action: string
+          p_kind: string
+          p_link: string
+          p_ref: string
+          p_subject: string
+          p_title: string
+        }
+        Returns: number
       }
       admin_alma_action_rate: {
         Args: { p_days?: number }
