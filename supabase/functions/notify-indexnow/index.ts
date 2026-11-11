@@ -8,6 +8,7 @@
 //   - source : libellé pour l'historique ("manual", "auto-no-impression", etc.)
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -39,6 +40,11 @@ function toAbsolute(input: string): string | null {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  // Lot SEC2 (11/11/2026) : réservé à un admin ou au rôle service. Les seuls
+  // appelants sont les écrans /admin (IndexNowPanel, NoImpressionActionable).
+  const authFail = await requireAdminOrServiceRole(req, corsHeaders);
+  if (authFail) return authFail;
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
