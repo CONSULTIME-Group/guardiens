@@ -39,18 +39,23 @@ describe("annonce commencée, candidats en attente", () => {
 });
 
 describe("message type aux candidats", () => {
-  const m = startedSitCandidateMessage({ sitterFirstName: "Léa", sitTitle: "Garde de deux chats à Marseille", ownerFirstName: "Camille" });
-  it("dit la relance faite, laisse la réponse au propriétaire, sans promesse", () => {
+  const m = startedSitCandidateMessage({ sitterFirstName: "Léa", ownerFirstName: "Camille", city: "Marseille", startDate: "2026-10-31" });
+  it("chaleureux et clair : relance faite, choix au propriétaire, dates libérées", () => {
+    expect(m.subject).toBe("Des nouvelles de votre candidature à Marseille");
     expect(m.body).toContain("Bonjour Léa,");
-    expect(m.body).toContain("nous avons relancé Camille");
-    expect(m.body).toContain("La réponse à une candidature appartient au propriétaire");
+    expect(m.body).toContain("vous méritez une vraie réponse");
+    expect(m.body).toContain("Nous avons écrit à Camille plusieurs fois");
+    expect(m.body).toContain("La garde devait commencer le 31 octobre");
+    expect(m.body).toContain("le choix du gardien revient toujours au propriétaire");
+    expect(m.body).toContain("vos dates soient de nouveau libres");
     expect(m.body).not.toMatch(/nous (allons )?(vous )?(trouver|chercher)/i);
-    expect(m.subject + m.body).not.toMatch(/[—–]/);
+    expect(m.subject + m.body).not.toMatch(/[\u2014\u2013]/);
   });
-  it("sans prénoms, le message reste correct", () => {
-    const g = startedSitCandidateMessage({ sitTitle: "Garde à Siros" });
+  it("sans prénoms ni ville, le message reste correct", () => {
+    const g = startedSitCandidateMessage({});
     expect(g.body.startsWith("Bonjour,")).toBe(true);
-    expect(g.body).toContain("nous avons relancé le propriétaire");
+    expect(g.body).toContain("Nous avons écrit au propriétaire plusieurs fois");
+    expect(g.subject).toBe("Des nouvelles de votre candidature");
   });
 });
 

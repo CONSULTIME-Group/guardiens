@@ -25,22 +25,42 @@ export function isListingStartedWaiting(l: StartedWaitingInput, now: Date = new 
 
 /**
  * Message type aux candidats d'une annonce commencée sans réponse du
- * propriétaire (texte de Jérémie, 11/11/2026 : « de notre côté on a aussi
- * relancé le propriétaire, la réponse lui appartient »). Formulations
- * affirmatives, aucun engagement à trouver une garde.
+ * propriétaire. Consigne de Jérémie (11/11/2026) : dire que nous avons
+ * relancé le propriétaire et que la réponse lui revient, sur un ton
+ * chaleureux et clair (première version refusée : « nul, peu chaleureux,
+ * peu clair »). Aucun engagement à trouver une garde.
  */
-export function startedSitCandidateMessage(input: { sitterFirstName?: string | null; sitTitle: string; ownerFirstName?: string | null }): { subject: string; body: string } {
+const frDay = (iso?: string | null): string | null => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso ?? "");
+  if (!m) return null;
+  const months = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+  const d = Number(m[3]);
+  return `${d === 1 ? "1er" : d} ${months[Number(m[2]) - 1]}`;
+};
+
+export function startedSitCandidateMessage(input: {
+  sitterFirstName?: string | null;
+  ownerFirstName?: string | null;
+  city?: string | null;
+  startDate?: string | null;
+}): { subject: string; body: string } {
   const hello = input.sitterFirstName?.trim() ? `Bonjour ${input.sitterFirstName.trim()},` : "Bonjour,";
-  const owner = input.ownerFirstName?.trim() || "le propriétaire";
+  const owner = input.ownerFirstName?.trim() || null;
+  const city = input.city?.trim() || null;
+  const day = frDay(input.startDate);
+  const where = city ? ` à ${city}` : "";
+  const garde = owner ? `la garde de ${owner}${where}` : `une garde${where}`;
+  const relance = owner ? `Nous avons écrit à ${owner} plusieurs fois` : "Nous avons écrit au propriétaire plusieurs fois";
   return {
-    subject: "Votre candidature : des nouvelles de notre côté",
+    subject: city ? `Des nouvelles de votre candidature à ${city}` : "Des nouvelles de votre candidature",
     body: [
       hello,
-      `Vous avez candidaté à l'annonce « ${input.sitTitle.trim()} ». La période de cette garde a commencé et ${owner} a laissé votre candidature en attente.`,
-      `De notre côté, nous avons relancé ${owner} à plusieurs reprises. La réponse à une candidature appartient au propriétaire, et nous tenons à vous donner des nouvelles plutôt que de vous laisser attendre.`,
-      "Votre candidature se clôt donc aujourd'hui. Votre profil reste visible des propriétaires, et d'autres gardes sont ouvertes en ce moment : vous les trouverez dans la recherche.",
-      "Merci pour votre disponibilité et pour la qualité de votre candidature.",
-      "Jérémie, Guardiens",
+      "Je vous écris moi-même, parce que vous méritez une vraie réponse.",
+      `Vous avez candidaté pour ${garde}. ${relance} pour qu'une réponse vous parvienne, et son silence dure encore.${day ? ` La garde devait commencer le ${day} : elle a donc débuté sans réponse de sa part.` : ""}`,
+      "Sur Guardiens, le choix du gardien revient toujours au propriétaire. Vous tenir au courant, en revanche, c'est notre rôle, et je suis désolé que vous ayez attendu si longtemps.",
+      "Je referme votre candidature aujourd'hui pour que vos dates soient de nouveau libres. Votre profil reste bien visible, et plusieurs gardes cherchent quelqu'un en ce moment : elles vous attendent dans la recherche.",
+      "Merci d'avoir proposé votre aide. Guardiens existe grâce à des gardiens comme vous.",
+      "Jérémie, fondateur de Guardiens",
     ].join("\n\n"),
   };
 }
