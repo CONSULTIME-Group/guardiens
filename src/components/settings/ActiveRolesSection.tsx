@@ -179,8 +179,7 @@ const ActiveRolesSection = () => {
               <div className="space-y-0.5">
                 <Label className="text-sm font-medium">Disponible pour garder</Label>
                 <p className="text-xs text-muted-foreground">
-                  Désactivez simplement ce bouton pour ne plus apparaître comme gardien
-                  disponible. Vous gardez votre compte, vos avis et votre historique.
+                  Éteignez ce bouton pour mettre votre disponibilité en pause. Vous gardez votre compte, vos avis et votre historique.
                 </p>
               </div>
               <Switch

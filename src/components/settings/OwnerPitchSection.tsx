@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Shield } from "lucide-react";
+import { Handshake } from "lucide-react";
 
 const OwnerPitchSection = ({ user }: { user: any }) => {
   const [loaded, setLoaded] = useState(false);
@@ -43,20 +43,20 @@ const OwnerPitchSection = ({ user }: { user: any }) => {
   return (
     <section>
       <div className="flex items-center gap-2 mb-4">
-        <Shield className="h-5 w-5 text-primary" />
-        <h2 className="font-heading text-lg font-semibold">Démarchage spontané pour une garde</h2>
+        <Handshake className="h-5 w-5 text-primary" />
+        <h2 className="font-heading text-lg font-semibold">Propositions de garde</h2>
       </div>
       <div className="flex items-start justify-between gap-4 rounded-xl border border-border bg-card p-4">
         <div className="flex-1">
-          <Label className="text-sm font-medium">Autoriser les gardiens à me proposer une garde sans annonce active</Label>
+          <Label htmlFor="owner-pitch-accept" className="text-sm font-medium">Recevoir des propositions de garde en dehors de mes annonces</Label>
           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
             Recommandé : laissez désactivé. Les gardiens passent ainsi par vos annonces publiées, ce qui garantit un cadre clair (dates, animaux, attentes).
           </p>
           <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-            <strong className="text-foreground">L'Entraide reste toujours ouverte :</strong> ce réglage ne concerne <em>que</em> les propositions de garde. Les coups de main ponctuels peuvent vous être proposés librement par les gens du coin.
+            <strong className="text-foreground">L'Entraide reste toujours ouverte :</strong> ce réglage porte sur les seules propositions de garde. Les coups de main ponctuels peuvent vous être proposés librement par les gens du coin.
           </p>
         </div>
-        <Switch checked={accept} onCheckedChange={handleToggle} />
+        <Switch id="owner-pitch-accept" checked={accept} onCheckedChange={handleToggle} />
       </div>
     </section>
   );

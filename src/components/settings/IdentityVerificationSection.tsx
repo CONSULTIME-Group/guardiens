@@ -429,7 +429,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
           <div className={`space-y-2 ${status !== "verified" ? "pt-3 mt-4 border-t border-border" : ""}`}>
             <p className="text-sm font-medium text-foreground">Pour aller plus loin, optionnel : selfie de vérification</p>
             <p className="text-xs text-muted-foreground">
-              Le selfie n'est pas nécessaire pour valider votre identité. Il ajoute un signal de confiance supplémentaire, visible par les membres.
+              Votre pièce d'identité suffit à valider votre identité. Le selfie est facultatif : il ajoute un signal de confiance supplémentaire, visible par les membres.
             </p>
             <p className="text-xs text-muted-foreground">
               {documentUrl
