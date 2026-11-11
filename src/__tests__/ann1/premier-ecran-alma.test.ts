@@ -112,6 +112,10 @@ describe("écran", () => {
     const j = page.indexOf("const welcomeEligible =");
     expect(page.slice(j, page.indexOf(";", j))).not.toContain("hasUserEditedRef");
   });
+  it("la barre de navigation basse est masquée sur le formulaire (lot ANN1e)", () => {
+    expect(page).toContain("useHideBottomNav(true);");
+    expect(page).toContain("bottom-[var(--bottom-nav-h,0px)]");
+  });
   it("« À mon domicile » est choisi d'office", () => {
     expect(page).toContain('useState<"home" | "away" | null>("home")');
   });
