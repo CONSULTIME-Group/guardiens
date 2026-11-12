@@ -54,6 +54,18 @@
   border-color: var(--arrival-green);
   box-shadow: 0 0 0 2px var(--arrival-green);
 }
+/* Lot INS1 étape 1 : cartes à cocher de l'inscription et bloc « inclus ». */
+.arrival-check-card { border-color: #C9C2B6; }
+.arrival-check-card[data-checked="true"] {
+  border-color: var(--arrival-green);
+  box-shadow: 0 0 0 2px var(--arrival-green);
+}
+.arrival-check-card:focus-within { outline: 2px solid var(--arrival-green); outline-offset: 2px; }
+.arrival-checkbox { accent-color: var(--arrival-green); }
+.arrival-eyebrow-green { color: #235741; }
+.arrival-included { background: #E6EFE9; border-radius: 1rem; }
+.arrival-included-badge { background: var(--arrival-green); }
+.arrival-included-text { color: #2F4A3D; }
 .arrival-primary {
   background: var(--arrival-green); color: #fff;
   min-height: 48px; border-radius: 9999px; font-weight: 600; width: 100%;

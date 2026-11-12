@@ -180,7 +180,8 @@ describe("mesure", () => {
     expect(arrivalIntentForSignup(false, "entraide")).toBeNull();
     expect(arrivalIntentForSignup(false, "sitter")).toBe("sitter");
     expect(arrivalIntentForSignup(false, null)).toBeNull();
-    expect(read("src/pages/Register.tsx")).toContain("arrivalIntentForSignup(entraideIntent, detectedIntent, selectedRole)");
+    // Lot INS1 étape 1 (12/11/2026) : l'appel passe par arrivalIntentForGuardChoice, qui délègue à arrivalIntentForSignup.
+    expect(read("src/pages/Register.tsx")).toContain("arrivalIntentForGuardChoice(entraideIntent, detectedIntent, selectedRole,");
     expect(read("src/contexts/AuthContext.tsx")).toContain("...(arrivalIntent ? { arrival_intent: arrivalIntent } : {})");
     expect(read("drizzle/migrations/0099_e17_boucle_tenue.sql")).toContain("_intent := NEW.raw_user_meta_data ->> 'arrival_intent';");
   });

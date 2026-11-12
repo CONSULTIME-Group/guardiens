@@ -12,7 +12,8 @@ describe("lot 2, enchaînements", () => {
   it("intention : owner, sitter, entraide ; polyvalent sans intention garde la destination", () => {
     expect(arrivalIntentFor("sitter", false)).toBe("sitter");
     expect(arrivalIntentFor("both", true)).toBe("entraide");
-    expect(arrivalIntentFor("both", false)).toBeNull();
+    // Lot INS1 étape 1 (12/11/2026) : un double rôle suit le parcours propriétaire d'abord.
+    expect(arrivalIntentFor("both", false)).toBe("owner");
     expect(afterWelcome(null, "/sits/create?source=signup")).toBe("/sits/create?source=signup");
   });
   it("redirection explicite : reprend après G3 (gardien) et après G1 (entraide)", () => {

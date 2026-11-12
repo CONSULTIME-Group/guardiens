@@ -27,7 +27,7 @@ import { AuthIllustrationPanel } from "@/components/auth/AuthIllustrationPanel";
 import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 import { lovable } from "@/integrations/lovable";
 import { startOAuthFlow, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
-import { arrivalIntentForSignup, detectSignupIntent, roleForSignupIntent, signupIntentBannerKey, signupIntentMatchesRole } from "@/lib/signupIntent";
+import { arrivalIntentForGuardChoice, detectSignupIntent, guardBoxesFor, resolveGuardChoice, roleForSignupIntent, signupIntentBannerKey, signupIntentMatchesRole } from "@/lib/signupIntent";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { ARRIVAL_FLAG, arrivalAppliesToNewSignup } from "@/lib/arrivalFlag";
 import { Suspense } from "react";
@@ -171,6 +171,10 @@ const Register = () => {
   const arrivalFlag = useFeatureFlag(ARRIVAL_FLAG);
   const v2 = arrivalFlag.enabled;
   const [entraideIntent, setEntraideIntent] = useState(detectedIntent === "entraide");
+  // Lot INS1 étape 1 (12/11/2026) : la garde se coche à l'écran C1. Les cases
+  // gardent leur état quand on revient par « Modifier ».
+  const [guardBoxes, setGuardBoxes] = useState(() => guardBoxesFor(initialRole, detectedIntent === "entraide"));
+  const [guardChosen, setGuardChosen] = useState(false);
   const postAuthTarget = resolvePostAuthTarget(selectedRole, redirectTarget, arrivalAppliesToNewSignup(arrivalFlag));
 
  const pwStrength = useMemo(() => getPasswordStrength(password), [password]);
@@ -295,7 +299,7 @@ const Register = () => {
  try {
  const result = await Promise.race([
  // Lot E17 : l'intention d'inscription est écrite sur le compte.
- register(cleanEmail, password, selectedRole, postAuthTarget, arrivalIntentForSignup(entraideIntent, detectedIntent, selectedRole)),
+ register(cleanEmail, password, selectedRole, postAuthTarget, arrivalIntentForGuardChoice(entraideIntent, detectedIntent, selectedRole, v2 && guardChosen && guardBoxes.owner && guardBoxes.sitter)),
  timeoutPromise,
  ]) as any;
 
@@ -671,27 +675,28 @@ const Register = () => {
 
   {step === 1 && v2 && (
    <Suspense fallback={null}><ArrivalC1
-    selected={selectedRole}
+    owner={guardBoxes.owner}
+    sitter={guardBoxes.sitter}
     loginHref={`/login${buildRedirectQuery(redirectTarget)}`}
-    onSelect={(r) => {
-     setSelectedRole(r);
-     setEntraideIntent(false);
+    onToggle={(r) => {
+     setGuardBoxes((prev) => ({ ...prev, [r]: !prev[r] }));
      setFormError(null);
-     trackEvent("signup_role_selected", { source: "/inscription", metadata: { role: r } });
-    }}
-    onEntraide={() => {
-     // Même logique que roleForSignupIntent("entraide") : rôle polyvalent.
-     const r = (roleForSignupIntent("entraide") ?? "both") as Role;
-     setSelectedRole(r);
-     setEntraideIntent(true);
-     try { localStorage.setItem("guardiens_signup_intent", "entraide"); } catch {}
-     trackEvent("signup_role_selected", { source: "/inscription", metadata: { role: r, intent: "entraide" } });
-     trackArrival("completed", "C1");
-     setStep(2);
     }}
     onContinue={() => {
-     if (!selectedRole) return;
-     try { localStorage.removeItem("guardiens_signup_intent"); } catch {}
+     // Lot INS1 étape 1 : une case, les deux, ou aucune. Sans case cochée,
+     // la personne arrive par l'entraide et les sorties (rôle polyvalent).
+     const outcome = resolveGuardChoice(guardBoxes.owner, guardBoxes.sitter);
+     setSelectedRole(outcome.role as Role);
+     setEntraideIntent(outcome.entraide);
+     setGuardChosen(true);
+     try {
+      if (outcome.entraide) localStorage.setItem("guardiens_signup_intent", "entraide");
+      else localStorage.removeItem("guardiens_signup_intent");
+     } catch {}
+     trackEvent("signup_role_selected", {
+      source: "/inscription",
+      metadata: { role: outcome.role, choice: outcome.choice, ...(outcome.entraide ? { intent: "entraide" } : {}) },
+     });
      trackArrival("completed", "C1");
      setStep(2);
     }}
@@ -750,7 +755,7 @@ const Register = () => {
   <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
   {v2 && (
    <Suspense fallback={null}><ArrivalC2Header
-    recap={entraideIntent ? "arrival.c2.entraide_recap" : selectedRole === "owner" ? "arrival.c1.owner_title" : selectedRole === "sitter" ? "arrival.c1.sitter_title" : (roles.find((r) => r.value === selectedRole)?.label ?? "")}
+    recap={entraideIntent ? "arrival.c2.entraide_recap" : selectedRole === "owner" ? "arrival.c1.owner_title" : selectedRole === "sitter" ? "arrival.c1.sitter_title" : selectedRole === "both" ? "arrival.c2.both_recap" : (roles.find((r) => r.value === selectedRole)?.label ?? "")}
     onModify={() => setStep(1)}
    /></Suspense>
   )}
