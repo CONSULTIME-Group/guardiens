@@ -1413,7 +1413,14 @@ html[data-keyboard-open] [data-guardiens-sheet="top"] {
   [data-settings-main] button:not([role="switch"]):not([role="checkbox"]):not([role="radio"]),
   [data-settings-main] a[role="button"],
   [data-settings-main] input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
-  [data-settings-main] [role="combobox"] {
+  [data-settings-main] [role="combobox"],
+  [data-settings-main] a[href]:not(p a) {
     min-height: 44px;
+  }
+  /* Lot PAR4 : un lien seul sur sa ligne devient une cible de 44 px ; un lien
+     dans une phrase garde sa place dans le texte. */
+  [data-settings-main] a[href]:not(p a):not([class*="flex"]):not([class*="block"]):not([class*="grid"]) {
+    display: inline-flex;
+    align-items: center;
   }
 }
