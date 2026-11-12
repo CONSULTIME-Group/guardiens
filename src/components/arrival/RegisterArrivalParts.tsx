@@ -23,20 +23,20 @@ export function ArrivalC1({ owner, sitter, onToggle, onContinue, loginHref }: {
     { role: "sitter", checked: sitter, title: t("arrival.c1.sitter_title"), text: t("arrival.c1.sitter_text"), img: gouacheGarde },
   ];
   return (
-    <div className="space-y-5" data-testid="arrival-c1">
+    <div className="space-y-4" data-testid="arrival-c1">
       <p className="text-center text-sm text-muted-foreground">{t("arrival.c1.header")}</p>
       <h2 className="text-3xl font-semibold">{t("arrival.c1.title")}</h2>
 
       {/* Lot INS1 étape 1 : la garde se coche (une case, les deux, ou aucune). */}
-      <div role="group" aria-labelledby="arrival-c1-guard" aria-describedby="arrival-c1-guard-hint" className="space-y-3">
+      <div role="group" aria-labelledby="arrival-c1-guard" aria-describedby="arrival-c1-guard-hint" className="space-y-2.5">
         <div>
           <p id="arrival-c1-guard" className="arrival-eyebrow">{t("arrival.c1.guard_eyebrow")}</p>
-          <p id="arrival-c1-guard-hint" className="mt-1.5 text-[15px] leading-snug text-foreground/80">{t("arrival.c1.guard_hint")}</p>
+          <p id="arrival-c1-guard-hint" className="mt-1 text-[15px] leading-snug text-foreground/80">{t("arrival.c1.guard_hint")}</p>
         </div>
         <div className="space-y-2.5">
           {cards.map((c) => (
             <label key={c.role} htmlFor={`arrival-c1-${c.role}`} data-checked={c.checked ? "true" : "false"}
-              className="arrival-card arrival-check-card flex w-full cursor-pointer items-center gap-3 p-3 text-left">
+              className="arrival-card arrival-check-card flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-left">
               <input
                 id={`arrival-c1-${c.role}`}
                 type="checkbox"
@@ -57,9 +57,9 @@ export function ArrivalC1({ owner, sitter, onToggle, onContinue, loginHref }: {
       </div>
 
       {/* Entraide et sorties : acquises à tout membre, rien à cocher. */}
-      <div className="space-y-2.5" data-testid="arrival-c1-included">
+      <div className="space-y-2" data-testid="arrival-c1-included">
         <p className="arrival-eyebrow arrival-eyebrow-green">{t("arrival.c1.all_eyebrow")}</p>
-        <div className="arrival-included flex items-center gap-3 px-3 py-3.5">
+        <div className="arrival-included flex items-center gap-3 px-3 py-3">
           <span role="img" aria-label={t("arrival.c1.included_badge")} className="arrival-included-badge flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
             <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
           </span>
