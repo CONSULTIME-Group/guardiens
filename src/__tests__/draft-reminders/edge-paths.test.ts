@@ -4,10 +4,24 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as eligibility from "../../../supabase/functions/_shared/draft-reminder-eligibility";
 import * as missing from "../../../supabase/functions/_shared/sit-draft-missing";
-import { fakeDb, baseData, draftRow, sentLog, SIT, OWNER, EMAIL, type FakeDbData, type Row } from "./fakeDb";
+import { fakeDb, baseData, draftRow, sentLog, NOW, SIT, OWNER, EMAIL, type FakeDbData, type Row } from "./fakeDb";
+
+// Correctif du 12/11/2026 : les données de ce fichier sont datées par rapport
+// à l'horloge figée de fakeDb (NOW, 07/11/2026), alors que les fonctions
+// testées lisaient l'heure réelle. Depuis le 12/11 à 8 h UTC, « relance il y
+// a 2 jours » valait 7 jours réels : l'espacement était tenu pour écoulé et
+// deux tests échouaient sur main. L'horloge du test est donc figée sur NOW
+// (seul Date est remplacé, les minuteries restent réelles).
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(NOW);
+});
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 const SERVICE = "fixture-service";
 const ADMIN = "admin-session";

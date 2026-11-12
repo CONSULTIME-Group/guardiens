@@ -1,9 +1,12 @@
 // MIROIR DE DOCUMENTATION, CE FICHIER NE DÉPLOIE RIEN.
 // La source de vérité est l'éditeur Cloudflare (Workers & Pages >
-// guardiens-prerender > Edit code). Ce fichier reflète la version active
-// 1f3bf743 (v7.3 du 07/09/2026), capturée le 07/09/2026. Toute modification
-// faite ici reste sans effet sur la production tant qu'elle n'est pas
-// reportée dans l'éditeur Cloudflare, ou déployée par `npx wrangler deploy`.
+// guardiens-prerender > Edit code). Le code sous le repère « CODE DÉPLOYÉ »
+// est, à l'octet près, la version active be02d9c5 (v7.5 du 12/11/2026),
+// capturée le 12/11/2026 : SHA-256
+// 25d5010079586e7204a35461c97482a904591c56bf402d51496f799dcb60a4ab.
+// Le bloc d'historique au-dessus du repère n'existe que dans ce miroir. Toute
+// modification faite ici reste sans effet sur la production tant qu'elle n'est
+// pas reportée dans l'éditeur Cloudflare.
 
 /**
  * Cloudflare Worker — Prerender.io proxy for guardiens.fr
@@ -11,6 +14,46 @@
  * Deploy: Cloudflare Dashboard > Workers & Pages > guardiens-prerender > Edit code
  *         ou `npx wrangler deploy`
  * Route:  guardiens.fr/* + *guardiens.fr/*
+ *
+ * ══ v7.5 (2026-11-12) : HTML DES ROBOTS ALIGNÉ SUR LES FICHIERS EN LIGNE ══
+ *
+ *  MESURE du 12/11/2026, 25 URL du sitemap demandées en Googlebot : 12
+ *  citaient une feuille de style `/assets/index-*.css` d'une ancienne mise en
+ *  ligne, qui répondait 404 (annonces, races, /petites-missions/ville, des
+ *  villes et des articles). Une copie Prerender vit jusqu'à 7 jours, l'origine
+ *  Lovable retire les fichiers des anciennes mises en ligne : Google rendait
+ *  ces pages sans mise en forme. Même cause, second effet : le HTML des robots
+ *  gardait 68 `<link rel="modulepreload">` (les scripts, eux, sont retirés par
+ *  Prerender), et Cloudflare comptait sur 7 jours 2 190 réponses 4xx à
+ *  Googlebot sur 9 590 requêtes, les chemins en tête étant tous des
+ *  `/assets/*.js`.
+ *
+ *  CORRIGÉ : `alignBotHtml` (HTMLRewriter, corps relayé en flux) retire les
+ *  modulepreload et pose la feuille de style en ligne sur toute réponse HTML
+ *  de Prerender, 200 comme 404. La feuille de style en ligne est lue sur
+ *  l'index de l'origine par `currentCssHref`, gardée 5 minutes en mémoire, en
+ *  parallèle de l'appel Prerender (aucune attente ajoutée, 1,5 s au plus si
+ *  l'origine se tait). Lecture en échec : dernière valeur connue, nouvel essai
+ *  une minute plus tard, et sans valeur le href reste celui de la copie. Aucun
+ *  rendu consommé, aucun changement pour un visiteur.
+ *
+ *  LIMITE CONNUE : seule `/assets/index-*.css` est réalignée. Une feuille de
+ *  style de morceau (ex. `mapTiles-*.css`) garde le nom de la copie.
+ *
+ *  TESTS : 21 scénarios dans le runtime workerd (miniflare) contre le v7.4,
+ *  dont la vraie page /house-sitting/lyon du 12/11 ; visiteurs, fichiers,
+ *  sitemap, `?lang=`, www, replis 403, 429 et 5xx identiques au v7.4.
+ *  RECETTE en production le 12/11/2026 (version be02d9c5, retour arrière
+ *  1474474e) : 25 URL sur 25 en Googlebot avec feuille de style en 200 et
+ *  zéro modulepreload, 404 gardée en 404 noindex.
+ *
+ * ══ v7.4 (2026-10-04) : SITEMAP VIVANT, VARIANTES ?lang= EN 301 ══
+ *
+ *  `/sitemap.xml` relaie la fonction Supabase `sitemap` (503 en cas de panne
+ *  de l'amont, jamais de repli sur le fichier du build) ; les anciennes
+ *  variantes `?lang=` reçoivent une redirection permanente vers l'URL sans ce
+ *  paramètre. Version 1474474e, voir
+ *  claude/reprise-seo-constats-claude-4-octobre-2026.md.
  *
  * ══ v7.3 (2026-09-07) : 404 RELAYÉES, JSON-LD BOTS SEULS, 304 SANS CORPS ══
  *
@@ -196,50 +239,61 @@
  *  - bytespider isolé, activable par env.PRERENDER_ALLOW_BYTESPIDER.
  */
 
-// PRERENDER_TOKEN est lu exclusivement depuis env.PRERENDER_TOKEN
-// (variable chiffrée Cloudflare Worker Secrets). Aucun fallback en clair.
+// ═══ CODE DÉPLOYÉ (be02d9c5) ═══
+/**
+ * guardiens-prerender, v7.5 (12/11/2026)
+ * Proxy Prerender.io pour guardiens.fr. Route : guardiens.fr/* et *guardiens.fr/*
+ *
+ * Historique détaillé, mesures et audits : dépôt Lovable,
+ * cloudflare-worker-prerender.js. Ce fichier ne garde que les invariants.
+ *
+ * INVARIANTS À NE PAS CASSER
+ *  1. Prerender ne reçoit jamais de query string (PRERENDER_KEEP_PARAMS vide).
+ *     Chaque paramètre conservé multiplie les renders facturés.
+ *  2. Un 404 remonté par Prerender est le signal voulu par la méta
+ *     prerender-status-code. Il est relayé. Le replier sur l'origine sert un
+ *     shell React vide en 200, que Google dédoublonne.
+ *  3. 403, 429 et 5xx sont des incidents de rendu, pas un verdict sur l'URL :
+ *     repli sur l'origine, jamais de 404 dur.
+ *  4. Le HTML prérendu n'entre jamais dans le cache edge Cloudflare : le
+ *     pipeline seo_dirty_at ne sait pas le purger.
+ *  5. Le compte Prerender est partagé avec onchercheunemaison.fr.
+ *  6. Le HTML servi aux robots cite la feuille de style en ligne et ne porte
+ *     aucun modulepreload : une copie Prerender vit jusqu'à 7 jours, l'origine
+ *     retire les fichiers des anciennes mises en ligne (alignBotHtml).
+ */
+
 const PRERENDER_SERVICE = 'https://service.prerender.io/';
-
-// Hôte canonique. Toute autre forme (www, http, port, sous-domaine) est
-// ramenée à celle-ci AVANT d'atteindre Prerender, sinon chaque variante est
-// une entrée de cache distincte et facturée.
 const CANONICAL_ORIGIN = 'guardiens.fr';
+const LOVABLE_ORIGIN_HOST = 'guardiens.lovable.app';
 
-// 20 s : au-dessus du temps de rendu réel des pages les plus lourdes. Abandonner
-// avant la fin ne fait pas économiser le render, il le fait payer deux fois car
-// le crawler réessaie.
+// 20 s : au-dessus du rendu réel des pages les plus lourdes. Abandonner avant
+// la fin ne fait pas économiser le render, le crawler réessaie et il est
+// facturé deux fois.
 const PRERENDER_TIMEOUT_MS = 20000;
 
-// Les bots sociaux coupent entre 3 et 10 s. Leur imposer 20 s garantit le pire
-// scénario : aperçu de partage vide ET render facturé.
+// Les bots sociaux coupent entre 3 et 10 s. Leur imposer 20 s garantit le pire :
+// aperçu de partage vide ET render facturé.
 const PRERENDER_TIMEOUT_SOCIAL_MS = 8000;
 const SOCIAL_REGEX = /facebookexternalhit|facebot|twitterbot|linkedinbot|slackbot|whatsapp|telegrambot|discordbot|pinterestbot|redditbot/i;
 
 const IGNORED_EXTENSIONS = /\.(js|css|xml|less|png|jpg|jpeg|gif|pdf|doc|txt|ico|rss|zip|mp3|rar|exe|wmv|avi|ppt|mpg|mpeg|tif|wav|mov|psd|ai|xls|mp4|m4a|swf|dat|dmg|iso|flv|m4v|torrent|ttf|woff|woff2|svg|eot|webp|avif|webm|json)$/i;
 
 /**
- * Paramètres de query string conservés dans l'URL envoyée à Prerender.
- * TOUT le reste est retiré, donc `?a=1&b=2` et `?a=9` produisent le même
- * render que l'URL nue.
- *
- * Règle d'ajout : un paramètre n'entre ici que s'il change le contenu indexable
- * de la page ET que la variante correspondante figure dans le sitemap. Aucune
- * URL du sitemap guardiens.fr ne porte de paramètre, donc cette liste est vide.
- * Chaque entrée ajoutée multiplie mécaniquement le nombre de renders facturés.
+ * Paramètres conservés dans l'URL envoyée à Prerender. Liste vide : aucune URL
+ * du sitemap ne porte de paramètre. N'ajouter une entrée que si elle change le
+ * contenu indexable ET figure dans le sitemap.
  */
 const PRERENDER_KEEP_PARAMS = [];
 
 /**
- * Chemins jamais envoyés à Prerender : parcours authentifié, formulaires,
- * redirections techniques et pages de test. Aucune valeur d'indexation, mais
- * un coût de render à chaque visite de bot non conforme au robots.txt.
+ * Chemins jamais envoyés à Prerender. Aucune valeur d'indexation, mais un coût
+ * de render à chaque visite de bot non conforme au robots.txt.
  *
- * ATTENTION AVANT D'AJOUTER OU DE CRÉER UNE ROUTE. Les préfixes d'un seul
- * segment court (`/go`, `/dev`, `/test`, `/acces`, `/review`, `/profil`)
- * bloquent définitivement ces URLs exactes. Créer un jour une page publique
- * `/acces` (plan d'accès) ou `/review` la désindexerait en silence, sans
- * message d'erreur. Vérifié le 11/08/2026 sur les 713 URLs du sitemap :
- * aucune collision. À revérifier à chaque ajout de route publique.
+ * ATTENTION. Les préfixes d'un seul segment court (/go, /dev, /test, /acces,
+ * /review, /profil) bloquent définitivement ces URLs exactes. Créer un jour une
+ * page publique /acces ou /review la désindexerait en silence, sans erreur.
+ * Revérifier à chaque ajout de route publique.
  */
 const NEVER_PRERENDER_PREFIXES = [
   '/admin',
@@ -285,15 +339,12 @@ const NEVER_PRERENDER_PREFIXES = [
 ];
 
 const BOT_AGENTS = [
-  // SEO crawlers
   'googlebot', 'bingbot', 'slurp', 'duckduckbot', 'yandexbot',
   'baiduspider', 'applebot',
-  // Generative AI bots
   'chatgpt-user', 'gptbot', 'oai-searchbot', 'google-extended', 'claudebot', 'claude-web', 'claude-searchbot',
   'anthropic-ai', 'perplexitybot', 'perplexity-user', 'meta-externalagent',
   'meta-externalfetcher', 'amazonbot', 'applebot-extended', 'mistralai-user',
   'duckassistbot', 'cohere-ai', 'youbot',
-  // Social sharing bots
   'facebookexternalhit', 'facebot', 'twitterbot', 'linkedinbot',
   'slackbot', 'whatsapp', 'telegrambot', 'discordbot',
   'pinterestbot', 'redditbot',
@@ -302,16 +353,14 @@ const BOT_AGENTS = [
 
 const OPTIONAL_BOT_AGENTS = ['bytespider'];
 
-/**
- * Outils SEO commerciaux. Coupés par défaut pour préserver le quota, mais
- * rendus activables : sans eux, Ahrefs Site Audit et Semrush Site Audit ne
- * voient qu'un shell React vide et rapportent des centaines de faux « missing
- * title » et « thin content ». C'est la seule mesure externe du rendu.
- * Mettre `PRERENDER_ALLOW_SEO_TOOLS = '1'` le temps d'un audit, puis couper.
- */
+// Coupés par défaut pour préserver le quota. Sans eux, Ahrefs et Semrush Site
+// Audit ne voient qu'un shell vide et rapportent des centaines de faux
+// « missing title ». Mettre PRERENDER_ALLOW_SEO_TOOLS = '1' le temps d'un
+// audit, puis couper.
 const SEO_TOOL_AGENTS = ['ahrefsbot', 'ahrefssiteaudit', 'semrushbot'];
 
-/** `new RegExp([].join('|'))` matche TOUTE chaîne. Garde-fou obligatoire. */
+// new RegExp([].join('|')) matche TOUTE chaîne : sur liste vide, tout le trafic
+// humain serait traité comme du bot. Garde-fou obligatoire.
 const safeRegex = (list) => (list.length ? new RegExp(list.join('|'), 'i') : /(?!)/);
 
 const BOT_REGEX = safeRegex(BOT_AGENTS);
@@ -324,16 +373,18 @@ function canonicalPath(pathname) {
   return p || '/';
 }
 
+// Comparaison segmentaire : /devenir-home-sitter survit à /dev,
+// /departement/... aussi, /pros à /pros/inscription.
 function isNeverPrerendered(pathname) {
   const p = canonicalPath(pathname).toLowerCase();
   return NEVER_PRERENDER_PREFIXES.some((prefix) => p === prefix || p.startsWith(prefix + '/'));
 }
 
 /**
- * Retourne l'URL canonique à soumettre à Prerender : https, hôte apex sans
- * port, pathname sans slash multiple ni slash final, query string réduite à la
- * whitelist et triée pour que l'ordre des paramètres ne crée pas deux entrées
- * de cache. Le fragment est ignoré, il n'est jamais transmis au serveur.
+ * URL canonique soumise à Prerender : https, hôte apex sans port, chemin sans
+ * slash multiple ni slash final, query réduite à la whitelist et triée. Sans
+ * cela, http et https, un port, un sous-domaine ou un paramètre de tracking
+ * créent chacun une entrée de cache facturée pour la même page.
  */
 function normalizePrerenderUrl(rawUrl) {
   const u = new URL(rawUrl);
@@ -348,7 +399,6 @@ function normalizePrerenderUrl(rawUrl) {
       .filter((n) => PRERENDER_KEEP_PARAMS.includes(n))
       .sort();
     for (const n of names) {
-      // getAll sur le nom d'origine, toutes casses confondues.
       const values = [...u.searchParams.entries()]
         .filter(([k]) => k.toLowerCase() === n)
         .map(([, v]) => v)
@@ -365,11 +415,12 @@ function detectBot(request, env, normalizedPath) {
   const ua = request.headers.get('user-agent') || '';
   const reasons = [];
 
-  // Test sur le pathname NORMALISÉ : sinon `/assets/hero.png/` échappe à
-  // l'ancre `$` du regex, puis la normalisation retire le slash et envoie
-  // un PNG se faire rendre en navigateur headless.
+  // Test sur le chemin NORMALISÉ : sinon /assets/hero.png/ échappe à l'ancre $
+  // du regex et un PNG part se faire rendre en navigateur headless.
   if (IGNORED_EXTENSIONS.test(normalizedPath)) reasons.push('static-asset');
   if (request.method !== 'GET' && request.method !== 'HEAD') reasons.push('non-get');
+  // Prerender repasse par ce Worker pour charger la page. Sans cette garde,
+  // boucle infinie.
   if (request.headers.get('x-prerender')) reasons.push('loop-guard');
   if (isNeverPrerendered(normalizedPath)) reasons.push('non-indexable-route');
 
@@ -397,7 +448,7 @@ async function fetchPrerender(url, token, ua, clientIp) {
   try {
     const headers = { 'X-Prerender-Token': token };
     // Sans ces deux en-têtes, Prerender classe 100 % du trafic en « Others »
-    // et les rapports Crawler Type / AI Insights sont inexploitables.
+    // et les rapports Crawler Type sont inexploitables.
     if (ua) headers['User-Agent'] = ua;
     if (clientIp) headers['X-Forwarded-For'] = clientIp;
 
@@ -414,9 +465,7 @@ async function fetchPrerender(url, token, ua, clientIp) {
   }
 }
 
-// Statuts sans corps. `fetchOrigin` retransmet les en-têtes conditionnels de
-// la requête, l'origine peut donc répondre 304. Attacher un corps à 204, 205
-// ou 304 lève une TypeError : erreur 1101, page perdue.
+/** Statuts sans corps : y attacher un body lève une TypeError, donc une 1101. */
 const NO_BODY_STATUSES = new Set([204, 205, 304]);
 
 function withDiagHeaders(response, diag, debug) {
@@ -424,12 +473,14 @@ function withDiagHeaders(response, diag, debug) {
   const headers = new Headers(response.headers);
   for (const [k, v] of Object.entries(diag)) {
     // Un UA hostile peut contenir des octets que Headers.set refuse, et cet
-    // appel est hors de tout try. On assainit plutôt que de risquer un 1101.
+    // appel est hors de tout try.
     const safe = String(v).replace(/[^\x20-\x7E]/g, '?').slice(0, 200);
     try {
       headers.set(k, safe);
     } catch (_e) { /* en-tête invalide, on l'omet */ }
   }
+  // fetchOrigin retransmet les en-têtes conditionnels, donc l'origine peut
+  // répondre 304.
   return new Response(NO_BODY_STATUSES.has(response.status) ? null : response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -437,11 +488,8 @@ function withDiagHeaders(response, diag, debug) {
   });
 }
 
-// Origine réelle Lovable. On tape directement le serveur Lovable avec le bon
-// Host header pour contourner la redirection guardiens.lovable.app vers
-// guardiens.fr.
-const LOVABLE_ORIGIN_HOST = 'guardiens.lovable.app';
-
+// On tape le serveur Lovable avec le bon Host pour contourner la redirection
+// guardiens.lovable.app vers guardiens.fr.
 async function fetchOrigin(request) {
   const url = new URL(request.url);
   // L'origine reçoit l'URL COMPLÈTE, query comprise : la normalisation ne
@@ -449,10 +497,8 @@ async function fetchOrigin(request) {
   const originUrl = `https://${LOVABLE_ORIGIN_HOST}${url.pathname}${url.search}`;
 
   const headers = new Headers(request.headers);
-  // Note : Workers dérive de toute façon le Host de l'URL de la sous-requête,
-  // ce delete est un no-op conservé pour ne pas dérouter à la relecture.
   headers.delete('host');
-  headers.set('x-forwarded-host', 'guardiens.fr');
+  headers.set('x-forwarded-host', CANONICAL_ORIGIN);
   headers.set('x-forwarded-proto', 'https');
   headers.set('x-lovable-skip-redirect', '1');
 
@@ -465,29 +511,24 @@ async function fetchOrigin(request) {
 }
 
 /**
- * Cache edge des fichiers dont le nom porte une empreinte de contenu.
- * Voir l'entrée v7.2 de l'en-tête pour le motif et pour la raison qui rend
- * cette dérogation compatible avec le « NON RETENU » du v7.1.
+ * Cache edge réservé aux fichiers dont le nom porte une empreinte de contenu
+ * (hash Vite, UUID d'upload). Un contenu différent produit un nom différent,
+ * donc ce cache ne peut pas devenir obsolète et n'a rien à purger. Le HTML
+ * n'entre jamais ici, voir l'invariant 4.
  */
 const IMMUTABLE_PREFIXES = ['/assets/', '/lovable-uploads/'];
-const IMMUTABLE_TTL = 31536000; // 1 an
+const IMMUTABLE_TTL = 31536000;
 
 function isImmutableAsset(pathname) {
-  // Chemin effondré : `//assets/index.js` ne commence pas par `/assets/` et
-  // ratait le cache edge.
   const p = canonicalPath(pathname);
   return IMMUTABLE_PREFIXES.some((prefix) => p.startsWith(prefix));
 }
 
-/**
- * Sert un fichier immuable depuis le cache edge, en le remplissant au premier
- * passage. Seul un 200 franc est stocké : une 404 transitoire pendant un
- * déploiement ne doit pas être figée un an à la frontière.
- */
 async function serveImmutableAsset(request, ctx) {
   const url = new URL(request.url);
-  // Nom haché : la query string ne change jamais le contenu. On la retire pour
-  // qu'un `?v=123` ne crée pas une entrée de cache distincte.
+  // Chemin effondré et query retirée : un nom haché ne change jamais de
+  // contenu, donc ?v=123 ou un slash doublé ne doivent pas créer une seconde
+  // entrée de cache.
   const originUrl = `https://${LOVABLE_ORIGIN_HOST}${canonicalPath(url.pathname)}`;
   const cacheKey = new Request(originUrl, { method: 'GET' });
   const cache = caches.default;
@@ -495,8 +536,8 @@ async function serveImmutableAsset(request, ctx) {
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
 
-  // Cookies et autorisation retirés : leur simple présence suffit à faire
-  // basculer Cloudflare en BYPASS.
+  // La seule présence d'un cookie ou d'une autorisation suffit à faire basculer
+  // Cloudflare en BYPASS.
   const headers = new Headers(request.headers);
   headers.delete('cookie');
   headers.delete('authorization');
@@ -510,10 +551,12 @@ async function serveImmutableAsset(request, ctx) {
   try {
     originResponse = await fetch(originUrl, { method: 'GET', headers, redirect: 'manual' });
   } catch (err) {
-    // Jamais de page blanche sur un asset : on laisse le chemin normal reprendre.
+    // Jamais de page blanche sur un asset : le chemin normal reprend.
     return fetchOrigin(request);
   }
 
+  // Seul un 200 franc est stocké : une 404 transitoire pendant un déploiement
+  // ne doit pas être figée un an à la frontière.
   if (originResponse.status !== 200) return originResponse;
 
   const out = new Response(originResponse.body, originResponse);
@@ -524,18 +567,17 @@ async function serveImmutableAsset(request, ctx) {
   return out;
 }
 
-// Fonction profile-jsonld (SSR du Schema.org pour Rich Results)
 const PROFILE_JSONLD_URL = 'https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/profile-jsonld';
 const PROFILE_PATH_RE = /^\/gardiens\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/?$/i;
 
 /**
- * Injecte le JSON-LD (Person + Service) dans le <head>. Garantit que Google et
- * les crawlers IA voient le Schema.org même sans exécuter le JS de la SPA.
+ * Injecte le JSON-LD Person et Service dans le head, pour que les crawlers
+ * voient le Schema.org sans exécuter le JS de la SPA.
  *
- * Le corps de `originResponse` est lu UNE SEULE FOIS, avant tout appel réseau
- * qui pourrait rejeter. Tous les chemins d'échec repassent par `passthrough()`,
- * qui reconstruit une réponse à partir du texte déjà en mémoire. Retourner
- * `originResponse` après l'avoir lue provoquait une erreur 1101.
+ * Le corps est lu UNE SEULE FOIS, avant tout appel réseau qui pourrait rejeter.
+ * Tous les chemins d'échec repassent par passthrough(), qui reconstruit une
+ * réponse depuis le texte en mémoire. Retourner originResponse après l'avoir
+ * lue provoque une erreur 1101.
  */
 async function injectProfileJsonLd(originResponse, profileId) {
   const ct = originResponse.headers.get('content-type') || '';
@@ -572,8 +614,8 @@ async function injectProfileJsonLd(originResponse, profileId) {
     /<script type="application\/ld\+json">/g,
     `<script type="application/ld+json" ${marker}>`,
   );
-  // Remplacement par FONCTION : sinon `$&` ou une apostrophe dollar dans la
-  // bio d'un gardien duplique une portion arbitraire du HTML dans le <head>.
+  // Remplacement par FONCTION : sinon un $& ou une apostrophe dollar dans la
+  // bio d'un gardien duplique une portion arbitraire du HTML dans le head.
   const patched = html.replace(/<\/head>/i, () => `${tagged}</head>`);
 
   const outHeaders = new Headers(headers);
@@ -581,8 +623,164 @@ async function injectProfileJsonLd(originResponse, profileId) {
   return new Response(patched, { status: originResponse.status, headers: outHeaders });
 }
 
-// robots.txt : servi par l'origine (public/robots.txt généré par
-// scripts/generate-robots.mjs). Le Worker ne l'intercepte pas.
+// === v7.5 : HTML des robots aligné sur les fichiers en ligne ===
+// Mesure du 12/11/2026 : 12 pages du sitemap sur 25 citaient une feuille de
+// style d'une ancienne mise en ligne, en 404, et Googlebot recevait 23 % de
+// réponses 4xx sur les 68 modulepreload de chaque page (scripts déjà retirés
+// par Prerender). La feuille de style en ligne est lue sur l'index de
+// l'origine, gardée 5 minutes en mémoire, en parallèle de l'appel Prerender :
+// aucun rendu consommé, aucune attente ajoutée. Toute panne laisse la page
+// telle que Prerender l'a rendue.
+const LIVE_CSS_TTL_MS = 5 * 60 * 1000;
+const LIVE_CSS_RETRY_MS = 60 * 1000;
+const LIVE_CSS_TIMEOUT_MS = 1500;
+const LIVE_CSS_IN_INDEX_RE = /href="(\/assets\/index-[A-Za-z0-9_-]+\.css)"/;
+const BUILD_CSS_HREF_RE = /^\/assets\/index-[A-Za-z0-9_-]+\.css$/;
+let liveCss = { href: null, expires: 0 };
+
+/** Ne rejette jamais. Rend null tant qu'aucune lecture n'a abouti. */
+async function currentCssHref(fetchImpl = fetch) {
+  const now = Date.now();
+  if (now < liveCss.expires) return liveCss.href;
+  try {
+    const r = await fetchImpl(`https://${LOVABLE_ORIGIN_HOST}/`, {
+      method: 'GET',
+      headers: {
+        accept: 'text/html',
+        'x-forwarded-host': CANONICAL_ORIGIN,
+        'x-forwarded-proto': 'https',
+        'x-lovable-skip-redirect': '1',
+      },
+      redirect: 'manual',
+      signal: AbortSignal.timeout(LIVE_CSS_TIMEOUT_MS),
+    });
+    if (r.status !== 200) throw new Error('index-' + r.status);
+    const match = (await r.text()).match(LIVE_CSS_IN_INDEX_RE);
+    if (!match) throw new Error('no-stylesheet');
+    liveCss = { href: match[1], expires: now + LIVE_CSS_TTL_MS };
+  } catch (_e) {
+    // Dernière valeur connue gardée, nouvel essai dans une minute.
+    liveCss = { href: liveCss.href, expires: now + LIVE_CSS_RETRY_MS };
+  }
+  return liveCss.href;
+}
+
+/**
+ * Retire les modulepreload et pose la feuille de style en ligne sur une réponse
+ * HTML de Prerender. Le corps reste un flux. Toute autre réponse, et toute
+ * erreur, repartent inchangées.
+ */
+function alignBotHtml(response, cssHref) {
+  try {
+    const ct = response.headers.get('content-type') || '';
+    if (!response.body || !ct.includes('text/html')) return response;
+    const rewriter = new HTMLRewriter().on('link[rel="modulepreload"]', {
+      element(el) {
+        el.remove();
+      },
+    });
+    if (cssHref) {
+      rewriter.on('link[rel="stylesheet"]', {
+        element(el) {
+          const href = el.getAttribute('href') || '';
+          if (href !== cssHref && BUILD_CSS_HREF_RE.test(href)) el.setAttribute('href', cssHref);
+        },
+      });
+    }
+    const out = new Response(rewriter.transform(response).body, response);
+    out.headers.delete('content-length');
+    return out;
+  } catch (_e) {
+    return response;
+  }
+}
+
+// robots.txt est servi par l'origine. Le Worker ne l'intercepte pas.
+
+// === v7.4 : sitemap vivant sous le domaine principal ===
+// /sitemap.xml relaie la fonction Supabase `sitemap`, qui lit les sources
+// publiques à chaque appel (cache interne 60 s). Aucun repli vers le fichier
+// statique du build : une panne de l'amont répond 503, le moteur réessaie.
+// L'amont n'appelle jamais guardiens.fr/sitemap.xml : pas de boucle.
+const LIVE_SITEMAP_URL = 'https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/sitemap';
+const SITEMAP_TIMEOUT_MS = 15000;
+const SITEMAP_MAX_BYTES = 5 * 1024 * 1024;
+const SITEMAP_LOC_PREFIX = '<loc>https://guardiens.fr/';
+
+async function serveLiveSitemap(request, fetchImpl = fetch) {
+  const method = request.method;
+  if (method !== 'GET' && method !== 'HEAD') {
+    return new Response(null, { status: 405, headers: { allow: 'GET, HEAD' } });
+  }
+  const fail = (reason) =>
+    new Response(method === 'HEAD' ? null : 'Sitemap temporairement indisponible.\n', {
+      status: 503,
+      headers: {
+        'content-type': 'text/plain; charset=utf-8',
+        'cache-control': 'no-store',
+        'retry-after': '600',
+        'x-sitemap-status': reason,
+      },
+    });
+
+  let upstream;
+  try {
+    upstream = await fetchImpl(LIVE_SITEMAP_URL, {
+      method: 'GET',
+      headers: { accept: 'application/xml' },
+      signal: AbortSignal.timeout(SITEMAP_TIMEOUT_MS),
+    });
+  } catch (_e) {
+    return fail('upstream-unreachable');
+  }
+  if (upstream.status !== 200) return fail('upstream-' + upstream.status);
+  const declared = Number(upstream.headers.get('content-length') || 0);
+  if (declared > SITEMAP_MAX_BYTES) return fail('too-large');
+
+  let body;
+  try {
+    body = await upstream.text();
+  } catch (_e) {
+    return fail('upstream-truncated');
+  }
+  if (body.length > SITEMAP_MAX_BYTES) return fail('too-large');
+  const trimmed = body.trim();
+  if (!trimmed.startsWith('<?xml') || !/<urlset[\s>]/.test(trimmed) || !trimmed.endsWith('</urlset>')) {
+    return fail('invalid-xml');
+  }
+  const locs = trimmed.match(/<loc>[^<]*<\/loc>/g) || [];
+  if (locs.length === 0) return fail('empty');
+  if (locs.some((l) => !l.startsWith(SITEMAP_LOC_PREFIX))) return fail('foreign-host');
+
+  return new Response(method === 'HEAD' ? null : body, {
+    status: 200,
+    headers: {
+      'content-type': 'application/xml; charset=utf-8',
+      'cache-control': 'no-store',
+      'x-sitemap-status': 'live',
+      'x-sitemap-urls': String(locs.length),
+    },
+  });
+}
+
+// === v7.4 : anciennes variantes ?lang= ===
+// Guardiens est monolingue depuis le 17/08/2026 et l'application n'émet aucun
+// lien ?lang=. Les variantes encore connues de Google reçoivent une vraie
+// redirection permanente vers l'URL sans ce paramètre (les autres paramètres
+// sont conservés), au lieu d'un 200 canonicalisé.
+function langRedirect(urlObj, method) {
+  if (method !== 'GET' && method !== 'HEAD') return null;
+  if (!urlObj.searchParams.has('lang')) return null;
+  const target = new URL(urlObj.toString());
+  target.protocol = 'https:';
+  target.hostname = CANONICAL_ORIGIN;
+  target.port = '';
+  target.searchParams.delete('lang');
+  return new Response(null, {
+    status: 301,
+    headers: { location: target.toString(), 'cache-control': 'public, max-age=86400' },
+  });
+}
 
 export default {
   async fetch(request, env, ctx) {
@@ -590,7 +788,6 @@ export default {
     const pathname = urlObj.pathname;
     const debug = Boolean(env && env.PRERENDER_DEBUG === '1');
 
-    // === 308 www vers apex ===
     // 308 et non 301 : préserve la méthode et le corps sur un POST.
     if (urlObj.hostname === 'www.guardiens.fr') {
       const target = `https://${CANONICAL_ORIGIN}${pathname}${urlObj.search}`;
@@ -599,16 +796,21 @@ export default {
         'cache-control': 'public, max-age=3600',
       };
       if (debug) {
-        headers['x-prerender-worker'] = 'guardiens-prerender-v7.3';
+        headers['x-prerender-worker'] = 'guardiens-prerender-v7.5';
         headers['x-prerender-status'] = 'www-to-apex-308';
       }
       return new Response(null, { status: 308, headers });
     }
 
-    // === Cache edge des fichiers à nom haché (v7.2) ===
-    // Court-circuit placé le plus tôt possible : ces fichiers n'ont rien à
-    // faire dans la détection de bot ni dans la normalisation d'URL. Limité au
-    // GET sans Range, pour ne jamais stocker de réponse partielle.
+    // === v7.4 : sitemap vivant, puis redirection des variantes ?lang= ===
+    if (pathname === '/sitemap.xml') return serveLiveSitemap(request);
+    const langResponse = langRedirect(urlObj, request.method);
+    if (langResponse) return langResponse;
+
+
+    // Court-circuit assets, placé avant la détection de bot : ces fichiers
+    // n'ont rien à y faire. GET sans Range uniquement, pour ne jamais stocker
+    // une réponse partielle.
     if (
       request.method === 'GET' &&
       !request.headers.get('range') &&
@@ -617,9 +819,8 @@ export default {
       return serveImmutableAsset(request, ctx);
     }
 
-    // URL normalisée : c'est ELLE, et non `request.url`, qui devient la clé de
-    // cache Prerender. Deux requêtes ne différant que par leurs paramètres de
-    // tracking, leur protocole ou leurs slashs coûtent un seul render.
+    // C'est cette URL, et non request.url, qui devient la clé de cache
+    // Prerender.
     const url = normalizePrerenderUrl(request.url);
     const normalizedPath = new URL(url).pathname;
 
@@ -627,7 +828,7 @@ export default {
 
     const baseDiag = debug
       ? {
-          'X-Prerender-Worker': 'guardiens-prerender-v7.3',
+          'X-Prerender-Worker': 'guardiens-prerender-v7.5',
           'X-Prerender-Bot-Detected': String(isBot),
           'X-Prerender-UA': ua || '(empty)',
           'X-Prerender-Skip-Reasons': reasons.join(',') || 'none',
@@ -636,15 +837,16 @@ export default {
       : {};
 
     /**
-     * Sortie unique vers l'origine. Pose le JSON-LD profil sur TOUS les
-     * chemins, y compris les secours : sans cela, quand Prerender tombe,
-     * Googlebot recevait un `/gardiens/:uuid` sans le moindre Schema.org.
+     * Sortie unique vers l'origine. Le JSON-LD est posé sur les chemins de
+     * secours, sans quoi, quand Prerender tombe, Googlebot reçoit une fiche
+     * gardien sans le moindre Schema.org.
+     *
+     * Réservé aux bots : sur le chemin bypass, donc chaque visite humaine,
+     * l'injection lisait tout le HTML en mémoire et ajoutait un aller-retour
+     * vers Supabase pour un balisage qu'aucun navigateur n'exploite.
      */
     const serveOrigin = async (status, extra = {}) => {
       const originResp = await fetchOrigin(request);
-      // JSON-LD réservé aux bots : `serveOrigin` sert aussi le chemin `bypass`,
-      // et l'injection lit tout le HTML en mémoire plus un aller-retour réseau
-      // pour un balisage qu'aucun navigateur n'exploite.
       const profileMatch = isBot ? canonicalPath(pathname).match(PROFILE_PATH_RE) : null;
       const finalResp = profileMatch
         ? await injectProfileJsonLd(originResp, profileMatch[1])
@@ -668,11 +870,15 @@ export default {
       }
 
       const clientIp = request.headers.get('cf-connecting-ip') || '';
-      const prerenderResponse = await fetchPrerender(url, token, ua, clientIp);
+      // v7.5 : la feuille de style en ligne est lue pendant l'appel Prerender.
+      const [prerenderResponse, cssHref] = await Promise.all([
+        fetchPrerender(url, token, ua, clientIp),
+        currentCssHref(),
+      ]);
 
       if (prerenderResponse.ok) {
         return withDiagHeaders(
-          prerenderResponse,
+          alignBotHtml(prerenderResponse, cssHref),
           {
             ...baseDiag,
             'X-Prerender-Status': 'hit',
@@ -682,9 +888,9 @@ export default {
         );
       }
 
-      // 3xx : relayer tel quel. Le render est déjà facturé ; le jeter pour
-      // servir un shell React en 200 crée un soft-404 et une redirection que
-      // le crawler ne consolidera jamais.
+      // 3xx relayés tels quels. Le render est déjà facturé ; le jeter pour
+      // servir un shell en 200 crée un soft-404 que le crawler ne consolide
+      // jamais.
       if (prerenderResponse.status >= 300 && prerenderResponse.status < 400) {
         return withDiagHeaders(
           prerenderResponse,
@@ -697,20 +903,20 @@ export default {
         );
       }
 
-      // 404 : relayer tel quel. La règle Ignored URL `/gardiens/` qui
-      // justifiait le repli n'existe pas côté Prerender (vérifié le
-      // 07/09/2026). Servir l'origine en 200 sur une URL inexistante crée un
-      // soft-404 indexable, pire qu'un 404 franc.
+      // 404 relayé tel quel, voir l'invariant 2.
       if (prerenderResponse.status === 404) {
         return withDiagHeaders(
-          prerenderResponse,
-          { ...baseDiag, 'X-Prerender-Status': 'notfound-passthrough', 'X-Prerender-Upstream-Status': 404 },
+          alignBotHtml(prerenderResponse, cssHref),
+          {
+            ...baseDiag,
+            'X-Prerender-Status': 'notfound-passthrough',
+            'X-Prerender-Upstream-Status': 404,
+          },
           debug,
         );
       }
 
-      // 403, 429 et 5xx seulement : repli sur l'origine, comportement du v6
-      // conservé volontairement pour ces statuts transitoires ou bloquants.
+      // 403, 429 et 5xx : repli sur l'origine, voir l'invariant 3.
       if (debug) console.log('[Prerender] Erreur ' + prerenderResponse.status + ' sur ' + url);
       return serveOrigin('fallback-upstream-error', {
         'X-Prerender-Upstream-Status': prerenderResponse.status,
