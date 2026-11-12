@@ -63,6 +63,52 @@ export function arrivalIntentForSignup(
 }
 
 /**
+ * Lot INS1 étape 1 (12/11/2026) : l'écran C1 propose deux cases à cocher pour
+ * la garde. L'entraide et les sorties sont acquises à tout membre.
+ *   une case : le rôle coché, comme avant ;
+ *   les deux : rôle polyvalent, parcours propriétaire d'abord ;
+ *   aucune   : rôle polyvalent et intention entraide (ancien lien « coup de main »).
+ */
+export type GuardChoice = "owner" | "sitter" | "both" | "none";
+
+export interface GuardChoiceOutcome {
+  choice: GuardChoice;
+  role: SignupRole;
+  /** L'inscription suit le parcours entraide. */
+  entraide: boolean;
+  /** Clé arrival.* du rappel affiché à l'étape 2. */
+  recapKey: string;
+}
+
+export function resolveGuardChoice(owner: boolean, sitter: boolean): GuardChoiceOutcome {
+  if (owner && sitter) return { choice: "both", role: "both", entraide: false, recapKey: "arrival.c2.both_recap" };
+  if (owner) return { choice: "owner", role: "owner", entraide: false, recapKey: "arrival.c1.owner_title" };
+  if (sitter) return { choice: "sitter", role: "sitter", entraide: false, recapKey: "arrival.c1.sitter_title" };
+  return { choice: "none", role: roleForSignupIntent("entraide") ?? "both", entraide: true, recapKey: "arrival.c2.entraide_recap" };
+}
+
+/** Cases à l'état voulu quand on revient à l'étape 1 avec un rôle déjà posé. */
+export function guardBoxesFor(role: SignupRole | null, entraide: boolean): { owner: boolean; sitter: boolean } {
+  if (entraide || !role) return { owner: false, sitter: false };
+  return { owner: role === "owner" || role === "both", sitter: role === "sitter" || role === "both" };
+}
+
+/**
+ * Intention écrite sur le compte pour une inscription du parcours v2 : les
+ * deux cases cochées valent « propriétaire d'abord ». Les autres cas suivent
+ * arrivalIntentForSignup.
+ */
+export function arrivalIntentForGuardChoice(
+  entraideChosen: boolean,
+  detected: SignupIntent | null,
+  chosenRole: SignupRole | null,
+  bothChecked: boolean,
+): SignupIntent | null {
+  if (!entraideChosen && bothChecked && chosenRole === "both") return "owner";
+  return arrivalIntentForSignup(entraideChosen, detected, chosenRole);
+}
+
+/**
  * Clé i18n du bandeau de contexte, sous register_page.intent_banner.
  * L'intention entraide se décline selon la destination exacte.
  */

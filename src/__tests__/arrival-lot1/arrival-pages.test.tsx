@@ -87,14 +87,16 @@ describe("Inscription C1", () => {
     expect(await screen.findByText(/Les deux|polyvalent/i)).toBeTruthy();
     expect(screen.queryByTestId("arrival-c1")).toBeNull();
   });
-  it("drapeau allumé : deux cartes, lien entraide", async () => {
+  // Lot INS1 étape 1 (12/11/2026) : deux cases à cocher, entraide et sorties incluses.
+  it("drapeau allumé : deux cases à cocher, entraide et sorties incluses", async () => {
     flag = { enabled: true, appliesSince: "2026-10-01T00:00:00Z", loading: false };
     const { default: Register } = await import("@/pages/Register");
     R(<Register />);
     expect(await screen.findByText("Je cherche un gardien")).toBeTruthy();
     expect(screen.getByText("Je veux garder")).toBeTruthy();
-    expect(screen.getByText("Je viens pour un coup de main ou un projet")).toBeTruthy();
-    fireEvent.click(screen.getByText("Je cherche un gardien"));
+    expect(screen.queryByText("Je viens pour un coup de main ou un projet")).toBeNull();
+    expect(screen.getByText("Entraide & sorties")).toBeTruthy();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Je cherche un gardien" }));
     fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
     expect(await screen.findByText("Créez votre compte")).toBeTruthy();
     expect(screen.getByText("Modifier")).toBeTruthy();

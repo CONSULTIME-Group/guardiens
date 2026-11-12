@@ -101,10 +101,15 @@ export const canSkipP1 = (o: { firstName?: string | null; city?: string | null; 
 export type ArrivalIntent = "owner" | "sitter" | "entraide";
 export type ArrivalFlow = "owner" | "sitter" | "entraide";
 
-/** Intention écrite en C4 : entraide si choisie en C1, sinon le rôle. */
+/**
+ * Intention écrite en C4 : entraide si choisie en C1, sinon le rôle.
+ * Lot INS1 étape 1 (12/11/2026) : un double rôle suit le parcours
+ * propriétaire d'abord (priorité aux annonces de garde), l'autre parcours lui
+ * est proposé ensuite. Avant, il partait sans intention droit vers /sits/create.
+ */
 export function arrivalIntentFor(role: string | null | undefined, entraide: boolean): ArrivalIntent | null {
   if (entraide) return "entraide";
-  return role === "owner" ? "owner" : role === "sitter" ? "sitter" : null;
+  return role === "owner" || role === "both" ? "owner" : role === "sitter" ? "sitter" : null;
 }
 
 const DEFAULT_NEXTS = ["/dashboard", "/sits/create?source=signup", "/"];

@@ -28,7 +28,9 @@ describe("intention écrite sur le compte", () => {
     expect(arrivalIntentForSignup(true, "owner", "sitter")).toBe("entraide");
   });
   it("Register transmet le rôle choisi", () => {
-    expect(read("src/pages/Register.tsx")).toContain("arrivalIntentForSignup(entraideIntent, detectedIntent, selectedRole)");
+    // Lot INS1 étape 1 (12/11/2026) : l'appel passe par arrivalIntentForGuardChoice, qui délègue à arrivalIntentForSignup.
+    expect(read("src/pages/Register.tsx")).toContain("arrivalIntentForGuardChoice(entraideIntent, detectedIntent, selectedRole,");
+    expect(read("src/lib/signupIntent.ts")).toContain("return arrivalIntentForSignup(entraideChosen, detected, chosenRole);");
   });
 });
 
