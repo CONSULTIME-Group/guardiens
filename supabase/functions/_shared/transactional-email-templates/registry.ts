@@ -70,6 +70,7 @@ import { template as adminDeliveryAlert } from './admin-delivery-alert.tsx'
 import { template as adminSignalsDigest } from './admin-signals-digest.tsx'
 import { template as adminTeamAlert } from './admin-team-alert.tsx'
 import { template as outingUpdate } from './outing-update.tsx'
+import { template as outingAlert } from './outing-alert.tsx'
 import { template as contentQualityDigest } from './content-quality-digest.tsx'
 import { template as missionFeedbackReceived } from './mission-feedback-received.tsx'
 import { template as missionThanksReceived } from './mission-thanks-received.tsx'
@@ -195,6 +196,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'admin-team-alert': adminTeamAlert,
   // Lot SORT3 : suivi d'une sortie (inscription, changement, annulation, rappel).
   'outing-update': outingUpdate,
+  // Lot SORT4 : alerte « nouvelle sortie ».
+  'outing-alert': outingAlert,
   'content-quality-digest': contentQualityDigest,
   'mission-feedback-received': missionFeedbackReceived,
   'mission-thanks-received': missionThanksReceived,

@@ -15,6 +15,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
+import OutingAlertsCard from "@/components/settings/OutingAlertsCard";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { OUTINGS_FLAG } from "@/lib/outingsFlag";
 
 interface AlertPref {
   id: string;
@@ -40,6 +43,9 @@ const AlertsSection = ({ user }: { user: any }) => {
   const [editingLabelValue, setEditingLabelValue] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<AlertPref | null>(null);
 
+  // Lot SORT4 : réglage des alertes sorties, quand la rubrique est ouverte.
+  const outingsOpen = useFeatureFlag(OUTINGS_FLAG).enabled;
+  const [myPostalCode, setMyPostalCode] = useState<string | null>(null);
   const [autourDeVous, setAutourDeVous] = useState(false);
   const [loadingAutour, setLoadingAutour] = useState(true);
 
@@ -71,6 +77,7 @@ const AlertsSection = ({ user }: { user: any }) => {
       .then(({ data }) => {
         const prefs = (data as any)?.email_preferences as any;
         setAutourDeVous(prefs?.autour_de_vous ?? false);
+        setMyPostalCode(((data as any)?.postal_code as string | null) || null);
         setLoadingAutour(false);
       });
   }, [user]);
@@ -178,6 +185,7 @@ const AlertsSection = ({ user }: { user: any }) => {
 
   return (
     <>
+      {outingsOpen && <OutingAlertsCard postalCode={myPostalCode} />}
       <section>
         <div className="flex items-center gap-2 mb-1">
           <MapPin className="h-5 w-5 text-primary" />

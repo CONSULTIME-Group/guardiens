@@ -323,6 +323,34 @@ export const JOIN_REFUSAL: Record<string, string> = {
   auth: "Connectez-vous pour prendre une place.",
 };
 
+/** Lot SORT4 : distances de l'alerte « nouvelle sortie » (décision du 11/11/2026). */
+export const OUTING_ALERT_RADII: ReadonlyArray<{ value: "quartier" | "5" | "15"; label: string }> = [
+  { value: "quartier", label: "Mon quartier" },
+  { value: "5", label: "5 km" },
+  { value: "15", label: "15 km" },
+];
+
+export const OUTING_ALERT_COPY = {
+  title: "Sorties",
+  subtitle: "Belote, balade, vélo, atelier",
+  switchLabel: "Alertes sorties",
+  distance: "Distance",
+  quartierHelp: (postalCode: string | null) => (postalCode ? `Mon quartier : les sorties qui portent votre code postal (${postalCode}).` : "Mon quartier : les sorties qui portent votre code postal."),
+  rhythm: "Un email à la publication d'une sortie, un par semaine au plus.",
+  saved: "Réglage enregistré",
+  failed: "L'enregistrement a échoué. Réessayez dans un instant.",
+  askTitle: "Arrêter les alertes sorties ?",
+  askButton: "Arrêter les alertes sorties",
+  stopTitle: "C'est fait",
+  stopBody: "Les alertes sorties sont arrêtées.",
+  stopKept: "Vos autres emails restent tels que vous les avez réglés : alertes de gardes, coups de main, messages.",
+  resume: "Réactiver les alertes sorties",
+  resumedTitle: "Alertes sorties réactivées",
+  resumedBody: "Vous recevez de nouveau les sorties publiées près de chez vous.",
+  settingsLink: "Régler toutes mes alertes",
+  invalid: "Ce lien a expiré. Réglez vos alertes depuis votre compte.",
+} as const;
+
 export const OUTING_COPY = {
   tabs: { entraide: "Entraide", sorties: "Sorties" },
   hubTitle: "Entraide & sorties",

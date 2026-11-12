@@ -23,7 +23,12 @@ import { acquireMemberSendClaim, finishMemberSendClaim, memberSendOutcome, type 
 
 const SITE_URL = 'https://guardiens.fr'
 // Lot W0 : gabarits qui affichent un lien de désinscription à jeton dans leur corps.
-const UNSUBSCRIBE_LINK_TEMPLATES: ReadonlySet<string> = new Set(['owner-no-sit-j21'])
+const UNSUBSCRIBE_LINK_TEMPLATES: ReadonlySet<string> = new Set(['owner-no-sit-j21', 'outing-alert'])
+// Lot SORT4 : l'alerte « nouvelle sortie » a son propre budget, tenu par la
+// base (une par semaine et par membre). Elle reste hors du compteur partagé de
+// la catégorie alert, qui sert les récapitulatifs de gardes, et son bouton de
+// désinscription en un geste coupe les seules alertes sorties.
+const OUTING_ALERT_TEMPLATE = 'outing-alert'
 
 // Trace d'un refus d'autorisation : sans elle, un 403 ou un 503 disparaissait
 // sans laisser d'occurrence agrégeable. Aucune adresse email n'est écrite,
@@ -939,7 +944,7 @@ Deno.serve(async (req) => {
     const isNearby = (r: CatRow) => NEARBY_SIT_ALERT_TEMPLATES.has(r.template_name ?? '')
     const nearbySitWeek = nonTxRows.filter(isNearby).map((r) => r.created_at)
     const alertWeek = nonTxRows
-      .filter((r) => r.metadata?.category === 'alert' && !isNearby(r))
+      .filter((r) => r.metadata?.category === 'alert' && !isNearby(r) && r.template_name !== OUTING_ALERT_TEMPLATE)
       .map((r) => r.created_at)
     // CORRECTIF 07/08/2026 : la categorie 'digest' a ses propres compteurs.
     const digestWeek = nonTxRows
@@ -1601,7 +1606,7 @@ Deno.serve(async (req) => {
     const oneClickUrl = `https://${SENDER_DOMAIN.replace(/^notify\./, '')}`
     // Use the supabase function URL directly so one-click hits the API without a UI
     const apiBase = Deno.env.get('SUPABASE_URL') ?? `https://${SENDER_DOMAIN}`
-    const oneClick = `${apiBase}/functions/v1/handle-email-unsubscribe?token=${unsubscribeToken}`
+    const oneClick = `${apiBase}/functions/v1/handle-email-unsubscribe?token=${unsubscribeToken}${templateName === OUTING_ALERT_TEMPLATE ? '&scope=outing' : ''}`
     headers['List-Unsubscribe'] = `<${oneClick}>, <${unsubAllUrl}>`
     headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click'
     void oneClickUrl

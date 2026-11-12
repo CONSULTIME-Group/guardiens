@@ -221,6 +221,7 @@ const EntraideHub = lazy(() => import("./pages/EntraideHub"), "EntraideHub");
 const Sorties = lazy(() => import("./pages/Sorties"), "Sorties");
 const SortieCreate = lazy(() => import("./pages/SortieCreate"), "SortieCreate");
 const SortieDetail = lazy(() => import("./pages/SortieDetail"), "SortieDetail");
+const SortiesAlertes = lazy(() => import("./pages/SortiesAlertes"), "SortiesAlertes");
 const QuestionDetail = lazy(() => import("./pages/QuestionDetail"), "QuestionDetail");
 const QuestionCreate = lazy(() => import("./pages/QuestionCreate"), "QuestionCreate");
 const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions"), "AdminSubscriptions");
@@ -571,6 +572,7 @@ const AppRoutes = () => {
       <Route path="/questions" element={<Navigate to="/petites-missions" replace />} />
       <Route path="/sorties" element={<PublicShellRoute><Sorties /></PublicShellRoute>} />
       <Route path="/sorties/proposer" element={<ProtectedRoute><SortieCreate /></ProtectedRoute>} />
+      <Route path="/sorties/alertes" element={<PublicShellRoute><SortiesAlertes /></PublicShellRoute>} />
       <Route path="/sorties/:slug" element={<PublicShellRoute><SortieDetail /></PublicShellRoute>} />
       <Route path="/questions/nouvelle" element={<ProtectedRoute><AppLayout><QuestionCreate /></AppLayout></ProtectedRoute>} />
       <Route path="/questions/:id" element={<PublicShellRoute><QuestionDetail /></PublicShellRoute>} />
