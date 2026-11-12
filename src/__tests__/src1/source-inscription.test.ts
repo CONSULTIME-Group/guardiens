@@ -22,7 +22,7 @@ import cases from "./channel-cases.json";
 import { normalizeSignupSourceRows, signupSourceRange, totalSignupSources, signupChannelLabel } from "@/lib/admin/signupSources";
 
 const read = (f: string) => readFileSync(resolve(process.cwd(), f), "utf8");
-const migration = read("drizzle/migrations/0142_src1_source_inscription.sql");
+const migration = read("drizzle/migrations/0144_src1_source_inscription.sql");
 const ARRIVAL = { search: "?utm_source=Test&utm_medium=cpc&utm_campaign=recette&gclid=ABC123xyz", pathname: "/", referrer: "https://www.google.fr/search?q=house+sitting" };
 
 beforeEach(() => {
@@ -214,7 +214,7 @@ describe("migration : écrite, sûre, non bloquante", () => {
     expect(migration).toContain("v_created < now() - interval '30 minutes'");
   });
   it("le contrat de production couvre la migration", () => {
-    expect(read("scripts/db/production-contracts.json")).toContain("0142_src1_source_inscription.sql");
+    expect(read("scripts/db/production-contracts.json")).toContain("0144_src1_source_inscription.sql");
   });
 });
 

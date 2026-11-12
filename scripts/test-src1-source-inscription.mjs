@@ -12,7 +12,7 @@ import { readFileSync } from 'node:fs';
 const { PGlite } = await import(process.env.PGLITE_MODULE || '@electric-sql/pglite');
 const db = new PGlite();
 const root = new URL('../', import.meta.url);
-const migration = readFileSync(new URL('drizzle/migrations/0142_src1_source_inscription.sql', root), 'utf8');
+const migration = readFileSync(new URL('drizzle/migrations/0144_src1_source_inscription.sql', root), 'utf8');
 const cases = JSON.parse(readFileSync(new URL('src/__tests__/src1/channel-cases.json', root), 'utf8'));
 const passed = [];
 

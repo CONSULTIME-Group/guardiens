@@ -335,25 +335,7 @@
       ]
     },
     {
-      "migration": "0141_adm22_alertes_equipe.sql",
-      "description": "Alertes de l'équipe : préférences par admin, mise en file d'un email immédiat sur message de contact, compte suspect et voyant système",
-      "checks": [
-        {
-          "name": "table_preferences",
-          "sql": "SELECT to_regclass('public.admin_alert_preferences') IS NOT NULL AS ok"
-        },
-        {
-          "name": "mise_en_file",
-          "sql": "SELECT position('adm22_alertes_equipe' IN pg_get_functiondef('public.admin_alert_enqueue(text,text,text,text,text,text)'::regprocedure)) > 0 AS ok"
-        },
-        {
-          "name": "declencheurs",
-          "sql": "SELECT count(*) = 2 AS ok FROM pg_trigger WHERE tgname IN ('trg_admin_alert_contact_message','trg_admin_alert_signal') AND NOT tgisinternal"
-        }
-      ]
-    },
-    {
-      "migration": "0142_src1_source_inscription.sql",
+      "migration": "0144_src1_source_inscription.sql",
       "description": "Source d'arrivée enregistrée à l'inscription : table fermée aux membres, écriture unique, canal calculé en base, lecture réservée à l'équipe",
       "checks": [
         {
@@ -371,6 +353,24 @@
         {
           "name": "lecture_equipe",
           "sql": "SELECT COALESCE(has_function_privilege('authenticated', to_regprocedure('public.admin_signup_sources(date,date)'), 'EXECUTE') AND NOT has_function_privilege('anon', to_regprocedure('public.admin_signup_sources(date,date)'), 'EXECUTE'), false) AS ok"
+        }
+      ]
+    },
+    {
+      "migration": "0141_adm22_alertes_equipe.sql",
+      "description": "Alertes de l'équipe : préférences par admin, mise en file d'un email immédiat sur message de contact, compte suspect et voyant système",
+      "checks": [
+        {
+          "name": "table_preferences",
+          "sql": "SELECT to_regclass('public.admin_alert_preferences') IS NOT NULL AS ok"
+        },
+        {
+          "name": "mise_en_file",
+          "sql": "SELECT position('adm22_alertes_equipe' IN pg_get_functiondef('public.admin_alert_enqueue(text,text,text,text,text,text)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "declencheurs",
+          "sql": "SELECT count(*) = 2 AS ok FROM pg_trigger WHERE tgname IN ('trg_admin_alert_contact_message','trg_admin_alert_signal') AND NOT tgisinternal"
         }
       ]
     }

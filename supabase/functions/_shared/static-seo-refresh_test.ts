@@ -1,6 +1,8 @@
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
+  isHubPath,
   pickStaticToRecache,
+  spaceOutboxHubs,
   shouldMarkStatic,
   STATIC_RENDER_BUDGET,
   STATIC_SEO_URLS,
@@ -100,4 +102,26 @@ Deno.test("vite.config.ts n'appelle plus prerender-recache-pending", async () =>
   const vite = await Deno.readTextFile(new URL("../../../vite.config.ts", import.meta.url));
   assertEquals(vite.includes("prerender-recache-pending"), false);
   assertEquals(vite.includes("functions/v1"), false);
+});
+
+// Lot PR4 (12/11/2026) : espacement des rendus.
+Deno.test("PR4 : un hub rendu depuis moins de 6 heures attend, une annonce part", () => {
+  const now = Date.parse("2026-11-12T12:00:00Z");
+  const rows = [{ path: "/" }, { path: "/house-sitting/lyon" }, { path: "/annonces/garde-a-lyon-abc123" }];
+  const last = new Map([["/", now - 3_600_000], ["/annonces/garde-a-lyon-abc123", now - 60_000]]);
+  const { toRender, spaced } = spaceOutboxHubs(rows, last, now);
+  assertEquals(toRender.map((r) => r.path), ["/house-sitting/lyon", "/annonces/garde-a-lyon-abc123"]);
+  assertEquals(spaced.map((s) => s.row.path), ["/"]);
+  assertEquals(spaced[0].until, new Date(now + 5 * 3_600_000).toISOString());
+  assert(isHubPath("/departement/rhone"));
+  assert(!isHubPath("/gardiens/7d78edb4-cd34-4ef4-bd3b-7f1cb07da9f9"));
+});
+
+Deno.test("PR4 : une page statique rendue depuis moins de 24 heures attend la suivante", () => {
+  const now = Date.parse("2026-11-12T12:00:00Z");
+  const mark = "2026-11-12T11:00:00Z";
+  const last = new Map(STATIC_SEO_URLS.slice(0, 10).map((u) => [u, "2026-11-12T08:00:00Z"]));
+  const res = pickStaticToRecache(mark, last, STATIC_RENDER_BUDGET, now);
+  assertEquals(res.toRecache, STATIC_SEO_URLS.slice(10));
+  assertEquals(res.deferred, 10);
 });
