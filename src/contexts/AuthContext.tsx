@@ -7,6 +7,7 @@ import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { getOAuthTraceId, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
 import { cleanupPushOnLogoutLazy as cleanupPushOnLogout, reconcilePushSessionLazy as reconcilePushSession } from "@/lib/pushSession";
 import { applyPendingSignupRole } from "@/lib/signupRole";
+import { getSignupSource, recordPendingSignupSource } from "@/lib/signupSource";
 import type { RoleSwitchSource } from "@/lib/roleSwitchSource";
 import { reportConfirmedOwnerSignup } from "@/lib/ownerSignupConversion";
 import { applyPendingLegalAcceptance, LEGAL_ACCEPTED_SIGNUP } from "@/lib/legalAcceptance";
@@ -186,6 +187,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await applyPendingSignupRole();
     // Lot J1 : trace d'acceptation d'une inscription Google, sans attendre.
     void applyPendingLegalAcceptance();
+    // Lot SRC1 : source d'arrivée d'une inscription Google, sans attendre.
+    // Aucun appel pour un compte de plus de 30 minutes.
+    void recordPendingSignupSource(supabaseUser);
     const profileRequest = fetchMyProfile(supabaseUser.id!, { fresh: true });
 
     let timeoutId: number | undefined;
@@ -421,6 +425,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [clearInvalidSession, fetchProfile]);
 
   const register = useCallback(async (email: string, password: string, role: Role, nextPath?: string, arrivalIntent?: string | null) => {
+    const signupSource = getSignupSource();
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -429,7 +434,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Lot J1 : la case cochée à l'inscription, écrite côté serveur.
         // Lot E17 : l'intention d'inscription, écrite sur le profil par
         // handle_new_user (profiles.arrival_intent).
-        data: { role, legal_accepted: LEGAL_ACCEPTED_SIGNUP, ...(arrivalIntent ? { arrival_intent: arrivalIntent } : {}) },
+        // Lot SRC1 : la source d'arrivée, écrite par handle_new_user dans
+        // profile_signup_sources (canal recalculé côté serveur).
+        data: {
+          role,
+          legal_accepted: LEGAL_ACCEPTED_SIGNUP,
+          ...(arrivalIntent ? { arrival_intent: arrivalIntent } : {}),
+          ...(signupSource ? { signup_source: signupSource } : {}),
+        },
       },
     });
     if (error) throw error;

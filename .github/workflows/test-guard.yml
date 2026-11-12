@@ -62,6 +62,8 @@ jobs:
         run: npm run test:sql:d4
       - name: Mouvement de l'accueil ordinateur, lot G3 (Postgres local)
         run: npm run test:sql:d7
+      - name: Source enregistrée à l'inscription, lot SRC1 (Postgres local)
+        run: npm run test:sql:src1
 
       - name: Diagnostic des brouillons, préférences réservées aux admins
         run: node scripts/test-draft-reminder-admin-privacy.mjs

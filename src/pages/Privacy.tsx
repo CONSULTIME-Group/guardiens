@@ -65,6 +65,7 @@ const Privacy = () => {
             <li>Modération et lutte contre la fraude : intérêt légitime (art. 6.1.f)</li>
             <li>Assistance par Alma, aides à la rédaction, analyse de la qualité des photos : exécution du contrat</li>
             <li>Amélioration du service, statistiques anonymisées : intérêt légitime</li>
+            <li>Mesure du canal d'arrivée à l'inscription : intérêt légitime. Nous enregistrons le canal par lequel vous êtes arrivé (par exemple un moteur de recherche ou une publicité) pour mesurer nos actions, sans identifiant publicitaire.</li>
             <li>Obligations comptables et fiscales : obligation légale (art. 6.1.c)</li>
           </ul>
 

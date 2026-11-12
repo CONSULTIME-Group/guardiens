@@ -1,3 +1,4 @@
+import { withSignupSrcParam } from "@/lib/signupSource";
 import { useState } from "react";
 import { rememberLegalAcceptance } from "@/lib/legalAcceptance";
 import Head from "@/components/seo/Head";
@@ -52,7 +53,8 @@ const Login = () => {
     try {
       trackEvent("login_completed", { source: "/login", metadata: { method: "google", stage: "started" } });
     } catch {}
-    const googleRedirectUrl = `${window.location.origin}${postAuthTarget}`;
+    // Lot SRC1 : ce bouton crée aussi des comptes, la source d'arrivée suit.
+    const googleRedirectUrl = `${window.location.origin}${withSignupSrcParam(postAuthTarget)}`;
     logOAuthStage("sdk_called", "/login", { redirect_uri: googleRedirectUrl });
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: googleRedirectUrl,

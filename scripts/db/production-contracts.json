@@ -335,6 +335,28 @@
       ]
     },
     {
+      "migration": "0144_src1_source_inscription.sql",
+      "description": "Source d'arrivée enregistrée à l'inscription : table fermée aux membres, écriture unique, canal calculé en base, lecture réservée à l'équipe",
+      "checks": [
+        {
+          "name": "table_source",
+          "sql": "SELECT to_regclass('public.profile_signup_sources') IS NOT NULL AS ok"
+        },
+        {
+          "name": "table_fermee_aux_membres",
+          "sql": "SELECT NOT has_table_privilege('authenticated', 'public.profile_signup_sources', 'SELECT') AND NOT has_table_privilege('anon', 'public.profile_signup_sources', 'SELECT') AS ok"
+        },
+        {
+          "name": "inscription_email",
+          "sql": "SELECT position('src1_source_inscription' IN pg_get_functiondef('public.handle_new_user()'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "lecture_equipe",
+          "sql": "SELECT COALESCE(has_function_privilege('authenticated', to_regprocedure('public.admin_signup_sources(date,date)'), 'EXECUTE') AND NOT has_function_privilege('anon', to_regprocedure('public.admin_signup_sources(date,date)'), 'EXECUTE'), false) AS ok"
+        }
+      ]
+    },
+    {
       "migration": "0141_adm22_alertes_equipe.sql",
       "description": "Alertes de l'équipe : préférences par admin, mise en file d'un email immédiat sur message de contact, compte suspect et voyant système",
       "checks": [

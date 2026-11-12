@@ -1,4 +1,5 @@
 import { reportSignupConversion } from "@/lib/cookieConsent";
+import { trackEvent } from "@/lib/analytics";
 
 interface ConfirmedSignup {
   id: string;
@@ -15,5 +16,9 @@ export function reportConfirmedOwnerSignup(user: ConfirmedSignup, role: string, 
   // Email confirmation may happen days after account creation.
   if (now < confirmed || now - confirmed > 5 * 60 * 1000) return;
   if (Math.abs(signedIn - confirmed) > 60 * 1000) return;
-  reportSignupConversion(user.id);
+  // Lot SRC1 : chaque envoi laisse une ligne, pour comparer le compteur de
+  // Google Ads à la base. Les conditions d'envoi ne changent pas.
+  if (reportSignupConversion(user.id)) {
+    void trackEvent("ads_signup_conversion_sent", { source: "google_ads", metadata: { role } });
+  }
 }

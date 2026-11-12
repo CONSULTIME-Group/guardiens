@@ -33,6 +33,7 @@ export type EventType =
   | "push_activation_cta_clicked"
   | "push_enabled"
   | "push_resubscribe_shown"
+  | "ads_signup_conversion_sent"                // Lot SRC1 : conversion Google Ads réellement envoyée (role)
   | "push_resubscribe_clicked"
   | "push_offer_shown"
   | "push_offer_clicked"
