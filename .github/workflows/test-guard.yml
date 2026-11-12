@@ -58,6 +58,9 @@ jobs:
       - name: Publication réservée au propriétaire, lot P1 (Postgres local)
         run: npm run test:sql:p1
 
+      - name: Relances des brouillons presque prêts et des propriétaires silencieux, lot REL1 (Postgres local)
+        run: npm run test:sql:rel1
+
       - name: Mouvement de l'accueil ordinateur, lot D4 (Postgres local)
         run: npm run test:sql:d4
       - name: Mouvement de l'accueil ordinateur, lot G3 (Postgres local)

@@ -32,6 +32,10 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   // destinataire, au meme titre que 'new-application'. Aucun plafond de
   // frequence depuis le 02/08/2026, seules les heures calmes s'appliquent.
   'owner-pending-application-nudge',
+  // Lot REL1 : seconde et dernière relance à 7 jours, même nature, une par annonce.
+  'owner-pending-applications-second-nudge',
+  // Lot REL1 : nouvelle de sa propre candidature, donnée une fois au candidat.
+  'application-owner-silent',
   // Relance de confirmation sur une annonce ou la mise en relation a deja eu
   // lieu : consequence directe des echanges reels entre deux membres
   // identifies, meme nature que 'owner-pending-application-nudge'.
@@ -120,6 +124,8 @@ const PRODUCT: ReadonlyArray<string> = [
 
   'availability-nudge',
   'sit-draft-reminder',
+  // Lot REL1 : dernier email d'un brouillon presque prêt, un par annonce.
+  'sit-draft-almost-ready',
   'summer-listing-reminder',
   'listing-unpublished-feedback',
   // Affinité

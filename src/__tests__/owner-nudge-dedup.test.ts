@@ -1,3 +1,4 @@
+import * as rel1Sweeps from "../../supabase/functions/_shared/rel1-sweeps";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { runInNewContext } from "node:vm";
@@ -62,6 +63,8 @@ function harness(logs: Row[], options: { signalError?: string; sendStatus?: numb
     if(name.includes("cron-run-log")) return { startCronRun: async () => ({ finish, fail: vi.fn() }) };
     // Lot R1 : créneau quotidien de relance, libre dans ce harnais (testé à part).
     if(name.includes("reminder-daily-slot")) return { createReminderSlot: () => ({ isTaken: async () => false, take: () => {} }) };
+    // Lot REL1 : balayages réels, sans cible dans ce harnais (detect_unanswered_applications vide).
+    if(name.includes("rel1-sweeps")) return rel1Sweeps;
     throw new Error(name);
   } });
   return { fetch, finish, invoke: () => handler(new Request("https://fixture.invalid", {method:"POST",body:"{}"})),

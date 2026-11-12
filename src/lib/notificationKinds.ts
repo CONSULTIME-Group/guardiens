@@ -42,6 +42,8 @@ export const NOTIFICATION_KINDS: Readonly<Record<string, NotificationKind>> = {
   application_rejected: { tone: "warning", category: "applications" },
   application_cancelled: { tone: "muted", category: "applications" },
   application_closed: { tone: "muted", category: "applications" },
+  // Lot REL1 : la réponse du propriétaire se fait attendre, candidature ouverte.
+  application_owner_silent: { tone: "muted", category: "applications" },
   application_reopened: { tone: "info", category: "applications" },
   long_stay_application_rejected: { tone: "warning", category: "applications" },
   long_stay_application_cancelled: { tone: "muted", category: "applications" },

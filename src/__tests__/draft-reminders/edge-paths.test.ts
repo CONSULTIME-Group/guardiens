@@ -7,6 +7,8 @@ import ts from "typescript";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as eligibility from "../../../supabase/functions/_shared/draft-reminder-eligibility";
 import * as missing from "../../../supabase/functions/_shared/sit-draft-missing";
+import * as sequenceRules from "../../../supabase/functions/_shared/owner-sequence-rules";
+import * as rel1Sweeps from "../../../supabase/functions/_shared/rel1-sweeps";
 import { fakeDb, baseData, draftRow, sentLog, NOW, SIT, OWNER, EMAIL, type FakeDbData, type Row } from "./fakeDb";
 
 // Correctif du 12/11/2026 : les données de ce fichier sont datées par rapport
@@ -50,6 +52,8 @@ function load(name: string, db: ReturnType<typeof fakeDb>, send: (body: Row) => 
   };
   const rpc = vi.fn(async (fn: string) => {
     if (fn === "detect_stale_drafts") return { data: [{ sit_id: SIT, owner_id: OWNER, owner_email: EMAIL, owner_first_name: "Camille", days_since_created: 3 }], error: null };
+    // Lot REL1 : second passage « presque prêt », aucune cible dans ces jeux de données.
+    if (fn === "detect_almost_ready_drafts") return { data: [], error: null };
     throw new Error(`Unexpected rpc ${fn}`);
   });
   const client = { from, rpc, auth: { getUser: async () => ({ data: { user: { id: "admin-id" } } }) } };
@@ -73,6 +77,8 @@ function load(name: string, db: ReturnType<typeof fakeDb>, send: (body: Row) => 
       if (spec.includes("sit-draft-missing")) return missing;
       if (spec.includes("require-admin")) return { requireAdminOrServiceRole: async () => null };
       if (spec.includes("cron-run-log")) return { withCronRunLog: (_n: string, h: typeof handler) => h, startCronRun: async () => ({ finish: vi.fn(), fail: vi.fn() }) };
+      if (spec.includes("owner-sequence-rules")) return sequenceRules;
+      if (spec.includes("rel1-sweeps")) return rel1Sweeps;
       if (spec.includes("owner-nearby")) return { loadOwnerSitterPool: async () => [], ownerNearbyContext: () => ({ count: 0, label: null }) };
       throw new Error(`Unexpected import ${spec}`);
     },

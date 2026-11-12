@@ -27,6 +27,7 @@
     "test:sql:w0": "node scripts/test-w0-sequence-proprietaire.mjs",
     "test:sql:v1": "node scripts/test-v1-noel-v3.mjs",
     "test:sql:p1": "node scripts/test-p1-publication-proprietaire.mjs",
+    "test:sql:rel1": "node scripts/test-rel1-relances.mjs",
     "test:sql:d4": "node scripts/test-d4-mouvement-accueil.mjs",
     "test:sql:d7": "node scripts/test-d7-zone-alerte.mjs",
     "test:sql:src1": "node scripts/test-src1-source-inscription.mjs",

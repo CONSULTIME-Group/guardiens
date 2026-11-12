@@ -12,9 +12,12 @@ export interface QuickActionProps {
   primaryLabel?: string
   declineUrl?: string
   thinkingUrl?: string
+  /** Libellés des deux liens seconds (lot REL1). */
+  thinkingLabel?: string
+  declineLabel?: string
 }
 
-export const QuickActions = ({ primaryHref, primaryLabel, declineUrl, thinkingUrl }: QuickActionProps) => (
+export const QuickActions = ({ primaryHref, primaryLabel, declineUrl, thinkingUrl, thinkingLabel, declineLabel }: QuickActionProps) => (
   <Section style={wrap}>
     <Section style={{ textAlign: 'center' as const, margin: '0 0 12px' }}>
       <Button style={primaryBtn} href={primaryHref}>
@@ -29,12 +32,12 @@ export const QuickActions = ({ primaryHref, primaryLabel, declineUrl, thinkingUr
         <Section style={{ textAlign: 'center' as const }}>
           {thinkingUrl ? (
             <Button style={secondaryBtn} href={thinkingUrl}>
-              Pas encore décidé
+              {thinkingLabel || 'Pas encore décidé'}
             </Button>
           ) : null}
           {declineUrl ? (
             <Button style={secondaryBtn} href={declineUrl}>
-              Décliner poliment
+              {declineLabel || 'Décliner poliment'}
             </Button>
           ) : null}
         </Section>

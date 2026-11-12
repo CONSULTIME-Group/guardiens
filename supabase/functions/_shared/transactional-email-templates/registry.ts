@@ -104,6 +104,9 @@ import { template as affinityOnboardingNudge } from './affinity-onboarding-nudge
 import { template as accountDeleted } from './account-deleted.tsx'
 import { template as unsubscribeLink } from './unsubscribe-link.tsx'
 import { template as ownerPendingApplicationNudge } from './owner-pending-application-nudge.tsx'
+import { template as ownerPendingApplicationsSecondNudge } from './owner-pending-applications-second-nudge.tsx'
+import { template as applicationOwnerSilent } from './application-owner-silent.tsx'
+import { template as sitDraftAlmostReady } from './sit-draft-almost-ready.tsx'
 import { template as ownerSitUnconfirmed } from './owner-sit-unconfirmed.tsx'
 import { template as entraideLigneHelpsWith } from './entraide-ligne-helps-with.tsx'
 import { template as entraideLigneRelance } from './entraide-ligne-relance.tsx'
@@ -225,6 +228,10 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'unsubscribe-link': unsubscribeLink,
   'account-deleted': accountDeleted,
   'owner-pending-application-nudge': ownerPendingApplicationNudge,
+  // Lot REL1 (12/11/2026)
+  'owner-pending-applications-second-nudge': ownerPendingApplicationsSecondNudge,
+  'application-owner-silent': applicationOwnerSilent,
+  'sit-draft-almost-ready': sitDraftAlmostReady,
   'owner-sit-unconfirmed': ownerSitUnconfirmed,
   'discussion-stalled-nudge': discussionStalledNudge,
   'entraide-ligne-helps-with': entraideLigneHelpsWith,

@@ -9,6 +9,7 @@
  * - Sticky apply bar + ApplicationModal
  * - Bouton "Annuler ma participation" si gardien candidat sur garde confirmée
  */
+import OwnerResponsePendingNote from "@/components/sits/OwnerResponsePendingNote";
 import { calendarDate, daysBetween } from "@/lib/calendarDate";
 import { useState, useEffect } from "react";
 import PushMomentOffer from "@/components/notifications/PushMomentOffer";
@@ -436,6 +437,8 @@ const SitterSitView = ({
                       <CheckCircle2 className="h-5 w-5 mr-2" aria-hidden="true" /> Candidature envoyée
                     </Button>
                     {/* Lot NOTIF1 : la réponse du propriétaire arrive sur ce téléphone. */}
+                    {/* Lot REL1 : mention lue par le seul candidat (option B). */}
+                    <OwnerResponsePendingNote sitId={sit.id} applicationStatus={myApplicationStatus} className="text-left" />
                     <PushMomentOffer moment="application_sent" className="text-left md:max-w-md" />
                   </div>
                 ) : !canApplyGuards ? (

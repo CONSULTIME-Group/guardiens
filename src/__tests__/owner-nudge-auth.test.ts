@@ -1,3 +1,4 @@
+import * as rel1Sweeps from "../../supabase/functions/_shared/rel1-sweeps";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { runInNewContext } from "node:vm";
@@ -18,6 +19,9 @@ function harness(options: { admin?: boolean; flag?: boolean; roleError?: boolean
     if (["detect_pending_applications", "detect_stalled_discussions"].includes(name)) {
       return { data: [], error: options.detectorError ? { message: "detector unavailable" } : null };
     }
+    // Lot REL1 : candidatures sans réponse à 7 et 10 jours, mention synchronisée.
+    if (name === "detect_unanswered_applications") return { data: [], error: null };
+    if (name === "sync_owner_response_pending") return { data: [{ marked: 0, cleared: 0 }], error: null };
     throw new Error(`Unexpected RPC ${name}`);
   });
   const from = vi.fn((table: string) => {
@@ -54,6 +58,8 @@ function harness(options: { admin?: boolean; flag?: boolean; roleError?: boolean
     if (specifier.includes("cron-run-log")) return { startCronRun };
     // Lot R1 : créneau quotidien de relance (testé à part).
     if (specifier.includes("reminder-daily-slot")) return { createReminderSlot: () => ({ isTaken: async () => false, take: () => {} }) };
+    // Lot REL1 : balayages réels, sans cible dans ce harnais.
+    if (specifier.includes("rel1-sweeps")) return rel1Sweeps;
     throw new Error(`Unexpected import ${specifier}`);
   });
   return { invoke: (req: Request) => handler(req), from, rpc, getUser, createClient, startCronRun, finish, fail, fetch };
