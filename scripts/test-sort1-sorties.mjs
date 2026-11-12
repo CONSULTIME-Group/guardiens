@@ -31,6 +31,9 @@ await db.exec(`
   CREATE TABLE public.reports(id uuid PRIMARY KEY DEFAULT gen_random_uuid(), reporter_id uuid NOT NULL, target_type text NOT NULL DEFAULT 'profile',
     target_id uuid NOT NULL, status text NOT NULL DEFAULT 'new');
   CREATE TABLE public.feature_flags(key text PRIMARY KEY, enabled boolean NOT NULL DEFAULT false, description text);
+  CREATE TABLE auth.users(id uuid PRIMARY KEY, email text);
+  CREATE TABLE public.email_deferred_queue(id uuid PRIMARY KEY DEFAULT gen_random_uuid(), template_name text NOT NULL, recipient_email text NOT NULL,
+    template_data jsonb, idempotency_key text, defer_reason text, scheduled_for timestamptz);
 `);
 
 const migration2 = readFileSync(new URL('drizzle/migrations/0146_sort2_modification_sortie.sql', root), 'utf8');
@@ -38,7 +41,10 @@ await db.exec(migration);
 await db.exec(migration);
 await db.exec(migration2);
 await db.exec(migration2);
-passed.push('migrations 0145 et 0146 rejouables');
+const migration3 = readFileSync(new URL('drizzle/migrations/0147_sort3_emails_sorties.sql', root), 'utf8');
+await db.exec(migration3);
+await db.exec(migration3);
+passed.push('migrations 0145, 0146 et 0147 rejouables');
 
 const one = async (sql, params = []) => (await db.query(sql, params)).rows[0];
 const as = (uid) => db.exec(`SELECT set_config('fixture.uid', '${uid ?? ''}', false)`);
@@ -48,6 +54,9 @@ for (const [id, name] of [[MARTINE, 'Martine'], [KARIM, 'Karim'], [LEA, 'Léa'],
   await db.query(`INSERT INTO public.profiles(id, first_name, postal_code, latitude, longitude) VALUES ($1, $2, '69005', 45.76, 4.82)`, [id, name]);
 }
 await db.query(`INSERT INTO public.user_roles VALUES ($1, 'admin')`, [ADMIN]);
+for (const [id, name] of [[MARTINE, 'martine'], [KARIM, 'karim'], [LEA, 'lea'], [PAUL, 'paul'], [NOE, 'noe']]) {
+  await db.query(`INSERT INTO auth.users(id, email) VALUES ($1, $2)`, [id, `${name}@fixture.test`]);
+}
 
 assert.equal((await one(`SELECT enabled FROM public.feature_flags WHERE key = 'sorties'`)).enabled, false);
 passed.push('drapeau créé éteint');
@@ -178,5 +187,62 @@ await as(MARTINE);
 await assert.rejects(db.query(`UPDATE public.outings SET title = 'Autre titre' WHERE id = $1`, [outing.id]), /OUTING_CANCELLED_LOCKED/);
 passed.push('sortie annulée : contenu figé');
 
+// 11. Lot SORT3 : emails de service. Drapeau éteint, rien en file malgré tout ce qui précède.
+const queued = async (where = 'true', params = []) => (await db.query(`SELECT recipient_email, template_name, defer_reason, idempotency_key, template_data FROM public.email_deferred_queue WHERE ${where} ORDER BY idempotency_key`, params)).rows;
+assert.equal((await one(`SELECT enabled FROM public.feature_flags WHERE key = 'sorties_emails'`)).enabled, false);
+assert.equal((await queued()).length, 0);
+passed.push('emails : drapeau créé éteint, aucune ligne en file');
+
+await db.exec(`UPDATE public.feature_flags SET enabled = true WHERE key = 'sorties_emails'`);
+await as(MARTINE);
+const velo = await one(`
+  INSERT INTO public.outings(organizer_id, title, category, starts_at, place_kind, place_label, city, postal_code, capacity, reserved)
+  VALUES ($1, 'Balade à vélo', 'velo', '2026-12-13 09:00:00+00', 'public', 'Berges du Rhône', 'Lyon', '69007', 8, 1) RETURNING *`, [MARTINE]);
+assert.equal((await one(`SELECT public.outing_when_label('2026-12-13 09:00:00+00') AS l`)).l, 'Dimanche 13 décembre, 10 h');
+assert.equal((await one(`SELECT public.outing_when_label('2026-08-01 16:30:00+00') AS l`)).l, 'Samedi 1er août, 18 h 30');
+await as(KARIM);
+await db.query(`SELECT public.outing_join($1, 'lien')`, [velo.id]);
+await as(LEA);
+await db.query(`SELECT public.outing_join($1)`, [velo.id]);
+let mails = await queued(`defer_reason = 'outing_joined'`);
+assert.equal(mails.length, 2);
+assert.equal(mails.every((m) => m.recipient_email === 'martine@fixture.test' && m.template_name === 'outing-update'), true);
+assert.equal(mails.some((m) => m.template_data.subject === 'Karim vient à votre sortie'), true);
+assert.equal(mails[0].template_data.whenWhere, 'Dimanche 13 décembre, 10 h · Berges du Rhône');
+assert.match(mails[0].template_data.link, /^https:\/\/guardiens\.fr\/sorties\/balade-a-velo-[0-9a-f]{8}$/);
+// Une place libérée puis reprise par le même membre : un seul email.
+await db.query(`SELECT public.outing_leave($1)`, [velo.id]);
+await db.query(`SELECT public.outing_join($1)`, [velo.id]);
+assert.equal((await queued(`defer_reason = 'outing_joined'`)).length, 2);
+passed.push('emails : une inscription prévient l\'organisateur, une fois par inscrit');
+
+await as(MARTINE);
+await db.query(`UPDATE public.outings SET description = 'Allure tranquille.' WHERE id = $1`, [velo.id]);
+assert.equal((await queued(`defer_reason = 'outing_changed'`)).length, 0);
+await db.query(`UPDATE public.outings SET starts_at = '2026-12-13 13:00:00+00' WHERE id = $1`, [velo.id]);
+mails = await queued(`defer_reason = 'outing_changed'`);
+assert.deepEqual(mails.map((m) => m.recipient_email), ['karim@fixture.test', 'lea@fixture.test'].sort((a, b) => (mails.find((m) => m.recipient_email === a).idempotency_key < mails.find((m) => m.recipient_email === b).idempotency_key ? -1 : 1)));
+assert.equal(mails[0].template_data.whenWhere, 'Dimanche 13 décembre, 14 h · Berges du Rhône');
+passed.push('emails : un changement de jour prévient chaque inscrit, pas un changement de texte');
+
+// Rappel : la veille, à partir de 18 h à Paris, une seule fois.
+assert.equal((await one(`SELECT public.outing_enqueue_reminders('2026-12-12 16:30:00+00') AS n`)).n, 0);
+assert.equal((await one(`SELECT public.outing_enqueue_reminders('2026-12-11 18:00:00+00') AS n`)).n, 0);
+assert.equal((await one(`SELECT public.outing_enqueue_reminders('2026-12-12 17:05:00+00') AS n`)).n, 3);
+assert.equal((await one(`SELECT public.outing_enqueue_reminders('2026-12-12 18:05:00+00') AS n`)).n, 0);
+mails = await queued(`defer_reason = 'outing_reminder'`);
+assert.equal(mails.length, 3);
+assert.equal(mails.every((m) => m.template_data.subject === 'Demain : Balade à vélo'), true);
+passed.push('emails : rappel de la veille à partir de 18 h à Paris, une fois, organisateur et inscrits');
+
+await db.query(`SELECT public.outing_cancel($1, 'Pluie annoncée.')`, [velo.id]);
+mails = await queued(`defer_reason = 'outing_cancelled'`);
+assert.equal(mails.length, 2);
+assert.match(mails[0].template_data.body, /Pluie annoncée/);
+assert.equal(mails[0].template_data.cta, 'Voir les sorties');
+assert.equal((await queued()).every((m) => !/[—–]/.test(JSON.stringify(m.template_data))), true);
+assert.equal((await one(`SELECT count(*)::int AS n FROM public.email_deferred_queue`)).n, (await one(`SELECT count(DISTINCT idempotency_key)::int AS n FROM public.email_deferred_queue`)).n);
+passed.push('emails : annulation avec le mot de l\'organisateur, une clé par envoi');
+
 for (const p of passed) console.log(`ok  ${p}`);
-console.log(`\n${passed.length} contrôles verts (SORT1 et SORT2)`);
+console.log(`\n${passed.length} contrôles verts (SORT1, SORT2 et SORT3)`);
