@@ -69,6 +69,8 @@ jobs:
         run: npm run test:sql:src1
       - name: Sorties à places comptées, lot SORT1 (Postgres local)
         run: npm run test:sql:sort1
+      - name: Entraide vers les membres présents, lot SORT6 (Postgres local)
+        run: npm run test:sql:sort6
 
       - name: Diagnostic des brouillons, préférences réservées aux admins
         run: node scripts/test-draft-reminder-admin-privacy.mjs

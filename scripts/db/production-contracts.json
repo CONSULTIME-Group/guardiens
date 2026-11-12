@@ -559,6 +559,24 @@
           "sql": "SELECT NOT has_function_privilege('anon', 'public.admin_outing_set_hidden(uuid, boolean)', 'EXECUTE') AS ok"
         }
       ]
+    },
+    {
+      "migration": "0150_sort6_entraide_membres_presents.sql",
+      "description": "L'audience de l'entraide (vagues et nombre annoncé dans le formulaire) ne retient que les membres vus depuis 30 jours",
+      "checks": [
+        {
+          "name": "vagues_membres_presents",
+          "sql": "SELECT position('sort6_membres_presents' IN pg_get_functiondef('public.mission_wave_audience_floor(uuid, integer, integer, integer)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "apercu_membres_presents",
+          "sql": "SELECT position('sort6_membres_presents' IN pg_get_functiondef('public.mission_wave_audience_preview(double precision, double precision)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "vagues_role_service",
+          "sql": "SELECT NOT has_function_privilege('authenticated', 'public.mission_wave_audience_floor(uuid, integer, integer, integer)', 'EXECUTE') AS ok"
+        }
+      ]
     }
   ]
 }
