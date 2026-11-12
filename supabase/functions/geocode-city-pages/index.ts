@@ -173,9 +173,15 @@ Deno.serve(async (req) => {
       geocodees++;
     }
 
-    // Recalcule nearby_sitter_count pour toutes les pages désormais géocodées.
-    const { error: rpcErr } = await supabase.rpc("recalc_seo_city_nearby_counts");
-    if (rpcErr) console.warn(`geocode-city-pages: recalc échoué`, rpcErr.message);
+    // Recalcule nearby_sitter_count seulement quand ce passage a géocodé au
+    // moins une page (lot PR4, 12/11/2026). La tâche quotidienne
+    // recalc-seo-city-nearby-counts-daily (04 h UTC) tient les compteurs à jour.
+    // Recalculer toutes les 10 minutes marquait une page ville à rendre à chaque
+    // inscription dans son rayon : environ 665 rendus Prerender en 8 jours.
+    if (geocodees > 0) {
+      const { error: rpcErr } = await supabase.rpc("recalc_seo_city_nearby_counts");
+      if (rpcErr) console.warn(`geocode-city-pages: recalc échoué`, rpcErr.message);
+    }
 
     const { count: restantes } = await supabase
       .from("seo_city_pages")
