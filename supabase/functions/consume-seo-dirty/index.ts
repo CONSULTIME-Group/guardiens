@@ -8,10 +8,16 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun } from "../_shared/cron-run-log.ts";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 import {
+  HUB_MIN_RENDER_INTERVAL_HOURS,
+  isHubPath,
+  OUTBOX_SPACING_LOOKAHEAD,
   pickStaticToRecache,
+  spaceOutboxHubs,
   STATIC_FAMILY,
   STATIC_LOG_SOURCE,
+  STATIC_MIN_RENDER_INTERVAL_HOURS,
   STATIC_RENDER_BUDGET,
+  STATIC_SEO_URLS,
 } from "../_shared/static-seo-refresh.ts";
 import { isSitterProfileIndexable } from "../_shared/sitterProfileIndexability.js";
 
@@ -417,10 +423,32 @@ Deno.serve(async (req) => {
     const outboxRetries: Array<{ path: string; dirty_at: string }> = [];
     const { data: pendingUrls, error: outboxError } = await sb.from("seo_url_outbox")
       .select("path, dirty_at").order("first_dirty_at", { ascending: true })
-      .order("path", { ascending: true }).lte("next_attempt_at", new Date().toISOString()).limit(STATIC_RENDER_BUDGET);
+      .order("path", { ascending: true }).lte("next_attempt_at", new Date().toISOString())
+      .limit(STATIC_RENDER_BUDGET + OUTBOX_SPACING_LOOKAHEAD);
     if (outboxError) throw outboxError;
-    const outboxMetrics = { outbox_recached: 0, outbox_failed: 0, outbox_deferred: 0 };
-    const outboxRows = (pendingUrls ?? []) as Array<{ path: string; dirty_at: string }>;
+    const outboxMetrics = { outbox_recached: 0, outbox_failed: 0, outbox_deferred: 0, outbox_spaced: 0 };
+    // Lot PR4 : un hub (accueil, hubs, ville, guide de ville, departement) rendu
+    // avec succes depuis moins de 6 heures attend. Les lignes lues en plus du
+    // budget evitent qu'un hub en attente prenne la place d'une autre page.
+    const outboxCandidates = (pendingUrls ?? []) as Array<{ path: string; dirty_at: string }>;
+    const hubLastOkMs = new Map<string, number>();
+    const hubUrls = outboxCandidates.filter((r) => isHubPath(r.path)).map((r) => `${SITE}${r.path}`);
+    if (hubUrls.length > 0) {
+      const { data: hubOk, error: hubOkError } = await sb.from("prerender_recache_log")
+        .select("url, created_at").in("url", hubUrls).eq("ok", true)
+        .gte("created_at", new Date(Date.now() - HUB_MIN_RENDER_INTERVAL_HOURS * 3_600_000).toISOString())
+        .order("created_at", { ascending: false }).limit(1000);
+      // Lecture en echec : aucun espacement a ce passage, la file est rendue comme avant.
+      if (hubOkError) console.warn("[consume-seo-dirty] espacement des hubs non lu", hubOkError.message);
+      for (const r of (hubOk ?? []) as Array<{ url: string; created_at: string }>) {
+        const path = r.url.slice(SITE.length) || "/";
+        if (!hubLastOkMs.has(path)) hubLastOkMs.set(path, new Date(r.created_at).getTime());
+      }
+    }
+    const { toRender: outboxRows, spaced: outboxSpaced } = spaceOutboxHubs(
+      outboxCandidates, hubLastOkMs, Date.now(), STATIC_RENDER_BUDGET,
+    );
+    outboxMetrics.outbox_spaced = outboxSpaced.length;
     for (const row of outboxRows) {
       const url = `${SITE}${row.path}`;
       const res = await recache(url);
@@ -499,20 +527,27 @@ Deno.serve(async (req) => {
       if (stErr) throw stErr;
       const markedAt = (st?.last_marked_at as string | null) ?? null;
       if (markedAt) {
+        // Lot PR4 : la lecture remonte a 24 heures au moins, pour connaitre le
+        // dernier rendu reussi de chaque page meme avant le repere.
+        const staticNowMs = Date.now();
+        const staticSince = new Date(Math.min(
+          new Date(markedAt).getTime(),
+          staticNowMs - STATIC_MIN_RENDER_INTERVAL_HOURS * 3_600_000,
+        )).toISOString();
         const { data: okRows, error: okErr } = await sb
           .from("prerender_recache_log")
           .select("url, created_at")
-          .in("source", [STATIC_LOG_SOURCE, "consume-seo-dirty:outbox"])
+          .in("url", [...STATIC_SEO_URLS])
           .eq("ok", true)
-          .gte("created_at", markedAt)
+          .gte("created_at", staticSince)
           .order("created_at", { ascending: false })
-          .limit(100);
+          .limit(1000);
         if (okErr) throw okErr;
         const lastOk = new Map<string, string>();
         for (const r of (okRows ?? []) as Array<{ url: string; created_at: string }>) {
           if (!lastOk.has(r.url)) lastOk.set(r.url, r.created_at);
         }
-        const { toRecache, deferred } = pickStaticToRecache(markedAt, lastOk, STATIC_RENDER_BUDGET - outboxRows.length);
+        const { toRecache, deferred } = pickStaticToRecache(markedAt, lastOk, STATIC_RENDER_BUDGET - outboxRows.length, staticNowMs);
         staticMetrics.static_deferred = deferred;
         for (const url of toRecache) {
           const res = await recache(url);
@@ -546,6 +581,15 @@ Deno.serve(async (req) => {
         .update({ next_attempt_at: new Date(Date.now() + 30 * 60_000).toISOString() })
         .eq("path", row.path).eq("dirty_at", row.dirty_at);
       if (retryError) throw retryError;
+    }
+    // Lot PR4 : un hub en attente revient quand son dernier rendu a 6 heures.
+    // Un changement arrive entre-temps remet next_attempt_at a l'instant, la
+    // ligne est alors relue et espacee de nouveau au passage suivant.
+    for (const { row, until } of outboxSpaced) {
+      const { error: spaceError } = await sb.from("seo_url_outbox")
+        .update({ next_attempt_at: until })
+        .eq("path", row.path).eq("dirty_at", row.dirty_at);
+      if (spaceError) throw spaceError;
     }
     // Une suppression est acquittee seulement pour la version lue.
     for (const row of outboxAcks) {
