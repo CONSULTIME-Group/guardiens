@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import BlockedMembersCard from "@/components/settings/BlockedMembersCard";
 import { useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -107,12 +106,18 @@ const Settings = () => {
   const sectionParam = searchParams.get("section") || searchParams.get("tab");
   const hasSectionParam = !!sectionParam && SECTIONS.some((s) => s.id === sectionParam);
   const showSectionList = isMobile && !hasSectionParam;
+  // Lot PAR4 : Sécurité et identité s'ouvre sur un sommaire, chaque sujet a sa page.
+  const focusParam = searchParams.get("focus");
+  // Les liens d'invitation à vérifier son identité (?section=security&src=…)
+  // ouvrent la page Identité, comme avant le sommaire.
+  const securityPart = SECURITY_PARTS.find((part) => part.id === focusParam)?.id
+    ?? (searchParams.get("src") ? "identity" : null);
+  const openSecurityPart = (part: SecurityPartId | null) =>
+    setSearchParams(part ? { section: "security", focus: part } : { section: "security" });
   const setActiveSection = (id: SectionId) => {
     setActiveSectionState(id);
     setSearchParams({ section: id });
   };
-  const proSectionRef = useRef<HTMLDivElement | null>(null);
-  const identitySectionRef = useRef<HTMLDivElement | null>(null);
 
   // Deep-link via ?section=xxx ou ?tab=xxx (aliases). Toutes les sections déclarées sont valides.
   useEffect(() => {
@@ -120,12 +125,6 @@ const Settings = () => {
     const valid: SectionId[] = SECTIONS.map((s) => s.id);
     if (param && valid.includes(param)) {
       setActiveSectionState(param);
-      const focus = searchParams.get("focus");
-      if (focus === "pro") {
-        setTimeout(() => proSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
-      } else if (focus === "identity") {
-        setTimeout(() => identitySectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
-      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -405,7 +404,14 @@ const Settings = () => {
         currentPasswordForEmail={currentPasswordForEmail} setCurrentPasswordForEmail={setCurrentPasswordForEmail}
         onSubmitEmail={handleEmailChange}
       />;
-      case "security": return <SecuritySection
+      case "security": return securityPart === null ? (
+        <SecurityHub onOpen={openSecurityPart} />
+      ) : securityPart === "identity" ? (
+        <IdentityVerificationSection user={user} />
+      ) : securityPart === "pro" ? (
+        <ProVerificationSection user={user} />
+      ) : <SecuritySection
+        part={securityPart}
         user={user}
         currentPassword={currentPassword} setCurrentPassword={setCurrentPassword}
         newPassword={newPassword} setNewPassword={setNewPassword}
@@ -535,19 +541,18 @@ const Settings = () => {
           {/* Content */}
           <main className={`min-w-0 ${showSectionList ? "hidden md:block" : ""}`} data-settings-main>
             <div className="rounded-xl border border-border bg-card p-5 md:p-7">
-              {renderSection(activeSection)}
-              {activeSection === "security" && (
-                <>
-                  <Separator className="my-8" />
-                  <div ref={identitySectionRef} id="identity-verification" className="scroll-mt-24">
-                    <IdentityVerificationSection user={user} />
-                  </div>
-                  <Separator className="my-8" />
-                  <div ref={proSectionRef} id="pro-verification">
-                    <ProVerificationSection user={user} />
-                  </div>
-                </>
+              {activeSection === "security" && securityPart !== null && (
+                <button
+                  type="button"
+                  data-testid="security-back"
+                  onClick={() => openSecurityPart(null)}
+                  className="mb-4 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-primary"
+                >
+                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                  Sécurité et identité
+                </button>
               )}
+              {renderSection(activeSection)}
             </div>
           </main>
         </div>
@@ -704,18 +709,53 @@ const AccountSection = ({ user, profileHref, newEmail, setNewEmail, currentPassw
   </section>
 );
 
+type SecurityPartId = "password" | "sessions" | "identity" | "pro";
+const SECURITY_PARTS: ReadonlyArray<{ id: SecurityPartId; label: string; hint: string }> = [
+  { id: "password", label: "Mot de passe", hint: "Modifier le mot de passe de votre compte." },
+  { id: "sessions", label: "Appareils connectés", hint: "Déconnecter vos autres appareils." },
+  { id: "identity", label: "Vérification d'identité", hint: "L'écusson qui rassure les autres membres." },
+  { id: "pro", label: "Statut professionnel", hint: "Déclarer une activité liée aux animaux." },
+];
+
+const SecurityHub = ({ onOpen }: { onOpen: (part: SecurityPartId) => void }) => (
+  <section data-testid="security-hub">
+    <SectionHeader icon={Shield} title="Sécurité et identité" description="Quatre sujets, chacun sur sa page." />
+    <ul className="divide-y divide-border rounded-xl border border-border">
+      {SECURITY_PARTS.map((part) => (
+        <li key={part.id}>
+          <button
+            type="button"
+            onClick={() => onOpen(part.id)}
+            className="flex w-full min-h-[60px] items-center gap-3 px-4 py-2 text-left"
+          >
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-medium text-foreground">{part.label}</span>
+              <span className="block text-xs text-muted-foreground">{part.hint}</span>
+            </span>
+            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+          </button>
+        </li>
+      ))}
+    </ul>
+  </section>
+);
+
 const SecuritySection = ({
   currentPassword, setCurrentPassword, newPassword, setNewPassword, confirmPassword, setConfirmPassword,
-  showCurrent, setShowCurrent, showNew, setShowNew, onSubmit, onSignOutOthers, signingOutOthers,
+  showCurrent, setShowCurrent, showNew, setShowNew, onSubmit, onSignOutOthers, signingOutOthers, part,
 }: any) => {
   const strength = useMemo(() => getPasswordStrength(newPassword), [newPassword]);
 
   return (
     <section>
-      <SectionHeader icon={Shield} title="Sécurité et identité" description="Mot de passe, sessions actives, vérification d'identité." />
+      <SectionHeader
+        icon={part === "sessions" ? LogOut : Shield}
+        title={part === "sessions" ? "Appareils connectés" : "Mot de passe"}
+        description={part === "sessions" ? "Gardez la main sur les appareils où votre compte est ouvert." : "Choisissez un mot de passe que vous utilisez seulement ici."}
+      />
 
       <div className="space-y-6">
-        <div className="space-y-3">
+        {part !== "sessions" && <div className="space-y-3">
           <Label htmlFor="current-pw">Mot de passe actuel</Label>
           <div className="relative">
             <Input id="current-pw" type={showCurrent ? "text" : "password"}
@@ -765,11 +805,9 @@ const SecuritySection = ({
           <p className="text-xs text-muted-foreground">
             Minimum 8 caractères, avec majuscules, minuscules et chiffres ou symboles.
           </p>
-        </div>
+        </div>}
 
-        <Separator />
-
-        <div className="space-y-2">
+        {part === "sessions" && <div className="space-y-2">
           <Label className="text-sm">Sessions actives</Label>
           <p className="text-xs text-muted-foreground">
             Déconnecter tous vos autres appareils si vous pensez que votre compte est compromis.
@@ -778,17 +816,40 @@ const SecuritySection = ({
             <LogOut className="h-4 w-4" />
             {signingOutOthers ? "Déconnexion..." : "Déconnecter tous les autres appareils"}
           </Button>
-        </div>
+        </div>}
       </div>
     </section>
   );
 };
 
+const EMAIL_GROUPS = [
+  {
+    title: "Vos échanges",
+    hint: "Ce qui attend une réponse de votre part.",
+    zonesLink: false,
+    rows: [
+      { key: "email_messages", label: "Messages", hint: "Un membre vous écrit." },
+      { key: "email_new_application", label: "Candidatures", hint: "Sur vos annonces." },
+      { key: "email_reminders", label: "Rappels de garde", hint: "Avant et pendant une garde." },
+      { key: "email_review_prompts", label: "Avis à laisser", hint: "Après une garde." },
+    ],
+  },
+  {
+    title: "Près de chez vous",
+    hint: "Les nouveautés de votre secteur.",
+    zonesLink: true,
+    rows: [
+      { key: "email_sitter_suggestions", label: "Suggestions de gardiens", hint: "Pour vos annonces en ligne." },
+    ],
+  },
+] as const;
+
 const NotificationsSection = ({ prefs, savingKey, allNotifsOn, onMasterToggle, onSave }: any) => (
   <section>
-    <AdminTeamAlertsSection />
+    {/* Lot PAR4 : un ordre de lecture unique. Cet appareil, puis les emails
+        par sujet, puis les alertes de l'équipe. */}
     <PushNotificationsSection />
-    <SectionHeader icon={Bell} title="Notifications email" description="Choisissez les emails que vous souhaitez recevoir." />
+    <SectionHeader icon={Bell} title="Par email" description="Choisissez les emails que vous recevez, sujet par sujet." />
 
     <div className="space-y-4">
       <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3">
@@ -799,25 +860,42 @@ const NotificationsSection = ({ prefs, savingKey, allNotifsOn, onMasterToggle, o
         <Switch id="email-all" checked={allNotifsOn} onCheckedChange={onMasterToggle} />
       </div>
 
-      {([
-        { key: "email_new_application", label: "Nouvelles candidatures" },
-        { key: "email_messages", label: "Messages" },
-        { key: "email_reminders", label: "Rappels de garde" },
-        { key: "email_sitter_suggestions", label: "Suggestions de gardiens" },
-        { key: "email_review_prompts", label: "Avis à laisser" },
-      ] as const).map(({ key, label }) => (
-        <div key={key} className="flex items-center justify-between">
-          <Label htmlFor={`pref-${key}`} className="text-sm">
-            {label}
-            {savingKey === key && <span className="ml-2 text-xs text-muted-foreground">Enregistrement…</span>}
-          </Label>
-          <Switch id={`pref-${key}`} checked={prefs[key]} onCheckedChange={(v) => onSave({ [key]: v })} />
+      {EMAIL_GROUPS.map((group) => (
+        <div key={group.title} data-testid="email-group" className="rounded-xl border border-border p-4">
+          <h3 className="text-sm font-semibold">{group.title}</h3>
+          <p className="mb-2 text-xs text-muted-foreground">{group.hint}</p>
+          <div className="divide-y divide-border">
+            {group.rows.map(({ key, label, hint }) => (
+              <div key={key} className="flex min-h-[56px] items-center justify-between gap-3 py-2">
+                <div className="min-w-0">
+                  <Label htmlFor={`pref-${key}`} className="text-sm">
+                    {label}
+                    {savingKey === key && <span className="ml-2 text-xs text-muted-foreground">Enregistrement…</span>}
+                  </Label>
+                  <p className="text-xs text-muted-foreground">{hint}</p>
+                </div>
+                <Switch id={`pref-${key}`} checked={prefs[key]} onCheckedChange={(v) => onSave({ [key]: v })} />
+              </div>
+            ))}
+            {group.zonesLink && (
+              <Link
+                to="/settings?section=alerts"
+                className="flex min-h-[56px] items-center justify-between gap-3 py-2 text-sm text-foreground"
+              >
+                <span className="min-w-0">
+                  <span className="block font-medium">Mes zones d'alerte</span>
+                  <span className="block text-xs text-muted-foreground">Annonces et coups de main publiés dans vos zones.</span>
+                </span>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+              </Link>
+            )}
+          </div>
         </div>
       ))}
 
       {/* Lot X3c : appliqué par notify-new-message et send-transactional-email
           (supabase/functions/_shared/notification-preferences.ts). */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border p-4">
         <div className="min-w-0">
           <Label className="text-sm">Rythme des emails de messages</Label>
           <p className="text-xs text-muted-foreground">Un email par conversation au plus sur cette durée.</p>
@@ -849,6 +927,7 @@ const NotificationsSection = ({ prefs, savingKey, allNotifsOn, onMasterToggle, o
         <EmailDigestCard />
       </div>
     </div>
+    <div className="mt-8"><AdminTeamAlertsSection /></div>
   </section>
 );
 
