@@ -41,6 +41,10 @@ import {
 } from "@/lib/sitFieldModeration";
 import InlinePhotoUpload from "@/components/sits/create/InlinePhotoUpload";
 import CreateSitSetupStep from "@/components/sits/create/CreateSitSetupStep";
+import InlineHousingTypeChoice from "@/components/sits/create/InlineHousingTypeChoice";
+import InlineProfilePlaceBlock from "@/components/sits/create/InlineProfilePlaceBlock";
+import { invalidateMyOnboardingStatus } from "@/lib/myProfile";
+import { HOUSING_NOTICE_TEXT, entryMissing, firstNameFromAccount, isFirstNameUsable, step0EntryErrors, type HousingNotice } from "@/lib/sitCreateEntry";
 import CreateSitExpress from "@/components/sits/create/CreateSitExpress";
 import SitCreateWelcome from "@/components/sits/create/SitCreateWelcome";
 import { useHideBottomNav } from "@/components/layout/ChromeVisibility";
@@ -663,6 +667,14 @@ const CreateSit = () => {
   const [profileCompletion, setProfileCompletion] = useState(0);
   const [ownerCity, setOwnerCity] = useState<string>("");
   const [ownerHasCoords, setOwnerHasCoords] = useState(false);
+  // Lot ENT1 (12/11/2026) : ce qui manque au profil se demande dans l'étape 0.
+  // Les champs restent à l'écran pendant la visite, même une fois remplis.
+  const [cityAsked, setCityAsked] = useState(false);
+  const [firstNameAsked, setFirstNameAsked] = useState(false);
+  const [inlineFirstName, setInlineFirstName] = useState("");
+  const [housingNotice, setHousingNotice] = useState<HousingNotice | null>(null);
+  const saveAfterHousingRef = useRef(false);
+  const entryStateTrackedRef = useRef(false);
   // Annonce publiée à venir (lot N7) : le parcours express la signale.
   const [upcomingPublishedSitId, setUpcomingPublishedSitId] = useState<string | null>(null);
   // Lot P1 (19/10/2026) : annonces en ligne ou gardes confirmées à venir du
@@ -1011,6 +1023,13 @@ const CreateSit = () => {
 
       setProfileCompletion(profileRes.data?.profile_completion || 0);
       setOwnerCity(profileRes.data?.city || "");
+      setCityAsked(!(profileRes.data?.city || "").trim());
+      if (!isFirstNameUsable((profileRes.data as any)?.first_name)) {
+        setFirstNameAsked(true);
+        // Session locale, aucune lecture réseau de plus.
+        const { data: authData } = await supabase.auth.getSession();
+        setInlineFirstName(((profileRes.data as any)?.first_name || "").trim() || firstNameFromAccount(authData?.session?.user?.user_metadata));
+      }
       setOwnerHasCoords(typeof (profileRes.data as any)?.latitude === "number" && typeof (profileRes.data as any)?.longitude === "number");
       setOwnerBio((profileRes.data as any)?.bio || "");
       setProfileFirstName((profileRes.data as any)?.first_name || "");
@@ -1379,7 +1398,24 @@ const CreateSit = () => {
   // distance, on prévient avant la fermeture de l'onglet.
   useUnsavedChanges(unsavedRemote);
 
+  // Lot ENT1 : sans logement, rien ne peut s'enregistrer (sits.property_id non
+  // nul). Le clic mène au bloc « Votre logement », la saisie reste en place.
+  const askHousing = (notice: HousingNotice) => {
+    setHousingNotice(notice);
+    setPreviewOpen(false);
+    setCurrentStep(0);
+    setTimeout(() => {
+      if (typeof document === "undefined") return;
+      document.getElementById("sit-housing-field")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 80);
+  };
+
   const handleSaveAndExit = async () => {
+    if (!property) {
+      void trackEvent("sits_create_save_needs_housing", { source: "/sits/create" });
+      askHousing("save");
+      return;
+    }
     const id = await saveDraft();
     if (id) {
       markExit("save_and_exit");
@@ -1708,7 +1744,7 @@ const CreateSit = () => {
       return;
     }
     if (b.id === "property") {
-      setSetupVoluntary(true); setSetupEntered(true); setSetupDismissed(false);
+      askHousing("publish");
       return;
     }
     if (b.action) {
@@ -1848,9 +1884,9 @@ const CreateSit = () => {
       toast({
         variant: "destructive",
         title: "Impossible de publier l'annonce",
-        description: "Votre logement n'est pas encore décrit sur votre profil.",
+        description: "Indiquez votre type de logement, un seul choix suffit.",
       });
-      setSetupVoluntary(true); setSetupEntered(true); setSetupDismissed(false);
+      askHousing("publish");
       return;
     }
     const blocking = getBlockingBlockers(publishBlockers);
@@ -2136,6 +2172,15 @@ const CreateSit = () => {
       if (dateError) errors.push({ field: "endDate", anchor: "dates-field" });
       if (!reasonValid) errors.push({ field: "descriptionReason", anchor: "description-field" });
       if (!expectationsValid) errors.push({ field: "descriptionExpectations", anchor: "description-field" });
+      // Lot ENT1 : logement, commune et prénom se contrôlent ici, au clic sur
+      // « Suivant », jamais pour enregistrer le brouillon.
+      const entryErrors = step0EntryErrors({
+        hasProperty: !!property, ownerCity, sitCity, firstName: profileFirstName,
+        firstNameAsked, firstNameValue: inlineFirstName,
+      });
+      if (entryErrors.some((e) => e.field === "property")) setHousingNotice("next");
+      // Ordre de l'écran : logement, commune, prénom, puis les champs de l'annonce.
+      errors.unshift(...entryErrors);
       if (errors.length > 0) {
         void trackEvent("sits_create_next_blocked", {
           source: "/sits/create",
@@ -2160,7 +2205,23 @@ const CreateSit = () => {
 
   const handleNext = () => {
     if (!validateCurrentStep()) return;
+    // Un prénom proposé d'office et laissé tel quel s'écrit au passage.
+    if (currentStep === 0) void saveInlineFirstName();
     setCurrentStep(s => s + 1);
+  };
+
+  // Lot ENT1 : prénom écrit sur le profil à la sortie du champ.
+  const saveInlineFirstName = async () => {
+    const clean = inlineFirstName.trim();
+    if (!user || !firstNameAsked || !isFirstNameUsable(clean) || clean === profileFirstName.trim()) return;
+    const { error } = await supabase.from("profiles").update({ first_name: clean }).eq("id", user.id);
+    if (error) {
+      console.error("[CreateSit] first name save failed", error);
+      return;
+    }
+    setProfileFirstName(clean);
+    void invalidateMyOnboardingStatus(user.id);
+    void trackEvent("sits_create_inline_identity_saved", { source: "/sits/create", metadata: { fields: ["first_name"] } });
   };
 
   // Prérequis vérifiés à l'entrée du flow, pas en cours de route : inutile de
@@ -2181,45 +2242,11 @@ const CreateSit = () => {
     dismissed: setupDismissed,
     voluntary: setupVoluntary,
   });
-  const preflightMissing = setupState.missing;
-  const preflightBlocked = !loading && preflightMissing.length > 0;
+  // Lot ENT1 (12/11/2026) : plus aucun contrôle d'entrée. Le formulaire
+  // s'ouvre toujours, sans redirection vers l'écran P1 de l'arrivée ni ouverture
+  // automatique de l'écran de mise en route, qui reste accessible par choix.
+  // sits_create_preflight_blocked n'est plus émis (témoin : 0 attendu).
   const preflightSignature = setupState.missingIds.join(",");
-  const preflightTrackedRef = useRef<string>("");
-
-  useEffect(() => {
-    if (!preflightBlocked) return;
-    if (preflightTrackedRef.current === preflightSignature) return;
-    preflightTrackedRef.current = preflightSignature;
-    void trackEvent("sits_create_preflight_blocked", {
-      source: "/sits/create",
-      metadata: {
-        missing: preflightSignature.split(","),
-        profile_completion: profileCompletion,
-      },
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preflightBlocked, preflightSignature]);
-
-  // Lot C1 (01/11/2026) : un compte arrivée v2 à qui il manque prénom, commune
-  // ou logement reprend « Faisons connaissance » (P1) au lieu de l'ancien écran
-  // de mise en route, puis revient ici. Une seule fois par visite.
-  const arrivalRedirectedRef = useRef(false);
-  const arrivalShouldResumeP1 = arrivalV2Account && preflightBlocked
-    && (setupState.missingIds.includes("identity") || setupState.missingIds.includes("property"));
-  useEffect(() => {
-    if (!arrivalShouldResumeP1 || arrivalRedirectedRef.current) return;
-    arrivalRedirectedRef.current = true;
-    const back = `${location.pathname}${location.search}`;
-    void trackEvent("arrival_p1_resumed_from_create", { source: "/sits/create", metadata: { missing: setupState.missingIds } });
-    markExit("arrival_resume");
-    navigate(`/arrivee/vous?next=${encodeURIComponent(back)}`, { replace: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [arrivalShouldResumeP1]);
-
-  // Écran de mise en route : on y entre dès qu'un prérequis manque au chargement.
-  useEffect(() => {
-    if (preflightBlocked && !arrivalShouldResumeP1) setSetupEntered(true);
-  }, [preflightBlocked, arrivalShouldResumeP1]);
 
   const showSetup = setupState.showSetup;
   // Valeur courante lisible depuis le nettoyage d'effet, pour ne pas émettre
@@ -2323,6 +2350,7 @@ const CreateSit = () => {
     setProfileFirstName(firstName);
     setProfilePostalCode(postalCode);
     setProfileCountry(country);
+    setInlineFirstName(firstName);
     // Le pays du profil amorce le pays de l'annonce tant que celui-ci est
     // resté au défaut : une annonce hors France doit être géocodée dans
     // son pays, sinon elle reste invisible dans la recherche.
@@ -2343,6 +2371,29 @@ const CreateSit = () => {
     requested: expressParams.express, hasProperty: !!property, showSetup, loading,
   });
   expressActiveRef.current = expressActive;
+
+  // Lot ENT1 : état du profil au premier affichage du formulaire, une fois par visite.
+  useEffect(() => {
+    if (loading || showSetup || expressActive || entryStateTrackedRef.current) return;
+    entryStateTrackedRef.current = true;
+    void trackEvent("sits_create_entry_state", {
+      source: "/sits/create",
+      metadata: {
+        missing: entryMissing({ hasProperty: !!property, ownerCity, firstName: profileFirstName }),
+        profile_completion: profileCompletion,
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, showSetup, expressActive]);
+
+  // Lot ENT1 : le brouillon s'enregistre dès que le logement existe, sans
+  // attendre une nouvelle frappe (le texte saisi avant le choix part en base).
+  useEffect(() => {
+    if (!property || !saveAfterHousingRef.current) return;
+    saveAfterHousingRef.current = false;
+    void saveDraft({ silent: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [property]);
   const [expressUploading, setExpressUploading] = useState(false);
   const expressPrefilledRef = useRef(false);
   const expressTextEditedRef = useRef(false);
@@ -2807,23 +2858,76 @@ const CreateSit = () => {
           <>
 
 
-          {/* Lot L1 : commune exigée quand le profil n'en porte pas. */}
-          {!ownerCity.trim() && (
-            <div id="sit-city-field" className="scroll-mt-24">
-              <Label htmlFor="sit_city_required" className="text-sm font-medium">Commune de votre logement</Label>
+          {/* Lot ENT1 : logement créé en un geste, seulement sans logement. */}
+          {!property && user && (
+            <InlineHousingTypeChoice
+              userId={user.id}
+              notice={housingNotice ? HOUSING_NOTICE_TEXT[housingNotice] : null}
+              onSaved={(saved: InlineHousingResult) => {
+                setProperty({
+                  id: saved.id,
+                  type: saved.type,
+                  environment: saved.environment,
+                  equipments: [],
+                  photos: [],
+                  description: null,
+                  rooms_count: saved.rooms_count,
+                  bedrooms_count: saved.bedrooms_count,
+                });
+                setHousingNotice(null);
+                saveAfterHousingRef.current = true;
+                void invalidateMyOnboardingStatus(user.id);
+                void trackEvent("sits_create_inline_housing_saved", { source: "/sits/create", metadata: { type: saved.type } });
+              }}
+            />
+          )}
+
+          {/* Lot ENT1 : commune saisie ici quand le profil n'en porte pas (lot L1),
+              écrite sur le profil avec le composant de l'écran P1. */}
+          {cityAsked && user && (
+            <InlineProfilePlaceBlock
+              userId={user.id}
+              initialPostalCode={profilePostalCode}
+              initialCountry={profileCountry}
+              invalid={!!touched.city}
+              onSaved={(place) => {
+                setOwnerCity(place.city);
+                setProfilePostalCode(place.postalCode);
+                setProfileCountry(place.country);
+                if (place.country !== "FR") setSitCountry((prev) => (prev === "FR" ? place.country : prev));
+                void invalidateMyOnboardingStatus(user.id);
+                void trackEvent("sits_create_inline_identity_saved", { source: "/sits/create", metadata: { fields: ["city"] } });
+                // Coordonnées relues après le géocodage du profil.
+                setTimeout(() => {
+                  void supabase.from("profiles").select("latitude, longitude").eq("id", user.id).maybeSingle().then(({ data }) => {
+                    if (!data) return;
+                    setOwnerHasCoords(typeof (data as any).latitude === "number" && typeof (data as any).longitude === "number");
+                  });
+                }, 4000);
+              }}
+            />
+          )}
+
+          {/* Lot ENT1 : prénom demandé ici quand le profil n'en porte pas. */}
+          {firstNameAsked && (
+            <div id="sit-first-name-field" data-testid="sit-first-name-field" className="scroll-mt-24">
+              <Label htmlFor="sit_first_name" className="text-sm font-medium">Votre prénom</Label>
               <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
-                Indiquez la commune de votre logement pour que les gardiens sachent où se trouve la garde.
+                Il accompagne votre annonce auprès des gardiens.
               </p>
               <Input
-                id="sit_city_required"
-                value={sitCity}
-                onChange={(e) => setSitCity(normalizeCityTyping(e.target.value))}
-                onBlur={(e) => setSitCity(normalizeCityName(e.target.value))}
-                placeholder="Ex : Lozanne"
-                className="h-12 text-base"
-                maxLength={100}
-                autoComplete="address-level2"
+                id="sit_first_name"
+                value={inlineFirstName}
+                onChange={(e) => setInlineFirstName(e.target.value)}
+                onBlur={() => { void saveInlineFirstName(); }}
+                className={cn("h-12 text-base", touched.first_name && !isFirstNameUsable(inlineFirstName) && "border-destructive focus-visible:ring-destructive")}
+                maxLength={50}
+                autoComplete="given-name"
+                aria-invalid={touched.first_name && !isFirstNameUsable(inlineFirstName) ? true : undefined}
               />
+              {touched.first_name && !isFirstNameUsable(inlineFirstName) && (
+                <p role="alert" className="mt-1.5 text-sm font-medium text-destructive">Indiquez votre prénom pour continuer</p>
+              )}
             </div>
           )}
 
@@ -3535,7 +3639,7 @@ const CreateSit = () => {
                 variant="outline"
                 className="h-12 px-4 shrink-0 text-base"
                 onClick={handleSaveAndExit}
-                disabled={savingDraft || !property}
+                disabled={savingDraft}
               >
                 {savingDraft ? "Sauvegarde…" : <><span className="hidden sm:inline">Enregistrer & quitter</span><span className="sm:hidden">Enregistrer</span></>}
               </Button>
@@ -3556,7 +3660,7 @@ const CreateSit = () => {
                   variant="ghost"
                   className="h-12 px-3 shrink-0 text-sm"
                   onClick={handleSaveAndExit}
-                  disabled={savingDraft || !property}
+                  disabled={savingDraft}
                 >
                   {savingDraft ? "Sauvegarde…" : <><span className="hidden sm:inline">Enregistrer & quitter</span><span className="sm:hidden">Enregistrer</span></>}
                 </Button>

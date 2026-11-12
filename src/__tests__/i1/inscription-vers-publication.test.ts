@@ -49,7 +49,7 @@ describe("I1, photo demandée avant la publication, plus à l'entrée", () => {
 
   it("le formulaire ne fait plus de la photo un prérequis d'entrée", () => {
     const src = readFileSync("src/pages/CreateSit.tsx", "utf8");
-    const call = src.slice(src.indexOf("const setupState = resolveSetupState({"), src.indexOf("const preflightMissing"));
+    const call = src.slice(src.indexOf("const setupState = resolveSetupState({"), src.indexOf("const preflightSignature"));
     expect(call).toMatch(/hasPhoto: true,/);
   });
 
