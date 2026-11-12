@@ -33,7 +33,7 @@ describe("Menu rangé", () => {
   // Lot ADM14 : au quotidien la vue d'ensemble et les annonces, puis « Chaque semaine ».
   it("vue d'ensemble, annonces, entraide, utilisateurs, puis les écrans de la semaine", () => {
     expect(daily.map((i) => i.label)).toEqual([
-      "Vue d'ensemble", "Annonces", "Entraide", "Utilisateurs", "Messages contact", "Erreurs", "Trafic", "Alma", "Pilotage entraide",
+      "Vue d'ensemble", "Annonces", "Entraide", "Sorties", "Utilisateurs", "Messages contact", "Erreurs", "Trafic", "Alma", "Pilotage entraide",
     ]);
   });
 
@@ -43,7 +43,8 @@ describe("Menu rangé", () => {
     const removed = ["/admin/small-missions?tab=projets", "/admin/analysis-requests", "/admin/hero-weights"];
     for (const to of OLD_MENU.filter((x) => !removed.includes(x))) expect(all.filter((x) => x === to), to).toHaveLength(1);
     for (const to of removed) expect(all, to).not.toContain(to);
-    expect(all).toHaveLength(35);
+    // Lot SORT5 : une entrée de plus, « Sorties », à côté de l'entraide.
+    expect(all).toHaveLength(36);
   });
 
   it("chaque entrée du menu correspond à une route", () => {

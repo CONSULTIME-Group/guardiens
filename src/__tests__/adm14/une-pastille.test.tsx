@@ -154,7 +154,7 @@ describe("menu", () => {
 
   it("Vue d'ensemble, Annonces, Entraide, Utilisateurs, puis Chaque semaine, puis Outils sans pastille", () => {
     expect(daily.map((g) => g.label)).toEqual(["AU QUOTIDIEN", "CHAQUE SEMAINE"]);
-    expect(daily[0].items.map((i) => i.label)).toEqual(["Vue d'ensemble", "Annonces", "Entraide", "Utilisateurs", "Messages contact", "Erreurs"]); // lot ADM20
+    expect(daily[0].items.map((i) => i.label)).toEqual(["Vue d'ensemble", "Annonces", "Entraide", "Sorties", "Utilisateurs", "Messages contact", "Erreurs"]); // lot ADM20
     expect(daily[1].items.map((i) => i.label)).toEqual(["Trafic", "Alma", "Pilotage entraide"]); // lot ADM20 : Affinité aux outils
     expect(all.filter((i) => i.workList).map((i) => i.to)).toEqual(["/admin"]);
     for (const g of tools) for (const i of g.items) expect(i.workList, i.label).toBeFalsy();

@@ -3,7 +3,7 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Users, Megaphone, CalendarCheck, Star, Flag,
   ShieldCheck, Mail, FileText, LogOut, ArrowLeft, MapPin, HelpCircle,
-  Compass, Handshake, CreditCard, MessageSquare, ScrollText, Settings,
+  Compass, Handshake, CalendarHeart, CreditCard, MessageSquare, ScrollText, Settings,
   Lightbulb, AlertTriangle, Bug, Stethoscope, Sprout, BarChart3, Send,
   Sparkles, UserX, HeartHandshake, Building2, Award, MailCheck, Inbox, PawPrint, Scale,
   ChevronLeft, ChevronRight, ChevronDown, ChevronUp,
@@ -50,6 +50,8 @@ const adminNavGroups: NavGroup[] = [
       // Annonces et Entraide : les annonces du site, lues chaque jour (Jérémie, 09/11/2026).
       { to: "/admin/listings", icon: Megaphone, label: "Annonces", news: "listings" },
       { to: "/admin/small-missions", icon: Handshake, label: "Entraide", news: "entraide" },
+      // Lot SORT5 : les sorties se lisent à côté de l'entraide (rubrique « Entraide & sorties »).
+      { to: "/admin/sorties", icon: CalendarHeart, label: "Sorties" },
       { to: "/admin/users", icon: Users, label: "Utilisateurs" },
       // Lot ADM20 : ouverts presque chaque jour (25 et 15 vues en 14 jours, audit du 11/11/2026).
       { to: "/admin/contact-messages", icon: Mail, label: "Messages contact" },

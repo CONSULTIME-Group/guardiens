@@ -228,6 +228,7 @@ const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions")
 const AdminLegal = lazy(() => import("./pages/admin/AdminLegal"), "AdminLegal");
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"), "AdminSettings");
 const AdminContactMessages = lazy(() => import("./pages/admin/AdminContactMessages"), "AdminContactMessages");
+const AdminOutings = lazy(() => import("./pages/admin/AdminOutings"), "AdminOutings");
 const AdminMutualAidPilot = lazy(() => import("./pages/admin/AdminMutualAidPilot"), "AdminMutualAidPilot");
 const AdminSkills = lazy(() => import("./pages/admin/AdminSkills"), "AdminSkills");
 const AdminMassEmails = lazy(() => import("./pages/admin/AdminMassEmails"), "AdminMassEmails");
@@ -624,6 +625,7 @@ const AppRoutes = () => {
 
         <Route path="/admin/faq" element={<AdminFAQ />} />
         <Route path="/admin/small-missions" element={<AdminSmallMissions />} />
+        <Route path="/admin/sorties" element={<AdminOutings />} />
         <Route path="/admin/legal" element={<AdminLegal />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/contact-messages" element={<AdminContactMessages />} />
