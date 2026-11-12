@@ -149,12 +149,15 @@ describe("C1, consentement cookies", () => {
     await freshModule();
     const { CookieConsentBanner, COOKIE_BANNER_TEXT } = await import("@/components/legal/CookieConsentBanner");
     render(<MemoryRouter><CookieConsentBanner /></MemoryRouter>);
-    expect(screen.getByText("Un mot sur les cookies")).toBeTruthy();
+    // Lot COOK1 (12/11/2026) : bandeau compact, le titre n'apparaît qu'une fois « Personnaliser » ouvert.
+    expect(screen.queryByText("Un mot sur les cookies")).toBeNull();
+    expect(screen.getByText("Nous mesurons l'audience et nos publicités, seulement avec votre accord.")).toBeTruthy();
     const actions = screen.getByTestId("cookie-actions").querySelectorAll("button");
     expect(Array.from(actions).map((b) => b.textContent)).toEqual(["Tout accepter", "Tout refuser", "Personnaliser"]);
     const classes = new Set(Array.from(actions).map((b) => b.className));
     expect(classes.size).toBe(1);
     fireEvent.click(screen.getByText("Personnaliser"));
+    expect(screen.getByText("Un mot sur les cookies")).toBeTruthy();
     expect(screen.getByRole("switch", { name: /Mesure d'audience/ }).getAttribute("aria-checked")).toBe("false");
     expect(screen.getByRole("switch", { name: /Mesure des publicités/ }).getAttribute("aria-checked")).toBe("false");
     await act(async () => { fireEvent.click(screen.getByText("Enregistrer mon choix")); });

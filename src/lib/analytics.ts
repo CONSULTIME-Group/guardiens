@@ -40,6 +40,7 @@ export type EventType =
   | "push_offer_postponed"
   | "push_renewed_silently"
   | "signup_role_applied"
+  | "signup_terms_reminder_clicked"            // Lot COOK1 : rappel « Il reste à cocher la case des conditions » touché
   | "arrival_step_viewed"            // Lot 1 arrivée v2 (step C1..P4)
   | "arrival_step_completed"
   | "arrival_p1_resumed_from_create" // Lot C1 : compte v2 incomplet renvoyé de /sits/create vers P1

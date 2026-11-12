@@ -25,7 +25,14 @@ export const COOKIE_BANNER_TEXT = {
   necessaryLabel: "Fonctionnement du site",
   necessaryText: "Connexion, sécurité et mémorisation de ce choix. Toujours actifs.",
   more: "Tout savoir sur les cookies",
+  // Lot COOK1 (12/11/2026) : bandeau compact, une phrase et trois boutons sur une ligne.
+  compactBody: "Nous mesurons l'audience et nos publicités, seulement avec votre accord.",
+  compactMore: "En savoir plus",
+  regionLabel: "Cookies",
 } as const;
+
+/** Trois boutons de même poids : 44 px, même contour, texte sur une ligne à 360 px. */
+const COMPACT_BUTTON = "h-11 w-full whitespace-nowrap rounded-full px-1 text-[13px] font-medium";
 
 /**
  * Bandeau de consentement : en bas d'écran, sans voile ni blocage.
@@ -62,12 +69,49 @@ export function CookieConsentBanner() {
   };
 
   const t = COOKIE_BANNER_TEXT;
+
+  // Lot COOK1 (12/11/2026) : tant que « Personnaliser » n'est pas ouvert, le
+  // bandeau tient en une phrase et trois boutons de même poids sur une ligne.
+  // Mesure du 12/11 à 390 x 844 : l'ancien bandeau faisait 344 px (41 % de
+  // l'écran) et recouvrait le bouton « Continuer » de l'inscription.
+  if (!customizing) {
+    return (
+      <section
+        role="region"
+        aria-label={t.regionLabel}
+        data-testid="cookie-banner"
+        data-compact="true"
+        className="fixed inset-x-0 bottom-0 z-[60] px-3 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] animate-fade-in"
+      >
+        <div className="mx-auto flex max-w-3xl flex-col gap-1.5 rounded-2xl border border-border bg-card p-2.5 text-card-foreground shadow-lg">
+          <p className="text-[13px] leading-[18px] text-muted-foreground font-body">
+            {t.compactBody}{" "}
+            <Link to="/cookies" className="underline underline-offset-2 text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">
+              {t.compactMore}
+            </Link>
+          </p>
+          <div className="grid grid-cols-3 gap-2" data-testid="cookie-actions">
+            <Button variant="outline" className={COMPACT_BUTTON} onClick={() => decide(true, true)}>{t.accept}</Button>
+            <Button variant="outline" className={COMPACT_BUTTON} onClick={() => decide(false, false)}>{t.refuse}</Button>
+            <Button
+              variant="outline"
+              className={COMPACT_BUTTON}
+              onClick={() => { setCustomizing(true); setTimeout(() => titleRef.current?.focus(), 0); }}
+            >
+              {t.customize}
+            </Button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section
       role="region"
       aria-labelledby="cookie-banner-title"
       data-testid="cookie-banner"
-      className="fixed inset-x-0 bottom-0 z-[60] p-3 sm:p-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] animate-fade-in"
+      className="fixed inset-x-0 bottom-0 z-[60] max-h-[100dvh] overflow-y-auto p-3 sm:p-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] animate-fade-in"
     >
       <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-card text-card-foreground shadow-lg p-4 sm:p-5">
         <h2
@@ -85,7 +129,7 @@ export function CookieConsentBanner() {
           </Link>
         </p>
 
-        {customizing && (
+        {(
           <div className="mt-4 space-y-3" data-testid="cookie-customize">
             <div className="flex items-start justify-between gap-4 rounded-xl bg-muted/50 p-3">
               <div>
@@ -114,11 +158,7 @@ export function CookieConsentBanner() {
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2" data-testid="cookie-actions">
           <Button variant="outline" className="w-full" onClick={() => decide(true, true)}>{t.accept}</Button>
           <Button variant="outline" className="w-full" onClick={() => decide(false, false)}>{t.refuse}</Button>
-          {customizing ? (
-            <Button variant="outline" className="w-full" onClick={() => decide(analytics, ads)}>{t.save}</Button>
-          ) : (
-            <Button variant="outline" className="w-full" onClick={() => setCustomizing(true)}>{t.customize}</Button>
-          )}
+          <Button variant="outline" className="w-full" onClick={() => decide(analytics, ads)}>{t.save}</Button>
         </div>
       </div>
     </section>

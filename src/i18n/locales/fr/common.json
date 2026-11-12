@@ -1044,7 +1044,10 @@
     "submit": "Créer mon compte",
     "submitting": "Création...",
     "continue": "Continuer",
-    "terms_required_hint": "Cochez la case pour continuer.",
+    "terms_required_hint": "Cochez cette case pour créer votre compte.",
+    "accept_short": "J'accepte les conditions de Guardiens",
+    "accept_read": "Lire : <1>CGU</1>, <2>CGS</2>, <3>confidentialité</3>",
+    "terms_reminder": "Il reste à cocher la case des conditions",
     "terms_accepted_confirm": "Vous avez accepté les CGU, les CGS et la politique de confidentialité.",
     "terms_accepted_edit": "Modifier",
     "intent_banner": {

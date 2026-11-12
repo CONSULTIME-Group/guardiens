@@ -21,7 +21,7 @@ import { sanitizeRedirect, buildRedirectQuery } from "@/lib/safeRedirect";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent, trackEventWithUserId, mapSignupError } from "@/lib/analytics";
 import { mapAuthError } from "@/lib/authErrorMessages";
-import { Eye, EyeOff, MailCheck, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, MailCheck, ArrowLeft, ArrowUp } from "lucide-react";
 import { InAppBrowserBanner } from "@/components/auth/InAppBrowserBanner";
 import { AuthIllustrationPanel } from "@/components/auth/AuthIllustrationPanel";
 import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
@@ -273,8 +273,8 @@ const Register = () => {
 
   // Garde-fou : les liens /inscription?role=... sautent l'étape 1, on doit donc revérifier ici.
   if (!acceptedTerms) {
-   setTermsHighlighted(true);
-   setFormError(t("register_page.terms_required_hint"));
+   // Lot COOK1 : le message s'affiche sous la case, la page y remonte.
+   focusTerms();
    try { trackEvent("signup_form_blocked", { source: "/inscription", metadata: { reason: "terms_not_accepted", role: selectedRole } }); } catch {}
    return;
   }
@@ -422,14 +422,24 @@ const Register = () => {
   navigate(`/login${qs ? `?${qs}` : ""}`);
  };
 
+  // Lot COOK1 (12/11/2026) : case oubliée, par email comme par Google. Le bloc
+  // passe en rouge, le message s'affiche sous la case, la page y remonte et
+  // la case prend le focus.
+  const focusTerms = () => {
+    setFormError(null);
+    setTermsHighlighted(true);
+    setTimeout(() => {
+      const box = document.getElementById("accept-terms");
+      box?.scrollIntoView({ behavior: "smooth", block: "center" });
+      box?.focus({ preventScroll: true });
+    }, 50);
+  };
+
   const handleGoogleSignUp = async () => {
     if (!acceptedTerms) {
       logOAuthStage("blocked_terms", "/inscription");
-      setFormError(t("register_page.error_terms_google"));
-      setTermsHighlighted(true);
-      setTimeout(() => {
-        document.getElementById("accept-terms")?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 50);
+      // Lot COOK1 : même rappel que par email, sous la case.
+      focusTerms();
       return;
     }
  setIsGoogleLoading(true);
@@ -758,45 +768,56 @@ const Register = () => {
   </button>
   </div>
 
+  <div className="space-y-2">
+  {/* Lot COOK1 (12/11/2026) : toute la ligne est la cible (56 px), case de
+      24 px, liens sur une ligne à part pour que le texte se touche sans
+      ouvrir un lien. Mesure du 12/11 : case de 16 px, 22 blocages en 7 jours. */}
   <div
+    data-testid="terms-block"
     className={cn(
-      "flex items-start gap-3 rounded-lg border p-3 transition-colors",
+      "overflow-hidden rounded-2xl transition-colors",
       termsHighlighted && !acceptedTerms
-        ? "border-destructive bg-destructive/5 animate-in fade-in-0"
-        : "border-border bg-muted/30"
+        ? "border-2 border-destructive bg-destructive/5"
+        : "border border-field bg-card"
     )}
   >
-    <Checkbox
-      id="accept-terms"
-      aria-label="J'accepte les conditions générales d'utilisation, les conditions générales de service et la politique de confidentialité"
-      checked={acceptedTerms}
-      onCheckedChange={(v) => {
-        const checked = v === true;
-        setAcceptedTerms(checked);
-        if (checked) {
-          setTermsHighlighted(false);
-          setFormError(null);
-          try { trackEvent("signup_terms_checked", { source: "/inscription", metadata: { step: 2 } }); } catch {}
-        }
-      }}
-      className="mt-0.5"
-    />
-    <label htmlFor="accept-terms" className="text-sm text-foreground/80 leading-snug cursor-pointer">
+    <label htmlFor="accept-terms" className="flex min-h-[56px] cursor-pointer items-center gap-3 px-3.5 text-[15px] font-medium leading-5 text-foreground">
+      <Checkbox
+        id="accept-terms"
+        aria-label="J'accepte les conditions générales d'utilisation, les conditions générales de service et la politique de confidentialité"
+        aria-describedby={termsHighlighted && !acceptedTerms ? "terms-error" : undefined}
+        aria-invalid={termsHighlighted && !acceptedTerms ? true : undefined}
+        checked={acceptedTerms}
+        onCheckedChange={(v) => {
+          const checked = v === true;
+          setAcceptedTerms(checked);
+          if (checked) {
+            setTermsHighlighted(false);
+            setFormError(null);
+            try { trackEvent("signup_terms_checked", { source: "/inscription", metadata: { step: 2 } }); } catch {}
+          }
+        }}
+        className="m-2.5 h-6 w-6 rounded-md [&_svg]:h-5 [&_svg]:w-5"
+      />
+      <span>{t("register_page.accept_short")}</span>
+    </label>
+    <p className="pb-2.5 pl-[70px] pr-3.5 text-[13px] leading-[18px] text-muted-foreground">
       <Trans
-        i18nKey="register_page.accept_label"
+        i18nKey="register_page.accept_read"
         components={{
-          1: <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
-          2: <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
-          3: <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" />,
+          1: <Link to="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2" />,
+          2: <Link to="/cgs" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2" />,
+          3: <Link to="/confidentialite" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2" />,
         }}
       />
-    </label>
+    </p>
   </div>
   {termsHighlighted && !acceptedTerms && (
-    <p role="alert" className="text-xs text-destructive">
+    <p id="terms-error" role="alert" className="text-sm font-medium leading-5 text-destructive">
       {t("register_page.terms_required_hint")}
     </p>
   )}
+  </div>
 
   <Button
 
@@ -908,6 +929,21 @@ const Register = () => {
            <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
              {isLoading ? t("register_page.submitting") : t("register_page.submit")}
            </Button>
+           {/* Lot COOK1 : tant que la case reste vide après un essai, un rappel touchable reste sous le bouton. */}
+           {termsHighlighted && !acceptedTerms && (
+             <button
+               type="button"
+               data-testid="terms-reminder"
+               onClick={() => {
+                 try { trackEvent("signup_terms_reminder_clicked", { source: "/inscription" }); } catch {}
+                 focusTerms();
+               }}
+               className="mx-auto flex min-h-[44px] w-full items-center justify-center gap-2 text-sm font-medium text-destructive underline underline-offset-2"
+             >
+               <ArrowUp className="h-4 w-4" aria-hidden="true" />
+               {t("register_page.terms_reminder")}
+             </button>
+           )}
   </form>
   )}
 
