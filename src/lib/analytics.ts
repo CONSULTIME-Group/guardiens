@@ -39,6 +39,7 @@ export type EventType =
   | "push_offer_postponed"
   | "push_renewed_silently"
   | "signup_role_applied"
+  | "ads_signup_conversion_sent"                // Lot SRC1 : conversion Google Ads réellement envoyée (role)
   | "arrival_step_viewed"            // Lot 1 arrivée v2 (step C1..P4)
   | "arrival_step_completed"
   | "arrival_p1_resumed_from_create" // Lot C1 : compte v2 incomplet renvoyé de /sits/create vers P1

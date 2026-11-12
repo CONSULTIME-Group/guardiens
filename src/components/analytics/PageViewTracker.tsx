@@ -5,6 +5,7 @@ import { captureUtmFromUrl } from "@/lib/campaignAttribution";
 import { trackGoogleAnalyticsPageView } from "@/lib/cookieConsent";
 import { recordPath } from "@/lib/navHistory";
 import { markNavigation } from "@/lib/perfMarks";
+import { captureSignupSource, maskClickIds } from "@/lib/signupSource";
 
 /**
  * Track une vue de page à chaque changement de route.
@@ -39,6 +40,13 @@ const PageViewTracker = () => {
     // Lot perf 1 : début d'une vue interne pour les jalons de vitesse.
     markNavigation(path);
 
+    // Lot SRC1 : source d'arrivée, retenue à la première page vue de la visite.
+    captureSignupSource({
+      search: location.search,
+      pathname: location.pathname,
+      referrer: typeof document !== "undefined" ? document.referrer : null,
+    });
+
     const now = Date.now();
     if (lastPath.current === path && now - lastEmitAt.current < 1500) return;
 
@@ -49,7 +57,8 @@ const PageViewTracker = () => {
       source: location.pathname,
       metadata: {
         path: location.pathname,
-        search: location.search || undefined,
+        // Lot SRC1 : la valeur d'un identifiant de clic publicitaire n'est jamais stockée.
+        search: maskClickIds(location.search),
         referrer: typeof document !== "undefined" ? document.referrer || undefined : undefined,
       },
     });

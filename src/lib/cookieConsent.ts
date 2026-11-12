@@ -157,13 +157,13 @@ export function disableAdsMeasurement() {
  * propriétaire »), seulement si la mesure publicitaire a été acceptée.
  * Une seule fois par compte : la clé locale évite un second envoi.
  */
-export function reportSignupConversion(userId: string): void {
-  if (typeof window === "undefined") return;
-  if (!userId) return;
-  if (getStoredAdsConsent() !== "granted") return;
+export function reportSignupConversion(userId: string): boolean {
+  if (typeof window === "undefined") return false;
+  if (!userId) return false;
+  if (getStoredAdsConsent() !== "granted") return false;
   const key = `${ADS_REPORTED_PREFIX}${userId}`;
   try {
-    if (key && localStorage.getItem(key)) return;
+    if (key && localStorage.getItem(key)) return false;
   } catch {
     // stockage indisponible : l'envoi reste possible
   }
@@ -171,13 +171,15 @@ export function reportSignupConversion(userId: string): void {
   if (!adsLoaded) initConsentDefaults();
   enableAdsMeasurement();
   const gtag = (window as any).gtag;
-  if (typeof gtag !== "function") return;
+  if (typeof gtag !== "function") return false;
   gtag("event", "conversion", { send_to: SIGNUP_SEND_TO });
   try {
     if (key) localStorage.setItem(key, "1");
   } catch {
     // ignore
   }
+  // Lot SRC1 : vrai quand la conversion est réellement partie.
+  return true;
 }
 
 export function trackGoogleAnalyticsPageView(path: string) {

@@ -13,6 +13,7 @@ import { formatDurationFr, periodLabel, fmtInt } from "@/lib/admin/seoMetrics";
 const AdminAnalytics = lazy(() => import("./AdminAnalytics"), "AdminAnalytics");
 const AdminSEO = lazy(() => import("./AdminSEO"), "AdminSEO");
 const AdminSignupFunnelTab = lazy(() => import("@/components/admin/AdminSignupFunnelTab"), "AdminSignupFunnelTab");
+const SignupSourcesCard = lazy(() => import("@/components/admin/SignupSourcesCard"), "SignupSourcesCard");
 const Step0AbandonsCard = lazy(() => import("@/components/admin/Step0AbandonsCard"), "Step0AbandonsCard");
 const SignupFormSubStepsFunnel = lazy(() => import("@/components/admin/SignupFormSubStepsFunnel"), "SignupFormSubStepsFunnel");
 
@@ -148,6 +149,10 @@ const AdminTraffic = () => {
         </TabsContent>
 
         <TabsContent value="signup-funnel" className="mt-6 space-y-6">
+          {/* Lot SRC1 : inscriptions par canal d'arrivée, comptées depuis profiles. */}
+          <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
+            <SignupSourcesCard />
+          </Suspense>
           <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
             <AdminSignupFunnelTab />
           </Suspense>

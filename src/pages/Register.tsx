@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { resolvePostAuthTarget } from "@/lib/postAuthTarget";
 import { rememberSignupRole, withSignupRoleParam } from "@/lib/signupRole";
+import { deriveSignupChannel, getSignupSource, withSignupSrcParam } from "@/lib/signupSource";
 import { rememberLegalAcceptance } from "@/lib/legalAcceptance";
 import { sanitizeRedirect, buildRedirectQuery } from "@/lib/safeRedirect";
 import { useToast } from "@/hooks/use-toast";
@@ -331,7 +332,7 @@ const Register = () => {
  try {
  trackEventWithUserId(newUserId, "signup_completed", {
  source: "/inscription",
- metadata: { role: selectedRole, user_id: newUserId, auto_confirmed: true },
+ metadata: { role: selectedRole, user_id: newUserId, auto_confirmed: true, channel: deriveSignupChannel(getSignupSource()) },
  });
  } catch {}
  navigate(postAuthTarget);
@@ -346,7 +347,7 @@ const Register = () => {
    localStorage.setItem(`signup_completed_tracked_${newUserId}`, "1");
    trackEventWithUserId(newUserId, "signup_completed", {
     source: "/inscription",
-    metadata: { role: selectedRole, user_id: newUserId, auto_confirmed: false, via: "signup" },
+    metadata: { role: selectedRole, user_id: newUserId, auto_confirmed: false, via: "signup", channel: deriveSignupChannel(getSignupSource()) },
    });
   }
  } catch {}
@@ -443,7 +444,8 @@ const Register = () => {
   if (selectedRole) rememberSignupRole(selectedRole);
   // Lot J1 : la case cochée vaut acceptation, transmise au retour de Google.
   rememberLegalAcceptance("signup_google");
-  const googleRedirectUrl = `${window.location.origin}${selectedRole ? withSignupRoleParam(postAuthTarget, selectedRole) : postAuthTarget}`;
+  // Lot SRC1 : la source d'arrivée voyage dans l'URL de retour, comme le rôle.
+  const googleRedirectUrl = `${window.location.origin}${withSignupSrcParam(selectedRole ? withSignupRoleParam(postAuthTarget, selectedRole) : postAuthTarget)}`;
 
   logOAuthStage("sdk_called", "/inscription", {
  role: selectedRole,
