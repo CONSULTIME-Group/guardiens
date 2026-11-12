@@ -351,6 +351,24 @@
           "sql": "SELECT count(*) = 2 AS ok FROM pg_trigger WHERE tgname IN ('trg_admin_alert_contact_message','trg_admin_alert_signal') AND NOT tgisinternal"
         }
       ]
+    },
+    {
+      "migration": "0142_lm1_date_contenu_pages_villes.sql",
+      "description": "Date de dernier changement de contenu des pages ville, source du lastmod du sitemap",
+      "checks": [
+        {
+          "name": "colonne_date_contenu",
+          "sql": "SELECT count(*) = 1 AS ok FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'seo_city_pages' AND column_name = 'content_updated_at' AND data_type = 'timestamp with time zone'"
+        },
+        {
+          "name": "fonction_date_contenu",
+          "sql": "SELECT position('lm1_date_contenu_pages_villes' IN pg_get_functiondef('public.trg_seo_city_page_content_date()'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "declencheur_date_contenu",
+          "sql": "SELECT count(*) = 1 AS ok FROM pg_trigger WHERE tgname = 'seo_city_pages_content_date' AND tgrelid = 'public.seo_city_pages'::regclass AND NOT tgisinternal"
+        }
+      ]
     }
   ]
 }

@@ -99,7 +99,9 @@ export async function collectSitemapData({ readAll, fetchOrCache, maxUpdatedAtWi
       }))
     ),
     fetchOrCache(
-      "seo_city_pages", cache,
+      // Lot LM1 (12/11/2026) : clé versionnée, les entrées gardées en cache
+      // sans date de contenu sont relues.
+      "seo_city_pages_v2", cache,
       // Tête de cache sur les pages publiées, SANS le filtre noindex : une
       // bascule noindex met à jour updated_at puis sort la ligne de
       // l'ensemble indexable. Une tête filtrée pourrait ne pas bouger et
@@ -107,10 +109,13 @@ export async function collectSitemapData({ readAll, fetchOrCache, maxUpdatedAtWi
       // Le compteur de lignes publiées fait partie de la clé : une
       // dépublication laisse la date max intacte (cas papeete, 24/08/2026).
       cityPagesHead,
-      () => readAll("seo_city_pages", "seo_city_pages", "id, slug, updated_at", "id", q => q.eq("published", true).or("noindex.is.null,noindex.eq.false")),
+      () => readAll("seo_city_pages", "seo_city_pages", "id, slug, updated_at, content_updated_at", "id", q => q.eq("published", true).or("noindex.is.null,noindex.eq.false")),
       rows => rows.map(cp => ({
         loc: `/house-sitting/${cp.slug}`,
-        lastmod: NO_RELIABLE_LASTMOD,
+        // Lot LM1 : content_updated_at avance seulement quand le contenu ou
+        // l'état d'indexation de la page change (migration 0142), jamais sur
+        // un recalcul de compteurs. Vide : lastmod omis.
+        lastmod: normalizeLastmod(cp.content_updated_at, today),
         changefreq: "weekly",
         priority: "0.8",
       }))
