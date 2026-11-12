@@ -23,7 +23,7 @@ import { acquireMemberSendClaim, finishMemberSendClaim, memberSendOutcome, type 
 
 const SITE_URL = 'https://guardiens.fr'
 // Lot W0 : gabarits qui affichent un lien de désinscription à jeton dans leur corps.
-const UNSUBSCRIBE_LINK_TEMPLATES: ReadonlySet<string> = new Set(['owner-no-sit-j21', 'outing-alert'])
+const UNSUBSCRIBE_LINK_TEMPLATES: ReadonlySet<string> = new Set(['owner-no-sit-j21'])
 // Lot SORT4 : l'alerte « nouvelle sortie » a son propre budget, tenu par la
 // base (une par semaine et par membre). Elle reste hors du compteur partagé de
 // la catégorie alert, qui sert les récapitulatifs de gardes, et son bouton de
@@ -1449,7 +1449,7 @@ Deno.serve(async (req) => {
   // (owner-no-sit-j21 seul), même jeton que le pied de page, toujours posé ici
   // et jamais repris de l'appelant. Les autres gabarits reçoivent leurs
   // données inchangées.
-  if (UNSUBSCRIBE_LINK_TEMPLATES.has(templateName)) {
+  if (UNSUBSCRIBE_LINK_TEMPLATES.has(templateName) || templateName === OUTING_ALERT_TEMPLATE) {
     templateData = { ...templateData, unsubscribeAllUrl: `${SITE_URL}/unsubscribe?token=${unsubscribeToken}` }
   }
   templateData = normalizeEmailFirstNames(templateData)

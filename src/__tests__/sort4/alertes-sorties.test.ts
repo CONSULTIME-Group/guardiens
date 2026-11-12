@@ -37,7 +37,7 @@ describe("arrêt des seules alertes sorties", () => {
     expect(read("supabase/functions/_shared/transactional-email-templates/registry.ts")).toContain("'outing-alert': outingAlert");
     expect(template).toContain("Arrêter les alertes sorties");
     expect(template).toContain("/sorties/alertes?token=");
-    expect(sender).toContain("new Set(['owner-no-sit-j21', 'outing-alert'])");
+    expect(sender).toContain("if (UNSUBSCRIBE_LINK_TEMPLATES.has(templateName) || templateName === OUTING_ALERT_TEMPLATE) {");
   });
   it("le bouton de désinscription de la messagerie coupe les sorties, pas le reste", () => {
     expect(sender).toContain("templateName === OUTING_ALERT_TEMPLATE ? '&scope=outing' : ''");
