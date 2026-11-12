@@ -12,8 +12,7 @@ import spotTrajet from "@/assets/missions/spot-trajet-480.webp";
 import spotBricolage from "@/assets/missions/spot-bricolage-480.webp";
 import spotVerger from "@/assets/missions/spot-verger-480.webp";
 
-/** Drapeau de mise en service (feature_flags.sorties). */
-export const OUTINGS_FLAG = "sorties";
+export { OUTINGS_FLAG } from "@/lib/outingsFlag";
 
 export const OUTING_CAPACITY_MIN = 2;
 export const OUTING_CAPACITY_MAX = 20;
@@ -246,6 +245,46 @@ export function outingInsertFromDraft(draft: OutingDraft, organizerId: string) {
   };
 }
 
+const pad = (n: number) => String(n).padStart(2, "0");
+
+/**
+ * Lot SORT2 : brouillon repris d'une sortie existante. « Modifier » garde le
+ * jour et l'heure, « Reproposer » les laisse à choisir.
+ */
+export function draftFromOuting(outing: PublicOuting, opts: { keepDate: boolean }): OutingDraft {
+  const start = new Date(outing.starts_at);
+  const validDate = opts.keepDate && !Number.isNaN(start.getTime());
+  return {
+    title: outing.title,
+    description: outing.description,
+    category: outing.category,
+    date: validDate ? `${start.getFullYear()}-${pad(start.getMonth() + 1)}-${pad(start.getDate())}` : "",
+    time: validDate ? `${pad(start.getHours())}:${pad(start.getMinutes())}` : "",
+    placeKind: outing.place_kind,
+    placeLabel: outing.place_label,
+    city: outing.city,
+    postalCode: outing.postal_code,
+    setting: outing.setting ?? "",
+    capacity: outing.capacity,
+    reserved: outing.reserved,
+    free: outing.participation_eur === null,
+    fee: outing.participation_eur === null ? "" : String(outing.participation_eur).replace(".", ","),
+    agendaConsent: false,
+  };
+}
+
+/** Champs qu'un organisateur modifie sur une sortie publiée (l'accord d'agenda reste celui de la publication). */
+export function outingUpdateFromDraft(draft: OutingDraft) {
+  const { organizer_id: _organizer, agenda_consent: _agenda, ...row } = outingInsertFromDraft(draft, "");
+  return row;
+}
+
+/** Places déjà prises par des inscrits : le total ne descend jamais dessous. */
+export function minCapacityForEdit(outing: Pick<PublicOuting, "taken" | "reserved">, reserved: number): number {
+  const attendees = Math.max(0, outing.taken - outing.reserved);
+  return Math.max(OUTING_CAPACITY_MIN, reserved + Math.max(attendees, 1));
+}
+
 /** Adresse de partage, avec la marque de provenance « lien d'un proche ». */
 export const SHARE_SOURCE_PARAM = "via";
 export const SHARE_SOURCE_VALUE = "proche";
@@ -303,6 +342,13 @@ export const OUTING_COPY = {
   rules: "Une sortie réunit des adultes autour d'un moment partagé. Les ventes, les prestations payées et la garde d'enfants ont leur place ailleurs.",
   agenda: "J'accepte que Guardiens relaie cette sortie sur des agendas locaux gratuits.",
   published: "Votre sortie est en ligne.",
+  updated: "Votre sortie est à jour.",
+  edit: "Modifier",
+  editTitle: "Modifier ma sortie",
+  editIntro: "Un changement de jour, d'heure ou de lieu est signalé aux inscrits dans leur cloche.",
+  repropose: "Reproposer cette sortie",
+  reproposeIntro: "Tout est repris de votre sortie précédente : choisissez le nouveau jour.",
+  capacityFloor: "Des inscrits comptent sur leur place : gardez un total au moins égal aux places prises.",
   shareTitle: "Le lien à envoyer à vos proches",
   shareBody: "Vos proches voient la fiche sans compte. Un compte gratuit suffit pour prendre une place.",
   guest: "Un compte gratuit suffit pour prendre une place : prénom, email, code postal.",

@@ -455,6 +455,24 @@
           "sql": "SELECT count(*) = 1 AS ok FROM public.feature_flags WHERE key = 'sorties'"
         }
       ]
+    },
+    {
+      "migration": "0146_sort2_modification_sortie.sql",
+      "description": "Modification d'une sortie : inscrits prévenus d'un changement de jour ou de lieu, date à venir exigée, sortie annulée figée",
+      "checks": [
+        {
+          "name": "garde_modification",
+          "sql": "SELECT position('sort2_modification_sortie' IN pg_get_functiondef('public.outings_guard_update()'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "declencheur_garde",
+          "sql": "SELECT count(*) = 1 AS ok FROM pg_trigger WHERE tgname = 'trg_outings_guard_update' AND tgrelid = 'public.outings'::regclass AND NOT tgisinternal"
+        },
+        {
+          "name": "declencheur_changement",
+          "sql": "SELECT count(*) = 1 AS ok FROM pg_trigger WHERE tgname = 'trg_outings_notify_change' AND tgrelid = 'public.outings'::regclass AND NOT tgisinternal"
+        }
+      ]
     }
   ]
 }

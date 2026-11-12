@@ -81,6 +81,12 @@ export const leaveOuting = (outingId: string) => action("outing_leave", { p_outi
 export const removeOutingAttendee = (outingId: string, userId: string) => action("outing_remove_attendee", { p_outing: outingId, p_user: userId });
 export const cancelOuting = (outingId: string, note: string) => action("outing_cancel", { p_outing: outingId, p_note: note });
 
+export async function updateOuting(outingId: string, row: Record<string, unknown>): Promise<{ ok: boolean; error: string | null }> {
+  const { data, error } = await db.from("outings").update(row).eq("id", outingId).select("id");
+  if (error) return { ok: false, error: error.message };
+  return { ok: Array.isArray(data) && data.length === 1, error: null };
+}
+
 export async function createOuting(row: Record<string, unknown>): Promise<{ slug: string | null; error: string | null; hint: string | null }> {
   const { data, error } = await db.from("outings").insert(row).select("slug").single();
   if (error) return { slug: null, error: error.message, hint: error.hint ?? null };

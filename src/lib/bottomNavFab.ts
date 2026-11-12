@@ -72,6 +72,10 @@ export interface BottomNavFab {
 }
 
 export function bottomNavFab(path: string, isOwnerView: boolean): BottomNavFab {
+  // Lot SORT2 : sur l'onglet Sorties, le bouton central propose une sortie.
+  if (path === "/sorties" || path === "/sorties/") {
+    return { to: "/sorties/proposer", label: "Proposer", ariaLabel: "Proposer une sortie", icon: "plus" };
+  }
   if (path.startsWith("/petites-missions")) {
     return { to: "/petites-missions/creer", label: "Publier", ariaLabel: "Publier", icon: "plus" };
   }

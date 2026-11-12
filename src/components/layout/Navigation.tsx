@@ -11,6 +11,8 @@ import { useNavBadgeCounts } from "@/hooks/useNavBadgeCounts";
 import { useChromeVisibility } from "./ChromeVisibility";
 import UserMenu from "./UserMenu";
 import { bottomNavFab, isFabHidden } from "@/lib/bottomNavFab";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { OUTINGS_FLAG } from "@/lib/outingsFlag";
 import {
   buildNavGroups,
   flattenNavGroups,
@@ -98,7 +100,9 @@ export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean 
     entraide: missionBadgeCount,
   };
   const isSitterLocked = effectiveRole === "sitter" && !hasAccess;
-  const groups = buildNavGroups(effectiveRole === "owner" ? "owner" : "sitter", isSitterLocked);
+  // Lot SORT2 : libellé « Entraide & sorties » quand les sorties sont ouvertes.
+  const outingsOpen = useFeatureFlag(OUTINGS_FLAG).enabled;
+  const groups = buildNavGroups(effectiveRole === "owner" ? "owner" : "sitter", isSitterLocked, outingsOpen);
 
   // En-tête compact au défilement : quand le menu descend, la bascule de
   // rôle et le bouton d'action primaire se replient ; le logo et l'avatar
@@ -376,8 +380,9 @@ export const BottomNav = () => {
   // Pastille du bouton Plus : somme exacte des pastilles visibles dans la
   // feuille (voir navModel.sheetBadge), sans doublon.
   const isSitterLocked = effectiveRole === "sitter" && !hasAccess;
+  const outingsOpen = useFeatureFlag(OUTINGS_FLAG).enabled;
   const sheetEntries = flattenNavGroups(
-    buildNavGroups(isOwnerView ? "owner" : "sitter", isSitterLocked)
+    buildNavGroups(isOwnerView ? "owner" : "sitter", isSitterLocked, outingsOpen)
   );
   const moreBadge = sheetBadge(navBadges);
 

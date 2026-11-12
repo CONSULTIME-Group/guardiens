@@ -88,6 +88,7 @@ const SortieDetail = () => {
 
   const source = joinSourceFromSearch(location.search);
   const justPublished = searchParams.get("publiee") === "1";
+  const justUpdated = searchParams.get("modifiee") === "1";
   const isOrganizer = !!user?.id && outing?.organizer_id === user.id;
 
   const load = useCallback(async () => {
@@ -248,6 +249,7 @@ const SortieDetail = () => {
         </div>
 
         {justPublished && isOrganizer && <Banner tone="ok" title={OUTING_COPY.published}>{OUTING_COPY.shareBody}</Banner>}
+        {justUpdated && isOrganizer && <Banner tone="ok" title={OUTING_COPY.updated}>{OUTING_COPY.editIntro}</Banner>}
         {!isAuthenticated && state === "open" && (
           <Banner tone="ok" title={`${organizerName} vous invite`}>Guardiens réunit les gens du coin autour de gardes, de coups de main et de sorties. Guardiens est gratuit.</Banner>
         )}
@@ -326,7 +328,13 @@ const SortieDetail = () => {
               </div>
             ))}
             {(state === "open" || state === "full") && (
-              <Button type="button" variant="outline" onClick={() => setCancelOpen(true)} className="h-12 rounded-2xl">Annuler la sortie</Button>
+              <div className="grid grid-cols-2 gap-2">
+                <Button asChild variant="outline" className="h-12 rounded-2xl"><Link to={`/sorties/proposer?modifier=${outing.slug}`}>{OUTING_COPY.edit}</Link></Button>
+                <Button type="button" variant="outline" onClick={() => setCancelOpen(true)} className="h-12 rounded-2xl">Annuler la sortie</Button>
+              </div>
+            )}
+            {(state === "past" || state === "cancelled") && (
+              <Button asChild className="h-12 rounded-2xl text-base" data-testid="outing-repropose"><Link to={`/sorties/proposer?depuis=${outing.slug}`}>{OUTING_COPY.repropose}</Link></Button>
             )}
           </section>
         )}

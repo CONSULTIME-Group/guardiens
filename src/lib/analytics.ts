@@ -21,6 +21,7 @@ export type EventType =
   | "outing_link_shared"
   | "outing_attendee_removed"
   | "outing_cancelled"
+  | "outing_updated"
   // Lot SC3 : question des trajets au moment où elle compte (candidature, page d'annonce).
   | "trips_prompt_seen"
   | "trips_prompt_answered"
