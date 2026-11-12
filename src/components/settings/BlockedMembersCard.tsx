@@ -70,13 +70,13 @@ const BlockedMembersCard = () => {
       <div>
         <h3 className="font-heading font-semibold text-foreground text-sm">Membres bloqués</h3>
         <p className="text-xs text-muted-foreground mt-1">
-          Un membre bloqué ne peut plus vous écrire ni voir vos publications. Vous pouvez le débloquer à tout moment.
+          Bloquer un membre ferme ses messages vers vous et lui masque vos publications. Vous pouvez le débloquer à tout moment.
         </p>
       </div>
       {loading ? (
         <p className="text-sm text-muted-foreground">Chargement…</p>
       ) : rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Vous n'avez bloqué aucun membre.</p>
+        <p className="text-sm text-muted-foreground">Votre liste de membres bloqués est vide.</p>
       ) : (
         <ul className="space-y-2">
           {rows.map((r) => (

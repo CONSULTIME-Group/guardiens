@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import {
   User, Bell, Shield, Trash2, Download, Sun, Moon, Monitor, ArrowRight,
   CreditCard, HelpCircle, Eye, EyeOff, AlertTriangle, LogOut, Layers,
-  Loader2, CheckCircle2, MessageCircle,
+  Loader2, CheckCircle2, MessageCircle, Handshake, Zap, MapPin, Smartphone, ChevronRight, ArrowLeft,
 } from "lucide-react";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import ActiveRolesSection from "@/components/settings/ActiveRolesSection";
@@ -37,6 +37,7 @@ import { Link } from "react-router-dom";
 import { useAlmaFrequency, type AlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { useAlmaHidden } from "@/hooks/useAlmaHidden";
 import InstallAppSection from "@/components/settings/InstallAppSection";
+import { useIsMobile } from "@/hooks/use-mobile";
 import PushNotificationsSection from "@/components/settings/PushNotificationsSection";
 import AdminTeamAlertsSection from "@/components/settings/AdminTeamAlertsSection";
 
@@ -71,25 +72,25 @@ interface SectionDef {
   id: SectionId;
   label: string;
   icon: React.ElementType;
-  group: "Compte" | "Préférences" | "Mes espaces" | "Aide & données" | "Zone dangereuse";
+  group: "Compte" | "Préférences" | "Mes espaces" | "Aide et données" | "Suppression";
 }
 
 const SECTIONS: SectionDef[] = [
   { id: "account", label: "Mon compte", icon: User, group: "Compte" },
-  { id: "security", label: "Sécurité & identité", icon: Shield, group: "Compte" },
+  { id: "security", label: "Sécurité et identité", icon: Shield, group: "Compte" },
   { id: "spaces", label: "Mes espaces", icon: Layers, group: "Mes espaces" },
-  { id: "owner-pitch", label: "Contacts spontanés", icon: Shield, group: "Mes espaces" },
-  { id: "emergency", label: "Gardien d'urgence", icon: Shield, group: "Mes espaces" },
+  { id: "owner-pitch", label: "Propositions de garde", icon: Handshake, group: "Mes espaces" },
+  { id: "emergency", label: "Gardien d'urgence", icon: Zap, group: "Mes espaces" },
+  { id: "billing", label: "Gratuité", icon: CreditCard, group: "Mes espaces" },
   { id: "notifications", label: "Notifications", icon: Bell, group: "Préférences" },
-  { id: "alerts", label: "Alertes annonces", icon: Bell, group: "Préférences" },
+  { id: "alerts", label: "Alertes annonces", icon: MapPin, group: "Préférences" },
   { id: "privacy", label: "Confidentialité", icon: EyeOff, group: "Préférences" },
   { id: "appearance", label: "Apparence", icon: Sun, group: "Préférences" },
-  { id: "installation", label: "Installer Guardiens", icon: Download, group: "Préférences" },
-  { id: "alma", label: "Fréquence d'Alma", icon: MessageCircle, group: "Préférences" },
-  { id: "billing", label: "Gratuité", icon: CreditCard, group: "Mes espaces" },
-  { id: "data", label: "Mes données", icon: Download, group: "Aide & données" },
-  { id: "help", label: "Aide & liens utiles", icon: HelpCircle, group: "Aide & données" },
-  { id: "danger", label: "Zone dangereuse", icon: AlertTriangle, group: "Zone dangereuse" },
+  { id: "installation", label: "Installer Guardiens", icon: Smartphone, group: "Préférences" },
+  { id: "alma", label: "Alma", icon: MessageCircle, group: "Préférences" },
+  { id: "data", label: "Mes données", icon: Download, group: "Aide et données" },
+  { id: "help", label: "Aide et liens utiles", icon: HelpCircle, group: "Aide et données" },
+  { id: "danger", label: "Supprimer mon compte", icon: AlertTriangle, group: "Suppression" },
 ];
 
 const Settings = () => {
@@ -98,8 +99,18 @@ const Settings = () => {
   const [prefs, setPrefs] = useState<NotifPrefs>(defaultPrefs);
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<string | null>(null);
-  const [activeSection, setActiveSection] = useState<SectionId>("account");
-  const [searchParams] = useSearchParams();
+  const [activeSection, setActiveSectionState] = useState<SectionId>("account");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isMobile = useIsMobile();
+  // Lot PAR2 : l'adresse suit la section (retour du téléphone, rechargement,
+  // partage). Sur téléphone, sans section dans l'adresse, la liste s'affiche.
+  const sectionParam = searchParams.get("section") || searchParams.get("tab");
+  const hasSectionParam = !!sectionParam && SECTIONS.some((s) => s.id === sectionParam);
+  const showSectionList = isMobile && !hasSectionParam;
+  const setActiveSection = (id: SectionId) => {
+    setActiveSectionState(id);
+    setSearchParams({ section: id });
+  };
   const proSectionRef = useRef<HTMLDivElement | null>(null);
   const identitySectionRef = useRef<HTMLDivElement | null>(null);
 
@@ -108,7 +119,7 @@ const Settings = () => {
     const param = (searchParams.get("section") || searchParams.get("tab")) as SectionId | null;
     const valid: SectionId[] = SECTIONS.map((s) => s.id);
     if (param && valid.includes(param)) {
-      setActiveSection(param);
+      setActiveSectionState(param);
       const focus = searchParams.get("focus");
       if (focus === "pro") {
         setTimeout(() => proSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
@@ -196,6 +207,7 @@ const Settings = () => {
 
   const savePrefs = async (updated: Partial<NotifPrefs>) => {
     if (!user) return;
+    const previousPrefs = prefs;
     const newPrefs = { ...prefs, ...updated };
     setPrefs(newPrefs);
     const key = Object.keys(updated)[0];
@@ -217,7 +229,13 @@ const Settings = () => {
       } as any);
     }
     setSavingKey(null);
-    if (error) toast.error("Erreur lors de la sauvegarde");
+    // Lot PAR1 : l'écran dit l'état réel. Échec = retour à l'ancien réglage.
+    if (error) {
+      setPrefs(previousPrefs);
+      toast.error("Ce réglage reste comme avant : l'enregistrement a échoué. Réessayez dans un instant.");
+    } else {
+      toast.success("Réglage enregistré");
+    }
   };
 
   const handleMasterToggle = async (v: boolean) => {
@@ -472,37 +490,51 @@ const Settings = () => {
             </nav>
           </aside>
 
-          {/* Tabs, mobile */}
-          <div className="md:hidden mb-4 -mx-4 px-4 overflow-x-auto">
-            <div className="flex gap-1 pb-2 w-max">
-              {SECTIONS.map((s) => {
-                const Icon = s.icon;
-                const isActive = activeSection === s.id;
-                const isDanger = s.id === "danger";
-                return (
-                  <button
-                    key={s.id}
-                    onClick={() => setActiveSection(s.id)}
-                    aria-current={isActive ? "page" : undefined}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                      isActive
-                        ? isDanger
-                          ? "bg-destructive text-destructive-foreground"
-                          : "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    {s.label}
-                  </button>
-                );
-              })}
+          {/* Lot PAR2, téléphone : liste des sections, puis la section seule. */}
+          {showSectionList ? (
+            <nav aria-label="Navigation des paramètres" data-testid="settings-section-list" className="md:hidden space-y-5">
+              {Object.entries(groupedSections).map(([group, items]) => (
+                <div key={group}>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">{group}</p>
+                  <ul className="rounded-xl border border-border bg-card divide-y divide-border overflow-hidden">
+                    {items.map((s) => {
+                      const Icon = s.icon;
+                      const isDanger = s.id === "danger";
+                      return (
+                        <li key={s.id}>
+                          <button
+                            type="button"
+                            onClick={() => setActiveSection(s.id)}
+                            className={`w-full min-h-[52px] flex items-center gap-3 px-4 py-3 text-left text-[15px] font-medium ${isDanger ? "text-destructive" : "text-foreground"}`}
+                          >
+                            <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
+                            <span className="flex-1 min-w-0">{s.label}</span>
+                            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </nav>
+          ) : (
+            <div className="md:hidden mb-3">
+              <button
+                type="button"
+                data-testid="settings-back-to-list"
+                onClick={() => setSearchParams({})}
+                className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-primary"
+              >
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                Tous les paramètres
+              </button>
             </div>
-          </div>
+          )}
 
           {/* Content */}
-          <main className="min-w-0">
-            <div className="rounded-xl border border-border bg-card p-5 md:p-7" aria-live="polite">
+          <main className={`min-w-0 ${showSectionList ? "hidden md:block" : ""}`} data-settings-main>
+            <div className="rounded-xl border border-border bg-card p-5 md:p-7">
               {renderSection(activeSection)}
               {activeSection === "security" && (
                 <>
@@ -650,7 +682,7 @@ const AccountSection = ({ user, profileHref, newEmail, setNewEmail, currentPassw
         <Label htmlFor="new-email">Modifier l'email</Label>
         <Input id="new-email" type="email" placeholder="nouvelle@adresse.com"
           value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
-        <Input id="current-pw-email" type="password" placeholder="Mot de passe actuel"
+        <Input id="current-pw-email" type="password" aria-label="Mot de passe actuel" placeholder="Mot de passe actuel"
           value={currentPasswordForEmail} onChange={(e) => setCurrentPasswordForEmail(e.target.value)} autoComplete="current-password" />
         <Button onClick={onSubmitEmail} disabled={!newEmail || !currentPasswordForEmail} size="sm">
           Envoyer le lien de confirmation
@@ -680,7 +712,7 @@ const SecuritySection = ({
 
   return (
     <section>
-      <SectionHeader icon={Shield} title="Sécurité" description="Mot de passe, sessions actives, vérification d'identité." />
+      <SectionHeader icon={Shield} title="Sécurité et identité" description="Mot de passe, sessions actives, vérification d'identité." />
 
       <div className="space-y-6">
         <div className="space-y-3">
@@ -690,7 +722,7 @@ const SecuritySection = ({
               value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)}
               autoComplete="current-password" />
             <button type="button" onClick={() => setShowCurrent(!showCurrent)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-0 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center text-muted-foreground hover:text-foreground"
               aria-label={showCurrent ? "Masquer" : "Afficher"}>
               {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -702,7 +734,7 @@ const SecuritySection = ({
               value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
               autoComplete="new-password" />
             <button type="button" onClick={() => setShowNew(!showNew)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-0 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center text-muted-foreground hover:text-foreground"
               aria-label={showNew ? "Masquer" : "Afficher"}>
               {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -721,7 +753,7 @@ const SecuritySection = ({
             </div>
           )}
 
-          <Input type={showNew ? "text" : "password"} placeholder="Confirmer le nouveau mot de passe"
+          <Input type={showNew ? "text" : "password"} aria-label="Confirmer le nouveau mot de passe" placeholder="Confirmer le nouveau mot de passe"
             value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
             autoComplete="new-password" />
 
@@ -761,10 +793,10 @@ const NotificationsSection = ({ prefs, savingKey, allNotifsOn, onMasterToggle, o
     <div className="space-y-4">
       <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3">
         <div>
-          <Label className="text-sm font-medium">Tout activer / désactiver</Label>
+          <Label htmlFor="email-all" className="text-sm font-medium">Tous les emails</Label>
           <p className="text-xs text-muted-foreground">Bascule rapide pour tous les emails ci-dessous.</p>
         </div>
-        <Switch checked={allNotifsOn} onCheckedChange={onMasterToggle} />
+        <Switch id="email-all" checked={allNotifsOn} onCheckedChange={onMasterToggle} />
       </div>
 
       {([
@@ -775,11 +807,11 @@ const NotificationsSection = ({ prefs, savingKey, allNotifsOn, onMasterToggle, o
         { key: "email_review_prompts", label: "Avis à laisser" },
       ] as const).map(({ key, label }) => (
         <div key={key} className="flex items-center justify-between">
-          <Label className="text-sm">
+          <Label htmlFor={`pref-${key}`} className="text-sm">
             {label}
             {savingKey === key && <span className="ml-2 text-xs text-muted-foreground">Enregistrement…</span>}
           </Label>
-          <Switch checked={prefs[key]} onCheckedChange={(v) => onSave({ [key]: v })} />
+          <Switch id={`pref-${key}`} checked={prefs[key]} onCheckedChange={(v) => onSave({ [key]: v })} />
         </div>
       ))}
 
@@ -791,7 +823,7 @@ const NotificationsSection = ({ prefs, savingKey, allNotifsOn, onMasterToggle, o
           <p className="text-xs text-muted-foreground">Un email par conversation au plus sur cette durée.</p>
         </div>
         <Select value={prefs.message_email_delay} onValueChange={(v) => onSave({ message_email_delay: v })}>
-          <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-48" aria-label="Rythme des emails de messages"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="30min">Toutes les 30 min</SelectItem>
             <SelectItem value="1h">Toutes les heures</SelectItem>
@@ -802,7 +834,7 @@ const NotificationsSection = ({ prefs, savingKey, allNotifsOn, onMasterToggle, o
       </div>
 
       <div className="pt-3 border-t border-border">
-        <Button variant="link" size="sm" className="px-0 gap-1" asChild>
+        <Button variant="link" size="sm" className="px-0 gap-1 min-h-[44px]" asChild>
           <Link to="/email-preferences">
             Voir tous les types d'emails
             <ArrowRight className="h-3.5 w-3.5" />
@@ -883,7 +915,7 @@ const PrivacySection = ({ prefs, onSave }: any) => (
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <Label className="text-sm">Qui peut voir mon profil</Label>
         <Select value={prefs.profile_visibility} onValueChange={(v) => onSave({ profile_visibility: v })}>
-          <SelectTrigger className="w-full sm:w-56"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-56" aria-label="Qui peut voir mon profil"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous les utilisateurs</SelectItem>
             <SelectItem value="verified">Utilisateurs vérifiés</SelectItem>
@@ -892,8 +924,8 @@ const PrivacySection = ({ prefs, onSave }: any) => (
       </div>
 
       <div className="flex items-center justify-between">
-        <Label className="text-sm">Afficher ma dernière connexion</Label>
-        <Switch checked={prefs.show_last_seen} onCheckedChange={(v) => onSave({ show_last_seen: v })} />
+        <Label htmlFor="pref-show-last-seen" className="text-sm">Afficher ma dernière connexion</Label>
+        <Switch id="pref-show-last-seen" checked={prefs.show_last_seen} onCheckedChange={(v) => onSave({ show_last_seen: v })} />
       </div>
 
       <BlockedMembersCard />
@@ -905,7 +937,7 @@ const ThemeSection = () => {
   const { theme, setTheme } = useTheme();
   return (
     <section>
-      <SectionHeader icon={Sun} title="Apparence" description="Le mode sombre n'est pas disponible sur certaines pages stratégiques." />
+      <SectionHeader icon={Sun} title="Apparence" description="Certaines pages gardent toujours le mode clair." />
       <ToggleGroup type="single" value={theme} onValueChange={(v) => v && setTheme(v as any)}>
         <ToggleGroupItem value="light" aria-label="Mode clair" className="gap-2">
           <Sun className="h-4 w-4" /> Clair
@@ -925,12 +957,12 @@ const ALMA_OPTIONS: { value: AlmaFrequency; label: string; description: string }
   {
     value: "silent",
     label: "Silencieuse",
-    description: "Alma n'intervient jamais spontanément. Vous restez maître du tempo.",
+    description: "Alma répond quand vous l'appelez. Vous restez maître du tempo.",
   },
   {
     value: "low",
     label: "Peu bavarde",
-    description: "Seulement l'essentiel. Uniquement des conseils utiles et contextuels, jamais d'anecdote ni d'humour.",
+    description: "Seulement l'essentiel : des conseils utiles, liés à ce que vous faites.",
   },
   {
     value: "balanced",
@@ -1089,7 +1121,7 @@ const AlmaFrequencySection = () => {
         <SectionHeader
           icon={MessageCircle}
           title="Types de conseils"
-          description="Choisissez les catégories qu'Alma peut vous partager. Une catégorie décochée n'apparaîtra plus, ni spontanément, ni à la demande."
+          description="Choisissez les catégories qu'Alma peut vous partager. Une catégorie décochée reste silencieuse, y compris quand vous sollicitez Alma."
         />
         <div className="space-y-5" aria-busy={!mutedLoaded}>
           {ALMA_CATEGORY_GROUPS.map((group) => (
@@ -1161,7 +1193,7 @@ const BillingSection = ({ user }: { user: any }) => {
 
         <div className="rounded-lg border border-border bg-muted/30 p-4">
           <p className="text-sm font-medium">Entraide</p>
-          <p className="text-xs text-muted-foreground mt-1">L'entraide coûte 0 €, aucune commission prélevée.</p>
+          <p className="text-xs text-muted-foreground mt-1">L'entraide coûte 0 €, commission comprise.</p>
         </div>
 
         <div className="flex flex-wrap gap-2 pt-2">
@@ -1192,7 +1224,7 @@ const DataSection = ({ onExport, exporting }: any) => (
 
 const HelpSection = () => (
   <section>
-    <SectionHeader icon={HelpCircle} title="Aide & liens utiles" description="Documentation, conditions et présentation de la plateforme." />
+    <SectionHeader icon={HelpCircle} title="Aide et liens utiles" description="Documentation, conditions et présentation de la plateforme." />
     <ul className="space-y-1">
       {[
         { to: "/dashboard?tour=true", label: "Revoir la présentation de Guardiens" },
@@ -1223,7 +1255,7 @@ const DangerSection = ({ user, activeCommitmentsCount, onRequestDelete }: any) =
     <section className="rounded-xl border border-destructive/30 bg-destructive/5 -m-1 p-5">
       <div className="flex items-center gap-2 mb-3">
         <AlertTriangle className="h-5 w-5 text-destructive" />
-        <h2 className="font-heading text-lg font-semibold text-destructive">Zone dangereuse</h2>
+        <h2 className="font-heading text-lg font-semibold text-destructive">Supprimer mon compte</h2>
       </div>
       <p className="text-sm text-foreground/80 mb-4">
         La suppression de votre compte est <strong>immédiate et irréversible</strong>. Vos données personnelles sont effacées sur-le-champ.

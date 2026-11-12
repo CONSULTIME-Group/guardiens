@@ -1404,3 +1404,16 @@ html[data-keyboard-open] [data-guardiens-sheet="top"] {
     min-height: 44px;
   }
 }
+
+/* Lot PAR1 (12/11/2026) : dans Paramètres, sous 768 px, boutons, champs et
+   listes déroulantes mesurent 44 px de haut au moins. Interrupteurs, cases et
+   boutons radio gardent leur taille. Mesure du 12/11 à 390 px : 35 cibles
+   sous 44 px dans le contenu des 15 sections. */
+@media (max-width: 767px) {
+  [data-settings-main] button:not([role="switch"]):not([role="checkbox"]):not([role="radio"]),
+  [data-settings-main] a[role="button"],
+  [data-settings-main] input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  [data-settings-main] [role="combobox"] {
+    min-height: 44px;
+  }
+}

@@ -181,7 +181,7 @@ const AlertsSection = ({ user }: { user: any }) => {
       <section>
         <div className="flex items-center gap-2 mb-1">
           <MapPin className="h-5 w-5 text-primary" />
-          <h2 className="font-heading text-lg font-semibold">Alertes annonces et missions</h2>
+          <h2 className="font-heading text-lg font-semibold">Alertes annonces</h2>
         </div>
         <p className="text-sm text-muted-foreground mb-4">
           Recevez un email quand de nouvelles annonces apparaissent dans vos zones configurées.
@@ -199,7 +199,7 @@ const AlertsSection = ({ user }: { user: any }) => {
             <div className="space-y-3">
               {alertes.map((alerte) => (
                 <div key={alerte.id} className="bg-card border rounded-lg p-4 flex items-start gap-4">
-                  <Switch checked={alerte.active} onCheckedChange={() => handleToggleActive(alerte)} />
+                  <Switch aria-label={`Alerte ${alerte.label || "sans nom"}`} checked={alerte.active} onCheckedChange={() => handleToggleActive(alerte)} />
                   <div className="flex-1 min-w-0">
                     {editingLabelId === alerte.id ? (
                       <Input autoFocus value={editingLabelValue}
@@ -382,7 +382,7 @@ const AlertsSection = ({ user }: { user: any }) => {
               Chaque lundi matin, découvrez les membres disponibles près de chez vous et leurs compétences.
             </p>
           </div>
-          <Switch checked={autourDeVous} onCheckedChange={handleAutourToggle} disabled={loadingAutour} />
+          <Switch aria-label="Membres disponibles pour aider" checked={autourDeVous} onCheckedChange={handleAutourToggle} disabled={loadingAutour} />
         </div>
         {autourDeVous && (
           <p className="text-xs text-muted-foreground mt-2">
