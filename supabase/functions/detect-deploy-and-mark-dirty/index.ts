@@ -62,7 +62,14 @@ const SITE = "https://guardiens.fr";
 // 13/10/2026 (lot PR1) : 24 h -> 72 h. Avec une mise en ligne par jour, 24 h
 // relancait une vague quotidienne. L'expiration du cache Prerender est de
 // 7 jours : 72 h suffit a propager un gabarit bien avant cette echeance.
-const MIN_MARK_INTERVAL_HOURS = 72;
+// 12/11/2026 (lot PR5) : 72 h -> 168 h (7 jours). Trois vagues lues du 06/11
+// au 12/11/2026 (343, 493 et 494 pages), 72 heures d'ecart a chaque fois, soit
+// pres de 4 900 rendus par mois. Prerender refait lui-meme chaque copie 168 h
+// apres son dernier rendu (lu le 12/11/2026 sur 1 000 fiches du cache :
+// next_cache_at = last_refresh + 168 h) : un gabarit atteint donc toutes les
+// copies en 7 jours au plus, vague ou non. Une correction urgente passe par
+// une relance ciblee (file seo_url_outbox) ou par le mode force du detecteur.
+const MIN_MARK_INTERVAL_HOURS = 168;
 
 
 /**
@@ -133,8 +140,14 @@ export function extractBundleFingerprint(html: string): string | null {
  * cache Prerender est a 7 jours : marquer a 5 jours garantit un
  * rafraichissement avant expiration, avec deux jours de marge pour
  * l'ecoulement de la file (50 pages par passage).
+ *
+ * 12/11/2026 (lot PR5) : 5 -> 14 jours. A l'expiration, Prerender refait la
+ * copie de lui-meme (voir MIN_MARK_INTERVAL_HOURS) : le filet a 5 jours
+ * devancait ce rendu automatique et le remplacait par un rendu a nous tous les
+ * 5 jours. A 14 jours, il reste un vrai filet, pour le cas ou le rendu
+ * automatique de Prerender ne passerait pas.
  */
-const FAMILY_MAX_AGE_DAYS = 5;
+const FAMILY_MAX_AGE_DAYS = 14;
 
 /** Fichier d'empreintes emis au build par scripts/vite-plugin-route-hashes.mjs. */
 const ROUTE_HASHES_URL = `${SITE}/route-hashes.json`;
