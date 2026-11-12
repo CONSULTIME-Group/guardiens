@@ -123,6 +123,7 @@ const ALMA_SIGNED_TEMPLATES = new Set<string>([
   'sitter-daily-digest',
   'mission-daily-digest',
   'sit-draft-reminder',
+  'sit-draft-almost-ready',
   'owner-no-sit-j3',
   'owner-no-sit-j21',
 ])
@@ -625,6 +626,43 @@ Deno.serve(async (req) => {
       logMetadata = { ...logMetadata, sit_id: sitId, owner_id: draft.user_id, reminder_stage: idempotencyKey.endsWith('-2') ? 2 : 1 }
     } catch (error) {
       console.error('Draft reminder verification failed', error)
+      return new Response(JSON.stringify({ error: 'draft_verification_unavailable' }), {
+        status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+  }
+
+  // Lot REL1 : un brouillon presque prêt se relit au moment réel de l'envoi
+  // (report compris). Publié, supprimé ou date passée entre-temps : rien ne part.
+  if (templateName === 'sit-draft-almost-ready') {
+    try {
+      const sitId = templateData.sitId
+      if (typeof sitId !== 'string' || !/^[0-9a-f-]{36}$/i.test(sitId)) throw new Error('draft_id_required')
+      const { data: draft, error: draftError } = await supabase.from('sits')
+        .select('id, user_id, status, title, city, start_date, end_date, absence_reason, sitter_expectations, cover_photo_url')
+        .eq('id', sitId).maybeSingle()
+      if (draftError) throw draftError
+      const today = new Date().toISOString().slice(0, 10)
+      if (!draft || draft.status !== 'draft' || !draft.start_date || draft.start_date < today) {
+        if (sourceQueueId) {
+          const { error } = await supabase.from('email_deferred_queue')
+            .update({ status: 'abandoned', last_error: 'draft_no_longer_relevant' }).eq('id', sourceQueueId)
+          if (error) throw error
+        }
+        const { error: abandonLogError } = await supabase.from('email_send_log').insert({
+          message_id: messageId, template_name: templateName, recipient_email: effectiveRecipient,
+          status: 'abandoned', metadata: { ...logMetadata, idempotency_key: idempotencyKey, sit_id: sitId, abandon_reason: 'draft_no_longer_relevant' },
+        })
+        if (abandonLogError) console.error('email_send_log insert failed (almost ready abandoned)', { code: abandonLogError.code })
+        return new Response(JSON.stringify({ success: true, skipped: true, abandoned: true, reason: 'draft_no_longer_relevant' }), {
+          status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      const missingItems = await loadMissingDraftItems(supabase, draft)
+      templateData = { ...templateData, title: draft.title, missingItems, resumeUrl: draftReminderUrl(sitId, missingItems) }
+      logMetadata = { ...logMetadata, sit_id: sitId, owner_id: draft.user_id }
+    } catch (error) {
+      console.error('Almost ready draft verification failed', error)
       return new Response(JSON.stringify({ error: 'draft_verification_unavailable' }), {
         status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })

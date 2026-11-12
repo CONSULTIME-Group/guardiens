@@ -431,6 +431,8 @@ export const SETTING_LABELS: Dict = {
   affinity_min_common_criteria: "Affinité, critères communs minimum",
   affinity_min_score_percent: "Affinité, score minimum",
   close_orphan_emails: "Emails de clôture des candidatures orphelines",
+  rel1_draft_almost_ready: "Email « Votre annonce est presque prête »",
+  rel1_owner_silent: "Seconde relance du propriétaire et message au candidat",
   cp_relance_max: "Relances du code postal, maximum",
   mandatory_affinity_onboarding: "Questionnaire d'affinité obligatoire",
   species_filter_blocking: "Filtre d'espèces bloquant",

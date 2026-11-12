@@ -35,6 +35,7 @@ export const TEMPLATE_NOTIFICATION_PREFERENCE: Readonly<Record<string, Notificat
   "new-application": "email_new_application",
   "first-application-received": "email_new_application",
   "owner-pending-application-nudge": "email_new_application",
+  "owner-pending-applications-second-nudge": "email_new_application",
   "new-message": "email_messages",
   "unread-messages-reminder": "email_messages",
   "sit-reminder-j7": "email_reminders",

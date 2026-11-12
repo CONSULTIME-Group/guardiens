@@ -13,6 +13,8 @@ import {
   classifyTransactionalResponse, DRAFT_REMINDER_SELECT, DRAFT_REMINDER_TEMPLATE, evaluateDraftReminder,
 } from "../_shared/draft-reminder-eligibility.ts";
 import { withCronRunLog } from "../_shared/cron-run-log.ts";
+import { departureHoldsPublishAsk, loadLastDepartureAnswer } from "../_shared/owner-sequence-rules.ts";
+import { readFlag, REL1_FLAG_DRAFT, runAlmostReadySweep, type SendRequest } from "../_shared/rel1-sweeps.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,6 +22,44 @@ const corsHeaders = {
 };
 
 const MAX_PER_RUN = 25;
+
+// Lot REL1 : second passage « presque prêt », un seul email par annonce, pour
+// les brouillons que la relance ci-dessous ne couvre plus (annonce déjà
+// publiée une fois, plafond de deux relances atteint). Drapeau
+// rel1_draft_almost_ready éteint : la liste est calculée et rendue, rien ne part.
+// deno-lint-ignore no-explicit-any
+async function almostReadyPass(supabase: any, now: number, alreadyServed: ReadonlySet<string>) {
+  try {
+    const send = async (request: SendRequest) => {
+      const res = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-transactional-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}` },
+        body: JSON.stringify(request),
+      });
+      return classifyTransactionalResponse(res.ok, await res.json().catch(() => null));
+    };
+    return await runAlmostReadySweep({
+      client: supabase,
+      enabled: await readFlag(supabase, REL1_FLAG_DRAFT),
+      send,
+      loadMissing: (draft) => loadMissingDraftItems(supabase, draft as Record<string, unknown>),
+      resumeUrl: draftReminderUrl,
+      departureHeld: async (ownerId) => departureHoldsPublishAsk(await loadLastDepartureAnswer(supabase, ownerId), new Date(now)),
+      alreadyServed,
+    });
+  } catch (e) {
+    console.error("[sit-draft-reminder] almost ready pass failed", e);
+    return { mode: "error", error: (e as Error)?.message ?? "unknown" };
+  }
+}
+
+/** Champs simples du second passage, lisibles dans cron_run_log. */
+function almostReadyMetrics(r: Record<string, unknown>) {
+  return {
+    almost_ready_mode: r.mode, almost_ready_detected: r.detected ?? 0, almost_ready_eligible: r.eligible ?? 0,
+    almost_ready_sent: r.sent ?? 0, almost_ready_sit_ids: r.sit_ids ?? "",
+  };
+}
 
 // Règles d'admissibilité (jamais publié, réponse de départ, 48 heures après
 // un email de la séquence, deux relances au plus, 7 jours, préférences,
@@ -73,7 +113,8 @@ Deno.serve(withCronRunLog("send-sit-draft-reminder", async (req) => {
   }
 
   if (!drafts || drafts.length === 0) {
-    return new Response(JSON.stringify({ ok: true, sent: 0, skipped: 0 }), {
+    const almostReady = await almostReadyPass(supabase, now, new Set());
+    return new Response(JSON.stringify({ ok: true, sent: 0, skipped: 0, ...almostReadyMetrics(almostReady), almost_ready: almostReady }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -162,8 +203,9 @@ Deno.serve(withCronRunLog("send-sit-draft-reminder", async (req) => {
     }
   }
 
+  const almostReady = await almostReadyPass(supabase, now, sentToday);
   return new Response(
-    JSON.stringify({ ok: true, sent, deferred, skipped, held, total: drafts.length, errors_count: errors.length, errors, skip_reasons: skipReasons }),
+    JSON.stringify({ ok: true, sent, deferred, skipped, held, total: drafts.length, errors_count: errors.length, ...almostReadyMetrics(almostReady), errors, skip_reasons: skipReasons, almost_ready: almostReady }),
     { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
   );
 }));

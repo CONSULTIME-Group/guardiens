@@ -16,6 +16,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun, type CronRun } from "../_shared/cron-run-log.ts";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 import { createReminderSlot } from "../_shared/reminder-daily-slot.ts";
+import {
+  readFlag, REL1_FLAG_SILENT, runOwnerSilentSweep, runSecondNudgeSweep, type SendRequest,
+} from "../_shared/rel1-sweeps.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -552,8 +555,66 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ── Balayages 3 et 4 (lot REL1) : seconde relance du propriétaire à 7
+    // jours (une par annonce), puis message unique au candidat et mention à
+    // 10 jours. Drapeau rel1_owner_silent éteint : listes calculées, rien ne
+    // part et rien n'est écrit.
+    const rel1Enabled = await readFlag(serviceClient, REL1_FLAG_SILENT);
+    const rel1Send = async (request: SendRequest) => {
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, apikey: SUPABASE_SERVICE_ROLE_KEY },
+        body: JSON.stringify(request),
+      });
+      const body = await resp.json().catch(() => null);
+      if (!resp.ok || !body) return { outcome: "failed" as const, reason: `send_failed_${resp.status}` };
+      if (body.deferred) return { outcome: "deferred" as const };
+      if (body.skipped || body.abandoned || body.success === false) return { outcome: "skipped" as const, reason: String(body.reason ?? "skipped") };
+      return { outcome: "sent" as const };
+    };
+    const issueActionUrls = async (applicationId: string) => {
+      const [{ data: dTok }, { data: tTok }] = await Promise.all([
+        serviceClient.rpc("issue_application_action_token", { p_application_id: applicationId, p_action: "decline" }),
+        serviceClient.rpc("issue_application_action_token", { p_application_id: applicationId, p_action: "thinking" }),
+      ]);
+      return {
+        declineUrl: dTok ? `https://guardiens.fr/candidature/reponse?t=${dTok}` : undefined,
+        thinkingUrl: tTok ? `https://guardiens.fr/candidature/reponse?t=${tTok}` : undefined,
+      };
+    };
+    // deno-lint-ignore no-explicit-any
+    let secondNudge: Record<string, any> = { mode: "error" };
+    // deno-lint-ignore no-explicit-any
+    let ownerSilent: Record<string, any> = { mode: "error" };
+    try {
+      secondNudge = await runSecondNudgeSweep({
+        client: serviceClient, enabled: rel1Enabled && !!RESEND_API_KEY, send: rel1Send, slot, issueActionUrls,
+      });
+      ownerSilent = await runOwnerSilentSweep({ client: serviceClient, enabled: rel1Enabled, send: rel1Send });
+    } catch (e) {
+      errors.push({ application_id: "rel1_sweep", error: String((e as Error)?.message ?? e) });
+    }
+    for (const [name, result] of [["second_nudge", secondNudge], ["owner_silent", ownerSilent]] as const) {
+      if (result.error) errors.push({ application_id: `rel1_${name}`, error: String(result.error) });
+    }
+    const rel1Metrics = {
+      rel1_mode: rel1Enabled ? "live" : "simulation",
+      second_nudge_detected: secondNudge.detected ?? 0,
+      second_nudge_sits: secondNudge.sits ?? 0,
+      second_nudge_sent: secondNudge.sent ?? 0,
+      second_nudge_slot_taken: secondNudge.slot_taken ?? 0,
+      second_nudge_sit_ids: secondNudge.sit_ids ?? "",
+      owner_silent_detected: ownerSilent.detected ?? 0,
+      owner_silent_due: ownerSilent.due ?? 0,
+      owner_silent_notified: ownerSilent.notified ?? 0,
+      owner_silent_marked: ownerSilent.marked ?? 0,
+      owner_silent_cleared: ownerSilent.cleared ?? 0,
+      owner_silent_application_ids: ownerSilent.application_ids ?? "",
+    };
+
     if (run) {
       await run.finish(errors.length > 0 ? "partial" : "success", {
+        ...rel1Metrics,
         detected: pending.length,
         signals_inserted: signalsInserted,
         signals_skipped: signalsSkipped,
@@ -585,6 +646,7 @@ Deno.serve(async (req) => {
         stalled_emails_sent: stalledEmailsSent,
         stalled_emails_deferred: stalledEmailsDeferred,
         stalled_emails_skipped: stalledEmailsSkipped,
+        ...rel1Metrics,
         errors,
         generated_at: new Date().toISOString(),
       }),

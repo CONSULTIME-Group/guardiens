@@ -11,6 +11,7 @@
  *
  * Editorial : vouvoiement, aucun emoji, pas de tiret cadratin.
  */
+import { fetchOwnerResponsePendingIds, OWNER_RESPONSE_PENDING_LABEL, showsOwnerResponsePending } from "@/lib/ownerResponsePending";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Head from "@/components/seo/Head";
@@ -97,6 +98,8 @@ const MesCandidatures = () => {
   // Lot I2 : candidatures nées d'une proposition privée (garde en brouillon).
   const [proposalBySit, setProposalBySit] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  // Lot REL1 : candidatures qui portent « Réponse du propriétaire en attente ».
+  const [ownerPendingIds, setOwnerPendingIds] = useState<Set<string>>(new Set());
   const prevStatusRef = useRef<Record<string, string>>({});
 
   const load = async () => {
@@ -105,6 +108,8 @@ const MesCandidatures = () => {
     try {
       const { data, error } = await supabase.rpc("get_my_applications");
       if (error) throw error;
+      // Lecture à part : son échec ne touche jamais la liste.
+      fetchOwnerResponsePendingIds().then(setOwnerPendingIds);
       const rows = ((data as any[]) || []) as SitterApp[];
 
       // Hydratation RLS-safe des propriétaires via la vue publique.
@@ -391,6 +396,12 @@ const MesCandidatures = () => {
                 {badgeLabel}
               </span>
             </div>
+
+            {showsOwnerResponsePending(app.status, ownerPendingIds.has(app.application_id)) && (
+              <p data-testid="owner-response-pending" className="text-xs text-muted-foreground bg-muted/60 rounded-lg px-2.5 py-1.5 w-fit">
+                {OWNER_RESPONSE_PENDING_LABEL}
+              </p>
+            )}
 
             {note && (
               <p className="text-xs text-muted-foreground bg-muted/60 rounded-lg px-2.5 py-1.5 w-fit">

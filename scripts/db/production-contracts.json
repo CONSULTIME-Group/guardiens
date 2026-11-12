@@ -351,6 +351,32 @@
           "sql": "SELECT count(*) = 2 AS ok FROM pg_trigger WHERE tgname IN ('trg_admin_alert_contact_message','trg_admin_alert_signal') AND NOT tgisinternal"
         }
       ]
+    },
+    {
+      "migration": "0143_rel1_relances.sql",
+      "description": "REL1 : brouillons presque prêts, candidatures sans réponse à 7 et 10 jours, mention lue par le seul candidat, deux drapeaux éteints",
+      "checks": [
+        {
+          "name": "drapeaux",
+          "sql": "SELECT count(*) = 2 AS ok FROM public.feature_flags WHERE key IN ('rel1_draft_almost_ready','rel1_owner_silent')"
+        },
+        {
+          "name": "table_mention",
+          "sql": "SELECT to_regclass('public.owner_response_pending') IS NOT NULL AS ok"
+        },
+        {
+          "name": "brouillons_presque_prets",
+          "sql": "SELECT position('rel1_relances' IN pg_get_functiondef('public.detect_almost_ready_drafts()'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "candidatures_sans_reponse",
+          "sql": "SELECT position('rel1_relances' IN pg_get_functiondef('public.detect_unanswered_applications(integer)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "fonctions_service_seul",
+          "sql": "SELECT NOT has_function_privilege('authenticated', 'public.sync_owner_response_pending(uuid[],integer)', 'EXECUTE') AND NOT has_function_privilege('anon', 'public.detect_unanswered_applications(integer)', 'EXECUTE') AS ok"
+        }
+      ]
     }
   ]
 }

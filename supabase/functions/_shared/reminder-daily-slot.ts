@@ -19,6 +19,8 @@ export const REMINDER_TEMPLATES: ReadonlySet<string> = new Set([
   "unread-messages-reminder",
   "owner-pending-application-nudge",
   "discussion-stalled-nudge",
+  // Lot REL1 : seconde relance du propriétaire, à 7 jours.
+  "owner-pending-applications-second-nudge",
 ]);
 
 /** Vrai si la ligne de journal est une relance (statut ignoré ici). */
