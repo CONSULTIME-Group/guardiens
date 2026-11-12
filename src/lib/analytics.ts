@@ -408,6 +408,10 @@ export type EventType =
   | "sit_draft_local_copy_discarded"            // Lot PUB2 : copie locale écartée car le brouillon a changé en base depuis (reason)
   | "sits_create_preflight_blocked"             // Écran de prérequis affiché avant l'étape 0 (missing, profile_completion)
   | "sits_create_setup_shown"                   // Écran de mise en route affiché (missing)
+  | "sits_create_entry_state"                   // Lot ENT1 : premier affichage du formulaire, une fois par visite (missing parmi property, city, first_name ; profile_completion)
+  | "sits_create_inline_housing_saved"          // Lot ENT1 : logement créé depuis le formulaire (type)
+  | "sits_create_inline_identity_saved"         // Lot ENT1 : commune ou prénom écrits depuis le formulaire (fields)
+  | "sits_create_save_needs_housing"            // Lot ENT1 : clic sur « Enregistrer » sans logement
   | "sits_create_setup_completed"               // Mise en route terminée (duration_ms, filled)
   | "sits_create_setup_quit"                    // Mise en route quittée vers le tableau de bord (missing)
   | "sits_express_seen"                         // Parcours express affiché (lot N5, period)
