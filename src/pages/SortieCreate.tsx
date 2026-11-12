@@ -140,7 +140,7 @@ const SortieCreate = () => {
   return (
     <form onSubmit={submit} noValidate className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-5 pb-28 pt-4">
       <PageMeta title="Proposer une sortie" description="Proposez une sortie à places comptées près de chez vous." path="/sorties/proposer" noindex />
-      <Link to={source ? outingPath(source.slug) : "/sorties"} className="self-start py-2.5 text-[15px] font-medium no-underline">{source ? "← Ma sortie" : "← Sorties"}</Link>
+      <Link to={source ? outingPath(source.slug) : "/sorties"} className="inline-flex min-h-11 items-center self-start text-[15px] font-medium no-underline">{source ? "← Ma sortie" : "← Sorties"}</Link>
       <div className="flex flex-col gap-2">
         <h1 className="font-heading text-[28px] font-bold leading-tight">{editing ? OUTING_COPY.editTitle : OUTING_COPY.propose}</h1>
         <p className="text-[15px] leading-relaxed text-muted-foreground">{editing ? OUTING_COPY.editIntro : source ? OUTING_COPY.reproposeIntro : OUTING_COPY.formIntro}</p>
