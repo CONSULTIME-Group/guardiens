@@ -14696,6 +14696,55 @@ export type Database = {
           },
         ]
       }
+      owner_response_pending: {
+        Row: {
+          application_id: string
+          cleared_at: string | null
+          notified_at: string | null
+          since: string
+          sit_id: string
+          sitter_id: string
+        }
+        Insert: {
+          application_id: string
+          cleared_at?: string | null
+          notified_at?: string | null
+          since?: string
+          sit_id: string
+          sitter_id: string
+        }
+        Update: {
+          application_id?: string
+          cleared_at?: string | null
+          notified_at?: string | null
+          since?: string
+          sit_id?: string
+          sitter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_response_pending_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: true
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_response_pending_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "public_closed_sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_response_pending_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "sits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       past_animals: {
         Row: {
           breed: string | null
@@ -14955,6 +15004,84 @@ export type Database = {
           {
             foreignKeyName: "profile_moderation_profile_id_fkey"
             columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+        ]
+      }
+      profile_signup_sources: {
+        Row: {
+          channel: string
+          click_id_type: string | null
+          created_at: string
+          first_seen_at: string | null
+          landing_path: string | null
+          recorded_via: string
+          referrer_domain: string | null
+          user_id: string
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          channel: string
+          click_id_type?: string | null
+          created_at?: string
+          first_seen_at?: string | null
+          landing_path?: string | null
+          recorded_via: string
+          referrer_domain?: string | null
+          user_id: string
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          channel?: string
+          click_id_type?: string | null
+          created_at?: string
+          first_seen_at?: string | null
+          landing_path?: string | null
+          recorded_via?: string
+          referrer_domain?: string | null
+          user_id?: string
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_signup_sources_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "profile_signup_sources_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_signup_sources_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_helpers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_signup_sources_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_signup_sources_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "seo_couverture_manquante"
             referencedColumns: ["profil_id"]
@@ -19788,6 +19915,20 @@ export type Database = {
         Args: { p_metadata: Json; p_type: string }
         Returns: boolean
       }
+      admin_signup_sources: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          boths: number
+          channel: string
+          email_accounts: number
+          google_accounts: number
+          members_with_published_sit: number
+          owners: number
+          published_sits: number
+          signups: number
+          sitters: number
+        }[]
+      }
       admin_sit_exit_reasons: {
         Args: { p_days?: number }
         Returns: {
@@ -20047,6 +20188,7 @@ export type Database = {
         Returns: boolean
       }
       dept_code_from_postal: { Args: { p_postal: string }; Returns: string }
+      derive_signup_channel: { Args: { p: Json }; Returns: string }
       detect_affinity_stale: {
         Args: never
         Returns: {
@@ -20054,6 +20196,23 @@ export type Database = {
           first_name: string
           hours_since_started: number
           profile_id: string
+        }[]
+      }
+      detect_almost_ready_drafts: {
+        Args: never
+        Returns: {
+          absence_reason: string
+          city: string
+          cover_photo_url: string
+          end_date: string
+          id: string
+          owner_email: string
+          owner_first_name: string
+          sitter_expectations: string
+          start_date: string
+          title: string
+          updated_at: string
+          user_id: string
         }[]
       }
       detect_city_coverage_gaps: {
@@ -20225,6 +20384,26 @@ export type Database = {
           first_name: string
           profile_id: string
           signal: string
+        }[]
+      }
+      detect_unanswered_applications: {
+        Args: { p_days: number }
+        Returns: {
+          application_id: string
+          days_since_created: number
+          owner_email: string
+          owner_first_name: string
+          owner_id: string
+          owner_suppressed: boolean
+          second_nudge_logged: boolean
+          second_nudge_settled_at: string
+          sit_city: string
+          sit_id: string
+          sit_start_date: string
+          sit_title: string
+          sitter_email: string
+          sitter_first_name: string
+          sitter_id: string
         }[]
       }
       detect_unconfirmed_sits: {
@@ -21214,6 +21393,7 @@ export type Database = {
         Args: { p_source: string }
         Returns: boolean
       }
+      record_signup_source: { Args: { p: Json }; Returns: boolean }
       refresh_all_sitter_reply_stats: { Args: never; Returns: number }
       refresh_sitter_reply_stats: {
         Args: { p_user_id: string }
@@ -21415,6 +21595,14 @@ export type Database = {
         Args: { _code: string; _message: string; _sit_id: string }
         Returns: undefined
       }
+      signup_source_clean: {
+        Args: { p_max: number; p_value: string }
+        Returns: string
+      }
+      signup_source_insert: {
+        Args: { p: Json; p_user_id: string; p_via: string }
+        Returns: boolean
+      }
       sit_is_reviewable: { Args: { p_sit_id: string }; Returns: boolean }
       sit_proposal_blockers: { Args: { p_sit_id: string }; Returns: string[] }
       sit_proposal_limits: { Args: never; Returns: Json }
@@ -21438,6 +21626,13 @@ export type Database = {
       slugify: { Args: { input: string }; Returns: string }
       slugify_city: { Args: { input: string }; Returns: string }
       strip_emojis: { Args: { t: string }; Returns: string }
+      sync_owner_response_pending: {
+        Args: { p_application_ids: string[]; p_days?: number }
+        Returns: {
+          cleared: number
+          marked: number
+        }[]
+      }
       trigger_indexnow_push: {
         Args: { _path: string; _source: string }
         Returns: undefined
