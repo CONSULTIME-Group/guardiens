@@ -16111,6 +16111,7 @@ export type Database = {
           canonical_url: string | null
           city: string
           content: string | null
+          content_updated_at: string | null
           cover_image_url: string | null
           created_at: string
           department: string
@@ -16141,6 +16142,7 @@ export type Database = {
           canonical_url?: string | null
           city: string
           content?: string | null
+          content_updated_at?: string | null
           cover_image_url?: string | null
           created_at?: string
           department: string
@@ -16171,6 +16173,7 @@ export type Database = {
           canonical_url?: string | null
           city?: string
           content?: string | null
+          content_updated_at?: string | null
           cover_image_url?: string | null
           created_at?: string
           department?: string
