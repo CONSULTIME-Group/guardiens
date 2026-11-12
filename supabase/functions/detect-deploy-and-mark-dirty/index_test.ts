@@ -98,13 +98,13 @@ async function run(f: Fixture, options: Row = {}) {
   }
 }
 
-Deno.test("déploiement différé : le même bundle est repris après 72 h, puis reste dédupliqué", async () => {
+Deno.test("déploiement différé : le même bundle est repris après 120 h, puis reste dédupliqué", async () => {
   const f = fixture();
   assertEquals((await run(f)).payload.reason, "debounced");
   assertEquals(f.marked, []);
   assertEquals(f.state.get("cities")!.last_hash, "old");
-  for (const st of f.state.values()) st.last_marked_at = hoursAgo(73);
-  f.fingerprints[0].marked_at = hoursAgo(73);
+  for (const st of f.state.values()) st.last_marked_at = hoursAgo(121);
+  f.fingerprints[0].marked_at = hoursAgo(121);
   const resumed = await run(f);
   assertEquals(resumed.status, 200);
   assertEquals(resumed.payload.changed, false);
@@ -117,8 +117,8 @@ Deno.test("déploiement différé : le même bundle est repris après 72 h, puis
 
 Deno.test("refus de budget : les empreintes restent en attente et sont reprises sans nouveau bundle", async () => {
   const f = fixture();
-  for (const st of f.state.values()) st.last_marked_at = hoursAgo(73);
-  f.fingerprints[0].marked_at = hoursAgo(73);
+  for (const st of f.state.values()) st.last_marked_at = hoursAgo(121);
+  f.fingerprints[0].marked_at = hoursAgo(121);
   f.used = 9_999;
   assertEquals((await run(f)).payload.reason, "monthly_budget_exceeded");
   assertEquals(f.state.get("cities")!.last_hash, "old");
@@ -158,8 +158,8 @@ Deno.test("hash global différé : le changement reste visible au prochain passa
 Deno.test("fichier hashes indisponible : reprendre le bundle différé et mettre à jour sa date", async () => {
   const f = fixture();
   assertEquals((await run(f, { route_hashes: null })).payload.reason, "debounced");
-  for (const st of f.state.values()) st.last_marked_at = hoursAgo(73);
-  f.fingerprints[0].marked_at = hoursAgo(73);
+  for (const st of f.state.values()) st.last_marked_at = hoursAgo(121);
+  f.fingerprints[0].marked_at = hoursAgo(121);
   assertEquals((await run(f, { route_hashes: null })).payload.marked, 4);
   assert(f.fingerprints[1].marked_at);
   assertEquals((await run(f, { route_hashes: null })).payload.marked, 0);
@@ -167,8 +167,8 @@ Deno.test("fichier hashes indisponible : reprendre le bundle différé et mettre
 
 Deno.test("familles vides : une vague acceptée fait avancer le repère, sans boucle", async () => {
   const f = fixture(); f.empty = true;
-  for (const st of f.state.values()) st.last_marked_at = hoursAgo(73);
-  f.fingerprints[0].marked_at = hoursAgo(73);
+  for (const st of f.state.values()) st.last_marked_at = hoursAgo(121);
+  f.fingerprints[0].marked_at = hoursAgo(121);
   await run(f);
   assertEquals(f.state.get("cities")!.last_hash, "new");
   assert(f.fingerprints[1].marked_at);
@@ -178,15 +178,15 @@ Deno.test("familles vides : une vague acceptée fait avancer le repère, sans bo
 
 Deno.test("échec du marquage : conserver les références de la vague précédente", async () => {
   const f = fixture(); f.failMark = true;
-  for (const st of f.state.values()) st.last_marked_at = hoursAgo(73);
-  f.fingerprints[0].marked_at = hoursAgo(73);
+  for (const st of f.state.values()) st.last_marked_at = hoursAgo(121);
+  f.fingerprints[0].marked_at = hoursAgo(121);
   assertEquals((await run(f)).status, 500);
   assertEquals(f.state.get("cities")!.last_hash, "old");
   assertEquals(f.fingerprints[1].marked_at, null);
 });
 
 Deno.test("la dernière vague par famille protège aussi un bundle déjà marqué", async () => {
-  const f = fixture(); f.fingerprints[0].marked_at = hoursAgo(73);
+  const f = fixture(); f.fingerprints[0].marked_at = hoursAgo(121);
   assertEquals((await run(f)).payload.reason, "debounced");
   assertEquals(f.marked, []);
 });
@@ -215,18 +215,22 @@ Deno.test("familles contenu seul : jamais remises en file par une mise en ligne"
   assertEquals(g.marked.filter((m) => m.startsWith("family:")), []);
 });
 
-Deno.test("vague refusée avant 72 h, acceptée après", async () => {
+Deno.test("vague refusée avant 120 h (lot QUOTA1), acceptée après", async () => {
   const f = fixture();
-  for (const st of f.state.values()) st.last_marked_at = hoursAgo(48);
-  f.fingerprints[0].marked_at = hoursAgo(48);
+  // 100 h : acceptée avant le lot QUOTA1 (délai de 72 h), refusée depuis.
+  for (const st of f.state.values()) st.last_marked_at = hoursAgo(100);
+  f.fingerprints[0].marked_at = hoursAgo(100);
   assertEquals((await run(f)).payload.reason, "debounced");
   assertEquals(f.marked, []);
+  for (const st of f.state.values()) st.last_marked_at = hoursAgo(121);
+  f.fingerprints[0].marked_at = hoursAgo(121);
+  assertEquals((await run(f)).payload.marked, 4);
 });
 
 Deno.test("plafond lu depuis le début du cycle Prerender (le 4, heure de Paris), plus sur 30 jours glissants", async () => {
   const f = fixture();
-  for (const st of f.state.values()) st.last_marked_at = hoursAgo(73);
-  f.fingerprints[0].marked_at = hoursAgo(73);
+  for (const st of f.state.values()) st.last_marked_at = hoursAgo(121);
+  f.fingerprints[0].marked_at = hoursAgo(121);
   await run(f);
   const start = Date.parse(f.since.replace(/^gte\./, ""));
   assertEquals(start, renderCycleStart().getTime());

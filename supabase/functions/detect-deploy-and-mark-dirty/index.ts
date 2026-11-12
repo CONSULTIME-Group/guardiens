@@ -62,7 +62,14 @@ const SITE = "https://guardiens.fr";
 // 13/10/2026 (lot PR1) : 24 h -> 72 h. Avec une mise en ligne par jour, 24 h
 // relancait une vague quotidienne. L'expiration du cache Prerender est de
 // 7 jours : 72 h suffit a propager un gabarit bien avant cette echeance.
-const MIN_MARK_INTERVAL_HOURS = 72;
+// 12/11/2026 (lot QUOTA1) : 72 h -> 120 h. Du 04/11 au 12/11, trois vagues de
+// 343, 493 et 494 pages sont parties a 72 h d'ecart exactement : environ
+// 4 900 rendus par mois, la moitie du plafond, et le plafond aurait ete
+// atteint vers le 25/11. A 120 h, une vague tous les 5 jours au plus (environ
+// 2 960 rendus par mois). La valeur reste sous l'expiration du cache
+// Prerender (7 jours) et egale au filet FAMILY_MAX_AGE_DAYS : aucune copie
+// n'expire faute de vague. Ne pas depasser 5 jours sans revoir ce filet.
+const MIN_MARK_INTERVAL_HOURS = 120;
 
 
 /**

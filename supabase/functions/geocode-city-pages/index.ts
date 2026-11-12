@@ -3,6 +3,8 @@
  *
  * Renseigne latitude / longitude des pages villes SEO (`seo_city_pages`).
  * Appelée par un cron pg_cron toutes les 10 minutes, 30 pages par appel.
+ * Les compteurs de proximité ne sont recalculés que si une page vient d'être
+ * géocodée ; leur mise à jour de chaque jour est une tâche à part (04 h UTC).
  *
  * Point critique : la désambiguïsation par département. Une correspondance
  * par nom seul place Saint-Paul (La Réunion) dans l'Oise. On filtre les
@@ -173,9 +175,18 @@ Deno.serve(async (req) => {
       geocodees++;
     }
 
-    // Recalcule nearby_sitter_count pour toutes les pages désormais géocodées.
-    const { error: rpcErr } = await supabase.rpc("recalc_seo_city_nearby_counts");
-    if (rpcErr) console.warn(`geocode-city-pages: recalc échoué`, rpcErr.message);
+    // Recalcule nearby_sitter_count seulement quand ce passage a géocodé une
+    // page (lot QUOTA1, 12/11/2026). Le recalcul de chaque jour reste porté par
+    // la tâche recalc-seo-city-nearby-counts-daily (04 h UTC). Avant ce lot, le
+    // recalcul partait toutes les 10 minutes : chaque inscription dans le rayon
+    // d'une ville changeait son compteur, donc relançait son rendu Prerender
+    // dans le quart d'heure (environ 665 rendus en 8 jours, 17 % du cycle).
+    let recalcule = false;
+    if (geocodees > 0) {
+      const { error: rpcErr } = await supabase.rpc("recalc_seo_city_nearby_counts");
+      if (rpcErr) console.warn(`geocode-city-pages: recalc échoué`, rpcErr.message);
+      else recalcule = true;
+    }
 
     const { count: restantes } = await supabase
       .from("seo_city_pages")
@@ -184,7 +195,7 @@ Deno.serve(async (req) => {
       .lt("geocode_attempts", 3)
       .not("slug", "like", "test-%");
 
-    return json({ traitees, geocodees, rejetees_departement, rejetees_coherence, restantes: restantes ?? 0 });
+    return json({ traitees, geocodees, rejetees_departement, rejetees_coherence, recalcule, restantes: restantes ?? 0 });
   } catch (e) {
     return json({ error: String(e) }, 500);
   }
