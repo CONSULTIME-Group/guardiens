@@ -351,5 +351,38 @@ assert.equal((await one(`SELECT count(*) AS n FROM public.public_outings WHERE i
 assert.equal((await one(`SELECT public.admin_outing_set_hidden($1, true) AS r`, ['00000000-0000-0000-0000-0000000000ff'])).r.reason, 'not_found');
 passed.push('admin : masquer retire la sortie de la vue publique, rétablir la rend');
 
+// Droits réels : mêmes gestes sous les rôles du site (RLS active, plus de super-utilisateur).
+await db.exec(`GRANT USAGE ON SCHEMA public, auth TO anon, authenticated; GRANT EXECUTE ON FUNCTION auth.uid() TO anon, authenticated;
+  GRANT EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) TO anon, authenticated; GRANT SELECT ON public.user_roles TO anon, authenticated;`);
+const asRole = async (role, uid, fn) => {
+  await as(uid);
+  await db.exec(`SET ROLE ${role}`);
+  try { return await fn(); } finally { await db.exec('RESET ROLE'); }
+};
+const rls = await asRole('authenticated', KARIM, () => one(`
+  INSERT INTO public.outings(organizer_id, title, category, starts_at, place_kind, place_label, city, postal_code, capacity, reserved)
+  VALUES ($1, 'Pétanque du jeudi', 'jeux', now() + interval '9 days', 'public', 'Place Bellecour', 'Lyon', '69002', 6, 1)
+  RETURNING id, slug`, [KARIM]));
+assert.match(rls.slug, /^petanque-du-jeudi-/);
+await assert.rejects(() => asRole('authenticated', LEA, () => db.query(`
+  INSERT INTO public.outings(organizer_id, title, category, starts_at, place_kind, capacity, reserved)
+  VALUES ($1, 'Au nom d''un autre', 'jeux', now() + interval '9 days', 'online', 4, 1)`, [KARIM])), /row-level security/);
+assert.equal((await asRole('anon', null, () => one(`SELECT count(*)::int AS n FROM public.public_outings WHERE id = $1`, [rls.id]))).n, 1);
+await assert.rejects(() => asRole('anon', null, () => db.query(`SELECT 1 FROM public.outings LIMIT 1`)), /permission denied/);
+await assert.rejects(() => asRole('anon', null, () => db.query(`SELECT public.outing_join($1, 'site')`, [rls.id])), /permission denied/);
+assert.equal((await asRole('authenticated', LEA, () => one(`SELECT count(*)::int AS n FROM public.outings WHERE id = $1`, [rls.id]))).n, 0);
+assert.equal((await asRole('authenticated', LEA, () => db.query(`UPDATE public.outings SET title = 'Détournée' WHERE id = $1 RETURNING id`, [rls.id]))).rows.length, 0);
+assert.equal((await asRole('authenticated', LEA, () => one(`SELECT public.outing_join($1, 'site') AS r`, [rls.id]))).r.ok, true);
+assert.equal((await asRole('authenticated', LEA, () => one(`SELECT count(*)::int AS n FROM public.outing_attendees WHERE outing_id = $1`, [rls.id]))).n, 1);
+assert.equal((await asRole('authenticated', PAUL, () => one(`SELECT count(*)::int AS n FROM public.outing_attendees WHERE outing_id = $1`, [rls.id]))).n, 0);
+await assert.rejects(() => asRole('authenticated', LEA, () => db.query(`INSERT INTO public.outing_attendees(outing_id, user_id) VALUES ($1, $2)`, [rls.id, PAUL])), /permission denied/);
+assert.equal((await asRole('authenticated', KARIM, () => db.query(`UPDATE public.outings SET title = 'Pétanque du vendredi' WHERE id = $1 RETURNING id`, [rls.id]))).rows.length, 1);
+await assert.rejects(() => asRole('authenticated', KARIM, () => db.query(`UPDATE public.outings SET hidden_at = now() WHERE id = $1`, [rls.id])), /OUTING_FIELD_LOCKED/);
+await assert.rejects(() => asRole('authenticated', KARIM, () => db.query(`SELECT public.admin_outings_overview()`)), /ADMIN_ONLY/);
+assert.equal((await asRole('authenticated', ADMIN, () => one(`SELECT public.admin_outing_set_hidden($1, true) AS r`, [rls.id]))).r.hidden, true);
+assert.equal((await asRole('anon', null, () => one(`SELECT count(*)::int AS n FROM public.public_outings WHERE id = $1`, [rls.id]))).n, 0);
+await as(null);
+passed.push('droits réels sous anon et authenticated : publication, lecture publique, inscription, tables fermées, admin');
+
 for (const p of passed) console.log(`ok  ${p}`);
 console.log(`\n${passed.length} contrôles verts (SORT1 à SORT5)`);
