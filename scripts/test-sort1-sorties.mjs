@@ -240,7 +240,7 @@ mails = await queued(`defer_reason = 'outing_cancelled'`);
 assert.equal(mails.length, 2);
 assert.match(mails[0].template_data.body, /Pluie annoncée/);
 assert.equal(mails[0].template_data.cta, 'Voir les sorties');
-assert.equal((await queued()).every((m) => !/[—–]/.test(JSON.stringify(m.template_data))), true);
+assert.equal((await queued()).every((m) => !/[\u2014\u2013]/.test(JSON.stringify(m.template_data))), true);
 assert.equal((await one(`SELECT count(*)::int AS n FROM public.email_deferred_queue`)).n, (await one(`SELECT count(DISTINCT idempotency_key)::int AS n FROM public.email_deferred_queue`)).n);
 passed.push('emails : annulation avec le mot de l\'organisateur, une clé par envoi');
 
