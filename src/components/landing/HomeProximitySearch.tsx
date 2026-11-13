@@ -13,6 +13,13 @@ export function proximityLine(members: number): string {
   return `${members} membres inscrits à moins de 30 km de chez vous.`;
 }
 
+/** « saint-malo » devient « Saint-Malo », « l'isle-adam » devient « L'Isle-Adam ». */
+export const cityTitleCase = (city: string) =>
+  city.trim().replace(/\s+/g, " ").toLocaleLowerCase("fr").replace(/(^|[\s'’-])(\p{L})/gu, (_, sep: string, ch: string) => sep + ch.toLocaleUpperCase("fr"))
+    // Les petits mots de liaison restent en minuscules au milieu du nom (« Aix-en-Provence », « Saint-Cyr-au-Mont-d'Or »).
+    .replace(/(?<=[\s-])(En|De|Du|Des|La|Le|Les|Sur|Sous|Lès|Au|Aux|Et)(?=[\s-])/g, (word) => word.toLocaleLowerCase("fr"))
+    .replace(/(?<=[\s-])([DL])(?=['’])/g, (letter) => letter.toLowerCase());
+
 export interface HomeOrigin { lat: number; lng: number; city?: string | null }
 
 /** Lot HOME1 : un seul chiffre, les membres inscrits dans le rayon. */
@@ -55,7 +62,7 @@ export function HomeProximitySearch({ onLocated, tone = "dark" }: { onLocated: (
       setMessage("Les disponibilités de votre secteur seront bientôt visibles.");
     } else {
       setCounts({ members });
-      setSearched(value);
+      setSearched(cityTitleCase(value));
       onLocated(origin);
     }
     setLoading(false);
@@ -76,8 +83,9 @@ export function HomeProximitySearch({ onLocated, tone = "dark" }: { onLocated: (
           {loading ? "Recherche" : "Voir"}
         </Button>
       </form>
+      <div aria-live="polite">
       {counts && (
-        <p className={tone === "light" ? "mt-3 text-base font-medium text-foreground" : "mt-3 w-fit rounded-xl bg-black/55 px-3 py-2 text-base font-medium text-primary-foreground"} aria-live="polite">
+        <p className={tone === "light" ? "mt-3 text-base font-medium text-foreground" : "mt-3 w-fit rounded-xl bg-black/55 px-3 py-2 text-base font-medium text-primary-foreground"}>
           {proximityLine(counts.members)}
         </p>
       )}
@@ -90,9 +98,10 @@ export function HomeProximitySearch({ onLocated, tone = "dark" }: { onLocated: (
             ? "mt-2 inline-flex min-h-11 items-center text-base font-semibold text-primary underline underline-offset-4"
             : "mt-2 inline-flex min-h-11 w-fit items-center rounded-xl bg-black/55 px-3 text-base font-semibold text-primary-foreground underline underline-offset-4"}
         >
-          Voir les gardes autour de {searched.charAt(0).toLocaleUpperCase("fr")}{searched.slice(1)}
+          Voir les gardes autour de {searched}
         </Link>
       )}
+      </div>
       {message && <p className={tone === "light" ? "mt-2 text-sm text-foreground" : "mt-2 w-fit rounded-xl bg-black/55 px-3 py-2 text-sm text-primary-foreground"} aria-live="polite">{message}</p>}
     </div>
   );

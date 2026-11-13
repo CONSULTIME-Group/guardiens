@@ -5,6 +5,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
+import { cityTitleCase } from "@/components/landing/HomeProximitySearch";
 
 const home = readFileSync("src/components/landing/HomeProximitySearch.tsx", "utf8");
 const search = readFileSync("src/components/search/SearchSitter.tsx", "utf8");
@@ -19,5 +20,14 @@ describe("suite de la recherche de ville", () => {
   it("sans garde ouverte dans la zone, les plus proches passent avant les annonces terminées", () => {
     expect(search).toContain("!(activeReal.length === 0 && nearestShown.length > 0)");
     expect(search.indexOf("<NearestOutsideSection")).toBeLessThan(search.indexOf('data-testid="past-after-nearest"'));
+  });
+
+  it("écrit le nom de la ville proprement, dans le lien comme dans l'adresse", () => {
+    expect(cityTitleCase("rennes")).toBe("Rennes");
+    expect(cityTitleCase("saint-malo")).toBe("Saint-Malo");
+    expect(cityTitleCase("  l'isle-adam ")).toBe("L'Isle-Adam");
+    expect(cityTitleCase("AIX en  provence")).toBe("Aix en Provence");
+    expect(cityTitleCase("saint-cyr-au-mont-d'or")).toBe("Saint-Cyr-au-Mont-d'Or");
+    expect(cityTitleCase("la rochelle")).toBe("La Rochelle");
   });
 });

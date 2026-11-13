@@ -2819,7 +2819,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     })()}
 
      {/* Lien "Français à l'étranger" en pied de résultats (déplacé depuis le toolbar) */}
-     {tab === "sits" && (intlCount === null || intlCount > 0) && !loading && results.length > 0 && (
+     {/* Lot RECH1 : quand les gardes les plus proches ouvrent la page, ce lien leur laisse la première place. */}
+     {tab === "sits" && (intlCount === null || intlCount > 0) && !loading && results.length > 0 && !(nearestShown.length > 0 && !results.some((r: any) => !r.is_demo && !r.isAssigned && !r.isCompleted && !r.isPast)) && (
        <div className="mt-8 flex justify-center">
          <Link
            to="/annonces/international"
