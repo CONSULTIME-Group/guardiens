@@ -575,6 +575,28 @@
       ]
     },
     {
+      "migration": "0151_sec4_lectures_ouvertes_bornees.sql",
+      "description": "Lectures ouvertes bornées : galerie gardien et seuils de réputation fermés aux visiteurs, interrupteurs du site lisibles sur les seules colonnes utiles",
+      "checks": [
+        {
+          "name": "galerie_gardien_fermee_aux_visiteurs",
+          "sql": "SELECT NOT has_table_privilege('anon', 'public.sitter_gallery', 'SELECT') AS ok"
+        },
+        {
+          "name": "reputation_fermee_aux_visiteurs",
+          "sql": "SELECT NOT has_table_privilege('anon', 'public.reputation_config', 'SELECT') AS ok"
+        },
+        {
+          "name": "interrupteurs_lisibles",
+          "sql": "SELECT has_column_privilege('anon', 'public.feature_flags', 'enabled', 'SELECT') AS ok"
+        },
+        {
+          "name": "description_des_interrupteurs_fermee",
+          "sql": "SELECT NOT has_column_privilege('anon', 'public.feature_flags', 'description', 'SELECT') AS ok"
+        }
+      ]
+    },
+    {
       "migration": "0152_vit2_annonce_a_la_une.sql",
       "description": "Annonce à la une de la home : table d'une ligne lisible par tous, écrite par une fonction réservée aux admins",
       "checks": [
