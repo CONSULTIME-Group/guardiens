@@ -38,6 +38,8 @@ interface HomeListing {
   dateLabel?: string;
   /** Carte d'invitation, affichée tant qu'aucune sortie n'est ouverte. */
   invitation?: boolean;
+  /** Épinglée « à la une » par un admin : première carte de la vitrine nationale. */
+  featured?: boolean;
   /** Lieu affiché : commune puis département, ou pays hors de France (lot H2). */
   place?: string;
 }
@@ -111,7 +113,7 @@ const photosOf = (l: HomeListing) => l.photoCount ?? (l.photo ? 1 : 0);
  */
 export const rankShowcaseGuards = (guards: HomeListing[], now: number = Date.now()) =>
   onePerOwner(
-    [...guards].sort((a, b) => showcaseScore(b, now) - showcaseScore(a, now) || photosOf(b) - photosOf(a) || byCreatedDesc(a, b)),
+    [...guards].sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)) || showcaseScore(b, now) - showcaseScore(a, now) || photosOf(b) - photosOf(a) || byCreatedDesc(a, b)),
   );
 
 const distanceFrom = (origin: HomeOrigin | null, lat: number | null, lng: number | null) =>
@@ -276,6 +278,7 @@ export default function LiveListingsStrip({ origin = null, profileOrigin = null,
       createdAt: sit.created_at,
       country: sit.country,
       departementCode: sit.departement_code,
+      featured: sit.home_featured,
       ownerId: sit.user_id,
       href: `/annonces/${sit.slug || sit.id}`,
       latitude: sit.owner?.latitude ?? null,

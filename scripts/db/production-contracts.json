@@ -573,6 +573,54 @@
           "sql": "SELECT has_function_privilege('anon', 'public.home_members_nearby(double precision, double precision)', 'EXECUTE') AS ok"
         }
       ]
+    },
+    {
+      "migration": "0151_sec4_lectures_ouvertes_bornees.sql",
+      "description": "Lectures ouvertes bornées : galerie gardien et seuils de réputation fermés aux visiteurs, interrupteurs du site lisibles sur les seules colonnes utiles",
+      "checks": [
+        {
+          "name": "galerie_gardien_fermee_aux_visiteurs",
+          "sql": "SELECT NOT has_table_privilege('anon', 'public.sitter_gallery', 'SELECT') AS ok"
+        },
+        {
+          "name": "reputation_fermee_aux_visiteurs",
+          "sql": "SELECT NOT has_table_privilege('anon', 'public.reputation_config', 'SELECT') AS ok"
+        },
+        {
+          "name": "interrupteurs_lisibles",
+          "sql": "SELECT has_column_privilege('anon', 'public.feature_flags', 'enabled', 'SELECT') AS ok"
+        },
+        {
+          "name": "description_des_interrupteurs_fermee",
+          "sql": "SELECT NOT has_column_privilege('anon', 'public.feature_flags', 'description', 'SELECT') AS ok"
+        }
+      ]
+    },
+    {
+      "migration": "0152_vit2_annonce_a_la_une.sql",
+      "description": "Annonce à la une de la home : table d'une ligne lisible par tous, écrite par une fonction réservée aux admins",
+      "checks": [
+        {
+          "name": "table_presente",
+          "sql": "SELECT to_regclass('public.home_featured_sit') IS NOT NULL AS ok"
+        },
+        {
+          "name": "lecture_ouverte_aux_visiteurs",
+          "sql": "SELECT has_table_privilege('anon', 'public.home_featured_sit', 'SELECT') AS ok"
+        },
+        {
+          "name": "ecriture_fermee_aux_membres",
+          "sql": "SELECT count(*) = 0 AS ok FROM information_schema.role_table_grants WHERE table_schema = 'public' AND table_name = 'home_featured_sit' AND grantee IN ('anon', 'authenticated') AND privilege_type <> 'SELECT'"
+        },
+        {
+          "name": "fonction_admin",
+          "sql": "SELECT position('vit2_a_la_une' IN pg_get_functiondef('public.admin_set_home_featured(uuid, boolean)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "fonction_fermee_aux_visiteurs",
+          "sql": "SELECT NOT has_function_privilege('anon', 'public.admin_set_home_featured(uuid, boolean)', 'EXECUTE') AS ok"
+        }
+      ]
     }
   ]
 }
