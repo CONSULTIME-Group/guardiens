@@ -46,7 +46,7 @@ describe("entrées", () => {
     expect(isFabHidden("/publier")).toBe(true);
   });
   it("route protégée", () => {
-    expect(read("src/App.tsx")).toContain('<Route path="/publier" element={<ProtectedRoute><Publier /></ProtectedRoute>} />');
+    expect(read("src/App.tsx")).toContain('<Route path="/publier" element={<ProtectedRoute><AppLayout><Publier /></AppLayout></ProtectedRoute>} />');
   });
 });
 
