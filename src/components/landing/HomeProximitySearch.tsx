@@ -1,4 +1,5 @@
 import { FormEvent, useState } from "react";
+import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { geocodeCity } from "@/lib/geocode";
@@ -22,6 +23,8 @@ export function HomeProximitySearch({ onLocated, tone = "dark" }: { onLocated: (
   const [counts, setCounts] = useState<Counts | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  // Ville de la dernière recherche aboutie : le lien vers les annonces la porte, même si le champ change ensuite.
+  const [searched, setSearched] = useState("");
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -52,6 +55,7 @@ export function HomeProximitySearch({ onLocated, tone = "dark" }: { onLocated: (
       setMessage("Les disponibilités de votre secteur seront bientôt visibles.");
     } else {
       setCounts({ members });
+      setSearched(value);
       onLocated(origin);
     }
     setLoading(false);
@@ -76,6 +80,18 @@ export function HomeProximitySearch({ onLocated, tone = "dark" }: { onLocated: (
         <p className={tone === "light" ? "mt-3 text-base font-medium text-foreground" : "mt-3 w-fit rounded-xl bg-black/55 px-3 py-2 text-base font-medium text-primary-foreground"} aria-live="polite">
           {proximityLine(counts.members)}
         </p>
+      )}
+      {/* Lot RECH1 : la recherche de ville mène quelque part. Les gardes ouvertes autour de la ville saisie, sur la page des annonces. */}
+      {counts && searched && (
+        <Link
+          to={`/annonces?ville=${encodeURIComponent(searched)}`}
+          onClick={() => { void trackEvent("home_city_listings_clicked", { metadata: { members: counts.members } }); }}
+          className={tone === "light"
+            ? "mt-2 inline-flex min-h-11 items-center text-base font-semibold text-primary underline underline-offset-4"
+            : "mt-2 inline-flex min-h-11 w-fit items-center rounded-xl bg-black/55 px-3 text-base font-semibold text-primary-foreground underline underline-offset-4"}
+        >
+          Voir les gardes autour de {searched.charAt(0).toLocaleUpperCase("fr")}{searched.slice(1)}
+        </Link>
       )}
       {message && <p className={tone === "light" ? "mt-2 text-sm text-foreground" : "mt-2 w-fit rounded-xl bg-black/55 px-3 py-2 text-sm text-primary-foreground"} aria-live="polite">{message}</p>}
     </div>

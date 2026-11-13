@@ -2801,7 +2801,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
             </section>
           )}
 
-          {inactive.length > 0 && (
+          {/* Lot RECH1 : sans garde ouverte dans la zone, les gardes ouvertes les plus proches passent avant les annonces terminées (bloc rendu plus bas). */}
+          {inactive.length > 0 && !(activeReal.length === 0 && nearestShown.length > 0) && (
             <section className="mb-10">
               {groupHeader(
                 t("search_results.group_past"),
@@ -2839,7 +2840,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
      franceCount={densityCounts.france}
      // La photo de la première carte compte (FIRST_CARD_PHOTO) seulement quand
      // le rayon n'en montre aucune.
-     renderCard={(item: any, idx: number) => renderCard(item, idx === 0 && results.filter((r: any) => !r.is_demo).length === 0 ? 0 : undefined)}
+     renderCard={(item: any, idx: number) => renderCard(item, idx === 0 && results.filter((r: any) => !r.is_demo && !r.isAssigned && !r.isCompleted && !r.isPast).length === 0 ? 0 : undefined)}
      onSeeFrance={() => {
        trackEvent("search_outofzone_click", { source: "nearest_outside", metadata: { action: "expand_zone", to: "france", previous_mode: zoneMode, count_radius: densityCounts.radius, count_france: densityCounts.france } });
        setZoneModeByUser("france");
@@ -2847,6 +2848,25 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
      trackEvent={trackEvent}
    />
  )}
+ {/* Lot RECH1 : annonces terminées de la zone, après les gardes ouvertes les plus proches. */}
+ {tab === "sits" && !searchError && !(loading && !refreshing) && nearestShown.length > 0 && (() => {
+   const openInZone = results.some((r: any) => !r.is_demo && !r.isAssigned && !r.isCompleted && !r.isPast);
+   const inactive = results.filter((r: any) => !r.is_demo && (r.isAssigned || r.isCompleted || r.isPast));
+   if (openInZone || inactive.length === 0) return null;
+   return (
+     <section className="mt-12 mb-10" data-testid="past-after-nearest">
+       <div className="mb-4 flex items-baseline justify-between gap-3">
+         <h3 className="font-heading text-base sm:text-lg font-semibold text-foreground">
+           {t("search_results.group_past")} <span className="text-muted-foreground font-normal">({inactive.length})</span>
+         </h3>
+         <p className="text-xs text-muted-foreground hidden sm:block">{t("search_results.group_past_sub")}</p>
+       </div>
+       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-8 sm:gap-y-10">
+         {inactive.map((item: any) => renderCard(item))}
+       </div>
+     </section>
+   );
+ })()}
  </div>
  ) : (
  /* ─── Map view ─── */
