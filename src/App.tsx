@@ -574,7 +574,7 @@ const AppRoutes = () => {
       <Route path="/questions" element={<Navigate to="/petites-missions" replace />} />
       <Route path="/sorties" element={<PublicShellRoute><Sorties /></PublicShellRoute>} />
       <Route path="/sorties/proposer" element={<ProtectedRoute><SortieCreate /></ProtectedRoute>} />
-      <Route path="/publier" element={<ProtectedRoute><Publier /></ProtectedRoute>} />
+      <Route path="/publier" element={<ProtectedRoute><AppLayout><Publier /></AppLayout></ProtectedRoute>} />
       <Route path="/sorties/alertes" element={<PublicShellRoute><SortiesAlertes /></PublicShellRoute>} />
       <Route path="/sorties/:slug" element={<PublicShellRoute><SortieDetail /></PublicShellRoute>} />
       <Route path="/questions/nouvelle" element={<ProtectedRoute><AppLayout><QuestionCreate /></AppLayout></ProtectedRoute>} />
