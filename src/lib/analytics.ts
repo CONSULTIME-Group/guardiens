@@ -9,6 +9,18 @@ import { getSafeLocalStorage } from "@/lib/storageFallback";
 import { isLabOrBotTraffic } from "@/lib/labTraffic";
 
 export type EventType =
+  // Lot SORT1 : sorties à places comptées.
+  | "outings_list_viewed"
+  | "outing_propose_clicked"
+  | "outing_form_opened"
+  | "outing_published"
+  | "outing_viewed"
+  | "outing_join_needs_account"
+  | "outing_joined"
+  | "outing_left"
+  | "outing_link_shared"
+  | "outing_attendee_removed"
+  | "outing_cancelled"
   // Lot SC3 : question des trajets au moment où elle compte (candidature, page d'annonce).
   | "trips_prompt_seen"
   | "trips_prompt_answered"

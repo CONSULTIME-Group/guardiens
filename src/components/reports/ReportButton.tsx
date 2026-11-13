@@ -51,6 +51,16 @@ const reasonOptions: Record<string, { label: string; reasons: ReasonOption[] }> 
       { value: "other", label: "Autre" },
     ],
   },
+  // Lot SORT1 : deux signalements de membres différents masquent la sortie.
+  outing: {
+    label: "cette sortie",
+    reasons: [
+      { value: "commercial", label: "Activité commerciale" },
+      { value: "child_care", label: "Garde d'enfants" },
+      { value: "inappropriate", label: "Contenu inadapté" },
+      { value: "other", label: "Autre" },
+    ],
+  },
   small_mission: {
     label: "cette petite mission",
     reasons: [
@@ -67,7 +77,7 @@ const DUPLICATE_WINDOW_HOURS = 24;
 
 interface ReportButtonProps {
   targetId: string;
-  targetType: "profile" | "sit" | "review" | "small_mission" | "mission_question";
+  targetType: "profile" | "sit" | "review" | "small_mission" | "mission_question" | "outing";
   className?: string;
   /**
    * Variante fiche publique : déclencheur en lien discret pleine largeur,

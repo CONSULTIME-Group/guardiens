@@ -43,6 +43,8 @@ import CanHelpDialog from "@/components/entraide/CanHelpDialog";
 import { toast } from "sonner";
 import { capitalizeFirstName } from "@/lib/displayName";
 import { sortHelpers } from "@/lib/helperDisplay";
+import EntraideSortiesTabs from "@/components/outings/EntraideSortiesTabs";
+import { useOutingsEnabled } from "@/hooks/useOutingsEnabled";
 
 const EntraideMap = lazy(() => import("@/components/entraide/EntraideMap"), "EntraideMap");
 
@@ -133,6 +135,7 @@ interface MemberProfile {
 
 const EntraideHub = () => {
   const { isAuthenticated, user } = useAuth();
+  const { enabled: outingsOn } = useOutingsEnabled();
   const { canApplyMissions } = useAccessLevel();
   const navigate = useNavigate();
   const [needs, setNeeds] = useState<EntraideNeed[]>([]);
@@ -432,6 +435,8 @@ const EntraideHub = () => {
         imageAlt={SECTION_OG_IMAGES.entraide.alt}
       />
       <PageBreadcrumb items={[{ label: "Entraide" }]} />
+      {/* Lot SORT1 : sous-onglets Entraide et Sorties, quand la rubrique est ouverte. */}
+      {outingsOn && <div className="mx-auto mt-3 w-full max-w-2xl px-5"><EntraideSortiesTabs active="entraide" /></div>}
       <div className="min-w-0 bg-background pb-24">
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
           <EntraideHubIntro

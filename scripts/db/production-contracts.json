@@ -417,6 +417,44 @@
           "sql": "SELECT count(*) = 1 AS ok FROM pg_trigger WHERE tgname = 'seo_city_pages_content_date' AND tgrelid = 'public.seo_city_pages'::regclass AND NOT tgisinternal"
         }
       ]
+    },
+    {
+      "migration": "0145_sort1_sorties.sql",
+      "description": "Sorties à places comptées : tables, vue publique en lecture seule, fonctions d'inscription, masquage à deux signalements, drapeau éteint",
+      "checks": [
+        {
+          "name": "tables_sorties",
+          "sql": "SELECT count(*) = 2 AS ok FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('outings', 'outing_attendees')"
+        },
+        {
+          "name": "rls_active",
+          "sql": "SELECT count(*) = 2 AS ok FROM pg_class WHERE oid IN ('public.outings'::regclass, 'public.outing_attendees'::regclass) AND relrowsecurity"
+        },
+        {
+          "name": "vue_publique_lecture_seule",
+          "sql": "SELECT count(*) FILTER (WHERE privilege_type = 'SELECT') = 2 AND count(*) FILTER (WHERE privilege_type <> 'SELECT') = 0 AS ok FROM information_schema.role_table_grants WHERE table_schema = 'public' AND table_name = 'public_outings' AND grantee IN ('anon', 'authenticated')"
+        },
+        {
+          "name": "vue_sans_position",
+          "sql": "SELECT count(*) = 0 AS ok FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'public_outings' AND column_name IN ('latitude', 'longitude', 'hidden_at', 'agenda_consent')"
+        },
+        {
+          "name": "fonction_inscription",
+          "sql": "SELECT position('sort1_sorties' IN pg_get_functiondef('public.outing_join(uuid, text)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "inscription_fermee_aux_visiteurs",
+          "sql": "SELECT NOT has_function_privilege('anon', 'public.outing_join(uuid, text)', 'EXECUTE') AS ok"
+        },
+        {
+          "name": "masquage_deux_signalements",
+          "sql": "SELECT count(*) = 1 AS ok FROM pg_trigger WHERE tgname = 'trg_outing_hide_on_reports' AND tgrelid = 'public.reports'::regclass AND NOT tgisinternal"
+        },
+        {
+          "name": "drapeau_sorties",
+          "sql": "SELECT count(*) = 1 AS ok FROM public.feature_flags WHERE key = 'sorties'"
+        }
+      ]
     }
   ]
 }

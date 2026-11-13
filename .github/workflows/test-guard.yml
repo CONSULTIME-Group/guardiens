@@ -67,6 +67,8 @@ jobs:
         run: npm run test:sql:d7
       - name: Source enregistrée à l'inscription, lot SRC1 (Postgres local)
         run: npm run test:sql:src1
+      - name: Sorties à places comptées, lot SORT1 (Postgres local)
+        run: npm run test:sql:sort1
 
       - name: Diagnostic des brouillons, préférences réservées aux admins
         run: node scripts/test-draft-reminder-admin-privacy.mjs

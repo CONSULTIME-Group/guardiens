@@ -35,6 +35,9 @@ const ALWAYS_OPEN_PREFIXES = [
   // publier. Du 06 au 12/10, 5 auteurs renvoyés vers le questionnaire en
   // ouvrant leur propre besoin, l'une trois fois en deux minutes.
   "/petites-missions",
+  // Lot SORT1 (12/11/2026) : une sortie ouverte depuis le lien d'un proche
+  // garde sa fiche à l'écran, la place se prend dès le retour d'inscription.
+  "/sorties",
   // Lot X2 : les projets participatifs, page et candidatures du porteur (C-13).
   "/projets",
   // Lot L0 (arène tableau de bord v2, 08/11/2026) : le tableau de bord reste
