@@ -21236,6 +21236,10 @@ export type Database = {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
       }
+      home_members_nearby: {
+        Args: { p_lat: number; p_lng: number }
+        Returns: number
+      }
       home_proximity_counts: {
         Args: { p_lat: number; p_lng: number }
         Returns: {
