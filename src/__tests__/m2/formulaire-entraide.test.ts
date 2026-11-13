@@ -20,8 +20,8 @@ describe("M2, bouton central de la barre basse", () => {
     expect(bottomNavFab("/petites-missions", true).to).toBe("/petites-missions/creer");
   });
   it("propriétaire : publier une annonce de garde, inchangé", () => {
-    expect(bottomNavFab("/dashboard", true)).toEqual({ to: "/sits/create", label: "Publier", ariaLabel: "Publier", icon: "plus" });
-    expect(bottomNavFab("/sits", true).to).toBe("/sits/create");
+    expect(bottomNavFab("/dashboard", true)).toEqual({ to: "/publier", label: "Publier", ariaLabel: "Publier", icon: "plus" });
+    expect(bottomNavFab("/sits", true).to).toBe("/publier");
   });
   it("règle d'affichage inchangée", () => {
     expect(isFabHidden("/profile")).toBe(true);

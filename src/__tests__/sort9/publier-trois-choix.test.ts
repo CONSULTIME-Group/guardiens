@@ -49,3 +49,10 @@ describe("entrées", () => {
     expect(read("src/App.tsx")).toContain('<Route path="/publier" element={<ProtectedRoute><Publier /></ProtectedRoute>} />');
   });
 });
+
+describe("porte d'affinité", () => {
+  it("l'écran de choix reste ouvert à un nouveau membre, comme les formulaires de publication", async () => {
+    const { isPublishPath } = await import("@/lib/postOnboardingIntent");
+    expect(isPublishPath("/publier")).toBe(true);
+  });
+});

@@ -9,7 +9,7 @@
 const KEY = "guardiens_publish_intent";
 const TTL_MS = 24 * 3600 * 1000;
 
-const PUBLISH_PREFIXES = ["/petites-missions/creer", "/sits/create", "/projets/publier"];
+const PUBLISH_PREFIXES = ["/petites-missions/creer", "/sits/create", "/projets/publier", "/publier"];
 
 export function isPublishPath(path: string | null | undefined): boolean {
   if (!path || !/^\/(?!\/)/.test(path)) return false;
