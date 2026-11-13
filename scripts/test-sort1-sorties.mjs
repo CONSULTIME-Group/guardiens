@@ -33,9 +33,12 @@ await db.exec(`
   CREATE TABLE public.feature_flags(key text PRIMARY KEY, enabled boolean NOT NULL DEFAULT false, description text);
 `);
 
+const migration2 = readFileSync(new URL('drizzle/migrations/0146_sort2_modification_sortie.sql', root), 'utf8');
 await db.exec(migration);
 await db.exec(migration);
-passed.push('migration rejouable');
+await db.exec(migration2);
+await db.exec(migration2);
+passed.push('migrations 0145 et 0146 rejouables');
 
 const one = async (sql, params = []) => (await db.query(sql, params)).rows[0];
 const as = (uid) => db.exec(`SELECT set_config('fixture.uid', '${uid ?? ''}', false)`);
@@ -124,6 +127,18 @@ await db.query(`UPDATE public.outings SET title = 'Belote du samedi', capacity =
 assert.equal((await one(`SELECT slug FROM public.outings WHERE id = $1`, [outing.id])).slug, outing.slug);
 passed.push('modification : titre et places oui, état, masquage et adresse non');
 
+// 6 bis. Lot SORT2 : un changement de jour ou de lieu prévient les inscrits, une date passée est refusée.
+await as(MARTINE);
+await db.query(`UPDATE public.outings SET description = 'Je fournis les cartes.' WHERE id = $1`, [outing.id]);
+assert.equal((await one(`SELECT count(*)::int AS n FROM public.notifications WHERE type = 'outing_changed'`)).n, 0);
+await db.query(`UPDATE public.outings SET starts_at = now() + interval '6 days' WHERE id = $1`, [outing.id]);
+assert.equal((await one(`SELECT count(*)::int AS n FROM public.notifications WHERE user_id = $1 AND type = 'outing_changed'`, [KARIM])).n, 1);
+assert.equal((await one(`SELECT count(*)::int AS n FROM public.notifications WHERE user_id = $1 AND type = 'outing_changed'`, [PAUL])).n, 0);
+await db.query(`UPDATE public.outings SET place_label = 'Lyon 5e, Saint-Just' WHERE id = $1`, [outing.id]);
+assert.equal((await one(`SELECT count(*)::int AS n FROM public.notifications WHERE user_id = $1 AND type = 'outing_changed'`, [KARIM])).n, 2);
+await assert.rejects(db.query(`UPDATE public.outings SET starts_at = now() - interval '1 hour' WHERE id = $1`, [outing.id]), /OUTING_DATE_PAST/);
+passed.push('modification : inscrits prévenus d\'un changement de jour ou de lieu, date passée refusée');
+
 // 7. Lecture ouverte : aucune position, aucun identifiant d'inscrit.
 const cols = (await db.query(`SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'public_outings'`)).rows.map((x) => x.column_name);
 for (const forbidden of ['latitude', 'longitude', 'hidden_at', 'agenda_consent']) assert.equal(cols.includes(forbidden), false, forbidden);
@@ -158,5 +173,10 @@ await as(NOE);
 assert.equal((await one(`SELECT public.outing_join($1) AS r`, [outing.id])).r.reason, 'cancelled');
 passed.push('annulation par l\'organisateur seul, inscrits prévenus');
 
+// 10. Lot SORT2 : une sortie annulée garde son contenu.
+await as(MARTINE);
+await assert.rejects(db.query(`UPDATE public.outings SET title = 'Autre titre' WHERE id = $1`, [outing.id]), /OUTING_CANCELLED_LOCKED/);
+passed.push('sortie annulée : contenu figé');
+
 for (const p of passed) console.log(`ok  ${p}`);
-console.log(`\n${passed.length} contrôles verts (SORT1)`);
+console.log(`\n${passed.length} contrôles verts (SORT1 et SORT2)`);

@@ -1,6 +1,6 @@
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useAdmin } from "@/hooks/useAdmin";
-import { OUTINGS_FLAG } from "@/lib/outings";
+import { OUTINGS_FLAG } from "@/lib/outingsFlag";
 
 /**
  * Lot SORT1 : les sorties sont visibles quand le drapeau est allumé. Tant

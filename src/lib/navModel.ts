@@ -49,7 +49,12 @@ export interface NavGroup {
  *   voir la recherche derrière le verrou. Même règle que la barre latérale
  *   historique, désormais appliquée aussi à la feuille mobile.
  */
-export const buildNavGroups = (role: NavRole, sitterSearchLocked: boolean): NavGroup[] => [
+/** Lot SORT2 : la rubrique s'appelle « Entraide & sorties » quand les sorties sont ouvertes. */
+export const ENTRAIDE_NAV_LABEL = "Entraide";
+export const ENTRAIDE_SORTIES_NAV_LABEL = "Entraide & sorties";
+export const entraideNavLabel = (outingsOpen: boolean): string => (outingsOpen ? ENTRAIDE_SORTIES_NAV_LABEL : ENTRAIDE_NAV_LABEL);
+
+export const buildNavGroups = (role: NavRole, sitterSearchLocked: boolean, outingsOpen = false): NavGroup[] => [
   {
     id: "espace",
     label: "Mon espace",
@@ -59,7 +64,7 @@ export const buildNavGroups = (role: NavRole, sitterSearchLocked: boolean): NavG
         ? { to: "/sits", icon: Calendar, label: "Mes annonces", badgeKey: "sits" }
         : { to: "/mes-candidatures", icon: Calendar, label: "Mes candidatures", badgeKey: "sits" },
       { to: "/messages", icon: MessageCircle, label: "Messages", badgeKey: "messages" },
-      { to: "/petites-missions", icon: Handshake, label: "Entraide", badgeKey: "entraide" },
+      { to: "/petites-missions", icon: Handshake, label: entraideNavLabel(outingsOpen), badgeKey: "entraide" },
     ],
   },
   {

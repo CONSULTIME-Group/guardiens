@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyProfile } from "@/lib/myProfile";
 import { useOutingsEnabled } from "@/hooks/useOutingsEnabled";
-import { createOuting } from "@/lib/outingsData";
+import { createOuting, fetchOutingBySlug, updateOuting } from "@/lib/outingsData";
 import {
   EMPTY_OUTING_DRAFT,
   OUTING_CAPACITY_MAX,
@@ -20,11 +20,15 @@ import {
   OUTING_DESCRIPTION_MAX,
   OUTING_PLACE_KINDS,
   OUTING_TITLE_MAX,
+  draftFromOuting,
+  minCapacityForEdit,
   outingDraftErrors,
   outingInsertFromDraft,
   outingPath,
+  outingUpdateFromDraft,
   type OutingDraft,
   type OutingDraftField,
+  type PublicOuting,
 } from "@/lib/outings";
 import { capitalizeFirstName } from "@/lib/displayName";
 import { trackEvent } from "@/lib/analytics";
@@ -47,11 +51,33 @@ const SortieCreate = () => {
   const [errors, setErrors] = useState<Partial<Record<OutingDraftField, string>>>({});
   const [submitting, setSubmitting] = useState(false);
   const prefilled = useRef(false);
+  const [searchParams] = useSearchParams();
+  // Lot SORT2 : ?modifier=<adresse> reprend une sortie pour la corriger,
+  // ?depuis=<adresse> la repropose à un nouveau jour.
+  const editSlug = searchParams.get("modifier");
+  const sourceSlug = editSlug || searchParams.get("depuis");
+  const [source, setSource] = useState<PublicOuting | null>(null);
+  const [sourceState, setSourceState] = useState<"none" | "loading" | "ready" | "refused">(sourceSlug ? "loading" : "none");
+  const editing = !!editSlug && sourceState === "ready" && !!source;
   const seen = useRef(false);
   useHideBottomNav(true);
 
   useEffect(() => {
-    if (prefilled.current || !profile) return;
+    if (!sourceSlug || !user?.id) return;
+    let cancelled = false;
+    fetchOutingBySlug(sourceSlug).then(({ data }) => {
+      if (cancelled) return;
+      if (!data || data.organizer_id !== user.id || (editSlug && data.status !== "open")) { setSourceState("refused"); return; }
+      prefilled.current = true;
+      setSource(data);
+      setDraft(draftFromOuting(data, { keepDate: !!editSlug }));
+      setSourceState("ready");
+    });
+    return () => { cancelled = true; };
+  }, [sourceSlug, editSlug, user?.id]);
+
+  useEffect(() => {
+    if (sourceSlug || prefilled.current || !profile) return;
     prefilled.current = true;
     setDraft((d) => ({ ...d, city: d.city || capitalizeFirstName(profile.city) || "", postalCode: d.postalCode || profile.postal_code || "" }));
   }, [profile]);
@@ -59,11 +85,13 @@ const SortieCreate = () => {
   useEffect(() => {
     if (!enabled || seen.current) return;
     seen.current = true;
-    trackEvent("outing_form_opened");
-  }, [enabled]);
+    trackEvent("outing_form_opened", { metadata: { mode: editSlug ? "edit" : sourceSlug ? "repropose" : "new" } });
+  }, [enabled, editSlug, sourceSlug]);
 
   if (gateLoading) return <div className="mx-auto max-w-2xl p-5"><Skeleton className="h-12 w-full rounded-2xl" /></div>;
   if (!enabled) return <Navigate to="/petites-missions" replace />;
+  if (sourceState === "refused") return <Navigate to="/sorties" replace />;
+  if (sourceState === "loading") return <div className="mx-auto max-w-2xl p-5" aria-busy="true"><Skeleton className="h-12 w-full rounded-2xl" /></div>;
 
   const set = <K extends keyof OutingDraft>(key: K, value: OutingDraft[K]) => setDraft((d) => ({ ...d, [key]: value }));
   const openSeats = Math.max(1, draft.capacity - draft.reserved);
@@ -78,6 +106,24 @@ const SortieCreate = () => {
       document.getElementById(`outing-${first}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
+    if (editing && source) {
+      if (draft.capacity < minCapacityForEdit(source, draft.reserved)) {
+        setErrors({ capacity: OUTING_COPY.capacityFloor });
+        document.getElementById("outing-capacity")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+      setSubmitting(true);
+      const result = await updateOuting(source.id, outingUpdateFromDraft(draft));
+      setSubmitting(false);
+      if (!result.ok) {
+        if (result.error?.includes("OUTING_CAPACITY_BELOW_ATTENDEES")) setErrors({ capacity: OUTING_COPY.capacityFloor });
+        else toast.error("L'enregistrement a échoué. Vérifiez votre connexion et réessayez.");
+        return;
+      }
+      trackEvent("outing_updated", { metadata: { outing: source.id } });
+      navigate(`${outingPath(source.slug)}?modifiee=1`);
+      return;
+    }
     setSubmitting(true);
     const { slug, error, hint } = await createOuting(outingInsertFromDraft(draft, user.id));
     setSubmitting(false);
@@ -87,17 +133,17 @@ const SortieCreate = () => {
       else toast.error("L'enregistrement a échoué. Vérifiez votre connexion et réessayez.");
       return;
     }
-    trackEvent("outing_published", { metadata: { category: draft.category, place_kind: draft.placeKind, capacity: draft.capacity, free: draft.free } });
+    trackEvent("outing_published", { metadata: { category: draft.category, place_kind: draft.placeKind, capacity: draft.capacity, free: draft.free, reproposed: !!source } });
     navigate(`${outingPath(slug)}?publiee=1`);
   };
 
   return (
     <form onSubmit={submit} noValidate className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-5 pb-28 pt-4">
       <PageMeta title="Proposer une sortie" description="Proposez une sortie à places comptées près de chez vous." path="/sorties/proposer" noindex />
-      <Link to="/sorties" className="self-start py-2.5 text-[15px] font-medium no-underline">← Sorties</Link>
+      <Link to={source ? outingPath(source.slug) : "/sorties"} className="self-start py-2.5 text-[15px] font-medium no-underline">{source ? "← Ma sortie" : "← Sorties"}</Link>
       <div className="flex flex-col gap-2">
-        <h1 className="font-heading text-[28px] font-bold leading-tight">{OUTING_COPY.propose}</h1>
-        <p className="text-[15px] leading-relaxed text-muted-foreground">{OUTING_COPY.formIntro}</p>
+        <h1 className="font-heading text-[28px] font-bold leading-tight">{editing ? OUTING_COPY.editTitle : OUTING_COPY.propose}</h1>
+        <p className="text-[15px] leading-relaxed text-muted-foreground">{editing ? OUTING_COPY.editIntro : source ? OUTING_COPY.reproposeIntro : OUTING_COPY.formIntro}</p>
       </div>
 
       <fieldset id="outing-category" className="flex flex-col gap-2.5">
@@ -223,15 +269,17 @@ const SortieCreate = () => {
 
       <div className="flex flex-col gap-3 rounded-2xl bg-accent/30 p-4">
         <p className="text-sm leading-relaxed">{OUTING_COPY.rules}</p>
+        {!editing && (
         <label className="flex min-h-11 items-start gap-3 text-sm leading-relaxed">
           <Checkbox checked={draft.agendaConsent} onCheckedChange={(v) => set("agendaConsent", v === true)} className="mt-0.5 h-6 w-6" />
           <span>{OUTING_COPY.agenda}</span>
         </label>
+        )}
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card px-5 py-3">
         <Button type="submit" size="lg" disabled={submitting} className="mx-auto flex h-[52px] w-full max-w-2xl rounded-2xl text-base">
-          {submitting ? "Publication…" : "Publier ma sortie"}
+          {submitting ? "Enregistrement…" : editing ? "Enregistrer" : "Publier ma sortie"}
         </Button>
       </div>
     </form>
