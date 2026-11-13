@@ -51,7 +51,8 @@ const TABLE_MAX = 2;
  * fondre par hasard avec les autres ; sur le vivier réaliste (p4/), 49 → 43.
  */
 const P3_TOTAL: Record<string, number> = { "owner-true": 40, "sitter-true": 37, "owner-false": 28, "sitter-false": 30 };
-const HOME_MAX = 10;
+// Lot VIT1 (13/11/2026) : 11 lectures, la vitrine lit la prochaine sortie ouverte (public_outings).
+const HOME_MAX = 11;
 
 const recOf = () => h.rec as import("../p1b/supabaseRecorder").Recorder;
 const U = "00000000-0000-4000-8000-000000000001";
@@ -131,7 +132,7 @@ describe("P3, budget de lectures", () => {
     }, 30000);
   }
 
-  it("/ membre connecté sur ordinateur : au plus 10 lectures, aucune du tableau de bord ni d'Alma", async () => {
+  it("/ membre connecté sur ordinateur : au plus 11 lectures, aucune du tableau de bord ni d'Alma", async () => {
     const mm = window.matchMedia;
     (globalThis as any).ResizeObserver ??= class { observe() {} unobserve() {} disconnect() {} };
     (globalThis as any).IntersectionObserver ??= class { observe() {} unobserve() {} disconnect() {} takeRecords() { return []; } };
