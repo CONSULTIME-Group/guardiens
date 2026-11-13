@@ -26,6 +26,9 @@ import {
   averageAnswerLength,
   openingRepetition,
   inputSplit,
+  inputModeLabel,
+  speakerStats,
+  typedConversations,
   type RawConversation,
 } from "@/lib/admin/alma-conversations";
 import { toCsv } from "@/lib/admin/alma-analytics";
@@ -82,10 +85,14 @@ export function ConversationsTab({ since }: { since: string }) {
     refetchOnWindowFocus: false,
   });
 
-  const themes = useMemo(() => aggregateThemes(rows), [rows]);
+  // Lot ALMA4b : thèmes, longueur et amorces se mesurent sur les messages
+  // écrits ou dictés ; les réponses d'un geste (fait lu en base) ont leur tuile.
+  const typedRows = useMemo(() => typedConversations(rows), [rows]);
+  const speakers = useMemo(() => speakerStats(rows), [rows]);
+  const themes = useMemo(() => aggregateThemes(typedRows), [typedRows]);
   const refusals = useMemo(() => aggregateRefusals(rows), [rows]);
-  const avgLength = useMemo(() => averageAnswerLength(rows), [rows]);
-  const openings = useMemo(() => openingRepetition(rows), [rows]);
+  const avgLength = useMemo(() => averageAnswerLength(typedRows), [typedRows]);
+  const openings = useMemo(() => openingRepetition(typedRows), [typedRows]);
   const split = useMemo(() => inputSplit(rows), [rows]);
   const followed = followedRaw ?? { total: 0, count: 0, rate: null };
 
@@ -123,11 +130,23 @@ export function ConversationsTab({ since }: { since: string }) {
       {truncated && (
         <p className="text-xs text-muted-foreground">Données partielles : seules les {ROW_LIMIT} réponses les plus récentes de la période sont lues.</p>
       )}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <Card>
+          <CardContent className="p-4" data-testid="alma-speakers-tile">
+            <p className="text-xs text-muted-foreground">Personnes qui parlent à Alma</p>
+            <p className="text-2xl font-semibold">{shown(truncated ? `${speakers.people}+` : speakers.people)}</p>
+            <p className="text-xs text-muted-foreground">
+              {ready ? `${speakers.typedPeople} en écrivant, ${speakers.replyChipPeople} d'un geste` : ""}
+            </p>
+          </CardContent>
+        </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground">Échanges</p>
             <p className="text-2xl font-semibold">{shown(truncated ? `${rows.length}+` : rows.length)}</p>
+            <p className="text-xs text-muted-foreground">
+              {ready ? `${speakers.typed} écrits ou dictés, ${speakers.replyChips} réponses d'un geste` : ""}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -243,7 +262,7 @@ export function ConversationsTab({ since }: { since: string }) {
                   {r.active_role === "owner" ? "propriétaire" : "gardien"}
                 </Badge>
                 {r.register && <Badge variant="secondary">{adminLabel(r.register, ALMA_REGISTER_LABELS)}</Badge>}
-                {r.input_mode && <Badge variant="outline">{r.input_mode === "voice" ? "voix" : "clavier"}</Badge>}
+                {inputModeLabel(r.input_mode) && <Badge variant="outline">{inputModeLabel(r.input_mode)}</Badge>}
                 {r.refusal_reason && <Badge variant="destructive">{reasonLabel(r.refusal_reason)}</Badge>}
               </div>
               <p className="text-sm font-medium whitespace-pre-wrap">{r.question}</p>

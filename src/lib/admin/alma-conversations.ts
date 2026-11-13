@@ -82,6 +82,7 @@ const REFUSAL_LABEL: Record<string, string> = {
   urgence: "Urgence",
   daily_limit: "Plafond quotidien",
   empty_answer: "Réponse vide",
+  reply_chip_limit: "Plafond des réponses d'un geste",
 };
 
 export function aggregateRefusals(rows: RawConversation[]): RefusalStat[] {
@@ -128,21 +129,80 @@ export function openingRepetition(rows: RawConversation[]): OpeningRepetition {
 export interface InputSplit {
   voice: number;
   keyboard: number;
+  /** Lot ALMA4b : réponses d'un geste sous un fait (input_mode reply_chip). */
+  replyChip: number;
   unknown: number;
   voiceShare: number;
+}
+
+/** Lot ALMA4 : valeur de input_mode pour une réponse d'un geste. */
+export const REPLY_CHIP_INPUT_MODE = "reply_chip";
+
+export function isReplyChipRow(r: Pick<RawConversation, "input_mode">): boolean {
+  return r.input_mode === REPLY_CHIP_INPUT_MODE;
+}
+
+/** Libellé du mode de saisie d'un échange, ou null quand il est inconnu. */
+export function inputModeLabel(mode: string | null | undefined): string | null {
+  if (mode === "voice") return "voix";
+  if (mode === "keyboard") return "clavier";
+  if (mode === REPLY_CHIP_INPUT_MODE) return "réponse d'un geste";
+  return null;
+}
+
+/**
+ * Lot ALMA4b : les réponses d'un geste sortent des mesures de qualité des
+ * réponses (thèmes, longueur, amorces) : la question est le libellé d'une
+ * puce et la réponse un fait lu en base, jamais un texte du modèle.
+ */
+export function typedConversations<T extends Pick<RawConversation, "input_mode">>(rows: T[]): T[] {
+  return rows.filter((r) => !isReplyChipRow(r));
+}
+
+export interface SpeakerStats {
+  /** Personnes distinctes qui ont parlé à Alma, en écrivant ou d'un geste. */
+  people: number;
+  typedPeople: number;
+  replyChipPeople: number;
+  typed: number;
+  replyChips: number;
+}
+
+/**
+ * « Parler à Alma » (arène du 10/11/2026) : message tapé ou dicté, ou réponse
+ * d'un geste. Une personne qui fait les deux compte une fois.
+ */
+export function speakerStats(rows: Array<Pick<RawConversation, "input_mode" | "user_id">>): SpeakerStats {
+  const typedPeople = new Set<string>();
+  const chipPeople = new Set<string>();
+  let typed = 0;
+  let replyChips = 0;
+  for (const r of rows) {
+    if (isReplyChipRow(r)) { replyChips++; chipPeople.add(r.user_id); }
+    else { typed++; typedPeople.add(r.user_id); }
+  }
+  return {
+    people: new Set([...typedPeople, ...chipPeople]).size,
+    typedPeople: typedPeople.size,
+    replyChipPeople: chipPeople.size,
+    typed,
+    replyChips,
+  };
 }
 
 export function inputSplit(rows: RawConversation[]): InputSplit {
   let voice = 0;
   let keyboard = 0;
+  let replyChip = 0;
   let unknown = 0;
   for (const r of rows) {
     if (r.input_mode === "voice") voice++;
     else if (r.input_mode === "keyboard") keyboard++;
+    else if (isReplyChipRow(r)) replyChip++;
     else unknown++;
   }
   const known = voice + keyboard;
-  return { voice, keyboard, unknown, voiceShare: known > 0 ? voice / known : 0 };
+  return { voice, keyboard, replyChip, unknown, voiceShare: known > 0 ? voice / known : 0 };
 }
 
 export interface ActionEvent {

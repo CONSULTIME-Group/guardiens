@@ -1,6 +1,7 @@
 import { KpiTile, Pager, SearchInput, usePagedSearch } from "@/components/admin/ui";
 import { adminLabel, ALMA_FACT_TYPE_LABELS } from "@/lib/admin/labels";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { ReplyChipCard } from "./_components/alma/ReplyChipCard";
 import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -403,6 +404,8 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
         <KpiCard label="Taux de rejet" value={whispersError ? UNAVAILABLE_LABEL : fmtPct(totals.dismissRate)} />
         <KpiCard label="Personnes qui ont coupé ce type" value={whispersError ? UNAVAILABLE_LABEL : totals.blacklisted} />
       </div>
+
+      <ReplyChipCard since={since} />
 
       <Card>
         <CardContent className="p-6 space-y-3">
