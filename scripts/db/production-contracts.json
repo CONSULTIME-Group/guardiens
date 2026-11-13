@@ -588,7 +588,7 @@
         },
         {
           "name": "ecriture_fermee_aux_membres",
-          "sql": "SELECT NOT has_table_privilege('authenticated', 'public.home_featured_sit', 'INSERT') AS ok"
+          "sql": "SELECT count(*) = 0 AS ok FROM information_schema.role_table_grants WHERE table_schema = 'public' AND table_name = 'home_featured_sit' AND grantee IN ('anon', 'authenticated') AND privilege_type <> 'SELECT'"
         },
         {
           "name": "fonction_admin",
