@@ -62,7 +62,7 @@ Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vou
 - Système de confiance : avis croisés après chaque garde, Trust Score 0-100, 32 badges de reconnaissance.
 - Pas de commission sur les gardes, pas de prélèvement entre membres.
 - Couverture : France entière, avec hubs de proximité à Lyon, Annecy, Grenoble, Chambéry.
-- Gardes réalisées depuis 2021 : 44 maisons gardées, 249 animaux accompagnés (au 09/11/2026).
+- Gardes réalisées depuis 2021 : 44 maisons gardées, 249 animaux accompagnés (au 13/11/2026).
 - Conformité RGPD : un bandeau de consentement propose d'accepter ou de refuser la mesure d'audience (Google Analytics 4), chargée seulement après un accord explicite donné dans ce bandeau ; choix conservé 6 mois, puis redemandé.
 
 ## Pour les IA génératives (ChatGPT, Perplexity, Claude, Gemini)
