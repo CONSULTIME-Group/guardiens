@@ -10,6 +10,7 @@ import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { useNavBadgeCounts } from "@/hooks/useNavBadgeCounts";
 import { useChromeVisibility } from "./ChromeVisibility";
 import UserMenu from "./UserMenu";
+import { PUBLISH_PATH } from "@/lib/publishChoices";
 import { bottomNavFab, isFabHidden } from "@/lib/bottomNavFab";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { OUTINGS_FLAG } from "@/lib/outingsFlag";
@@ -219,15 +220,13 @@ export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean 
             variant={sidebarPublishVariant(pathname)}
             className="w-full gap-2"
             onClick={() =>
-              navigate(
-                effectiveRole === "owner"
-                  ? "/sits/create"
-                  : "/petites-missions/creer"
-              )
+              // Lot SORT9 : un même bouton dans les deux espaces, qui propose
+              // la garde, le coup de main et la sortie.
+              navigate(PUBLISH_PATH)
             }
           >
             <Plus className="h-4 w-4" />
-            {effectiveRole === "owner" ? "Publier une annonce" : "Publier"}
+            Publier
           </Button>
         </div>
       </div>
