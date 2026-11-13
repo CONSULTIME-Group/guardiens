@@ -8,28 +8,39 @@ import { readFileSync } from "node:fs";
 import { __resetVisitIdForTests, describeHomeClick, getVisitId } from "@/lib/analytics";
 import { clsStillOpen } from "@/lib/webVitals";
 
+const accept = () => localStorage.setItem("guardiens_cookie_consent_v1", JSON.stringify({ value: "granted", timestamp: Date.now() }));
+
 describe("identifiant de visite", () => {
-  beforeEach(() => { sessionStorage.clear(); __resetVisitIdForTests(); });
+  beforeEach(() => { sessionStorage.clear(); localStorage.clear(); __resetVisitIdForTests(); });
 
   it("reste le même pendant la visite", () => {
     const first = getVisitId();
     expect(first).toMatch(/^[a-z0-9]{12,32}$/);
     expect(getVisitId()).toBe(first);
+  });
+
+  it("sans accord cookies, rien ne s'écrit dans le navigateur", () => {
+    getVisitId();
+    expect(sessionStorage.getItem("g_visit")).toBeNull();
+    expect(localStorage.getItem("g_visit")).toBeNull();
+  });
+
+  it("après l'accord, le même identifiant s'écrit dans le stockage de session et survit au rechargement", () => {
+    const first = getVisitId();
+    accept();
+    expect(getVisitId()).toBe(first);
+    expect(sessionStorage.getItem("g_visit")).toBe(first);
+    expect(localStorage.getItem("g_visit")).toBeNull();
     __resetVisitIdForTests();
     expect(getVisitId()).toBe(first);
   });
 
-  it("change à la visite suivante (stockage de session vidé)", () => {
+  it("change à la visite suivante", () => {
+    accept();
     const first = getVisitId();
     sessionStorage.clear();
     __resetVisitIdForTests();
     expect(getVisitId()).not.toBe(first);
-  });
-
-  it("vit dans le stockage de session, jamais dans le stockage durable", () => {
-    getVisitId();
-    expect(sessionStorage.getItem("g_visit")).toBeTruthy();
-    expect(localStorage.getItem("g_visit")).toBeNull();
   });
 });
 

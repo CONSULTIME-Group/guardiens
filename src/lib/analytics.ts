@@ -6,6 +6,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { getDeviceContext } from "@/lib/deviceContext";
 import { getSafeLocalStorage, getSafeSessionStorage } from "@/lib/storageFallback";
+import { getStoredConsent } from "@/lib/cookieConsent";
 import { isLabOrBotTraffic } from "@/lib/labTraffic";
 
 export type EventType =
@@ -502,25 +503,30 @@ let memoryVisitId: string | null = null;
 
 /**
  * Lot HOME3 (13/11/2026) : identifiant de visite. Aléatoire, sans lien avec la
- * personne ni l'appareil, rangé dans le stockage de session de l'onglet (il
- * disparaît à sa fermeture). Chaque événement le porte : on peut ainsi relier
- * un clic de la home à l'inscription ou à la publication de la même visite.
+ * personne ni l'appareil. Chaque événement le porte : on peut ainsi relier un
+ * clic de la home à l'inscription ou à la publication de la même visite.
+ * Même règle que la source d'inscription (lot SRC1) : il s'écrit dans le
+ * stockage de session de l'onglet seulement après l'accord cookies ; sans
+ * accord, il vit en mémoire et s'éteint au rechargement de la page.
  */
 export function getVisitId(): string | null {
   if (typeof window === "undefined") return null;
-  if (memoryVisitId) return memoryVisitId;
   try {
-    const store = getSafeSessionStorage();
-    const known = store?.getItem(VISIT_KEY);
-    if (known && /^[a-z0-9]{12,32}$/.test(known)) { memoryVisitId = known; return known; }
-    const bytes = new Uint8Array(12);
-    crypto.getRandomValues(bytes);
-    const id = Array.from(bytes, (b) => (b % 36).toString(36)).join("") + Date.now().toString(36).slice(-4);
-    store?.setItem(VISIT_KEY, id);
-    memoryVisitId = id;
-    return id;
+    const consented = getStoredConsent() === "granted";
+    const store = consented ? getSafeSessionStorage() : null;
+    if (!memoryVisitId) {
+      const known = store?.getItem(VISIT_KEY);
+      if (known && /^[a-z0-9]{12,32}$/.test(known)) memoryVisitId = known;
+    }
+    if (!memoryVisitId) {
+      const bytes = new Uint8Array(12);
+      crypto.getRandomValues(bytes);
+      memoryVisitId = Array.from(bytes, (b) => (b % 36).toString(36)).join("") + Date.now().toString(36).slice(-4);
+    }
+    if (store && store.getItem(VISIT_KEY) !== memoryVisitId) store.setItem(VISIT_KEY, memoryVisitId);
+    return memoryVisitId;
   } catch {
-    return null;
+    return memoryVisitId;
   }
 }
 const VISIT_KEY = "g_visit";
