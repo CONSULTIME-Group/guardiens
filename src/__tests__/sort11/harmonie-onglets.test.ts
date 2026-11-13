@@ -67,6 +67,19 @@ describe("SORT11, même squelette", () => {
     expect(read("src/pages/ProjetsListing.tsx")).toContain("/projets/publier?titre=");
   });
 
+  it("lot SORT12 : les chantiers s'affichent dans la même carte en ligne, deux colonnes à l'ordinateur", () => {
+    const page = read("src/pages/ProjetsListing.tsx");
+    expect(page).toContain("<ProjetRow key={p.id} projet={p} />");
+    expect(page).toContain('className="grid gap-3 md:grid-cols-2"');
+    expect(read("src/pages/Sorties.tsx")).toContain('className="grid gap-3 md:grid-cols-2"');
+    const row = read("src/components/outings/ProjetRow.tsx");
+    const card = read("src/components/outings/OutingCard.tsx");
+    const shell = 'className="relative flex gap-3.5 rounded-2xl border border-border bg-card p-3.5"';
+    expect(row).toContain(shell);
+    expect(card).toContain(shell);
+    expect(row).not.toMatch(/[—–]/);
+  });
+
   it("ponctuation et vocabulaire", () => {
     for (const file of [...PAGES, "src/components/outings/HubHeader.tsx"]) {
       expect(read(file), file).not.toMatch(/[—–]/);
