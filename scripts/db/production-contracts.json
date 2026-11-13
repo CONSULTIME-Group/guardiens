@@ -575,7 +575,7 @@
       ]
     },
     {
-      "migration": "0151_vit2_annonce_a_la_une.sql",
+      "migration": "0152_vit2_annonce_a_la_une.sql",
       "description": "Annonce à la une de la home : table d'une ligne lisible par tous, écrite par une fonction réservée aux admins",
       "checks": [
         {
