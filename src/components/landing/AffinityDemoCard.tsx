@@ -10,8 +10,9 @@ import { trackEvent } from "@/lib/analytics";
  * Preuve visuelle du score d'affinité (exemple illustratif, liste de
  * critères pondérés, lien vers l'explication complète). Extrait de
  * l'ancienne section AffinityScoreShowcase, supprimée le 06/09/2026 car
- * elle répétait la carte 01 de ConfianceSection. Le bloc vit désormais
- * dans ConfianceSection et porte l'ancre "#matching".
+ * elle répétait la carte 01 de ConfianceSection. Depuis le lot HOME8
+ * (13/11/2026) le bloc vit dans ChoisirSection et porte l'ancre "#matching" :
+ * texte à gauche, carte à droite à partir de 768 px.
  */
 export default function AffinityDemoCard() {
   const { t } = useTranslation();
@@ -28,9 +29,9 @@ export default function AffinityDemoCard() {
   ];
 
   return (
-    <div id="matching" ref={ref} className="scroll-mt-24 mt-7 md:mt-9">
+    <div id="matching" ref={ref} className="scroll-mt-24 mt-8 md:mt-12 md:grid md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] md:items-start md:gap-12">
       <div>
-        <ul className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <ul className="grid grid-cols-1 gap-3 md:gap-4 md:text-lg">
           {bullets.map((b, i) => (
             <li key={i} className="flex gap-3 text-foreground/85">
               <CheckCircle2 className="w-5 h-5 mt-0.5 text-primary shrink-0" aria-hidden="true" />
@@ -53,7 +54,7 @@ export default function AffinityDemoCard() {
         </div>
       </div>
 
-      <div className="mt-7 w-full rounded-2xl border border-border bg-card p-6 md:p-8 shadow-sm">
+      <div className="mt-7 w-full rounded-2xl border border-border bg-card p-6 shadow-sm md:mt-0 md:p-8">
         <div className="flex items-center justify-between mb-4">
           <span className="font-body text-xs uppercase tracking-widest text-foreground/75">
             {t("landing.affinity.demo_label")}

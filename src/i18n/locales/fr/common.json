@@ -394,6 +394,20 @@
       "entraide_text": "Un coup de main entre deux personnes, ou un chantier participatif à plusieurs : un potager à arroser, des courses, une haie à planter.",
       "sorties_title": "Sorties",
       "sorties_text": "Une balade, une partie de belote, un jeu de société, à plusieurs."
+    },
+    "choose": {
+      "eyebrow": "L'affinité",
+      "title": "Votre gardien idéal, votre maison idéale, votre moment.",
+      "lede": "Sur Guardiens, chacun décrit ce qu'il cherche. Le score d'affinité montre ensuite où vous vous correspondez, et vous choisissez.",
+      "sitter_who": "Vous partez",
+      "sitter_title": "Votre gardien idéal",
+      "sitter_text": "Un couple, un retraité, une famille, quelqu'un d'actif ou quelqu'un qui reste à la maison, avec voiture ou à pied. Vous décrivez qui vous voulez chez vous.",
+      "home_who": "Vous gardez",
+      "home_title": "Votre maison idéale",
+      "home_text": "Chien, chat, poules ou jardin : vous dites avec quels animaux vous êtes à l'aise, votre rythme, et ce que vous préférez éviter.",
+      "moment_who": "Pour tous",
+      "moment_title": "Votre moment",
+      "moment_text": "Vos dates quand vous partez, vos zones d'alerte quand vous gardez. Chaque nouvelle annonce arrive aux gardiens qu'elle concerne."
     }
   },
   "faq": {
