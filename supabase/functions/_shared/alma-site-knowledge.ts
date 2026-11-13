@@ -507,7 +507,7 @@ export const ALMA_KNOWLEDGE_EXCLUDED_ROUTES: string[] = [
   "/", // accueil, Alma y est déjà
   // Lot SORT1 (12/11/2026) : sorties derrière le drapeau « sorties », éteint.
   // À décrire à Alma à l'ouverture de la rubrique.
-  "/sorties", "/sorties/proposer", "/sorties/:slug",
+  "/sorties", "/sorties/proposer", "/sorties/:slug", "/sorties/alertes",
   "*", // page introuvable
   // Légal
   "/cgu", "/cgs", "/confidentialite", "/mentions-legales", "/cookies",

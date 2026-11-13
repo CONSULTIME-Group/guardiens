@@ -181,6 +181,8 @@ const ALERT: ReadonlyArray<string> = [
   'nearby-sit-alert',
   // Vague d'entraide : sollicitation de proximite, desinscription obligatoire.
   'mission-help-needed',
+  // Lot SORT4 : alerte « nouvelle sortie », arrêt propre aux sorties.
+  'outing-alert',
   'sitter-daily-digest',
   'alert-digest',
 ]

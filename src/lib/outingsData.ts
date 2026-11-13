@@ -92,3 +92,25 @@ export async function createOuting(row: Record<string, unknown>): Promise<{ slug
   if (error) return { slug: null, error: error.message, hint: error.hint ?? null };
   return { slug: (data as { slug: string }).slug, error: null, hint: null };
 }
+
+// ── Lot SORT4 : alerte « nouvelle sortie » ──
+export type OutingAlertRadius = "quartier" | "5" | "15";
+export interface OutingAlertPreference { enabled: boolean; radius: OutingAlertRadius }
+
+export async function fetchMyOutingAlertPreference(): Promise<OutingAlertPreference | null> {
+  const { data, error } = await db.rpc("my_outing_alert_preference");
+  if (error || !data) return null;
+  const radius = data.radius === "quartier" || data.radius === "5" ? data.radius : "15";
+  return { enabled: data.enabled !== false, radius };
+}
+
+export async function saveMyOutingAlertPreference(pref: OutingAlertPreference): Promise<boolean> {
+  const { data, error } = await db.rpc("set_my_outing_alert_preference", { p_enabled: pref.enabled, p_radius: pref.radius });
+  return !error && data?.ok === true;
+}
+
+/** Arrêt ou reprise par le lien de l'email, sans connexion. */
+export async function setOutingAlertsByToken(token: string, enabled: boolean): Promise<boolean> {
+  const { data, error } = await db.rpc("outing_alerts_set_by_token", { p_token: token, p_enabled: enabled });
+  return !error && data?.ok === true;
+}

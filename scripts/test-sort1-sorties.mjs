@@ -21,7 +21,9 @@ await db.exec(`
   $$;
   CREATE TYPE public.app_role AS ENUM ('admin', 'user');
   CREATE TABLE public.profiles(id uuid PRIMARY KEY, first_name text, postal_code text, latitude numeric, longitude numeric,
-    identity_verified boolean, created_at timestamptz NOT NULL DEFAULT now());
+    identity_verified boolean, created_at timestamptz NOT NULL DEFAULT now(), email text, account_status text DEFAULT 'active',
+    last_seen_at timestamptz DEFAULT now());
+  CREATE TABLE public.email_unsubscribe_tokens(id uuid PRIMARY KEY DEFAULT gen_random_uuid(), token text UNIQUE, email text UNIQUE);
   CREATE TABLE public.user_roles(user_id uuid, role public.app_role);
   CREATE FUNCTION public.has_role(_user_id uuid, _role public.app_role) RETURNS boolean LANGUAGE sql STABLE AS $$
     SELECT EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = _user_id AND role = _role)
@@ -44,7 +46,10 @@ await db.exec(migration2);
 const migration3 = readFileSync(new URL('drizzle/migrations/0147_sort3_emails_sorties.sql', root), 'utf8');
 await db.exec(migration3);
 await db.exec(migration3);
-passed.push('migrations 0145, 0146 et 0147 rejouables');
+const migration4 = readFileSync(new URL('drizzle/migrations/0148_sort4_alertes_sorties.sql', root), 'utf8');
+await db.exec(migration4);
+await db.exec(migration4);
+passed.push('migrations 0145 à 0148 rejouables');
 
 const one = async (sql, params = []) => (await db.query(sql, params)).rows[0];
 const as = (uid) => db.exec(`SELECT set_config('fixture.uid', '${uid ?? ''}', false)`);
@@ -244,5 +249,66 @@ assert.equal((await queued()).every((m) => !/[\u2014\u2013]/.test(JSON.stringify
 assert.equal((await one(`SELECT count(*)::int AS n FROM public.email_deferred_queue`)).n, (await one(`SELECT count(DISTINCT idempotency_key)::int AS n FROM public.email_deferred_queue`)).n);
 passed.push('emails : annulation avec le mot de l\'organisateur, une clé par envoi');
 
+// 12. Lot SORT4 : alerte « nouvelle sortie ». Drapeau éteint : rien, malgré les publications précédentes.
+assert.equal((await one(`SELECT enabled FROM public.feature_flags WHERE key = 'sorties_alertes'`)).enabled, false);
+assert.equal((await queued(`defer_reason = 'outing_alert'`)).length, 0);
+await db.exec(`UPDATE public.feature_flags SET enabled = true WHERE key = 'sorties_alertes'`);
+// Karim : même code postal. Léa : à 4 km, réglée sur 5 km. Paul : à 12 km, sans réglage (15 km).
+// Noé : à 12 km, réglé sur « Mon quartier ». Admin : à 40 km. Un sixième membre proche, absent depuis 45 jours.
+const ABSENT = U(7);
+await db.query(`INSERT INTO public.profiles(id, first_name, postal_code, latitude, longitude, last_seen_at) VALUES ($1, 'Zoé', '69005', 45.76, 4.82, now() - interval '45 days')`, [ABSENT]);
+await db.query(`INSERT INTO auth.users(id, email) VALUES ($1, 'zoe@fixture.test'), ($2, 'admin@fixture.test')`, [ABSENT, ADMIN]);
+await db.query(`UPDATE public.profiles SET email = lower(first_name) || '@fixture.test'`);
+await db.query(`UPDATE public.profiles SET postal_code = '69160', latitude = 45.76, longitude = 4.769 WHERE id = $1`, [LEA]);
+await db.query(`UPDATE public.profiles SET postal_code = '69260', latitude = 45.76, longitude = 4.666 WHERE id = ANY($1)`, [[PAUL, NOE]]);
+await db.query(`UPDATE public.profiles SET postal_code = '38200', latitude = 45.52, longitude = 4.87 WHERE id = $1`, [ADMIN]);
+await as(LEA);
+assert.deepEqual((await one(`SELECT public.my_outing_alert_preference() AS p`)).p, { enabled: true, radius: '15' });
+assert.equal((await one(`SELECT public.set_my_outing_alert_preference(true, '5') AS r`)).r.ok, true);
+assert.equal((await one(`SELECT public.set_my_outing_alert_preference(true, '30') AS r`)).r.reason, 'radius');
+await as(NOE);
+await db.query(`SELECT public.set_my_outing_alert_preference(true, 'quartier')`);
+await as(MARTINE);
+const tarot = await one(`
+  INSERT INTO public.outings(organizer_id, title, category, starts_at, place_kind, place_label, city, postal_code, capacity, reserved)
+  VALUES ($1, 'Tarot du jeudi', 'jeux', now() + interval '4 days', 'home', 'Lyon 5e', 'Lyon', '69005', 5, 2) RETURNING *`, [MARTINE]);
+let alerts = await queued(`defer_reason = 'outing_alert'`);
+assert.deepEqual(alerts.map((m) => m.recipient_email).sort(), ['karim@fixture.test', 'lea@fixture.test', 'paul@fixture.test'].sort());
+assert.equal(alerts[0].template_name, 'outing-alert');
+assert.equal(alerts[0].template_data.placesLeft, 3);
+assert.match(alerts[0].template_data.link, /\?via=alerte$/);
+passed.push('alerte : même code postal, 5 km et 15 km servis ; « Mon quartier » ailleurs, 40 km, organisateur et membre absent écartés');
+
+// Une alerte par semaine et par membre : une seconde sortie le même jour reste sans envoi.
+await db.query(`INSERT INTO public.outings(organizer_id, title, category, starts_at, place_kind, place_label, city, postal_code, capacity, reserved)
+  VALUES ($1, 'Échecs au café', 'jeux', now() + interval '6 days', 'public', 'Café de la Place', 'Lyon', '69005', 4, 1)`, [MARTINE]);
+assert.equal((await queued(`defer_reason = 'outing_alert'`)).length, 3);
+passed.push('alerte : au plus une par semaine et par membre');
+
+// Arrêt en un clic par le jeton de l'email : seules les alertes sorties changent.
+await db.query(`INSERT INTO public.email_unsubscribe_tokens(token, email) VALUES ('${'a'.repeat(64)}', 'Karim@fixture.test')`);
+await as(null);
+assert.equal((await one(`SELECT public.outing_alerts_set_by_token('court', false) AS r`)).r.ok, false);
+assert.equal((await one(`SELECT public.outing_alerts_set_by_token($1, false) AS r`, ['b'.repeat(64)])).r.ok, false);
+assert.deepEqual((await one(`SELECT public.outing_alerts_set_by_token($1, false) AS r`, ['a'.repeat(64)])).r, { ok: true, enabled: false });
+assert.equal((await one(`SELECT enabled FROM public.outing_alert_preferences WHERE user_id = $1`, [KARIM])).enabled, false);
+await db.exec(`DELETE FROM public.outing_alert_log`);
+await as(MARTINE);
+await db.query(`INSERT INTO public.outings(organizer_id, title, category, starts_at, place_kind, place_label, city, postal_code, capacity, reserved)
+  VALUES ($1, 'Scrabble du dimanche', 'jeux', now() + interval '8 days', 'home', 'Lyon 5e', 'Lyon', '69005', 4, 1)`, [MARTINE]);
+alerts = await queued(`defer_reason = 'outing_alert' AND template_data->>'title' = 'Scrabble du dimanche'`);
+assert.deepEqual(alerts.map((m) => m.recipient_email).sort(), ['lea@fixture.test', 'paul@fixture.test'].sort());
+await as(null);
+assert.equal((await one(`SELECT public.outing_alerts_set_by_token($1, true) AS r`, ['a'.repeat(64)])).r.enabled, true);
+passed.push('arrêt par le jeton de l\'email : alertes sorties seules, reprise possible');
+
+// Une sortie en ligne reste sans alerte.
+await db.exec(`DELETE FROM public.outing_alert_log`);
+await as(MARTINE);
+await db.query(`INSERT INTO public.outings(organizer_id, title, category, starts_at, place_kind, capacity, reserved)
+  VALUES ($1, 'Échecs en ligne', 'jeux', now() + interval '3 days', 'online', 2, 1)`, [MARTINE]);
+assert.equal((await queued(`template_data->>'title' = 'Échecs en ligne'`)).length, 0);
+passed.push('alerte : sortie en ligne sans envoi');
+
 for (const p of passed) console.log(`ok  ${p}`);
-console.log(`\n${passed.length} contrôles verts (SORT1, SORT2 et SORT3)`);
+console.log(`\n${passed.length} contrôles verts (SORT1 à SORT4)`);

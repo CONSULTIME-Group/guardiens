@@ -34,6 +34,8 @@ Deno.serve(async (req) => {
   const url = new URL(req.url)
   let token: string | null = url.searchParams.get('token')
   let category: string | null = url.searchParams.get('category')
+  // Lot SORT4 : désinscription en un geste limitée aux alertes sorties.
+  const scope: string | null = url.searchParams.get('scope')
   let categoriesPayload: { product?: boolean; digest?: boolean; alert?: boolean } | null = null
   let unsubscribeAll = false
   let requestEmail: string | null = null
@@ -41,8 +43,8 @@ Deno.serve(async (req) => {
   if (req.method === 'POST') {
     const contentType = req.headers.get('content-type') ?? ''
     if (contentType.includes('application/x-www-form-urlencoded')) {
-      // RFC 8058 one-click → suppress entirely
-      unsubscribeAll = true
+      // RFC 8058 one-click → suppress entirely, sauf portée « outing » (lot SORT4)
+      unsubscribeAll = scope !== 'outing'
     } else {
       try {
         const body = await req.json()
@@ -116,6 +118,16 @@ Deno.serve(async (req) => {
   }
 
   if (!token) return jsonResponse({ error: 'Token is required' }, 400)
+
+  // Lot SORT4 : le bouton de désinscription d'une alerte sortie coupe les
+  // seules alertes sorties. Les autres emails du membre restent tels quels.
+  if (req.method === 'POST' && scope === 'outing') {
+    const { data: stopped, error: stopError } = await supabase.rpc('outing_alerts_set_by_token', { p_token: token, p_enabled: false })
+    if (stopError || (stopped as { ok?: boolean } | null)?.ok !== true) {
+      return jsonResponse({ error: 'Invalid or expired token' }, 404)
+    }
+    return jsonResponse({ success: true, mode: 'outing_alerts' })
+  }
 
   const { data: tokenRecord, error: lookupError } = await supabase
     .from('email_unsubscribe_tokens')

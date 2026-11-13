@@ -503,6 +503,40 @@
           "sql": "SELECT count(*) = 0 AS ok FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'public_outings' AND column_name = 'reminder_sent_at'"
         }
       ]
+    },
+    {
+      "migration": "0148_sort4_alertes_sorties.sql",
+      "description": "Alerte « nouvelle sortie » derrière le drapeau sorties_alertes : réglage par membre, destinataires à 15 km au plus, une alerte par semaine, arrêt par jeton limité aux sorties",
+      "checks": [
+        {
+          "name": "tables_alertes",
+          "sql": "SELECT count(*) = 2 AS ok FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('outing_alert_preferences', 'outing_alert_log')"
+        },
+        {
+          "name": "drapeau_alertes_sorties",
+          "sql": "SELECT count(*) = 1 AS ok FROM public.feature_flags WHERE key = 'sorties_alertes'"
+        },
+        {
+          "name": "destinataires",
+          "sql": "SELECT position('sort4_alertes_sorties' IN pg_get_functiondef('public.outing_alert_recipients(uuid, timestamptz)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "destinataires_fermes",
+          "sql": "SELECT NOT has_function_privilege('authenticated', 'public.outing_alert_recipients(uuid, timestamptz)', 'EXECUTE') AS ok"
+        },
+        {
+          "name": "journal_ferme",
+          "sql": "SELECT count(*) = 0 AS ok FROM information_schema.role_table_grants WHERE table_schema = 'public' AND table_name = 'outing_alert_log' AND grantee IN ('anon', 'authenticated')"
+        },
+        {
+          "name": "declencheur_publication",
+          "sql": "SELECT count(*) = 1 AS ok FROM pg_trigger WHERE tgname = 'trg_outing_alert_on_publish' AND tgrelid = 'public.outings'::regclass AND NOT tgisinternal"
+        },
+        {
+          "name": "arret_par_jeton",
+          "sql": "SELECT has_function_privilege('anon', 'public.outing_alerts_set_by_token(text, boolean)', 'EXECUTE') AS ok"
+        }
+      ]
     }
   ]
 }
