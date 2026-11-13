@@ -356,6 +356,7 @@ export type EventType =
   | "alma_whisper_emitted"                      // Whisper narratif affiché (whisper_type, surface, priority)
   | "alma_whisper_dismissed"                    // Whisper fermé (whisper_type, reason)
   | "alma_whisper_action_clicked"               // Action d'un whisper cliquée (whisper_type, action_id)
+  | "alma_whisper_reply_clicked"                // Lot ALMA4 : puce de réponse sous un aperçu (chip, fact_id, fact_type, surface)
  | "alma_frequency_changed"                    // Slider fréquence Alma modifié (from, to)
  | "alma_blacklisted_type"                     // Whisper type blacklisté 30j après 3 dismiss (whisper_type)
  // Pass 3, republish + welcome cross-canal ----------------------------------

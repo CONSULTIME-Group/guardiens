@@ -35,6 +35,7 @@ import * as almaUsage from "../../../supabase/functions/_shared/alma-usage";
 import * as almaBond from "../../../supabase/functions/_shared/alma-bond";
 import * as almaSafety from "../../../supabase/functions/_shared/alma-safety";
 import * as turnCap from "../../../supabase/functions/_shared/alma-turn-cap";
+import * as replyChip from "../../../supabase/functions/_shared/alma-reply-chip";
 import * as almaIntegrity from "../../../supabase/functions/_shared/alma-integrity";
 import * as sitPlace from "../../../supabase/functions/_shared/sit-place";
 import { ALMA_PAGE_LABELS, almaPageKindLabel, almaPageLabel } from "../../../supabase/functions/_shared/alma-page-labels";
@@ -207,7 +208,7 @@ function harness(profile: Record<string, unknown>) {
     "alma-system-prompt.ts": prompt, "alma-intent.ts": almaIntent, "alma-site-knowledge.ts": siteKnowledge,
     "alma-facts.ts": almaFacts, "alma-inventory.ts": almaInventory, "alma-next-action.ts": nextAction,
     "alma-classify.ts": almaClassify, "alma-output.ts": almaOutput, "normalize-contact-message.ts": normalizeContact,
-    "alma-owner-question.ts": ownerQuestion, "sit-location.ts": sitLocation, "alma-home-photo.ts": homePhoto, "alma-truth.ts": truth, "alma-companion.ts": companion, "alma-places.ts": places, "mission-child-care.ts": childCare, "alma-version.ts": almaVersion, "alma-usage.ts": almaUsage, "alma-bond.ts": almaBond, "alma-safety.ts": almaSafety, "alma-turn-cap.ts": turnCap, "alma-integrity.ts": almaIntegrity,
+    "alma-owner-question.ts": ownerQuestion, "sit-location.ts": sitLocation, "alma-home-photo.ts": homePhoto, "alma-truth.ts": truth, "alma-companion.ts": companion, "alma-places.ts": places, "mission-child-care.ts": childCare, "alma-version.ts": almaVersion, "alma-usage.ts": almaUsage, "alma-bond.ts": almaBond, "alma-safety.ts": almaSafety, "alma-turn-cap.ts": turnCap, "alma-integrity.ts": almaIntegrity, "alma-reply-chip.ts": replyChip,
   };
   runInNewContext(outputText, {
     exports: {}, Request, Response, Date, console: { error: vi.fn(), log: vi.fn() },

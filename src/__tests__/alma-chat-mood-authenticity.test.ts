@@ -24,6 +24,7 @@ import * as almaBond from "../../supabase/functions/_shared/alma-bond";
 // Lot A4 : sûreté, plafond réservé, intégrité des entrées.
 import * as almaSafety from "../../supabase/functions/_shared/alma-safety";
 import * as turnCap from "../../supabase/functions/_shared/alma-turn-cap";
+import * as replyChip from "../../supabase/functions/_shared/alma-reply-chip";
 import * as almaIntegrity from "../../supabase/functions/_shared/alma-integrity";
 
 const validMood = { mood: "petillante", content: "Le soleil donne sur la fenêtre.", active: true };
@@ -89,6 +90,7 @@ function harness(options: { rows?: typeof validMood[]; error?: boolean; throws?:
       if (name.endsWith("alma-bond.ts")) return almaBond;
       if (name.endsWith("alma-safety.ts")) return almaSafety;
       if (name.endsWith("alma-turn-cap.ts")) return turnCap;
+      if (name.endsWith("alma-reply-chip.ts")) return replyChip;
       if (name.endsWith("alma-integrity.ts")) return almaIntegrity;
       throw new Error(`Unexpected import ${name}`);
     },

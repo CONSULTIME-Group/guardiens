@@ -30,6 +30,7 @@ import * as almaBond from "../../../supabase/functions/_shared/alma-bond";
 // Lot A4 : sûreté, plafond réservé, intégrité des entrées.
 import * as almaSafety from "../../../supabase/functions/_shared/alma-safety";
 import * as turnCap from "../../../supabase/functions/_shared/alma-turn-cap";
+import * as replyChip from "../../../supabase/functions/_shared/alma-reply-chip";
 import * as almaIntegrity from "../../../supabase/functions/_shared/alma-integrity";
 import { ALMA_REPLAY_CASES } from "@/data/almaReplayCases";
 import { checkReplayAnswer } from "@/lib/alma/replayChecks";
@@ -76,7 +77,7 @@ function harness(profile: Record<string, unknown>, modelAnswers: string[] = ["R�
     "alma-facts.ts": almaFacts, "alma-inventory.ts": almaInventory, "alma-next-action.ts": nextAction,
     "alma-classify.ts": almaClassify, "alma-output.ts": almaOutput, "normalize-contact-message.ts": normalizeContact,
     "alma-owner-question.ts": ownerQuestion, "sit-location.ts": sitLocation, "alma-home-photo.ts": homePhoto, "alma-truth.ts": truth, "alma-companion.ts": companion, "alma-places.ts": places, "mission-child-care.ts": childCare, "alma-version.ts": almaVersion, "alma-usage.ts": almaUsage, "alma-bond.ts": almaBond,
-    "alma-safety.ts": almaSafety, "alma-turn-cap.ts": turnCap, "alma-integrity.ts": almaIntegrity,
+    "alma-safety.ts": almaSafety, "alma-turn-cap.ts": turnCap, "alma-integrity.ts": almaIntegrity, "alma-reply-chip.ts": replyChip,
   };
   runInNewContext(outputText, {
     exports: {}, Request, Response, Date, console: { error: vi.fn(), log: vi.fn() },

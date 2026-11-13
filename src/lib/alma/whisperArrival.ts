@@ -11,7 +11,8 @@
 export type WhisperArrival = "open_spontaneous" | "peek" | "badge_only";
 
 export const ALMA_SPONTANEOUS_SESSION_KEY = "alma_spontaneous_opened";
-export const ALMA_PEEK_DURATION_MS = 6000;
+/** Lot ALMA4 : 12 s (6 s avant), le temps de lire trois lignes et de répondre. */
+export const ALMA_PEEK_DURATION_MS = 12000;
 
 /** Types de whisper qui ne déplient jamais le panneau d'eux-mêmes. */
 export const ALMA_PREVIEW_ONLY_TYPES: readonly string[] = ["usage_nudge"];

@@ -35,8 +35,8 @@ describe("P1, Alma discrète sur mobile", () => {
   it("ordinateur : jamais pendant qu'un champ a le focus", () => {
     expect(decideWhisperArrival({ isMobile: false, pathname: "/sits", spontaneousAlreadyUsed: false, formFieldFocused: true })).toBe("badge_only");
   });
-  it("bulle : 6 s, toucher ouvre le panneau avec origin peek, mesure peek_shown", () => {
-    expect(ALMA_PEEK_DURATION_MS).toBe(6000);
+  it("bulle : 12 s (lot ALMA4), toucher ouvre le panneau avec origin peek, mesure peek_shown", () => {
+    expect(ALMA_PEEK_DURATION_MS).toBe(12000);
     expect(DOCK).toContain('onClick={(e) => openPanel("peek", e.currentTarget)}');
     expect(DOCK).toContain('"alma_whisper_peek_shown"');
   });
