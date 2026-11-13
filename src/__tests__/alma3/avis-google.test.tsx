@@ -103,7 +103,7 @@ describe("lot ALMA3, avis Google", () => {
     expect(read("src/components/layout/NotificationBell.tsx")).toContain('openGoogleReview("notification_bell")');
     const dock = read("src/components/ai/alma/AlmaDock.tsx");
     expect(dock).toContain("whisperMessage: entryContext?.instantLine ?? whisperPanelMessage(whisper),");
-    expect(dock).toContain("journal={whisperOwnsPanel ? null : journal}");
+    expect(dock).toContain("journal={whisperOwnsPanel || replyThread ? null : journal}");
     expect(dock).toContain('}, "google_review");');
     const wiring = read("src/components/ai/alma/wiring/AlmaGoogleReviewWhisper.tsx");
     expect(wiring).toContain('if (pathname !== "/dashboard") return;');
