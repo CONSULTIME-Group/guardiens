@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { composeHomeListings, rankShowcaseGuards, showcaseScore } from "@/components/landing/LiveListingsStrip";
+import { cleanListingTitle, composeHomeListings, rankShowcaseGuards, showcaseScore } from "@/components/landing/LiveListingsStrip";
 
 type Listing = Parameters<typeof composeHomeListings>[0][number];
 
@@ -90,5 +90,47 @@ describe("vitrine nationale de la home", () => {
   it("score : photos, fraîcheur et destination", () => {
     expect(showcaseScore(listing("a", "garde", 0, { photoCount: 0, photo: null, createdAt: daysAgo(90) }), NOW)).toBe(0);
     expect(showcaseScore(listing("b", "garde", 0, { photoCount: 5, createdAt: daysAgo(3), country: "PF" }), NOW)).toBe(6);
+  });
+});
+
+describe("vitrine de la home, lot VIT1", () => {
+  const outing = listing("sortie", "sortie" as "garde", 0, { photo: null, photoCount: 0 });
+
+  it("avec une sortie : quatre gardes, un coup de main, une sortie, les trois familles dans les quatre premières cartes", () => {
+    const guards = Array.from({ length: 7 }, (_, index) => listing(`g${index}`, "garde", index));
+    const needs = [listing("b0", "besoin", 0)];
+    const result = composeHomeListings(guards, needs, null, NOW, outing);
+    expect(result.map((item) => item.kind)).toEqual(["garde", "garde", "besoin", "sortie", "garde", "garde"]);
+  });
+
+  it("à score égal, l'annonce la mieux illustrée passe devant la plus récente", () => {
+    const ranked = rankShowcaseGuards([
+      listing("trois-photos-recente", "garde", 0, { photoCount: 3, createdAt: daysAgo(1) }),
+      listing("douze-photos", "garde", 0, { photoCount: 12, createdAt: daysAgo(10) }),
+    ], NOW);
+    expect(ranked[0].id).toBe("douze-photos");
+  });
+
+  it("donne le bonus de destination à l'outre-mer rangé sous le pays FR (Papeete, 987)", () => {
+    const base = { photoCount: 1, createdAt: daysAgo(3) };
+    expect(showcaseScore(listing("papeete", "garde", 0, { ...base, departementCode: "987" }), NOW))
+      .toBe(showcaseScore(listing("lyon", "garde", 0, { ...base, departementCode: "69" }), NOW) + 2);
+  });
+
+  it("montre un coup de main hors animaux avant une garde de chat", () => {
+    const needs = [
+      listing("chat", "besoin", 0, { title: "Pension chat" }),
+      listing("pet", "besoin", 0, { title: "Pet sitting" }),
+      listing("potager", "besoin", 0, { title: "Arroser mon potager" }),
+      listing("garde-corps", "besoin", 0, { title: "Poser un garde-corps" }),
+    ];
+    const result = composeHomeListings([], needs, null, NOW, outing);
+    expect(result.find((item) => item.kind === "besoin")?.id).toBe("potager");
+    const sansPotager = composeHomeListings([], needs.filter((n) => n.id !== "potager"), null, NOW, outing);
+    expect(sansPotager.find((item) => item.kind === "besoin")?.id).toBe("garde-corps");
+  });
+
+  it("retire les émojis du titre affiché", () => {
+    expect(cleanListingTitle("Un Noël magique 🎄✨ au Québec")).toBe("Un Noël magique au Québec");
   });
 });
