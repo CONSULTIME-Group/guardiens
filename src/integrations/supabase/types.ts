@@ -14189,6 +14189,328 @@ export type Database = {
           },
         ]
       }
+      outing_alert_log: {
+        Row: {
+          created_at: string
+          outing_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          outing_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          outing_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outing_alert_log_outing_id_fkey"
+            columns: ["outing_id"]
+            isOneToOne: false
+            referencedRelation: "outings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outing_alert_log_outing_id_fkey"
+            columns: ["outing_id"]
+            isOneToOne: false
+            referencedRelation: "public_outings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outing_alert_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "outing_alert_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outing_alert_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_helpers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outing_alert_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outing_alert_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+        ]
+      }
+      outing_alert_preferences: {
+        Row: {
+          enabled: boolean
+          radius: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          enabled?: boolean
+          radius?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          enabled?: boolean
+          radius?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outing_alert_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "outing_alert_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outing_alert_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_helpers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outing_alert_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outing_alert_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+        ]
+      }
+      outing_attendees: {
+        Row: {
+          created_at: string
+          outing_id: string
+          source: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          outing_id: string
+          source?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          outing_id?: string
+          source?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outing_attendees_outing_id_fkey"
+            columns: ["outing_id"]
+            isOneToOne: false
+            referencedRelation: "outings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outing_attendees_outing_id_fkey"
+            columns: ["outing_id"]
+            isOneToOne: false
+            referencedRelation: "public_outings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outing_attendees_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "outing_attendees_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outing_attendees_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_helpers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outing_attendees_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outing_attendees_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+        ]
+      }
+      outings: {
+        Row: {
+          agenda_consent: boolean
+          cancel_note: string | null
+          cancelled_at: string | null
+          capacity: number
+          category: string
+          city: string
+          created_at: string
+          description: string
+          hidden_at: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          organizer_id: string
+          participation_eur: number | null
+          place_kind: string
+          place_label: string
+          postal_code: string
+          reminder_sent_at: string | null
+          reserved: number
+          setting: string | null
+          slug: string
+          starts_at: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agenda_consent?: boolean
+          cancel_note?: string | null
+          cancelled_at?: string | null
+          capacity: number
+          category?: string
+          city?: string
+          created_at?: string
+          description?: string
+          hidden_at?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          organizer_id: string
+          participation_eur?: number | null
+          place_kind?: string
+          place_label?: string
+          postal_code?: string
+          reminder_sent_at?: string | null
+          reserved?: number
+          setting?: string | null
+          slug: string
+          starts_at: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          agenda_consent?: boolean
+          cancel_note?: string | null
+          cancelled_at?: string | null
+          capacity?: number
+          category?: string
+          city?: string
+          created_at?: string
+          description?: string
+          hidden_at?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          organizer_id?: string
+          participation_eur?: number | null
+          place_kind?: string
+          place_label?: string
+          postal_code?: string
+          reminder_sent_at?: string | null
+          reserved?: number
+          setting?: string | null
+          slug?: string
+          starts_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outings_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "outings_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outings_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_helpers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outings_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outings_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+        ]
+      }
       owner_departure_intents: {
         Row: {
           answered_at: string
@@ -18869,6 +19191,70 @@ export type Database = {
           },
         ]
       }
+      public_outings: {
+        Row: {
+          cancel_note: string | null
+          cancelled_at: string | null
+          capacity: number | null
+          category: string | null
+          city: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          organizer_first_name: string | null
+          organizer_id: string | null
+          organizer_identity_verified: boolean | null
+          organizer_member_since: string | null
+          participation_eur: number | null
+          place_kind: string | null
+          place_label: string | null
+          postal_code: string | null
+          reserved: number | null
+          setting: string | null
+          slug: string | null
+          starts_at: string | null
+          status: string | null
+          taken: number | null
+          title: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outings_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "outings_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outings_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_helpers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outings_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outings_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+        ]
+      }
       public_owner_profiles: {
         Row: {
           competences: string[] | null
@@ -19898,6 +20284,11 @@ export type Database = {
       }
       admin_menu_badges: { Args: never; Returns: Json }
       admin_message_stats: { Args: { _since?: string }; Returns: Json }
+      admin_outing_set_hidden: {
+        Args: { p_hidden: boolean; p_outing: string }
+        Returns: Json
+      }
+      admin_outings_overview: { Args: { p_limit?: number }; Returns: Json }
       admin_projet_kpis: { Args: never; Returns: Json }
       admin_reject_competence_label: {
         Args: { p_label: string }
@@ -21074,6 +21465,7 @@ export type Database = {
         Returns: Json
       }
       my_mutual_aid_radius_km: { Args: never; Returns: number }
+      my_outing_alert_preference: { Args: never; Returns: Json }
       my_pending_legal_documents: {
         Args: never
         Returns: {
@@ -21093,6 +21485,58 @@ export type Database = {
         Args: { p_response_id: string }
         Returns: string
       }
+      outing_alert_enqueue: { Args: { p_outing: string }; Returns: number }
+      outing_alert_recipients: {
+        Args: { p_now?: string; p_outing: string }
+        Returns: {
+          distance_km: number
+          user_id: string
+        }[]
+      }
+      outing_alerts_set_by_token: {
+        Args: { p_enabled: boolean; p_token: string }
+        Returns: Json
+      }
+      outing_attendee_list: {
+        Args: { p_outing: string }
+        Returns: {
+          first_name: string
+          identity_verified: boolean
+          joined_at: string
+          member_since: string
+          user_id: string
+        }[]
+      }
+      outing_cancel: {
+        Args: { p_note?: string; p_outing: string }
+        Returns: Json
+      }
+      outing_distance_km: {
+        Args: { lat1: number; lat2: number; lng1: number; lng2: number }
+        Returns: number
+      }
+      outing_email_enqueue: {
+        Args: {
+          p_actor_name?: string
+          p_kind: string
+          p_outing: string
+          p_recipient: string
+          p_stamp?: string
+        }
+        Returns: number
+      }
+      outing_enqueue_reminders: { Args: { p_now?: string }; Returns: number }
+      outing_join: {
+        Args: { p_outing: string; p_source?: string }
+        Returns: Json
+      }
+      outing_leave: { Args: { p_outing: string }; Returns: Json }
+      outing_my_status: { Args: { p_outing: string }; Returns: string }
+      outing_remove_attendee: {
+        Args: { p_outing: string; p_user: string }
+        Returns: Json
+      }
+      outing_when_label: { Args: { p_starts_at: string }; Returns: string }
       owner_gallery_next_cover: {
         Args: { p_created: string; p_position: number; p_user: string }
         Returns: string
@@ -21588,6 +22032,10 @@ export type Database = {
           p_token: string
         }
         Returns: boolean
+      }
+      set_my_outing_alert_preference: {
+        Args: { p_enabled: boolean; p_radius: string }
+        Returns: Json
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
