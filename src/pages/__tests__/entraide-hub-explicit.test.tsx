@@ -7,12 +7,12 @@ vi.mock("@/components/missions/ExchangeHowItWorks", () => ({
   default: () => <section aria-label="Comment ça marche">Comment ça marche</section>,
 }));
 
-const renderContent = (showHelp: boolean, city: string | null = null, countLine: string | null = null) => {
+const renderContent = (showHelp: boolean, countLine: string | null = null) => {
   const onNeed = vi.fn();
   const onHelp = vi.fn();
   render(
     <MemoryRouter>
-      <EntraideHubIntro city={city} countLine={countLine} showHelp={showHelp} onNeed={onNeed} onHelp={onHelp} />
+      <EntraideHubIntro countLine={countLine} showHelp={showHelp} onNeed={onNeed} onHelp={onHelp} />
       <EntraideHowItWorks />
       <EntraideFaq />
     </MemoryRouter>,
@@ -23,7 +23,7 @@ const renderContent = (showHelp: boolean, city: string | null = null, countLine:
 describe("EntraideHub, contenu explicite (lot E4)", () => {
   it("présente le modèle complet aux visiteurs sans compte", () => {
     const { onNeed, onHelp } = renderContent(true);
-    expect(screen.getByRole("heading", { level: 1, name: "Entraide et coups de main près de chez vous" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Entraide près de chez vous" })).toBeInTheDocument();
     expect(screen.getByText(/Le potager à arroser, les courses, un trajet/)).toBeInTheDocument();
     expect(screen.getByText(/dix à la fois/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Comment ça se passe" })).toBeInTheDocument();
@@ -38,11 +38,12 @@ describe("EntraideHub, contenu explicite (lot E4)", () => {
   });
 
   it("une personne qui aide déjà voit un seul bouton, la ville et le nombre", () => {
-    renderContent(false, "Lyon", "Autour de Lyon, 78 personnes sont prêtes à donner un coup de main.");
+    renderContent(false, "78 personnes prêtes à aider autour de Lyon");
     expect(screen.getByRole("button", { name: "Demander un coup de main" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Proposer mon aide" })).not.toBeInTheDocument();
-    expect(screen.getByText("Entraide · autour de Lyon")).toBeInTheDocument();
-    expect(screen.getByText(/78 personnes sont prêtes/)).toBeInTheDocument();
+    // Lot SORT11 : le chiffre tient en une ligne courte, avec un lien vers les personnes.
+    expect(screen.getByText(/78 personnes prêtes à aider autour de Lyon/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Les voir" })).toHaveAttribute("href", "#entraide-helpers-title");
   });
 
   it("aucune tournure négative dans la FAQ", async () => {

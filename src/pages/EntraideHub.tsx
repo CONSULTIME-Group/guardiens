@@ -12,7 +12,6 @@ import type { MissionBadgeRow } from "@/components/missions/MissionBadgesReceive
 import EntraideProofs from "@/components/entraide/EntraideProofs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
-import MutualAidRadiusLine from "@/components/entraide/MutualAidRadiusLine";
 import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity } from "@/lib/geocode";
 import { trackEvent } from "@/lib/analytics";
@@ -27,7 +26,7 @@ import {
 } from "@/lib/entraideHubModel";
 import {
   HELPERS_FIRST_SHOWN,
-  helpersCountLine,
+  helpersPulseLine,
   helpersMore,
   farNeedsLabel,
   farNeedsHeading,
@@ -45,6 +44,8 @@ import { capitalizeFirstName } from "@/lib/displayName";
 import { sortHelpers } from "@/lib/helperDisplay";
 import EntraideSortiesTabs from "@/components/outings/EntraideSortiesTabs";
 import { useOutingsEnabled } from "@/hooks/useOutingsEnabled";
+import { HUB_SHELL, HUB_TABS, HubHeader, HubSettingsLine } from "@/components/outings/HubHeader";
+import { ALERT_SETTINGS_PATH, radiusLineText, useMutualAidRadiusKm } from "@/components/entraide/MutualAidRadiusLine";
 
 const EntraideMap = lazy(() => import("@/components/entraide/EntraideMap"), "EntraideMap");
 
@@ -69,33 +70,35 @@ const HOW_STEPS = [
 
 /**
  * Lot E4 : en-tête unique, visiteur et membre. Un seul bouton plein
- * (« Demander un coup de main ») ; « Proposer mon aide » en second plan,
- * remplacé par la ligne de rayon quand la personne aide déjà.
+ * (« Demander un coup de main ») ; « Proposer mon aide » en second plan.
+ * Lot SORT11 : même squelette que les onglets Sorties et Chantiers
+ * (HubHeader), le chiffre en une ligne courte sous le bouton.
  */
-export const EntraideHubIntro = ({ city, countLine, showHelp, onNeed, onHelp, children }: {
-  city: string | null;
+export const EntraideHubIntro = ({ countLine, showHelp, onNeed, onHelp, children }: {
   countLine: string | null;
   showHelp: boolean;
   onNeed: () => void;
   onHelp: () => void;
   children?: React.ReactNode;
 }) => (
-  <header className="pb-2 pt-3">
-    <p className="text-xs font-semibold uppercase tracking-wide text-primary">{city ? `Entraide · autour de ${city}` : "Entraide"}</p>
-    <h1 className="mt-2 max-w-3xl font-heading text-[1.75rem] font-bold leading-tight text-foreground sm:text-[2.5rem]">
-      Entraide et coups de main près de chez vous
-    </h1>
-    <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-      {countLine ? `${countLine} ` : ""}
-      <span className="hidden sm:inline">Le potager à arroser, les courses, un trajet, une partie de jeux de société : dites simplement ce qu'il vous faut.</span>
-      <span className="sm:hidden">Dites simplement ce qu'il vous faut.</span>
-    </p>
-    <div className="mt-5 flex flex-row flex-wrap items-center gap-3">
-      <Button onClick={onNeed}>Demander un coup de main</Button>
-      {showHelp && <Button variant="outline" onClick={onHelp}>Proposer mon aide</Button>}
-    </div>
+  <HubHeader
+    title="Entraide près de chez vous"
+    phrase="Le potager à arroser, les courses, un trajet, une partie de jeux de société : dites simplement ce qu'il vous faut."
+    actions={
+      <>
+        <Button size="lg" className="h-[52px] rounded-2xl text-base sm:h-12" onClick={onNeed}>Demander un coup de main</Button>
+        {showHelp && <Button size="lg" variant="outline" className="h-[52px] rounded-2xl text-base sm:h-12" onClick={onHelp}>Proposer mon aide</Button>}
+      </>
+    }
+    pulse={countLine ? (
+      <>
+        {countLine} ·{" "}
+        <a href="#entraide-helpers-title" className="-my-3 inline-block py-3 font-semibold text-primary underline underline-offset-4">Les voir</a>
+      </>
+    ) : null}
+  >
     {children}
-  </header>
+  </HubHeader>
 );
 
 export const EntraideHowItWorks = () => (
@@ -145,7 +148,6 @@ const EntraideHub = () => {
   const [searchedOrigin, setSearchedOrigin] = useState<Origin>(null);
   const [searchedCity, setSearchedCity] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
-  const [showLocationField, setShowLocationField] = useState(false);
   // Liste par défaut partout, mobile et ordinateur, connecté ou non.
   const [mapOpen, setMapOpen] = useState(false);
   const [profile, setProfile] = useState<MemberProfile | null>(null);
@@ -158,6 +160,7 @@ const EntraideHub = () => {
   // Lot E11 : null tant que le membre n'a pas choisi ; sinon son choix.
   const [farOpen, setFarOpen] = useState<boolean | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const radiusKm = useMutualAidRadiusKm(!isAuthenticated ? false : profileLoaded ? profile?.available_for_help === true : null);
   const [counts, setCounts] = useState<Map<string, { given_count: number | null; received_count: number | null }>>(new Map());
   const [badges, setBadges] = useState<Map<string, MissionBadgeRow[]>>(new Map());
 
@@ -311,7 +314,6 @@ const EntraideHub = () => {
     if (result) {
       setSearchedOrigin([result.lat, result.lng]);
       setSearchedCity(city.trim());
-      setShowLocationField(false);
       setHelpersShown(HELPERS_FIRST_SHOWN);
       setFarOpen(null);
     }
@@ -407,6 +409,13 @@ const EntraideHub = () => {
     }
   };
 
+  // Lot SORT11 : lieu, rayon et savoir-faire sur une ligne, détail replié.
+  const settingsSummary = [
+    originCity || "Votre position",
+    radiusKm !== null ? `${radiusKm} km` : null,
+    profile?.available_for_help === true ? "savoir-faire" : null,
+  ].filter(Boolean).join(" · ");
+
   const locationField = (
     <div className="flex max-w-md gap-2">
       <Input value={city} onChange={(event) => setCity(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void locate(); }} placeholder="Votre ville" aria-label="Votre ville" className="min-w-0" />
@@ -434,34 +443,34 @@ const EntraideHub = () => {
         image={SECTION_OG_IMAGES.entraide.url}
         imageAlt={SECTION_OG_IMAGES.entraide.alt}
       />
-      <PageBreadcrumb items={[{ label: "Entraide" }]} />
-      {/* Lot SORT1 : sous-onglets Entraide et Sorties, quand la rubrique est ouverte. */}
-      {outingsOn && <div className="mx-auto mt-3 w-full max-w-2xl px-5"><EntraideSortiesTabs active="entraide" /></div>}
       <div className="min-w-0 bg-background pb-24">
-        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className={HUB_SHELL}>
+          <PageBreadcrumb items={[{ label: "Entraide" }]} />
+          {/* Lot SORT1 : sous-onglets Entraide et Sorties, quand la rubrique est ouverte. */}
+          {outingsOn && <div className={HUB_TABS}><EntraideSortiesTabs active="entraide" /></div>}
           <EntraideHubIntro
-            city={placeCity}
-            countLine={pageLoading ? null : helpersCountLine(nearHelpersCount, placeCity)}
+            countLine={pageLoading ? null : helpersPulseLine(nearHelpersCount, placeCity)}
             showHelp={!isAuthenticated || (profileLoaded && profile?.available_for_help !== true)}
             onNeed={goNeed}
             onHelp={goHelp}
           >
-            <div className="mt-4 space-y-1 text-sm text-muted-foreground">
-              {originPending ? null : origin && !showLocationField ? (
-                <p>
-                  Lieu : {originCity || "votre position"} ·{" "}
-                  <button type="button" onClick={() => setShowLocationField(true)} className="font-semibold text-primary underline underline-offset-4">
-                    Changer de lieu
-                  </button>
-                </p>
-              ) : locationField}
-              {isAuthenticated && <MutualAidRadiusLine availableForHelp={profileLoaded ? profile?.available_for_help === true : null} />}
-              {profile?.available_for_help === true && (
-                <p>
-                  <Link to="/profile?section=savoir-faire" className="font-semibold text-primary underline underline-offset-4">Mes savoir-faire</Link>
-                </p>
-              )}
-            </div>
+            {originPending ? null : origin ? (
+              <HubSettingsLine summary={settingsSummary} key={settingsSummary}>
+                <p>Changer de lieu :</p>
+                {locationField}
+                {radiusKm !== null && (
+                  <p>
+                    {radiusLineText(radiusKm)}{" "}
+                    <Link to={ALERT_SETTINGS_PATH} className="font-semibold text-primary underline underline-offset-4">Modifier le rayon</Link>
+                  </p>
+                )}
+                {profile?.available_for_help === true && (
+                  <p>
+                    <Link to="/profile?section=savoir-faire" className="font-semibold text-primary underline underline-offset-4">Mes savoir-faire</Link>
+                  </p>
+                )}
+              </HubSettingsLine>
+            ) : locationField}
           </EntraideHubIntro>
 
           <EntraideIdeas onPick={pickIdea} />
