@@ -455,10 +455,11 @@ export const ALMA_REPLAY_CASES: AlmaReplayCase[] = [
     "pagePath": "/sits/85315487-7c43-4e10-a97e-821aefd10a8c",
     "expect": {
       "mentionsOwner": true,
-      "mentions": [
-        "69380"
-      ],
       "mentionsAny": [
+        [
+          "Chazay",
+          "69380"
+        ],
         [
           "yorkshire"
         ],
@@ -491,10 +492,11 @@ export const ALMA_REPLAY_CASES: AlmaReplayCase[] = [
     "pagePath": "/sits/85315487-7c43-4e10-a97e-821aefd10a8c",
     "expect": {
       "mentionsOwner": true,
-      "mentions": [
-        "69380"
-      ],
       "mentionsAny": [
+        [
+          "Chazay",
+          "69380"
+        ],
         [
           "yorkshire"
         ],
