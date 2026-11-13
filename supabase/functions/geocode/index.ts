@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { cityQueryVariants, countryQueryVariants } from "../_shared/geocode-variants.ts";
 import { geocodeOfficialFr } from "../_shared/geocode-official-fr.ts";
+import { allowOutboundGeocode, callerAddress } from "../_shared/geocode-quota.ts";
 
 
 const corsHeaders = {
@@ -90,7 +91,7 @@ function placeCacheKey(city: unknown, country: unknown): string | null {
 
 /** Une commune : cache, puis variantes, puis Nominatim. Réponse inchangée. */
 // deno-lint-ignore no-explicit-any
-async function geocodePlace(supabase: any, city: any, country: any): Promise<Response> {
+async function geocodePlace(supabase: any, city: any, country: any, allowOutbound: () => Promise<boolean> = async () => true): Promise<Response> {
   if (!city || typeof city !== "string" || city.trim().length < 2) {
     return new Response(JSON.stringify({ error: "Invalid city" }), {
       status: 400,
@@ -201,6 +202,15 @@ async function geocodePlace(supabase: any, city: any, country: any): Promise<Res
     if (official) return await cacheAndRespond(official.lat, official.lng, { city: official.nom, country: resolvedCountry });
   }
 
+  // Lot HOME4 : quota avant toute sortie vers Nominatim (par appelant et au
+  // total, à l'heure). Le cache et le référentiel officiel restent libres.
+  if (!(await allowOutbound())) {
+    return new Response(
+      JSON.stringify({ error: "RATE_LIMITED", fallback: true, lat: null, lng: null }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+
   // 3) Nominatim, variante par variante, au plus quatre requêtes.
   let unavailable = false;
   for (const attempt of attempts.slice(0, 4)) {
@@ -263,6 +273,11 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json();
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const address = callerAddress(req.headers);
+    const allowOutbound = () => allowOutboundGeocode(address, async (bucket, limit) => {
+      const { data, error } = await supabase.rpc("geocode_quota_take", { p_bucket: bucket, p_limit: limit });
+      return error ? null : data === true;
+    });
 
     // Lot H3 : plusieurs communes en un appel. Le cache est lu en une requête,
     // les communes absentes du cache sont cherchées une à une (8 au plus), les
@@ -290,7 +305,7 @@ Deno.serve(async (req) => {
         if (misses >= BATCH_MISS_MAX) { results.push({ error: "DEFERRED", fallback: true, lat: null, lng: null }); continue; }
         misses++;
         try {
-          results.push(await (await geocodePlace(supabase, places[i]?.city, places[i]?.country)).json());
+          results.push(await (await geocodePlace(supabase, places[i]?.city, places[i]?.country, allowOutbound)).json());
         } catch {
           results.push({ error: "GEOCODING_FAILED", fallback: true, lat: null, lng: null });
         }
@@ -300,7 +315,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    return await geocodePlace(supabase, body?.city, body?.country);
+    return await geocodePlace(supabase, body?.city, body?.country, allowOutbound);
   } catch (error) {
     console.error("Geocode error:", error);
     // Toujours 200 + fallback, le front gère l'absence de coords.
