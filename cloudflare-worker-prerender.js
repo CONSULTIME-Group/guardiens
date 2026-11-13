@@ -15,6 +15,24 @@
  *         ou `npx wrangler deploy`
  * Route:  guardiens.fr/* + *guardiens.fr/*
  *
+ * ══ v7.6 (2026-11-13) : BALISE GOOGLEBOT RETIRÉE DES COPIES SERVIES AUX ROBOTS ══
+ *
+ *  MESURE du 13/11/2026 : Googlebot pour smartphone reçoit encore la balise
+ *  `<meta name="googlebot" content="noindex, nofollow">` sur 21 pages d'un
+ *  échantillon de 39 URL du sitemap (accueil, /tarifs, /annonces, pages
+ *  villes de Paris, Marseille, Toulouse, Nantes). Les mêmes pages lues en
+ *  Googlebot ordinateur sont propres. Search Console : accueil « Exclue par
+ *  la balise noindex », exploration du 12/11/2026 par Googlebot smartphone.
+ *
+ *  CAUSE : Prerender garde une copie par type d'appareil. La relance de
+ *  `consume-seo-dirty` rafraîchit la copie ordinateur ; les copies smartphone
+ *  rendues avant le correctif SEO-GB1 du 10/11 restent servies jusqu'à leur
+ *  expiration (168 heures).
+ *
+ *  CORRIGÉ : `alignBotHtml` retire `meta[name="googlebot"]` de toute réponse
+ *  HTML de Prerender. Aucun rendu consommé. La balise `robots` n'est pas
+ *  touchée : une page en noindex voulu le reste.
+ *
  * ══ v7.5 (2026-11-12) : HTML DES ROBOTS ALIGNÉ SUR LES FICHIERS EN LIGNE ══
  *
  *  MESURE du 12/11/2026, 25 URL du sitemap demandées en Googlebot : 12
@@ -675,6 +693,15 @@ function alignBotHtml(response, cssHref) {
     const ct = response.headers.get('content-type') || '';
     if (!response.body || !ct.includes('text/html')) return response;
     const rewriter = new HTMLRewriter().on('link[rel="modulepreload"]', {
+      element(el) {
+        el.remove();
+      },
+    });
+    // v7.6 : une copie rendue avant le 10/11/2026 garde la balise googlebot
+    // « noindex, nofollow » du script de preview. Hors preview, googlebot ne
+    // contredit jamais robots (PageMeta, lot SEO-GB1) : la balise est retirée
+    // de toute réponse servie à un robot. La balise robots reste intacte.
+    rewriter.on('meta[name="googlebot"]', {
       element(el) {
         el.remove();
       },
