@@ -12701,6 +12701,24 @@ export type Database = {
         }
         Relationships: []
       }
+      geocode_quota: {
+        Row: {
+          bucket: string
+          hits: number
+          window_start: string
+        }
+        Insert: {
+          bucket: string
+          hits?: number
+          window_start: string
+        }
+        Update: {
+          bucket?: string
+          hits?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
       guide_osm_requests: {
         Row: {
           city_guide_id: string
@@ -20930,6 +20948,10 @@ export type Database = {
       generate_sit_slug: {
         Args: { p_city: string; p_id: string; p_title: string }
         Returns: string
+      }
+      geocode_quota_take: {
+        Args: { p_bucket: string; p_limit: number }
+        Returns: boolean
       }
       get_activity_since_last_visit: { Args: never; Returns: Json }
       get_affinity_completeness_stats: { Args: never; Returns: Json }
