@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { cityQueryVariants, countryQueryVariants } from "../_shared/geocode-variants.ts";
 import { geocodeOfficialFr } from "../_shared/geocode-official-fr.ts";
 import { allowOutboundGeocode, callerAddress } from "../_shared/geocode-quota.ts";
+import { NOMINATIM_EMAIL, NOMINATIM_HEADERS, photonUrl, pickPhotonPlace } from "../_shared/geocode-photon.ts";
 
 
 const corsHeaders = {
@@ -218,6 +219,7 @@ async function geocodePlace(supabase: any, city: any, country: any, allowOutboun
       format: "json",
       limit: "1",
       country: isFrPostal ? "France" : attempt.country.label,
+      email: NOMINATIM_EMAIL,
     });
     if (isFrPostal) {
       params.set("postalcode", attempt.city);
@@ -230,13 +232,15 @@ async function geocodePlace(supabase: any, city: any, country: any, allowOutboun
     // Timeout explicite : sans borne, un pic de requêtes simultanées sur
     // Nominatim (rate limité) fait traîner les workers jusqu'à saturation et
     // la plateforme répond alors 502 avant que le handler ne rende sa réponse.
-    const res = await fetch(url, {
-      headers: { "User-Agent": "Guardiens-App/1.0" },
-      signal: AbortSignal.timeout(6000),
-    });
+    let res: Response | null = null;
+    try {
+      res = await fetch(url, { headers: NOMINATIM_HEADERS, signal: AbortSignal.timeout(6000) });
+    } catch (err) {
+      console.warn(`Nominatim unreachable for "${attempt.city}": ${err instanceof Error ? err.message : String(err)}`);
+    }
 
-    if (!res.ok) {
-      console.warn(`Nominatim returned ${res.status} for "${attempt.city}, ${attempt.country.label}"`);
+    if (!res || !res.ok) {
+      if (res) console.warn(`Nominatim returned ${res.status} for "${attempt.city}, ${attempt.country.label}"`);
       unavailable = true;
       break;
     }
@@ -244,6 +248,33 @@ async function geocodePlace(supabase: any, city: any, country: any, allowOutboun
     const results = await res.json();
     if (results && results.length > 0) {
       return await cacheAndRespond(parseFloat(results[0].lat), parseFloat(results[0].lon), attempt);
+    }
+  }
+
+  // Lot GEO1 : Nominatim refuse ou ne répond pas, Photon (mêmes données
+  // OpenStreetMap) prend le relais, variante par variante, au plus quatre.
+  if (unavailable && !isFrPostal) {
+    let photonDown = false;
+    for (const attempt of attempts.slice(0, 4)) {
+      try {
+        const r = await fetch(photonUrl(attempt.city, attempt.country.code), {
+          headers: NOMINATIM_HEADERS,
+          signal: AbortSignal.timeout(6000),
+        });
+        if (!r.ok) { console.warn(`Photon returned ${r.status} for "${attempt.city}"`); photonDown = true; break; }
+        const place = pickPhotonPlace(await r.json(), attempt.country.code);
+        if (place) return await cacheAndRespond(place.lat, place.lng, attempt);
+      } catch (err) {
+        console.warn(`Photon unreachable for "${attempt.city}": ${err instanceof Error ? err.message : String(err)}`);
+        photonDown = true;
+        break;
+      }
+    }
+    if (!photonDown) {
+      return new Response(JSON.stringify({ error: "City not found", lat: null, lng: null }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
   }
 
