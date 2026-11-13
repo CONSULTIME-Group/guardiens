@@ -160,40 +160,41 @@ const Landing = () => {
       {/* ═══════════════ MAIN LANDMARK (englobe tout le contenu) ═══════════════ */}
       <main id="main-content" className="min-w-0">
       {/* ═══════════════ SECTION 1, HERO (épuré, 3 blocs) ═══════════════ */}
-      <section className="relative flex min-h-[100svh] w-full items-center overflow-hidden">
+      <section className="relative flex min-h-[100svh] w-full items-start md:items-center overflow-hidden">
+        {/* Lot HOME1 : une photo cadrée pour chaque format. Verticale sur
+            téléphone (ciel pour le texte, mas et chien dessous), paysage au-delà. */}
         <picture>
           <source
-            type="image/avif"
-            srcSet="/hero-landing-640.avif 640w, /hero-landing-960.avif 960w, /hero-landing-1280.avif 1280w, /hero-landing-1920.avif 1920w"
+            media="(max-width: 767px)"
+            type="image/webp"
+            srcSet="/hero-portrait-480.webp 480w, /hero-portrait-752.webp 752w"
             sizes="100vw"
           />
           <source
             type="image/webp"
-            srcSet="/hero-landing-640.webp 640w, /hero-landing-960.webp 960w, /hero-landing-1280.webp 1280w, /hero-landing-1920.webp 1920w"
+            srcSet="/hero-paysage-640.webp 640w, /hero-paysage-960.webp 960w, /hero-paysage-1344.webp 1344w"
             sizes="100vw"
           />
           <img
-            src="/hero-landing.webp"
-            alt="Golden retriever assis dans l'herbe d'un jardin ensoleillé, gueule ouverte."
-            className="absolute inset-0 w-full h-full object-cover"
+            src="/hero-paysage-1344.webp"
+            alt="Au coucher du soleil, un golden retriever et un chat veillent devant un mas en pierre et sa piscine."
+            className="absolute inset-0 w-full h-full object-cover object-bottom md:object-center"
             loading="eager"
             {...({ fetchpriority: "high" } as any)}
-            width={1920}
-            height={1080}
+            width={1344}
+            height={752}
             sizes="100vw"
             decoding="async"
           />
         </picture>
-        {/* Voile renforcé sous la colonne (jusqu'à 680 px) et qui s'efface vers le
-            sujet de la photo : contraste AA sur tous les textes du hero. */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 via-45% to-black/25" />
+        {/* Voile : sombre sous le texte, clair sur le mas et le chien. Du haut
+            vers le bas sur téléphone, de gauche à droite au-delà. */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/55 via-55% to-black/0 md:hidden" />
+        <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-black/90 via-black/65 via-40% to-black/5" />
 
-        <div className="relative z-10 lp-wide pb-8 pt-20 md:py-24">
-          {/* Colonne pleine largeur sur mobile, 600 px puis 680 px sur grand
-              écran : la maison et le paysage restent visibles à droite. */}
+        <div className="relative z-10 lp-wide pb-8 pt-7 md:py-24">
           <div className="w-full max-w-full md:max-w-[600px] lg:max-w-[680px]">
 
-            {/* Une seule star typographique : l'accroche, seule en Playfair. */}
             <h1 className="font-heading text-[clamp(26px,8.4vw,38px)] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-2 md:mb-6 text-balance">
               <span className="block font-body text-xs md:text-sm font-semibold uppercase tracking-[0.14em] text-white/90 mb-2 md:mb-3">
                 {t("landing.hero.title_eyebrow")}
@@ -205,34 +206,50 @@ const Landing = () => {
               {t("landing.hero.lede")}
             </p>
 
-            {/* La ligne qui porte l'ouverture : ce qu'on trouve sans l'avoir
-                cherché. Playfair italique, taille intermédiaire entre le
-                titre et le paragraphe. */}
-            <p className="font-heading italic text-lg md:text-2xl text-white/95 leading-snug mb-3 md:mb-6 animate-hero-fade-up animation-delay-700">
+            <p className="font-heading italic text-lg md:text-2xl text-white/95 leading-snug mb-4 md:mb-6 animate-hero-fade-up animation-delay-700">
               {t("landing.hero.motto")}
             </p>
 
-            <div className="flex flex-wrap items-center gap-2 md:gap-4 animate-hero-fade-up animation-delay-900">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-0 animate-hero-fade-up animation-delay-900">
               <Button
                 onClick={() => {
                   void trackEvent("cta_proprio_clicked", { metadata: { location: "hero" } });
                   navigate(isMember ? "/sits/create" : `/inscription?redirect=${encodeURIComponent("/sits/create")}`);
                 }}
                 style={{ boxShadow: "0 6px 14px rgba(44,109,80,.24)" }}
-                className="font-body text-base font-semibold tracking-wide rounded-full px-8 sm:px-12 py-4 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 ring-2 ring-primary-foreground/10"
+                className="h-12 w-full sm:w-auto font-body text-base font-semibold tracking-wide rounded-full px-8 sm:px-12 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 ring-2 ring-primary-foreground/10"
               >
                 {t("landing.hero.cta_owner")}
               </Button>
+              <p className="flex min-h-[44px] w-full sm:w-auto items-center justify-center sm:justify-start font-body text-[13px] md:text-sm text-white/90">
+                {t("landing.hero.free_line")}&nbsp;
+                <Link
+                  to="/tarifs"
+                  onClick={() => { void trackEvent("home_pricing_link_clicked", { metadata: { location: "hero" } }); }}
+                  className="inline-flex min-h-[44px] items-center text-white underline underline-offset-4"
+                >
+                  {t("landing.hero.free_link")}
+                </Link>
+              </p>
+            </div>
+            <div className="flex items-center gap-2 md:gap-3 md:mt-1 animate-hero-fade-up animation-delay-900">
               <Button
                 variant="outline"
                 onClick={() => {
                   void trackEvent("cta_aid_clicked", { metadata: { location: "hero" } });
                   navigate(isMember ? "/petites-missions/creer" : `/inscription?redirect=${encodeURIComponent("/petites-missions/creer")}`);
                 }}
-                className="font-body text-sm font-medium tracking-wide rounded-full px-7 py-3 bg-transparent text-white border border-white/60 hover:bg-white/10 hover:text-white transition-all duration-200"
+                className="h-12 flex-1 sm:flex-none font-body text-sm font-medium tracking-wide rounded-full px-5 sm:px-7 bg-transparent text-white border border-white/60 hover:bg-white/10 hover:text-white transition-all duration-200"
               >
                 {t("landing.hero.cta_sitter")}
               </Button>
+              <Link
+                to="/sorties"
+                onClick={() => { void trackEvent("home_outings_link_clicked", { metadata: { location: "hero" } }); }}
+                className="inline-flex h-12 items-center justify-center rounded-full border border-white/60 px-5 sm:px-7 font-body text-sm font-medium tracking-wide text-white hover:bg-white/10 transition-all duration-200"
+              >
+                {t("landing.hero.cta_outings")}
+              </Link>
             </div>
             <HomeProximitySearch onLocated={setHomeOrigin} />
             {isPressHighlighted && (
@@ -263,7 +280,7 @@ const Landing = () => {
                 </span>
               </a>
             )}
-            {!isAuthenticated && <Link to="/inscription?role=sitter" className="mt-2 block w-fit text-xs text-primary-foreground/90 underline underline-offset-4">Vous voulez garder ? Créez votre profil.</Link>}
+            {!isAuthenticated && <Link to="/inscription?role=sitter" className="mt-1 inline-flex min-h-[44px] w-fit items-center text-sm text-primary-foreground/95 underline underline-offset-4">Vous voulez garder ? Créez votre profil.</Link>}
           </div>
         </div>
       </section>

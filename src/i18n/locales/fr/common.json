@@ -64,10 +64,10 @@
   "landing": {
     "hero": {
       "eyebrow": "Gardes · Coups de main · Urgences",
-      "title_eyebrow": "Garde d'animaux, de maison et entraide",
+      "title_eyebrow": "Garde d'animaux à domicile et de maison, entraide, sorties",
       "title_main": "Près de chez vous, il y a toujours quelqu'un.",
       "motto": "Tout commence par un échange, et finit par une rencontre.",
-      "lede": "Quelqu'un pour garder votre maison et vos animaux quand vous partez. Quelqu'un pour une partie de belote, un chien à promener ou le potager à arroser le reste de l'année.",
+      "lede": "Une garde quand vous partez, un coup de main ou une sortie le reste de l'année.",
       "cta_owner": "Publier mon annonce de garde",
       "cta_sitter": "Demander un coup de main",
       "cta_aid": "Je cherche ou je propose un coup de main →",
@@ -81,7 +81,10 @@
       "chip_guides": "Guides fournis",
       "cta_member_owner": "Publier une annonce",
       "cta_member_sitter": "Proposer un coup de main",
-      "cta_member_search": "Trouver une garde"
+      "cta_member_search": "Trouver une garde",
+      "free_line": "Guardiens est gratuit.",
+      "free_link": "Voir les tarifs",
+      "cta_outings": "Les sorties"
     },
     "toc": {
       "aria": "Sommaire de la page",
