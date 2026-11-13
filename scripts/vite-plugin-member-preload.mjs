@@ -36,7 +36,11 @@ export function memberPreloadPlugin() {
           for (const i of byFile.get(f)?.imports ?? []) walk(i);
         };
         for (const root of roots) {
-          const start = chunks.find((c) => c.facadeModuleId && c.facadeModuleId.endsWith(root));
+          // La racine est d'ordinaire la façade de son fichier ; quand le découpage
+          // la range dans un fichier partagé, on précharge le fichier qui la contient.
+          const start =
+            chunks.find((c) => c.facadeModuleId && c.facadeModuleId.endsWith(root)) ||
+            chunks.find((c) => (c.moduleIds ?? Object.keys(c.modules ?? {})).some((id) => id.endsWith(root)));
           if (!start) throw new Error(`[p2b-member-preload] racine introuvable : ${root}`);
           walk(start.fileName);
         }
