@@ -1527,6 +1527,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/guides/poussan</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/guides/conquereuil-44290</loc>
     <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -1715,6 +1721,12 @@
   <url>
     <loc>https://guardiens.fr/guides/papeete</loc>
     <lastmod>2026-10-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/montcaret</loc>
+    <lastmod>2026-11-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3013,6 +3025,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/0ce62478-cba6-44d5-a907-9f8ccaf4698f</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/0dd3fa01-8777-4210-a352-1f13c33a9ed2</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3034,6 +3051,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/13839c10-3cfc-4850-a772-d5a89e721eef</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/152feaba-e000-44fa-a4e6-73a6264717f3</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3074,6 +3096,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/25df09bd-f5c7-4b7f-928a-a3a79f105ee2</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/26cfa381-793d-457b-94ea-ccd4efd50c95</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3608,6 +3635,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/ac7e6968-2bf1-4379-b4ff-5afe55bb88ac</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/ae667090-ab7b-4b7d-be64-c0b29a3bdce3</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3709,6 +3741,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/c9ec92ff-3003-43c1-80c7-54d6666c4c32</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/ca7bbc92-d6c8-4392-abf5-46adb176df4b</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3918,11 +3955,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/garde-de-aiko-mon-border-collie-licq-atherey-2a2cfe</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/annonces/un-noel-magique-au-c-ur-du-magnifique-quebec-entoure-de-natu-saint-ludger-quebec-45219d</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -3944,6 +3976,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/annonces/nous-recherchons-une-personne-ou-un-couple-retraite-pour-gar-853154</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/annonces/une-presence-a-la-maison-pendant-les-fetes-a-poussan-86da8d</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3983,12 +4020,12 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/une-garde-de-2-chiens-et-1-chat-saint-vulbas-f5e13d</loc>
+    <loc>https://guardiens.fr/annonces/garde-de-2-chats-a-montcaret-ee920d</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/garde-de-alpha-chouchen-maika-mango-et-pompon-cet-hiver-a-pl-plechatel-fe9775</loc>
+    <loc>https://guardiens.fr/annonces/une-garde-de-2-chiens-et-1-chat-saint-vulbas-f5e13d</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -4003,12 +4040,12 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/petites-missions/une-ou-un-gardien-pour-notre-boxette</loc>
+    <loc>https://guardiens.fr/petites-missions/besoin-un-coin-jardin-pour-mettre-en-securite-mon-camping-car-et-mon-chat-je-vis</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/petites-missions/besoin-un-coin-jardin-pour-mettre-en-securite-mon-camping-car-et-mon-chat-je-vis</loc>
+    <loc>https://guardiens.fr/petites-missions/je-cherche-des-opportunites-de-garde-d-animaux-chiens-et-chats-avec-hebergement</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
