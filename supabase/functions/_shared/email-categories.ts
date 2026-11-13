@@ -101,6 +101,8 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   'admin-delivery-alert',
   'admin-signals-digest',
   'admin-team-alert',
+  // Lot SORT3 : suivi d'une sortie où le membre est inscrit ou organisateur.
+  'outing-update',
   'content-quality-digest',
 ]
 

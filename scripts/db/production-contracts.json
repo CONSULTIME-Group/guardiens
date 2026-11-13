@@ -473,6 +473,36 @@
           "sql": "SELECT count(*) = 1 AS ok FROM pg_trigger WHERE tgname = 'trg_outings_notify_change' AND tgrelid = 'public.outings'::regclass AND NOT tgisinternal"
         }
       ]
+    },
+    {
+      "migration": "0147_sort3_emails_sorties.sql",
+      "description": "Emails de service des sorties derrière le drapeau sorties_emails : inscription, changement, annulation, rappel de la veille",
+      "checks": [
+        {
+          "name": "drapeau_emails_sorties",
+          "sql": "SELECT count(*) = 1 AS ok FROM public.feature_flags WHERE key = 'sorties_emails'"
+        },
+        {
+          "name": "colonne_rappel",
+          "sql": "SELECT count(*) = 1 AS ok FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'outings' AND column_name = 'reminder_sent_at'"
+        },
+        {
+          "name": "mise_en_file",
+          "sql": "SELECT position('sort3_emails_sorties' IN pg_get_functiondef('public.outing_email_enqueue(text, uuid, uuid, text, text)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "mise_en_file_fermee",
+          "sql": "SELECT NOT has_function_privilege('authenticated', 'public.outing_email_enqueue(text, uuid, uuid, text, text)', 'EXECUTE') AS ok"
+        },
+        {
+          "name": "declencheurs_emails",
+          "sql": "SELECT count(*) = 2 AS ok FROM pg_trigger WHERE tgname IN ('trg_outing_email_on_attendee', 'trg_outing_email_on_outing_change') AND NOT tgisinternal"
+        },
+        {
+          "name": "vue_publique_sans_rappel",
+          "sql": "SELECT count(*) = 0 AS ok FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'public_outings' AND column_name = 'reminder_sent_at'"
+        }
+      ]
     }
   ]
 }
