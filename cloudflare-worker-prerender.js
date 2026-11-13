@@ -1,10 +1,12 @@
 // MIROIR DE DOCUMENTATION, CE FICHIER NE DÉPLOIE RIEN.
 // La source de vérité est l'éditeur Cloudflare (Workers & Pages >
 // guardiens-prerender > Edit code). Le code sous le repère « CODE DÉPLOYÉ »
-// est la version active f6ea93ce (v7.6 du 13/11/2026) : la v7.5 (be02d9c5),
-// capturée à l'octet près le 12/11/2026, plus la ligne 440 saisie dans
-// l'éditeur le 13/11/2026 (retrait de la balise googlebot). SHA-256 du miroir :
-// 03988afa1bd22c584ec10d05135f2dfb27d233107291fb5b6cbbd0d0c89bc697.
+// est la version active 1267b9f1 (v7.7 du 13/11/2026) : la v7.6 (f6ea93ce),
+// plus deux saisies dans l'éditeur le 13/11/2026 vers 17 h 45 (lot HOME4) :
+// la ligne « export default { » du gestionnaire devient
+// « const guardiensWorker = { », et le bloc « v7.7 : en-têtes de sécurité »
+// est collé en fin de fichier (724 lignes dans l'éditeur). Retour arrière :
+// liste des versions de l'éditeur, remettre f6ea93ce en version active.
 // Le bloc d'historique au-dessus du repère n'existe que dans ce miroir. Toute
 // modification faite ici reste sans effet sur la production tant qu'elle n'est
 // pas reportée dans l'éditeur Cloudflare.
@@ -802,7 +804,7 @@ function langRedirect(urlObj, method) {
   });
 }
 
-export default {
+const guardiensWorker = {
   async fetch(request, env, ctx) {
     const urlObj = new URL(request.url);
     const pathname = urlObj.pathname;
@@ -946,5 +948,39 @@ export default {
       console.error('[Prerender] Échec sur ' + url + ' : ' + message);
       return serveOrigin('fallback-exception', { 'X-Prerender-Error': message });
     }
+  },
+};
+
+// === v7.7 : en-têtes de sécurité (lot HOME4, 13/11/2026) ===
+// Audit de la home : la page s'affichait dans un cadre tiers, sans
+// X-Frame-Options ni Permissions-Policy, HSTS à 30 jours. Les en-têtes sont
+// posés en sortie, sur toute réponse du Worker. Une erreur ici rend la
+// réponse d'origine telle quelle : la sécurité ajoutée ne casse jamais le site.
+const SECURITY_HEADERS = {
+  'strict-transport-security': 'max-age=31536000',
+  'x-frame-options': 'SAMEORIGIN',
+  'permissions-policy': 'camera=(), microphone=(self), geolocation=(self), usb=(), bluetooth=(), serial=(), midi=()',
+};
+const FRAME_CSP = "frame-ancestors 'self'";
+
+function withSecurityHeaders(response) {
+  try {
+    if (!response || response.status === 101 || response.webSocket) return response;
+    const out = new Response(NO_BODY_STATUSES.has(response.status) ? null : response.body, response);
+    for (const [k, v] of Object.entries(SECURITY_HEADERS)) out.headers.set(k, v);
+    const ct = out.headers.get('content-type') || '';
+    if (ct.includes('text/html') && !out.headers.has('content-security-policy')) {
+      out.headers.set('content-security-policy', FRAME_CSP);
+    }
+    return out;
+  } catch (_e) {
+    return response;
+  }
+}
+
+export default {
+  async fetch(request, env, ctx) {
+    const response = await guardiensWorker.fetch(request, env, ctx);
+    return withSecurityHeaders(response);
   },
 };
