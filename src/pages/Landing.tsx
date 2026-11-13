@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "@/i18n/react";
-import { trackEvent } from "@/lib/analytics";
+import { describeHomeClick, trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchMyProfile } from "@/lib/myProfile";
 
@@ -170,7 +170,15 @@ const Landing = () => {
       <PublicHeader authedVariant />
 
       {/* ═══════════════ MAIN LANDMARK (englobe tout le contenu) ═══════════════ */}
-      <main id="main-content" className="min-w-0">
+      {/* Lot HOME3 : tout clic sur un lien ou un bouton de la home laisse une trace (section, destination, libellé). */}
+      <main
+        id="main-content"
+        className="min-w-0"
+        onClickCapture={(event) => {
+          const click = describeHomeClick(event.target as Element);
+          if (click) void trackEvent("home_click", { source: "landing", metadata: click, transport: "beacon" });
+        }}
+      >
       {/* ═══════════════ SECTION 1, HERO (épuré, 3 blocs) ═══════════════ */}
       <section className="relative flex min-h-[calc(100svh-77px-92px)] md:min-h-[calc(100svh-77px-128px)] w-full items-start md:items-center overflow-hidden">
         {/* Lot HOME1 : une photo cadrée pour chaque format. Verticale sur
