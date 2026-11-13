@@ -1,5 +1,6 @@
 // Alma conversationnelle (lot 1).
 // Entrée : { message, history: [{role, content}], active_role, surface, input_mode }
+// ou { kind: "reply_chip", fact_id, active_role, surface } (lot ALMA4, sans modèle)
 // Sortie : { answer, action?, chips? } ou { limited: true, message } ou { error }
 // Lot J2-A : action et chips sont optionnels, le front antérieur les ignore.
 //
@@ -40,6 +41,16 @@ import { formatInventory, inventoryItemOfSit, loadAlmaInventory } from "../_shar
 import { almaResponseAction, almaResponseChips, applyDraftToAction, computeNextAction, formatActionDirective, isAnimalEmergency } from "../_shared/alma-next-action.ts";
 import { isChildCareRequest } from "../_shared/mission-child-care.ts";
 import { ALMA_VERSION } from "../_shared/alma-version.ts";
+import {
+  isFactId,
+  pickReplyFact,
+  replyActionChip,
+  replyChipKindForFact,
+  REPLY_CHIP_DAILY_LIMIT,
+  REPLY_CHIP_EMPTY_ANSWER,
+  REPLY_CHIP_INPUT_MODE,
+  REPLY_CHIP_LABELS,
+} from "../_shared/alma-reply-chip.ts";
 import { almaProfileVisibleToModel, polishAlmaAnswer } from "../_shared/alma-output.ts";
 import { sitIdFromPath } from "../_shared/alma-next-action.ts";
 import {
@@ -221,7 +232,9 @@ Deno.serve(async (req) => {
     if (body?.kind === "version") return json({ version: ALMA_VERSION });
     const message = typeof body?.message === "string" ? body.message.trim() : "";
     const isContact = body?.kind === "contact_humans";
-    if (!isContact && (!message || message.length > 2000)) {
+    // Lot ALMA4 : réponse d'un geste sous un fait, réplique scriptée sans modèle.
+    const isReplyChip = body?.kind === "reply_chip";
+    if (!isContact && !isReplyChip && (!message || message.length > 2000)) {
       return json({ error: "Message invalide (1 à 2000 caractères)." }, 400);
     }
     let register = detectRegister(message);
@@ -303,6 +316,95 @@ Deno.serve(async (req) => {
         console.error("alma_contact_request signal failed", e);
       }
       return json({ ok: true });
+    }
+
+    // Lot ALMA4 (arène « Alma vivante », lot L4) : le membre a touché la puce
+    // posée sous un fait (« Une autre ! », « Raconte »). Alma répond par un
+    // autre fait de la même famille, lu en base, jamais par le modèle, et
+    // clôt par une puce d'action. La ligne porte input_mode reply_chip.
+    if (isReplyChip) {
+      const sourceId = isFactId(body?.fact_id) ? String(body.fact_id) : null;
+      if (!sourceId) return json({ error: "Requête invalide." }, 400);
+      const { data: source } = await adminClient
+        .from("alma_cultural_facts")
+        .select("id, fact_type, context_filter")
+        .eq("id", sourceId)
+        .eq("active", true)
+        .maybeSingle();
+      const factType = String((source as any)?.fact_type ?? "");
+      const chipKind = replyChipKindForFact(factType);
+      if (!source || !chipKind) return json({ error: "Requête invalide." }, 400);
+
+      const dayAgo = new Date(Date.now() - 24 * 3_600_000).toISOString();
+      const monthAgo = new Date(Date.now() - 30 * 24 * 3_600_000).toISOString();
+      const [usedRes, historyRes, poolRes] = await Promise.all([
+        adminClient.from("alma_conversations").select("id", { count: "exact", head: true })
+          .eq("user_id", userId).eq("input_mode", REPLY_CHIP_INPUT_MODE).gte("created_at", dayAgo),
+        adminClient.from("alma_whisper_history").select("metadata")
+          .eq("user_id", userId).in("whisper_type", ["cultural_fact", "usage_nudge"]).gte("emitted_at", monthAgo)
+          .order("emitted_at", { ascending: false }).limit(500),
+        adminClient.from("alma_cultural_facts")
+          .select("id, content, context_filter, seasonal_start_month, seasonal_end_month, needs_pro_referral")
+          .eq("active", true).eq("fact_type", factType).limit(200),
+      ]);
+      const limited = usedRes.error ? true : (usedRes.count ?? 0) >= REPLY_CHIP_DAILY_LIMIT;
+      const recentIds = ((historyRes.data ?? []) as any[])
+        .map((row) => row?.metadata?.fact_id)
+        .filter((id) => typeof id === "string");
+      const month = Number(new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Paris", month: "numeric" }).format(new Date()));
+      const picked = limited || historyRes.error || poolRes.error
+        ? null
+        : pickReplyFact({
+            factType,
+            sourceId,
+            sourceFilter: (source as any).context_filter ?? {},
+            candidates: (poolRes.data ?? []) as any[],
+            recentIds,
+            month,
+          });
+      const answer = picked ? picked.content.trim() : REPLY_CHIP_EMPTY_ANSWER;
+      const actionChip = replyActionChip(activeRole, factType);
+      if (picked) {
+        // Le fait raconté entre dans la rotation, comme un fait affiché.
+        const { error: histErr } = await adminClient.from("alma_whisper_history").insert({
+          user_id: userId,
+          whisper_type: "cultural_fact",
+          surface,
+          session_id: "reply_chip",
+          dismissed_reason: "reply_chip",
+          metadata: { fact_id: picked.id, fact_type: factType, via: "reply_chip" },
+        });
+        if (histErr) console.error("alma-chat reply_chip history failed", histErr);
+      }
+      const { data: logged, error: logErr } = await adminClient.from("alma_conversations").insert({
+        user_id: userId,
+        surface,
+        active_role: activeRole,
+        input_mode: REPLY_CHIP_INPUT_MODE,
+        question: REPLY_CHIP_LABELS[chipKind],
+        answer,
+        register: "perso",
+        refusal_reason: limited ? "reply_chip_limit" : null,
+        latency_ms: Date.now() - startedAt,
+        sources_count: 0,
+        page_path: pagePath,
+        chips: [actionChip],
+        classification: {
+          intent: "reply_chip",
+          chip: chipKind,
+          fact_id: sourceId,
+          reply_fact_id: picked?.id ?? null,
+          usage: emptyAlmaUsage(),
+          version: ALMA_VERSION,
+        },
+      }).select("id").single();
+      if (logErr) console.error("alma-chat reply_chip log failed", logErr);
+      return json({
+        answer,
+        chips: almaResponseChips([actionChip]),
+        reply_fact_id: picked?.id ?? null,
+        ...((logged as any)?.id ? { conversation_id: (logged as any).id } : {}),
+      });
     }
 
     // Lot J2-B : rejeu admin du jeu de non-régression, sans écriture ni signal.

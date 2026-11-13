@@ -259,6 +259,78 @@ export async function sendAlmaMessage({
   }
 }
 
+export interface SendAlmaReplyChipArgs {
+  /** Texte du fait auquel le membre répond, premier message du fil. */
+  factText: string;
+  /** Libellé de la puce touchée (« Une autre ! », « Raconte »). */
+  chipLabel: string;
+  factId: string;
+  surface: string;
+  activeRole: "owner" | "sitter";
+  /** Injection pour les tests. */
+  invoke?: typeof supabase.functions.invoke;
+}
+
+/**
+ * Lot ALMA4 : réponse d'un geste sous un fait d'Alma. Le fait ouvre le fil,
+ * la puce devient le message du membre, et alma-chat répond par son chemin
+ * scripté (kind reply_chip, aucun appel au modèle), clos par une puce d'action.
+ */
+export async function sendAlmaReplyChip({
+  factText,
+  chipLabel,
+  factId,
+  surface,
+  activeRole,
+  invoke,
+}: SendAlmaReplyChipArgs): Promise<void> {
+  if (state.sending) return;
+  const requestGeneration = conversationGeneration;
+  const opening = state.messages.length === 0 && factText.trim()
+    ? [{ id: nextId(), role: "alma" as const, content: factText.trim() }]
+    : [];
+  setState({
+    open: true,
+    sending: true,
+    error: null,
+    messages: [...state.messages, ...opening, { id: nextId(), role: "user", content: chipLabel }],
+  });
+
+  const call = invoke ?? supabase.functions.invoke.bind(supabase.functions);
+  try {
+    const { data, error } = await call("alma-chat", {
+      body: {
+        kind: "reply_chip",
+        fact_id: factId,
+        surface,
+        active_role: activeRole,
+        page_path: typeof window !== "undefined" ? window.location.pathname : undefined,
+      },
+    });
+    if (requestGeneration !== conversationGeneration) return;
+    const answer = typeof (data as any)?.answer === "string" ? (data as any).answer.trim() : "";
+    if (error || !answer) {
+      setState({ sending: false, error: "Alma reste joignable dans un instant, réessayez." });
+      return;
+    }
+    setState({
+      sending: false,
+      messages: [
+        ...state.messages,
+        {
+          id: nextId(),
+          role: "alma",
+          content: answer,
+          chips: readAlmaChips((data as any)?.chips),
+        },
+      ],
+    });
+  } catch {
+    if (requestGeneration !== conversationGeneration) return;
+    setState({ sending: false, error: "Alma reste joignable dans un instant, réessayez." });
+  }
+}
+
 /** Lot J2-B : ouvre le formulaire de contact humain, dans le fil d'Alma. */
 export function openAlmaHumanContact() {
   setState({ open: true, contactOpen: true, error: null });

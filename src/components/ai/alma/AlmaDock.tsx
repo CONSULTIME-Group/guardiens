@@ -22,7 +22,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { isAlmaPillHiddenOn } from "@/lib/alma/dockPillVisibility";
 
 import { ChevronDown, X, MoreHorizontal, Check, EyeOff, Lightbulb, Route, MessageCircle, Mail } from "lucide-react";
-import { openAlmaHumanContact } from "@/lib/alma/conversation-store";
+import { openAlmaHumanContact, sendAlmaReplyChip } from "@/lib/alma/conversation-store";
 import { AlmaConversation } from "./AlmaConversation";
 import { useAlmaJournal } from "@/hooks/useAlmaJournal";
 import type { AlmaJournalEntry } from "@/lib/alma/journal";
@@ -68,6 +68,7 @@ import {
   spontaneousUsedThisSession,
 } from "@/lib/alma/whisperArrival";
 import { resolveAlmaCtaHref } from "@/lib/alma/cta-actions";
+import { PEEK_SCROLL_ARM_MS, peekLines, replyChipForWhisper } from "@/lib/alma/peekReply";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -282,6 +283,20 @@ function AlmaDockInner() {
     if (!peekId) return;
     const t = setTimeout(() => setPeekId(null), ALMA_PEEK_DURATION_MS);
     return () => clearTimeout(t);
+  }, [peekId]);
+  // Lot ALMA4 : un défilement referme l'aperçu, une fois passé le saut de
+  // page d'une navigation. Écoute en capture : les listes défilent dans
+  // leur propre conteneur.
+  useEffect(() => {
+    if (!peekId) return;
+    let armed = false;
+    const arm = window.setTimeout(() => { armed = true; }, PEEK_SCROLL_ARM_MS);
+    const onScroll = () => { if (armed) setPeekId(null); };
+    window.addEventListener("scroll", onScroll, { capture: true, passive: true });
+    return () => {
+      window.clearTimeout(arm);
+      window.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions);
+    };
   }, [peekId]);
   const [entryContext, setEntryContext] = useState<AlmaDockOpenDetail | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
@@ -499,7 +514,12 @@ function AlmaDockInner() {
     if (!whisper) return;
     if (peekVisible && firstDisplayOf(peekTrackedRef.current, whisper.id)) {
       trackEvent("alma_whisper_peek_shown" as any, {
-        metadata: { surface: surfaceFromPath(location.pathname, activeRole), whisper_type: whisper.type },
+        metadata: {
+          surface: surfaceFromPath(location.pathname, activeRole),
+          whisper_type: whisper.type,
+          // Lot ALMA4 : puce de réponse affichée avec l'aperçu, ou null.
+          chip: replyChipForWhisper(whisper)?.kind ?? null,
+        },
       });
     }
     const display = peekVisible ? "peek" : panelShowsWhisper ? "panel" : null;
@@ -611,7 +631,7 @@ function AlmaDockInner() {
 
   // Ouverture du panneau tracée avec son origine (N6).
   const openPanel = useCallback(
-    (origin: "whisper" | "avatar" | "pill" | "peek", trigger?: HTMLElement | null) => {
+    (origin: "whisper" | "avatar" | "pill" | "peek" | "reply_chip", trigger?: HTMLElement | null) => {
       setPeekId(null);
       triggerRef.current = trigger ?? (
         document.activeElement instanceof HTMLElement ? document.activeElement : null
@@ -629,6 +649,32 @@ function AlmaDockInner() {
       setFocusSignal((value) => value + 1);
     },
     [location.pathname, activeRole],
+  );
+
+  // Lot ALMA4 : puce de réponse sous l'aperçu d'un fait. Le panneau s'ouvre
+  // sur le fait, la puce devient le message du membre, alma-chat répond par
+  // son chemin scripté (aucun appel au modèle). Le murmure est clos : le
+  // fait vit désormais dans le fil.
+  const peekChip = replyChipForWhisper(whisper);
+  const onPeekChip = useCallback(
+    (trigger: HTMLElement) => {
+      if (!whisper || !peekChip) return;
+      const surface = surfaceFromPath(location.pathname, activeRole);
+      trackEvent("alma_whisper_reply_clicked", {
+        metadata: { chip: peekChip.kind, fact_id: peekChip.factId, fact_type: peekChip.factType, surface },
+      });
+      const factText = whisper.message;
+      openPanel("reply_chip", trigger);
+      void sendAlmaReplyChip({
+        factText,
+        chipLabel: peekChip.label,
+        factId: peekChip.factId,
+        surface,
+        activeRole: activeRole === "owner" ? "owner" : "sitter",
+      });
+      doDismiss("action_clicked", `reply_chip_${peekChip.kind}`);
+    },
+    [whisper, peekChip, location.pathname, activeRole, openPanel, doDismiss],
   );
 
   const openFromPill = useCallback((trigger: HTMLElement) => {
@@ -949,15 +995,45 @@ function AlmaDockInner() {
 
       {/* Lot ALMA1 : l'aperçu se rend aussi sur /search et /annonces (dock
           compact), une ligne au-dessus de la pastille réduite. */}
+      {/* Lot ALMA4 : texte entier, quatre lignes au plus (une ligne sur un
+          écran d'action), et sous un fait une puce de réponse d'un geste. */}
       {peekVisible && whisper && (
-        <button
-          type="button"
-          data-testid="alma-whisper-peek"
-          onClick={(e) => openPanel("peek", e.currentTarget)}
-          className="pointer-events-auto mb-2 max-w-[18rem] truncate rounded-full border border-border bg-card/95 px-3 py-1.5 text-left text-sm text-foreground shadow-md backdrop-blur"
+        <div
+          data-testid="alma-whisper-peek-card"
+          className={cn(
+            "pointer-events-auto mb-2 max-w-[min(24rem,100%)] border border-border bg-card/95 text-left shadow-md backdrop-blur",
+            peekLines(whisper.surface) === 1 && !peekChip ? "rounded-full" : "rounded-2xl",
+          )}
         >
-          {whisper.message}
-        </button>
+          <button
+            type="button"
+            data-testid="alma-whisper-peek"
+            onClick={(e) => openPanel("peek", e.currentTarget)}
+            className={cn(
+              "block w-full px-3 text-left text-sm leading-snug text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              peekLines(whisper.surface) === 1 ? "rounded-full py-1.5" : "rounded-2xl pt-2",
+              peekLines(whisper.surface) !== 1 && !peekChip && "pb-2",
+            )}
+          >
+            {/* La coupe vit sur un élément sans marge intérieure : une marge
+                basse sur l'élément coupé laisserait voir la ligne suivante. */}
+            <span className={peekLines(whisper.surface) === 1 ? "block truncate" : "line-clamp-4"}>
+              {whisper.message}
+            </span>
+          </button>
+          {peekChip && (
+            <div className="px-2 pb-1.5 pt-1">
+              <button
+                type="button"
+                data-testid="alma-whisper-peek-chip"
+                onClick={(e) => onPeekChip(e.currentTarget)}
+                className="inline-flex min-h-11 items-center rounded-full border border-border bg-background px-4 text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {peekChip.label}
+              </button>
+            </div>
+          )}
+        </div>
       )}
 
       {!hideCollapsedPill && (
