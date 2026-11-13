@@ -656,6 +656,12 @@ function AlmaDockInner() {
   // son chemin scripté (aucun appel au modèle). Le murmure est clos : le
   // fait vit désormais dans le fil.
   const peekChip = replyChipForWhisper(whisper);
+  // Lot ALMA4b : panneau ouvert par une puce, le fil commence par le fait ;
+  // la page du jour reste de côté jusqu'à la fermeture.
+  const [replyThread, setReplyThread] = useState(false);
+  useEffect(() => {
+    if (!expanded) setReplyThread(false);
+  }, [expanded]);
   const onPeekChip = useCallback(
     (trigger: HTMLElement) => {
       if (!whisper || !peekChip) return;
@@ -672,7 +678,12 @@ function AlmaDockInner() {
         surface,
         activeRole: activeRole === "owner" ? "owner" : "sitter",
       });
-      doDismiss("action_clicked", `reply_chip_${peekChip.kind}`);
+      // Lot ALMA4b : aucun identifiant d'action. Une réponse d'un geste est
+      // une parole, pas une action du murmure : elle reste hors du « taux
+      // d'action » des murmures (admin_a10_whisper_stats compte action_taken)
+      // et se lit sur alma_whisper_reply_clicked.
+      setReplyThread(true);
+      doDismiss("action_clicked");
     },
     [whisper, peekChip, location.pathname, activeRole, openPanel, doDismiss],
   );
@@ -974,7 +985,7 @@ function AlmaDockInner() {
           onFocus={onComposerFocused}
           onTyped={onComposerTyped}
           action={conversationAction}
-          journal={whisperOwnsPanel ? null : journal}
+          journal={whisperOwnsPanel || replyThread ? null : journal}
           onJournalAction={onJournalAction}
           onJournalReply={onJournalReply}
         />

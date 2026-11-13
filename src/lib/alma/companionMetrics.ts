@@ -38,7 +38,10 @@ export function openerGroups(answers: Array<string | null | undefined>): { total
 }
 
 export function measureCompanion(rows: CompanionRow[]): CompanionMeasure {
-  const answered = rows.filter((r) => typeof r.answer === "string" && r.answer.trim());
+  // Lot ALMA4b : une réponse d'un geste rend un fait lu en base, elle sort
+  // des mesures de variété et de repli du modèle.
+  const answered = rows.filter((r) =>
+    typeof r.answer === "string" && r.answer.trim() && r.classification?.intent !== "reply_chip");
   const sharedOpeners = openerGroups(answered.map((r) => r.answer)).repeated;
   const flagged = answered.filter((r) => r.classification && typeof r.classification.fallback_template === "boolean");
   return {
