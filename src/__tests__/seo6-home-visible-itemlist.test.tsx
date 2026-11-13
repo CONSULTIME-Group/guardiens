@@ -25,7 +25,7 @@ const graph = (container: HTMLElement) => {
   const script = container.querySelector('script[type="application/ld+json"]');
   return script ? JSON.parse(script.textContent!) : null;
 };
-const visiblePaths = (container: HTMLElement) => Array.from(container.querySelectorAll('[data-testid="live-listings-list"] a')).map((a) => a.getAttribute("href"));
+const visiblePaths = (container: HTMLElement) => Array.from(container.querySelectorAll('[data-testid="live-listings-list"] a:not([data-invitation])')).map((a) => a.getAttribute("href"));
 const schemaPaths = (container: HTMLElement) => graph(container)?.itemListElement.map((item: any) => new URL(item.url).pathname);
 
 beforeEach(() => { fixture.sits = []; fixture.missions = []; fixture.loading = false; });
@@ -36,11 +36,13 @@ describe("ItemList de l'accueil issu des vraies cartes", () => {
     fixture.sits = Array.from({ length: 7 }, (_, i) => sit(String(i)));
     fixture.missions = Array.from({ length: 3 }, (_, i) => mission(String(i)));
     const { container } = render(<MemoryRouter><LiveListingsStrip /></MemoryRouter>);
-    await waitFor(() => expect(visiblePaths(container)).toHaveLength(6));
+    // Lot VIT1 : la sixième carte invite à proposer une sortie, elle reste hors de la liste déclarée.
+    await waitFor(() => expect(visiblePaths(container)).toHaveLength(5));
+    expect(container.querySelectorAll('[data-testid="live-listings-list"] a[data-invitation]')).toHaveLength(1);
     expect(schemaPaths(container)).toEqual(visiblePaths(container));
-    expect(graph(container).numberOfItems).toBe(6);
+    expect(graph(container).numberOfItems).toBe(5);
     expect(graph(container).itemListElement.map((item: any) => item.name)).toEqual(
-      Array.from(container.querySelectorAll('[data-testid="live-listings-list"] h3')).map((h) => h.textContent));
+      Array.from(container.querySelectorAll('[data-testid="live-listings-list"] a:not([data-invitation]) h3')).map((h) => h.textContent));
   });
 
   it("suit le tri par proximité après changement de ville", async () => {
