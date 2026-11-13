@@ -28,9 +28,6 @@ export function ServiceAfterServiceSection() {
         </ol>
         <p className="mx-auto mt-10 max-w-2xl text-center font-heading text-xl italic md:text-2xl">La technologie sert à se trouver. Tout le reste se passe en vrai.</p>
         <p className="mx-auto mt-6 max-w-2xl leading-relaxed text-pine-foreground/90">Nous nous sommes posé une question : et si la technologie servait à se rencontrer ? À découvrir qu'à quelques kilomètres, quelqu'un a besoin d'un coup de main. Pour l'un, c'est un vrai besoin. Pour l'autre, une heure. Et se sentir utile, échanger quelques mots, rencontrer une personne, c'est aussi une façon de se faire du bien.</p>
-        <p className="mx-auto mt-4 max-w-2xl font-semibold">
-          Elisa et Jérémie · <Link to="/a-propos" className="underline underline-offset-4">Lire notre histoire</Link>
-        </p>
         <div className="mt-8 flex justify-center">
           <Link
             to={homeCtaTarget("/petites-missions/creer", isAuthenticated)}
@@ -39,7 +36,7 @@ export function ServiceAfterServiceSection() {
             Demander un coup de main
           </Link>
         </div>
-        <Link to="/actualites/technologie-recreer-lien-pres-de-chez-soi" className="mx-auto mt-5 block w-fit text-sm underline underline-offset-4">Lire l'article</Link>
+        <Link to="/actualites/technologie-recreer-lien-pres-de-chez-soi" className="mx-auto mt-3 flex min-h-11 w-fit items-center text-sm underline underline-offset-4">Lire l'article</Link>
       </div>
       <img src={rooftops1600} alt="" width={1600} height={374} loading="lazy" className="mx-auto mt-8 block w-full max-w-[820px] opacity-80" />
     </section>

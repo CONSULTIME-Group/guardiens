@@ -42,6 +42,7 @@ export function LandingTocBar() {
     { href: "#vous-choisissez", label: "Vous choisissez" },
     { href: "#confiance", label: "Confiance" },
     { href: "#ils-lont-vecu", label: "Ils l'ont vécu" },
+    { href: "#notre-histoire", label: "Notre histoire" },
     { href: "#definition", label: "Guardiens" },
     { href: "#faq", label: t("landing.toc.faq") },
   ];

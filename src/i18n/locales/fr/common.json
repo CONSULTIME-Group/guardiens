@@ -246,7 +246,7 @@
     "affinity": {
       "title": "Vous décrivez qui vous voulez chez vous",
       "subtitle": "Un couple, un retraité, une famille, quelqu'un qui part randonner la journée ou quelqu'un qui reste à la maison, avec voiture ou à pied. Vous le dites à l'inscription, et chaque candidature reçoit un score calculé sur ce que vous avez décrit.",
-      "bullet1": "Vous décrivez votre gardien idéal, votre rythme de vie, l'ambiance de votre foyer et la présence que vous attendez pendant la garde.",
+      "bullet1": "Propriétaire ou gardien, chacun décrit ce qu'il cherche, son rythme de vie et la présence prévue pendant la garde.",
       "bullet2": "Chaque candidature est notée critère par critère, avec le poids de chacun affiché.",
       "bullet3": "Vous voyez le détail, vous décidez.",
       "cta": "Comprendre le score d'affinité",
@@ -395,8 +395,22 @@
       "sorties_title": "Sorties",
       "sorties_text": "Une balade, une partie de belote, un jeu de société, à plusieurs."
     },
+    "manifesto": {
+      "lead": "On a gardé 37 maisons en cinq ans.",
+      "title_1": "On ne gardait pas des maisons.",
+      "title_2": "On collectionnait des vies.",
+      "l1": "Votre jardin contre un repas.",
+      "l2": "Vos clés contre une histoire.",
+      "l3": "Des gens du coin qui se font confiance,",
+      "l4": "et parfois des amis pour la vie.",
+      "signature": "Jérémie et Elisa",
+      "link": "Lire notre histoire",
+      "alt_elisa": "Portrait d'Elisa, cofondatrice de Guardiens.",
+      "alt_jeremie": "Portrait de Jérémie, cofondateur de Guardiens."
+    },
     "choose": {
-      "eyebrow": "L'affinité",
+      "cta": "Créer mon compte gratuitement",
+      "eyebrow": "Vous choisissez",
       "title": "Votre gardien idéal, votre maison idéale, votre moment.",
       "lede": "Sur Guardiens, chacun décrit ce qu'il cherche. Le score d'affinité montre ensuite où vous vous correspondez, et vous choisissez.",
       "sitter_who": "Vous partez",
@@ -404,7 +418,7 @@
       "sitter_text": "Un couple, un retraité, une famille, quelqu'un d'actif ou quelqu'un qui reste à la maison, avec voiture ou à pied. Vous décrivez qui vous voulez chez vous.",
       "home_who": "Vous gardez",
       "home_title": "Votre maison idéale",
-      "home_text": "Chien, chat, poules ou jardin : vous dites avec quels animaux vous êtes à l'aise, votre rythme, et ce que vous préférez éviter.",
+      "home_text": "Chien, chat, poules, jardin à arroser : vous dites ce qui vous convient, votre rythme, et ce que vous préférez éviter.",
       "moment_who": "Pour tous",
       "moment_title": "Votre moment",
       "moment_text": "Vos dates quand vous partez, vos zones d'alerte quand vous gardez. Chaque nouvelle annonce arrive aux gardiens qu'elle concerne."

@@ -244,6 +244,7 @@ export type EventType =
   | "pricing_cta_clicked"
   | "cta_signup_clicked"
   | "home_family_clicked"
+  | "home_manifesto_clicked"
   | "cta_outing_clicked"              // Lot TAR1 : clic sur un bouton de la page tarifs (cta)
   // Admin refresh IA articles post-pivot -------------------------------------
   | "admin_article_refresh_previewed"       // Aperçu du refresh IA (article_id, slug)
