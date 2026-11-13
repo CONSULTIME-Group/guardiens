@@ -8,7 +8,7 @@ const comparisonSource = readFileSync("src/components/landing/ComparatifSection.
 
 describe("structure H1 de la home", () => {
   it("suit l'ordre éditorial validé", () => {
-    const names = ["LiveListingsStrip", "LandingTocBar", "HowItWorksSection", "ServiceAfterServiceSection", "ConfianceSection", "LivedItSection", "UsagesSection", "FaqSection", "FinalCtaSection"];
+    const names = ["LiveListingsStrip", "LandingTocBar", "HowItWorksSection", "ServiceAfterServiceSection", "ChoisirSection", "ConfianceSection", "LivedItSection", "ManifesteSection", "UsagesSection", "FaqSection", "FinalCtaSection"];
     const positions = names.map((name) => source.indexOf(`<${name}`));
     expect(positions.every((position) => position >= 0)).toBe(true);
     expect(positions).toEqual([...positions].sort((a, b) => a - b));

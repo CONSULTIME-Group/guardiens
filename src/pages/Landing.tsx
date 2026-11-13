@@ -31,6 +31,8 @@ import { LandingTocBar } from "@/components/landing/LandingTocBar";
 import HomeJsonLd from "@/components/landing/HomeJsonLd";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { ConfianceSection } from "@/components/landing/ConfianceSection";
+import { ManifesteSection } from "@/components/landing/ManifesteSection";
+import { ChoisirSection } from "@/components/landing/ChoisirSection";
 import { FaqSection } from "@/components/landing/FaqSection";
 import { FinalCtaSection } from "@/components/landing/FinalCtaSection";
 
@@ -317,10 +319,16 @@ const Landing = () => {
 
       <ServiceAfterServiceSection />
 
-      {/* ═══════════════ CONFIANCE ET AFFINITÉ CONDENSÉE ═══════════════ */}
+      {/* ═══════════════ VOUS CHOISISSEZ : les trois choix et le score d'affinité (lot HOME8) ═══════════════ */}
+      <ChoisirSection />
+
+      {/* ═══════════════ CONFIANCE : trois repères ═══════════════ */}
       <ConfianceSection />
 
       <LivedItSection />
+
+      {/* ═══════════════ NOTRE HISTOIRE : version courte du manifeste (lot HOME8) ═══════════════ */}
+      <ManifesteSection />
 
       <UsagesSection />
 

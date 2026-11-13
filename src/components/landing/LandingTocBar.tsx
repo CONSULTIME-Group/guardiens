@@ -39,8 +39,10 @@ export function LandingTocBar() {
     { href: "#en-ce-moment", label: "En ce moment" },
     { href: "#comment-ca-marche", label: t("landing.toc.how") },
     { href: "#service-apres-service", label: "Un service après l'autre" },
+    { href: "#vous-choisissez", label: "Vous choisissez" },
     { href: "#confiance", label: "Confiance" },
     { href: "#ils-lont-vecu", label: "Ils l'ont vécu" },
+    { href: "#notre-histoire", label: "Notre histoire" },
     { href: "#definition", label: "Guardiens" },
     { href: "#faq", label: t("landing.toc.faq") },
   ];

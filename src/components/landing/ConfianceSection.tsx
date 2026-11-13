@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { RevealSection } from "@/components/ui/RevealSection";
 
 export function ConfianceSection() {
@@ -24,25 +23,6 @@ export function ConfianceSection() {
           {pillars.map(([title, text], index) => <RevealSection key={title} delay={0.1 + index * 0.1}><article className="h-full border-t border-border pt-5"><h3 className="font-heading text-xl font-semibold text-foreground">{title}</h3><p className="mt-3 text-sm leading-relaxed text-muted-foreground">{text}</p></article></RevealSection>)}
         </div>
 
-        <RevealSection delay={0.4} className="mt-10">
-          <article className="rounded-2xl border border-primary/25 bg-primary/5 p-[22px] md:p-[34px]">
-            <div>
-              <div className="flex items-center gap-3">
-                <span aria-hidden="true" className="block h-6 w-[3px] rounded-full bg-terra" />
-                <p className="text-[10px] md:text-xs tracking-[0.2em] uppercase text-terra font-body font-medium">L'affinité</p>
-              </div>
-              <h3 className="mt-[14px] font-heading text-2xl md:text-3xl font-semibold text-foreground">Votre gardien idéal, décrit par vous</h3>
-              <div className="mt-[14px] space-y-2 text-foreground/75 leading-relaxed">
-                <p>Vous décrivez le gardien recherché : rythme de vie, présence, expérience avec vos animaux et mobilité.</p>
-                <p>Le score d'affinité classe chaque candidature critère par critère.</p>
-                <p>Vous voyez le détail du calcul et vous choisissez.</p>
-              </div>
-              <Link to="/a-propos#affinite" className="mt-5 inline-flex min-h-11 items-center font-semibold text-primary underline underline-offset-4">
-                Comprendre le score d'affinité
-              </Link>
-            </div>
-          </article>
-        </RevealSection>
 
       </div>
     </section>
