@@ -383,6 +383,16 @@
       ]
     },
     {
+     "migration": "0155_rel1b_horaire_relances.sql",
+     "description": "Relance des candidatures en attente à la minute 07 (09 h 07 et 17 h 07 UTC), hors de la minute 00 où les appels pg_net échouent",
+     "checks": [
+      {
+       "name": "horaire_minute_07",
+       "sql": "SELECT schedule = '7 9,17 * * *' AS ok FROM cron.job WHERE jobname = 'nudge-owner-pending-application'"
+      }
+     ]
+    },
+    {
       "migration": "0141_adm22_alertes_equipe.sql",
       "description": "Alertes de l'équipe : préférences par admin, mise en file d'un email immédiat sur message de contact, compte suspect et voyant système",
       "checks": [
