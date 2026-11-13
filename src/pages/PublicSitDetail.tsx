@@ -6,6 +6,7 @@ import { calendarDate, daysBetween, daysFromToday, isPastDay } from "@/lib/calen
 import { Suspense, useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "@/i18n/react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { stripGluedText } from "@/lib/sitSlugClean";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -109,6 +110,14 @@ const PublicSitDetail = () => {
     setAvgRating(null); setReviewCount(0); setLatestReviews([]); setHasApplied(false);
     setIsAcceptedSitter(false); setLiveAppCount(null); setViewerType("anonymous"); sitViewFired.current = false;
     if (!param) { setLoadError("not_found"); setLoading(false); return; }
+    // Lot HOME7 : un lien partagé arrive parfois avec le début de la phrase
+    // suivante collé à l'adresse. L'adresse nettoyée reprend la main.
+    const cleaned = stripGluedText(param);
+    if (cleaned !== param) {
+      setCanonicalRedirect(`/annonces/${cleaned}${window.location.search}${window.location.hash}`);
+      setLoading(false);
+      return;
+    }
     const load = async () => {
       try {
         // Param peut être un UUID (URL legacy) ou un slug SEO.
