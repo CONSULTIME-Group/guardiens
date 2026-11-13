@@ -20,7 +20,7 @@ await db.exec(`
     SELECT nullif(current_setting('fixture.uid', true), '')::uuid
   $$;
   CREATE TYPE public.app_role AS ENUM ('admin', 'user');
-  CREATE TABLE public.profiles(id uuid PRIMARY KEY, first_name text, postal_code text, latitude numeric, longitude numeric,
+  CREATE TABLE public.profiles(id uuid PRIMARY KEY, first_name text, postal_code text, latitude double precision, longitude double precision,
     identity_verified boolean, created_at timestamptz NOT NULL DEFAULT now(), email text, account_status text DEFAULT 'active',
     last_seen_at timestamptz DEFAULT now());
   CREATE TABLE public.email_unsubscribe_tokens(id uuid PRIMARY KEY DEFAULT gen_random_uuid(), token text UNIQUE, email text UNIQUE);

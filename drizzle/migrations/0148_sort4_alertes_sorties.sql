@@ -71,7 +71,7 @@ AS $fn$
   -- sort4_alertes_sorties
   SELECT p.id,
          CASE WHEN o.latitude IS NOT NULL AND p.latitude IS NOT NULL
-              THEN round(public.outing_distance_km(o.latitude, o.longitude, p.latitude, p.longitude), 1) END AS distance_km
+              THEN round(public.outing_distance_km(o.latitude, o.longitude, p.latitude::numeric, p.longitude::numeric), 1) END AS distance_km
   FROM public.outings o
   JOIN public.profiles p ON p.id <> o.organizer_id
   LEFT JOIN public.outing_alert_preferences pref ON pref.user_id = p.id
@@ -88,7 +88,7 @@ AS $fn$
       OR (
         COALESCE(pref.radius, '15') <> 'quartier'
         AND o.latitude IS NOT NULL AND p.latitude IS NOT NULL
-        AND public.outing_distance_km(o.latitude, o.longitude, p.latitude, p.longitude)
+        AND public.outing_distance_km(o.latitude, o.longitude, p.latitude::numeric, p.longitude::numeric)
             <= CASE COALESCE(pref.radius, '15') WHEN '5' THEN 5 ELSE 15 END
       )
     )
