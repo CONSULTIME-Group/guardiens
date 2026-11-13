@@ -62,8 +62,7 @@ export function HomeProximitySearch({ onLocated, tone = "dark" }: { onLocated: (
       </form>
       {counts && (
         <p className={`mt-3 text-base font-medium ${textTone}`} aria-live="polite">
-          {counts.gardiens_count} gardiens et {counts.helpers_count} personnes prêtes à aider à moins de 30 km
-          {(counts.gardiens_count < 1 || counts.helpers_count < 1) && <span className="block">Soyez parmi les premiers de votre secteur.</span>}
+          {Math.max(counts.gardiens_count, counts.helpers_count)} membres inscrits à moins de 30 km de chez vous.
         </p>
       )}
       {message && <p className={`mt-2 text-sm ${textTone}`} aria-live="polite">{message}</p>}
