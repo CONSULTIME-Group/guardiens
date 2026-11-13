@@ -31,7 +31,7 @@ export const OUTING_CATEGORIES: ReadonlyArray<{ value: OutingCategory; label: st
   { value: "jeux", label: "Jeux", art: spotJeux, alt: "Deux personnes jouent aux cartes" },
   { value: "balades", label: "Balades et randonnées", art: spotBienetre, alt: "Deux personnes partagent un moment dehors" },
   { value: "chiens", label: "Avec les chiens", art: spotChien, alt: "Une personne promène un chien" },
-  { value: "velo", label: "Vélo", art: spotTrajet, alt: "Un trajet sur une petite route" },
+  { value: "velo", label: "Sport", art: spotTrajet, alt: "Un trajet sur une petite route" },
   { value: "jardin", label: "Jardin et potager", art: spotJardin, alt: "Une personne jardine" },
   { value: "repas", label: "Repas et cuisine", art: spotCourses, alt: "Un panier de courses" },
   { value: "culture", label: "Culture", art: spotBienetre, alt: "Deux personnes partagent un moment" },
