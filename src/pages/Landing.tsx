@@ -309,7 +309,7 @@ const Landing = () => {
 
       {/* ═══════════════ ANNONCES DISPONIBLES (preuve vivante, remontée en
           troisième position le 06/09/2026, agrandie à six annonces) ═══════════════ */}
-       <LiveListingsStrip origin={homeOrigin} profileOrigin={profileOrigin} />
+       <LiveListingsStrip origin={homeOrigin} profileOrigin={profileOrigin} isAuthenticated={isAuthenticated} />
 
       {/* ═══════════════ SOMMAIRE DE PAGE, maillage interne ═══════════════ */}
       <LandingTocBar />

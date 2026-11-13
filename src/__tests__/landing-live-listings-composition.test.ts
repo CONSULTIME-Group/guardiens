@@ -122,9 +122,12 @@ describe("vitrine de la home, lot VIT1", () => {
       listing("chat", "besoin", 0, { title: "Pension chat" }),
       listing("pet", "besoin", 0, { title: "Pet sitting" }),
       listing("potager", "besoin", 0, { title: "Arroser mon potager" }),
+      listing("garde-corps", "besoin", 0, { title: "Poser un garde-corps" }),
     ];
     const result = composeHomeListings([], needs, null, NOW, outing);
     expect(result.find((item) => item.kind === "besoin")?.id).toBe("potager");
+    const sansPotager = composeHomeListings([], needs.filter((n) => n.id !== "potager"), null, NOW, outing);
+    expect(sansPotager.find((item) => item.kind === "besoin")?.id).toBe("garde-corps");
   });
 
   it("retire les émojis du titre affiché", () => {

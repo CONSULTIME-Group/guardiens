@@ -59,7 +59,8 @@ export const liveListingsTitle = (origin: HomeOrigin | null) => {
 };
 
 /**
- * Gardes de maison d'abord, entraide ensuite : cinq gardes, un besoin.
+ * Gardes de maison d'abord, entraide ensuite : cinq gardes et un besoin,
+ * ou quatre gardes, un besoin et une sortie quand la carte de sortie est là.
  * Un besoin n'apparaît que s'il porte une photo.
  */
 const GUARD_TARGET = 5;
@@ -124,8 +125,8 @@ const hasPhoto = (l: HomeListing) => Boolean(l.photo) || (l.photoCount ?? 0) > 0
 
 /** Un coup de main hors animaux d'abord : la home montre l'étendue de l'entraide (lot VIT1). */
 const nonAnimalFirst = (needs: HomeListing[]) => {
-  // « Pet sitting », « pension », « garde » : des titres d'animaux que la règle générale laisse passer.
-  const isAnimal = (l: HomeListing) => inferMissionCategory(l.title) === "animals" || /\b(pet|sitting|pension|garde|gardiennage)\b/i.test(l.title);
+  // « Pet sitting », « pension chat », « garde de chien » : titres d'animaux que la règle générale laisse passer.
+  const isAnimal = (l: HomeListing) => inferMissionCategory(l.title) === "animals" || /\b(pet[- ]?sitting|gardiennage)\b/i.test(l.title);
   return [...needs.filter((l) => !isAnimal(l)), ...needs.filter(isAnimal)];
 };
 
@@ -193,18 +194,23 @@ const OUTING_INVITATION: HomeListing = {
  * `profileOrigin` : ville du profil d'un membre connecté, qui sert seulement à
  * afficher la distance sans changer l'ordre de la vitrine nationale.
  */
-export default function LiveListingsStrip({ origin = null, profileOrigin = null }: { origin?: HomeOrigin | null; profileOrigin?: HomeOrigin | null }) {
+export default function LiveListingsStrip({ origin = null, profileOrigin = null, isAuthenticated = false }: { origin?: HomeOrigin | null; profileOrigin?: HomeOrigin | null; isAuthenticated?: boolean }) {
   const { data: sits = [], isLoading: sitsLoading } = useRecentPublishedSits();
   const [missions, setMissions] = useState<HomeListing[]>([]);
   const [loadingMissions, setLoadingMissions] = useState(true);
   const [outing, setOuting] = useState<HomeListing>(OUTING_INVITATION);
+  // La vitrine attend la lecture des sorties : une carte posée puis remplacée ferait clignoter la quatrième place.
+  const [outingReady, setOutingReady] = useState(false);
 
   useEffect(() => {
     let active = true;
     // Une lecture en échec laisse la carte d'invitation en place.
     void Promise.resolve().then(fetchUpcomingOutings).catch(() => ({ data: [] })).then(({ data }) => {
-      const next = data[0];
-      if (!active || !next) return;
+      if (!active) return;
+      setOutingReady(true);
+      // La prochaine sortie où il reste une place.
+      const next = data.find((o) => o.capacity > o.taken);
+      if (!next) return;
       setOuting({
         id: next.id,
         kind: "sortie",
@@ -279,14 +285,19 @@ export default function LiveListingsStrip({ origin = null, profileOrigin = null 
     const reference = origin ?? profileOrigin;
     const locatedGuards = guards.map((listing) => ({ ...listing, distance: distanceFrom(reference, listing.latitude, listing.longitude) }));
     const locatedNeeds = missions.map((listing) => ({ ...listing, distance: distanceFrom(reference, listing.latitude, listing.longitude) }));
-    return composeHomeListings(locatedGuards, locatedNeeds, origin, Date.now(), outing);
-  }, [missions, origin, outing, profileOrigin, sits]);
+    // Une sortie n'a pas de coordonnées : avec une ville saisie, la carte invite à en proposer une près de chez soi.
+    const outingCard = origin ? OUTING_INVITATION : outing;
+    const card = outingCard.invitation && !isAuthenticated
+      ? { ...outingCard, href: `/inscription?redirect=${encodeURIComponent("/sorties/proposer")}` }
+      : outingCard;
+    return composeHomeListings(locatedGuards, locatedNeeds, origin, Date.now(), card);
+  }, [isAuthenticated, missions, origin, outing, profileOrigin, sits]);
 
   const formatDate = (date: string | null) => date
     ? new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" }).format(new Date(date))
     : null;
 
-  if (sitsLoading || loadingMissions) {
+  if (sitsLoading || loadingMissions || !outingReady) {
     // Squelette à la même hauteur que la vitrine chargée (lot perf 16, 04/11/2026) :
     // un bandeau réduit à une barre poussait tout le reste de l'accueil (sommaire,
     // « Comment ça marche », pied de page) au moment de l'arrivée des annonces.
@@ -300,7 +311,7 @@ export default function LiveListingsStrip({ origin = null, profileOrigin = null 
             {[0, 1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="w-[80%] shrink-0 overflow-hidden rounded-lg border border-border bg-card md:w-auto md:shrink">
                 <div className="aspect-[4/3] animate-pulse bg-muted" />
-                <div className="h-[162px] p-4"><div className="h-3 w-16 animate-pulse rounded bg-muted" /><div className="mt-3 h-5 w-4/5 animate-pulse rounded bg-muted" /></div>
+                <div className="h-[138px] p-4"><div className="h-3 w-16 animate-pulse rounded bg-muted" /><div className="mt-3 h-5 w-4/5 animate-pulse rounded bg-muted" /></div>
               </div>
             ))}
           </div>
@@ -331,8 +342,8 @@ export default function LiveListingsStrip({ origin = null, profileOrigin = null 
               return (
                 <Link key={`${listing.kind}-${listing.id}`} to={listing.href} data-invitation={listing.invitation ? "" : undefined} className="group w-[80%] shrink-0 snap-start overflow-hidden rounded-lg md:w-auto md:shrink border border-border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-                    {photo ? <img src={storageImageUrl(photo, { width: 480, height: 360 }) || photo} srcSet={storageImageSrcSet(photo, [400, 640], 75, 4 / 3)} sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" alt={title} width={480} height={360} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" /> : listing.kind === "sortie" ? <img src={outingVisual} alt="" aria-hidden="true" width={480} height={480} loading="lazy" className="h-full w-full object-contain p-4" /> : <div className="flex h-full items-center justify-center px-6 text-center font-heading text-xl text-muted-foreground">{LISTING_KIND_LABEL[listing.kind]}</div>}
-                    <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[13px] font-semibold shadow-sm ${KIND_BADGE[listing.kind]}`} data-testid="live-listing-kind">{LISTING_KIND_LABEL[listing.kind]}</span>
+                    {photo ? <img src={storageImageUrl(photo, { width: 480, height: 360 }) || photo} srcSet={storageImageSrcSet(photo, [400, 640], 75, 4 / 3)} sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" alt={title} width={480} height={360} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" /> : listing.kind === "sortie" ? <img src={outingVisual} alt="" aria-hidden="true" width={480} height={480} loading="lazy" className="h-full w-full object-contain p-4" /> : null}
+                    <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-sm font-semibold shadow-sm ${KIND_BADGE[listing.kind]}`} data-testid="live-listing-kind">{LISTING_KIND_LABEL[listing.kind]}</span>
                   </div>
                   <div className="p-4">
                     <h3 className="line-clamp-2 font-heading text-lg font-semibold text-foreground">{title}</h3>
