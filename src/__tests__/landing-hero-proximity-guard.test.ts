@@ -21,13 +21,21 @@ describe("landing.hero, entraide près de chez soi", () => {
     (JSON.parse(fs.readFileSync(COMMON_PATH, "utf8")) as any).landing
   );
 
-  it("présente la garde et l'entraide du quotidien", () => {
-    expect(landing["hero.title_eyebrow"]).toBe("Garde d'animaux, de maison et entraide");
+  it("porte le titre, la devise et un seul bouton (lot HOME1)", () => {
     expect(landing["hero.title_main"]).toBe("Près de chez vous, il y a toujours quelqu'un.");
+    expect(landing["hero.motto"]).toBe("Tout commence par un échange, et finit par une rencontre.");
+    expect(landing["hero.cta_signup"]).toBe("Créer mon compte gratuitement");
+    expect(landing["hero.nearby_title"]).toBe("Qui est près de chez vous ?");
+  });
+
+  it("dit les trois familles sous les chiffres, avec les mots recherchés", () => {
+    expect(landing["families.title"]).toBe(
+      "Garde d'animaux à domicile, garde de maison, entraide et sorties près de chez vous : tout est gratuit.",
+    );
+    expect(landing["families.entraide_text"]).toContain("chantier participatif");
     expect(landing["hero.lede"]).toBe(
       "Quelqu'un pour garder votre maison et vos animaux quand vous partez. Quelqu'un pour une partie de belote, un chien à promener ou le potager à arroser le reste de l'année.",
     );
-    expect(landing["hero.motto"]).toBe("Tout commence par un échange, et finit par une rencontre.");
   });
 
   it("n'emploie aucun tiret cadratin ou demi-cadratin dans le hero", () => {

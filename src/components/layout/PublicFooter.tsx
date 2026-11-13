@@ -153,6 +153,7 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
             <h3 className={heading}>{t("footer.sections.mutual_aid")}</h3>
             <ul className="space-y-0">
               <li><Link to="/petites-missions" className={linkCls}>{t("footer.links.all_mutual_aid")}</Link></li>
+              <li><Link to="/projets" className={linkCls}>{t("footer.links.projects")}</Link></li>
               {FOOTER_MISSION_CITIES.map(({ slug, cityName }) => (
                 <li key={slug}><Link to={`/petites-missions/${slug}`} className={linkCls}>{t("footer.links.mutual_aid_city", { city: cityName })}</Link></li>
               ))}

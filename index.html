@@ -105,7 +105,8 @@
          imagesrcset sur un link preload (Safari iOS antérieur à 17.2) : les
          navigateurs modernes utilisent imagesrcset, les anciens href, sans
          double téléchargement. -->
-    <link rel="preload" as="image" type="image/avif" href="/hero-landing-960.avif" imagesrcset="/hero-landing-640.avif 640w, /hero-landing-960.avif 960w, /hero-landing-1280.avif 1280w, /hero-landing-1920.avif 1920w" imagesizes="100vw" fetchpriority="high" />
+    <link rel="preload" as="image" type="image/avif" media="(max-width: 767px)" href="/hero-portrait-750.avif" imagesrcset="/hero-portrait-480.avif 480w, /hero-portrait-750.avif 750w, /hero-portrait-1080.avif 1080w" imagesizes="100vw" fetchpriority="high" />
+    <link rel="preload" as="image" type="image/avif" media="(min-width: 768px)" href="/hero-paysage-960.avif" imagesrcset="/hero-paysage-640.avif 640w, /hero-paysage-960.avif 960w, /hero-paysage-1280.avif 1280w, /hero-paysage-1920.avif 1920w" imagesizes="100vw" fetchpriority="high" />
 
     <link rel="preconnect" href="https://erhccyqevdyevpyctsjj.supabase.co" />
     <link rel="preconnect" href="https://erhccyqevdyevpyctsjj.supabase.co" crossorigin />
@@ -114,9 +115,16 @@
       /* Lot P5 : fond du hero de l'accueil peint avant React (#boot-hero).
          Même place que la photo du vrai hero : sous PublicHeader (77 px à
          toutes les largeurs mesurées), hauteur 100svh. Retiré par Landing. */
-      #boot-hero{position:absolute;top:77px;left:0;right:0;height:100vh;height:100svh;overflow:hidden;z-index:60;pointer-events:none;background:#faf8f5}
-      #boot-hero img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
-      #boot-hero div{position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(to right,rgba(0,0,0,.95) 0%,rgba(0,0,0,.75) 45%,rgba(0,0,0,.25) 100%)}
+      #boot-hero{position:absolute;top:77px;left:0;right:0;height:calc(100vh - 169px);height:calc(100svh - 169px);overflow:hidden;z-index:60;pointer-events:none;background:#faf8f5}
+      #boot-hero img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:top}
+      #boot-hero div{position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(to bottom,rgba(0,0,0,.8) 0%,rgba(0,0,0,.6) 45%,rgba(0,0,0,0) 65%)}
+      /* Lot HOME1 : au-delà de 768 px, photo paysage et voile de gauche à droite,
+         comme le vrai hero (hauteur 100svh moins l'en-tête et la bande des chiffres). */
+      @media (min-width:768px){
+        #boot-hero{height:calc(100vh - 205px);height:calc(100svh - 205px)}
+        #boot-hero img{object-position:center}
+        #boot-hero div{background:linear-gradient(to right,rgba(0,0,0,.9) 0%,rgba(0,0,0,.65) 40%,rgba(0,0,0,.05) 100%)}
+      }
     </style>
   </head>
 
@@ -124,9 +132,11 @@
     <div id="root"></div>
     <div id="boot-hero" aria-hidden="true">
       <picture>
-        <source type="image/avif" srcset="/hero-landing-640.avif 640w, /hero-landing-960.avif 960w, /hero-landing-1280.avif 1280w, /hero-landing-1920.avif 1920w" sizes="100vw" />
-        <source type="image/webp" srcset="/hero-landing-640.webp 640w, /hero-landing-960.webp 960w, /hero-landing-1280.webp 1280w, /hero-landing-1920.webp 1920w" sizes="100vw" />
-        <img src="/hero-landing.webp" alt="" loading="eager" fetchpriority="high" width="1920" height="1080" sizes="100vw" decoding="async" />
+        <source media="(max-width: 767px)" type="image/avif" srcset="/hero-portrait-480.avif 480w, /hero-portrait-750.avif 750w, /hero-portrait-1080.avif 1080w" sizes="100vw" />
+        <source media="(max-width: 767px)" type="image/webp" srcset="/hero-portrait-480.webp 480w, /hero-portrait-750.webp 750w, /hero-portrait-1080.webp 1080w" sizes="100vw" />
+        <source type="image/avif" srcset="/hero-paysage-640.avif 640w, /hero-paysage-960.avif 960w, /hero-paysage-1280.avif 1280w, /hero-paysage-1920.avif 1920w" sizes="100vw" />
+        <source type="image/webp" srcset="/hero-paysage-640.webp 640w, /hero-paysage-960.webp 960w, /hero-paysage-1280.webp 1280w, /hero-paysage-1920.webp 1920w" sizes="100vw" />
+        <img src="/hero-paysage-1280.webp" alt="" loading="eager" fetchpriority="high" width="1920" height="1075" sizes="100vw" decoding="async" />
       </picture>
       <div></div>
     </div>

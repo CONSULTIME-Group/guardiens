@@ -47,7 +47,8 @@
       "house_sitting_city": "House-sitting {{city}}",
       "all_mutual_aid": "Toute l'entraide",
       "mutual_aid_city": "Entraide à {{city}}",
-      "associations": "Associations et refuges"
+      "associations": "Associations et refuges",
+      "projects": "Chantiers participatifs"
     },
     "tagline": "House-sitting de proximité",
     "version": "Guardiens · Version bêta · {{year}}",
@@ -64,7 +65,6 @@
   "landing": {
     "hero": {
       "eyebrow": "Gardes · Coups de main · Urgences",
-      "title_eyebrow": "Garde d'animaux, de maison et entraide",
       "title_main": "Près de chez vous, il y a toujours quelqu'un.",
       "motto": "Tout commence par un échange, et finit par une rencontre.",
       "lede": "Quelqu'un pour garder votre maison et vos animaux quand vous partez. Quelqu'un pour une partie de belote, un chien à promener ou le potager à arroser le reste de l'année.",
@@ -81,7 +81,9 @@
       "chip_guides": "Guides fournis",
       "cta_member_owner": "Publier une annonce",
       "cta_member_sitter": "Proposer un coup de main",
-      "cta_member_search": "Trouver une garde"
+      "cta_member_search": "Trouver une garde",
+      "nearby_title": "Qui est près de chez vous ?",
+      "cta_signup": "Créer mon compte gratuitement"
     },
     "toc": {
       "aria": "Sommaire de la page",
@@ -383,6 +385,15 @@
       "step3_text": "L'accord de garde signé, votre gardien s'installe. Vous recevez des nouvelles. Vous rentrez chez vous, souvent avec une nouvelle relation.",
       "step3_title": "Partez l'esprit léger",
       "title": "Comment ça marche ?"
+    },
+    "families": {
+      "title": "Garde d'animaux à domicile, garde de maison, entraide et sorties près de chez vous : tout est gratuit.",
+      "garde_title": "Garde de maison et d'animaux",
+      "garde_text": "Un gardien s'installe chez vous pendant votre absence. Vos animaux restent à la maison.",
+      "entraide_title": "Entraide",
+      "entraide_text": "Un coup de main entre deux personnes, ou un chantier participatif à plusieurs : un potager à arroser, des courses, une haie à planter.",
+      "sorties_title": "Sorties",
+      "sorties_text": "Une balade, une partie de belote, un jeu de société, à plusieurs."
     }
   },
   "faq": {

@@ -16,6 +16,16 @@ import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
 import { UsagesSection } from "@/components/landing/UsagesSection";
 import { ServiceAfterServiceSection } from "@/components/landing/ServiceAfterServiceSection";
 import { HomeProximitySearch, type HomeOrigin } from "@/components/landing/HomeProximitySearch";
+import familyGardes from "@/assets/aquarelles/univers-gardes-320.webp";
+import familyEntraide from "@/assets/aquarelles/univers-entraide-320.webp";
+import familySorties from "@/assets/missions/spot-jeux-480.webp";
+
+/** Lot HOME1 : les trois familles présentées sous les chiffres. */
+const HOME_FAMILIES = [
+  { key: "garde", to: "/annonces", image: familyGardes },
+  { key: "entraide", to: "/petites-missions", image: familyEntraide },
+  { key: "sorties", to: "/sorties", image: familySorties },
+] as const;
 import { LivedItSection } from "@/components/landing/LivedItSection";
 import { LandingTocBar } from "@/components/landing/LandingTocBar";
 import HomeJsonLd from "@/components/landing/HomeJsonLd";
@@ -160,81 +170,62 @@ const Landing = () => {
       {/* ═══════════════ MAIN LANDMARK (englobe tout le contenu) ═══════════════ */}
       <main id="main-content" className="min-w-0">
       {/* ═══════════════ SECTION 1, HERO (épuré, 3 blocs) ═══════════════ */}
-      <section className="relative flex min-h-[100svh] w-full items-center overflow-hidden">
+      <section className="relative flex min-h-[calc(100svh-77px-92px)] md:min-h-[calc(100svh-77px-128px)] w-full items-start md:items-center overflow-hidden">
+        {/* Lot HOME1 : une photo cadrée pour chaque format. Verticale sur
+            téléphone (ciel pour le texte, mas et chien dessous), paysage au-delà. */}
         <picture>
-          <source
-            type="image/avif"
-            srcSet="/hero-landing-640.avif 640w, /hero-landing-960.avif 960w, /hero-landing-1280.avif 1280w, /hero-landing-1920.avif 1920w"
-            sizes="100vw"
-          />
-          <source
-            type="image/webp"
-            srcSet="/hero-landing-640.webp 640w, /hero-landing-960.webp 960w, /hero-landing-1280.webp 1280w, /hero-landing-1920.webp 1920w"
-            sizes="100vw"
-          />
+          <source media="(max-width: 767px)" type="image/avif" srcSet="/hero-portrait-480.avif 480w, /hero-portrait-750.avif 750w, /hero-portrait-1080.avif 1080w" sizes="100vw" />
+          <source media="(max-width: 767px)" type="image/webp" srcSet="/hero-portrait-480.webp 480w, /hero-portrait-750.webp 750w, /hero-portrait-1080.webp 1080w" sizes="100vw" />
+          <source type="image/avif" srcSet="/hero-paysage-640.avif 640w, /hero-paysage-960.avif 960w, /hero-paysage-1280.avif 1280w, /hero-paysage-1920.avif 1920w" sizes="100vw" />
+          <source type="image/webp" srcSet="/hero-paysage-640.webp 640w, /hero-paysage-960.webp 960w, /hero-paysage-1280.webp 1280w, /hero-paysage-1920.webp 1920w" sizes="100vw" />
           <img
-            src="/hero-landing.webp"
-            alt="Golden retriever assis dans l'herbe d'un jardin ensoleillé, gueule ouverte."
-            className="absolute inset-0 w-full h-full object-cover"
+            src="/hero-paysage-1280.webp"
+            alt="Au coucher du soleil, des amis partagent un repas en terrasse devant un mas en pierre, un golden retriever et un chat au premier plan."
+            className="absolute inset-0 w-full h-full object-cover object-top md:object-center"
             loading="eager"
             {...({ fetchpriority: "high" } as any)}
             width={1920}
-            height={1080}
+            height={1075}
             sizes="100vw"
             decoding="async"
           />
         </picture>
-        {/* Voile renforcé sous la colonne (jusqu'à 680 px) et qui s'efface vers le
-            sujet de la photo : contraste AA sur tous les textes du hero. */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 via-45% to-black/25" />
+        {/* Voile : sombre sous le texte, clair sur le mas et le chien. Du haut
+            vers le bas sur téléphone, de gauche à droite au-delà. */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 via-45% to-black/0 to-65% md:hidden" />
+        <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-black/90 via-black/65 via-40% to-black/5" />
 
-        <div className="relative z-10 lp-wide pb-8 pt-20 md:py-24">
-          {/* Colonne pleine largeur sur mobile, 600 px puis 680 px sur grand
-              écran : la maison et le paysage restent visibles à droite. */}
+        <div className="relative z-10 lp-wide pb-8 pt-7 md:py-16">
           <div className="w-full max-w-full md:max-w-[600px] lg:max-w-[680px]">
 
-            {/* Une seule star typographique : l'accroche, seule en Playfair. */}
             <h1 className="font-heading text-[clamp(26px,8.4vw,38px)] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-2 md:mb-6 text-balance">
-              <span className="block font-body text-xs md:text-sm font-semibold uppercase tracking-[0.14em] text-white/90 mb-2 md:mb-3">
-                {t("landing.hero.title_eyebrow")}
-              </span>
               <span className="block">{t("landing.hero.title_main")}</span>
             </h1>
 
-            <p className="font-body text-sm md:text-base text-white/90 leading-relaxed mb-2 md:mb-6 animate-hero-fade-up animation-delay-400">
-              {t("landing.hero.lede")}
-            </p>
-
-            {/* La ligne qui porte l'ouverture : ce qu'on trouve sans l'avoir
-                cherché. Playfair italique, taille intermédiaire entre le
-                titre et le paragraphe. */}
-            <p className="font-heading italic text-lg md:text-2xl text-white/95 leading-snug mb-3 md:mb-6 animate-hero-fade-up animation-delay-700">
+            <p className="font-heading italic text-lg md:text-2xl text-white/95 leading-snug mb-6 md:mb-8 animate-hero-fade-up animation-delay-700">
               {t("landing.hero.motto")}
             </p>
 
-            <div className="flex flex-wrap items-center gap-2 md:gap-4 animate-hero-fade-up animation-delay-900">
+            {/* Lot HOME1 : un hero, un geste. Un seul bouton (le choix du rôle
+                se fait à l'inscription), puis le compteur de proximité. */}
+            <div className="animate-hero-fade-up animation-delay-900">
               <Button
-                onClick={() => {
-                  void trackEvent("cta_proprio_clicked", { metadata: { location: "hero" } });
-                  navigate(isMember ? "/sits/create" : `/inscription?redirect=${encodeURIComponent("/sits/create")}`);
-                }}
+                asChild
                 style={{ boxShadow: "0 6px 14px rgba(44,109,80,.24)" }}
-                className="font-body text-base font-semibold tracking-wide rounded-full px-8 sm:px-12 py-4 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 ring-2 ring-primary-foreground/10"
+                className="h-14 w-full sm:w-auto font-body text-lg font-semibold tracking-wide rounded-full px-8 sm:px-12 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 ring-2 ring-primary-foreground/10"
               >
-                {t("landing.hero.cta_owner")}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  void trackEvent("cta_aid_clicked", { metadata: { location: "hero" } });
-                  navigate(isMember ? "/petites-missions/creer" : `/inscription?redirect=${encodeURIComponent("/petites-missions/creer")}`);
-                }}
-                className="font-body text-sm font-medium tracking-wide rounded-full px-7 py-3 bg-transparent text-white border border-white/60 hover:bg-white/10 hover:text-white transition-all duration-200"
-              >
-                {t("landing.hero.cta_sitter")}
+                <Link
+                  to={isMember ? "/sits/create" : "/inscription"}
+                  onClick={() => { void trackEvent(isMember ? "cta_proprio_clicked" : "cta_signup_clicked", { metadata: { location: "hero" } }); }}
+                >
+                  {isMember ? t("landing.hero.cta_owner") : t("landing.hero.cta_signup")}
+                </Link>
               </Button>
             </div>
-            <HomeProximitySearch onLocated={setHomeOrigin} />
+            <div className="mt-7 md:mt-10 animate-hero-fade-up animation-delay-900">
+              <p className="font-body text-base font-medium text-white">{t("landing.hero.nearby_title")}</p>
+              <HomeProximitySearch onLocated={setHomeOrigin} />
+            </div>
             {isPressHighlighted && (
               <a
                 href={PRESS_ARTICLE_URL}
@@ -263,7 +254,6 @@ const Landing = () => {
                 </span>
               </a>
             )}
-            {!isAuthenticated && <Link to="/inscription?role=sitter" className="mt-2 block w-fit text-xs text-primary-foreground/90 underline underline-offset-4">Vous voulez garder ? Créez votre profil.</Link>}
           </div>
         </div>
       </section>
@@ -286,17 +276,31 @@ const Landing = () => {
                   </div>
                 ))}
               </dl>
-              <div className="mt-4 md:mt-5 flex justify-center">
-                <Link
-                  to="/petites-missions"
-                  onClick={() => {
-                    trackEvent("cta_aid_clicked", { metadata: { location: "kpi_band" } });
-                  }}
-                  className="inline-flex items-center justify-center min-h-[44px] font-body text-sm font-medium text-muted-foreground underline underline-offset-4 decoration-border hover:text-foreground hover:decoration-foreground/50 transition-colors"
-                >
-                  {t("landing.hero.cta_aid")}
-                </Link>
-              </div>
+              {/* Lot HOME1 : les trois familles de Guardiens, dites une fois,
+                  sous les chiffres. Le titre porte les mots recherchés. */}
+              <h2 className="mx-auto mt-8 md:mt-10 max-w-3xl text-center font-heading text-xl md:text-2xl font-semibold text-foreground text-balance">
+                {t("landing.families.title")}
+              </h2>
+              <p className="mx-auto mt-3 max-w-2xl text-center font-body text-sm md:text-base leading-relaxed text-muted-foreground">
+                {t("landing.hero.lede")}
+              </p>
+              <ul className="mt-5 md:mt-6 grid gap-4 md:grid-cols-3 md:gap-6">
+                {HOME_FAMILIES.map((family) => (
+                  <li key={family.key}>
+                    <Link
+                      to={family.to}
+                      onClick={() => { void trackEvent("home_family_clicked", { metadata: { family: family.key } }); }}
+                      className="flex h-full items-center gap-4 rounded-2xl border border-border/70 bg-card p-4 md:flex-col md:items-start md:gap-3 md:p-6 transition-shadow hover:shadow-md"
+                    >
+                      <img src={family.image} alt="" aria-hidden="true" width={320} height={320} loading="lazy" decoding="async" className="h-20 w-20 flex-none object-contain md:h-28 md:w-28" />
+                      <span className="flex flex-col gap-1">
+                        <span className="font-heading text-lg md:text-xl font-semibold text-foreground">{t(`landing.families.${family.key}_title`)}</span>
+                        <span className="font-body text-sm md:text-[15px] leading-relaxed text-muted-foreground">{t(`landing.families.${family.key}_text`)}</span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
          </section>
        )}

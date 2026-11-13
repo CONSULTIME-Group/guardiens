@@ -559,6 +559,20 @@
           "sql": "SELECT NOT has_function_privilege('anon', 'public.admin_outing_set_hidden(uuid, boolean)', 'EXECUTE') AS ok"
         }
       ]
+    },
+    {
+      "migration": "0150_home1_membres_a_proximite.sql",
+      "description": "Compteur de la home : membres actifs à moins de 30 km, lisible par un visiteur",
+      "checks": [
+        {
+          "name": "fonction_presente",
+          "sql": "SELECT position('home1_membres_a_proximite' IN pg_get_functiondef('public.home_members_nearby(double precision, double precision)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "ouverte_aux_visiteurs",
+          "sql": "SELECT has_function_privilege('anon', 'public.home_members_nearby(double precision, double precision)', 'EXECUTE') AS ok"
+        }
+      ]
     }
   ]
 }
