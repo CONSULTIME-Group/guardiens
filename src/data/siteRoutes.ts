@@ -188,6 +188,14 @@ export const staticRoutes: SiteRoute[] = [
  ogImage: "https://guardiens.fr/og/og-entraide.jpg",
  },
  {
+ path: "/sorties",
+ title: "Sorties et parties près de chez vous | Guardiens",
+ metaDescription: "Belote, balade, vélo, atelier : des moments à quelques-uns entre membres Guardiens, avec des places comptées. Guardiens est gratuit.",
+ h1: "Sorties et parties près de chez vous",
+ sitemapPriority: "0.7",
+ changeFreq: "daily",
+ },
+ {
  path: "/projets",
  title: "Chantiers participatifs et projets à réaliser ensemble | Guardiens",
  metaDescription: "Planter une haie, construire un abri : rejoignez un chantier participatif près de chez vous ou publiez votre projet. Guardiens est gratuit.",

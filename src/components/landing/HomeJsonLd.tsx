@@ -3,9 +3,6 @@ import { SOCIAL_LINKS } from "@/data/socialLinks";
 import { useInternationalSitsCount } from "@/hooks/useInternationalSitsCount";
 // Lot P2b : constante légère, siteRoutes (22 Ko) reste hors de la page d'accueil.
 import { HOME_OG_IMAGE } from "@/data/siteConstants";
-import howtoStep1 from "@/assets/illustrations/howto-step-1-annonce-448.webp";
-import howtoStep2 from "@/assets/illustrations/howto-step-2-rencontre-448.webp";
-import howtoStep3 from "@/assets/illustrations/howto-step-3-depart-448.webp";
 
 // Mise à jour manuelle à chaque retouche du contenu de la home.
 const HOME_CONTENT_LAST_MODIFIED = "2026-10-04";
@@ -95,15 +92,6 @@ export default function HomeJsonLd() {
               url: "https://guardiens.fr",
               inLanguage: "fr-FR",
               publisher: { "@id": "https://guardiens.fr/#organization" },
-              potentialAction: {
-                "@type": "SearchAction",
-                target: {
-                  "@type": "EntryPoint",
-                  urlTemplate:
-                    "https://guardiens.fr/recherche?q={search_term_string}",
-                },
-                "query-input": "required name=search_term_string",
-              },
             },
             {
               "@type": "WebPage",
@@ -122,51 +110,7 @@ export default function HomeJsonLd() {
               dateModified: HOME_CONTENT_LAST_MODIFIED,
               mainEntity: [
                 { "@id": "https://guardiens.fr/#service" },
-                { "@id": "https://guardiens.fr/#howto" },
                 { "@id": "https://guardiens.fr/#faq" },
-              ],
-            },
-            {
-              "@type": "HowTo",
-              "@id": "https://guardiens.fr/#howto",
-              name: "Comment trouver un gardien de confiance pour sa maison et ses animaux",
-              description:
-                "Trois étapes pour confier votre maison et vos animaux à un gardien à proximité. Guardiens est gratuit.",
-              totalTime: "PT5M",
-              estimatedCost: {
-                "@type": "MonetaryAmount",
-                currency: "EUR",
-                value: "0",
-              },
-              supply: [
-                { "@type": "HowToSupply", name: "Dates de votre absence" },
-                { "@type": "HowToSupply", name: "Description de votre maison et de vos animaux" },
-              ],
-              step: [
-                {
-                  "@type": "HowToStep",
-                  position: 1,
-                  name: "Décrivez votre garde",
-                  text: "Renseignez vos animaux, vos dates et votre maison. Votre annonce est publiée et visible des gardiens partout en France.",
-                  url: "https://guardiens.fr/#how-it-works",
-                  image: `https://guardiens.fr${howtoStep1}`,
-                },
-                {
-                  "@type": "HowToStep",
-                  position: 2,
-                  name: "Recevez des candidatures",
-                  text: "Des gardiens à proximité postulent. Consultez leurs profils, lisez les avis, échangez par messagerie et, si vous le souhaitez, rencontrez celui ou celle qui vous correspond.",
-                  url: "https://guardiens.fr/#how-it-works",
-                  image: `https://guardiens.fr${howtoStep2}`,
-                },
-                {
-                  "@type": "HowToStep",
-                  position: 3,
-                  name: "Partez sereinement",
-                  text: "Votre gardien s'installe, l'accord de garde récapitule ce que vous avez prévu, vous recevez des nouvelles régulières et vous rentrez l'esprit léger.",
-                  url: "https://guardiens.fr/#how-it-works",
-                  image: `https://guardiens.fr${howtoStep3}`,
-                },
               ],
             },
             {
