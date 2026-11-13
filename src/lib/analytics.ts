@@ -242,7 +242,7 @@ export type EventType =
   | "pricing_baseline_seen"            // Impression du bloc éditorial baseline (surface: tarifs|landing_faq|my_subscription|observatoire)
   | "pricing_faq_expanded"             // Ouverture d'une question de la FAQ tarifs (question_id)
   | "pricing_cta_clicked"
-  | "home_pricing_link_clicked"
+  | "home_sitter_link_clicked"
   | "home_outings_link_clicked"              // Lot TAR1 : clic sur un bouton de la page tarifs (cta)
   // Admin refresh IA articles post-pivot -------------------------------------
   | "admin_article_refresh_previewed"       // Aperçu du refresh IA (article_id, slug)

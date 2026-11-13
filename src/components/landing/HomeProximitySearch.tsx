@@ -9,7 +9,8 @@ export interface HomeOrigin { lat: number; lng: number; city?: string | null }
 
 interface Counts { gardiens_count: number; helpers_count: number }
 
-export function HomeProximitySearch({ onLocated }: { onLocated: (origin: HomeOrigin) => void }) {
+export function HomeProximitySearch({ onLocated, tone = "dark" }: { onLocated: (origin: HomeOrigin) => void; tone?: "dark" | "light" }) {
+  const textTone = tone === "light" ? "text-foreground" : "text-primary-foreground";
   const [city, setCity] = useState("");
   const [counts, setCounts] = useState<Counts | null>(null);
   const [loading, setLoading] = useState(false);
@@ -45,7 +46,7 @@ export function HomeProximitySearch({ onLocated }: { onLocated: (origin: HomeOri
   };
 
   return (
-    <div className="mt-4 max-w-md">
+    <div className={tone === "light" ? "mt-1 w-full max-w-md" : "mt-4 max-w-md"}>
       <form onSubmit={submit} className="flex gap-2" aria-label="Disponibilités autour de votre ville">
         <Input
           value={city}
@@ -53,19 +54,19 @@ export function HomeProximitySearch({ onLocated }: { onLocated: (origin: HomeOri
           placeholder="Votre ville"
           aria-label="Votre ville"
           maxLength={100}
-          className="h-11 border-primary-foreground/45 bg-background/90 text-foreground placeholder:text-muted-foreground"
+          className={tone === "light" ? "h-12 border-border bg-card text-base text-foreground placeholder:text-muted-foreground" : "h-11 border-primary-foreground/45 bg-background/90 text-foreground placeholder:text-muted-foreground"}
         />
-        <Button type="submit" variant="secondary" size="sm" className="h-11 bg-secondary px-5 text-secondary-foreground disabled:bg-secondary disabled:text-secondary-foreground disabled:opacity-60" disabled={loading || city.trim().length < 2}>
+        <Button type="submit" variant="secondary" size="sm" className="h-12 bg-secondary px-5 text-secondary-foreground disabled:bg-secondary disabled:text-secondary-foreground disabled:opacity-60" disabled={loading || city.trim().length < 2}>
           {loading ? "Recherche" : "Voir"}
         </Button>
       </form>
       {counts && (
-        <p className="mt-2 text-sm text-primary-foreground" aria-live="polite">
+        <p className={`mt-2 text-sm ${textTone}`} aria-live="polite">
           {counts.gardiens_count} gardiens et {counts.helpers_count} personnes prêtes à aider à moins de 30 km
           {(counts.gardiens_count < 1 || counts.helpers_count < 1) && <span className="block">Soyez parmi les premiers de votre secteur.</span>}
         </p>
       )}
-      {message && <p className="mt-2 text-sm text-primary-foreground" aria-live="polite">{message}</p>}
+      {message && <p className={`mt-2 text-sm ${textTone}`} aria-live="polite">{message}</p>}
     </div>
   );
 }

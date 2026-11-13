@@ -160,7 +160,7 @@ const Landing = () => {
       {/* ═══════════════ MAIN LANDMARK (englobe tout le contenu) ═══════════════ */}
       <main id="main-content" className="min-w-0">
       {/* ═══════════════ SECTION 1, HERO (épuré, 3 blocs) ═══════════════ */}
-      <section className="relative flex min-h-[100svh] w-full items-start md:items-center overflow-hidden">
+      <section className="relative flex min-h-[calc(100svh-77px-92px)] md:min-h-[calc(100svh-77px-128px)] w-full items-start md:items-center overflow-hidden">
         {/* Lot HOME1 : une photo cadrée pour chaque format. Verticale sur
             téléphone (ciel pour le texte, mas et chien dessous), paysage au-delà. */}
         <picture>
@@ -192,7 +192,7 @@ const Landing = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/55 via-55% to-black/0 md:hidden" />
         <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-black/90 via-black/65 via-40% to-black/5" />
 
-        <div className="relative z-10 lp-wide pb-8 pt-7 md:py-24">
+        <div className="relative z-10 lp-wide pb-8 pt-7 md:py-16">
           <div className="w-full max-w-full md:max-w-[600px] lg:max-w-[680px]">
 
             <h1 className="font-heading text-[clamp(26px,8.4vw,38px)] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-2 md:mb-6 text-balance">
@@ -202,7 +202,7 @@ const Landing = () => {
               <span className="block">{t("landing.hero.title_main")}</span>
             </h1>
 
-            <p className="font-body text-sm md:text-base text-white/90 leading-relaxed mb-2 md:mb-6 animate-hero-fade-up animation-delay-400">
+            <p className="hidden md:block font-body text-base text-white/90 leading-relaxed mb-6 animate-hero-fade-up animation-delay-400">
               {t("landing.hero.lede")}
             </p>
 
@@ -210,48 +210,43 @@ const Landing = () => {
               {t("landing.hero.motto")}
             </p>
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-0 animate-hero-fade-up animation-delay-900">
+            {/* Lot HOME1 : une seule action pleine, la gratuité en clair, puis
+                trois liens calmes. Le champ ville vit sous les chiffres. */}
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-1 animate-hero-fade-up animation-delay-900">
               <Button
                 onClick={() => {
                   void trackEvent("cta_proprio_clicked", { metadata: { location: "hero" } });
                   navigate(isMember ? "/sits/create" : `/inscription?redirect=${encodeURIComponent("/sits/create")}`);
                 }}
                 style={{ boxShadow: "0 6px 14px rgba(44,109,80,.24)" }}
-                className="h-12 w-full sm:w-auto font-body text-base font-semibold tracking-wide rounded-full px-8 sm:px-12 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 ring-2 ring-primary-foreground/10"
+                className="h-14 w-full sm:w-auto font-body text-lg font-semibold tracking-wide rounded-full px-8 sm:px-12 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 ring-2 ring-primary-foreground/10"
               >
                 {t("landing.hero.cta_owner")}
               </Button>
-              <p className="flex min-h-[44px] w-full sm:w-auto items-center justify-center sm:justify-start font-body text-[13px] md:text-sm text-white/90">
-                {t("landing.hero.free_line")}&nbsp;
-                <Link
-                  to="/tarifs"
-                  onClick={() => { void trackEvent("home_pricing_link_clicked", { metadata: { location: "hero" } }); }}
-                  className="inline-flex min-h-[44px] items-center text-white underline underline-offset-4"
-                >
-                  {t("landing.hero.free_link")}
-                </Link>
+              <p className="w-full sm:w-auto text-center sm:text-left font-body text-base text-white">
+                {t("landing.hero.free_line")}
               </p>
             </div>
-            <div className="flex items-center gap-2 md:gap-3 md:mt-1 animate-hero-fade-up animation-delay-900">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  void trackEvent("cta_aid_clicked", { metadata: { location: "hero" } });
-                  navigate(isMember ? "/petites-missions/creer" : `/inscription?redirect=${encodeURIComponent("/petites-missions/creer")}`);
-                }}
-                className="h-12 flex-1 sm:flex-none font-body text-sm font-medium tracking-wide rounded-full px-5 sm:px-7 bg-transparent text-white border border-white/60 hover:bg-white/10 hover:text-white transition-all duration-200"
-              >
-                {t("landing.hero.cta_sitter")}
-              </Button>
-              <Link
-                to="/sorties"
-                onClick={() => { void trackEvent("home_outings_link_clicked", { metadata: { location: "hero" } }); }}
-                className="inline-flex h-12 items-center justify-center rounded-full border border-white/60 px-5 sm:px-7 font-body text-sm font-medium tracking-wide text-white hover:bg-white/10 transition-all duration-200"
-              >
-                {t("landing.hero.cta_outings")}
-              </Link>
-            </div>
-            <HomeProximitySearch onLocated={setHomeOrigin} />
+            <nav aria-label={t("landing.hero.also_label")} className="mt-5 md:mt-8 animate-hero-fade-up animation-delay-900">
+              <p className="font-body text-sm text-white/80">{t("landing.hero.also_label")}</p>
+              <ul className="mt-1 flex flex-col md:flex-row md:gap-x-8">
+                {[
+                  { to: isMember ? "/petites-missions/creer" : `/inscription?redirect=${encodeURIComponent("/petites-missions/creer")}`, label: t("landing.hero.cta_sitter"), event: "cta_aid_clicked" as const },
+                  { to: "/sorties", label: t("landing.hero.cta_outings"), event: "home_outings_link_clicked" as const },
+                  ...(!isAuthenticated ? [{ to: "/inscription?role=sitter", label: t("landing.hero.cta_keep"), event: "home_sitter_link_clicked" as const }] : []),
+                ].map((item) => (
+                  <li key={item.to}>
+                    <Link
+                      to={item.to}
+                      onClick={() => { void trackEvent(item.event, { metadata: { location: "hero" } }); }}
+                      className="inline-flex min-h-[44px] items-center font-body text-base font-medium text-white underline underline-offset-4 decoration-white/60 hover:decoration-white"
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
             {isPressHighlighted && (
               <a
                 href={PRESS_ARTICLE_URL}
@@ -280,7 +275,6 @@ const Landing = () => {
                 </span>
               </a>
             )}
-            {!isAuthenticated && <Link to="/inscription?role=sitter" className="mt-1 inline-flex min-h-[44px] w-fit items-center text-sm text-primary-foreground/95 underline underline-offset-4">Vous voulez garder ? Créez votre profil.</Link>}
           </div>
         </div>
       </section>
@@ -303,16 +297,9 @@ const Landing = () => {
                   </div>
                 ))}
               </dl>
-              <div className="mt-4 md:mt-5 flex justify-center">
-                <Link
-                  to="/petites-missions"
-                  onClick={() => {
-                    trackEvent("cta_aid_clicked", { metadata: { location: "kpi_band" } });
-                  }}
-                  className="inline-flex items-center justify-center min-h-[44px] font-body text-sm font-medium text-muted-foreground underline underline-offset-4 decoration-border hover:text-foreground hover:decoration-foreground/50 transition-colors"
-                >
-                  {t("landing.hero.cta_aid")}
-                </Link>
+              <div className="mt-5 md:mt-6 flex flex-col items-center gap-1">
+                <p className="font-heading text-lg md:text-xl font-semibold text-foreground">{t("landing.hero.nearby_title")}</p>
+                <HomeProximitySearch onLocated={setHomeOrigin} tone="light" />
               </div>
             </div>
          </section>
