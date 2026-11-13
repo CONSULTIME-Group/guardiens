@@ -635,6 +635,32 @@
           "sql": "SELECT NOT has_function_privilege('authenticated', 'public.outing_alert_recipients(uuid, timestamptz)', 'EXECUTE') AS ok"
         }
       ]
+    },
+    {
+      "migration": "0154_home4_quota_geocode.sql",
+      "description": "Quota horaire des recherches geocode envoyées à Nominatim : table et fonction réservées au rôle de service",
+      "checks": [
+        {
+          "name": "table_presente",
+          "sql": "SELECT to_regclass('public.geocode_quota') IS NOT NULL AS ok"
+        },
+        {
+          "name": "table_fermee_aux_visiteurs",
+          "sql": "SELECT NOT has_table_privilege('anon', 'public.geocode_quota', 'SELECT') AS ok"
+        },
+        {
+          "name": "fonction_presente",
+          "sql": "SELECT position('home4_quota_geocode' IN pg_get_functiondef('public.geocode_quota_take(text, integer)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "fonction_fermee_aux_visiteurs",
+          "sql": "SELECT NOT has_function_privilege('anon', 'public.geocode_quota_take(text, integer)', 'EXECUTE') AS ok"
+        },
+        {
+          "name": "fonction_fermee_aux_membres",
+          "sql": "SELECT NOT has_function_privilege('authenticated', 'public.geocode_quota_take(text, integer)', 'EXECUTE') AS ok"
+        }
+      ]
     }
   ]
 }
