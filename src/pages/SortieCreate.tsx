@@ -16,6 +16,7 @@ import {
   OUTING_CAPACITY_MAX,
   OUTING_CAPACITY_MIN,
   OUTING_CATEGORIES,
+  type OutingCategory,
   OUTING_COPY,
   OUTING_DESCRIPTION_MAX,
   OUTING_PLACE_KINDS,
@@ -81,6 +82,13 @@ const SortieCreate = () => {
     prefilled.current = true;
     setDraft((d) => ({ ...d, city: d.city || capitalizeFirstName(profile.city) || "", postalCode: d.postalCode || profile.postal_code || "" }));
   }, [profile]);
+
+  // Lot SORT11 : ?categorie=<valeur> vient des vignettes « Une idée pour commencer ».
+  const ideaCategory = searchParams.get("categorie");
+  useEffect(() => {
+    if (sourceSlug || !ideaCategory) return;
+    if (OUTING_CATEGORIES.some((c) => c.value === ideaCategory)) setDraft((d) => (d.category ? d : { ...d, category: ideaCategory as OutingCategory }));
+  }, [ideaCategory, sourceSlug]);
 
   useEffect(() => {
     if (!enabled || seen.current) return;

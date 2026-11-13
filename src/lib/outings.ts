@@ -354,8 +354,8 @@ export const OUTING_ALERT_COPY = {
 export const OUTING_COPY = {
   tabs: { entraide: "Entraide", sorties: "Sorties", projets: "Chantiers" },
   hubTitle: "Entraide & sorties",
-  sortiesTitle: "Sorties et parties près de chez vous",
-  sortiesIntro: "Une belote à quatre, une balade à vélo, une randonnée, des échecs en ligne. Des moments à quelques-uns, avec des places comptées. Guardiens est gratuit.",
+  sortiesTitle: "Sorties près de chez vous",
+  sortiesIntro: "Une belote, une balade, une randonnée : des moments à quelques-uns, avec des places comptées.",
   propose: "Proposer une sortie",
   join: "Je viens",
   leave: "Libérer ma place",

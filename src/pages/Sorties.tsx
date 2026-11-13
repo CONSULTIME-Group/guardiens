@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import EntraideSortiesTabs from "@/components/outings/EntraideSortiesTabs";
+import { HUB_SHELL, HUB_TABS, HubHeader, HubIdeas, HubSettingsLine } from "@/components/outings/HubHeader";
+import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import OutingCard from "@/components/outings/OutingCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyProfile } from "@/lib/myProfile";
@@ -22,6 +24,7 @@ const Sorties = () => {
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
   const [category, setCategory] = useState<OutingCategory | "all">("all");
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!enabled) return;
@@ -59,28 +62,58 @@ const Sorties = () => {
   const proposeHref = isAuthenticated ? "/sorties/proposer" : `/inscription?redirect=${encodeURIComponent("/sorties/proposer")}`;
   const empty = !loading && !failed && near.length === 0;
 
+  const upcoming = outings.length;
+  const pulse = loading || failed || upcoming === 0 ? null : upcoming === 1 ? "1 sortie à venir" : `${upcoming} sorties à venir`;
+  // Une idée : le formulaire s'ouvre sur l'activité choisie.
+  const pickIdea = (value: string) => {
+    trackEvent("outing_propose_clicked", { source: "sorties_idea", metadata: { category: value } });
+    const form = `/sorties/proposer?categorie=${encodeURIComponent(value)}`;
+    navigate(isAuthenticated ? form : `/inscription?redirect=${encodeURIComponent(form)}`);
+  };
+
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-5 pb-10 pt-4">
+    <div className={`${HUB_SHELL} flex flex-col gap-4 pb-24`}>
       <PageMeta
         title="Sorties et parties près de chez vous"
-        description="Belote, balade, vélo, atelier : des moments à quelques-uns entre membres Guardiens, avec des places comptées. Guardiens est gratuit."
+        description="Belote, balade, sport, atelier : des moments à quelques-uns entre membres Guardiens, avec des places comptées. Guardiens est gratuit."
         path="/sorties"
         noindex={preview}
       />
-      <h1 className="font-heading text-[28px] font-bold leading-tight">{OUTING_COPY.hubTitle}</h1>
-      <EntraideSortiesTabs active="sorties" />
-      {preview && (
-        <p role="status" className="rounded-xl bg-accent/40 px-4 py-3 text-sm">
-          Aperçu réservé à l'équipe : la rubrique s'ouvre aux membres quand le réglage « sorties » est allumé.
-        </p>
-      )}
-      <div className="flex flex-col gap-2">
-        <h2 className="text-lg font-semibold">{OUTING_COPY.sortiesTitle}</h2>
-        <p className="text-[15px] leading-relaxed text-muted-foreground">{OUTING_COPY.sortiesIntro}</p>
+      <div>
+        <PageBreadcrumb items={[{ label: "Sorties" }]} />
+        <div className={HUB_TABS}><EntraideSortiesTabs active="sorties" /></div>
+        {preview && (
+          <p role="status" className="mt-3 rounded-xl bg-accent/40 px-4 py-3 text-sm">
+            Aperçu réservé à l'équipe : la rubrique s'ouvre aux membres quand le réglage « sorties » est allumé.
+          </p>
+        )}
+        <HubHeader
+          title={OUTING_COPY.sortiesTitle}
+          phrase={OUTING_COPY.sortiesIntro}
+          actions={
+            <Button asChild size="lg" className="h-[52px] rounded-2xl text-base sm:h-12">
+              <Link to={proposeHref} onClick={() => trackEvent("outing_propose_clicked", { source: "sorties_tab" })}>{OUTING_COPY.propose}</Link>
+            </Button>
+          }
+          pulse={pulse}
+        >
+          {isAuthenticated && (
+            <HubSettingsLine summary={[memberCity || "Votre lieu", "alertes sorties"].join(" · ")}>
+              <p>Vous êtes prévenu des nouvelles sorties proposées près de chez vous.</p>
+              <p>
+                <Link to="/settings?section=alerts" className="font-semibold text-primary underline underline-offset-4">Régler mes alertes</Link>
+              </p>
+            </HubSettingsLine>
+          )}
+        </HubHeader>
+        <HubIdeas
+          id="sorties-ideas-title"
+          ideas={OUTING_CATEGORIES.slice(0, 6).map((c) => ({ key: c.value, label: c.label, image: c.art }))}
+          onPick={(idea) => pickIdea(idea.key)}
+        />
       </div>
-      <Button asChild size="lg" className="h-[52px] rounded-2xl text-base">
-        <Link to={proposeHref} onClick={() => trackEvent("outing_propose_clicked", { source: "sorties_tab" })}>{OUTING_COPY.propose}</Link>
-      </Button>
+
+      <h2 className="mt-2 font-heading text-xl font-semibold text-foreground sm:text-2xl">Sorties à venir</h2>
 
       {usedCategories.length > 1 && (
         <div className="flex flex-wrap gap-2" role="group" aria-label="Activités">
@@ -112,7 +145,7 @@ const Sorties = () => {
       )}
 
       {!loading && !failed && near.length > 0 && (
-        <div className="flex flex-col gap-3">
+        <div className="grid gap-3 md:grid-cols-2">
           {near.map((o) => <OutingCard key={o.id} outing={o} />)}
         </div>
       )}

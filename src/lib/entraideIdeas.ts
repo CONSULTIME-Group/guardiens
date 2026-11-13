@@ -29,6 +29,14 @@ export function helpersCountLine(count: number, city: string | null): string | n
   return city ? `Autour de ${city}, ${people} à donner un coup de main.` : `Sur Guardiens, ${people} à donner un coup de main.`;
 }
 
+/** Lot SORT11 : la même information en une ligne courte, sous le bouton. */
+export function helpersPulseLine(count: number, city: string | null): string | null {
+  if (count <= 0) return null;
+  const people = count === 1 ? "1 personne prête à aider" : `${count} personnes prêtes à aider`;
+  if (!city) return `${people} sur Guardiens`;
+  return city === "vous" ? `${people} autour de chez vous` : `${people} autour de ${city}`;
+}
+
 /** Titre de la section des personnes. */
 export function helpersSectionTitle(count: number, city: string | null): string {
   if (!city) return "Prêts à aider sur Guardiens";

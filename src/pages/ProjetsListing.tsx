@@ -1,6 +1,13 @@
 import EntraideSortiesTabs from "@/components/outings/EntraideSortiesTabs";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { HUB_SHELL, HUB_TABS, HubHeader, HubIdeas, HubSettingsLine, type HubIdea } from "@/components/outings/HubHeader";
+import spotJardin from "@/assets/missions/spot-jardin-160.webp";
+import spotBricolage from "@/assets/missions/spot-bricolage-160.webp";
+import spotVerger from "@/assets/missions/spot-verger-160.webp";
+import spotPoules from "@/assets/missions/spot-poules-160.webp";
+import spotBienetre from "@/assets/missions/spot-bienetre-160.webp";
+import spotCourses from "@/assets/missions/spot-courses-160.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { reportError } from "@/lib/errorLogger";
 import PageMeta from "@/components/PageMeta";
@@ -41,6 +48,16 @@ const PROJET_DEFAULT_RADIUS: RadiusKm = 250;
 
 const radiusLabel = (value: number) =>
   PROJET_RADIUS_CHOICES.find((c) => c.value === value)?.label ?? `${value} km`;
+
+/** Lot SORT11 : idées de chantier, le formulaire s'ouvre avec le titre et la nature. */
+const PROJET_IDEAS: ReadonlyArray<HubIdea & { nature: string }> = [
+  { key: "haie", label: "Planter une haie", image: spotJardin, nature: "jardin" },
+  { key: "abri", label: "Construire un abri", image: spotBricolage, nature: "construction" },
+  { key: "poulailler", label: "Monter un poulailler", image: spotPoules, nature: "animaux" },
+  { key: "verger", label: "Une récolte au verger", image: spotVerger, nature: "jardin" },
+  { key: "lieu", label: "Remettre un lieu en état", image: spotCourses, nature: "renovation" },
+  { key: "fete", label: "Préparer une fête de village", image: spotBienetre, nature: "evenement" },
+];
 
 const LEGAL_GUIDE_URL = "/actualites/chantier-participatif-projet-collectif-cadre-legal";
 
@@ -94,6 +111,7 @@ const ProjetsEditorial = () => (
 );
 
 const ProjetsListing = () => {
+  const navigate = useNavigate();
   const [projets, setProjets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -194,63 +212,64 @@ const ProjetsListing = () => {
         statusCode={hubSeo.statusCode}
       />
 
-      <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        <div className="mb-6">
-          <PageBreadcrumb items={[{ label: "Projets participatifs" }]} />
-        </div>
+      <div className={`${HUB_SHELL} pb-24`}>
+        <PageBreadcrumb items={[{ label: "Projets participatifs" }]} />
         {/* Lot HOME1 : les projets sont une forme d'entraide, mêmes onglets. */}
-        <div className="mb-8 w-full max-w-2xl"><EntraideSortiesTabs active="projets" /></div>
+        <div className={HUB_TABS}><EntraideSortiesTabs active="projets" /></div>
 
-        <header className="max-w-3xl mb-8">
-          <p className="text-sm font-semibold text-primary mb-2">Chantiers et projets participatifs</p>
-          <h1 className="font-heading text-[2rem] md:text-[2.5rem] font-bold leading-tight mb-4 text-foreground">
-            Des chantiers et projets à réaliser ensemble
-          </h1>
-          <p className="text-base md:text-lg leading-relaxed text-foreground/85">
-            Planter un jardin, construire un abri, remettre un lieu en état… Découvrez les projets proposés sur
-            Guardiens et participez selon vos envies et vos disponibilités.
-          </p>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <Button asChild className="rounded-full">
-              <a href="#projets-resultats">Découvrir les projets</a>
+        {/* Lot SORT11 : même en-tête que les onglets Entraide et Sorties. */}
+        <HubHeader
+          title="Chantiers près de chez vous"
+          phrase="Planter une haie, construire un abri, remettre un lieu en état : des projets participatifs à réaliser à plusieurs."
+          actions={
+            <Button asChild size="lg" className="h-[52px] rounded-2xl text-base sm:h-12">
+              <Link to="/projets/publier">Proposer un chantier</Link>
             </Button>
-            <Button asChild variant="outline" className="rounded-full">
-              <Link to="/projets/publier">Publier un projet</Link>
-            </Button>
-          </div>
-        </header>
+          }
+          pulse={loading || loadError || projets.length === 0 ? null : projets.length === 1 ? "1 chantier ouvert" : `${projets.length} chantiers ouverts`}
+        >
+          {!loading && projets.length > 0 && (
+            <HubSettingsLine summary={[proximity.active ? proximity.postal : "Toute la France", proximity.active ? radiusLabel(radius) : null].filter(Boolean).join(" · ")}>
+              <div className="flex flex-wrap items-center gap-3">
+                <ProximityFilter
+                  postal={proximity.postal}
+                  onPostalChange={proximity.setPostal}
+                  radius={proximity.radius}
+                  onRadiusChange={proximity.setRadius}
+                  active={proximity.active}
+                  resolving={proximity.resolving}
+                  isValidPostal={proximity.isValidPostal}
+                  onUseMyLocation={proximity.useMyLocation}
+                  onClear={() => proximity.setPostal("")}
+                  originError={proximity.originError}
+                  radiusChoices={PROJET_RADIUS_CHOICES}
+                  radiusAlwaysEnabled
+                />
+                {proximity.active && (
+                  <Select value={sort} onValueChange={(v) => setSort(v as "distance" | "recent")}>
+                    <SelectTrigger className="h-9 w-auto min-w-[140px] text-xs" aria-label="Ordre d'affichage">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="distance" className="text-xs">Plus proches</SelectItem>
+                      <SelectItem value="recent" className="text-xs">Plus récents</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+            </HubSettingsLine>
+          )}
+        </HubHeader>
+        <HubIdeas
+          id="projets-ideas-title"
+          ideas={PROJET_IDEAS}
+          onPick={(idea) => {
+            const nature = PROJET_IDEAS.find((row) => row.key === idea.key)?.nature ?? "autre";
+            navigate(`/projets/publier?titre=${encodeURIComponent(idea.label)}&categorie=${nature}`);
+          }}
+        />
 
-        <div id="projets-resultats" className="scroll-mt-24" />
-        {/* Barre de proximité : origine, rayon, et ordre d'affichage. */}
-        {!loading && projets.length > 0 && (
-          <div className="mb-8 flex flex-wrap items-center gap-3">
-            <ProximityFilter
-              postal={proximity.postal}
-              onPostalChange={proximity.setPostal}
-              radius={proximity.radius}
-              onRadiusChange={proximity.setRadius}
-              active={proximity.active}
-              resolving={proximity.resolving}
-              isValidPostal={proximity.isValidPostal}
-              onUseMyLocation={proximity.useMyLocation}
-              onClear={() => proximity.setPostal("")}
-              originError={proximity.originError}
-              radiusChoices={PROJET_RADIUS_CHOICES}
-              radiusAlwaysEnabled
-            />
-            {proximity.active && (
-              <Select value={sort} onValueChange={(v) => setSort(v as "distance" | "recent")}>
-                <SelectTrigger className="h-9 w-auto min-w-[140px] text-xs" aria-label="Ordre d'affichage">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="distance" className="text-xs">Plus proches</SelectItem>
-                  <SelectItem value="recent" className="text-xs">Plus récents</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-        )}
+        <h2 id="projets-resultats" className="mb-5 mt-8 scroll-mt-24 font-heading text-xl font-semibold text-foreground sm:text-2xl">Chantiers ouverts</h2>
 
         {loading ? (
           <div className="h-40" aria-busy="true" />

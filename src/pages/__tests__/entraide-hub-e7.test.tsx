@@ -127,11 +127,13 @@ describe("Entraide, la page vue d'un membre", () => {
 
   it("prend l'origine dans le profil connecté, sans saisie de ville", async () => {
     renderHub();
-    expect(await screen.findByRole("heading", { name: "Entraide et coups de main près de chez vous" })).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByText(/Autour de Lyon, 19 personnes sont prêtes à donner un coup de main\./)).toBeInTheDocument());
-    expect(screen.getByText(/Lieu : Lyon/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Changer de lieu" })).toBeInTheDocument();
-    expect(screen.getByText("Entraide · autour de Lyon")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Entraide près de chez vous" })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/19 personnes prêtes à aider autour de Lyon/)).toBeInTheDocument());
+    // Lot SORT11 : lieu, rayon et savoir-faire sur une ligne, détail replié.
+    const settings = screen.getByRole("button", { name: /Lyon.*Modifier/ });
+    expect(settings).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(settings);
+    expect(screen.getByRole("textbox", { name: "Votre ville" })).toBeVisible();
     expect(screen.queryByRole("button", { name: "Situer" })).toBeNull();
   });
 
