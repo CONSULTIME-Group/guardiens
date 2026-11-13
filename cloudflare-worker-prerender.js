@@ -1,9 +1,10 @@
 // MIROIR DE DOCUMENTATION, CE FICHIER NE DÉPLOIE RIEN.
 // La source de vérité est l'éditeur Cloudflare (Workers & Pages >
 // guardiens-prerender > Edit code). Le code sous le repère « CODE DÉPLOYÉ »
-// est, à l'octet près, la version active be02d9c5 (v7.5 du 12/11/2026),
-// capturée le 12/11/2026 : SHA-256
-// 25d5010079586e7204a35461c97482a904591c56bf402d51496f799dcb60a4ab.
+// est la version active f6ea93ce (v7.6 du 13/11/2026) : la v7.5 (be02d9c5),
+// capturée à l'octet près le 12/11/2026, plus la ligne 440 saisie dans
+// l'éditeur le 13/11/2026 (retrait de la balise googlebot). SHA-256 du miroir :
+// 03988afa1bd22c584ec10d05135f2dfb27d233107291fb5b6cbbd0d0c89bc697.
 // Le bloc d'historique au-dessus du repère n'existe que dans ce miroir. Toute
 // modification faite ici reste sans effet sur la production tant qu'elle n'est
 // pas reportée dans l'éditeur Cloudflare.
@@ -257,7 +258,7 @@
  *  - bytespider isolé, activable par env.PRERENDER_ALLOW_BYTESPIDER.
  */
 
-// ═══ CODE DÉPLOYÉ (be02d9c5) ═══
+// ═══ CODE DÉPLOYÉ (f6ea93ce) ═══
 /**
  * guardiens-prerender, v7.5 (12/11/2026)
  * Proxy Prerender.io pour guardiens.fr. Route : guardiens.fr/* et *guardiens.fr/*
@@ -697,15 +698,7 @@ function alignBotHtml(response, cssHref) {
         el.remove();
       },
     });
-    // v7.6 : une copie rendue avant le 10/11/2026 garde la balise googlebot
-    // « noindex, nofollow » du script de preview. Hors preview, googlebot ne
-    // contredit jamais robots (PageMeta, lot SEO-GB1) : la balise est retirée
-    // de toute réponse servie à un robot. La balise robots reste intacte.
-    rewriter.on('meta[name="googlebot"]', {
-      element(el) {
-        el.remove();
-      },
-    });
+    rewriter.on('meta[name="googlebot"]', { element(el) { el.remove(); } });
     if (cssHref) {
       rewriter.on('link[rel="stylesheet"]', {
         element(el) {
