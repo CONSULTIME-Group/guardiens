@@ -42,7 +42,7 @@ async function almostReadyPass(supabase: any, now: number, alreadyServed: Readon
       client: supabase,
       enabled: await readFlag(supabase, REL1_FLAG_DRAFT),
       send,
-      loadMissing: (draft) => loadMissingDraftItems(supabase, draft as Record<string, unknown>),
+      loadMissing: (draft) => loadMissingDraftItems(supabase, draft as unknown as Record<string, unknown>),
       resumeUrl: draftReminderUrl,
       departureHeld: async (ownerId) => departureHoldsPublishAsk(await loadLastDepartureAnswer(supabase, ownerId), new Date(now)),
       alreadyServed,
