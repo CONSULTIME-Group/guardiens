@@ -1,9 +1,10 @@
 // MIROIR DE DOCUMENTATION, CE FICHIER NE DÉPLOIE RIEN.
 // La source de vérité est l'éditeur Cloudflare (Workers & Pages >
 // guardiens-prerender > Edit code). Le code sous le repère « CODE DÉPLOYÉ »
-// est, à l'octet près, la version active be02d9c5 (v7.5 du 12/11/2026),
-// capturée le 12/11/2026 : SHA-256
-// 25d5010079586e7204a35461c97482a904591c56bf402d51496f799dcb60a4ab.
+// est la version active f6ea93ce (v7.6 du 13/11/2026) : la v7.5 (be02d9c5),
+// capturée à l'octet près le 12/11/2026, plus la ligne 440 saisie dans
+// l'éditeur le 13/11/2026 (retrait de la balise googlebot). SHA-256 du miroir :
+// 03988afa1bd22c584ec10d05135f2dfb27d233107291fb5b6cbbd0d0c89bc697.
 // Le bloc d'historique au-dessus du repère n'existe que dans ce miroir. Toute
 // modification faite ici reste sans effet sur la production tant qu'elle n'est
 // pas reportée dans l'éditeur Cloudflare.
@@ -14,6 +15,24 @@
  * Deploy: Cloudflare Dashboard > Workers & Pages > guardiens-prerender > Edit code
  *         ou `npx wrangler deploy`
  * Route:  guardiens.fr/* + *guardiens.fr/*
+ *
+ * ══ v7.6 (2026-11-13) : BALISE GOOGLEBOT RETIRÉE DES COPIES SERVIES AUX ROBOTS ══
+ *
+ *  MESURE du 13/11/2026 : Googlebot pour smartphone reçoit encore la balise
+ *  `<meta name="googlebot" content="noindex, nofollow">` sur 21 pages d'un
+ *  échantillon de 39 URL du sitemap (accueil, /tarifs, /annonces, pages
+ *  villes de Paris, Marseille, Toulouse, Nantes). Les mêmes pages lues en
+ *  Googlebot ordinateur sont propres. Search Console : accueil « Exclue par
+ *  la balise noindex », exploration du 12/11/2026 par Googlebot smartphone.
+ *
+ *  CAUSE : Prerender garde une copie par type d'appareil. La relance de
+ *  `consume-seo-dirty` rafraîchit la copie ordinateur ; les copies smartphone
+ *  rendues avant le correctif SEO-GB1 du 10/11 restent servies jusqu'à leur
+ *  expiration (168 heures).
+ *
+ *  CORRIGÉ : `alignBotHtml` retire `meta[name="googlebot"]` de toute réponse
+ *  HTML de Prerender. Aucun rendu consommé. La balise `robots` n'est pas
+ *  touchée : une page en noindex voulu le reste.
  *
  * ══ v7.5 (2026-11-12) : HTML DES ROBOTS ALIGNÉ SUR LES FICHIERS EN LIGNE ══
  *
@@ -239,7 +258,7 @@
  *  - bytespider isolé, activable par env.PRERENDER_ALLOW_BYTESPIDER.
  */
 
-// ═══ CODE DÉPLOYÉ (be02d9c5) ═══
+// ═══ CODE DÉPLOYÉ (f6ea93ce) ═══
 /**
  * guardiens-prerender, v7.5 (12/11/2026)
  * Proxy Prerender.io pour guardiens.fr. Route : guardiens.fr/* et *guardiens.fr/*
@@ -679,6 +698,7 @@ function alignBotHtml(response, cssHref) {
         el.remove();
       },
     });
+    rewriter.on('meta[name="googlebot"]', { element(el) { el.remove(); } });
     if (cssHref) {
       rewriter.on('link[rel="stylesheet"]', {
         element(el) {
