@@ -202,8 +202,8 @@ const Landing = () => {
         </picture>
         {/* Voile : sombre sous le texte, clair sur le mas et le chien. Du haut
             vers le bas sur téléphone, de gauche à droite au-delà. */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 via-45% to-black/0 to-65% md:hidden" />
-        <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-black/90 via-black/65 via-40% to-black/5" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 via-45% to-black/25 to-65% md:hidden" />
+        <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-black/95 via-black/75 via-45% to-black/25" />
 
         <div className="relative z-10 lp-wide pb-8 pt-7 md:py-16">
           <div className="w-full max-w-full md:max-w-[600px] lg:max-w-[680px]">
