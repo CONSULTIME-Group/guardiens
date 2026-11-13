@@ -456,6 +456,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     if (data.user) {
+      // Lot VIT2 : relie la visite au compte créé. L'identifiant de visite part
+      // dans les métadonnées de l'événement, à côté du compte, sans rien
+      // changer au déclencheur d'inscription.
+      const signupUserId = data.user.id;
+      void import("@/lib/analytics").then(({ trackEvent }) => trackEvent("signup_visit_linked", { metadata: { signup_user_id: signupUserId, role }, anonymous: true })).catch(() => undefined);
       // If there's an active session (auto-confirm enabled), update profile now
       if (data.session) {
         await supabase

@@ -55,6 +55,22 @@ const AdminSitsManagement = () => {
   const [noteModal, setNoteModal] = useState<{ open: boolean; id: string; note: string }>({ open: false, id: "", note: "" });
   const [forceCompleteModal, setForceCompleteModal] = useState<{ open: boolean; sit: any | null }>({ open: false, sit: null });
   const [forcingComplete, setForcingComplete] = useState(false);
+  // Lot VIT2 : garde épinglée en tête de la vitrine de la home (une seule à la fois).
+  const [featuredSitId, setFeaturedSitId] = useState<string | null>(null);
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    void (supabase as any).from("home_featured_sit").select("sit_id").limit(1).then(({ data }: { data: { sit_id: string }[] | null }) => {
+      setFeaturedSitId(data?.[0]?.sit_id ?? null);
+    });
+  }, []);
+  const toggleHomeFeatured = async (sitId: string) => {
+    const next = featuredSitId !== sitId;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any).rpc("admin_set_home_featured", { p_sit: sitId, p_on: next });
+    if (error) { toast.error("L'épingle a échoué. Réessayez dans un instant."); return; }
+    setFeaturedSitId(next ? sitId : null);
+    toast.success(next ? "Annonce à la une de la home." : "Annonce retirée de la une.");
+  };
 
   // Sheet state
   const [selectedSit, setSelectedSit] = useState<any | null>(null);
@@ -490,6 +506,17 @@ const AdminSitsManagement = () => {
                       <Button variant="ghost" size="icon" title="Voir le dossier" onClick={() => openSitSheet(sit)}>
                         <Eye className="h-4 w-4" />
                       </Button>
+                      {sit._type === "sit" && sit.status === "published" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title={featuredSitId === sit.id ? "Retirer de la une de la home" : "Mettre à la une de la home"}
+                          aria-pressed={featuredSitId === sit.id}
+                          onClick={() => toggleHomeFeatured(sit.id)}
+                        >
+                          <Star className={`h-4 w-4 ${featuredSitId === sit.id ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+                        </Button>
+                      )}
                       {isOverdue && (
                         <Button variant="ghost" size="icon" title="Forcer fin" onClick={() => setForceCompleteModal({ open: true, sit })} disabled={forcingComplete && forceCompleteModal.sit?.id === sit.id}>
                           <RotateCcw className="h-4 w-4 text-primary" />

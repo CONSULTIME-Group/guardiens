@@ -133,4 +133,12 @@ describe("vitrine de la home, lot VIT1", () => {
   it("retire les émojis du titre affiché", () => {
     expect(cleanListingTitle("Un Noël magique 🎄✨ au Québec")).toBe("Un Noël magique au Québec");
   });
+
+  it("place l'annonce épinglée par un admin en première carte (lot VIT2)", () => {
+    const ranked = rankShowcaseGuards([
+      listing("belle", "garde", 0, { photoCount: 12, createdAt: daysAgo(1), country: "CA" }),
+      listing("epinglee", "garde", 0, { photoCount: 1, createdAt: daysAgo(40), featured: true }),
+    ], NOW);
+    expect(ranked[0].id).toBe("epinglee");
+  });
 });
