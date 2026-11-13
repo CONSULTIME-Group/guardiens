@@ -384,5 +384,17 @@ assert.equal((await asRole('anon', null, () => one(`SELECT count(*)::int AS n FR
 await as(null);
 passed.push('droits réels sous anon et authenticated : publication, lecture publique, inscription, tables fermées, admin');
 
+// Lot SORT8 : l'alerte prévient aussi un membre absent depuis plus de 30 jours.
+const migration8 = readFileSync(new URL('drizzle/migrations/0153_sort8_alerte_tous_les_membres.sql', root), 'utf8');
+await db.exec(migration8);
+await db.exec(migration8);
+await as(null);
+const withAbsent = (await db.query(`SELECT user_id FROM public.outing_alert_recipients($1)`, [tarot.id])).rows.map((r) => r.user_id);
+assert.equal(withAbsent.includes(ABSENT), true);
+assert.equal(withAbsent.includes(MARTINE), false);
+await db.query(`UPDATE public.profiles SET account_status = 'suspended' WHERE id = $1`, [ABSENT]);
+assert.equal((await db.query(`SELECT user_id FROM public.outing_alert_recipients($1)`, [tarot.id])).rows.some((r) => r.user_id === ABSENT), false);
+passed.push('alerte (SORT8) : un membre absent depuis 45 jours est prévenu, un compte suspendu reste écarté');
+
 for (const p of passed) console.log(`ok  ${p}`);
 console.log(`\n${passed.length} contrôles verts (SORT1 à SORT5)`);

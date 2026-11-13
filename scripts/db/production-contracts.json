@@ -621,6 +621,20 @@
           "sql": "SELECT NOT has_function_privilege('anon', 'public.admin_set_home_featured(uuid, boolean)', 'EXECUTE') AS ok"
         }
       ]
+    },
+    {
+      "migration": "0153_sort8_alerte_tous_les_membres.sql",
+      "description": "L'alerte nouvelle sortie prévient tous les membres actifs du rayon, sans condition de dernière visite",
+      "checks": [
+        {
+          "name": "destinataires_sans_condition_de_visite",
+          "sql": "SELECT position('sort8_alerte_tous_les_membres' IN pg_get_functiondef('public.outing_alert_recipients(uuid, timestamptz)'::regprocedure)) > 0 AND position('last_seen_at' IN pg_get_functiondef('public.outing_alert_recipients(uuid, timestamptz)'::regprocedure)) = 0 AS ok"
+        },
+        {
+          "name": "destinataires_fermes",
+          "sql": "SELECT NOT has_function_privilege('authenticated', 'public.outing_alert_recipients(uuid, timestamptz)', 'EXECUTE') AS ok"
+        }
+      ]
     }
   ]
 }

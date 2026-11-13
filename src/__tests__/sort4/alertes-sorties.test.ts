@@ -19,7 +19,11 @@ describe("règles de l'alerte (décisions des 11 et 12/11)", () => {
     expect(sql).toContain("WHEN '5' THEN 5 ELSE 15 END");
   });
   it("membres vus depuis 30 jours, une alerte par semaine, rien pour une sortie complète ou en ligne", () => {
-    expect(sql).toContain("AND p.last_seen_at > p_now - interval '30 days'");
+    // Lot SORT8 (13/11/2026) : la condition de dernière visite est retirée par 0153.
+    const sort8 = readFileSync("drizzle/migrations/0153_sort8_alerte_tous_les_membres.sql", "utf8");
+    expect(sort8.split("$fn$")[1]).not.toMatch(/last_seen_at/);
+    expect(sort8).toContain("AND NOT EXISTS (SELECT 1 FROM public.outing_alert_log l");
+    expect(sort8).toContain("LIMIT 300;");
     expect(sql).toContain("WHERE l.user_id = p.id AND l.created_at > p_now - interval '7 days'");
     expect(sql).toContain("IF v_left <= 0 THEN RETURN 0; END IF;");
     expect(sql).toContain("AND o.place_kind <> 'online'");
