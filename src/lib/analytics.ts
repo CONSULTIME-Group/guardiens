@@ -247,6 +247,7 @@ export type EventType =
   | "home_family_clicked"
   | "home_manifesto_clicked"
   | "home_click"
+  | "home_city_listings_clicked"
   | "signup_visit_linked"
   | "cta_outing_clicked"              // Lot TAR1 : clic sur un bouton de la page tarifs (cta)
   // Admin refresh IA articles post-pivot -------------------------------------
