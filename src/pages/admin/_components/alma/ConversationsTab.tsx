@@ -145,7 +145,7 @@ export function ConversationsTab({ since }: { since: string }) {
             <p className="text-xs text-muted-foreground">Échanges</p>
             <p className="text-2xl font-semibold">{shown(truncated ? `${rows.length}+` : rows.length)}</p>
             <p className="text-xs text-muted-foreground">
-              {ready ? `${speakers.typed} écrits ou dictés, ${speakers.replyChips} réponses d'un geste` : ""}
+              {ready ? `${speakers.typed} écrit${speakers.typed > 1 ? "s" : ""} ou dicté${speakers.typed > 1 ? "s" : ""}, ${speakers.replyChips} réponse${speakers.replyChips > 1 ? "s" : ""} d'un geste` : ""}
             </p>
           </CardContent>
         </Card>
