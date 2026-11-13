@@ -20,7 +20,7 @@ await db.exec(`
     SELECT nullif(current_setting('fixture.uid', true), '')::uuid
   $$;
   CREATE TYPE public.app_role AS ENUM ('admin', 'user');
-  CREATE TABLE public.profiles(id uuid PRIMARY KEY, first_name text, postal_code text, latitude numeric, longitude numeric,
+  CREATE TABLE public.profiles(id uuid PRIMARY KEY, first_name text, postal_code text, latitude double precision, longitude double precision,
     identity_verified boolean, created_at timestamptz NOT NULL DEFAULT now(), email text, account_status text DEFAULT 'active',
     last_seen_at timestamptz DEFAULT now());
   CREATE TABLE public.email_unsubscribe_tokens(id uuid PRIMARY KEY DEFAULT gen_random_uuid(), token text UNIQUE, email text UNIQUE);
@@ -49,7 +49,10 @@ await db.exec(migration3);
 const migration4 = readFileSync(new URL('drizzle/migrations/0148_sort4_alertes_sorties.sql', root), 'utf8');
 await db.exec(migration4);
 await db.exec(migration4);
-passed.push('migrations 0145 à 0148 rejouables');
+const migration5 = readFileSync(new URL('drizzle/migrations/0149_sort5_admin_sorties.sql', root), 'utf8');
+await db.exec(migration5);
+await db.exec(migration5);
+passed.push('migrations 0145 à 0149 rejouables');
 
 const one = async (sql, params = []) => (await db.query(sql, params)).rows[0];
 const as = (uid) => db.exec(`SELECT set_config('fixture.uid', '${uid ?? ''}', false)`);
@@ -310,5 +313,76 @@ await db.query(`INSERT INTO public.outings(organizer_id, title, category, starts
 assert.equal((await queued(`template_data->>'title' = 'Échecs en ligne'`)).length, 0);
 passed.push('alerte : sortie en ligne sans envoi');
 
+// Lot SORT5 : lecture admin et masquage.
+await as(MARTINE);
+await assert.rejects(() => db.query(`SELECT public.admin_outings_overview()`), /ADMIN_ONLY/);
+await assert.rejects(() => db.query(`SELECT public.admin_outing_set_hidden($1, true)`, [outing.id]), /ADMIN_ONLY/);
+await as(null);
+await assert.rejects(() => db.query(`SELECT public.admin_outings_overview()`), /ADMIN_ONLY/);
+passed.push('admin : lecture et masquage fermés aux membres et aux visiteurs');
+
+await as(ADMIN);
+const total = Number((await one(`SELECT count(*) AS n FROM public.outings`)).n);
+const going = Number((await one(`SELECT count(*) AS n FROM public.outing_attendees WHERE status = 'going'`)).n);
+let overview = (await one(`SELECT public.admin_outings_overview() AS r`)).r;
+assert.equal(overview.counters.published_total, total);
+assert.equal(overview.counters.joins_total, going);
+assert.equal(Object.values(overview.counters.joins_by_source).reduce((a, b) => a + b, 0), going);
+assert.equal(overview.counters.alerts_sent, Number((await one(`SELECT count(*) AS n FROM public.outing_alert_log`)).n));
+assert.equal(overview.counters.alerts_stopped, Number((await one(`SELECT count(*) AS n FROM public.outing_alert_preferences WHERE NOT enabled`)).n));
+assert.deepEqual(Object.keys(overview.counters.flags).sort(), ['sorties', 'sorties_alertes', 'sorties_emails']);
+assert.equal(overview.outings.length, total);
+const first = overview.outings.find((o) => o.id === outing.id);
+assert.equal(first.organizer_first_name, 'Martine');
+assert.ok(first.organizer_last_seen_at);
+assert.equal(typeof first.taken, 'number');
+assert.equal((await one(`SELECT public.admin_outings_overview(1) AS r`)).r.outings.length, 1);
+passed.push('admin : compteurs et liste rendus en une lecture, bornée');
+
+const target = (await one(`SELECT id FROM public.outings WHERE title = 'Scrabble du dimanche'`)).id;
+const hiddenBefore = overview.counters.hidden;
+assert.deepEqual((await one(`SELECT public.admin_outing_set_hidden($1, true) AS r`, [target])).r, { ok: true, hidden: true });
+assert.equal((await one(`SELECT count(*) AS n FROM public.public_outings WHERE id = $1`, [target])).n, 0);
+overview = (await one(`SELECT public.admin_outings_overview() AS r`)).r;
+assert.equal(overview.counters.hidden, hiddenBefore + 1);
+assert.ok(overview.outings.find((o) => o.id === target).hidden_at);
+assert.deepEqual((await one(`SELECT public.admin_outing_set_hidden($1, false) AS r`, [target])).r, { ok: true, hidden: false });
+assert.equal((await one(`SELECT count(*) AS n FROM public.public_outings WHERE id = $1`, [target])).n, 1);
+assert.equal((await one(`SELECT public.admin_outing_set_hidden($1, true) AS r`, ['00000000-0000-0000-0000-0000000000ff'])).r.reason, 'not_found');
+passed.push('admin : masquer retire la sortie de la vue publique, rétablir la rend');
+
+// Droits réels : mêmes gestes sous les rôles du site (RLS active, plus de super-utilisateur).
+await db.exec(`GRANT USAGE ON SCHEMA public, auth TO anon, authenticated; GRANT EXECUTE ON FUNCTION auth.uid() TO anon, authenticated;
+  GRANT EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) TO anon, authenticated; GRANT SELECT ON public.user_roles TO anon, authenticated;`);
+const asRole = async (role, uid, fn) => {
+  await as(uid);
+  await db.exec(`SET ROLE ${role}`);
+  try { return await fn(); } finally { await db.exec('RESET ROLE'); }
+};
+const rls = await asRole('authenticated', KARIM, () => one(`
+  INSERT INTO public.outings(organizer_id, title, category, starts_at, place_kind, place_label, city, postal_code, capacity, reserved)
+  VALUES ($1, 'Pétanque du jeudi', 'jeux', now() + interval '9 days', 'public', 'Place Bellecour', 'Lyon', '69002', 6, 1)
+  RETURNING id, slug`, [KARIM]));
+assert.match(rls.slug, /^petanque-du-jeudi-/);
+await assert.rejects(() => asRole('authenticated', LEA, () => db.query(`
+  INSERT INTO public.outings(organizer_id, title, category, starts_at, place_kind, capacity, reserved)
+  VALUES ($1, 'Au nom d''un autre', 'jeux', now() + interval '9 days', 'online', 4, 1)`, [KARIM])), /row-level security/);
+assert.equal((await asRole('anon', null, () => one(`SELECT count(*)::int AS n FROM public.public_outings WHERE id = $1`, [rls.id]))).n, 1);
+await assert.rejects(() => asRole('anon', null, () => db.query(`SELECT 1 FROM public.outings LIMIT 1`)), /permission denied/);
+await assert.rejects(() => asRole('anon', null, () => db.query(`SELECT public.outing_join($1, 'site')`, [rls.id])), /permission denied/);
+assert.equal((await asRole('authenticated', LEA, () => one(`SELECT count(*)::int AS n FROM public.outings WHERE id = $1`, [rls.id]))).n, 0);
+assert.equal((await asRole('authenticated', LEA, () => db.query(`UPDATE public.outings SET title = 'Détournée' WHERE id = $1 RETURNING id`, [rls.id]))).rows.length, 0);
+assert.equal((await asRole('authenticated', LEA, () => one(`SELECT public.outing_join($1, 'site') AS r`, [rls.id]))).r.ok, true);
+assert.equal((await asRole('authenticated', LEA, () => one(`SELECT count(*)::int AS n FROM public.outing_attendees WHERE outing_id = $1`, [rls.id]))).n, 1);
+assert.equal((await asRole('authenticated', PAUL, () => one(`SELECT count(*)::int AS n FROM public.outing_attendees WHERE outing_id = $1`, [rls.id]))).n, 0);
+await assert.rejects(() => asRole('authenticated', LEA, () => db.query(`INSERT INTO public.outing_attendees(outing_id, user_id) VALUES ($1, $2)`, [rls.id, PAUL])), /permission denied/);
+assert.equal((await asRole('authenticated', KARIM, () => db.query(`UPDATE public.outings SET title = 'Pétanque du vendredi' WHERE id = $1 RETURNING id`, [rls.id]))).rows.length, 1);
+await assert.rejects(() => asRole('authenticated', KARIM, () => db.query(`UPDATE public.outings SET hidden_at = now() WHERE id = $1`, [rls.id])), /OUTING_FIELD_LOCKED/);
+await assert.rejects(() => asRole('authenticated', KARIM, () => db.query(`SELECT public.admin_outings_overview()`)), /ADMIN_ONLY/);
+assert.equal((await asRole('authenticated', ADMIN, () => one(`SELECT public.admin_outing_set_hidden($1, true) AS r`, [rls.id]))).r.hidden, true);
+assert.equal((await asRole('anon', null, () => one(`SELECT count(*)::int AS n FROM public.public_outings WHERE id = $1`, [rls.id]))).n, 0);
+await as(null);
+passed.push('droits réels sous anon et authenticated : publication, lecture publique, inscription, tables fermées, admin');
+
 for (const p of passed) console.log(`ok  ${p}`);
-console.log(`\n${passed.length} contrôles verts (SORT1 à SORT4)`);
+console.log(`\n${passed.length} contrôles verts (SORT1 à SORT5)`);

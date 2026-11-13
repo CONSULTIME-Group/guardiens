@@ -537,6 +537,28 @@
           "sql": "SELECT has_function_privilege('anon', 'public.outing_alerts_set_by_token(text, boolean)', 'EXECUTE') AS ok"
         }
       ]
+    },
+    {
+      "migration": "0149_sort5_admin_sorties.sql",
+      "description": "Lecture et pilotage des sorties dans l'espace admin : liste, compteurs, masquer et rétablir, réservés aux admins",
+      "checks": [
+        {
+          "name": "lecture_admin",
+          "sql": "SELECT position('sort5_admin_sorties' IN pg_get_functiondef('public.admin_outings_overview(integer)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "lecture_fermee_aux_visiteurs",
+          "sql": "SELECT NOT has_function_privilege('anon', 'public.admin_outings_overview(integer)', 'EXECUTE') AS ok"
+        },
+        {
+          "name": "masquage_admin",
+          "sql": "SELECT position('sort5_admin_sorties' IN pg_get_functiondef('public.admin_outing_set_hidden(uuid, boolean)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "masquage_ferme_aux_visiteurs",
+          "sql": "SELECT NOT has_function_privilege('anon', 'public.admin_outing_set_hidden(uuid, boolean)', 'EXECUTE') AS ok"
+        }
+      ]
     }
   ]
 }
