@@ -7,7 +7,7 @@ Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vou
 ## Pages principales
 
 - [Accueil](/): Découvrir Guardiens, propriétaires et gardiens, garde à domicile, entraide locale.
-- [Nos engagements](/tarifs): notre modèle économique, nos engagements de transparence et l'état actuel de l'accès.
+- [Tarifs](/tarifs): pourquoi Guardiens est gratuit aujourd'hui, ce que coûte la plateforme, et la contribution qui sera demandée plus tard aux membres satisfaits.
 - [À propos](/a-propos): Notre mission, nos valeurs, l'équipe derrière Guardiens.
 - [Observatoire](/observatoire-garde-animaux): Chiffres-clés sur la garde d'animaux à domicile en France, datapoints sourcés.
 - [FAQ](/faq): Réponses aux questions fréquentes, fonctionnement, sécurité, entraide.
@@ -22,6 +22,7 @@ Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vou
 - [Entraide à Grenoble](/petites-missions/grenoble): coups de main près de chez soi autour de Grenoble, besoins déposés et personnes qui disent « Je peux ».
 - [Entraide à Bordeaux](/petites-missions/bordeaux): coups de main près de chez soi autour de Bordeaux, besoins déposés et personnes qui disent « Je peux ».
 <!-- entraide-villes:end -->
+- [Sorties](/sorties): Sorties et parties entre membres près de chez soi (belote, balade, vélo, randonnée, atelier), avec des places comptées. Chaque membre peut en proposer une.
 - [Projets participatifs](/projets): Projets à réaliser ensemble (plantation, construction, remise en état), participation selon ses envies et ses disponibilités.
 - [Gardien d'urgence](/gardien-urgence): Le réseau de gardiens d'urgence, ouvert dès que chaque secteur compte assez de gardiens expérimentés.
 - [Devenir home-sitter](/devenir-home-sitter): Guide pour devenir gardien à domicile sur Guardiens.
@@ -30,7 +31,6 @@ Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vou
 - [House-sitting par ville](/house-sitting): Pages ville dédiées au house-sitting et à la garde d'animaux, de maison et de jardin, 169 villes couvertes.
 - [House-sitting par département](/departement): Pages département, chacune recense villes couvertes, gardiens inscrits et guides locaux, 70 départements couverts.
 - [Annonces de garde](/annonces): Toutes les annonces de garde à domicile, partout en France.
-- [Pros animaliers](/pros): Annuaire de vétérinaires, éducateurs, toiletteurs, ostéopathes, transporteurs vérifiés.
 - [Associations et refuges](/associations): Refuges, sanctuaires, réseaux de familles d'accueil et centres de soins faune sauvage, présentés par l'équipe Guardiens, avec leurs besoins et leur page de dons.
 - [Races d'animaux](/races): Guides de garde par race (chiens, chats, NAC, équidés), conseils gardien.
 - [Contact](/contact): Nous écrire.
@@ -56,12 +56,12 @@ Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vou
 - Plateforme : Guardiens, garde d'animaux à domicile, de maison et de jardin en France.
 - Éditeur : Jérémie Martinot, SIRET 894 864 040 00015.
 - Modèle : Guardiens est gratuit pour tous les membres, aucune commission prélevée sur les gardes.
-- Préavis : chaque membre sera informé par email 30 jours à l'avance si le modèle change.
+- Évolution : Guardiens est gratuit aujourd'hui, ses coûts sont pris en charge par ses fondateurs. Une contribution sera demandée plus tard aux membres satisfaits, annoncée à l'avance par email.
 - Entraide entre particuliers : coups de main près de chez soi (jardinage, potager, courses, trajets, jeux de société), réponse en un geste avec « Je peux ». En retour : un merci, un café, ou un coup de main quand ce sera votre tour. Vous voyez ça ensemble.
 - Vérification d'identité : ouverte à tous les membres, propriétaires comme gardiens. La pièce d'identité envoyée est analysée automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Cette vérification n'est pas un préalable au dépôt d'une annonce ou d'une candidature, et elle ne concerne pas tous les profils.
 - Système de confiance : avis croisés après chaque garde, Trust Score 0-100, 32 badges de reconnaissance.
 - Pas de commission sur les gardes, pas de prélèvement entre membres.
-- Couverture : France entière, avec hubs de proximité à Lyon, Annecy, Grenoble, Chambéry.
+- Couverture : France entière.
 - Gardes réalisées depuis 2021 : 44 maisons gardées, 249 animaux accompagnés (au 13/11/2026).
 - Conformité RGPD : un bandeau de consentement propose d'accepter ou de refuser la mesure d'audience (Google Analytics 4), chargée seulement après un accord explicite donné dans ce bandeau ; choix conservé 6 mois, puis redemandé.
 
