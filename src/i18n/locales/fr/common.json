@@ -82,11 +82,8 @@
       "cta_member_owner": "Publier une annonce",
       "cta_member_sitter": "Proposer un coup de main",
       "cta_member_search": "Trouver une garde",
-      "free_line": "Guardiens est gratuit.",
-      "cta_outings": "Voir les sorties",
-      "cta_keep": "Garder une maison",
-      "also_label": "Vous pouvez aussi :",
-      "nearby_title": "Et près de chez vous ?"
+      "nearby_title": "Qui est près de chez vous ?",
+      "cta_signup": "S'inscrire gratuitement"
     },
     "toc": {
       "aria": "Sommaire de la page",

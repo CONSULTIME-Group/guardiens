@@ -46,7 +46,7 @@ export function HomeProximitySearch({ onLocated, tone = "dark" }: { onLocated: (
   };
 
   return (
-    <div className={tone === "light" ? "mt-1 w-full max-w-md" : "mt-4 max-w-md"}>
+    <div className={tone === "light" ? "mt-1 w-full max-w-md" : "mt-2 max-w-md"}>
       <form onSubmit={submit} className="flex gap-2" aria-label="Disponibilités autour de votre ville">
         <Input
           value={city}
@@ -54,14 +54,14 @@ export function HomeProximitySearch({ onLocated, tone = "dark" }: { onLocated: (
           placeholder="Votre ville"
           aria-label="Votre ville"
           maxLength={100}
-          className={tone === "light" ? "h-12 border-border bg-card text-base text-foreground placeholder:text-muted-foreground" : "h-11 border-primary-foreground/45 bg-background/90 text-foreground placeholder:text-muted-foreground"}
+          className={tone === "light" ? "h-12 border-border bg-card text-base text-foreground placeholder:text-muted-foreground" : "h-12 border-primary-foreground/45 bg-background/90 text-base text-foreground placeholder:text-muted-foreground"}
         />
         <Button type="submit" variant="secondary" size="sm" className="h-12 bg-secondary px-5 text-secondary-foreground disabled:bg-secondary disabled:text-secondary-foreground disabled:opacity-60" disabled={loading || city.trim().length < 2}>
           {loading ? "Recherche" : "Voir"}
         </Button>
       </form>
       {counts && (
-        <p className={`mt-2 text-sm ${textTone}`} aria-live="polite">
+        <p className={`mt-3 text-base font-medium ${textTone}`} aria-live="polite">
           {counts.gardiens_count} gardiens et {counts.helpers_count} personnes prêtes à aider à moins de 30 km
           {(counts.gardiens_count < 1 || counts.helpers_count < 1) && <span className="block">Soyez parmi les premiers de votre secteur.</span>}
         </p>

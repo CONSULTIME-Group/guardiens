@@ -202,51 +202,28 @@ const Landing = () => {
               <span className="block">{t("landing.hero.title_main")}</span>
             </h1>
 
-            <p className="hidden md:block font-body text-base text-white/90 leading-relaxed mb-6 animate-hero-fade-up animation-delay-400">
-              {t("landing.hero.lede")}
-            </p>
-
-            <p className="font-heading italic text-lg md:text-2xl text-white/95 leading-snug mb-4 md:mb-6 animate-hero-fade-up animation-delay-700">
+            <p className="font-heading italic text-lg md:text-2xl text-white/95 leading-snug mb-6 md:mb-8 animate-hero-fade-up animation-delay-700">
               {t("landing.hero.motto")}
             </p>
 
-            {/* Lot HOME1 : une seule action pleine, la gratuité en clair, puis
-                trois liens calmes. Le champ ville vit sous les chiffres. */}
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-1 animate-hero-fade-up animation-delay-900">
+            {/* Lot HOME1 : un hero, un geste. Un seul bouton (le choix du rôle
+                se fait à l'inscription), puis le compteur de proximité. */}
+            <div className="animate-hero-fade-up animation-delay-900">
               <Button
                 onClick={() => {
-                  void trackEvent("cta_proprio_clicked", { metadata: { location: "hero" } });
-                  navigate(isMember ? "/sits/create" : `/inscription?redirect=${encodeURIComponent("/sits/create")}`);
+                  void trackEvent(isMember ? "cta_proprio_clicked" : "cta_signup_clicked", { metadata: { location: "hero" } });
+                  navigate(isMember ? "/sits/create" : "/inscription");
                 }}
                 style={{ boxShadow: "0 6px 14px rgba(44,109,80,.24)" }}
                 className="h-14 w-full sm:w-auto font-body text-lg font-semibold tracking-wide rounded-full px-8 sm:px-12 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 ring-2 ring-primary-foreground/10"
               >
-                {t("landing.hero.cta_owner")}
+                {isMember ? t("landing.hero.cta_owner") : t("landing.hero.cta_signup")}
               </Button>
-              <p className="w-full sm:w-auto text-center sm:text-left font-body text-base text-white">
-                {t("landing.hero.free_line")}
-              </p>
             </div>
-            <nav aria-label={t("landing.hero.also_label")} className="mt-5 md:mt-8 animate-hero-fade-up animation-delay-900">
-              <p className="font-body text-sm text-white/80">{t("landing.hero.also_label")}</p>
-              <ul className="mt-1 flex flex-col md:flex-row md:gap-x-8">
-                {[
-                  { to: isMember ? "/petites-missions/creer" : `/inscription?redirect=${encodeURIComponent("/petites-missions/creer")}`, label: t("landing.hero.cta_sitter"), event: "cta_aid_clicked" as const },
-                  { to: "/sorties", label: t("landing.hero.cta_outings"), event: "home_outings_link_clicked" as const },
-                  ...(!isAuthenticated ? [{ to: "/inscription?role=sitter", label: t("landing.hero.cta_keep"), event: "home_sitter_link_clicked" as const }] : []),
-                ].map((item) => (
-                  <li key={item.to}>
-                    <Link
-                      to={item.to}
-                      onClick={() => { void trackEvent(item.event, { metadata: { location: "hero" } }); }}
-                      className="inline-flex min-h-[44px] items-center font-body text-base font-medium text-white underline underline-offset-4 decoration-white/60 hover:decoration-white"
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+            <div className="mt-7 md:mt-10 animate-hero-fade-up animation-delay-900">
+              <p className="font-body text-base font-medium text-white">{t("landing.hero.nearby_title")}</p>
+              <HomeProximitySearch onLocated={setHomeOrigin} />
+            </div>
             {isPressHighlighted && (
               <a
                 href={PRESS_ARTICLE_URL}
@@ -297,10 +274,9 @@ const Landing = () => {
                   </div>
                 ))}
               </dl>
-              <div className="mt-5 md:mt-6 flex flex-col items-center gap-1">
-                <p className="font-heading text-lg md:text-xl font-semibold text-foreground">{t("landing.hero.nearby_title")}</p>
-                <HomeProximitySearch onLocated={setHomeOrigin} tone="light" />
-              </div>
+              <p className="mx-auto mt-5 md:mt-6 max-w-2xl text-center font-body text-sm md:text-base leading-relaxed text-muted-foreground">
+                {t("landing.hero.lede")}
+              </p>
             </div>
          </section>
        )}
