@@ -5,12 +5,19 @@ import { geocodeCity } from "@/lib/geocode";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 
+/** Phrase du résultat : un seul chiffre, accordé, et un secteur vide dit avec envie. */
+export function proximityLine(members: number): string {
+  if (members < 1) return "Soyez parmi les premiers membres de votre secteur.";
+  if (members === 1) return "1 membre inscrit à moins de 30 km de chez vous.";
+  return `${members} membres inscrits à moins de 30 km de chez vous.`;
+}
+
 export interface HomeOrigin { lat: number; lng: number; city?: string | null }
 
-interface Counts { gardiens_count: number; helpers_count: number }
+/** Lot HOME1 : un seul chiffre, les membres inscrits dans le rayon. */
+interface Counts { members: number }
 
 export function HomeProximitySearch({ onLocated, tone = "dark" }: { onLocated: (origin: HomeOrigin) => void; tone?: "dark" | "light" }) {
-  const textTone = tone === "light" ? "text-foreground" : "text-primary-foreground";
   const [city, setCity] = useState("");
   const [counts, setCounts] = useState<Counts | null>(null);
   const [loading, setLoading] = useState(false);
@@ -31,15 +38,20 @@ export function HomeProximitySearch({ onLocated, tone = "dark" }: { onLocated: (
       return;
     }
     const origin = { lat: Number(geo.lat.toFixed(2)), lng: Number(geo.lng.toFixed(2)), city: value };
-    const { data, error } = await supabase.rpc("home_proximity_counts", {
-      p_lat: origin.lat,
-      p_lng: origin.lng,
-    });
-    const row = Array.isArray(data) ? data[0] : data;
-    if (error || !row) {
+    // Le total des membres vient de home_members_nearby. Tant que cette
+    // fonction manque en base, le plus grand des deux anciens compteurs sert
+    // de minimum.
+    const total = await (supabase.rpc as unknown as (fn: string, args: Record<string, number>) => Promise<{ data: unknown }>)("home_members_nearby", { p_lat: origin.lat, p_lng: origin.lng });
+    let members: number | null = typeof total.data === "number" ? total.data : null;
+    if (members === null) {
+      const { data } = await supabase.rpc("home_proximity_counts", { p_lat: origin.lat, p_lng: origin.lng });
+      const row = Array.isArray(data) ? data[0] : data;
+      if (row) members = Math.max(Number(row.gardiens_count), Number(row.helpers_count));
+    }
+    if (members === null) {
       setMessage("Les disponibilités de votre secteur seront bientôt visibles.");
     } else {
-      setCounts({ gardiens_count: Number(row.gardiens_count), helpers_count: Number(row.helpers_count) });
+      setCounts({ members });
       onLocated(origin);
     }
     setLoading(false);
@@ -61,11 +73,11 @@ export function HomeProximitySearch({ onLocated, tone = "dark" }: { onLocated: (
         </Button>
       </form>
       {counts && (
-        <p className={`mt-3 text-base font-medium ${textTone}`} aria-live="polite">
-          {Math.max(counts.gardiens_count, counts.helpers_count)} membres inscrits à moins de 30 km de chez vous.
+        <p className={tone === "light" ? "mt-3 text-base font-medium text-foreground" : "mt-3 w-fit rounded-xl bg-black/55 px-3 py-2 text-base font-medium text-primary-foreground"} aria-live="polite">
+          {proximityLine(counts.members)}
         </p>
       )}
-      {message && <p className={`mt-2 text-sm ${textTone}`} aria-live="polite">{message}</p>}
+      {message && <p className={tone === "light" ? "mt-2 text-sm text-foreground" : "mt-2 w-fit rounded-xl bg-black/55 px-3 py-2 text-sm text-primary-foreground"} aria-live="polite">{message}</p>}
     </div>
   );
 }

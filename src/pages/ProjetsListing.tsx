@@ -1,3 +1,4 @@
+import EntraideSortiesTabs from "@/components/outings/EntraideSortiesTabs";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -194,9 +195,11 @@ const ProjetsListing = () => {
       />
 
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        <div className="mb-8">
+        <div className="mb-6">
           <PageBreadcrumb items={[{ label: "Projets participatifs" }]} />
         </div>
+        {/* Lot HOME1 : les projets sont une forme d'entraide, mêmes onglets. */}
+        <div className="mb-8 w-full max-w-2xl"><EntraideSortiesTabs active="projets" /></div>
 
         <header className="max-w-3xl mb-8">
           <p className="text-sm font-semibold text-primary mb-2">Chantiers et projets participatifs</p>

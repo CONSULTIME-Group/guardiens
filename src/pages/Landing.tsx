@@ -18,7 +18,7 @@ import { ServiceAfterServiceSection } from "@/components/landing/ServiceAfterSer
 import { HomeProximitySearch, type HomeOrigin } from "@/components/landing/HomeProximitySearch";
 import familyGardes from "@/assets/aquarelles/univers-gardes-320.webp";
 import familyEntraide from "@/assets/aquarelles/univers-entraide-320.webp";
-import familySorties from "@/assets/aquarelles/univers-ensemble-320.webp";
+import familySorties from "@/assets/missions/spot-jeux-480.webp";
 
 /** Lot HOME1 : les trois familles présentées sous les chiffres. */
 const HOME_FAMILIES = [
@@ -174,32 +174,25 @@ const Landing = () => {
         {/* Lot HOME1 : une photo cadrée pour chaque format. Verticale sur
             téléphone (ciel pour le texte, mas et chien dessous), paysage au-delà. */}
         <picture>
-          <source
-            media="(max-width: 767px)"
-            type="image/webp"
-            srcSet="/hero-portrait-480.webp 480w, /hero-portrait-752.webp 752w"
-            sizes="100vw"
-          />
-          <source
-            type="image/webp"
-            srcSet="/hero-paysage-640.webp 640w, /hero-paysage-960.webp 960w, /hero-paysage-1344.webp 1344w"
-            sizes="100vw"
-          />
+          <source media="(max-width: 767px)" type="image/avif" srcSet="/hero-portrait-480.avif 480w, /hero-portrait-750.avif 750w, /hero-portrait-1080.avif 1080w" sizes="100vw" />
+          <source media="(max-width: 767px)" type="image/webp" srcSet="/hero-portrait-480.webp 480w, /hero-portrait-750.webp 750w, /hero-portrait-1080.webp 1080w" sizes="100vw" />
+          <source type="image/avif" srcSet="/hero-paysage-640.avif 640w, /hero-paysage-960.avif 960w, /hero-paysage-1280.avif 1280w, /hero-paysage-1920.avif 1920w" sizes="100vw" />
+          <source type="image/webp" srcSet="/hero-paysage-640.webp 640w, /hero-paysage-960.webp 960w, /hero-paysage-1280.webp 1280w, /hero-paysage-1920.webp 1920w" sizes="100vw" />
           <img
-            src="/hero-paysage-1344.webp"
-            alt="Au coucher du soleil, un golden retriever et un chat veillent devant un mas en pierre et sa piscine."
-            className="absolute inset-0 w-full h-full object-cover object-bottom md:object-center"
+            src="/hero-paysage-1280.webp"
+            alt="Au coucher du soleil, des amis partagent un repas en terrasse devant un mas en pierre, un golden retriever et un chat au premier plan."
+            className="absolute inset-0 w-full h-full object-cover object-top md:object-center"
             loading="eager"
             {...({ fetchpriority: "high" } as any)}
-            width={1344}
-            height={752}
+            width={1920}
+            height={1075}
             sizes="100vw"
             decoding="async"
           />
         </picture>
         {/* Voile : sombre sous le texte, clair sur le mas et le chien. Du haut
             vers le bas sur téléphone, de gauche à droite au-delà. */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/55 via-55% to-black/0 md:hidden" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 via-45% to-black/0 to-65% md:hidden" />
         <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-black/90 via-black/65 via-40% to-black/5" />
 
         <div className="relative z-10 lp-wide pb-8 pt-7 md:py-16">
@@ -217,14 +210,16 @@ const Landing = () => {
                 se fait à l'inscription), puis le compteur de proximité. */}
             <div className="animate-hero-fade-up animation-delay-900">
               <Button
-                onClick={() => {
-                  void trackEvent(isMember ? "cta_proprio_clicked" : "cta_signup_clicked", { metadata: { location: "hero" } });
-                  navigate(isMember ? "/sits/create" : "/inscription");
-                }}
+                asChild
                 style={{ boxShadow: "0 6px 14px rgba(44,109,80,.24)" }}
                 className="h-14 w-full sm:w-auto font-body text-lg font-semibold tracking-wide rounded-full px-8 sm:px-12 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 ring-2 ring-primary-foreground/10"
               >
-                {isMember ? t("landing.hero.cta_owner") : t("landing.hero.cta_signup")}
+                <Link
+                  to={isMember ? "/sits/create" : "/inscription"}
+                  onClick={() => { void trackEvent(isMember ? "cta_proprio_clicked" : "cta_signup_clicked", { metadata: { location: "hero" } }); }}
+                >
+                  {isMember ? t("landing.hero.cta_owner") : t("landing.hero.cta_signup")}
+                </Link>
               </Button>
             </div>
             <div className="mt-7 md:mt-10 animate-hero-fade-up animation-delay-900">
@@ -286,6 +281,9 @@ const Landing = () => {
               <h2 className="mx-auto mt-8 md:mt-10 max-w-3xl text-center font-heading text-xl md:text-2xl font-semibold text-foreground text-balance">
                 {t("landing.families.title")}
               </h2>
+              <p className="mx-auto mt-3 max-w-2xl text-center font-body text-sm md:text-base leading-relaxed text-muted-foreground">
+                {t("landing.hero.lede")}
+              </p>
               <ul className="mt-5 md:mt-6 grid gap-4 md:grid-cols-3 md:gap-6">
                 {HOME_FAMILIES.map((family) => (
                   <li key={family.key}>

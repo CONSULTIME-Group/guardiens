@@ -8,8 +8,10 @@ const landingSource = fs.readFileSync(
 );
 
 describe("voile du hero de la page d'accueil", () => {
-  it("utilise un dégradé Tailwind valide et interdit l'ancienne classe couleur", () => {
-    expect(landingSource).toContain("bg-gradient-to-r from-black/95");
+  it("garde un voile sombre sous le texte, sur téléphone comme sur ordinateur (lot HOME1)", () => {
+    // Téléphone : du haut vers le bas. Ordinateur : de gauche à droite.
+    expect(landingSource).toContain("bg-gradient-to-b from-black/80");
+    expect(landingSource).toContain("bg-gradient-to-r from-black/90");
     expect(landingSource).not.toContain("bg-hero-overlay");
   });
 });

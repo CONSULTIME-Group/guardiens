@@ -243,7 +243,8 @@ export type EventType =
   | "pricing_faq_expanded"             // Ouverture d'une question de la FAQ tarifs (question_id)
   | "pricing_cta_clicked"
   | "cta_signup_clicked"
-  | "home_family_clicked"              // Lot TAR1 : clic sur un bouton de la page tarifs (cta)
+  | "home_family_clicked"
+  | "cta_outing_clicked"              // Lot TAR1 : clic sur un bouton de la page tarifs (cta)
   // Admin refresh IA articles post-pivot -------------------------------------
   | "admin_article_refresh_previewed"       // Aperçu du refresh IA (article_id, slug)
   | "admin_article_refresh_applied"         // Refresh IA appliqué (article_id, slug, changes_count)
