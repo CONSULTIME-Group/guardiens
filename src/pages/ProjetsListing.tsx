@@ -17,7 +17,7 @@ import { isIndexableProjetMission } from "../../supabase/functions/_shared/entra
 import { faqPageJsonLd } from "@/lib/associationFaq";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { Button } from "@/components/ui/button";
-import SearchListingCard from "@/components/search/listing/SearchListingCard";
+import ProjetRow from "@/components/outings/ProjetRow";
 import ProximityFilter, { type RadiusChoice } from "@/components/missions/ProximityFilter";
 import { useMissionDistance, type RadiusKm } from "@/hooks/useMissionDistance";
 import {
@@ -306,18 +306,8 @@ const ProjetsListing = () => {
             </div>
           </section>
         ) : visibleProjets.length > 0 ? (
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-            {visibleProjets.map((p, i) => (
-              <SearchListingCard
-                key={p.id}
-                item={p}
-                listIndex={i}
-                tab="missions"
-                hasAccess
-                testDemoMode={false}
-                formatDate={(d) => (d ? new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : "")}
-              />
-            ))}
+          <section className="grid gap-3 md:grid-cols-2" data-testid="projets-list">
+            {visibleProjets.map((p) => <ProjetRow key={p.id} projet={p} />)}
           </section>
         ) : (
           <section className="rounded-[2rem] border border-border bg-muted/50 p-8 md:p-12 max-w-3xl">
