@@ -220,6 +220,7 @@ const EntraideHub = lazy(() => import("./pages/EntraideHub"), "EntraideHub");
 // Lot SORT1 : sorties à places comptées (rubrique « Entraide & sorties »).
 const Sorties = lazy(() => import("./pages/Sorties"), "Sorties");
 const SortieCreate = lazy(() => import("./pages/SortieCreate"), "SortieCreate");
+const Publier = lazy(() => import("./pages/Publier"), "Publier");
 const SortieDetail = lazy(() => import("./pages/SortieDetail"), "SortieDetail");
 const SortiesAlertes = lazy(() => import("./pages/SortiesAlertes"), "SortiesAlertes");
 const QuestionDetail = lazy(() => import("./pages/QuestionDetail"), "QuestionDetail");
@@ -573,6 +574,7 @@ const AppRoutes = () => {
       <Route path="/questions" element={<Navigate to="/petites-missions" replace />} />
       <Route path="/sorties" element={<PublicShellRoute><Sorties /></PublicShellRoute>} />
       <Route path="/sorties/proposer" element={<ProtectedRoute><SortieCreate /></ProtectedRoute>} />
+      <Route path="/publier" element={<ProtectedRoute><Publier /></ProtectedRoute>} />
       <Route path="/sorties/alertes" element={<PublicShellRoute><SortiesAlertes /></PublicShellRoute>} />
       <Route path="/sorties/:slug" element={<PublicShellRoute><SortieDetail /></PublicShellRoute>} />
       <Route path="/questions/nouvelle" element={<ProtectedRoute><AppLayout><QuestionCreate /></AppLayout></ProtectedRoute>} />

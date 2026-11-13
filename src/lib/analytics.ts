@@ -13,6 +13,8 @@ export type EventType =
   // Lot SORT1 : sorties à places comptées.
   | "outings_list_viewed"
   | "outing_propose_clicked"
+  | "publish_chooser_viewed"
+  | "publish_chooser_clicked"
   | "outing_form_opened"
   | "outing_published"
   | "outing_viewed"

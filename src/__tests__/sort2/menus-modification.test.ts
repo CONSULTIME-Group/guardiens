@@ -38,7 +38,7 @@ describe("bouton central", () => {
     expect(bottomNavFab("/sorties", true)).toEqual({ to: "/sorties/proposer", label: "Proposer", ariaLabel: "Proposer une sortie", icon: "plus" });
     expect(bottomNavFab("/sorties", false).to).toBe("/sorties/proposer");
     expect(bottomNavFab("/petites-missions", true).to).toBe("/petites-missions/creer");
-    expect(bottomNavFab("/dashboard", true).to).toBe("/sits/create");
+    expect(bottomNavFab("/dashboard", true).to).toBe("/publier"); // lot SORT9
   });
 });
 

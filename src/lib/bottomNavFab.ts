@@ -14,6 +14,7 @@ const NO_FAB_EXACT = new Set([
   "/sits/create",
   "/sits/new",
   "/petites-missions/creer",
+  "/publier",
   "/questions/nouvelle",
   "/profile",
   "/settings",
@@ -79,7 +80,8 @@ export function bottomNavFab(path: string, isOwnerView: boolean): BottomNavFab {
   if (path.startsWith("/petites-missions")) {
     return { to: "/petites-missions/creer", label: "Publier", ariaLabel: "Publier", icon: "plus" };
   }
-  if (isOwnerView) return { to: "/sits/create", label: "Publier", ariaLabel: "Publier", icon: "plus" };
+  // Lot SORT9 : côté propriétaire, « Publier » ouvre le choix des trois types.
+  if (isOwnerView) return { to: "/publier", label: "Publier", ariaLabel: "Publier", icon: "plus" };
   return { to: SITTER_AVAILABILITY_PATH, label: "Dispo", ariaLabel: "Mes disponibilités", icon: "availability" };
 }
 
