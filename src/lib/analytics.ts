@@ -5,7 +5,8 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { getDeviceContext } from "@/lib/deviceContext";
-import { getSafeLocalStorage } from "@/lib/storageFallback";
+import { getSafeLocalStorage, getSafeSessionStorage } from "@/lib/storageFallback";
+import { getStoredConsent } from "@/lib/cookieConsent";
 import { isLabOrBotTraffic } from "@/lib/labTraffic";
 
 export type EventType =
@@ -245,6 +246,7 @@ export type EventType =
   | "cta_signup_clicked"
   | "home_family_clicked"
   | "home_manifesto_clicked"
+  | "home_click"
   | "cta_outing_clicked"              // Lot TAR1 : clic sur un bouton de la page tarifs (cta)
   // Admin refresh IA articles post-pivot -------------------------------------
   | "admin_article_refresh_previewed"       // Aperçu du refresh IA (article_id, slug)
@@ -497,10 +499,60 @@ interface TrackOptions {
  * La chaîne de user agent brute n'est jamais stockée, seulement les champs
  * catégoriels qui en sont déduits.
  */
+let memoryVisitId: string | null = null;
+
+/**
+ * Lot HOME3 (13/11/2026) : identifiant de visite. Aléatoire, sans lien avec la
+ * personne ni l'appareil. Chaque événement le porte : on peut ainsi relier un
+ * clic de la home à l'inscription ou à la publication de la même visite.
+ * Même règle que la source d'inscription (lot SRC1) : il s'écrit dans le
+ * stockage de session de l'onglet seulement après l'accord cookies ; sans
+ * accord, il vit en mémoire et s'éteint au rechargement de la page.
+ */
+export function getVisitId(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const consented = getStoredConsent() === "granted";
+    const store = consented ? getSafeSessionStorage() : null;
+    if (!memoryVisitId) {
+      const known = store?.getItem(VISIT_KEY);
+      if (known && /^[a-z0-9]{12,32}$/.test(known)) memoryVisitId = known;
+    }
+    if (!memoryVisitId) {
+      const bytes = new Uint8Array(12);
+      crypto.getRandomValues(bytes);
+      memoryVisitId = Array.from(bytes, (b) => (b % 36).toString(36)).join("") + Date.now().toString(36).slice(-4);
+    }
+    if (store && store.getItem(VISIT_KEY) !== memoryVisitId) store.setItem(VISIT_KEY, memoryVisitId);
+    return memoryVisitId;
+  } catch {
+    return memoryVisitId;
+  }
+}
+const VISIT_KEY = "g_visit";
+
+/** Remise à zéro pour les tests. */
+export function __resetVisitIdForTests(): void { memoryVisitId = null; }
+
 function withDeviceContext(metadata?: Record<string, any>): Record<string, any> | null {
   const device = getDeviceContext();
-  if (!device) return metadata ?? null;
-  return { ...(metadata ?? {}), ...device };
+  const visit = getVisitId();
+  if (!device && !visit) return metadata ?? null;
+  return { ...(metadata ?? {}), ...(device ?? {}), ...(visit ? { visit_id: visit } : {}) };
+}
+
+/**
+ * Lot HOME3 : description d'un clic sur la home, pour les liens et boutons
+ * restés sans événement. Section (ancre de la section parente), destination
+ * et libellé court. Renvoie null hors lien et hors bouton.
+ */
+export function describeHomeClick(target: Element | null): { section: string; href: string | null; label: string } | null {
+  const el = target?.closest?.("a, button");
+  if (!el) return null;
+  const section = el.closest("section[id]")?.id ?? "hors-section";
+  const href = el.getAttribute("href");
+  const label = (el.getAttribute("aria-label") || el.textContent || "").replace(/\s+/g, " ").trim().slice(0, 60);
+  return { section, href: href ? href.split("?")[0].slice(0, 120) : null, label };
 }
 
 

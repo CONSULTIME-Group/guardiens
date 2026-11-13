@@ -491,6 +491,12 @@ function hasPainted(): boolean {
   } catch { return false; }
 }
 
+/** Le CLS reste ouvert tant que la page d'arrivée est à l'écran ; une fois clos, il le reste. Pure, testée. */
+export function clsStillOpen(startPath: string, currentPath: string, alreadyClosed: boolean): boolean {
+  if (alreadyClosed) return false;
+  return exactVitalPath(startPath) === exactVitalPath(currentPath);
+}
+
 let started = false;
 
 /** Démarre la mesure une fois par document. `onPerfEntry` : rappel de test ou de débogage. */
@@ -554,12 +560,21 @@ const reportWebVitals = (onPerfEntry?: (metric: MetricWithAttribution) => void) 
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(false); });
   window.addEventListener("pagehide", () => flush(true));
 
+  // Lot HOME3 : le CLS se clôt au premier changement de route. La mesure est
+  // rangée sous la page d'arrivée ; sans clôture, les décalages des pages
+  // visitées ensuite s'ajoutaient à son compte.
+  const startPath = window.location.pathname;
+  let clsClosed = false;
   const handler = (m: MetricWithAttribution) => {
+    if (m.name === "CLS") {
+      clsClosed = clsStillOpen(startPath, window.location.pathname, clsClosed) ? false : true;
+      if (clsClosed) return;
+    }
     collector.record(m.name as VitalName, m.value, m.rating, vitalAttribution(m));
     onPerfEntry?.(m);
   };
   try {
-    onCLS(handler);
+    onCLS(handler, { reportAllChanges: true });
     onINP(handler);
     onFCP(handler);
     onLCP(handler);
