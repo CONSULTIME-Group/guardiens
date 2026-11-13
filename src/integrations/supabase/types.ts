@@ -12913,6 +12913,39 @@ export type Database = {
         }
         Relationships: []
       }
+      home_featured_sit: {
+        Row: {
+          featured_at: string
+          featured_by: string | null
+          sit_id: string
+        }
+        Insert: {
+          featured_at?: string
+          featured_by?: string | null
+          sit_id: string
+        }
+        Update: {
+          featured_at?: string
+          featured_by?: string | null
+          sit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_featured_sit_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: true
+            referencedRelation: "public_closed_sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "home_featured_sit_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: true
+            referencedRelation: "sits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       house_guides: {
         Row: {
           access_codes: string | null
@@ -20301,6 +20334,10 @@ export type Database = {
       admin_send_message_to_user: {
         Args: { p_content: string; p_target_user_id: string }
         Returns: string
+      }
+      admin_set_home_featured: {
+        Args: { p_on: boolean; p_sit: string }
+        Returns: boolean
       }
       admin_signal_is_expected_noise: {
         Args: { p_metadata: Json; p_type: string }
