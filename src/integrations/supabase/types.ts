@@ -21360,6 +21360,7 @@ export type Database = {
         Args: { p_action: string; p_application_id: string }
         Returns: string
       }
+      lift_my_unsubscribe: { Args: never; Returns: boolean }
       link_referral: { Args: { p_code: string }; Returns: Json }
       list_identity_documents_to_purge: {
         Args: { _retention_days?: number }
@@ -21544,6 +21545,7 @@ export type Database = {
         Args: { _application_id: string }
         Returns: string
       }
+      notify_sitters_for_sit: { Args: { p_sit_id: string }; Returns: number }
       open_mission_response_conversation: {
         Args: { p_response_id: string }
         Returns: string
