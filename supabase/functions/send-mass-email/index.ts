@@ -411,6 +411,30 @@ async function ensureUnsubscribeTokens(
  * Applique tous les filtres et retourne la liste de profils correspondants {id, email}.
  * Logique côté serveur — utilise le service-role client.
  */
+
+/**
+ * Lot MAIL1 (14/11/2026) : lecture complète d'une table d'exclusion, par pages
+ * de 1 000 lignes triées. Une lecture sans pagination s'arrête à 1 000 lignes :
+ * au-delà, un filtre « aucune candidature jamais » laisserait passer des
+ * membres qui ont candidaté. Une erreur arrête l'envoi plutôt que d'élargir
+ * l'audience.
+ */
+export async function readAll<T>(
+  page: (from: number, to: number) => PromiseLike<{ data: unknown[] | null; error: { message: string } | null }>,
+  label: string,
+  size = 1000,
+): Promise<T[]> {
+  const rows: T[] = [];
+  for (let from = 0; ; from += size) {
+    const { data, error } = await page(from, from + size - 1);
+    if (error) throw new Error(`${label} read failed: ${error.message}`);
+    const chunk = (data ?? []) as T[];
+    rows.push(...chunk);
+    if (chunk.length < size) break;
+  }
+  return rows;
+}
+
 async function fetchTargetedProfiles(
   // deno-lint-ignore no-explicit-any
   serviceClient: any,
@@ -543,11 +567,13 @@ async function fetchTargetedProfiles(
   }
 
   if (filters.abonnes_actifs) {
-    const { data: subs } = await serviceClient
+    const subs = await readAll<{ user_id: string }>((from, to) => serviceClient
       .from("subscriptions")
       .select("user_id")
-      .in("status", ["active", "trial"]);
-    const activeIds = new Set((subs || []).map((s: any) => s.user_id));
+      .in("status", ["active", "trial"])
+      .order("user_id", { ascending: true })
+      .range(from, to), "subscriptions");
+    const activeIds = new Set(subs.map((s) => s.user_id));
     result = result.filter((p) => activeIds.has(p.id));
   }
 
@@ -555,10 +581,12 @@ async function fetchTargetedProfiles(
 
   // Aucune candidature jamais envoyée
   if (filters.no_application_ever) {
-    const { data: appSitters } = await serviceClient
+    const appSitters = await readAll<{ sitter_id: string }>((from, to) => serviceClient
       .from("applications")
-      .select("sitter_id");
-    const withApp = new Set((appSitters || []).map((a: any) => a.sitter_id));
+      .select("sitter_id")
+      .order("id", { ascending: true })
+      .range(from, to), "applications");
+    const withApp = new Set(appSitters.map((a) => a.sitter_id));
     result = result.filter((p) => !withApp.has(p.id));
   }
 
@@ -572,11 +600,13 @@ async function fetchTargetedProfiles(
 
   // Aucune conversation jamais (ni owner ni sitter)
   if (filters.no_conversation_ever) {
-    const { data: convs } = await serviceClient
+    const convs = await readAll<{ owner_id: string | null; sitter_id: string | null }>((from, to) => serviceClient
       .from("conversations")
-      .select("owner_id, sitter_id");
+      .select("owner_id, sitter_id")
+      .order("id", { ascending: true })
+      .range(from, to), "conversations");
     const withConv = new Set<string>();
-    for (const c of (convs || []) as any[]) {
+    for (const c of convs) {
       if (c.owner_id) withConv.add(c.owner_id);
       if (c.sitter_id) withConv.add(c.sitter_id);
     }
@@ -615,20 +645,24 @@ async function fetchTargetedProfiles(
 
   // Aucune petite mission (coup de main) publiée
   if (filters.no_mission_ever) {
-    const { data: missionAuthors } = await serviceClient
+    const missionAuthors = await readAll<{ user_id: string }>((from, to) => serviceClient
       .from("small_missions")
-      .select("user_id");
-    const withMission = new Set((missionAuthors || []).map((m: any) => m.user_id));
+      .select("user_id")
+      .order("id", { ascending: true })
+      .range(from, to), "small_missions");
+    const withMission = new Set(missionAuthors.map((m) => m.user_id));
     result = result.filter((p) => !withMission.has(p.id));
   }
 
   // Respect opt-out catégorie "product" (conseils / accompagnement)
   if (filters.respect_product_optout) {
-    const { data: optOuts } = await serviceClient
+    const optOuts = await readAll<{ user_id: string }>((from, to) => serviceClient
       .from("email_preferences")
       .select("user_id")
-      .eq("product_emails", false);
-    const optedOut = new Set((optOuts || []).map((p: any) => p.user_id));
+      .eq("product_emails", false)
+      .order("user_id", { ascending: true })
+      .range(from, to), "email_preferences");
+    const optedOut = new Set(optOuts.map((p) => p.user_id));
     result = result.filter((p) => !optedOut.has(p.id));
   }
 
