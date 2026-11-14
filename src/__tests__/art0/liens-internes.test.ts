@@ -62,3 +62,11 @@ describe("lot ART0, liens internes de l'éditeur d'articles", () => {
     expect(sql).toMatch(/REVOKE ALL ON FUNCTION public\.trigger_indexnow_push\(text, text\) FROM PUBLIC, anon, authenticated/);
   });
 });
+
+describe("lot ART0, adresse de la photo", () => {
+  it("l'éditeur accepte une adresse https pour la couverture", () => {
+    const src = readFileSync(resolve(__dirname, "../../pages/ArticleEditor.tsx"), "utf8");
+    expect(src).toContain('id="cover-image-url"');
+    expect(src).toContain("L'adresse de la photo doit commencer par https://");
+  });
+});

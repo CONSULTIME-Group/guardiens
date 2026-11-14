@@ -101,6 +101,10 @@ const ArticleEditor = () => {
       return;
     }
 
+    if (form.cover_image_url && !/^https:\/\//i.test(form.cover_image_url)) {
+      toast.error("L'adresse de la photo doit commencer par https://");
+      return;
+    }
     const linkIssue = form.internal_links.map(articleLinkProblem).find(Boolean);
     if (linkIssue) { toast.error("Liens vers d'autres pages : " + linkIssue); return; }
 
@@ -273,6 +277,16 @@ const ArticleEditor = () => {
             </Button>
           )}
           <input id="cover-upload" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+          <div className="mt-3">
+            <Label htmlFor="cover-image-url">Adresse de la photo</Label>
+            <Input
+              id="cover-image-url"
+              value={form.cover_image_url}
+              onChange={e => updateField("cover_image_url", e.target.value.trim())}
+              placeholder="https://… (ou ajoutez un fichier ci-dessus)"
+              inputMode="url"
+            />
+          </div>
           <div className="mt-3">
             <Label htmlFor="hero-image-alt">Description de la photo</Label>
             <Input
