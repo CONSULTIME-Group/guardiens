@@ -687,7 +687,7 @@
       ]
     },
     {
-      "migration": "0156_eml1_email_sortie_personne.sql",
+      "migration": "0158_eml1_email_sortie_personne.sql",
       "description": "L'email « X vient à votre sortie » porte la fiche de la personne (photo, prénom, ville, lien)",
       "checks": [
         {

@@ -13,7 +13,7 @@ import type { TemplateEntry } from './registry.ts'
 // migration 0147) : sujet, titre, corps, ligne de rendez-vous, lien.
 // Lot EML1 (14/11/2026) : quand un membre s'inscrit, l'email présente la
 // personne (photo, prénom, ville, membre depuis, lien vers sa fiche), données
-// posées par la migration 0156 dans `actor`.
+// posées par la migration 0158 dans `actor`.
 
 interface Actor {
   firstName?: string

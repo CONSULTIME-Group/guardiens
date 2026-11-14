@@ -398,7 +398,7 @@ passed.push('alerte (SORT8) : un membre absent depuis 45 jours est prévenu, un 
 
 // Lot EML1 : l'email d'inscription porte la fiche de la personne.
 await db.exec(`ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url text, ADD COLUMN IF NOT EXISTS city text`);
-const migrationEml1 = readFileSync(new URL('drizzle/migrations/0156_eml1_email_sortie_personne.sql', root), 'utf8');
+const migrationEml1 = readFileSync(new URL('drizzle/migrations/0158_eml1_email_sortie_personne.sql', root), 'utf8');
 await db.exec(migrationEml1);
 await db.exec(migrationEml1);
 await db.query(`UPDATE public.profiles SET city = 'Lyon', avatar_url = 'https://exemple.test/a.webp', identity_verified = true WHERE id = $1`, [ABSENT]);
