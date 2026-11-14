@@ -72,3 +72,29 @@ jobs:
 
       - name: Diagnostic des brouillons, préférences réservées aux admins
         run: node scripts/test-draft-reminder-admin-privacy.mjs
+
+  # Lot CI1 (14/11/2026) : le build de production, en parallèle des tests.
+  # Une PR verte aux tests peut casser `vite build` (greffons de découpage) :
+  # la publication Lovable reste alors sans effet, sans message d'erreur
+  # (incident du 13/11 au soir, PR 362 puis 363).
+  production-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - run: bun install --frozen-lockfile
+
+      - name: Build de production
+        run: npx vite build
+
+      - name: Garde du build
+        run: P2_BUILD_DIR=dist npm run test:guard:build
