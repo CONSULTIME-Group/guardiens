@@ -97,6 +97,11 @@ describe("en-tête : gouache entière, à côté du prénom sur ordinateur", () 
     expect(side).not.toContain("object-cover");
     expect(hero).toMatch(/lg:max-w-\[856px\]" data-hero-gouache-side/);
   });
+  it("lot FG1b : prénom et marque d'identité sur une ligne dans la colonne de 440 px", () => {
+    expect(hero).toContain("lg:text-[36px]");
+    expect(hero).toContain("lg:w-[440px]");
+    expect(read("src/index.css")).toMatch(/profile-hero-identity \{\s*width: 440px;/);
+  });
   it("le lieu de vie reste « Habite à » (lot CP1)", () => {
     expect(hero).toContain("Habite à ${placeParts}");
   });
