@@ -2,9 +2,9 @@
  * Section éditoriale SEO bas de /recherche : maillage interne vers les hubs
  * villes/départements + FAQ structurée.
  *
- * Affichée uniquement aux visiteurs anonymes (conversion + SEO). Les
- * utilisateurs connectés voient une page outil épurée. Le JSON-LD FAQPage
- * est porté par SearchPage (Helmet) pour rester rendu côté serveur.
+ * Affichée aux visiteurs de /recherche et sur /annonces (lot RCH2, 14/11/2026 :
+ * la FAQ vivait seulement sur /search, en noindex). Le JSON-LD FAQPage est porté
+ * par SearchPage et par PublicListings.
  *
  * Lien interne : on pointe vers les 3 hubs SEO réels (Lyon / Annecy /
  * Grenoble), pas de mention régionale (positionnement national).
@@ -21,11 +21,11 @@ const HUB_CITIES = [
 export const SEARCH_FAQ = [
   {
     q: "Comment fonctionne la garde d'animaux à domicile sur Guardiens ?",
-    a: "Les propriétaires publient une annonce avec leurs dates et leurs animaux. Les gardiens consultent les annonces librement, postulent, échangent par messagerie, puis se rencontrent avant de confirmer la garde d'un commun accord.",
+    a: "Les propriétaires publient une annonce avec leurs dates et leurs animaux. Les gardiens consultent les annonces librement, postulent et échangent par messagerie. Une rencontre avant la garde reste possible, si vous le souhaitez tous les deux, et la garde se confirme d'un commun accord.",
   },
   {
-    q: "Combien coûte la consultation des annonces ?",
-    a: "La consultation est libre, même sans compte. L'inscription pour postuler à une annonce coûte 0 €. L'espace propriétaire coûte 0 €. L'espace gardien coûte 0 €.",
+    q: "Combien coûte Guardiens ?",
+    a: "Guardiens est gratuit. La consultation des annonces est libre, même sans compte.",
   },
   {
     q: "Quels animaux peut-on faire garder ?",
