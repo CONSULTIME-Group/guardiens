@@ -34,6 +34,7 @@ import { invalidateMyApplications } from "@/lib/dashboardShared";
 import { afterReplyTarget, isDesktopViewport, noticeFirstName } from "@/lib/afterPublish";
 import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
+import { sitterProfileHref } from "@/lib/sitterProfileV2";
 
 const AFFINITY_COLUMNS =
   "user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok";
@@ -269,7 +270,7 @@ export default function ApplicationDetail() {
           </section>
         )}
 
-        <Link to={`/gardiens/${app!.sitter_id}`} className="inline-flex min-h-[44px] items-center text-[15px] font-semibold text-primary underline underline-offset-4">
+        <Link to={sitterProfileHref(app!.sitter_id, "candidature")} className="inline-flex min-h-[44px] items-center text-[15px] font-semibold text-primary underline underline-offset-4">
           Voir le profil complet de {displayName}
         </Link>
 

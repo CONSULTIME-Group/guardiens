@@ -10,6 +10,8 @@ import { getStoredConsent } from "@/lib/cookieConsent";
 import { isLabOrBotTraffic } from "@/lib/labTraffic";
 
 export type EventType =
+  // Lot FG0 : ouverture d'une fiche publique gardien, avec sa provenance.
+  | "sitter_profile_opened"
   // Lot SORT1 : sorties à places comptées.
   | "outings_list_viewed"
   | "outing_propose_clicked"

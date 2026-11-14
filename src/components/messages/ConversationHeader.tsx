@@ -27,6 +27,7 @@ import PresenceBadge from "./PresenceBadge";
 import ProAvatarBadge from "@/components/badges/ProAvatarBadge";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { daysFromToday } from "@/lib/calendarDate";
+import { sitterProfileHref } from "@/lib/sitterProfileV2";
 
 interface ConversationHeaderProps {
   conv: any;
@@ -346,7 +347,7 @@ const ConversationHeader = ({
             </button>
           )}
           {conv.other_user?.id && isMemberLinkable(conv.other_user) ? (
-            <Link to={`/gardiens/${conv.other_user.id}`} className="shrink-0 relative block">
+            <Link to={sitterProfileHref(conv.other_user.id, "conversation")} className="shrink-0 relative block">
               {getMemberAvatarUrl(conv.other_user) ? (
                 <img src={avatarImageUrl(getMemberAvatarUrl(conv.other_user), 44)} alt={`Photo de ${getMemberDisplayName(conv.other_user, 'utilisateur')}`} className="w-11 h-11 rounded-full object-cover hover:ring-2 hover:ring-primary/50 transition-all" />
               ) : (
@@ -366,7 +367,7 @@ const ConversationHeader = ({
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               {conv.other_user?.id && isMemberLinkable(conv.other_user) ? (
-                <Link to={`/gardiens/${conv.other_user.id}`} className="font-semibold text-base hover:text-primary transition-colors capitalize">
+                <Link to={sitterProfileHref(conv.other_user.id, "conversation")} className="font-semibold text-base hover:text-primary transition-colors capitalize">
                   {capitalize(getMemberDisplayName(conv.other_user, 'Membre'))}
                 </Link>
               ) : (

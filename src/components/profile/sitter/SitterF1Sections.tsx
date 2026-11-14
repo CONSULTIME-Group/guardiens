@@ -1,9 +1,8 @@
-import { formatRatingFr } from "@/lib/formatRatingFr";
 /**
  * Fiche gardien publique allégée (lot F1), onglet « Côté gardien ».
  * Sections sans cadre, séparées par l'espace. Tokens existants uniquement.
  */
-import { useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -13,8 +12,7 @@ import { BADGE_DEFINITIONS } from "@/components/badges/badge-definitions";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { getMemberAvatarUrl, getMemberPublicFirstName } from "@/lib/memberUtils";
 import { capitalizeFirstName } from "@/lib/displayName";
-import type { SkillGroup, SkillSpot } from "@/lib/sitterSkillGroups";
-import { cutLongText, reviewDateLabel } from "@/lib/sitterProfileFacts";
+import { reviewDateLabel } from "@/lib/sitterProfileFacts";
 import spotVerger from "@/assets/missions/spot-verger-160.webp";
 
 import { SPOTS } from "@/components/profile/skillSpots";
@@ -32,79 +30,6 @@ export const SectionHeading = ({ eyebrow, title, id }: { eyebrow: string; title:
     </h2>
   </div>
 );
-
-/* ── Ses savoir-faire ─────────────────────────────────────────────── */
-export const SitterSkillsSection = ({
-  groups,
-  totalCount,
-  headline,
-  competences,
-  specialSkills,
-}: {
-  groups: SkillGroup[];
-  totalCount: number;
-  headline: string;
-  competences: string[];
-  specialSkills: string[];
-}) => {
-  const [open, setOpen] = useState(false);
-  if (groups.length === 0) return null;
-  return (
-    <section aria-label="Ses savoir-faire" className="scroll-mt-20">
-      <SectionHeading eyebrow="Ses savoir-faire" title={headline} />
-      <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-10">
-        {groups.map((g) => (
-          <li key={g.key} className="flex items-center gap-[14px] min-w-0">
-            {SPOTS[g.spot] ? (
-              <img src={SPOTS[g.spot]} alt="" aria-hidden="true" width={46} height={46} loading="lazy" decoding="async" className="h-[46px] w-[46px] shrink-0 object-contain" />
-            ) : (
-              <span aria-hidden="true" className="h-[46px] w-[46px] shrink-0" />
-            )}
-            <span className="min-w-0">
-              <span className="block text-[15px] font-semibold text-foreground font-body">{g.label}</span>
-              {g.detail && <span className="block text-[13.5px] text-muted-foreground font-body">{g.detail}</span>}
-            </span>
-          </li>
-        ))}
-      </ul>
-      {totalCount > 0 && (
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          className="mt-[22px] inline-flex items-center gap-1.5 text-[14px] font-medium text-primary underline underline-offset-4 font-body"
-        >
-          {open ? "Replier la liste" : `Voir ses ${totalCount} savoir-faire`}
-          <ArrowRight className={`h-4 w-4 transition-transform ${open ? "rotate-90" : ""}`} aria-hidden="true" />
-        </button>
-      )}
-      {open && (
-        <div className="mt-[22px] grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-          {competences.length > 0 && (
-            <div>
-              <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Savoir-faire</h3>
-              <div className="flex flex-wrap gap-1.5">
-                {competences.map((c) => (
-                  <span key={c} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground/80 font-body">{c}</span>
-                ))}
-              </div>
-            </div>
-          )}
-          {specialSkills.length > 0 && (
-            <div>
-              <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Soins spécifiques</h3>
-              <div className="flex flex-wrap gap-1.5">
-                {specialSkills.map((c) => (
-                  <span key={c} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground/80 font-body">{c}</span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-    </section>
-  );
-};
 
 /* ── Avis éditoriaux ──────────────────────────────────────────────── */
 export const EditorialReview = ({ review, badgeIds }: { review: any; badgeIds: string[] }) => {
@@ -149,69 +74,6 @@ export const EditorialReview = ({ review, badgeIds }: { review: any; badgeIds: s
   );
 };
 
-/* ── Qui est {prénom} ─────────────────────────────────────────────── */
-export const SitterAboutSection = ({
-  firstName,
-  motivation,
-  bio,
-  facts,
-  deptLink,
-  children,
-}: {
-  firstName: string;
-  motivation: string;
-  bio: string;
-  facts: Array<{ label: string; value: string }>;
-  deptLink: { href: string; label: string } | null;
-  children?: ReactNode;
-}) => {
-  const [open, setOpen] = useState(false);
-  const full = [motivation, bio].filter(Boolean).join("\n\n");
-  const cut = cutLongText(full);
-  // L5 : section masquée quand rien de réel n'est à montrer.
-  if (!full && facts.length === 0 && !children) return null;
-  return (
-    <section aria-label={`À propos de ${firstName}`} className="scroll-mt-20">
-      <SectionHeading eyebrow="À propos" title={`Qui est ${firstName}.`} />
-      {full && (
-        <div className="max-w-[700px]">
-          <p className="text-[16px] leading-[1.7] text-foreground font-body whitespace-pre-line">
-            {open || !cut.truncated ? full : cut.text}
-          </p>
-          {cut.truncated && (
-            <button
-              type="button"
-              onClick={() => setOpen((v) => !v)}
-              aria-expanded={open}
-              className="mt-2 text-[14px] font-medium text-primary underline underline-offset-4 font-body"
-            >
-              {open ? "Replier" : "Lire la suite"}
-            </button>
-          )}
-        </div>
-      )}
-      {facts.length > 0 && (
-        <dl className="mt-[34px] pt-[22px] border-t border-border grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-5">
-          {facts.map((f) => (
-            <div key={f.label} className="min-w-0">
-              <dt className="text-[11.5px] uppercase tracking-[0.14em] text-secondary font-body font-semibold">{f.label}</dt>
-              <dd className="mt-1 text-[14.5px] text-foreground font-body break-words">{f.value}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
-      {deptLink && (
-        <p className="mt-[22px]">
-          <Link to={deptLink.href} className="text-[14px] text-muted-foreground underline underline-offset-4 hover:text-foreground">
-            {deptLink.label}
-          </Link>
-        </p>
-      )}
-      {children && <div className="mt-[34px]">{children}</div>}
-    </section>
-  );
-};
-
 /* ── Bandeau entraide ─────────────────────────────────────────────── */
 export const EntraideBand = ({
   text,
@@ -222,12 +84,11 @@ export const EntraideBand = ({
 }) => (
   <section
     aria-label="Aussi là pour un coup de main"
-    className="flex items-start gap-[14px] md:gap-[22px] rounded-[20px] bg-secondary/10 pt-[22px] pr-[28px] pb-[22px] pl-[18px]"
+    className="flex items-center gap-[14px] md:gap-[22px] border-t border-border pt-[22px]"
   >
     <img src={spotVerger} alt="" aria-hidden="true" width={76} height={76} loading="lazy" decoding="async" className="h-[52px] w-[52px] md:h-[76px] md:w-[76px] shrink-0 object-contain" />
     <div className="min-w-0">
-      <p className="text-[12px] uppercase tracking-[0.16em] text-secondary font-body font-semibold">Aussi là pour un coup de main</p>
-      <p className="mt-2 text-[15.5px] leading-relaxed text-foreground font-body whitespace-pre-line break-words">{text}</p>
+      <p className="text-[15.5px] leading-relaxed text-foreground font-body whitespace-pre-line break-words">{text}</p>
       {link && (
         link.to ? (
           <Link to={link.to} className="mt-2 inline-flex items-center gap-1 text-[14px] font-medium text-primary underline underline-offset-4">
@@ -243,7 +104,7 @@ export const EntraideBand = ({
   </section>
 );
 
-/* ── Offre d'entraide déclarée (lot L3) ──────────────────────────── */
+/* ── Offre d'entraide déclarée (lot L3, refondue au lot FG1) ─────── */
 export const EntraideOfferSection = ({
   offer,
   firstName,
@@ -255,43 +116,24 @@ export const EntraideOfferSection = ({
 }) => {
   if (!offer.offered) return null;
   return (
-    <section aria-label={`Ce que propose ${firstName}`} className="space-y-4">
-      <SectionHeading eyebrow="Ce que je propose" title={`${firstName} propose un coup de main${city ? ` autour de ${city}` : ""}`} />
+    <section aria-labelledby="ses-coups-de-main" className="relative overflow-hidden rounded-[22px] bg-[hsl(var(--hero-paper))] px-5 py-6 md:px-7" data-entraide-offer>
+      <img src={SPOTS["spot-jardin"]} alt="" aria-hidden="true" width={80} height={80} loading="lazy" decoding="async" className="pointer-events-none absolute right-3 top-3 h-[72px] w-[72px] object-contain md:h-20 md:w-20" />
+      <h2 id="ses-coups-de-main" className="max-w-[calc(100%-5rem)] font-heading text-[21px] md:text-[24px] font-semibold leading-tight text-foreground">
+        Ses coups de main
+      </h2>
+      <p className="mt-2 max-w-[calc(100%-5rem)] text-[15.5px] leading-relaxed text-foreground">
+        {firstName} aide{city ? ` autour de ${city}` : ""}{offer.categories.length > 0 ? ` : ${offer.categories.map((c) => c.label.toLowerCase()).join(", ")}.` : "."}
+      </p>
       {offer.line && (
-        <p className="text-[15.5px] leading-relaxed text-foreground font-body whitespace-pre-line break-words">« {offer.line} »</p>
+        <p className="mt-3 whitespace-pre-line break-words font-heading text-[17px] italic leading-relaxed text-foreground">« {offer.line} »</p>
       )}
       {offer.categories.length > 0 && (
-        <ul className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <ul className="mt-4 flex flex-wrap gap-1.5">
           {offer.categories.map((c) => (
-            <li key={c.key} className="flex flex-col items-center gap-2 rounded-xl bg-secondary/10 px-3 py-4 text-center">
-              <img src={SPOTS[c.spot]} alt="" aria-hidden="true" width={64} height={64} loading="lazy" decoding="async" className="h-16 w-16 object-contain" />
-              <span className="text-sm font-medium text-foreground font-body">{c.label}</span>
-            </li>
+            <li key={c.key} className="rounded-full border border-secondary/30 bg-card px-3 py-1 text-[14px] text-foreground">{c.label}</li>
           ))}
         </ul>
       )}
-    </section>
-  );
-};
-
-/* ── Comment ça se passe ──────────────────────────────────────────── */
-export const HowItWorksSteps = ({ firstName }: { firstName: string }) => {
-  const steps = [
-    `Vous écrivez à ${firstName} et lui présentez votre maison et vos animaux.`,
-    "Vous faites connaissance. Une rencontre avant la garde est conseillée.",
-    `${firstName} s'installe chez vous. Vous partez l'esprit léger.`,
-  ];
-  return (
-    <section aria-label="Comment ça se passe" className="scroll-mt-20">
-      <SectionHeading eyebrow="Comment ça se passe" title="Trois étapes, à votre rythme." />
-      <ol className="grid grid-cols-1 md:grid-cols-3 gap-[22px] md:gap-[34px]">
-        {steps.map((s, i) => (
-          <li key={i} className="border-t-[1.5px] border-border pt-[14px]">
-            <span className="block font-heading text-[24px] text-primary leading-none">{i + 1}</span>
-            <p className="mt-2 text-[15px] leading-relaxed text-foreground font-body">{s}</p>
-          </li>
-        ))}
-      </ol>
     </section>
   );
 };
@@ -332,61 +174,56 @@ export const CtaButton = ({
   );
 };
 
-/* ── Carte contact du rail ────────────────────────────────────────── */
+/* ── Carte contact (lot FG1) : une phrase, un bouton, dans le flux ─── */
 export const SitterContactCard = ({
   firstName,
   cta,
   reassurance,
-  facts,
   showButton,
   ctaVisible = true,
   sticky,
   secondary,
+  title,
+  text,
 }: {
   firstName: string;
   cta: HeroCtaVariant;
   reassurance?: string;
-  facts: Array<{ label: string; value: string }>;
-  /** "always" : desktop ; "md" : à partir de md (mobile porté par la barre collante). */
+  /** "always" : desktop ; "md" : à partir de lg (téléphone porté par la barre collante). */
   showButton: "always" | "md";
   ctaVisible?: boolean;
   sticky?: boolean;
   /** Action secondaire visible à toutes les tailles (lot I1 : inviter sur une garde publiée). */
   secondary?: ReactNode;
+  title?: string;
+  text?: string;
 }) => {
   if (cta.kind === "own") return null;
   const btnCls =
-    "flex w-full h-[52px] items-center justify-center rounded-[99px] bg-primary px-5 text-[15px] font-medium text-primary-foreground hover:bg-primary/90 transition-colors text-center leading-tight";
+    "flex w-full h-[50px] items-center justify-center rounded-[99px] bg-card px-5 text-[15px] font-semibold text-primary hover:bg-card/90 transition-colors text-center leading-tight";
   return (
     <div
-      className={`rounded-[22px] bg-card p-[22px] shadow-[0_10px_30px_-12px_hsl(var(--foreground)/0.18)] ${
+      className={`rounded-[22px] bg-primary px-6 py-6 text-primary-foreground ${
         sticky ? "lg:sticky lg:top-[calc(var(--public-header-h,0px)+16px)] lg:z-10" : ""
       }`}
       data-contact-card
+      data-contact-v2
     >
-      <h2 className="font-heading text-[23px] font-semibold text-foreground leading-tight">Faire garder avec {firstName}</h2>
-      <p className="mt-2 text-[14.5px] text-muted-foreground font-body">
-        Présentez votre maison et vos animaux à {firstName}, puis faites connaissance.
+      <h2 className="font-heading text-[21px] md:text-[23px] font-semibold leading-tight">
+        {title ?? `Présentez votre maison à ${firstName}`}
+      </h2>
+      <p className="mt-2 text-[14.5px] leading-relaxed text-primary-foreground/90">
+        {text ?? "Vous échangez à votre rythme dans votre messagerie Guardiens, et vous vous rencontrez si vous le souhaitez."}
       </p>
       <div className={!ctaVisible ? "hidden" : showButton === "md" ? "hidden lg:block" : ""}>
-        <div className="mt-[14px]">
-          <CtaButton cta={cta} firstName={firstName} className={btnCls} />
+        <div className="mt-4">
+          <CtaButton cta={cta} firstName={firstName} className={btnCls} short={cta.kind === "owner" || cta.kind === "sitter"} />
         </div>
-        <p className="mt-2 text-center text-[12.5px] text-muted-foreground font-body">
-          {reassurance || "Vous échangez d'abord, vous décidez ensuite."}
-        </p>
+        {reassurance && (
+          <p className="mt-2 text-center text-[12.5px] text-primary-foreground/85">{reassurance}</p>
+        )}
       </div>
-      {secondary ? <div className="mt-[10px]" data-contact-secondary>{secondary}</div> : null}
-      {facts.length > 0 && (
-        <dl className="mt-[14px]">
-          {facts.map((f) => (
-            <div key={f.label} className="flex items-baseline justify-between gap-4 border-t border-border py-2.5 text-[14px] font-body">
-              <dt className="text-muted-foreground shrink-0">{f.label}</dt>
-              <dd className="text-foreground text-right min-w-0 break-words">{f.value}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
+      {secondary ? <div className="mt-3 [&_button]:border-primary-foreground/40 [&_button]:bg-transparent [&_button]:text-primary-foreground" data-contact-secondary>{secondary}</div> : null}
     </div>
   );
 };
@@ -408,14 +245,14 @@ export const SitterStickyBar = ({
   isAvailable: boolean;
 }) => {
   if (cta.kind === "own") return null;
-  const sub = [
-    avgRating > 0 && reviewCount > 0 ? `★ ${formatRatingFr(avgRating)}` : null,
-    isAvailable ? "Disponible" : null,
-  ].filter(Boolean).join(" · ");
+  // Lot FG2 : la note vit dans le bandeau et les avis, la barre dit la disponibilité.
+  void avgRating;
+  void reviewCount;
+  const sub = isAvailable ? "Disponible" : "";
   return (
     <div
       data-sitter-sticky-bar
-      className="lg:hidden fixed left-0 right-0 z-40 bottom-[var(--bottom-nav-h,0px)] bg-background/[0.97] border-t border-border shadow-[0_-6px_20px_-10px_hsl(var(--foreground)/0.2)] px-5 pt-3 pb-[calc(22px+env(safe-area-inset-bottom))]"
+      className="lg:hidden fixed left-0 right-0 z-40 bottom-[var(--bottom-nav-h,0px)] bg-card border-t border-border px-3 pt-2 pb-[calc(8px+env(safe-area-inset-bottom))]"
     >
       <div className="flex items-center gap-3 min-w-0">
         <Avatar className="w-10 h-10 shrink-0">
@@ -424,88 +261,45 @@ export const SitterStickyBar = ({
         </Avatar>
         <div className="min-w-0 flex-1">
           <p className="text-[15px] font-semibold text-foreground font-body truncate">{firstName}</p>
-          {sub && <p className="text-[12.5px] text-muted-foreground font-body truncate">{sub}</p>}
+          {sub && <p className="text-[13px] text-primary font-body truncate">{sub}</p>}
         </div>
         <CtaButton
           cta={cta}
           firstName={firstName}
           short
-          className="inline-flex h-12 shrink-0 max-w-[60%] items-center justify-center rounded-[99px] bg-primary px-5 text-[14px] font-medium text-primary-foreground text-center leading-tight"
+          className="inline-flex h-11 shrink-0 max-w-[62%] items-center justify-center rounded-[99px] bg-primary px-5 text-[14px] font-medium text-primary-foreground text-center leading-tight"
         />
       </div>
     </div>
   );
 };
 
-/* ── En bref : preuves chiffrées sous les onglets (lot F, 11/10/2026) ── */
+/* ── En bref : preuves chiffrées sous la gouache (lot F, refondu au lot FG1) ──
+ * Chiffres réels seulement, chacun une fois ; la liste d'animaux vit dans
+ * « Son quotidien ». Un trait d'accent au-dessus de chaque chiffre. */
 export const SitterGlanceBand = ({
   items,
 }: {
-  items: Array<{ value: string; label: string; size?: "lg" | "sm" }>;
+  items: Array<{ value: string; label: string; anchor?: string }>;
 }) => {
   if (items.length === 0) return null;
   return (
     <dl
       aria-label="En bref"
       data-profile-glance
-      className="profile-glance grid grid-cols-2 md:grid-cols-4 gap-x-[22px] gap-y-[22px] rounded-[22px] px-[22px] py-[22px] md:px-[34px] md:py-[26px]"
+      className="profile-glance grid grid-cols-2 md:grid-cols-4 overflow-hidden rounded-[18px] border border-secondary/25 bg-card"
     >
       {items.map((it) => (
-        <div key={it.label} className="flex min-w-0 flex-col-reverse gap-1.5">
-          <dt className="text-[13.5px] text-muted-foreground font-body">{it.label}</dt>
-          <dd
-            className={
-              it.size === "sm"
-                ? "font-heading text-[19px] md:text-[22px] font-semibold leading-snug text-foreground break-words"
-                : "font-heading text-[30px] md:text-[38px] font-semibold leading-none text-foreground"
-            }
-          >
+        <div key={it.label} className="flex min-w-0 flex-col-reverse gap-1 border-secondary/15 px-4 py-4 md:px-7 md:py-5 [&:not(:last-child)]:md:border-r even:border-l md:even:border-l-0 [&:nth-child(n+3)]:border-t md:[&:nth-child(n+3)]:border-t-0">
+          <dt className="text-[12.5px] md:text-[13px] text-muted-foreground font-body">
+            {it.anchor ? <a href={`#${it.anchor}`} className="underline-offset-4 hover:underline">{it.label}</a> : it.label}
+          </dt>
+          <dd className="font-heading text-[24px] md:text-[32px] font-semibold leading-none text-foreground">
+            <span aria-hidden="true" className="mb-2.5 block h-[3px] w-7 rounded-full bg-secondary/70" />
             {it.value}
           </dd>
         </div>
       ))}
     </dl>
-  );
-};
-
-/* ── Sa façon de garder : conditions déclarées (lot F, 11/10/2026) ──
- * Sortie de la carte contact pour être lue en section. Pas d'icône
- * décorative (règle du projet), la présence pendant la garde en tête car
- * c'est le critère le plus lourd du moteur d'affinité. */
-export const SitterConditionsSection = ({
-  firstName,
-  presence,
-  facts,
-}: {
-  firstName: string;
-  presence: string;
-  facts: Array<{ label: string; value: string }>;
-}) => {
-  if (!presence && facts.length === 0) return null;
-  return (
-    <section aria-labelledby="sa-facon-de-garder" className="scroll-mt-20" data-profile-conditions>
-      <SectionHeading eyebrow="Conditions de garde" title="Sa façon de garder." id="sa-facon-de-garder" />
-      <p className="-mt-2 mb-[22px] text-[15px] text-muted-foreground font-body">
-        Ce que {firstName} a déclaré, pour vérifier en un coup d'œil que cela correspond à votre maison.
-      </p>
-      <div className="profile-surface overflow-hidden rounded-[18px] border border-border">
-        {presence && (
-          <div className="border-l-4 border-primary px-[22px] py-[18px] md:px-[26px]">
-            <p className="text-[13px] text-muted-foreground font-body">Présence pendant la garde</p>
-            <p className="mt-1 font-heading text-[20px] md:text-[22px] font-semibold leading-snug text-foreground">{presence}</p>
-          </div>
-        )}
-        {facts.length > 0 && (
-          <dl className={`grid grid-cols-1 md:grid-cols-2 gap-x-[34px] px-[22px] md:px-[26px] ${presence ? "border-t border-border" : ""}`}>
-            {facts.map((f) => (
-              <div key={f.label} className="min-w-0 border-b border-border/70 py-[16px] last:border-b-0 md:[&:nth-last-child(2):nth-child(odd)]:border-b-0">
-                <dt className="text-[13px] text-muted-foreground font-body">{f.label}</dt>
-                <dd className="mt-1 text-[15.5px] font-semibold text-foreground font-body break-words">{f.value}</dd>
-              </div>
-            ))}
-          </dl>
-        )}
-      </div>
-    </section>
   );
 };

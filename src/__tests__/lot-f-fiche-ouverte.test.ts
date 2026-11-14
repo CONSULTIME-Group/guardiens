@@ -49,8 +49,9 @@ describe("structure de la fiche ouverte", () => {
     expect(page).toMatch(/<ProfileHero\s+inNotebook\s+open/);
     expect(hero).toContain("max-w-[1536px]");
   });
-  it("conditions de garde en section, carte contact allégée", () => {
-    expect(page).toContain("<SitterConditionsSection");
+  it("conditions de garde dans « Son quotidien » (lot FG1), carte contact allégée", () => {
+    expect(page).toContain("<SitterDailyCard");
+    expect(page).toContain('label: "Zone de garde"');
     expect(page).not.toContain('label: "Mobilité"');
     expect(page).not.toContain('label: "Rayon"');
   });

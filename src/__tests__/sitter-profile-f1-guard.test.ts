@@ -14,18 +14,19 @@ describe("onglet gardien allégé", () => {
       expect(gardien).not.toContain(c);
     }
   });
-  it("contient la carte contact et les étapes", () => {
+  it("contient la carte contact, sans mode d'emploi en étapes (lot FG1, 14/11/2026)", () => {
     expect(gardien).toContain("<SitterContactCard");
-    expect(gardien).toContain("<HowItWorksSteps");
-    expect(sections).toContain("Faire garder avec");
-    expect(sections).toContain("Comment ça se passe");
+    expect(gardien).not.toContain("HowItWorksSteps");
+    expect(sections).not.toContain("Comment ça se passe");
+    expect(sections).toContain("Présentez votre maison à ${firstName}");
+    expect(sections).toContain("vous vous rencontrez si vous le souhaitez");
   });
   it("la carte contact et son rayon restent dans le flux", () => {
     expect(gardien).toContain("sticky={false}");
     expect(gardien).not.toContain("sticky={!mobile}");
   });
   it("ancres de confiance posées sur le bloc parcours", () => {
-    expect(gardien).toContain('journeyBlock(mobile ? "confiance-mobile" : "confiance")');
+    expect(gardien).toContain('journeyBlock("confiance")');
   });
   it("textes sans tiret cadratin ni demi-cadratin", () => {
     expect(sections).not.toMatch(/[\u2014\u2013]/);
