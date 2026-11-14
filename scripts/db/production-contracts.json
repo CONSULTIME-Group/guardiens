@@ -711,7 +711,7 @@
       ]
     },
     {
-      "migration": "0158_alr1_diffusion_position.sql",
+      "migration": "0160_alr1_diffusion_position.sql",
       "description": "Diffusion d'une annonce par sa position (propriétaire, commune de l'annonce, commune du profil), aucune diffusion sans position, rejeu à l'arrivée de la position, zone France entière en region + FR",
       "checks": [
         {

@@ -56,12 +56,19 @@ export function selectLegalPageVersion(
  * En-tête de version : « Version 9, publiée le 16 octobre 2026, en vigueur le
  * 16 novembre 2026. La version 8 reste applicable jusqu'à cette date. »
  */
-export function legalVersionHeading(document: LegalDocument, version: string): string {
+export function legalVersionHeading(document: LegalDocument, version: string, today: string = parisToday()): string {
   const v = findLegalVersion(document, version);
   if (!v) return `Version ${version}`;
   const head = `Version ${v.version}, publiée le ${frenchDate(v.publishedOn)}, en vigueur le ${frenchDate(v.effectiveOn)}.`;
   const prev = previousLegalVersion(document, version);
   if (!prev || v.effectiveOn <= v.publishedOn) return head;
+  // Lot COR1 : quand la version précédente n'est pas encore en vigueur elle
+  // non plus (deux versions annoncées à la suite), l'en-tête nomme la version
+  // qui s'applique aujourd'hui puis celle qui prend le relais.
+  if (prev.effectiveOn > today) {
+    const now = versionInForce(document, today);
+    return `${head} La version ${now.version} s'applique jusqu'au ${frenchDate(prev.effectiveOn)}, puis la version ${prev.version} jusqu'à cette date.`;
+  }
   return `${head} La version ${prev.version} reste applicable jusqu'à cette date.`;
 }
 
