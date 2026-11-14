@@ -112,7 +112,9 @@ describe("garde-fous du code (lot perf 2)", () => {
   it("mesure d'impression retenue tant que les compteurs attendent, recherche remplacée ignorée", async () => {
     const { readFileSync } = await import("node:fs");
     const src = readFileSync("src/components/search/SearchSitter.tsx", "utf8");
-    expect(src).toMatch(/if \(loading \|\| deptCountsPending \|\| tab !== "sits"/);
+    // Lot RCH1 : outOfZoneShown porte déjà !loading et tab === "sits".
+    expect(src).toMatch(/const outOfZoneShown = [^\n]*tab === "sits" && !loading/);
+    expect(src).toContain("if (!outOfZoneShown || deptCountsPending) return;");
     expect(src).toMatch(/if \(searchGenRef\.current !== gen\) return;\n  setResultCoords/);
     expect(src).toMatch(/const sitBase = tab === "sits" \? takeOrLoadSitBase\(\) : null;[\s\S]{0,400}await geocodeCity\(city\)/);
   });
