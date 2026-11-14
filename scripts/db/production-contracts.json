@@ -685,6 +685,16 @@
           "sql": "SELECT NOT has_function_privilege('authenticated', 'public.outing_email_enqueue(text, uuid, uuid, text, text)', 'EXECUTE') AS ok"
         }
       ]
+    },
+    {
+      "migration": "0157_dig1_recap_gardiens_demi_heure.sql",
+      "description": "Le récapitulatif quotidien des gardiens passe aux minutes 05 et 35, de 05 h à 12 h UTC",
+      "checks": [
+        {
+          "name": "horaire_demi_heure",
+          "sql": "SELECT schedule = '5,35 5-12 * * *' AS ok FROM cron.job WHERE jobname = 'sitter-daily-digest'"
+        }
+      ]
     }
   ]
 }
