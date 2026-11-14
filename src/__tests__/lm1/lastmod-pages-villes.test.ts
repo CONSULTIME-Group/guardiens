@@ -5,6 +5,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { Blob as NodeBlob, File as NodeFile } from "node:buffer";
 import { PGlite } from "@electric-sql/pglite";
 import { collectSitemapData } from "../../../supabase/functions/_shared/sitemap-data.js";
 import { createSitemapDocument } from "../../../supabase/functions/sitemap/live.js";
@@ -18,7 +19,20 @@ describe("LM1, migration 0142 : date de contenu des pages ville", () => {
     (await db.query<{ d: string | null }>("SELECT content_updated_at::text AS d FROM seo_city_pages WHERE slug = $1", [slug])).rows[0].d;
 
   beforeAll(async () => {
-    db = new PGlite();
+    // Sous jsdom, Blob et File sont ceux de jsdom, sans arrayBuffer : PGlite
+    // ne peut pas lire son paquet de données. On lui prête ceux de Node le
+    // temps du démarrage.
+    const jsdomBlob = globalThis.Blob;
+    const jsdomFile = globalThis.File;
+    globalThis.Blob = NodeBlob as unknown as typeof Blob;
+    globalThis.File = NodeFile as unknown as typeof File;
+    try {
+      db = new PGlite();
+      await db.waitReady;
+    } finally {
+      globalThis.Blob = jsdomBlob;
+      globalThis.File = jsdomFile;
+    }
     await db.exec(`
       CREATE TABLE public.seo_city_pages (
         id serial PRIMARY KEY, slug text, city text, h1_title text, intro_text text, content text,
