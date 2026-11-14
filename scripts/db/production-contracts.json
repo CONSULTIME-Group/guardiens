@@ -383,14 +383,14 @@
       ]
     },
     {
-     "migration": "0155_rel1b_horaire_relances.sql",
-     "description": "Relance des candidatures en attente à la minute 07 (09 h 07 et 17 h 07 UTC), hors de la minute 00 où les appels pg_net échouent",
-     "checks": [
-      {
-       "name": "horaire_minute_07",
-       "sql": "SELECT schedule = '7 9,17 * * *' AS ok FROM cron.job WHERE jobname = 'nudge-owner-pending-application'"
-      }
-     ]
+      "migration": "0155_rel1b_horaire_relances.sql",
+      "description": "Relance des candidatures en attente à la minute 07 (09 h 07 et 17 h 07 UTC), hors de la minute 00 où les appels pg_net échouent",
+      "checks": [
+        {
+          "name": "horaire_minute_07",
+          "sql": "SELECT schedule = '7 9,17 * * *' AS ok FROM cron.job WHERE jobname = 'nudge-owner-pending-application'"
+        }
+      ]
     },
     {
       "migration": "0141_adm22_alertes_equipe.sql",
@@ -669,6 +669,20 @@
         {
           "name": "fonction_fermee_aux_membres",
           "sql": "SELECT NOT has_function_privilege('authenticated', 'public.geocode_quota_take(text, integer)', 'EXECUTE') AS ok"
+        }
+      ]
+    },
+    {
+      "migration": "0156_eml1_email_sortie_personne.sql",
+      "description": "L'email « X vient à votre sortie » porte la fiche de la personne (photo, prénom, ville, lien)",
+      "checks": [
+        {
+          "name": "fonction_a_jour",
+          "sql": "SELECT position('eml1_email_sortie_personne' IN pg_get_functiondef('public.outing_email_enqueue(text, uuid, uuid, text, text)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "fonction_fermee_aux_membres",
+          "sql": "SELECT NOT has_function_privilege('authenticated', 'public.outing_email_enqueue(text, uuid, uuid, text, text)', 'EXECUTE') AS ok"
         }
       ]
     }

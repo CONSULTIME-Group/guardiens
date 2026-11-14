@@ -70,3 +70,16 @@ export function transactionalSender(templateName: string, siteName: string, from
   }
   return { from: `${siteName} <noreply@${fromDomain}>` };
 }
+
+/**
+ * Lot EML1 (14/11/2026) : un email qui annonce le geste d'une personne
+ * (« Maria Elisa vient à votre sortie ») porte son prénom dans l'expéditeur,
+ * « Maria Elisa via Guardiens ». L'adresse et la réponse restent celles de
+ * Guardiens : l'adresse email du membre n'est jamais exposée.
+ */
+export function personSenderFrom(firstName: unknown, fromDomain: string): string | null {
+  if (typeof firstName !== "string") return null;
+  const clean = firstName.replace(/["<>\\\r\n,;:@]/g, " ").replace(/\s+/g, " ").trim().slice(0, 40);
+  if (clean.length < 2) return null;
+  return `"${clean} via Guardiens" <noreply@${fromDomain}>`;
+}

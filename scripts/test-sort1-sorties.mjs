@@ -396,5 +396,24 @@ await db.query(`UPDATE public.profiles SET account_status = 'suspended' WHERE id
 assert.equal((await db.query(`SELECT user_id FROM public.outing_alert_recipients($1)`, [tarot.id])).rows.some((r) => r.user_id === ABSENT), false);
 passed.push('alerte (SORT8) : un membre absent depuis 45 jours est prévenu, un compte suspendu reste écarté');
 
+// Lot EML1 : l'email d'inscription porte la fiche de la personne.
+await db.exec(`ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url text, ADD COLUMN IF NOT EXISTS city text`);
+const migrationEml1 = readFileSync(new URL('drizzle/migrations/0156_eml1_email_sortie_personne.sql', root), 'utf8');
+await db.exec(migrationEml1);
+await db.exec(migrationEml1);
+await db.query(`UPDATE public.profiles SET city = 'Lyon', avatar_url = 'https://exemple.test/a.webp', identity_verified = true WHERE id = $1`, [ABSENT]);
+await db.query(`SELECT public.outing_email_enqueue('joined', $1, $2, 'Absent', $3)`, [tarot.id, MARTINE, ABSENT]);
+const personMail = await one(`SELECT template_data FROM public.email_deferred_queue WHERE idempotency_key = $1`, [`outing-joined-${tarot.id}-${MARTINE}-${ABSENT}`]);
+assert.equal(personMail.template_data.kind, 'joined');
+assert.equal(personMail.template_data.actor.city, 'Lyon');
+assert.equal(personMail.template_data.actor.avatarUrl, 'https://exemple.test/a.webp');
+assert.equal(personMail.template_data.actor.verified, true);
+assert.equal(personMail.template_data.actor.profileUrl, `https://guardiens.fr/gardiens/${ABSENT}`);
+assert.match(personMail.template_data.actor.memberSince, /^\d{4}-\d{2}$/);
+await db.query(`SELECT public.outing_email_enqueue('changed', $1, $2, NULL, 'x1')`, [tarot.id, MARTINE]);
+const changedMail = await one(`SELECT template_data FROM public.email_deferred_queue WHERE idempotency_key = $1`, [`outing-changed-${tarot.id}-${MARTINE}-x1`]);
+assert.equal(changedMail.template_data.actor, undefined);
+passed.push('email d\'inscription (EML1) : photo, ville, ancienneté, identité vérifiée et fiche de la personne ; rien de tel pour un changement');
+
 for (const p of passed) console.log(`ok  ${p}`);
 console.log(`\n${passed.length} contrôles verts (SORT1 à SORT5)`);
