@@ -17,6 +17,10 @@
  *                     ecrase par une valeur fixe.
  *   - 'departement' : code de departement deduit du code postal.
  *   - 'france'      : tout le pays.
+ *   Lot ALR2 (14/11/2026) : un gardien sans aucune zone active est servi à
+ *   30 km de la position de son profil (zone implicite, rien d'écrit en base,
+ *   sous le plafond de destinataires). Sans position du propriétaire, la
+ *   commune de l'annonce sert de position (geocode_cache).
  *
  * Idempotence stricte : une ligne 'sit_notification_log' par couple annonce et
  * gardien, cle 'publish-alert-{sit_id}-{user_id}'. Un second passage dans la
@@ -45,6 +49,12 @@ import {
   remainingCompletionSteps,
 } from "../_shared/completion-steps/index.ts";
 import { readAllRows } from "../_shared/read-all-rows.ts";
+import {
+  boundingBox,
+  cacheCityKey,
+  DEFAULT_ALERT_RADIUS_KM,
+  defaultZonesFor,
+} from "../_shared/default-alert-zone.ts";
 
 
 const corsHeaders = {
@@ -112,6 +122,7 @@ export interface AlertZone {
   zone_type: string;
   radius_km: number | null;
   departement: string | null;
+  region_code?: string | null;
 }
 
 export interface SitLocation {
@@ -141,6 +152,9 @@ export function zoneMatches(
       : null;
 
   if (zone.zone_type === "france") return { match: true, distanceKm };
+  // Lot ALR2 (constat A7) : « France entière » des Paramètres et de la
+  // recherche s'enregistre en region + FR, comme send-alert-digest la lit.
+  if (zone.zone_type === "region" && zone.region_code === "FR") return { match: true, distanceKm };
 
   if (zone.zone_type === "departement") {
     const zoneDept = (zone.departement ?? "").trim() || deptFromPostal(sitter.postal_code);
@@ -230,6 +244,9 @@ Deno.serve(async (req) => {
     dropped_over_cap: 0,
     deferred_to_digest: 0,
     deferred_rate_limited: 0,
+    // Lot ALR2 : gardiens servis par la zone implicite de 30 km.
+    default_zone_targets: 0,
+    location_from_city: 0,
   };
   const errors: string[] = [];
   // Lot W0 (point 11) : comptes « both » jamais publiés, une alerte immédiate
@@ -287,7 +304,7 @@ Deno.serve(async (req) => {
     const prefs = await readAllRows<any>((from, to) =>
       supabase
         .from("alert_preferences")
-        .select("user_id, zone_type, radius_km, departement, alert_types, active, source")
+        .select("user_id, zone_type, radius_km, departement, region_code, alert_types, active, source")
         .eq("active", true)
         .order("id", { ascending: true })
         .range(from, to)
@@ -305,6 +322,21 @@ Deno.serve(async (req) => {
           String(a.user_id).localeCompare(String(b.user_id)) ||
           (a.source == null ? 0 : 1) - (b.source == null ? 0 : 1),
       );
+    // Lot ALR2 : toute zone active, quel que soit son type d'annonce, est un
+    // choix du membre. Seuls les membres sans aucune zone reçoivent la zone
+    // implicite de 30 km.
+    // Une zone coupée par le membre est aussi un choix : il ne reçoit pas de
+    // zone implicite à la place.
+    const usersWithZone = new Set<string>((prefs ?? []).map((p: any) => String(p.user_id)));
+    const pausedPrefs = await readAllRows<any>((from, to) =>
+      supabase
+        .from("alert_preferences")
+        .select("user_id")
+        .eq("active", false)
+        .order("id", { ascending: true })
+        .range(from, to)
+    );
+    for (const p of pausedPrefs ?? []) usersWithZone.add(String((p as any).user_id));
 
     for (const sit of allSits) {
       if (stopForRateLimit) break;
@@ -328,6 +360,52 @@ Deno.serve(async (req) => {
         lon: (owner as any).longitude ?? null,
         dept: deptFromPostal((owner as any).postal_code),
       };
+      // Lot ALR2 (constat A1) : sans position du propriétaire, la commune de
+      // l'annonce, comme le déclencheur du récapitulatif (lot ALR1).
+      if (sitLocation.lat == null || sitLocation.lon == null) {
+        const key = cacheCityKey(sit.city || (owner as any).city);
+        if (key) {
+          const { data: gc, error: gcErr } = await supabase
+            .from("geocode_cache")
+            .select("lat, lng")
+            .eq("normalized_name", key)
+            .limit(1)
+            .maybeSingle();
+          if (gcErr) errors.push(`geocode_cache ${sit.id}: ${gcErr.message}`);
+          else if (gc && (gc as any).lat != null && (gc as any).lng != null) {
+            sitLocation.lat = Number((gc as any).lat);
+            sitLocation.lon = Number((gc as any).lng);
+            metrics.location_from_city += 1;
+          }
+        }
+      }
+
+      // Lot ALR2 : gardiens sans zone d'alerte, servis à 30 km de leur profil.
+      const sitZones: any[] = [...zones];
+      if (sitLocation.lat != null && sitLocation.lon != null) {
+        const box = boundingBox(sitLocation.lat, sitLocation.lon, DEFAULT_ALERT_RADIUS_KM);
+        const { data: around, error: aroundErr } = await supabase
+          .from("profiles")
+          .select("id, latitude, longitude")
+          .in("role", ["sitter", "both"])
+          .gte("latitude", box.minLat)
+          .lte("latitude", box.maxLat)
+          .gte("longitude", box.minLon)
+          .lte("longitude", box.maxLon)
+          .order("id", { ascending: true })
+          .limit(2000);
+        if (aroundErr) {
+          errors.push(`default zone ${sit.id}: ${aroundErr.message}`);
+        } else {
+          const implicit = defaultZonesFor(
+            { lat: sitLocation.lat, lon: sitLocation.lon },
+            (around ?? []) as any[],
+            usersWithZone,
+            sit.user_id,
+          );
+          sitZones.push(...implicit);
+        }
+      }
       const ownerFirstName = toTitleCase((owner as any).first_name);
       // Lot Q1 : garde lointaine (propriétaire loin de la France, ou gardien à plus de 200 km).
       const ownerFar = isOwnerFarFromFrance((owner as any).latitude, (owner as any).longitude);
@@ -353,7 +431,7 @@ Deno.serve(async (req) => {
         }
       }
 
-      const candidateIds = [...new Set(zones.map((z: any) => z.user_id as string))].filter(
+      const candidateIds = [...new Set(sitZones.map((z: any) => z.user_id as string))].filter(
         (id) => id !== sit.user_id,
       );
       if (candidateIds.length === 0) continue;
@@ -406,7 +484,7 @@ Deno.serve(async (req) => {
       };
       const targets: Target[] = [];
       const seen = new Set<string>();
-      for (const zone of zones as any[]) {
+      for (const zone of sitZones as any[]) {
         if (seen.has(zone.user_id)) continue;
         const sitter = sitterById.get(zone.user_id);
         if (!sitter) continue;
@@ -417,7 +495,7 @@ Deno.serve(async (req) => {
         if (suppressed.has(String(sitter.email).toLowerCase())) continue;
 
         const verdict = zoneMatches(
-          { zone_type: zone.zone_type, radius_km: zone.radius_km, departement: zone.departement },
+          { zone_type: zone.zone_type, radius_km: zone.radius_km, departement: zone.departement, region_code: zone.region_code ?? null },
           sitLocation,
           { lat: sitter.latitude ?? null, lon: sitter.longitude ?? null, postal_code: sitter.postal_code ?? null },
         );
@@ -433,6 +511,7 @@ Deno.serve(async (req) => {
           // aucune priorite hors plafond.
           manual: zone.source === null || zone.source === undefined,
         });
+        if (zone.source === "alr2_position_profil") metrics.default_zone_targets += 1;
       }
 
       targets.sort((a, b) => (a.distance_km ?? 99999) - (b.distance_km ?? 99999));
