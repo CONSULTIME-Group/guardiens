@@ -16,6 +16,8 @@ import { endBootListings, takeBootListingsCounts } from "@/lib/listingsPrefetch"
 import type { ShownListState } from "@/components/search/SearchSitter";
 import InternationalShowcase from "@/components/listings/InternationalShowcase";
 import PastListingsSection from "@/components/listings/PastListingsSection";
+import { publishedThisWeekCount } from "@/lib/listingsWeek";
+import { itemListDescription } from "@/lib/itemListFacts";
 import SearchSeoFooter, { SEARCH_FAQ } from "@/components/search/SearchSeoFooter";
 
 const SearchSitter = lazyWithRetry(
@@ -44,6 +46,8 @@ export default function PublicListings() {
   const intlPending = intlCount === undefined;
   const [openCount, setOpenCount] = useState<number>(bootCounts?.openCount ?? 0);
   const [citiesCount, setCitiesCount] = useState<number>(bootCounts?.citiesCount ?? 0);
+  // Lot RCH7 : ouvertes publiées depuis 7 jours (surtitre).
+  const [weekCount, setWeekCount] = useState<number>(bootCounts?.weekCount ?? 0);
 
   const TITLE = t("public_listings.meta_title");
   const DESCRIPTION = t("public_listings.meta_description");
@@ -104,7 +108,7 @@ export default function PublicListings() {
     (async () => {
       // Lot L1 : ouvertes en France (FR strict), même population que la liste.
       const { data, count } = await applyOpenSitFilter(
-        supabase.from("sits").select("city", { count: "exact" }),
+        supabase.from("sits").select("city, published_at", { count: "exact" }),
       ).eq("country", "FR");
       if (cancelled) return;
       setOpenCount(count || 0);
@@ -114,6 +118,7 @@ export default function PublicListings() {
           .filter(Boolean),
       );
       setCitiesCount(cities.size);
+      setWeekCount(publishedThisWeekCount(data || []));
     })();
     return () => { cancelled = true; };
   }, []);
@@ -130,6 +135,8 @@ export default function PublicListings() {
       position: i + 1,
       url: `https://guardiens.fr${s.path}`,
       name: s.title || BREADCRUMB_LISTINGS,
+      // Lot RCH7 : animaux et commune de la garde, lisibles par les moteurs.
+      ...(itemListDescription(s) ? { description: itemListDescription(s) } : {}),
     })),
   } : null;
   const jsonld = itemListLd ? [...BASE_JSONLD, itemListLd] : BASE_JSONLD;
@@ -142,6 +149,9 @@ export default function PublicListings() {
         cities: citiesCount >= 2
           ? t("public_listings.cities_count", { count: citiesCount })
           : t("public_listings.all_france"),
+        fresh: weekCount > 0
+          ? t("public_listings.week_count", { count: weekCount })
+          : t("public_listings.fresh_daily"),
       })
     : t("public_listings.eyebrow");
 

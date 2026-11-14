@@ -94,14 +94,14 @@ describe("parité avec la vraie carte (lot perf 4)", () => {
     for (const c of hero) expect(page, c).toContain(c);
   });
 
-  it("au plus 12 cartes, en-tête de groupe comme la vraie liste", () => {
+  it("au plus 12 cartes, sans intertitre de groupe comme la vraie liste (lot RCH7)", () => {
     const d = data();
     d.open = Array.from({ length: 20 }, (_, i) => sit(`s${i}`));
     const html = bootListingsHtml(buildBootModel(d, TODAY), bootTexts(JSON.parse(readFileSync("src/i18n/locales/fr/common.json", "utf8"))), TODAY);
     const el = document.createElement("div");
     el.innerHTML = html;
     expect(el.querySelectorAll('[data-testid="search-card-boot"]')).toHaveLength(BOOT_VISIBLE);
-    expect(el.textContent).toContain("Annonces disponibles (20)");
+    expect(el.textContent).not.toContain("Annonces disponibles");
     expect(el.textContent).toContain("20 annonces ouvertes · France entière · mise à jour quotidienne");
     expect(el.querySelectorAll("h1")).toHaveLength(0);
   });

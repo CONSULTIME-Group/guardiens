@@ -66,7 +66,7 @@ export function bootEligibleSearch(search: string): boolean {
       const model = buildBootModel(data, today);
       if (model.active.length === 0) return;
       // Repris par PublicListings (takeBootListingsCounts) : mêmes lignes au relais.
-      w.__GUARDIENS_LISTINGS_COUNTS__ = { openCount: model.openCount, citiesCount: model.citiesCount, intlCount: model.intlCount, at: Date.now() };
+      w.__GUARDIENS_LISTINGS_COUNTS__ = { openCount: model.openCount, citiesCount: model.citiesCount, intlCount: model.intlCount, weekCount: model.weekCount, at: Date.now() };
       style = document.createElement("style");
       style.textContent = BOOT_CSS;
       document.head.appendChild(style);

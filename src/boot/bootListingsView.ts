@@ -24,6 +24,7 @@ import { STARTED_SIT_NOTICE, isStartedOpenSit } from "@/lib/sitStarted";
 import { petSpeciesCountLabel } from "@/lib/petLabels";
 import { isNewlyPublished, publishedAgoLabel } from "@/lib/publishedAgo";
 import type { ListingsPrefetch } from "@/lib/listingsPrefetch";
+import { publishedThisWeekCount } from "@/lib/listingsWeek";
 
 export interface BootTexts {
   h1: string;
@@ -34,6 +35,10 @@ export interface BootTexts {
   citiesOne: string;
   citiesOther: string;
   allFrance: string;
+  /** Lot RCH7 : « {{count}} publiée(s) cette semaine », sinon « mise à jour quotidienne ». */
+  weekOne: string;
+  weekOther: string;
+  freshDaily: string;
   seeAlsoMissions: string;
   localGuides: string;
   pricing: string;
@@ -80,6 +85,8 @@ export interface BootModel {
   openCount: number;
   citiesCount: number;
   intlCount: number;
+  /** Lot RCH7 : ouvertes en France publiées depuis 7 jours. */
+  weekCount: number;
 }
 
 /** Même population et même ordre que SearchSitter pour un visiteur sans ville. */
@@ -121,7 +128,7 @@ export function buildBootModel(data: ListingsPrefetch, today: string): BootModel
   const openFr = data.open.filter((s: any) => isOpenSit(s, today) && s.country === "FR");
   const cities = new Set(openFr.map((s: any) => (s.city || "").trim().toLowerCase()).filter(Boolean));
   const intlCount = data.open.filter((s: any) => isOpenSit(s, today) && isAbroadPlace({ ...s, owner: ownerById.get(s.user_id) ?? null })).length;
-  return { active, inactiveCount, openCount: openFr.length, citiesCount: cities.size, intlCount };
+  return { active, inactiveCount, openCount: openFr.length, citiesCount: cities.size, intlCount, weekCount: publishedThisWeekCount(openFr) };
 }
 
 /** Carte d'annonce, mêmes classes que SearchListingCard (carte « sit », visiteur). */
@@ -184,6 +191,9 @@ export function bootListingsHtml(model: BootModel, texts: BootTexts, today: stri
     ? plural(model.openCount, texts.eyebrowStatsOne, texts.eyebrowStatsOther).replace(
         /\{\{cities\}\}/g,
         model.citiesCount >= 2 ? plural(model.citiesCount, texts.citiesOne, texts.citiesOther) : texts.allFrance,
+      ).replace(
+        /\{\{fresh\}\}/g,
+        model.weekCount > 0 ? plural(model.weekCount, texts.weekOne, texts.weekOther) : texts.freshDaily,
       )
     : texts.eyebrow;
   const intlLabel = escapeHtml(plural(model.intlCount, texts.intlOne, texts.intlOther));
@@ -212,9 +222,8 @@ export function bootListingsHtml(model: BootModel, texts: BootTexts, today: stri
   // 767 px, 227 px au-delà, marge haute de la liste comprise).
   const controls = `<div class="boot-controls" aria-hidden="true"><div class="boot-row"><span class="boot-pill boot-wide"></span><span class="boot-pill boot-grow"></span></div><div class="boot-row"><span class="boot-pill"></span><span class="boot-pill"></span><span class="boot-pill"></span><span class="boot-pill"></span></div></div>`;
   const cards = model.active.slice(0, BOOT_VISIBLE).map((s, i) => bootCardHtml(s, i, today)).join("");
-  const header = model.inactiveCount > 0
-    ? `<div class="mb-4 flex items-baseline justify-between gap-3"><h3 class="font-heading text-base sm:text-lg font-semibold text-foreground">${escapeHtml(texts.groupAvailable)} <span class="text-muted-foreground font-normal">(${model.active.length})</span></h3></div>`
-    : "";
+  // Lot RCH7 : la vraie liste ne montre plus les annonces fermées (lot RCH3), donc aucun intertitre.
+  const header = "";
   const list = model.active.length > 0
     ? `<div class="px-6"><section class="mb-10">${header}<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-8 sm:gap-y-10">${cards}</div></section></div>`
     : "";

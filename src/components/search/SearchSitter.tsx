@@ -100,7 +100,9 @@ import { diffSearchInputs, formatTriggers, searchKey, triggerMotif, type SearchI
 import { NEAREST_OUTSIDE_SHOWN, NEAREST_OUTSIDE_THRESHOLD, nearestTierOf, pickNearestOutside, type NearestTier } from "@/lib/nearestOutsideZone";
 import { NearestOutsideSection } from "@/components/search/listing/NearestOutsideSection";
 import AlertActionLine from "@/components/search/listing/AlertActionLine";
+import OwnerVisitorLine from "@/components/search/listing/OwnerVisitorLine";
 import { isRadiusDeclared } from "@/lib/searchRadius";
+import { itemListPlace, itemListSpecies } from "@/lib/itemListFacts";
 import { ownerPublishHref } from "@/lib/almaVisitorSearch";
 import { applyOpenSitFilter, checkGeocodedPoint, communeDeptFromCoords, pointUsable, fetchAllPages, fetchInChunks, isEndedSit, isFrancePlace, isOpenSit, isPastSit, isWithinRadius, parisTodayIso, resolveSitPlace, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
@@ -156,7 +158,8 @@ interface SearchSitterProps {
 
 export type ShownListState = {
   status: "loading" | "ready" | "error";
-  items: { path: string; title: string | null }[];
+  /** Lot RCH7 : place (commune de la garde) et species (« 2 chats ») pour l'ItemList. */
+  items: { path: string; title: string | null; place?: string | null; species?: string | null }[];
 };
 
 const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProps = {}) => {
@@ -741,7 +744,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
      const real = tab === "sits" ? results.filter((r: any) => !r.is_demo) : [];
      const isInactive = (r: any) => r.isAssigned || r.isCompleted || r.isPast;
      const shown = [...real.filter((r: any) => !isInactive(r)).slice(0, visibleCount), ...real.filter(isInactive)];
-     state = { status: "ready", items: shown.map((r: any) => ({ path: sitPath(r), title: r.title ?? null })) };
+     state = { status: "ready", items: shown.map((r: any) => ({ path: sitPath(r), title: r.title ?? null, place: itemListPlace(r), species: itemListSpecies(r) })) };
    }
    const key = state.status + JSON.stringify(state.items);
    if (key === lastListKeyRef.current) return;
@@ -2827,16 +2830,11 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
                 );
                 // Lot RCH6 (décision 5) : visiteur, une ligne propriétaire après le premier groupe.
                 const ownerLine = isVisitor ? (
-                  <div key="owner-line" className="my-8 flex flex-col sm:flex-row sm:items-center gap-3 rounded-2xl border border-border bg-card px-4 py-4 sm:px-5" data-testid="owner-visitor-line">
-                    <p className="flex-1 text-[14px] text-foreground">Vous partez bientôt ? Votre annonce part par email aux gardiens proches de chez vous.</p>
-                    <Link
-                      to={city ? `/recherche-gardiens?ville=${encodeURIComponent(city)}` : ownerPublishHref(true, "annonces")}
-                      onClick={() => { try { void trackEvent("owner_publish_bar_clicked", { source: "annonces", metadata: { with_city: !!city } }); } catch { /* mesure facultative */ } }}
-                      className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border border-primary px-5 text-sm font-semibold text-primary hover:bg-primary/5"
-                    >
-                      {city ? `Voir les gardiens à ${city}` : "Publier ma garde"}
-                    </Link>
-                  </div>
+                  <OwnerVisitorLine
+                    key="owner-line"
+                    city={city || null}
+                    href={city ? `/recherche-gardiens?ville=${encodeURIComponent(city)}` : ownerPublishHref(true, "annonces")}
+                  />
                 ) : null;
                 if (!grouped) {
                   return <><div className={gridCls}>{visibleActive.map((item) => renderCard(item, globalIdx++))}</div>{alertLine}{ownerLine}</>;
