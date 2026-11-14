@@ -45,7 +45,7 @@ const StepMobility = ({ data, onChange }: Props) => {
           value={isRadiusDeclared(data.geographic_radius) ? String(data.geographic_radius) : ""}
           onChange={v => onChange({ geographic_radius: v === "" ? null : Number(v) })}
         />
-        <HintBubble>Sans réponse, nous retenons 100 km autour de chez vous. Choisissez la distance qui vous convient vraiment : elle détermine les annonces que vous recevez.</HintBubble>
+        <HintBubble>Sans réponse, nous retenons 100 km autour de chez vous. Choisissez la distance qui vous convient vraiment : elle sert à vous proposer les gardes à votre portée.</HintBubble>
       </div>
 
       <TravelZonesField data={data} onChange={onChange} />

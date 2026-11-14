@@ -152,7 +152,7 @@ const ActivateRoleDialog = ({
       : "Vous avez aussi des animaux à faire garder ?";
     const description = hasContactIntent
       ? "Guardiens sépare les espaces gardien et propriétaire. Pour envoyer un message côté propriétaire, activez votre profil propriétaire en un clic."
-      : "L'espace propriétaire coûte 0 €. Activez-le en un clic pour publier des annonces et trouver un gardien près de chez vous.";
+      : "Guardiens est gratuit. Activez l'espace propriétaire en un clic pour publier des annonces et trouver un gardien près de chez vous.";
     const primaryLabel = hasContactIntent
       ? loading
         ? "Activation..."

@@ -263,7 +263,7 @@ const ParrainagePage = () => {
           <CardContent>
             <ol className="space-y-2 text-sm text-muted-foreground font-body list-decimal pl-5">
               <li>Vous partagez votre lien personnel à un proche.</li>
-              <li>Votre filleul crée son compte, 0 €, via votre lien.</li>
+              <li>Votre filleul crée son compte via votre lien.</li>
               <li>Dès qu'il active son espace, son inscription compte dans vos filleuls.</li>
               <li>À 3, 5 puis 10 filleuls, vous débloquez les paliers de récompense.</li>
             </ol>

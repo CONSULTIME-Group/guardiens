@@ -19,7 +19,7 @@ const jsonLd = {
         "Guide complet pour devenir home-sitter : créer votre profil, gagner la confiance des propriétaires, décrocher vos premières gardes à domicile.",
       url: URL,
       step: [
-        { "@type": "HowToStep", position: 1, name: "Créer votre profil gardien", text: "Inscrivez-vous, 0 €, complétez votre bio, ajoutez vos expériences avec les animaux et vérifiez votre identité." },
+        { "@type": "HowToStep", position: 1, name: "Créer votre profil gardien", text: "Inscrivez-vous, complétez votre bio, ajoutez vos expériences avec les animaux et vérifiez votre identité." },
         { "@type": "HowToStep", position: 2, name: "Renseigner votre zone et vos disponibilités", text: "Indiquez la ville où vous pouvez garder, votre rayon d'intervention et vos créneaux disponibles." },
         { "@type": "HowToStep", position: 3, name: "Candidater aux annonces", text: "Parcourez les gardes proposées près de chez vous. Personnalisez chaque message pour convaincre le propriétaire." },
         { "@type": "HowToStep", position: 4, name: "Échanger et faire connaissance", text: "Discutez via la messagerie sécurisée et proposez, si vous le souhaitez, une rencontre avec l'animal et les propriétaires." },
@@ -131,7 +131,7 @@ export default function DevenirHomeSitter() {
             </h2>
             <ol>
               <li>
-                <strong>Créer votre profil.</strong> Inscription : 0 €. Photo
+                <strong>Créer votre profil.</strong> Guardiens est gratuit. Photo
                 claire, bio honnête, expériences animales détaillées.
               </li>
               <li>
@@ -214,7 +214,7 @@ export default function DevenirHomeSitter() {
                 Prêt à devenir home-sitter ?
               </h2>
               <p className="text-muted-foreground m-0">
-                Créez votre profil, 0 €, et candidatez aux gardes près
+                Créez votre profil et candidatez aux gardes près
                 de chez vous.
               </p>
               <div className="flex flex-wrap gap-3">

@@ -1750,6 +1750,11 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  ? t("search_results.count_members", { count: resultCount })
   : resultCount === 0 && demoCount > 0
   ? t("search_results.count_demo", { count: demoCount })
+ // Lot RCH2 (14/11/2026) : sous un rayon vide, la ligne dit la distance de
+ // la garde la plus proche affichée dessous, plus jamais « Aucune annonce
+ // ouverte près de {ville} » au-dessus d'une garde à 17 km.
+ : resultCount === 0 && tab === "sits" && appliedZone === "radius" && nearestShown.length > 0 && typeof nearestShown[0]?.distance === "number"
+ ? t("search_results.count_calm_radius", { radius: radius[0], km: Math.max(1, Math.round(nearestShown[0].distance)) })
  : resultCount === 0
  ? (city ? t("search_results.count_none_city", { city }) : t("search_results.count_none"))
  : tab !== "sits"
@@ -2095,7 +2100,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  {/* ─── Sort bar + view toggle (sticky avec les pills pour cohérence visuelle) ─── */}
  <div className="flex justify-between items-center gap-2 px-4 sm:px-6 py-2 border-t border-border/60 bg-background flex-nowrap">
  <div className="flex items-center gap-2 min-w-0 flex-1">
- <span role="status" aria-live="polite" className="text-xs sm:text-sm text-muted-foreground truncate flex-1 min-w-0" title={countLabel}>{refreshing ? t("search_results.refreshing") : loading ? t("search_results.searching") : countLabel}</span>
+ <span role="status" aria-live="polite" className="text-sm text-foreground/80 line-clamp-2 flex-1 min-w-0" title={countLabel}>{refreshing ? t("search_results.refreshing") : loading ? t("search_results.searching") : countLabel}</span>
  <Select value={sort} onValueChange={(v) => handleSortChange(v as SortOption)}>
  <SelectTrigger className="h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs shrink-0">
  <span className="text-muted-foreground hidden sm:inline">{t("search_results.sort_label")}&nbsp;</span>

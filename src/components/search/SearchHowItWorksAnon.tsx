@@ -24,7 +24,7 @@ const STEPS = [
   {
     n: "2",
     title: "Inscrivez-vous et postulez",
-    text: "Créez votre profil gardien, 0 €, présentez votre expérience et postulez aux annonces qui correspondent à votre disponibilité.",
+    text: "Créez votre profil gardien, présentez votre expérience et postulez aux annonces qui correspondent à votre disponibilité.",
   },
   {
     n: "3",
@@ -43,8 +43,8 @@ const TRUST = [
     text: "Chaque garde réalisée donne lieu à un avis croisé propriétaire / gardien, non modifiable.",
   },
   {
-    title: "Rencontre conseillée",
-    text: "Nous vous conseillons une rencontre avant la confirmation pour valider la confiance mutuelle.",
+    title: "Rencontre à votre choix",
+    text: "Une rencontre avant la garde reste possible, si vous le souhaitez tous les deux.",
   },
   {
     title: "Score de confiance",
@@ -122,15 +122,12 @@ const SearchHowItWorksAnon = () => (
             Prêt à postuler à votre première garde ?
           </p>
           <p className="text-sm text-muted-foreground mt-1">
-            Inscription : 0 €. L'espace gardien est gratuit.
+            Guardiens est gratuit.
           </p>
         </div>
         <div className="flex gap-2 shrink-0">
           <Button asChild size="lg">
-            <Link to="/inscription">Inscription : 0 €</Link>
-          </Button>
-          <Button asChild size="lg" variant="outline">
-            <Link to="/tarifs">Voir les tarifs</Link>
+            <Link to="/inscription">Créer mon compte</Link>
           </Button>
         </div>
       </div>
