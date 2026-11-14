@@ -33,6 +33,9 @@ describe("COR1, en-tête de la v10 avant le 16/11", () => {
       "Version 10, publiée le 14 novembre 2026, en vigueur le 14 décembre 2026. La version 8 s'applique jusqu'au 16 novembre 2026, puis la version 9 jusqu'à cette date.",
     );
     expect(legalVersionHeading("cgu", "10", "2026-11-20")).toContain("La version 9 reste applicable jusqu'à cette date.");
+  });
+});
+
 describe("CGU10b, audit juridique du 14/11", () => {
   const t = readFileSync("src/components/legal/TermsV10.tsx", "utf8");
   it("ce qui se passe hors de la Plateforme relève des membres", () => {
