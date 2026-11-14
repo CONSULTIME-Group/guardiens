@@ -11,6 +11,8 @@ const Toaster = optionalLazy(() => import("@/components/ui/toaster").then((m) =>
 const Sonner = optionalLazy(() => import("@/components/ui/sonner").then((m) => ({ default: m.Toaster })));
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { registerAppQueryClient } from "@/lib/appQueryClient";
+import ShortLinkRedirect from "@/components/analytics/ShortLinkRedirect";
+import { SHORT_LINKS } from "@/lib/shortLinks";
 import { BrowserRouter, Route, Routes, Navigate, useParams, useLocation, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
@@ -497,6 +499,10 @@ const AppRoutes = () => {
       <Route path="/messagerie" element={<Navigate to="/messages" replace />} />
       <Route path="/tableau-de-bord" element={<Navigate to="/dashboard" replace />} />
       <Route path="/register" element={<RegisterRedirect />} />
+      {/* Lot SRC3 : liens courts des réseaux sociaux, UTM ajoutés à la redirection. */}
+      {Object.keys(SHORT_LINKS).map((slug) => (
+        <Route key={slug} path={`/${slug}`} element={<ShortLinkRedirect slug={slug} />} />
+      ))}
       <Route path="/inscription" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
       <Route path="/auth/confirm" element={<AuthConfirm />} />
       {/* Lot X2 : anciens liens de /devenir-home-sitter (404 au 13/10/2026). */}
