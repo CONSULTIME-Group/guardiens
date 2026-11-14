@@ -44,8 +44,9 @@ describe("arrêt des seules alertes sorties", () => {
     expect(sender).toContain("if (UNSUBSCRIBE_LINK_TEMPLATES.has(templateName) || templateName === OUTING_ALERT_TEMPLATE) {");
   });
   it("le bouton de désinscription de la messagerie coupe les sorties, pas le reste", () => {
-    expect(sender).toContain("templateName === OUTING_ALERT_TEMPLATE ? '&scope=outing' : ''");
-    expect(unsub).toContain("unsubscribeAll = scope !== 'outing'");
+    // Lot ALR6 : hors sorties, le clic coupe la famille de l'email reçu.
+    expect(sender).toContain("templateName === OUTING_ALERT_TEMPLATE ? '&scope=outing' : `&category=");
+    expect(unsub).toContain("if (scope !== 'outing') {");
     expect(unsub).toContain("supabase.rpc('outing_alerts_set_by_token', { p_token: token, p_enabled: false })");
     expect(unsub.indexOf("scope === 'outing'")).toBeLessThan(unsub.indexOf(".from('email_unsubscribe_tokens')\n    .select('*')"));
   });

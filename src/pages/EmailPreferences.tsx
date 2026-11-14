@@ -135,6 +135,14 @@ const EmailPreferences = () => {
       p_sit_alert_frequency: prefs.sit_alert_frequency,
       p_mutual_aid_frequency: prefs.mutual_aid_frequency,
     } as any);
+    // Lot ALR6 : garder au moins une famille lève une ancienne désinscription
+    // totale (clic de messagerie d'avant le 14/11/2026), sinon rien ne partait.
+    const keepsAFamily =
+      prefs.product_emails || prefs.sit_alert_frequency !== "none" || prefs.mutual_aid_frequency !== "none";
+    if (!error && keepsAFamily) {
+      const { error: liftError } = await supabase.rpc("lift_my_unsubscribe" as any);
+      if (liftError) console.warn("[email-preferences] lift_my_unsubscribe", liftError.message);
+    }
     setSaving(false);
     if (error) toast.error("Impossible d'enregistrer vos préférences");
     else toast.success("Préférences enregistrées");

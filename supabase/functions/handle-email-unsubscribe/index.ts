@@ -6,6 +6,9 @@ const corsHeaders = {
     'authorization, x-client-info, apikey, content-type',
 }
 
+// Lot ALR6 : familles d'emails que le membre règle lui-même.
+const FAMILIES = ['product', 'digest', 'alert']
+
 function jsonResponse(data: Record<string, unknown>, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
@@ -38,13 +41,22 @@ Deno.serve(async (req) => {
   const scope: string | null = url.searchParams.get('scope')
   let categoriesPayload: { product?: boolean; digest?: boolean; alert?: boolean } | null = null
   let unsubscribeAll = false
+  let oneClickFamily: string | null = null
+  let oneClickAllFamilies = false
   let requestEmail: string | null = null
 
   if (req.method === 'POST') {
     const contentType = req.headers.get('content-type') ?? ''
     if (contentType.includes('application/x-www-form-urlencoded')) {
-      // RFC 8058 one-click → suppress entirely, sauf portée « outing » (lot SORT4)
-      unsubscribeAll = scope !== 'outing'
+      // RFC 8058 one-click. Lot ALR6 (14/11/2026) : le clic coupe la famille
+      // de l'email reçu (paramètre category posé par send-transactional-email).
+      // Sans famille (email envoyé avant le lot), il coupe les trois familles,
+      // sans liste de suppression : messages des membres, candidatures et
+      // emails de service continuent. Portée « outing » : lot SORT4.
+      if (scope !== 'outing') {
+        if (category && FAMILIES.includes(category)) oneClickFamily = category
+        else oneClickAllFamilies = true
+      }
     } else {
       try {
         const body = await req.json()
@@ -144,9 +156,12 @@ Deno.serve(async (req) => {
     const { data: prefs } = await supabase
       .rpc('get_email_preferences_by_email', { p_email: tokenRecord.email.toLowerCase() })
       .maybeSingle()
+    // Lot ALR6 : le lien reste un lien de gestion, même après une ancienne
+    // désinscription totale : le membre retrouve ses réglages et peut rallumer
+    // une famille (ce qui lève l'ancienne liste de suppression).
     return jsonResponse({
-      valid: !tokenRecord.used_at,
-      already_unsubscribed: !!tokenRecord.used_at,
+      valid: true,
+      already_unsubscribed: false,
       email: tokenRecord.email,
       preferences: prefs ?? null,
     })
@@ -154,8 +169,18 @@ Deno.serve(async (req) => {
 
   // === POST branches ===
 
+  // Lot ALR6 : « Tout désactiver » de la page et clic de la messagerie sans
+  // famille = les trois familles coupées, sans liste de suppression.
+  if (unsubscribeAll || oneClickAllFamilies) {
+    categoriesPayload = { product: false, digest: false, alert: false }
+    unsubscribeAll = false
+  }
+  if (oneClickFamily) {
+    category = oneClickFamily
+  }
+
   // Branch A: Category-only opt-out (token NOT consumed — user can still tweak more)
-  if (!unsubscribeAll && (category || categoriesPayload)) {
+  if (category || categoriesPayload) {
     // Build patch
     const patch: { product: boolean | null; digest: boolean | null; alert: boolean | null } = {
       product: null, digest: null, alert: null,
@@ -188,50 +213,35 @@ Deno.serve(async (req) => {
       console.error('Category preference update failed', rpcErr)
       return jsonResponse({ error: 'Could not update preferences' }, 500)
     }
+    // Lot ALR6 : une famille rallumée lève une ancienne désinscription
+    // totale (motif unsubscribe seulement ; plaintes et rebonds restent).
+    if (finalProduct || finalDigest || finalAlert) {
+      const { error: liftErr } = await supabase
+        .from('suppressed_emails')
+        .delete()
+        .eq('email', tokenRecord.email.toLowerCase())
+        .eq('reason', 'unsubscribe')
+      if (liftErr) console.error('Unsubscribe suppression lift failed', liftErr)
+      // Le jeton consommé par l'ancienne désinscription totale bloquait aussi
+      // tout envoi (garde-fou de send-transactional-email) : il redevient actif.
+      if (!liftErr && tokenRecord.used_at) {
+        const { error: tokErr } = await supabase
+          .from('email_unsubscribe_tokens')
+          .update({ used_at: null })
+          .eq('token', token)
+        if (tokErr) console.error('Unsubscribe token reset failed', tokErr)
+      }
+    }
+    const allOff = !finalProduct && !finalDigest && !finalAlert
     return jsonResponse({
       success: true,
-      mode: 'category',
+      mode: allOff ? 'all' : 'category',
       preferences: { product_emails: finalProduct, digest_emails: finalDigest, alert_emails: finalAlert },
     })
   }
 
-  // Branch B: full unsubscribe (legacy / one-click) → suppress + consume token
-  if (tokenRecord.used_at) {
-    return jsonResponse({ success: false, reason: 'already_unsubscribed' })
-  }
-
-  const { data: updated, error: updateError } = await supabase
-    .from('email_unsubscribe_tokens')
-    .update({ used_at: new Date().toISOString() })
-    .eq('token', token)
-    .is('used_at', null)
-    .select()
-    .maybeSingle()
-
-  if (updateError) {
-    console.error('Failed to mark token as used', { error: updateError, token })
-    return jsonResponse({ error: 'Failed to process unsubscribe' }, 500)
-  }
-  if (!updated) {
-    return jsonResponse({ success: false, reason: 'already_unsubscribed' })
-  }
-
-  const { error: suppressError } = await supabase
-    .from('suppressed_emails')
-    .upsert(
-      { email: tokenRecord.email.toLowerCase(), reason: 'unsubscribe' },
-      { onConflict: 'email' },
-    )
-  if (suppressError) {
-    console.error('Failed to suppress email', { error: suppressError, email: tokenRecord.email })
-    return jsonResponse({ error: 'Failed to process unsubscribe' }, 500)
-  }
-
-  // Also flip all categories off for the linked user (defensive — suppression already blocks all)
-  await supabase.rpc('set_email_preferences_by_token', {
-    p_token: token, p_product: false, p_digest: false, p_alert: false,
-  })
-
-  console.log('Email unsubscribed (full)', { email: tokenRecord.email })
-  return jsonResponse({ success: true, mode: 'all' })
+  // Lot ALR6 : plus de désinscription totale par liste de suppression depuis
+  // un lien ; seuls les rebonds et les plaintes y entrent (et la suppression
+  // de compte). Une requête sans famille ni choix n'a rien à faire.
+  return jsonResponse({ error: 'Nothing to update' }, 400)
 })
