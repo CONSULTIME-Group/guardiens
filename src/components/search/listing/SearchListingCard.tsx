@@ -470,7 +470,9 @@ const SearchListingCard = ({
   );
 
   if (isClickable) {
-    return <Link to={linkTo}>{cardContent}</Link>;
+    // Lot RCH1 (14/11/2026) : la fiche ouverte sait qu'elle vient de la
+    // recherche (sit_view.metadata.from), redirection comprise.
+    return <Link to={linkTo} state={{ from: "search" }}>{cardContent}</Link>;
   }
   return <>{cardContent}</>;
 };
