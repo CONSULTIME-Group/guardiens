@@ -95,7 +95,9 @@ describe("branchement de la recherche", () => {
   });
   it("section sous moins de 3 gardes ouvertes, bandeau hors zone et bulle Alma masqués", () => {
     expect(src).toContain("openInRadius < NEAREST_OUTSIDE_THRESHOLD ? nearestFiltered.slice(0, NEAREST_OUTSIDE_SHOWN) : []");
-    expect(src).toContain("const showOutOfZone = nearestShown.length === 0 &&");
+    // Lot RCH1 : la règle vit dans outOfZoneShown, partagée avec la mesure.
+    expect(src).toContain("const outOfZoneShown = nearestShown.length === 0 &&");
+    expect(src).toContain("const showOutOfZone = outOfZoneShown;");
     expect(src).toContain("{nearestShown.length === 0 && (\n      <AlmaEmptySearchBubble");
   });
   it("aucune annonce d'exemple mêlée aux gardes réelles proches, card_source mesuré", () => {

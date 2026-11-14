@@ -9,7 +9,8 @@
  * Le détail des comportements vit dans les sous-vues.
  */
 import { Suspense, useState, useEffect, useCallback, useRef } from "react";
-import { useParams, Link, Navigate, useSearchParams } from "react-router-dom";
+import { useParams, Link, Navigate, useSearchParams, useLocation } from "react-router-dom";
+import { viewFromState } from "@/lib/sitViewSource";
 import Head from "@/components/seo/Head";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -81,6 +82,7 @@ const fallbackImageForGeo = (city: string | null, country: string | null): strin
 
 const SitDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const { user, activeRole, switchRole } = useAuth();
   useEffect(() => {
     void (activeRole === "owner" ? loadOwnerView() : loadSitterView()).catch(() => {});
@@ -384,7 +386,7 @@ const SitDetail = () => {
     try {
       trackEvent("sit_view", {
         source: "/sits/:id",
-        metadata: { sit_id: sit.id, viewer_type: viewerType },
+        metadata: { sit_id: sit.id, viewer_type: viewerType, from: viewFromState(location.state) },
       });
     } catch {}
   }, [sit?.id, user, activeRole]);
