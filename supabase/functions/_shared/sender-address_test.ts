@@ -1,5 +1,5 @@
 import { assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts'
-import { transactionalSender, CONTACT_REPLY_ADDRESS, REPLY_TO_ADDRESS, FOUNDER_CAMPAIGN_TEMPLATES } from './sender-address.ts'
+import { transactionalSender, CONTACT_REPLY_ADDRESS, REPLY_TO_ADDRESS, FOUNDER_CAMPAIGN_TEMPLATES, personSenderFrom } from './sender-address.ts'
 
 Deno.test('gabarits des fondateurs : nom affiché et reply_to contact@guardiens.fr', () => {
   assertEquals(FOUNDER_CAMPAIGN_TEMPLATES.length, 3)
@@ -15,4 +15,11 @@ Deno.test('contact-reply garde Guardiens et la même adresse de réponse', () =>
 })
 Deno.test('autres gabarits : Guardiens, sans reply_to', () => {
   assertEquals(transactionalSender('sit-confirmed', 'Guardiens', 'guardiens.fr'), { from: 'Guardiens <noreply@guardiens.fr>' })
+})
+
+Deno.test('personSenderFrom : prénom nettoyé, adresse de Guardiens', () => {
+  assertEquals(personSenderFrom('Maria Elisa', 'guardiens.fr'), '"Maria Elisa via Guardiens" <noreply@guardiens.fr>')
+  assertEquals(personSenderFrom('Jo"<x@y.z>', 'guardiens.fr'), '"Jo x y.z via Guardiens" <noreply@guardiens.fr>')
+  assertEquals(personSenderFrom('', 'guardiens.fr'), null)
+  assertEquals(personSenderFrom(undefined, 'guardiens.fr'), null)
 })

@@ -12,7 +12,7 @@ import { getEmailCategory, type EmailCategory } from '../_shared/email-categorie
 import { bypassesSuppression } from '../_shared/email-suppression.ts'
 import { checkNotificationPreference, notificationPreferenceFor, readNotificationPreferencesByEmail } from '../_shared/notification-preferences.ts'
 import { evaluateSitAlert, isSitStatusGuardedTemplate } from '../_shared/sit-alert-guard.ts'
-import { REPLY_TO_ADDRESS, transactionalSender } from '../_shared/sender-address.ts'
+import { REPLY_TO_ADDRESS, personSenderFrom, transactionalSender } from '../_shared/sender-address.ts'
 import { wrapEmailLink } from '../_shared/email-link-wrap.ts'
 // Prénom affiché : nettoyage et capitalisation, source unique partagée.
 import { normalizeEmailFirstNames } from '../_shared/email-first-name.ts'
@@ -85,6 +85,9 @@ const SENDER_DOMAIN = "notify.guardiens.fr"
 // When display_from_root is enabled, this can be the root domain for cleaner branding,
 // even though actual sending uses the subdomain above.
 const FROM_DOMAIN = "guardiens.fr"
+
+// Lot EML1 (14/11/2026) : gabarits envoyés sans le suivi du prestataire.
+const PROVIDER_TRACKING_OFF: ReadonlySet<string> = new Set(['outing-update'])
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -1613,8 +1616,12 @@ Deno.serve(async (req) => {
   }
 
   const sender = transactionalSender(templateName, SITE_NAME, FROM_DOMAIN)
+  // Lot EML1 : l'inscription à une sortie part au nom de la personne.
+  const personFrom = templateName === 'outing-update' && templateData?.kind === 'joined'
+    ? personSenderFrom(templateData?.actor?.firstName, FROM_DOMAIN)
+    : null
   const resendPayload: Record<string, unknown> = {
-    from: sender.from,
+    from: personFrom ?? sender.from,
     to: [effectiveRecipient],
     subject: resolvedSubject,
     html,
@@ -1622,7 +1629,11 @@ Deno.serve(async (req) => {
     // Activation explicite du tracking Resend (pixel d'ouverture + réécriture des liens).
     // Sans cette clé, les envois transactionnels remontent 0 open / 0 click dans email_send_log
     // (le webhook resend-webhook ne reçoit alors que delivered / bounced / complained).
-    tracking: { opens: true, clicks: true },
+    // Lot EML1 : les emails d'une personne à une personne gardent le seul
+    // suivi de Guardiens (pixel et /go). Le double suivi du prestataire
+    // (second pixel, liens réécrits vers un domaine tiers) range l'email
+    // parmi les promotions de Gmail.
+    tracking: PROVIDER_TRACKING_OFF.has(templateName) ? { opens: false, clicks: false } : { opens: true, clicks: true },
   }
   if (Object.keys(headers).length > 0) {
     resendPayload.headers = headers
