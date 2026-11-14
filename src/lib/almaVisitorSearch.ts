@@ -15,6 +15,12 @@ export const VISITOR_ALERT_PARAM = "alerte";
 /** Destination de « Vous partez ? Publiez votre annonce » pour un visiteur. */
 export const VISITOR_OWNER_PUBLISH_SIGNUP_URL = `/inscription?role=owner&redirect=${encodeURIComponent("/sits/create")}`;
 
+/** Lot RCH6 : « Publier ma garde » avec son origine mesurée (?via=), visiteur ou membre. */
+export function ownerPublishHref(isVisitor: boolean, via: "recherche_gardiens" | "annonces"): string {
+  const target = `/sits/create?via=${via}`;
+  return isVisitor ? `/inscription?role=owner&redirect=${encodeURIComponent(target)}` : target;
+}
+
 /**
  * Recherche courante (chemin et requête), avec la zone quand elle diffère du
  * rayon (la zone n'est pas recopiée dans l'URL par la recherche) et le

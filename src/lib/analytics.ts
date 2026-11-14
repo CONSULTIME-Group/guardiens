@@ -227,6 +227,7 @@ export type EventType =
   | "see_all_sits_clicked"             // Clic "Voir toutes les annonces" (source)
   | "sitter_no_nearby_empty_state_seen" // 1×/session (total_published, radius_km)
   | "sitter_alert_subscribed"          // Inscription alerte (type, radius_km)
+  | "owner_publish_bar_clicked"        // Lot RCH6 : « Publier ma garde » depuis /recherche-gardiens ou /annonces (source)
   | "sitter_alert_modify_radius"       // Modification du rayon (old_km, new_km)
   | "sitter_secondary_card_clicked"    // Clic carte secondaire (type: missions|breeds|guides)
   | "sitter_alert_confirmation_seen"   // Toast/message post-inscription alerte (radius_km)

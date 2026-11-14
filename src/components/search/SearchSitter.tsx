@@ -101,6 +101,7 @@ import { NEAREST_OUTSIDE_SHOWN, NEAREST_OUTSIDE_THRESHOLD, nearestTierOf, pickNe
 import { NearestOutsideSection } from "@/components/search/listing/NearestOutsideSection";
 import AlertActionLine from "@/components/search/listing/AlertActionLine";
 import { isRadiusDeclared } from "@/lib/searchRadius";
+import { ownerPublishHref } from "@/lib/almaVisitorSearch";
 import { applyOpenSitFilter, checkGeocodedPoint, communeDeptFromCoords, pointUsable, fetchAllPages, fetchInChunks, isEndedSit, isFrancePlace, isOpenSit, isPastSit, isWithinRadius, parisTodayIso, resolveSitPlace, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -2824,8 +2825,21 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
                     homeCity={userCity || null}
                   />
                 );
+                // Lot RCH6 (décision 5) : visiteur, une ligne propriétaire après le premier groupe.
+                const ownerLine = isVisitor ? (
+                  <div key="owner-line" className="my-8 flex flex-col sm:flex-row sm:items-center gap-3 rounded-2xl border border-border bg-card px-4 py-4 sm:px-5" data-testid="owner-visitor-line">
+                    <p className="flex-1 text-[14px] text-foreground">Vous partez bientôt ? Votre annonce part par email aux gardiens proches de chez vous.</p>
+                    <Link
+                      to={city ? `/recherche-gardiens?ville=${encodeURIComponent(city)}` : ownerPublishHref(true, "annonces")}
+                      onClick={() => { try { void trackEvent("owner_publish_bar_clicked", { source: "annonces", metadata: { with_city: !!city } }); } catch { /* mesure facultative */ } }}
+                      className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border border-primary px-5 text-sm font-semibold text-primary hover:bg-primary/5"
+                    >
+                      {city ? `Voir les gardiens à ${city}` : "Publier ma garde"}
+                    </Link>
+                  </div>
+                ) : null;
                 if (!grouped) {
-                  return <><div className={gridCls}>{visibleActive.map((item) => renderCard(item, globalIdx++))}</div>{alertLine}</>;
+                  return <><div className={gridCls}>{visibleActive.map((item) => renderCard(item, globalIdx++))}</div>{alertLine}{ownerLine}</>;
                 }
                 let alertPlaced = false;
                 const band = (r: any) => (typeof r.distance !== "number" ? 2 : r.distance < 30 ? 0 : r.distance <= 100 ? 1 : 2);
@@ -2843,6 +2857,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
                       </h3>
                       <div className={gridCls}>{shownInBand.map((item) => renderCard(item, globalIdx++))}</div>
                       {withLine && alertLine}
+                      {withLine && ownerLine}
                     </div>
                   );
                 });
