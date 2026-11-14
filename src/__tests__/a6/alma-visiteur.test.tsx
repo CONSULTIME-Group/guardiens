@@ -281,7 +281,9 @@ describe("A6 · carte Alma des profils publics", () => {
 
   it("le profil public passe l'inscription au visiteur seulement", () => {
     const src = readFileSync("src/pages/PublicSitterProfile.tsx", "utf8");
-    expect(src.match(/signupHref=\{!isAuthenticated && !hasSession \? profileSignupHref\(/g)?.length).toBe(2);
+    // Lot FG1 (14/11/2026) : l'onglet gardien n'a plus de carte Alma, le visiteur
+    // s'inscrit depuis l'en-tête et la carte contact ; l'onglet propriétaire la garde.
+    expect(src.match(/signupHref=\{!isAuthenticated && !hasSession \? profileSignupHref\(/g)?.length).toBe(1);
     expect(readFileSync("src/components/profile/AlmaWhisperCard.tsx", "utf8")).not.toMatch(/openAlmaDock/);
   });
 });

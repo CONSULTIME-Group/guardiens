@@ -17,6 +17,7 @@ import MissionBadgesReceived from "@/components/missions/MissionBadgesReceived";
 import { avatarImageUrl } from "@/lib/storageImage";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import { responderTrust } from "@/lib/responderTrust";
+import { sitterProfileHref } from "@/lib/sitterProfileV2";
 
 interface Props {
   response: any;
@@ -157,18 +158,18 @@ const MissionResponseCard = ({
     >
       <div className="flex items-start gap-3 md:gap-4">
         {r.responder?.avatar_url ? (
-          <Link to={`/gardiens/${r.responder_id}`} className="shrink-0">
+          <Link to={sitterProfileHref(r.responder_id, "coup-de-main")} className="shrink-0">
             <img src={avatarImageUrl(r.responder.avatar_url, 48)} alt="" className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover" />
           </Link>
         ) : (
-          <Link to={`/gardiens/${r.responder_id}`} className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-muted flex items-center justify-center font-bold shrink-0">
+          <Link to={sitterProfileHref(r.responder_id, "coup-de-main")} className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-muted flex items-center justify-center font-bold shrink-0">
             {r.responder?.first_name?.charAt(0) || "?"}
           </Link>
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
             <Link
-              to={`/gardiens/${r.responder_id}`}
+              to={sitterProfileHref(r.responder_id, "coup-de-main")}
               className="font-semibold text-sm hover:underline inline-flex items-center gap-1.5"
             >
               {r.responder?.first_name || "Un membre"}

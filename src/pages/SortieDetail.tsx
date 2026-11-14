@@ -42,6 +42,7 @@ import { startConversationAndNavigate } from "@/lib/conversation";
 import { capitalizeFirstName } from "@/lib/displayName";
 import { trackEvent } from "@/lib/analytics";
 import { toast } from "sonner";
+import { sitterProfileHref } from "@/lib/sitterProfileV2";
 
 const JOIN_PARAM = "je-viens";
 
@@ -297,7 +298,13 @@ const SortieDetail = () => {
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Proposée par</p>
-            <p className="text-base font-semibold">{isOrganizer ? "Vous" : organizerName}</p>
+            {isOrganizer ? (
+              <p className="text-base font-semibold">Vous</p>
+            ) : (
+              <Link to={sitterProfileHref(outing.organizer_id, "sortie")} className="inline-flex min-h-11 items-center text-base font-semibold underline-offset-4 hover:underline">
+                {organizerName}
+              </Link>
+            )}
             <p className="text-sm text-muted-foreground">{[since, outing.organizer_identity_verified ? "Identité vérifiée" : null].filter(Boolean).join(" · ")}</p>
           </div>
         </div>
@@ -318,7 +325,9 @@ const SortieDetail = () => {
             {attendees.map((a) => (
               <div key={a.user_id} className="flex flex-col gap-2.5 rounded-2xl border border-border bg-card p-3.5">
                 <div>
-                  <p className="text-base font-semibold">{capitalizeFirstName(a.first_name) || "Un membre"}</p>
+                  <Link to={sitterProfileHref(a.user_id, "sortie")} className="inline-flex min-h-11 items-center text-base font-semibold underline-offset-4 hover:underline">
+                    {capitalizeFirstName(a.first_name) || "Un membre"}
+                  </Link>
                   <p className="text-sm text-muted-foreground">{[memberSince(a.member_since), a.identity_verified ? "Identité vérifiée" : null].filter(Boolean).join(" · ")}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-2">

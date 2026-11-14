@@ -1198,6 +1198,45 @@
     background-color: hsl(var(--background));
   }
   .profile-open .profile-hero[data-hero-open] [data-hero-content] { padding-top: 0.5rem; }
+  /* Lot FG1 (14/11/2026) : en-tête et bandeau des chiffres sur le papier de la
+     gouache (le multiply fond son blanc dans ce papier), gouache à côté du
+     prénom à partir de 1 024 px, identité sans filet (le bandeau suit). */
+  .profile-notebook-sheet.profile-open .profile-hero.profile-notebook,
+  .profile-open [data-profile-paper] {
+    background-color: hsl(var(--hero-paper));
+  }
+  /* Carte contact v2 : verte et pleine, malgré l'aplatissement des cartes
+     de la feuille (règles .profile-notebook-sheet plus haut). */
+  .profile-notebook-sheet.profile-open [data-contact-card][data-contact-v2] {
+    background-color: hsl(var(--primary));
+    border-radius: 22px;
+    border-bottom: 0;
+    padding: 1.5rem;
+  }
+  .profile-notebook-sheet.profile-open [data-profile-content] [data-contact-v2] .bg-card {
+    background-color: hsl(var(--card));
+  }
+  .profile-notebook-sheet.profile-open .profile-hero[data-in-notebook] .profile-hero-identity {
+    border-bottom: 0;
+    padding-bottom: 0.25rem;
+  }
+  @media (min-width: 1024px) {
+    .profile-notebook-sheet.profile-open .profile-hero[data-hero-open] [data-hero-content] {
+      max-width: 1240px;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 2rem;
+      padding-top: 1.75rem;
+      padding-bottom: 0.5rem;
+    }
+    .profile-notebook-sheet.profile-open .profile-hero[data-hero-open] .profile-hero-identity {
+      width: 400px;
+      flex-shrink: 0;
+    }
+    .profile-notebook-sheet.profile-open .profile-hero[data-hero-open] [data-hero-gouache-side] {
+      flex: 1 1 0%;
+    }
+  }
   .profile-open [data-hero-avatar] img,
   .profile-open [data-hero-avatar] > span {
     width: 96px;

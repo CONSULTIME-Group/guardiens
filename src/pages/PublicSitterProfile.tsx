@@ -83,20 +83,29 @@ import { petSpeciesLabel } from "@/lib/petLabels";
 import { isRadiusDeclared } from "@/lib/searchRadius";
 import { countLabel } from "@/lib/pluralizeFr";
 import {
-  SitterSkillsSection,
   EditorialReview,
-  SitterAboutSection,
   EntraideBand,
   EntraideOfferSection,
-  HowItWorksSteps,
   SitterContactCard,
   SitterStickyBar,
   SectionHeading,
-  SitterConditionsSection,
   SitterGlanceBand,
+  SPOTS,
 } from "@/components/profile/sitter/SitterF1Sections";
+import {
+  SitterLetter,
+  SitterDailyCard,
+  V2Heading,
+  V2Card,
+  NearbySitters,
+  type DailyRow,
+  type NearbySitter,
+} from "@/components/profile/sitter/SitterV2Sections";
+import { glanceItems as buildGlanceItems, lifestylePublicLabel, readProfileSource, shouldTrackProfileOpen } from "@/lib/sitterProfileV2";
+import { useHideBottomNav } from "@/components/layout/ChromeVisibility";
+import { trackEvent } from "@/lib/analytics";
 import ProposeSitDialog from "@/components/sits/owner/ProposeSitDialog";
-import { groupSitterSkills, skillsHeadline } from "@/lib/sitterSkillGroups";
+import { groupSitterSkills } from "@/lib/sitterSkillGroups";
 import { declaredHelpOffer, hasEntraideFacet, entraideOfferBandText, lastVisitLabel } from "@/lib/profileSignals";
 import {
   meetingPreferenceLabel,
@@ -107,6 +116,7 @@ import {
   ownerHostedSitsCount,
   gardeZoneLabel,
   noticeDelayLabel,
+  aroundCity,
 } from "@/lib/sitterProfileFacts";
 
 /** Pages entraide par ville réellement routées (App.tsx). */
@@ -258,6 +268,31 @@ export default function PublicSitterProfile() {
   // département de la personne consultée quand il est connu et documenté.
   const [footerLocal, setFooterLocal] = useState<FooterLocalContext | null>(null);
   const [deptSitterCount, setDeptSitterCount] = useState<number | null>(null);
+  // Lot FG1 : trois gardiens du même département, avec photo, en fin de fiche.
+  const [nearbySitters, setNearbySitters] = useState<NearbySitter[]>([]);
+  // Lot FG2 : une seule barre en bas de la fiche au téléphone, la sienne.
+  useHideBottomNav(true);
+  // Lot FG0 : ouverture de fiche mesurée avec sa provenance (?depuis=).
+  const profileSource = readProfileSource(searchParams.get("depuis"));
+  useEffect(() => {
+    if (loading || !profile?.id) return;
+    let storage: Storage | null = null;
+    try { storage = typeof window !== "undefined" ? window.sessionStorage : null; } catch { storage = null; }
+    if (!shouldTrackProfileOpen(storage, profile.id, profileSource)) return;
+    void trackEvent("sitter_profile_opened", {
+      metadata: {
+        profile: profile.id,
+        source: profileSource,
+        tab: searchParams.get("tab") ?? null,
+        signed_in: !!auth?.user,
+        viewer_role: auth?.activeRole ?? null,
+        own: auth?.user?.id === profile.id,
+        layout: typeof window !== "undefined" && window.innerWidth >= 1024 ? "desktop" : "phone",
+      },
+    });
+    // Une fois par fiche et par provenance dans l'onglet (shouldTrackProfileOpen).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, profile?.id, profileSource]);
 
   // Pass 5, compagnon culturel : fait race si l'un des animaux du gardien matche.
   useAlmaCulturalFact({
@@ -418,7 +453,10 @@ export default function PublicSitterProfile() {
   const handleTabChange = (tab: ProfileTab) => {
     setActiveTab(tab);
     // push (pas replace) → la back nav restitue l'onglet précédent.
-    setSearchParams({ tab });
+    // Lot FG0 : les autres paramètres (provenance ?depuis=) restent en place.
+    const next = new URLSearchParams(searchParams);
+    next.set("tab", tab);
+    setSearchParams(next);
   };
 
   // Sync activeTab quand ?tab= change via back/forward ou ouverture en nouvel
@@ -881,7 +919,28 @@ export default function PublicSitterProfile() {
         .eq("departement_code", code)
         .in("role", ["sitter", "both"]);
 
+      // Lot FG1 : trois gardiens du département avec photo, vus récemment.
+      const { data: nearby } = await (supabase as any)
+        .from("public_profiles")
+        .select("id, first_name, city, avatar_url")
+        .eq("departement_code", code)
+        .in("role", ["sitter", "both"])
+        .neq("id", profile?.id ?? id)
+        .not("avatar_url", "is", null)
+        .order("last_seen_at", { ascending: false, nullsFirst: false })
+        .limit(3);
+
       if (cancelled) return;
+      setNearbySitters(
+        (Array.isArray(nearby) ? nearby : [])
+          .filter((n: any) => n?.id && n.id !== profile?.id)
+          .map((n: any) => ({
+            id: n.id,
+            firstName: capitalizeFirstName(getMemberPublicFirstName(n, "Gardien")),
+            city: n.city || null,
+            avatarUrl: n.avatar_url && !String(n.avatar_url).includes("placeholder.svg") ? n.avatar_url : null,
+          })),
+      );
       setDeptSitterCount(typeof count === "number" ? count : null);
       setFooterLocal({
         departmentName: deptName,
@@ -894,7 +953,7 @@ export default function PublicSitterProfile() {
 
     loadGeo();
     return () => { cancelled = true; };
-  }, [profile?.departement_code, profile?.city]);
+  }, [profile?.departement_code, profile?.city, profile?.id]);
 
   // Complément d'affinité réservé aux membres connectés (la vue publique
   // `public_sitter_profiles` ne porte pas les colonnes d'affinité). Le user_id
@@ -1246,7 +1305,6 @@ export default function PublicSitterProfile() {
   // life_pace est le repli de lifestyle dans le moteur : affiché seulement si
   // lifestyle est vide, pour ne pas doubler l'information.
   const lifePace: string = lifestyle.length === 0 ? (sitterProfile?.life_pace || "") : "";
-  const experienceLabel: string = sitterProfile?.experience_years || "";
   // Présence pendant la garde : critère le plus lourd du moteur (poids 2),
   // affiché avec le libellé exact du formulaire. Repli : availability_during.
   const presenceLabel: string =
@@ -1299,7 +1357,8 @@ export default function PublicSitterProfile() {
     trustSignals,
   });
   // Meta description structurée : promesse + animaux + zone + signaux de confiance.
-  const animalsForDesc = animalLabels || "animaux";
+  // Lot FG1 : description en phrase correcte (espèces en minuscules, majuscule après le point).
+  const animalsForDesc = (animalLabels || "animaux").toLowerCase();
   const cityForDesc = city ? `à ${locationLabel}${radius ? ` (rayon ${radius} km)` : ''}` : "près de chez vous";
   const trustForDesc = [
     profile?.identity_verified ? "identité vérifiée" : null,
@@ -1307,7 +1366,8 @@ export default function PublicSitterProfile() {
     reviewCount > 0 ? `${formatRatingFr(avgRating)}/5 (${reviewCount} avis)` : null,
   ].filter(Boolean).join(" · ");
   const descBase = `${firstName} garde vos ${animalsForDesc} ${cityForDesc}.`;
-  const pageDesc = (descBase + (trustForDesc ? ` ${trustForDesc}.` : '')).slice(0, 160);
+  const trustSentence = trustForDesc ? trustForDesc.charAt(0).toUpperCase() + trustForDesc.slice(1) : "";
+  const pageDesc = (descBase + (trustSentence ? ` ${trustSentence}.` : '')).slice(0, 160);
   const pageUrl = buildAbsoluteUrl(`/gardiens/${id}`);
   // Indexabilité des fiches gardien : politique posée le 20/07/2026, confirmée
   // le 12/08/2026. Objectif : rouvrir le canal SEO des profils sans exposer les
@@ -1481,6 +1541,15 @@ export default function PublicSitterProfile() {
   };
   const { cta: heroCta, reassurance: heroCtaReassurance } = heroCtaFor(activeTab);
 
+  // Lot FG1 : bandeau des chiffres (gardes, note, expérience, ancienneté).
+  const glanceV2 = buildGlanceItems({
+    completedSits,
+    avgRating: sitterRoleAvg,
+    reviewCount: sitterRoleCount,
+    experience: sitterProfile ? sitterProfile.experience_years : null,
+    memberSince: profile?.created_at ?? null,
+  });
+
   // Signalement : lien discret en bas du rail, jamais sur sa propre fiche.
   // Valeurs `reason` alignées sur les conventions existantes de la table reports.
   const reportNode = !isOwn && id ? (
@@ -1611,7 +1680,7 @@ export default function PublicSitterProfile() {
             completedSits={isSitterFacet ? completedSits : 0}
             lastSeenAt={profile?.last_seen_at ?? null}
             mobilityLabels={isSitterFacet ? travelZoneLabels(sitterProfile?.travel_zones) : []}
-            isAvailable={isSitterFacet && isAvailable}
+            isAvailable={isSitterFacet ? isAvailable : activeTab === "entraide" ? !!helpOffer.offered : false}
             avgRating={heroAvg}
             reviewCount={heroCount}
             statutGardien={isSitterFacet ? (reputation?.statut_gardien ?? null) : null}
@@ -1624,16 +1693,17 @@ export default function PublicSitterProfile() {
         );
       })()}
 
-      {/* ── BARRE D'ONGLETS, visible si ≥ 2 onglets ── */}
-      {availableTabs > 1 && (
-        <p className="profile-notebook-page pt-4 text-sm text-muted-foreground font-body">
-          {hasSitterProfile && hasOwnerProfile
-            ? `${firstName} garde chez les autres et fait garder à la maison.`
-            : hasSitterProfile
-              ? `${firstName} garde chez les autres et participe à l'entraide.`
-              : `${firstName} fait garder à la maison et participe à l'entraide.`}
-        </p>
+      {/* Lot FG1 : chiffres réels sous la gouache, sur le même papier, une
+          seule fois chacun (facettes gardien et entraide). */}
+      {activeTab !== "proprio" && glanceV2.length > 0 && (
+        <div data-profile-paper className="pb-7 pt-1 md:pb-9">
+          <div className="profile-notebook-page">
+            <SitterGlanceBand items={glanceV2} />
+          </div>
+        </div>
       )}
+
+      {/* ── BARRE D'ONGLETS, visible si ≥ 2 onglets ── */}
       {availableTabs > 1 && (
         <div className="profile-notebook-page profile-notebook-tabs flex flex-wrap border-b border-border sticky z-40" style={{ top: "var(--public-header-h, 0px)" }}>
           {hasSitterProfile && (
@@ -1702,9 +1772,15 @@ export default function PublicSitterProfile() {
       {/* ── SÉPARATEUR ── */}
       {availableTabs <= 1 && activeTab !== "gardien" && <div className="profile-notebook-page"><hr className="border-border" /></div>}
 
-      {/* ── ONGLET GARDIEN, fiche allégée (lot F1) ───────────────────── */}
+      {/* ── ONGLET GARDIEN, fiche allégée (lot F1), refondue au lot FG1 ─────
+          Maquettes « Fiche gardien publique · avant / après » (14/11/2026) :
+          la présentation en lettre, le quotidien déclaré dans une carte,
+          chaque chiffre une fois, un bouton par écran. Bureau : lecture à
+          gauche, quotidien, parcours et contact à droite. Téléphone : une
+          colonne dans l'ordre des order-*. */}
       {activeTab === 'gardien' && (() => {
         const redirectTo = `/gardiens/${id}?tab=gardien`;
+        // Lot FG1 : même chiffre que la page de candidature (clé score).
         const affinityNode = !isAuthenticated
           ? <AffinityTeaserCard sitterFirstName={firstName} redirectTo={redirectTo} />
           : (isOwner && !isOwn && sitterProfile)
@@ -1716,37 +1792,19 @@ export default function PublicSitterProfile() {
                   size="md"
                   scope="single"
                   variant="numeric"
+                  displayKey="score"
                 />
               )
             : null;
-        // Alma : UNE phrase pertinente, dérivée de données réelles uniquement.
-        let almaPhrase: string | null = null;
-        if (avgRating >= 4.5 && reviewCount >= 3) {
-          almaPhrase = `${firstName} rassure : ${reviewCount} propriétaires lui donnent ${formatRatingFr(avgRating)} sur 5.`;
-        } else if (isAvailable) {
-          almaPhrase = `${firstName} est disponible en ce moment, c'est le bon moment pour prendre contact.`;
-        } else if (completedSits >= 3) {
-          almaPhrase = `${firstName} a déjà mené ${completedSits} gardes à leur terme.`;
-        } else if (profile?.identity_verified) {
-          almaPhrase = `L'identité de ${firstName} a été vérifiée à partir d'une pièce officielle.`;
-        }
-        // Lot A6 : le dock d'Alma n'est pas monté sur cette page. Visiteur :
-        // la carte mène à l'inscription propriétaire, retour sur ce profil.
-        // Membre : carte de lecture, sans bouton.
-        const almaNode = !isOwn ? (
-          <AlmaWhisperCard
-            phrase={almaPhrase}
-            surface="gardien"
-            signupHref={!isAuthenticated && !hasSession ? profileSignupHref("owner", redirectTo) : null}
-            actionLabel={`Créer mon compte pour écrire à ${firstName}`}
-          />
-        ) : null;
 
-        // Savoir-faire
-        const { groups: skillGroups, totalCount: skillsTotal } = groupSitterSkills({
+        // Savoir-faire : les petites gouaches des animaux gardés.
+        const { groups: skillGroups } = groupSitterSkills({
           animalTypes, competences, specialSkills,
         });
-        const headline = skillsHeadline(animalTypes, skillGroups.some((g) => g.key === 'soins'), firstName);
+        const animalSpots = skillGroups
+          .map((g) => SPOTS[g.spot])
+          .filter((src, i, all): src is string => !!src && all.indexOf(src) === i)
+          .slice(0, 4);
 
         // Avis
         const sortedSitterReviews = [...sitterRoleReviews].sort((a: any, b: any) =>
@@ -1761,21 +1819,35 @@ export default function PublicSitterProfile() {
         );
         const otherBadges = (userBadges || []).filter((b: any) => !reviewBadgeIds.has(b.badge_id));
 
-        // Qui est
-        const aboutFacts = [
-          { label: "Langues", value: listLabel(sitterLanguages, ["Autre"]) },
-          { label: "Centres d'intérêt", value: listLabel(sitterInterests) },
-          { label: "Autres passions", value: listLabel(passionsOf(sitterProfile)) },
-          { label: "À la maison", value: homeFactLabel(sitterProfile?.own_animals, sitterProfile?.life_pace) },
-          { label: "Expérience de garde", value: guardExperienceLabel(sitterProfile?.guard_experience) },
-          { label: "Atouts", value: assetsLabel(declaredCertifications, sitterProfile?.has_license, sitterProfile?.has_vehicle) },
-          // L5 : faits de l'ancien bloc pratique, jamais présentés ailleurs.
-          { label: "Accompagnants", value: companionsLabel(sitterProfile) },
-          { label: "Style de vie", value: listLabel(lifestyle) },
-          { label: "Environnements préférés", value: listLabel(preferredEnvironments.map((e) => ENV_LABELS[e] || e)) },
-        ].filter((f) => f.value);
+        // Son quotidien : ce que le gardien a déclaré, rien sans déclaration.
+        const animalsFact = animalTypes.length > 0
+          ? (animalTypes.some((a) => a.toLowerCase() === 'tous')
+              ? "Tous les animaux"
+              : animalTypes.map((a) => ANIMAL_LABELS[a] || a).join(", "))
+          : "";
+        const animalsSentence = animalsFact
+          ? animalsFact.charAt(0).toUpperCase() + animalsFact.slice(1).toLowerCase()
+          : "";
+        const dailyRows: DailyRow[] = [
+          { label: "Style de vie", chips: lifestyle.map(lifestylePublicLabel) },
+          { label: "Environnements préférés", chips: preferredEnvironments.map((e) => ENV_LABELS[e] || e) },
+          { label: "Animaux gardés", text: animalsSentence, spots: animalsSentence ? animalSpots : [] },
+          { label: "Savoir-faire", chips: [...competences, ...specialSkills].filter(Boolean).slice(0, 10) },
+          { label: "Zone de garde", text: gardeZoneLabel({ radiusKm: radius, city: city || null, zoneLabels: travelZoneLabels(sitterProfile?.travel_zones) }) },
+          { label: "Durée des gardes", text: durationLabel },
+          { label: "Rythme", text: frequencyLabel },
+          { label: "Délai pour le prévenir", text: noticeDelay },
+          { label: "Avant la garde", text: meetingPreferenceLabel(sitterProfile?.meeting_preference) },
+          { label: "Langues", text: listLabel(sitterLanguages, ["Autre"]) },
+          { label: "Centres d'intérêt", text: listLabel(sitterInterests) },
+          { label: "Autres passions", text: listLabel(passionsOf(sitterProfile)) },
+          { label: "À la maison", text: homeFactLabel(sitterProfile?.own_animals, sitterProfile?.life_pace) },
+          { label: "Gardes avec animaux", text: guardExperienceLabel(sitterProfile?.guard_experience) },
+          { label: "Atouts", text: assetsLabel(declaredCertifications, sitterProfile?.has_license, sitterProfile?.has_vehicle) },
+          { label: "Accompagnants", text: companionsLabel(sitterProfile) },
+        ];
 
-        // Bandeau entraide
+        // Ligne entraide
         const bandText = entraideOfferBandText(helpOffer, firstName, city || null);
         const band = bandText ? { text: bandText } : null;
         const citySlug = city ? citySlugOf(city) : "";
@@ -1785,57 +1857,18 @@ export default function PublicSitterProfile() {
             ? { label: `L'entraide à ${city}`, to: `/petites-missions/${citySlug}` }
             : null;
 
-        // Carte contact
-        const animalsFact = animalTypes.length > 0
-          ? (animalTypes.some((a) => a.toLowerCase() === 'tous')
-              ? "Tous"
-              : animalTypes.map((a) => ANIMAL_LABELS[a] || a).join(", "))
-          : "";
-        // Lot F (11/10/2026) : les conditions quittent la carte contact pour la
-        // section « Sa façon de garder ». Rayon et zones fusionnés en une ligne,
-        // préavis rendu lisible. Rien d'affiché sans déclaration.
-        const conditionFacts = [
-          { label: "Zone de garde", value: gardeZoneLabel({ radiusKm: radius, city: city || null, zoneLabels: travelZoneLabels(sitterProfile?.travel_zones) }) },
-          { label: "Animaux gardés", value: animalsFact },
-          { label: "Durée des gardes", value: durationLabel },
-          { label: "Rythme", value: frequencyLabel },
-          { label: "Délai pour le prévenir", value: noticeDelay },
-          { label: "Avant la garde", value: meetingPreferenceLabel(sitterProfile?.meeting_preference) },
-          { label: "Expérience", value: experienceLabel },
-        ].filter((f) => f.value);
-        const contactFacts = [
-          { label: "Avis", value: sitterRoleCount > 0 ? `★ ${formatRatingFr(sitterRoleAvg)} (${sitterRoleCount})` : "" },
-        ].filter((f) => f.value);
-
-        // En bref : preuves réelles seulement, bande masquée sans garde ni avis.
-        const sinceDate = profile?.created_at ? new Date(profile.created_at) : null;
-        const sinceLabel = sinceDate && !Number.isNaN(sinceDate.getTime())
-          ? sinceDate.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
-          : "";
-        type GlanceItem = { value: string; label: string; size?: "lg" | "sm" };
-        const glanceCandidates: Array<GlanceItem | null> = [
-          completedSits > 0 ? { value: String(completedSits), label: completedSits > 1 ? "gardes réalisées" : "garde réalisée" } : null,
-          sitterRoleCount > 0 ? { value: `${formatRatingFr(sitterRoleAvg)} / 5`, label: `d'après ${sitterRoleCount} avis` } : null,
-          animalsFact ? { value: animalsFact, label: "animaux gardés", size: "sm" } : null,
-          sinceLabel ? { value: sinceLabel.charAt(0).toUpperCase() + sinceLabel.slice(1), label: "membre depuis", size: "sm" } : null,
-        ];
-        const glanceItems: GlanceItem[] = completedSits > 0 || sitterRoleCount > 0
-          ? glanceCandidates.filter((x): x is GlanceItem => x !== null)
-          : [];
-
         const firstSitDate = gardeReviews
           .map((r: any) => r.sit_start_date as string | null)
           .filter(Boolean)
           .sort()[0] ?? null;
 
         const journeyBlock = (anchorId: string) => (
-          <section id={anchorId} aria-label={`Parcours de ${firstName}`} className="scroll-mt-24 px-1">
-            <p className="flex items-center gap-2 text-[12px] uppercase tracking-[0.16em] text-secondary font-body font-semibold mb-[14px]">
-              <span aria-hidden="true" className="inline-block h-px w-[22px] bg-secondary" />
+          <section id={anchorId} aria-labelledby={`${anchorId}-titre`} className="scroll-mt-24 rounded-[22px] border border-border bg-card px-5 py-5 md:px-6">
+            <h2 id={`${anchorId}-titre`} className="font-heading text-[19px] md:text-[20px] font-semibold text-foreground mb-3">
               Son parcours
-            </p>
+            </h2>
             {reviews.length === 0 && (userBadges || []).length === 0 && completedSits === 0 ? (
-              <div className="text-sm [&_section]:border-0 [&_section]:bg-transparent [&_section]:p-0">
+              <div className="text-sm [&_section]:border-0 [&_section]:bg-transparent [&_section]:p-0 [&_header]:hidden">
                 <FreshStartStory
                   firstName={firstName}
                   createdAt={profile?.created_at}
@@ -1867,211 +1900,194 @@ export default function PublicSitterProfile() {
           </section>
         );
 
-        const railChildren = (mobile: boolean) => (
-          <>
-            <SitterContactCard
-              firstName={firstName}
-              cta={heroCta}
-              reassurance={heroCtaReassurance}
-              facts={contactFacts}
-              showButton={mobile ? "md" : "always"}
-              ctaVisible={!heroCtaVisible}
-              sticky={false}
-              secondary={
-                isOwner && !isOwn && auth?.user?.id && (resolvedProfileId ?? id) ? (
-                  <>
-                    <button
-                      type="button"
-                      data-propose-sit-trigger
-                      onClick={() => setProposeOpen(true)}
-                      className="flex w-full h-[48px] items-center justify-center rounded-[99px] border border-border bg-card px-5 text-[15px] font-medium text-foreground hover:border-primary/50 transition-colors"
-                    >
-                      Lui proposer ma garde
-                    </button>
-                    <ProposeSitDialog
-                      open={proposeOpen}
-                      onOpenChange={closePropose}
-                      ownerId={auth.user.id}
-                      sitter={{ id: (resolvedProfileId ?? id)!, first_name: firstName }}
-                      initialSitId={proposerParam}
-                      onWriteFirst={() => {
-                        closePropose(false);
-                        void contactSitterHandler();
-                      }}
-                    />
-                  </>
-                ) : null
-              }
-            />
-            {journeyBlock(mobile ? "confiance-mobile" : "confiance")}
-            {affinityNode}
-            {almaNode}
-            {reportNode}
-          </>
+        const contactNode = (
+          <SitterContactCard
+            firstName={firstName}
+            cta={heroCta}
+            reassurance={heroCtaReassurance}
+            showButton="md"
+            ctaVisible={!heroCtaVisible}
+            sticky={false}
+            secondary={
+              isOwner && !isOwn && auth?.user?.id && (resolvedProfileId ?? id) ? (
+                <>
+                  <button
+                    type="button"
+                    data-propose-sit-trigger
+                    onClick={() => setProposeOpen(true)}
+                    className="flex w-full h-[48px] items-center justify-center rounded-[99px] border px-5 text-[15px] font-medium transition-colors"
+                  >
+                    Lui proposer ma garde
+                  </button>
+                  <ProposeSitDialog
+                    open={proposeOpen}
+                    onOpenChange={closePropose}
+                    ownerId={auth.user.id}
+                    sitter={{ id: (resolvedProfileId ?? id)!, first_name: firstName }}
+                    initialSitId={proposerParam}
+                    onWriteFirst={() => {
+                      closePropose(false);
+                      void contactSitterHandler();
+                    }}
+                  />
+                </>
+              ) : null
+            }
+          />
         );
 
         return (
-        <div data-profile-content className="profile-notebook-page py-[34px] md:py-[52px] pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-[52px]">
-          <div>
-          <div className="space-y-[52px] min-w-0">
+        <div data-profile-content className="profile-notebook-page py-[28px] md:py-[44px] pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-[52px]">
+          <div className="flex flex-col gap-[26px] lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:items-start lg:gap-x-16 lg:gap-y-0" data-profile-columns>
+          <div className="contents lg:flex lg:min-w-0 lg:flex-col lg:gap-[44px]">
 
-            <SitterGlanceBand items={glanceItems} />
-
-            <SitterAboutSection
-              firstName={firstName}
-              motivation={motivation || ""}
-              bio={bio || ""}
-              facts={aboutFacts}
-              deptLink={geoInfo.deptSlug && geoInfo.deptName
-                ? { href: `/departement/${geoInfo.deptSlug}`, label: `Voir les gardiens en ${geoInfo.deptName}` }
-                : null}
-            >
-              {externalExperiences.length > 0 ? <PublicExperiences experiences={externalExperiences} /> : null}
-            </SitterAboutSection>
-
-            <SitterConditionsSection firstName={firstName} presence={presenceLabel} facts={conditionFacts} />
-
-            <SitterSkillsSection
-              groups={skillGroups}
-              totalCount={skillsTotal}
-              headline={headline}
-              competences={competences}
-              specialSkills={specialSkills}
-            />
+            <div className="order-1 lg:order-none">
+              <SitterLetter firstName={firstName} motivation={motivation || ""} bio={bio || ""} ownPreview={isOwn} />
+              {externalExperiences.length > 0 ? <div className="mt-[26px]"><PublicExperiences experiences={externalExperiences} /></div> : null}
+            </div>
 
             {/* Avis : masqués sans avis (L5, aucune section vide). */}
             {sitterRoleCount > 0 && (
-            <section aria-label="Avis reçus" className="scroll-mt-20">
-              <SectionHeading eyebrow="Avis" title={sitterReviewsHeading(sitterRoleCount, sitterRoleAvg, firstName).title} />
-              <p className="-mt-2 mb-[22px] text-sm text-muted-foreground">
-                {sitterRoleCount > 0
-                  ? sitterReviewsHeading(sitterRoleCount, sitterRoleAvg, firstName).summary
-                  : ""}
+            <section aria-labelledby="avis" className="order-3 lg:order-none scroll-mt-24">
+              <V2Heading id="avis">{sitterReviewsHeading(sitterRoleCount, sitterRoleAvg, firstName).title.replace(/\.$/, "")}</V2Heading>
+              <p className="mt-1 mb-[18px] text-sm text-muted-foreground">
+                {sitterReviewsHeading(sitterRoleCount, sitterRoleAvg, firstName).summary}
               </p>
-              {sitterRoleCount > 0 && (
-                <>
-                  {showReviewChips && (
-                    <div className="flex flex-wrap gap-2 mb-[22px]" role="tablist" aria-label="Filtrer les avis">
-                      {([
-                        { id: 'all', label: 'Tous', count: sitterRoleCount },
-                        { id: 'gardes', label: 'Gardes', count: gardeReviews.length },
-                        { id: 'missions', label: 'Missions', count: missionReviews.length },
-                      ] as const).map((c) => {
-                        const active = reviewFilter === c.id;
-                        return (
-                          <button
-                            key={c.id}
-                            type="button"
-                            role="tab"
-                            aria-selected={active}
-                            onClick={() => setReviewFilter(c.id)}
-                            className={[
-                              'inline-flex items-center gap-1.5 rounded-[99px] border px-3 py-1.5 text-xs font-body transition-colors',
-                              active
-                                ? 'bg-primary text-primary-foreground border-primary'
-                                : 'bg-card text-foreground/70 border-border hover:border-primary/40 hover:text-foreground',
-                            ].join(' ')}
-                          >
-                            {c.label} <span className={active ? 'opacity-90' : 'text-muted-foreground'}>({c.count})</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                  <div>
-                    {visibleReviews.map((r: any) => (
-                      <EditorialReview key={r.id} review={r} badgeIds={r.sit_id ? badgesBySitId[r.sit_id] || [] : []} />
-                    ))}
-                  </div>
-                  <ShowMoreBtn items={filteredReviews} showAll={showAllGardeReviews} setShowAll={setShowAllGardeReviews} />
-                </>
+              {showReviewChips && (
+                <div className="flex flex-wrap gap-2 mb-[18px]" role="tablist" aria-label="Filtrer les avis">
+                  {([
+                    { id: 'all', label: 'Tous', count: sitterRoleCount },
+                    { id: 'gardes', label: 'Gardes', count: gardeReviews.length },
+                    { id: 'missions', label: 'Coups de main', count: missionReviews.length },
+                  ] as const).map((c) => {
+                    const active = reviewFilter === c.id;
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={active}
+                        onClick={() => setReviewFilter(c.id)}
+                        className={[
+                          'inline-flex min-h-11 items-center gap-1.5 rounded-[99px] border px-3 text-xs font-body transition-colors',
+                          active
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-card text-foreground/70 border-border hover:border-primary/40 hover:text-foreground',
+                        ].join(' ')}
+                      >
+                        {c.label} <span className={active ? 'opacity-90' : 'text-muted-foreground'}>({c.count})</span>
+                      </button>
+                    );
+                  })}
+                </div>
               )}
+              <div className="rounded-[22px] border border-border bg-card px-5 py-5 md:px-8 md:py-7">
+                {visibleReviews.map((r: any) => (
+                  <EditorialReview key={r.id} review={r} badgeIds={r.sit_id ? badgesBySitId[r.sit_id] || [] : []} />
+                ))}
+              </div>
+              <ShowMoreBtn items={filteredReviews} showAll={showAllGardeReviews} setShowAll={setShowAllGardeReviews} />
             </section>
             )}
 
-            {band && <EntraideBand text={band.text} link={bandLink} />}
+            {band && <div className="order-5 lg:order-none"><EntraideBand text={band.text} link={bandLink} /></div>}
 
-            {!isOwn && <HowItWorksSteps firstName={firstName} />}
-
-            {/* 5. Galerie. Réservée aux membres connectés (décision produit) :
-                un visiteur déconnecté voit un encart sobre avec le nombre réel
-                de photos et un lien vers l'inscription, jamais les images.
-                Sur son propre profil sans photo, un encart invite à en ajouter. */}
+            <div className="order-7 lg:order-none empty:hidden">
             {!hasSession ? (
-              galleryCount > 0 && (
+                galleryCount > 0 && (
+                  <section aria-label="Galerie" className="scroll-mt-20">
+                    <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
+                        Galerie
+                      </p>
+                      <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
+                        {galleryCount} photo{galleryCount > 1 ? "s" : ""} partagée{galleryCount > 1 ? "s" : ""} par {firstName}.
+                      </h2>
+                      <p className="text-sm text-muted-foreground mt-2 max-w-xl leading-relaxed">
+                        Ces photos ne sont visibles que par les membres connectés de Guardiens.
+                        C'est une protection pour {firstName} : elles n'apparaissent pas dans les moteurs de recherche.
+                      </p>
+                      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4">
+                        <Link
+                          to={`/inscription?redirect=/gardiens/${id}`}
+                          className="inline-flex items-center text-sm font-medium text-primary underline underline-offset-4 hover:text-primary/80 transition-colors"
+                        >
+                          Créer un compte pour les voir
+                        </Link>
+                        <Link
+                          to={`/login?redirect=/gardiens/${id}`}
+                          className="inline-flex items-center text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+                        >
+                          Déjà membre ? Connectez-vous
+                        </Link>
+                      </div>
+                    </div>
+                  </section>
+                )
+              ) : gallery.length > 0 ? (
                 <section aria-label="Galerie" className="scroll-mt-20">
-                  <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+                  <div className="mb-5">
                     <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
                       Galerie
                     </p>
                     <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
-                      {galleryCount} photo{galleryCount > 1 ? "s" : ""} partagée{galleryCount > 1 ? "s" : ""} par {firstName}.
+                      Quelques instants de {firstName}.
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Cliquez pour agrandir.
+                    </p>
+                  </div>
+                  <GallerySimple visibleGallery={visibleGallery} setLightboxIdx={setLightboxIdx} />
+                </section>
+              ) : isOwn ? (
+                <section aria-label="Galerie" className="scroll-mt-20">
+                  <div className="rounded-2xl border border-dashed border-border bg-card p-5 sm:p-6">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
+                      Galerie
+                    </p>
+                    <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
+                      Montrez-vous, c'est ce qui rassure.
                     </h2>
                     <p className="text-sm text-muted-foreground mt-2 max-w-xl leading-relaxed">
-                      Ces photos ne sont visibles que par les membres connectés de Guardiens.
-                      C'est une protection pour {firstName} : elles n'apparaissent pas dans les moteurs de recherche.
+                      Un gardien avec des photos est choisi, un gardien sans photo ne l'est presque jamais.
+                      Ajoutez plusieurs instants : vous avec des animaux, votre quotidien, vos expériences de garde.
                     </p>
-                    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4">
-                      <Link
-                        to={`/inscription?redirect=/gardiens/${id}`}
-                        className="inline-flex items-center text-sm font-medium text-primary underline underline-offset-4 hover:text-primary/80 transition-colors"
-                      >
-                        Créer un compte pour les voir
-                      </Link>
-                      <Link
-                        to={`/login?redirect=/gardiens/${id}`}
-                        className="inline-flex items-center text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
-                      >
-                        Déjà membre ? Connectez-vous
-                      </Link>
-                    </div>
+                    <p className="text-sm text-muted-foreground mt-2 max-w-xl leading-relaxed">
+                      Vos photos ne sont visibles que par les membres connectés de Guardiens.
+                      Elles n'apparaissent pas dans les moteurs de recherche.
+                    </p>
+                    <Link
+                      to="/profile"
+                      className="inline-flex items-center mt-4 text-sm font-medium text-primary underline underline-offset-4 hover:text-primary/80 transition-colors"
+                    >
+                      Ajouter des photos à mon profil
+                    </Link>
                   </div>
                 </section>
-              )
-            ) : gallery.length > 0 ? (
-              <section aria-label="Galerie" className="scroll-mt-20">
-                <div className="mb-5">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
-                    Galerie
-                  </p>
-                  <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
-                    Quelques instants de {firstName}.
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Cliquez pour agrandir.
-                  </p>
-                </div>
-                <GallerySimple visibleGallery={visibleGallery} setLightboxIdx={setLightboxIdx} />
-              </section>
-            ) : isOwn ? (
-              <section aria-label="Galerie" className="scroll-mt-20">
-                <div className="rounded-2xl border border-dashed border-border bg-card p-5 sm:p-6">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
-                    Galerie
-                  </p>
-                  <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
-                    Montrez-vous, c'est ce qui rassure.
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-2 max-w-xl leading-relaxed">
-                    Un gardien avec des photos est choisi, un gardien sans photo ne l'est presque jamais.
-                    Ajoutez plusieurs instants : vous avec des animaux, votre quotidien, vos expériences de garde.
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-2 max-w-xl leading-relaxed">
-                    Vos photos ne sont visibles que par les membres connectés de Guardiens.
-                    Elles n'apparaissent pas dans les moteurs de recherche.
-                  </p>
-                  <Link
-                    to="/profile"
-                    className="inline-flex items-center mt-4 text-sm font-medium text-primary underline underline-offset-4 hover:text-primary/80 transition-colors"
-                  >
-                    Ajouter des photos à mon profil
-                  </Link>
-                </div>
-              </section>
-            ) : null}
-            {/* Zone secondaire en fin de flux, une seule fois. */}
-            <ProfileRail variant="secondary">{railChildren(false)}</ProfileRail>
+              ) : null}
+            </div>
           </div>
+
+          <div className="contents lg:flex lg:min-w-0 lg:flex-col lg:gap-[24px]">
+            <div className="order-2 lg:order-none empty:hidden">
+              <SitterDailyCard firstName={firstName} presence={presenceLabel} rows={dailyRows}>
+                {affinityNode}
+              </SitterDailyCard>
+            </div>
+            <div className="order-4 lg:order-none">{journeyBlock("confiance")}</div>
+            <div className="order-6 lg:order-none empty:hidden">{contactNode}</div>
+            <div className="order-8 lg:order-none empty:hidden">{reportNode}</div>
+          </div>
+          </div>
+
+          <div className="mt-[44px] md:mt-[56px]">
+            <NearbySitters
+              areaLabel={city ? aroundCity(city) : "du même département"}
+              sitters={nearbySitters}
+              moreLink={geoInfo.deptSlug && geoInfo.deptName
+                ? { href: `/departement/${geoInfo.deptSlug}`, label: `Voir les gardiens en ${geoInfo.deptName}` }
+                : null}
+            />
           </div>
         </div>
         );
@@ -2592,11 +2608,13 @@ export default function PublicSitterProfile() {
 
       {/* ── ONGLET ENTRAIDE ── */}
       {activeTab === 'entraide' && (
-        <div data-profile-content className="profile-notebook-page py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-8">
-          <div>
-          <div className="min-w-0 space-y-10">
+        <div data-profile-content className="profile-notebook-page py-[28px] md:py-[44px] pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-[52px]">
+          {/* Lot FG1 : même gabarit que l'onglet gardien, lecture à gauche,
+              contact à droite sur ordinateur. */}
+          <div className="flex flex-col gap-[26px] lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:items-start lg:gap-x-16">
+          <div className="min-w-0 space-y-[26px] lg:space-y-10">
 
-
+          <SitterLetter firstName={firstName} motivation={motivation || ""} bio={bio || ""} ownPreview={isOwn} />
 
           {/* Offre déclarée (opt-in), affichée même sans aucune mission réalisée. */}
           <EntraideOfferSection offer={helpOffer} firstName={firstName} city={city || null} />
@@ -2612,7 +2630,7 @@ export default function PublicSitterProfile() {
           {!entraideLoading && (missionsPublished.length > 0 || missionsHelped.length > 0 || missionFeedbacks.length > 0 || thanksReceived > 0) && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
-                { value: missionsPublished.length, label: 'Mission' + (missionsPublished.length > 1 ? 's publiées' : ' publiée') },
+                { value: missionsPublished.length, label: missionsPublished.length > 1 ? 'Coups de main demandés' : 'Coup de main demandé' },
                 { value: missionsHelped.length, label: 'Coup' + (missionsHelped.length > 1 ? 's de main donnés' : ' de main donné') },
                 { value: thanksReceived, label: 'Merci' + (thanksReceived > 1 ? 's reçus' : ' reçu') },
                 { value: missionFeedbacks.length, label: 'Avis reçu' + (missionFeedbacks.length > 1 ? 's' : '') },
@@ -2628,7 +2646,7 @@ export default function PublicSitterProfile() {
           {(entraideLoading || missionsPublished.length > 0) && (
           <div className="space-y-3">
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
-              Missions publiées{missionsPublished.length > 0 && ` (${missionsPublished.length})`}
+              Coups de main demandés{missionsPublished.length > 0 && ` (${missionsPublished.length})`}
             </p>
             {entraideLoading ? (
               <div className="space-y-2" aria-busy="true">
@@ -2647,7 +2665,7 @@ export default function PublicSitterProfile() {
                   return (
                     <div key={m.id} className="flex items-center justify-between gap-4 bg-card border border-border rounded-xl px-4 py-3">
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground font-body truncate">{m.title || m.category || 'Mission'}</p>
+                        <p className="text-sm font-medium text-foreground font-body truncate">{m.title || m.category || 'Coup de main'}</p>
                         {m.exchange_offer && (
                           <p className="text-xs text-foreground/50 font-body mt-0.5 truncate italic">En échange : {m.exchange_offer}</p>
                         )}
@@ -2733,14 +2751,20 @@ export default function PublicSitterProfile() {
           </div>
           )}
 
-          {!entraideLoading && missionsPublished.length === 0 && missionsHelped.length === 0 && missionFeedbacks.length === 0 && (
-            <p className="text-sm text-muted-foreground font-body" data-entraide-empty>
-              {helpOffer.offered ? `Pas encore de mission réalisée par ${firstName}.` : `Aucune mission d'entraide pour le moment.`}
-            </p>
-          )}
+          </div>
 
-            {/* Zone secondaire en fin de flux, une seule fois. */}
-            <ProfileRail variant="secondary">{reportNode}</ProfileRail>
+          <div className="flex min-w-0 flex-col gap-[24px]">
+            <SitterContactCard
+              firstName={firstName}
+              cta={heroCta}
+              reassurance={heroCtaReassurance}
+              showButton="md"
+              ctaVisible={!heroCtaVisible}
+              sticky={false}
+              title="Un coup de main commence par un message"
+              text="Vous convenez ensemble de ce qui vous arrange, et vous vous rencontrez si vous le souhaitez."
+            />
+            {reportNode}
           </div>
           </div>
         </div>

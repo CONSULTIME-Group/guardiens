@@ -38,6 +38,7 @@ import { fr } from "date-fns/locale";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { avatarImageUrl } from "@/lib/storageImage";
 import emptyApplications from "@/assets/aquarelles/accueil-rencontre-440.webp";
+import { sitterProfileHref } from "@/lib/sitterProfileV2";
 
 interface ApplicationsListProps {
   sitId: string;
@@ -401,7 +402,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
               </>
             );
             return isMemberLinkable(sitter) ? (
-              <Link to={`/gardiens/${app.sitter_id}`} className="shrink-0 relative block" aria-label={`Voir le profil de ${getMemberPublicFirstName(sitter, "ce gardien")}`}>
+              <Link to={sitterProfileHref(app.sitter_id, "candidature")} className="shrink-0 relative block" aria-label={`Voir le profil de ${getMemberPublicFirstName(sitter, "ce gardien")}`}>
                 {avatarInner}
               </Link>
             ) : (
@@ -411,7 +412,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               {isMemberLinkable(sitter) ? (
-                <Link to={`/gardiens/${app.sitter_id}`} className="text-base font-semibold text-foreground hover:underline">
+                <Link to={sitterProfileHref(app.sitter_id, "candidature")} className="text-base font-semibold text-foreground hover:underline">
                   {getMemberPublicFirstName(sitter, "Gardien")}
                 </Link>
               ) : (
@@ -493,7 +494,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         {(app.status === "pending" || app.status === "viewed") && (
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             <Link
-              to={`/gardiens/${app.sitter_id}`}
+              to={sitterProfileHref(app.sitter_id, "candidature")}
               target="_blank"
               className="border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors"
             >
@@ -535,7 +536,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         {app.status === "discussing" && (
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             <Link
-              to={`/gardiens/${app.sitter_id}`}
+              to={sitterProfileHref(app.sitter_id, "candidature")}
               target="_blank"
               className="border border-border rounded-full px-4 py-2 text-sm text-foreground hover:border-primary transition-colors"
             >
@@ -595,7 +596,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         {(app.status === "rejected" || app.status === "cancelled") && (
           <div className="flex gap-4 items-center mt-3">
             <Link
-              to={`/gardiens/${app.sitter_id}`}
+              to={sitterProfileHref(app.sitter_id, "candidature")}
               target="_blank"
               className="text-xs text-primary hover:underline"
             >

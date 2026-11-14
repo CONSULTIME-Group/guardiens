@@ -16,6 +16,7 @@ import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { sitterProfileHref } from "@/lib/sitterProfileV2";
 
 interface ApplicationsSectionProps {
   recentApps: AppRow[];
@@ -159,7 +160,7 @@ const AppCard = memo(({ app, sitterProfiles, sitterAffinityProfiles, featured = 
           {sitter?.id ? (
             <button
               type="button"
-              onClick={stop(() => navigate(`/gardiens/${sitter.id}`))}
+              onClick={stop(() => navigate(sitterProfileHref(sitter.id, "candidature")))}
               className="border border-border text-muted-foreground rounded-xl px-3 py-1.5 text-xs font-sans hover:bg-accent transition-colors"
             >
               Voir le profil
