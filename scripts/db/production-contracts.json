@@ -773,6 +773,28 @@
           "sql": "SELECT public.derive_signup_channel('{\"rd\":\"l.facebook.com\"}'::jsonb) = 'facebook' AS ok"
         }
       ]
+    },
+    {
+      "migration": "0163_rch5_etat_alerte_email.sql",
+      "description": "Le membre connecté lit l'état de ses emails d'alerte (immédiat, rythme espacé ou coupé) pour la ligne d'alerte de la recherche",
+      "checks": [
+        {
+          "name": "fonction_presente",
+          "sql": "SELECT position('rch5_etat_alerte_email' IN pg_get_functiondef('public.my_alert_email_state()'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "fermee_aux_visiteurs",
+          "sql": "SELECT NOT has_function_privilege('anon', 'public.my_alert_email_state()', 'EXECUTE') AS ok"
+        },
+        {
+          "name": "ouverte_aux_membres",
+          "sql": "SELECT has_function_privilege('authenticated', 'public.my_alert_email_state()', 'EXECUTE') AS ok"
+        },
+        {
+          "name": "sans_session_coupee",
+          "sql": "SELECT public.my_alert_email_state() = 'off' AS ok"
+        }
+      ]
     }
   ]
 }
