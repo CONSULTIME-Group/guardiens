@@ -5,6 +5,7 @@ import { useTranslation } from "@/i18n/react";
 import PageMeta from "@/components/PageMeta";
 import { logger } from "@/lib/logger";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { ownerPublishHref } from "@/lib/almaVisitorSearch";
 import ReportButton from "@/components/reports/ReportButton";
 import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity } from "@/lib/geocode";
@@ -1812,6 +1813,24 @@ const SearchOwner = () => {
                   Alerte créée, l'e-mail partira automatiquement.
                 </div>
               )}
+            {/* Lot RCH6 : la recherche de gardiens mène à l'annonce, qui part par email aux gardiens proches. */}
+            {results.length > 0 && city && zoneMode === "radius" && (
+              <div className="mb-5 rounded-[20px] border border-primary/20 bg-primary/[0.04] px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3" data-testid="owner-publish-bar">
+                <div className="min-w-0">
+                  <p className="font-heading text-[16px] font-semibold text-foreground">
+                    {results.length} gardien{results.length > 1 ? "s" : ""} à proximité de {city}, à moins de {radius[0]} km.
+                  </p>
+                  <p className="text-[13px] text-muted-foreground mt-1 leading-snug">Votre annonce part par email aux gardiens proches de chez vous.</p>
+                </div>
+                <Link
+                  to={ownerPublishHref(!user, "recherche_gardiens")}
+                  onClick={() => { try { void trackEvent("owner_publish_bar_clicked", { source: "recherche_gardiens", metadata: { count: results.length, radius_km: radius[0] } }); } catch { /* mesure facultative */ } }}
+                  className="shrink-0 inline-flex items-center justify-center min-h-11 rounded-full bg-primary px-5 text-[14px] font-semibold text-primary-foreground hover:bg-primary/90"
+                >
+                  Publier ma garde
+                </Link>
+              </div>
+            )}
             {results.length > 0 && <OwnerAffinityBanner className="mb-4" />}
             {/* Lot L4 : colonnes calculées sur la largeur UTILE (cartes de 280 px
                 minimum), hauteur de ligne libre, marge basse pour le dock Alma. */}
