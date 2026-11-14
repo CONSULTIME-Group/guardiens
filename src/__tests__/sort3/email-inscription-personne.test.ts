@@ -6,7 +6,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const read = (path: string) => readFileSync(path, "utf8");
-const sql = read("drizzle/migrations/0156_eml1_email_sortie_personne.sql");
+const sql = read("drizzle/migrations/0158_eml1_email_sortie_personne.sql");
 const template = read("supabase/functions/_shared/transactional-email-templates/outing-update.tsx");
 const sender = read("supabase/functions/send-transactional-email/index.ts");
 
