@@ -743,7 +743,7 @@
       ]
     },
     {
-      "migration": "0160_alr6_reglage_desinscription.sql",
+      "migration": "0161_alr6_reglage_desinscription.sql",
       "description": "Le membre connecté lève sa propre désinscription totale (motif unsubscribe) en rallumant une famille d'emails",
       "checks": [
         {

@@ -8,7 +8,7 @@ const read = (p: string) => readFileSync(p, "utf8");
 const handler = read("supabase/functions/handle-email-unsubscribe/index.ts");
 const sender = read("supabase/functions/send-transactional-email/index.ts");
 const prefsPage = read("src/pages/EmailPreferences.tsx");
-const sql = read("drizzle/migrations/0160_alr6_reglage_desinscription.sql");
+const sql = read("drizzle/migrations/0161_alr6_reglage_desinscription.sql");
 const fr = JSON.parse(read("src/i18n/locales/fr/common.json"));
 
 describe("ALR6 · désabonnement par famille", () => {
