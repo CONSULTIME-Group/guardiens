@@ -9,6 +9,7 @@
 // (pg_cron, secret vault supabase_service_role_key) et un admin connecté sont
 // acceptés ; tout autre appel reçoit 401/403 et est journalisé dans cron_run_log.
 
+import { massOpenPixelHtml, withOpenPixel } from "../_shared/open-pixel.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
 import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
@@ -403,9 +404,12 @@ Deno.serve(withCronFailureLog("process-mass-email-queue", async (req) => {
       };
       const personalizedSubject = personalize(campaign.subject);
 
-      const html = personalize(
-        buildHtml(campaign.subject, campaign.body, campaign.cta_label, campaign.cta_url)
-          .replaceAll(UNSUB_TOKEN_PLACEHOLDER, token),
+      const html = withOpenPixel(
+        personalize(
+          buildHtml(campaign.subject, campaign.body, campaign.cta_label, campaign.cta_url)
+            .replaceAll(UNSUB_TOKEN_PLACEHOLDER, token),
+        ),
+        massOpenPixelHtml(SUPABASE_URL, campaignId, { token }),
       );
 
       const unsubApiBase = `${SUPABASE_URL}/functions/v1/handle-email-unsubscribe`;
@@ -428,7 +432,7 @@ Deno.serve(withCronFailureLog("process-mass-email-queue", async (req) => {
             to: [rawEmail],
             subject: personalizedSubject,
             html,
-            tracking: { opens: true, clicks: true },
+            tracking: { opens: false, clicks: true },
             tags: [{ name: "campaign_id", value: campaignId }],
             headers: {
               "List-Unsubscribe": `<${oneClick}>, <${uiUrl}>`,

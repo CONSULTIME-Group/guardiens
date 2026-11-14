@@ -19,6 +19,7 @@
  * Sécurité : admin uniquement (user_roles.role = 'admin'). Aucun envoi automatique :
  * ce endpoint n'agit que sur appel explicite (mode="send") de l'admin.
  */
+import { massOpenPixelHtml, withOpenPixel } from "../_shared/open-pixel.ts";
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { isAccountBlockedForMarketing } from "../_shared/account-email-block.ts";
 import { resendFetch } from "../_shared/resend-guard.ts";
@@ -522,7 +523,7 @@ Deno.serve(async (req) => {
         reply_to: REPLY_TO_ADDRESS,
         to: [r.email],
         subject,
-        html: buildHtml({
+        html: withOpenPixel(buildHtml({
           recipientFirstName: r.first_name,
           authorFirstName,
           missionTitle: mission.title,
@@ -534,8 +535,8 @@ Deno.serve(async (req) => {
           missionCategory: (mission as any).category || null,
           missionDateNeeded: (mission as any).date_needed || null,
           missionPhotoUrl: photo,
-        }),
-        tracking: { opens: true, clicks: true },
+        }), massOpenPixelHtml(SUPABASE_URL, campaignId, { userId: r.user_id })),
+        tracking: { opens: false, clicks: true },
         tags: [
           { name: "campaign_id", value: campaignId },
           { name: "campaign_type", value: "proximity" },
