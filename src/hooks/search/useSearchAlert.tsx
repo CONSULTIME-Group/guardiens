@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { snapToAllowedRadius } from "@/lib/alertRadius";
+import { proposedAlertRadius, searchAlertRadius, snapToAllowedRadius } from "@/lib/alertRadius";
 import { getDeptCode } from "@/lib/departments";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
@@ -23,13 +23,17 @@ interface Params {
    * l'inscription, sans toast d'erreur.
    */
   visitorSignupUrl?: string | null;
+  /** Lot RCH4 : ville du profil, libellé de l'alerte quand aucune ville n'est cherchée. */
+  homeCity?: string | null;
+  /** Lot RCH4 : distance déclarée par le gardien (rayon de mobilité), sinon null. */
+  declaredRadiusKm?: number | null;
 }
 
 /**
  * Encapsule la création d'alerte depuis la recherche
  * (state + appel RPC + toasts d'erreur, snap rayon, fallback INVALID_RADIUS).
  */
-export function useSearchAlert({ city, cityPostalCode, userPostalCode, radius, setRadius, zoneMode = "radius", resetKeys, visitorSignupUrl = null }: Params) {
+export function useSearchAlert({ city, cityPostalCode, userPostalCode, radius, setRadius, zoneMode = "radius", resetKeys, visitorSignupUrl = null, homeCity = null, declaredRadiusKm = null }: Params) {
   const [alertCreated, setAlertCreated] = useState(false);
   const [isCreatingAlert, setIsCreatingAlert] = useState(false);
   const { toast } = useToast();
@@ -39,34 +43,38 @@ export function useSearchAlert({ city, cityPostalCode, userPostalCode, radius, s
   useEffect(() => { setAlertCreated(false); }, resetKeys);
 
   const createConfiguredAlert = async () => {
-    if (zoneMode === "france") {
+    // Lot RCH4 (décision 3 de Jérémie) : depuis la France entière comme depuis
+    // un rayon, l'alerte est un rayon autour de chez le gardien (le ciblage
+    // mesure la distance depuis son profil, notify-sitters-on-publish), jamais
+    // « France entière ». 30 km au moins ; France entière : rayon proposé
+    // selon la distance déclarée (100 km sans déclaration).
+    if (zoneMode === "france" || zoneMode === "radius") {
+      const place = (city || homeCity || "").trim();
+      const usedRadius = zoneMode === "france" ? proposedAlertRadius(declaredRadiusKm) : searchAlertRadius(radius[0]);
       const { data: existing } = await supabase
         .from("alert_preferences")
         .select("id")
         .eq("active", true)
-        .eq("zone_type", "region")
-        .eq("region_code", "FR")
+        .eq("zone_type", "rayon")
+        .eq("radius_km", usedRadius)
         .contains("alert_types", ["gardes"])
         .limit(1);
-
       if (existing && existing.length > 0) {
-        return { error: { message: "DOUBLON" }, usedRadius: null as number | null, label: "France entière" };
+        return { error: { message: "DOUBLON" }, usedRadius, label: `${usedRadius} km` };
       }
-
       const { error } = await supabase.rpc("create_alert_preference", {
-        p_label: "Gardes · France entière",
-        p_zone_type: "region",
-        p_city: null,
-        p_postal_code: null,
-        p_radius_km: null,
+        p_label: place ? `Gardes · ${place} · ${usedRadius} km` : `Gardes · ${usedRadius} km de chez moi`,
+        p_zone_type: "rayon",
+        p_city: place || null,
+        p_postal_code: (city ? cityPostalCode : userPostalCode) ?? null,
+        p_radius_km: usedRadius,
         p_departement: null,
-        p_region_code: "FR",
+        p_region_code: null,
         p_alert_types: ["gardes"],
         p_heure_envoi: "08:00",
         p_frequence: "quotidien",
       });
-
-      return { error, usedRadius: null as number | null, label: "France entière" };
+      return { error, usedRadius, label: `${usedRadius} km` };
     }
 
     if (zoneMode === "dept") {
@@ -104,31 +112,16 @@ export function useSearchAlert({ city, cityPostalCode, userPostalCode, radius, s
       return { error, usedRadius: null as number | null, label: `département ${deptCode}` };
     }
 
+    // Région : rayon de 100 km autour de la ville cherchée (inchangé).
     if (!city) {
       return { error: { message: "INVALID_CITY" }, usedRadius: null as number | null, label: "ville" };
     }
-
-    let usedRadius = snapToAllowedRadius(radius[0]);
-    let { error } = await supabase.rpc("create_alert_from_search", {
+    const usedRadius = snapToAllowedRadius(Math.max(radius[0], 100));
+    const { error } = await supabase.rpc("create_alert_from_search", {
       p_city: city,
       p_postal_code: cityPostalCode ?? null,
       p_radius_km: usedRadius,
     });
-
-    if (error && (error.message || "").includes("INVALID_RADIUS")) {
-      console.warn("[create_alert_from_search] INVALID_RADIUS, retry with 15km", {
-        attempted: usedRadius,
-        original: radius[0],
-      });
-      usedRadius = 15;
-      ({ error } = await supabase.rpc("create_alert_from_search", {
-        p_city: city,
-        p_postal_code: cityPostalCode ?? null,
-        p_radius_km: usedRadius,
-      }));
-      if (!error) setRadius([usedRadius]);
-    }
-
     return { error, usedRadius, label: `${city} (${usedRadius} km)` };
   };
 
@@ -171,9 +164,10 @@ export function useSearchAlert({ city, cityPostalCode, userPostalCode, radius, s
     } else {
       toast({
         title: "Alerte créée",
+        // Lot RCH4 : l'email part à la publication, mesuré depuis chez le gardien.
         description: usedRadius
-          ? `Vous recevrez chaque matin les nouvelles gardes près de ${city} (rayon ${usedRadius} km).`
-          : `Vous recevrez chaque matin les nouvelles gardes sur ${label}.`,
+          ? `Zone enregistrée. Les nouvelles gardes à moins de ${usedRadius} km de chez vous arrivent par email, dès leur publication.`
+          : `Zone enregistrée. Les nouvelles gardes sur ${label} arrivent par email, dès leur publication.`,
         action: <ToastAction altText="Personnaliser" onClick={() => navigate("/settings")}>Personnaliser</ToastAction>,
       });
       setAlertCreated(true);

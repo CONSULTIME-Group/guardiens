@@ -101,7 +101,8 @@ describe("branchement de la recherche", () => {
     expect(src).toContain("{nearestShown.length === 0 && (\n      <AlmaEmptySearchBubble");
   });
   it("aucune annonce d'exemple mêlée aux gardes réelles proches, card_source mesuré", () => {
-    expect(src).toContain("isPublic || nearestComing ? 0");
+    // Lot RCH4 : plus aucune annonce d'exemple, nulle part.
+    expect(src).toContain("const demoLimit = 0;");
     expect(src).toContain('card_source: radiusCount > 0 ? "radius" : "nearest"');
   });
 });

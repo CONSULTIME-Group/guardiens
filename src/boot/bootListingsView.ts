@@ -21,6 +21,8 @@ import { departementNameFromCode, formatCityDepartement } from "@/lib/locationLa
 import { DEPT_NAMES } from "@/lib/departments";
 import { OVERSEAS_NAMES } from "@/lib/homeListingPlace";
 import { STARTED_SIT_NOTICE, isStartedOpenSit } from "@/lib/sitStarted";
+import { petSpeciesCountLabel } from "@/lib/petLabels";
+import { isNewlyPublished, publishedAgoLabel } from "@/lib/publishedAgo";
 import type { ListingsPrefetch } from "@/lib/listingsPrefetch";
 
 export interface BootTexts {
@@ -146,11 +148,18 @@ export function bootCardHtml(item: any, listIndex: number, today: string): strin
     ? `<img src="${escapeHtml(storageImageUrl(cover, { width: 880, height: 660 }))}" alt="" class="w-full h-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.03]" ${imgLoad}>`
     : `<div class="absolute inset-0 flex items-center justify-center text-muted-foreground/40">${icon("paw", "lucide lucide-paw-print h-10 w-10")}</div>`;
 
-  const pets = petEntries.map(([species, count], idx) =>
-    `<span class="inline-flex items-center gap-1">${idx > 0 ? '<span aria-hidden="true" class="opacity-40">·</span>' : ""}${icon(SPECIES_ICON[species] || "paw", "h-3 w-3 opacity-70")}${count > 1 ? `<span>×${count}</span>` : ""}</span>`,
-  ).join("");
+  // Lot RCH4 : même rendu que SearchListingCard (espèces en toutes lettres,
+  // ancienneté de publication, pastille « Nouvelle »).
+  const speciesText = Object.entries(petGroups).map(([species, count]) => petSpeciesCountLabel(species, count)).filter(Boolean).join(", ");
+  void petEntries;
+  const pets = speciesText ? `<span>${escapeHtml(speciesText)}</span>` : "";
   const dates = dateLabel
-    ? `${petEntries.length > 0 ? '<span aria-hidden="true" class="opacity-40">·</span>' : ""}<span>${escapeHtml(dateLabel)}</span>`
+    ? `${speciesText ? '<span aria-hidden="true" class="opacity-40">·</span>' : ""}<span>${escapeHtml(dateLabel)}</span>`
+    : "";
+  const ago = publishedAgoLabel(item.published_at);
+  const agoHtml = ago ? `<p class="mt-1 text-[12px] text-muted-foreground" data-testid="card-published-ago">${escapeHtml(ago)}</p>` : "";
+  const newBadge = isNewlyPublished(item.published_at)
+    ? '<span class="absolute top-3 left-3 bg-primary text-primary-foreground text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm" data-testid="new-sit-badge">Nouvelle</span>'
     : "";
   const verified = item.owner?.identity_verified
     ? '<span class="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/[0.06] text-primary text-[11px] font-semibold px-2 py-0.5">Vérifié</span>'
@@ -158,11 +167,12 @@ export function bootCardHtml(item: any, listIndex: number, today: string): strin
 
   return `<a href="${sitHref(item)}"><article class="group relative flex h-full flex-col cursor-pointer  " data-testid="search-card-boot" data-demo="false" data-list-index="${listIndex + 1}">`
     // Emplacement du favori (vide pour un visiteur, comme FavoriteButton).
-    + `<div class="relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted border border-black/[0.06] shadow-[0_1px_3px_rgba(11,31,26,0.05),0_4px_16px_-4px_rgba(11,31,26,0.06)] transition-all duration-500 ease-out group-hover:shadow-[0_4px_12px_rgba(11,31,26,0.08),0_16px_40px_-8px_rgba(11,31,26,0.10)]">${img}<div class="absolute top-3 right-3"></div></div>`
+    + `<div class="relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted border border-black/[0.06] shadow-[0_1px_3px_rgba(11,31,26,0.05),0_4px_16px_-4px_rgba(11,31,26,0.06)] transition-all duration-500 ease-out group-hover:shadow-[0_4px_12px_rgba(11,31,26,0.08),0_16px_40px_-8px_rgba(11,31,26,0.10)]">${img}<div class="absolute top-1.5 right-1.5"></div>${newBadge}</div>`
     + `<div class="mt-4 px-0.5 flex flex-col flex-1">`
-    + `<p class="text-[11px] uppercase tracking-[0.16em] font-medium truncate text-primary/70"><span class="truncate">${escapeHtml(locationLabel || "France")}</span></p>`
+    + `<p class="text-[14px] sm:text-[15px] font-semibold text-foreground truncate" data-testid="card-distance-line"><span class="truncate">${escapeHtml(locationLabel || "France")}</span></p>`
     + `<div class="mt-1.5 flex items-start justify-between gap-2"><h3 class="font-sans text-[15px] sm:text-[16px] font-medium leading-snug text-foreground line-clamp-2">${title}</h3></div>`
     + `<div class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-muted-foreground">${pets}${dates}</div>`
+    + agoHtml
     + `<div class="mt-3 flex flex-wrap items-center gap-1.5">${verified}</div>`
     + `<div class="mt-auto">${started ? `<p class="mt-2 text-[11px] font-medium text-primary" data-testid="started-sit-notice">${escapeHtml(STARTED_SIT_NOTICE)}</p>` : ""}</div>`
     + `</div></article></a>`;

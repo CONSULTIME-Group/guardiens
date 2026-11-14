@@ -13,6 +13,8 @@ import { markMilestone } from "@/lib/perfMarks";
 import { sitCommune, sitLocationLabel } from "@/lib/sitLocation";
 import { projetMetaLine, projetNatureLabel } from "@/lib/projets";
 import { STARTED_SIT_NOTICE, isStartedOpenSit } from "@/lib/sitStarted";
+import { petSpeciesCountLabel } from "@/lib/petLabels";
+import { isNewlyPublished, publishedAgoLabel } from "@/lib/publishedAgo";
 
 
 import { PawPrint, Cat, Bird } from "lucide-react";
@@ -105,7 +107,19 @@ const SearchListingCard = ({
     !isMission &&
     !isDemo &&
     typeof item.distance === "number" &&
+    typeof radius === "number" &&
     item.distance > radius;
+  // Lot RCH4 : espèces en toutes lettres (« 2 chats ») et ancienneté de
+  // publication, seulement si published_at est renseigné.
+  const speciesText = Object.entries(petGroups)
+    .map(([species, names]) => petSpeciesCountLabel(species, names.length))
+    .filter(Boolean)
+    .join(", ");
+  const publishedAgo = publishedAgoLabel((item as any).published_at);
+  const isNewSit = isNewlyPublished((item as any).published_at);
+  const distanceText = typeof item.distance === "number"
+    ? `${item.distance < 1 ? "< 1" : Math.round(item.distance).toLocaleString("fr-FR").replace(/\s/g, "\u202F")} km`
+    : null;
   const { full: affinity, displayed: affinityDisplayed } = useAffinityWithShadow(
     item.ownerMatch ? { ...item.ownerMatch, pets: item.pets || [] } : null,
     viewerSitterProfile ?? null,
@@ -357,9 +371,16 @@ const SearchListingCard = ({
 
         {/* Favori seul en overlay top-right, discret. */}
         {!isDemo && !isInactive && (
-          <div className="absolute top-3 right-3" onClick={(e) => e.preventDefault()}>
-            <FavoriteButton targetType="sit" targetId={item.id} size="sm" />
+          <div className="absolute top-1.5 right-1.5" onClick={(e) => e.preventDefault()}>
+            {/* Lot RCH4 : cible tactile de 44 px. */}
+            <FavoriteButton targetType="sit" targetId={item.id} size="sm" className="min-h-11 min-w-11 flex items-center justify-center" />
           </div>
+        )}
+
+        {!isDemo && !isInactive && isNewSit && (
+          <span className="absolute top-3 left-3 bg-primary text-primary-foreground text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm" data-testid="new-sit-badge">
+            Nouvelle
+          </span>
         )}
 
         {/* Badge « Exemple » discret en coin (lin sur lin), pas de saturation cassée. */}
@@ -384,14 +405,10 @@ const SearchListingCard = ({
 
       {/* ─── Corps de carte sous l'image ─── */}
       <div className="mt-4 px-0.5 flex flex-col flex-1">
-        {/* Ligne 1 : ville · distance, en eyebrow sauge discret */}
-        <p className={`text-[11px] uppercase tracking-[0.16em] font-medium truncate ${isOutOfZone ? "text-primary" : "text-primary/70"}`}>
+        {/* Ligne 1 (lot RCH4) : distance en tête, en gras, puis le lieu. */}
+        <p className="text-[14px] sm:text-[15px] font-semibold text-foreground truncate" data-testid="card-distance-line">
+          {distanceText && <span>{distanceText} · </span>}
           <span className="truncate">{locationLabel || "France"}</span>
-          {item.distance != null && (
-            <span className="ml-1 opacity-70">
-              · {item.distance < 1 ? "< 1" : Math.round(item.distance).toLocaleString("fr-FR").replace(/\s/g, "\u202F")} km
-            </span>
-          )}
         </p>
 
         {/* Ligne 2 : titre Outfit (font-sans) pour scannabilité, poids medium */}
@@ -403,24 +420,17 @@ const SearchListingCard = ({
 
         {/* Ligne 3 : meta compacte (animaux + dates), petite typo, gris */}
         <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-muted-foreground">
-          {Object.entries(petGroups).slice(0, 3).map(([species, names], idx) => {
-            const IconComp = speciesIcon[species] || PawPrint;
-            const count = names.length;
-            return (
-              <span key={species} className="inline-flex items-center gap-1">
-                {idx > 0 && <span aria-hidden className="opacity-40">·</span>}
-                <IconComp className="h-3 w-3 opacity-70" aria-hidden />
-                {count > 1 && <span>×{count}</span>}
-              </span>
-            );
-          })}
+          {speciesText && <span>{speciesText}</span>}
           {dateLabel && (
             <>
-              {Object.keys(petGroups).length > 0 && <span aria-hidden className="opacity-40">·</span>}
+              {speciesText && <span aria-hidden className="opacity-40">·</span>}
               <span>{dateLabel}</span>
             </>
           )}
         </div>
+        {publishedAgo && !isDemo && !isInactive && (
+          <p className="mt-1 text-[12px] text-muted-foreground" data-testid="card-published-ago">{publishedAgo}</p>
+        )}
 
         {/* Ligne 4 : badges de confiance / affinité, ton-sur-ton, silence si rien. */}
         {(!isInactive && !isDemo) && (

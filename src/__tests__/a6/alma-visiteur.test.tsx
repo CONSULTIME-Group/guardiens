@@ -94,8 +94,9 @@ describe("A6 · adresses d'inscription", () => {
     expect(redirectOf(href)).toBe(path);
   });
 
-  it("la zone rayon n'est pas recopiée", () => {
-    expect(visitorSearchRedirect("/annonces", "", "radius")).toBe("/annonces?alerte=1");
+  it("lot RCH4 : la France entière, zone par défaut, n'est pas recopiée ; le rayon l'est", () => {
+    expect(visitorSearchRedirect("/annonces", "", "france")).toBe("/annonces?alerte=1");
+    expect(visitorSearchRedirect("/annonces", "", "radius")).toBe("/annonces?zone=radius&alerte=1");
   });
 
   it("« Vous partez ? » mène à l'inscription propriétaire vers /sits/create", () => {
@@ -231,7 +232,9 @@ describe("A6 · useSearchAlert, visiteur", () => {
     expect(toastMock).not.toHaveBeenCalled();
   });
 
-  it("membre : l'appel d'alerte reste inchangé", async () => {
+  it("membre, lot RCH4 : l'alerte de la recherche est un rayon de 30 km au moins, autour de chez lui", async () => {
+    const chain: any = { select: () => chain, eq: () => chain, contains: () => chain, limit: async () => ({ data: [], error: null }) };
+    fromMock.mockImplementation((() => chain) as any);
     const wrapper = ({ children }: { children: ReactNode }) => <MemoryRouter>{children}</MemoryRouter>;
     const { result } = renderHook(
       () => useSearchAlert({ city: "Lyon", cityPostalCode: "69001", radius: [15], setRadius: vi.fn(), resetKeys: [] }),
@@ -240,7 +243,18 @@ describe("A6 · useSearchAlert, visiteur", () => {
     await act(async () => {
       await result.current.handleCreateAlert();
     });
-    expect(rpcMock).toHaveBeenCalledWith("create_alert_from_search", expect.objectContaining({ p_city: "Lyon" }));
+    expect(rpcMock).toHaveBeenCalledWith("create_alert_preference", expect.objectContaining({ p_zone_type: "rayon", p_city: "Lyon", p_radius_km: 30, p_alert_types: ["gardes"] }));
+    expect(rpcMock).not.toHaveBeenCalledWith("create_alert_preference", expect.objectContaining({ p_region_code: "FR" }));
+    rpcMock.mockClear();
+    const { result: fr } = renderHook(
+      () => useSearchAlert({ city: "", cityPostalCode: null, radius: [15], setRadius: vi.fn(), zoneMode: "france", homeCity: "Pierrelatte", resetKeys: [] }),
+      { wrapper },
+    );
+    await act(async () => {
+      await fr.current.handleCreateAlert();
+    });
+    expect(rpcMock).toHaveBeenCalledWith("create_alert_preference", expect.objectContaining({ p_zone_type: "rayon", p_radius_km: 100, p_region_code: null }));
+    fromMock.mockImplementation((() => { throw new Error("aucune lecture attendue"); }) as any);
   });
 
   it("SearchSitter transmet l'inscription au hook et la recherche à la bulle", () => {

@@ -46,7 +46,7 @@ describe("lectures lancées par le HTML (lot perf 3)", () => {
     run(listingsPrefetchScript("https://x.supabase.co", "anon"));
     const slot = (window as any)[PREFETCH_GLOBAL];
     const data = await slot.p;
-    expect(calls[0]).toBe("https://x.supabase.co/rest/v1/sits?select=id,user_id,property_id,title,slug,status,city,country,departement_code,start_date,end_date,created_at,unpublished_at,environments,is_urgent,cover_photo_url,accepting_applications,max_applications,property:properties!sits_property_id_fkey(type,environment,photos,cover_photo_url)&or=(status.eq.published)&order=created_at.desc,id.asc&offset=0&limit=1000");
+    expect(calls[0]).toBe("https://x.supabase.co/rest/v1/sits?select=id,user_id,property_id,title,slug,status,city,country,departement_code,start_date,end_date,created_at,published_at,unpublished_at,environments,is_urgent,cover_photo_url,accepting_applications,max_applications,property:properties!sits_property_id_fkey(type,environment,photos,cover_photo_url)&or=(status.eq.published)&order=created_at.desc,id.asc&offset=0&limit=1000");
     expect(calls[1]).toMatch(/public_closed_sits\?select=.*&order=id\.asc&offset=0&limit=1000$/);
     expect(calls.find((u) => u.includes("public_profiles?"))).toMatch(/id=in\.\(o1,o2\)&order=id\.asc/);
     expect(calls.find((u) => u.includes("public_pets?"))).toMatch(/property_id=in\.\(p1\)/);

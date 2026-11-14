@@ -182,7 +182,10 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  // l'autre que si elle est explicitement demandée dans l'URL.
  const urlZone = searchParams.get("zone");
  if (urlZone === "radius" || urlZone === "dept" || urlZone === "region" || urlZone === "france") return urlZone;
- return "radius";
+ // Lot RCH4 (décision 1 de Jérémie) : par défaut, toute la France triée par
+ // distance ; un rayon demandé dans l'URL (?rayon=) garde le rayon.
+ if (searchParams.get("rayon")) return "radius";
+ return "france";
  });
  const [densityCounts, setDensityCounts] = useState<{ radius: number; dept: number; region: number; france: number }>({ radius: 0, dept: 0, region: 0, france: 0 });
  // Zone et rayon ne changent que sur un geste du membre (aucun élargissement automatique).
@@ -702,7 +705,9 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
      const openInRadius = final.filter((s: any) => !isInactiveSit(s)).length;
      const nearestComing = openInRadius < NEAREST_OUTSIDE_THRESHOLD && nearestFiltered.length > 0;
      const demoCadence = realCount === 0 ? 3 : realCount <= 3 ? 99 : 6;
-     const demoLimit = isPublic || nearestComing ? 0 : (realCount === 0 ? DEMO_SITS.length : realCount <= 3 ? 2 : DEMO_SITS.length);
+     // Lot RCH4 : plus aucune annonce d'exemple mêlée aux gardes réelles.
+     const demoLimit = 0;
+     void nearestComing; void isPublic;
      return interleaveDemos(final, DEMO_SITS.slice(0, demoLimit), demoCadence);
    }
    if (missionSubTab === "members") return [];
@@ -1014,6 +1019,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    zoneMode,
    resetKeys: [city, radius, zoneMode],
    visitorSignupUrl: isVisitor ? visitorSectorSignupUrl(visitorSearchPath) : null,
+   homeCity: userCity || null,
  });
 
  // Lot A6 : retour d'inscription depuis « Recevoir les annonces de ce secteur ».
@@ -1194,7 +1200,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     // On rapatrie aussi les annonces internationales, mais filterByLocation les
     // écarte des zones françaises (rayon / dept / région). Elles s'affichent en
     // mode « Toute la France » et sur la page dédiée /annonces/international.
-     const SIT_COLUMNS = "id, user_id, property_id, title, slug, status, city, country, departement_code, start_date, end_date, created_at, unpublished_at, environments, is_urgent, cover_photo_url, accepting_applications, max_applications, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)";
+     const SIT_COLUMNS = "id, user_id, property_id, title, slug, status, city, country, departement_code, start_date, end_date, created_at, published_at, unpublished_at, environments, is_urgent, cover_photo_url, accepting_applications, max_applications, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)";
 
     // Lot L1 : plus de plafond de 500. Lecture paginée stable (created_at puis id),
     // pages de 1 000 jusqu'à la dernière page incomplète. Les compteurs sont
@@ -1404,7 +1410,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     // Distance au lieu de garde géocodé (commune de l'annonce), jamais inventée.
     const placeCoords = coordsOf(sit);
     const dist = searchCoords && placeCoords ? haversineDistance(searchCoords.lat, searchCoords.lng, placeCoords.lat, placeCoords.lng) : null;
-    const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
+    // Lot RCH4 : « Nouvelle » et « Publiée il y a » seulement si published_at est renseigné.
+    const isNew = !!sit.published_at && differenceInHours(new Date(), new Date(sit.published_at)) < 48;
     const days = sit.start_date && sit.end_date ? (daysBetween(sit.start_date, sit.end_date) ?? 0) : 0;
     const sitEnvs: string[] = (sit as any).environments || [];
     const ownerEnvs: string[] = (ownerProf as any)?.environments || [];
@@ -1729,7 +1736,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   setDuration("all");
   setEmergencyOnly(false);
   setRadius([15]);
-  setZoneMode("radius");
+  setZoneMode("france");
   };
 
  const animalsLabel = animalTypes.length > 0 ? animalTypes.join(" · ") : "Animaux";
@@ -1743,6 +1750,13 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  const availableSitsCountForDrawer = tab === "sits" ? availableSitsCount : results.filter((r: any) => !r.is_demo).length;
  const demoCount = results.filter((r: any) => r.is_demo).length;
  const resultCount = tab === "missions" && missionSubTab === "members" ? availableMembers.length : availableSitsCount;
+ // Lot RCH4 : France entière avec un point (ville cherchée ou profil situé) :
+ // distance de la garde ouverte la plus proche, en tête de la ligne d'état.
+ const nearestFranceKm = (() => {
+   if (tab !== "sits" || appliedZone !== "france") return null;
+   const ds = results.filter((r: any) => !r.is_demo && !isInactiveSit(r) && typeof r.distance === "number").map((r: any) => r.distance as number);
+   return ds.length > 0 ? Math.max(1, Math.round(Math.min(...ds))) : null;
+ })();
   // hasNoLocalRealMissions retiré : OutOfZoneBanner couvre déjà ce cas.
  const countLabel = searchError
  ? "Recherche indisponible"
@@ -1767,6 +1781,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  ? t("search_results.count_available_dept", { count: resultCount })
  : appliedZone === "region"
  ? t("search_results.count_available_region", { count: resultCount })
+ : nearestFranceKm !== null
+ ? t("search_results.count_france_nearest", { count: resultCount, km: nearestFranceKm })
  : t("search_results.count_available_fr", { count: resultCount });
 
  // ─── Pill style ───
@@ -1792,7 +1808,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
       item={item}
       listIndex={listIndex}
       tab={tab}
-      radius={radius[0]}
+      // Lot RCH4 : « hors zone » n'a de sens que dans un rayon.
+      radius={appliedZone === "radius" ? radius[0] : undefined}
       hasAccess={hasAccess}
       testDemoMode={testDemoMode}
       formatDate={formatDate}
@@ -2788,9 +2805,29 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
         <>
           {visibleActive.length > 0 && (
             <section className="mb-10">
-              <div className={gridCls}>
-                {visibleActive.map((item) => renderCard(item, globalIdx++))}
-              </div>
+              {(() => {
+                // Lot RCH4 : France entière avec un point, gardes triées par
+                // distance et groupées sous trois intertitres.
+                const grouped = appliedZone === "france" && visibleActive.some((r: any) => typeof r.distance === "number");
+                if (!grouped) {
+                  return <div className={gridCls}>{visibleActive.map((item) => renderCard(item, globalIdx++))}</div>;
+                }
+                const band = (r: any) => (typeof r.distance !== "number" ? 2 : r.distance < 30 ? 0 : r.distance <= 100 ? 1 : 2);
+                const labels = [t("search_results.band_near"), t("search_results.band_mid"), t("search_results.band_far")];
+                return [0, 1, 2].map((b) => {
+                  const shownInBand = visibleActive.filter((r: any) => band(r) === b);
+                  if (shownInBand.length === 0) return null;
+                  const total = activeReal.filter((r: any) => band(r) === b).length;
+                  return (
+                    <div key={b} className="mb-8" data-testid={`distance-band-${b}`}>
+                      <h3 className="mb-4 font-heading text-base sm:text-lg font-semibold text-foreground">
+                        {labels[b]} <span className="text-muted-foreground font-normal">({total})</span>
+                      </h3>
+                      <div className={gridCls}>{shownInBand.map((item) => renderCard(item, globalIdx++))}</div>
+                    </div>
+                  );
+                });
+              })()}
               {hasMore && (
                 <div className="mt-8 flex justify-center">
                   <button

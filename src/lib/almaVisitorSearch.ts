@@ -22,7 +22,8 @@ export const VISITOR_OWNER_PUBLISH_SIGNUP_URL = `/inscription?role=owner&redirec
  */
 export function visitorSearchRedirect(pathname: string, search: string, zoneMode: SearchZoneMode): string {
   const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
-  if (zoneMode !== "radius") params.set("zone", zoneMode);
+  // Lot RCH4 : la France entière est la zone par défaut, un autre choix est recopié.
+  if (zoneMode !== "france") params.set("zone", zoneMode);
   params.set(VISITOR_ALERT_PARAM, "1");
   const path = pathname && pathname.startsWith("/") ? pathname : "/annonces";
   return `${path}?${params.toString()}`;
