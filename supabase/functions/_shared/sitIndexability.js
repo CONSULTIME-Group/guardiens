@@ -64,3 +64,26 @@ export const NON_INDEXABLE_STATUSES = ["confirmed", "archived"];
 export function isClosedSitStatus(status) {
   return NON_INDEXABLE_STATUSES.includes(String(status || ""));
 }
+
+/**
+ * Date du jour à Paris, au format AAAA-MM-JJ (lot RCH3).
+ * @param {Date} [now]
+ * @returns {string}
+ */
+export function parisTodayForIndex(now = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+}
+
+/**
+ * Vrai si la date de fin de la garde est passée (lot RCH3) : la page reste
+ * accessible mais n'est plus indexable ni listée dans le sitemap. Le jour de
+ * fin compte encore comme ouvert. Sans date de fin, rien n'est décidé ici.
+ * @param {Record<string, unknown>} sit
+ * @param {string} todayIso AAAA-MM-JJ, date du jour à Paris
+ * @returns {boolean}
+ */
+export function isSitEndDatePast(sit, todayIso) {
+  const end = sit && typeof sit.end_date === "string" ? sit.end_date.slice(0, 10) : "";
+  if (!end || !todayIso) return false;
+  return end < todayIso;
+}

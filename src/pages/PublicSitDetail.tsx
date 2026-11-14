@@ -22,7 +22,7 @@ import { trackEvent } from "@/lib/analytics";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { logger } from "@/lib/logger";
 import { captureDigestAttribution } from "@/lib/digestAttribution";
-import { isSitRichEnough } from "@/lib/sitIndexability";
+import { isSitEndDatePast, isSitRichEnough, parisTodayForIndex } from "@/lib/sitIndexability";
 import { sortReviewsNewestFirst } from "@/lib/reviewDates";
 import NearbySitsModule from "@/components/sits/NearbySitsModule";
 import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
@@ -637,7 +637,8 @@ const PublicSitDetail = () => {
   // scripts/generate-sitemap.mjs (src/lib/sitIndexability.js), pour que les
   // deux implémentations ne puissent plus diverger. Une garde pourvue ou
   // terminée n'est jamais indexable (sécurité : dates d'absence du foyer).
-  const isIndexable = !isClosedSit && isSitRichEnough(sit);
+  // Lot RCH3 : une garde publiée dont la date de fin est passée non plus.
+  const isIndexable = !isClosedSit && !isSitEndDatePast(sit, parisTodayForIndex()) && isSitRichEnough(sit);
 
 
   // Handler de partage unifié.
