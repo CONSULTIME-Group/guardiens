@@ -87,7 +87,9 @@ INSERT INTO public.legal_document_versions (document, version, published_on, eff
   ('privacy', '5', DATE '2026-10-14', DATE '2026-10-14', false),
   ('cgu', '9', DATE '2026-10-16', DATE '2026-11-16', true),
   ('cgs', '3', DATE '2026-10-16', DATE '2026-11-16', true),
-  ('privacy', '6', DATE '2026-10-16', DATE '2026-10-16', false)
+  ('privacy', '6', DATE '2026-10-16', DATE '2026-10-16', false),
+  -- Lot CGU10 (14/11/2026) : article 7 bis Sorties.
+  ('cgu', '10', DATE '2026-11-14', DATE '2026-12-14', true)
 ON CONFLICT (document, version) DO UPDATE
   SET published_on = EXCLUDED.published_on,
       effective_on = EXCLUDED.effective_on,
@@ -101,7 +103,8 @@ DELETE FROM public.legal_document_versions
    ('privacy', '5'),
    ('cgu', '9'),
    ('cgs', '3'),
-   ('privacy', '6')
+   ('privacy', '6'),
+   ('cgu', '10')
  );
 
 ALTER TABLE public.legal_document_versions ENABLE ROW LEVEL SECURITY;
@@ -256,8 +259,8 @@ BEGIN
   END IF;
 
   SELECT count(*) INTO v_rows FROM public.legal_document_versions;
-  IF v_rows <> 6 THEN
-    RAISE EXCEPTION 'legal_document_versions doit compter 6 lignes, trouvé %', v_rows;
+  IF v_rows <> 7 THEN
+    RAISE EXCEPTION 'legal_document_versions doit compter 7 lignes, trouvé %', v_rows;
   END IF;
 
   IF has_table_privilege('authenticated', 'public.legal_acceptances', 'INSERT')

@@ -6,15 +6,16 @@ import PublicFooter from "@/components/layout/PublicFooter";
 import LegalVersionNotice from "@/components/legal/LegalVersionNotice";
 import TermsV8 from "@/components/legal/TermsV8";
 import TermsV9 from "@/components/legal/TermsV9";
+import TermsV10 from "@/components/legal/TermsV10";
 import { selectLegalPageVersion } from "@/lib/legalPageVersion";
 
 /** Texte de chaque version publiée des CGU (calendrier : src/config/legalVersions.ts). */
-const TERMS_BY_VERSION: Record<string, ComponentType> = { "8": TermsV8, "9": TermsV9 };
+const TERMS_BY_VERSION: Record<string, ComponentType> = { "8": TermsV8, "9": TermsV9, "10": TermsV10 };
 
 const Terms = () => {
   const [params] = useSearchParams();
   const selection = selectLegalPageVersion("cgu", params.get("version"));
-  const Text = TERMS_BY_VERSION[selection.shown.version] ?? TermsV9;
+  const Text = TERMS_BY_VERSION[selection.shown.version] ?? TermsV10;
 
   return (
     <div className="min-h-screen bg-background text-foreground">

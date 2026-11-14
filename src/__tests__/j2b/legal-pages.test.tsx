@@ -57,13 +57,19 @@ describe("J2b · /cgu", () => {
     expect(link.getAttribute("href")).toBe("/cgu?version=9");
   });
 
-  it("après le 16/11/2026 : version 9 et lien discret vers la version 8", () => {
+  it("après le 16/11/2026 : version 9, et annonce de la version 10", () => {
     renderAt(AFTER, Terms, "/cgu");
     expect(screen.getByText(V9)).toBeTruthy();
     expect(screen.queryByText(V8)).toBeNull();
-    expect(screen.queryByText(/Une nouvelle version des CGU/)).toBeNull();
-    const link = screen.getByRole("link", { name: "Version précédente (version 8)" });
-    expect(link.getAttribute("href")).toBe("/cgu?version=8");
+    // Lot CGU10 : la version 10, publiée le 14/11, s'annonce jusqu'au 14/12 ;
+    // l'encadré d'annonce remplace alors le lien vers la version précédente.
+    expect(screen.getByText(/Une nouvelle version des CGU entre en vigueur le 14 décembre 2026/)).toBeTruthy();
+  });
+
+  it("lot CGU10 : à partir du 14/12/2026, la version 10 s'applique, avec l'article 7 bis Sorties", () => {
+    renderAt("2026-12-15", Terms, "/cgu");
+    expect(screen.getByText(/7 bis\. Sorties/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Version précédente (version 9)" }).getAttribute("href")).toBe("/cgu?version=9");
   });
 
   it("le jour d'entrée en vigueur (heure de Paris), la version 9 s'applique", () => {

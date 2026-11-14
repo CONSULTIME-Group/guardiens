@@ -214,7 +214,44 @@ Merci de faire vivre Guardiens avec nous,
 
 Elisa et Jérémie`;
 
+// Lot CGU10 (14/11/2026) : préavis de la version 10 (article 7 bis Sorties),
+// envoyé le jour de la publication, tous les comptes actifs.
+const CGU_V10_SUBJECT = "Les sorties arrivent dans nos conditions";
+const CGU_V10_BODY = `Bonjour,
+
+Depuis quelques jours, Guardiens permet de proposer des sorties : une belote à quatre, une randonnée, une balade avec les chiens, un atelier. Nos Conditions Générales d'Utilisation accueillent maintenant ces moments partagés, dans une version 10 qui entre en vigueur le <strong>14 décembre 2026</strong>.
+
+Ce qui change, en bref :
+<ul>
+<li><strong>Un nouvel article 7 bis, Sorties</strong> : l'organisateur fixe le jour, le lieu et le nombre de places, chacun s'inscrit librement et peut libérer sa place à tout moment.</li>
+<li><strong>L'argent reste simple</strong> : une sortie est gratuite par défaut, une participation aux frais réels peut être indiquée, et personne ne gagne d'argent à organiser.</li>
+<li><strong>Quelques activités restent hors des sorties</strong> : celles qui demandent un encadrement professionnel (plongée, escalade, haute montagne), la garde d'enfants et la vente.</li>
+<li><strong>Chacun reste responsable de soi</strong> : une responsabilité civile à jour, et une garantie des accidents de la vie pour les activités sportives.</li>
+</ul>
+
+Le reste de nos conditions est inchangé. Vous pouvez lire la version 10 dès maintenant : <a href="https://guardiens.fr/cgu?version=10" style="color:#2C6E49;font-weight:600;text-decoration:underline">les CGU, version 10</a>. Lors de votre première connexion à partir du 14 décembre, une case à cocher vous permettra de l'accepter.
+
+Guardiens est gratuit. Si ces conditions vous conviennent moins, vous pouvez fermer votre compte à tout moment depuis vos paramètres, gratuitement. Une question ? Écrivez-nous à contact@guardiens.fr.
+
+À bientôt sur Guardiens,
+
+Elisa et Jérémie`;
+
 const CAMPAIGN_PRESETS: CampaignPreset[] = [
+  {
+    key: "cgu_v10_preavis",
+    label: "Préavis CGU v10, sorties (14/11/2026)",
+    segment: "tous",
+    filters: { comptes_actifs: true },
+    subject: CGU_V10_SUBJECT,
+    body: CGU_V10_BODY,
+    ctaEnabled: true,
+    ctaLabel: "Lire les nouvelles conditions",
+    ctaUrl: "https://guardiens.fr/cgu?version=10",
+    utmEnabled: false,
+    utmCampaign: "cgu-v10-preavis",
+    utmContent: "cta",
+  },
   {
     key: "cgu_v9_preavis",
     label: "Préavis CGU v9 (16/10/2026)",

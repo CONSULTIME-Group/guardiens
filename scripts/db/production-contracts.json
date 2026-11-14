@@ -393,18 +393,18 @@
       ]
     },
     {
-     "migration": "0156_art0_indexnow_cle_service.sql",
-     "description": "trigger_indexnow_push appelle notify-indexnow avec la clé de service lue dans le coffre (les appels à la clé publique répondaient 401 depuis le lot SEC2)",
-     "checks": [
-      {
-       "name": "indexnow_cle_coffre",
-       "sql": "SELECT position('vault.decrypted_secrets' in pg_get_functiondef('public.trigger_indexnow_push(text,text)'::regprocedure)) > 0 AND position('eyJhbGci' in pg_get_functiondef('public.trigger_indexnow_push(text,text)'::regprocedure)) = 0 AS ok"
-      },
-      {
-       "name": "indexnow_droits_fermes",
-       "sql": "SELECT NOT has_function_privilege('anon', 'public.trigger_indexnow_push(text,text)', 'EXECUTE') AND NOT has_function_privilege('authenticated', 'public.trigger_indexnow_push(text,text)', 'EXECUTE') AS ok"
-      }
-     ]
+      "migration": "0156_art0_indexnow_cle_service.sql",
+      "description": "trigger_indexnow_push appelle notify-indexnow avec la clé de service lue dans le coffre (les appels à la clé publique répondaient 401 depuis le lot SEC2)",
+      "checks": [
+        {
+          "name": "indexnow_cle_coffre",
+          "sql": "SELECT position('vault.decrypted_secrets' in pg_get_functiondef('public.trigger_indexnow_push(text,text)'::regprocedure)) > 0 AND position('eyJhbGci' in pg_get_functiondef('public.trigger_indexnow_push(text,text)'::regprocedure)) = 0 AS ok"
+        },
+        {
+          "name": "indexnow_droits_fermes",
+          "sql": "SELECT NOT has_function_privilege('anon', 'public.trigger_indexnow_push(text,text)', 'EXECUTE') AND NOT has_function_privilege('authenticated', 'public.trigger_indexnow_push(text,text)', 'EXECUTE') AS ok"
+        }
+      ]
     },
     {
       "migration": "0141_adm22_alertes_equipe.sql",
@@ -729,6 +729,16 @@
         {
           "name": "diffusion_fermee_aux_membres",
           "sql": "SELECT NOT has_function_privilege('authenticated', 'public.notify_sitters_for_sit(uuid)', 'EXECUTE') AND NOT has_function_privilege('anon', 'public.notify_sitters_for_sit(uuid)', 'EXECUTE') AS ok"
+        }
+      ]
+    },
+    {
+      "migration": "0159_cgu10_sorties.sql",
+      "description": "CGU version 10 publiée le 14/11/2026, en vigueur le 14/12/2026, avec réacceptation",
+      "checks": [
+        {
+          "name": "cgu10_au_calendrier",
+          "sql": "SELECT count(*) = 1 AS ok FROM public.legal_document_versions WHERE document = 'cgu' AND version = '10' AND published_on = DATE '2026-11-14' AND effective_on = DATE '2026-12-14' AND requires_reaccept"
         }
       ]
     }

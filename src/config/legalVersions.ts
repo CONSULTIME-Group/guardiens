@@ -28,6 +28,8 @@ export const LEGAL_VERSIONS: readonly LegalVersion[] = [
   { document: "cgs", version: "3", publishedOn: "2026-10-16", effectiveOn: "2026-11-16", requiresReaccept: true },
   // Information alignée sur les CGU v9 (identité, mineurs, contrôle automatisé), effet immédiat.
   { document: "privacy", version: "6", publishedOn: "2026-10-16", effectiveOn: "2026-10-16", requiresReaccept: false },
+  // Lot CGU10 (14/11/2026) : article 7 bis Sorties, préavis de 30 jours (article 15.2).
+  { document: "cgu", version: "10", publishedOn: "2026-11-14", effectiveOn: "2026-12-14", requiresReaccept: true },
 ];
 
 /** Jour courant à Paris, AAAA-MM-JJ. */
