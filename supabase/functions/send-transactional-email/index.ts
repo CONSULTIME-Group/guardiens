@@ -117,6 +117,7 @@ import {
   decideDeferral,
   resolveDeferral,
   NEARBY_SIT_ALERT_TEMPLATES,
+  MUTUAL_AID_ALERT_TEMPLATES,
 
   isQuietAt,
   nextQuietEndFrom,
@@ -946,8 +947,11 @@ Deno.serve(async (req) => {
     // plus consommer le quota d'une alerte, ni l'inverse.
     const isNearby = (r: CatRow) => NEARBY_SIT_ALERT_TEMPLATES.has(r.template_name ?? '')
     const nearbySitWeek = nonTxRows.filter(isNearby).map((r) => r.created_at)
+    // Lot ALR3 (14/11/2026) : la demande d'entraide a son propre compteur.
+    const isMutualAid = (r: CatRow) => MUTUAL_AID_ALERT_TEMPLATES.has(r.template_name ?? '')
+    const mutualAidWeek = nonTxRows.filter(isMutualAid).map((r) => r.created_at)
     const alertWeek = nonTxRows
-      .filter((r) => r.metadata?.category === 'alert' && !isNearby(r) && r.template_name !== OUTING_ALERT_TEMPLATE)
+      .filter((r) => r.metadata?.category === 'alert' && !isNearby(r) && !isMutualAid(r) && r.template_name !== OUTING_ALERT_TEMPLATE)
       .map((r) => r.created_at)
     // CORRECTIF 07/08/2026 : la categorie 'digest' a ses propres compteurs.
     const digestWeek = nonTxRows
@@ -960,6 +964,7 @@ Deno.serve(async (req) => {
     const alertDay = alertWeek.filter((t) => t >= oneDayAgo)
     const digestDay = digestWeek.filter((t) => t >= oneDayAgo)
     const nearbySitDay = nearbySitWeek.filter((t) => t >= oneDayAgo)
+    const mutualAidDay = mutualAidWeek.filter((t) => t >= oneDayAgo)
 
 
     const decision = decideDeferral({
@@ -975,6 +980,8 @@ Deno.serve(async (req) => {
       alertWeekSentAt: alertWeek,
       nearbySitDaySentAt: nearbySitDay,
       nearbySitWeekSentAt: nearbySitWeek,
+      mutualAidDaySentAt: mutualAidDay,
+      mutualAidWeekSentAt: mutualAidWeek,
       digestDaySentAt: digestDay,
       digestWeekSentAt: digestWeek,
 

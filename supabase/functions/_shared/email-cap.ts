@@ -130,6 +130,32 @@ export const NEARBY_SIT_ALERT_TEMPLATES = new Set<string>(['nearby-sit-alert'])
 export const NEARBY_SIT_MAX_DEFER_HOURS = 18
 
 // ---------------------------------------------------------------------------
+// Lot ALR3 (14/11/2026) : compteur propre a la demande d'entraide.
+//
+// Constat verifie en base (audit du systeme d'alertes du 14/11/2026, A3) :
+// 'mission-help-needed' comptait dans le quota partage de la categorie 'alert'
+// (1 par jour) avec 'alert-digest' et 'sitter-daily-digest'. Un gardien qui
+// avait recu son recapitulatif du matin recevait la demande d'entraide le
+// lendemain : 69 demandes sur 314 en 30 jours reportees pour ce motif, 64
+// livrees plus de 12 h apres, delai median 19 h 43. Meme defaut que celui
+// corrige le 06/08/2026 pour l'alerte de nouvelle annonce.
+//
+// Regle : la demande d'entraide sort du quota partage et compte sur elle seule.
+// Justification du chiffre : une vague sollicite dix personnes par besoin et
+// la plateforme a porte 21 besoins en 30 jours ; 3 par jour et 10 par semaine
+// ne coupent que les boucles anormales. Les heures calmes s'appliquent
+// toujours (une demande de 23 h part a 8 h).
+export const CAP_MUTUAL_AID_PER_DAY = 3
+export const CAP_MUTUAL_AID_PER_WEEK = 10
+
+/**
+ * Demandes d'entraide, comptees sur leur propre quota. Elles ne consomment pas
+ * le quota de la categorie 'alert', et les recapitulatifs ne consomment pas le
+ * leur.
+ */
+export const MUTUAL_AID_ALERT_TEMPLATES = new Set<string>(['mission-help-needed'])
+
+// ---------------------------------------------------------------------------
 // CORRECTIF (07/08/2026) : compteur propre a la categorie 'digest'.
 //
 // Constat verifie en base : environ 190 emails detruits entre le 02 et le
@@ -368,6 +394,10 @@ export interface DeferInput {
   nearbySitDaySentAt?: string[]
   /** ISO timestamps of `sent` 'nearby-sit-alert' sur 7 jours, ascendant. */
   nearbySitWeekSentAt?: string[]
+  /** Lot ALR3 : `sent` 'mission-help-needed' sur 24h, ascendant. */
+  mutualAidDaySentAt?: string[]
+  /** Idem sur 7 jours. */
+  mutualAidWeekSentAt?: string[]
   /** ISO timestamps of `sent` emails de categorie 'digest' sur 24h, ascendant. */
   digestDaySentAt?: string[]
   /** Idem sur 7 jours. */
@@ -393,6 +423,7 @@ export function decideDeferral(input: DeferInput): DeferDecision {
     nonTxDaySentAt = [], nonTxWeekSentAt = [],
     alertDaySentAt = [], alertWeekSentAt = [],
     nearbySitDaySentAt = [], nearbySitWeekSentAt = [],
+    mutualAidDaySentAt = [], mutualAidWeekSentAt = [],
     digestDaySentAt = [], digestWeekSentAt = [],
 
   } = input
@@ -463,6 +494,27 @@ export function decideDeferral(input: DeferInput): DeferDecision {
         action: 'defer',
         reason: 'frequency_cap_category_day',
         scheduledFor: clamp(new Date(oldest.getTime() + 86400_000 + 30_000)),
+      }
+    }
+    return { action: 'send' }
+  }
+
+  // Lot ALR3 : demande d'entraide, compteur strictement propre au gabarit.
+  if (MUTUAL_AID_ALERT_TEMPLATES.has(templateName)) {
+    if (mutualAidWeekSentAt.length >= CAP_MUTUAL_AID_PER_WEEK) {
+      const oldest = new Date(mutualAidWeekSentAt[0])
+      return {
+        action: 'defer',
+        reason: 'frequency_cap_category_week',
+        scheduledFor: new Date(oldest.getTime() + 7 * 86400_000 + 30_000),
+      }
+    }
+    if (mutualAidDaySentAt.length >= CAP_MUTUAL_AID_PER_DAY) {
+      const oldest = new Date(mutualAidDaySentAt[0])
+      return {
+        action: 'defer',
+        reason: 'frequency_cap_category_day',
+        scheduledFor: new Date(oldest.getTime() + 86400_000 + 30_000),
       }
     }
     return { action: 'send' }

@@ -50,7 +50,7 @@ describe("arrêt des seules alertes sorties", () => {
     expect(unsub.indexOf("scope === 'outing'")).toBeLessThan(unsub.indexOf(".from('email_unsubscribe_tokens')\n    .select('*')"));
   });
   it("l'alerte sortie reste hors du compteur partagé des récapitulatifs de gardes", () => {
-    expect(sender).toContain("r.metadata?.category === 'alert' && !isNearby(r) && r.template_name !== OUTING_ALERT_TEMPLATE");
+    expect(sender).toContain("r.metadata?.category === 'alert' && !isNearby(r) && !isMutualAid(r) && r.template_name !== OUTING_ALERT_TEMPLATE");
   });
   it("le jeton ne touche que le réglage des sorties", () => {
     const fn = sql.slice(sql.indexOf("FUNCTION public.outing_alerts_set_by_token"), sql.indexOf("REVOKE ALL ON FUNCTION public.outing_alert_recipients"));
