@@ -7,6 +7,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { helpersPulseLine } from "@/lib/entraideIdeas";
 import { OUTING_COPY } from "@/lib/outings";
+import { projetPlaceSummary } from "@/pages/ProjetsListing";
 
 const read = (path: string) => readFileSync(path, "utf8");
 const PAGES = ["src/pages/EntraideHub.tsx", "src/pages/Sorties.tsx", "src/pages/ProjetsListing.tsx"];
@@ -108,6 +109,12 @@ describe("SORT11, même squelette", () => {
     expect(row).toContain(shell);
     expect(card).toContain(shell);
     expect(row).not.toMatch(/[—–]/);
+  });
+
+  it("lot SORT14 : le réglage des chantiers se lit sans contradiction", () => {
+    expect(projetPlaceSummary(true, "69005", Number.POSITIVE_INFINITY)).toBe("toute la France");
+    expect(projetPlaceSummary(true, "69005", 250)).toBe("69005 · 250 km");
+    expect(projetPlaceSummary(false, "", 250)).toBe("toute la France");
   });
 
   it("ponctuation et vocabulaire", () => {
