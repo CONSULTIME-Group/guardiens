@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
+import { HUB_ARTICLES } from "@/lib/hubArticles";
 import PageMeta from "@/components/PageMeta";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import EntraideSortiesTabs from "@/components/outings/EntraideSortiesTabs";
-import { HUB_SHELL, HUB_TABS, HubHeader, HubIdeas, HubSettingsLine } from "@/components/outings/HubHeader";
+import { HUB_SHELL, HUB_TABS, HubArticles, HubHeader, HubIdeas, HubSetting, HubSettings, HubStat, HubWhy } from "@/components/outings/HubHeader";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import OutingCard from "@/components/outings/OutingCard";
 import { useAuth } from "@/contexts/AuthContext";
@@ -63,7 +64,6 @@ const Sorties = () => {
   const empty = !loading && !failed && near.length === 0;
 
   const upcoming = outings.length;
-  const pulse = loading || failed || upcoming === 0 ? null : upcoming === 1 ? "1 sortie à venir" : `${upcoming} sorties à venir`;
   // Une idée : le formulaire s'ouvre sur l'activité choisie.
   const pickIdea = (value: string) => {
     trackEvent("outing_propose_clicked", { source: "sorties_idea", metadata: { category: value } });
@@ -82,6 +82,7 @@ const Sorties = () => {
       <div>
         <PageBreadcrumb items={[{ label: "Sorties" }]} />
         <div className={HUB_TABS}><EntraideSortiesTabs active="sorties" /></div>
+        <HubWhy />
         {preview && (
           <p role="status" className="mt-3 rounded-xl bg-accent/40 px-4 py-3 text-sm">
             Aperçu réservé à l'équipe : la rubrique s'ouvre aux membres quand le réglage « sorties » est allumé.
@@ -95,15 +96,13 @@ const Sorties = () => {
               <Link to={proposeHref} onClick={() => trackEvent("outing_propose_clicked", { source: "sorties_tab" })}>{OUTING_COPY.propose}</Link>
             </Button>
           }
-          pulse={pulse}
+          stat={loading || failed || upcoming === 0 ? null : <HubStat value={upcoming} label={upcoming === 1 ? "sortie à venir près de chez vous" : "sorties à venir près de chez vous"} href="#sorties-liste" action="Les voir" />}
         >
           {isAuthenticated && (
-            <HubSettingsLine summary={[memberCity || "Votre lieu", "alertes sorties"].join(" · ")}>
-              <p>Vous êtes prévenu des nouvelles sorties proposées près de chez vous.</p>
-              <p>
-                <Link to="/settings?section=alerts" className="font-semibold text-primary underline underline-offset-4">Régler mes alertes</Link>
-              </p>
-            </HubSettingsLine>
+            <HubSettings>
+              <HubSetting label="Ville" value={memberCity || "à renseigner"} action="Changer" to="/profile" />
+              <HubSetting label="Alertes sorties" value="autour de chez vous" action="Régler" to="/settings?section=alerts" />
+            </HubSettings>
           )}
         </HubHeader>
         <HubIdeas
@@ -113,7 +112,7 @@ const Sorties = () => {
         />
       </div>
 
-      <h2 className="mt-2 font-heading text-xl font-semibold text-foreground sm:text-2xl">Sorties à venir</h2>
+      <h2 id="sorties-liste" className="mt-2 scroll-mt-24 font-heading text-xl font-semibold text-foreground sm:text-2xl">Sorties à venir</h2>
 
       {usedCategories.length > 1 && (
         <div className="flex flex-wrap gap-2" role="group" aria-label="Activités">
@@ -164,6 +163,7 @@ const Sorties = () => {
           {far.map((o) => <OutingCard key={o.id} outing={o} />)}
         </section>
       )}
+      <HubArticles articles={HUB_ARTICLES.sorties} />
     </div>
   );
 };

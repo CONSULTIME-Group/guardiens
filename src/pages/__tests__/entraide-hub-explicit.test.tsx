@@ -41,9 +41,12 @@ describe("EntraideHub, contenu explicite (lot E4)", () => {
     renderContent(false, "78 personnes prêtes à aider autour de Lyon");
     expect(screen.getByRole("button", { name: "Demander un coup de main" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Proposer mon aide" })).not.toBeInTheDocument();
-    // Lot SORT11 : le chiffre tient en une ligne courte, avec un lien vers les personnes.
-    expect(screen.getByText(/78 personnes prêtes à aider autour de Lyon/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Les voir" })).toHaveAttribute("href", "#entraide-helpers-title");
+    // Lot SORT13 : le chiffre en grand dans un bloc qui mène aux personnes.
+    const stat = screen.getByTestId("hub-stat");
+    expect(stat).toHaveAttribute("href", "#entraide-helpers-title");
+    expect(stat).toHaveTextContent("78");
+    expect(stat).toHaveTextContent("personnes prêtes à aider autour de Lyon");
+    expect(stat).toHaveTextContent("Les voir");
   });
 
   it("aucune tournure négative dans la FAQ", async () => {

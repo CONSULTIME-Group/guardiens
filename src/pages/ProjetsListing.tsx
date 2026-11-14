@@ -1,7 +1,7 @@
 import EntraideSortiesTabs from "@/components/outings/EntraideSortiesTabs";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { HUB_SHELL, HUB_TABS, HubHeader, HubIdeas, HubSettingsLine, type HubIdea } from "@/components/outings/HubHeader";
+import { HUB_SHELL, HUB_TABS, HubArticles, HubHeader, HubIdeas, HubSetting, HubSettings, HubStat, HubWhy, type HubIdea } from "@/components/outings/HubHeader";
 import spotJardin from "@/assets/missions/spot-jardin-160.webp";
 import spotBricolage from "@/assets/missions/spot-bricolage-160.webp";
 import spotVerger from "@/assets/missions/spot-verger-160.webp";
@@ -10,6 +10,7 @@ import spotBienetre from "@/assets/missions/spot-bienetre-160.webp";
 import spotCourses from "@/assets/missions/spot-courses-160.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { reportError } from "@/lib/errorLogger";
+import { HUB_ARTICLES } from "@/lib/hubArticles";
 import PageMeta from "@/components/PageMeta";
 import { SECTION_OG_IMAGES } from "@/data/siteConstants";
 import { projetsHubSeo } from "@/lib/projetSeo";
@@ -20,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import ProjetRow from "@/components/outings/ProjetRow";
 import ProximityFilter, { type RadiusChoice } from "@/components/missions/ProximityFilter";
 import { useMissionDistance, type RadiusKm } from "@/hooks/useMissionDistance";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Select,
   SelectContent,
@@ -50,6 +52,7 @@ const radiusLabel = (value: number) =>
   PROJET_RADIUS_CHOICES.find((c) => c.value === value)?.label ?? `${value} km`;
 
 /** Lot SORT11 : idées de chantier, le formulaire s'ouvre avec le titre et la nature. */
+/** Lot SORT11 : idées de chantier */
 const PROJET_IDEAS: ReadonlyArray<HubIdea & { nature: string }> = [
   { key: "haie", label: "Planter une haie", image: spotJardin, nature: "jardin" },
   { key: "abri", label: "Construire un abri", image: spotBricolage, nature: "construction" },
@@ -112,6 +115,8 @@ const ProjetsEditorial = () => (
 
 const ProjetsListing = () => {
   const navigate = useNavigate();
+  const [placeOpen, setPlaceOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
   const [projets, setProjets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -216,6 +221,7 @@ const ProjetsListing = () => {
         <PageBreadcrumb items={[{ label: "Projets participatifs" }]} />
         {/* Lot HOME1 : les projets sont une forme d'entraide, mêmes onglets. */}
         <div className={HUB_TABS}><EntraideSortiesTabs active="projets" /></div>
+        <HubWhy />
 
         {/* Lot SORT11 : même en-tête que les onglets Entraide et Sorties. */}
         <HubHeader
@@ -226,10 +232,20 @@ const ProjetsListing = () => {
               <Link to="/projets/publier">Proposer un chantier</Link>
             </Button>
           }
-          pulse={loading || loadError || projets.length === 0 ? null : projets.length === 1 ? "1 chantier ouvert" : `${projets.length} chantiers ouverts`}
+          stat={loading || loadError || projets.length === 0 ? null : <HubStat value={projets.length} label={projets.length === 1 ? "chantier ouvert" : "chantiers ouverts"} href="#projets-resultats" action="Les voir" />}
         >
           {!loading && projets.length > 0 && (
-            <HubSettingsLine summary={[proximity.active ? proximity.postal : "Toute la France", proximity.active ? radiusLabel(radius) : null].filter(Boolean).join(" · ")}>
+            <>
+              <HubSettings>
+                <HubSetting
+                  label="Autour de"
+                  value={proximity.active ? `${proximity.postal} · ${radiusLabel(radius)}` : "toute la France"}
+                  action={placeOpen ? "Fermer" : "Choisir"}
+                  onClick={() => setPlaceOpen((open) => !open)}
+                  expanded={placeOpen}
+                />
+              </HubSettings>
+              {placeOpen && (
               <div className="flex flex-wrap items-center gap-3">
                 <ProximityFilter
                   postal={proximity.postal}
@@ -257,7 +273,8 @@ const ProjetsListing = () => {
                   </Select>
                 )}
               </div>
-            </HubSettingsLine>
+              )}
+            </>
           )}
         </HubHeader>
         <HubIdeas
@@ -348,7 +365,9 @@ const ProjetsListing = () => {
           </section>
         )}
 
-        <ProjetsEditorial />
+        <HubArticles articles={HUB_ARTICLES.projets} />
+        {/* Lot SORT13 : le texte de présentation et les questions fréquentes servent à qui arrive de l'extérieur. */}
+        {!isAuthenticated && <ProjetsEditorial />}
       </div>
     </div>
   );

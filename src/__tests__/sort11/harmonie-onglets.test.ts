@@ -18,7 +18,9 @@ describe("SORT11, même squelette", () => {
       expect(src, page).toContain("HUB_SHELL");
       expect(src, page).toContain("<div className={HUB_TABS}><EntraideSortiesTabs");
       expect(src, page).toContain("<HubHeader");
-      expect(src, page).toContain("<HubSettingsLine");
+      expect(src, page).toContain("<HubSettings>");
+      expect(src, page).toContain("<HubWhy />");
+      expect(src, page).toContain("<HubArticles articles={HUB_ARTICLES.");
     }
     expect(read("src/pages/Sorties.tsx")).toContain("<HubIdeas");
     expect(read("src/pages/ProjetsListing.tsx")).toContain("<HubIdeas");
@@ -54,11 +56,39 @@ describe("SORT11, même squelette", () => {
     expect(helpersPulseLine(0, "Lyon")).toBeNull();
   });
 
-  it("réglages repliés sur une ligne, cible de 44 px, détail annoncé", () => {
+  it("lot SORT13 : chaque réglage porte son nom, sa valeur et son geste, cible de 44 px", () => {
     const header = read("src/components/outings/HubHeader.tsx");
-    expect(header).toContain("aria-expanded={open}");
+    expect(header).toContain("export const HubSetting =");
     expect(header).toContain("min-h-11");
-    expect(header).toContain('hidden={!open}');
+    expect(header).toContain("aria-expanded={expanded}");
+    const hub = read("src/pages/EntraideHub.tsx");
+    expect(hub).toContain('<HubSetting label="Ville"');
+    expect(hub).toContain('label="Besoins reçus à"');
+    // Les savoir-faire se règlent depuis la section des personnes qui aident.
+    expect(hub.indexOf("mettre à jour mes savoir-faire")).toBeGreaterThan(hub.indexOf('id="entraide-helpers-title"'));
+  });
+
+  it("lot SORT13 : le chiffre est un bloc visible, le pourquoi cite une étude sourcée", () => {
+    const header = read("src/components/outings/HubHeader.tsx");
+    expect(header).toContain('data-testid="hub-stat"');
+    expect(header).toContain("(CRÉDOC, étude Solitudes 2025)");
+    expect(header).toContain("/actualites/technologie-recreer-lien-pres-de-chez-soi");
+    // L'ancien « 54 % » n'avait aucune source dans l'article cité.
+    for (const page of PAGES) expect(read(page), page).not.toContain("54 %");
+  });
+
+  it("lot SORT13 : un membre connecté va droit au contenu, questions fréquentes et liens par ville restent pour le visiteur", () => {
+    const hub = read("src/pages/EntraideHub.tsx");
+    expect(hub).toContain("{!isAuthenticated && <EntraideHowItWorks />}");
+    expect(hub).toMatch(/\{!isAuthenticated && \(\s*<>\s*<nav[^>]*aria-label="Entraide dans votre ville"/);
+    expect(read("src/pages/ProjetsListing.tsx")).toContain("{!isAuthenticated && <ProjetsEditorial />}");
+  });
+
+  it("lot SORT13 : la partie de jeux de société quitte les idées d'entraide", () => {
+    const ideas = read("src/lib/entraideIdeas.ts");
+    expect(ideas).not.toContain('key: "jeux"');
+    expect(ideas).toContain('key: "fruits"');
+    expect(read("src/pages/EntraideHub.tsx")).not.toContain("jeux de société : dites");
   });
 
   it("une idée de sortie ouvre le formulaire sur l'activité, une idée de chantier sur son titre", () => {
