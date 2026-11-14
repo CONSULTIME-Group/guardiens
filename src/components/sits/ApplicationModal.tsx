@@ -624,7 +624,12 @@ const ApplicationModal = ({
               rows={10}
               className="resize-none"
               placeholder="Votre message de candidature..."
+              aria-describedby="application-message-help"
             />
+            {/* Lot RCH5 : le propriétaire choisit d'abord le candidat le plus proche (6 fois sur 7, base du 14/11/2026). */}
+            <p id="application-message-help" className="text-xs text-muted-foreground" data-testid="application-message-help">
+              Présentez-vous, dites d'où vous venez, comment vous arrivez et à quelle date. Une rencontre avant la garde reste possible, si vous le souhaitez tous les deux.
+            </p>
             {shouldWarnPricing(message, sitterInfo?.profile?.pro_status) && <PricingAuthorWarning />}
             {almaUsed && (
               <p className="text-xs text-muted-foreground">Brouillon Alma inséré, à personnaliser avant envoi.</p>

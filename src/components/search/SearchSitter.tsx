@@ -99,6 +99,8 @@ import { markMilestone, perfViewElapsed, setViewExtra, skipMilestones } from "@/
 import { diffSearchInputs, formatTriggers, searchKey, triggerMotif, type SearchInputs } from "@/lib/searchTrigger";
 import { NEAREST_OUTSIDE_SHOWN, NEAREST_OUTSIDE_THRESHOLD, nearestTierOf, pickNearestOutside, type NearestTier } from "@/lib/nearestOutsideZone";
 import { NearestOutsideSection } from "@/components/search/listing/NearestOutsideSection";
+import AlertActionLine from "@/components/search/listing/AlertActionLine";
+import { isRadiusDeclared } from "@/lib/searchRadius";
 import { applyOpenSitFilter, checkGeocodedPoint, communeDeptFromCoords, pointUsable, fetchAllPages, fetchInChunks, isEndedSit, isFrancePlace, isOpenSit, isPastSit, isWithinRadius, parisTodayIso, resolveSitPlace, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -1010,6 +1012,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  const isVisitor = !user && !authLoading;
  const visitorSearchPath = visitorSearchRedirect(location.pathname, location.search, zoneMode);
 
+ // Lot RCH5 : distance déclarée par le gardien (30 = silence, doctrine affinité).
+ const declaredRadiusKm = isRadiusDeclared(sitterProfile?.geographic_radius) ? Number(sitterProfile.geographic_radius) : null;
  const { alertCreated, isCreatingAlert, handleCreateAlert } = useSearchAlert({
   city,
   cityPostalCode,
@@ -1020,6 +1024,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    resetKeys: [city, radius, zoneMode],
    visitorSignupUrl: isVisitor ? visitorSectorSignupUrl(visitorSearchPath) : null,
    homeCity: userCity || null,
+   declaredRadiusKm: declaredRadiusKm,
  });
 
  // Lot A6 : retour d'inscription depuis « Recevoir les annonces de ce secteur ».
@@ -2809,21 +2814,35 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
                 // Lot RCH4 : France entière avec un point, gardes triées par
                 // distance et groupées sous trois intertitres.
                 const grouped = appliedZone === "france" && visibleActive.some((r: any) => typeof r.distance === "number");
+                // Lot RCH5 : ligne d'alerte après le premier groupe de cartes.
+                const alertLine = (
+                  <AlertActionLine
+                    key="alert-line"
+                    userId={user?.id ?? null}
+                    visitorSignupHref={isVisitor ? visitorSectorSignupUrl(visitorSearchPath) : null}
+                    declaredRadiusKm={declaredRadiusKm}
+                    homeCity={userCity || null}
+                  />
+                );
                 if (!grouped) {
-                  return <div className={gridCls}>{visibleActive.map((item) => renderCard(item, globalIdx++))}</div>;
+                  return <><div className={gridCls}>{visibleActive.map((item) => renderCard(item, globalIdx++))}</div>{alertLine}</>;
                 }
+                let alertPlaced = false;
                 const band = (r: any) => (typeof r.distance !== "number" ? 2 : r.distance < 30 ? 0 : r.distance <= 100 ? 1 : 2);
                 const labels = [t("search_results.band_near"), t("search_results.band_mid"), t("search_results.band_far")];
                 return [0, 1, 2].map((b) => {
                   const shownInBand = visibleActive.filter((r: any) => band(r) === b);
                   if (shownInBand.length === 0) return null;
                   const total = activeReal.filter((r: any) => band(r) === b).length;
+                  const withLine = !alertPlaced;
+                  alertPlaced = true;
                   return (
                     <div key={b} className="mb-8" data-testid={`distance-band-${b}`}>
                       <h3 className="mb-4 font-heading text-base sm:text-lg font-semibold text-foreground">
                         {labels[b]} <span className="text-muted-foreground font-normal">({total})</span>
                       </h3>
                       <div className={gridCls}>{shownInBand.map((item) => renderCard(item, globalIdx++))}</div>
+                      {withLine && alertLine}
                     </div>
                   );
                 });
