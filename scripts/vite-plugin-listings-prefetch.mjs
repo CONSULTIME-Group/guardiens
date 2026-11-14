@@ -26,7 +26,7 @@ export const PREFETCH_PAGE = 1000;
 export const LISTINGS_PREFETCH_SPEC = {
   open: {
     table: "sits",
-    select: "id, user_id, property_id, title, slug, status, city, country, departement_code, start_date, end_date, created_at, unpublished_at, environments, is_urgent, cover_photo_url, accepting_applications, max_applications, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)",
+    select: "id, user_id, property_id, title, slug, status, city, country, departement_code, start_date, end_date, created_at, published_at, unpublished_at, environments, is_urgent, cover_photo_url, accepting_applications, max_applications, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)",
     query: "or=(status.eq.published)&order=created_at.desc,id.asc",
   },
   closed: {

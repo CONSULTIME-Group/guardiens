@@ -88,3 +88,25 @@ export const petSpeciesLabel = (value: string | null | undefined): string | null
 /** Espèce en minuscules pour les phrases, ou null si inconnue. */
 export const petSpeciesLabelLower = (value: string | null | undefined): string | null =>
   lookup(PET_SPECIES_LABELS_LOWER, value);
+
+const PET_SPECIES_PLURAL_LOWER: Record<string, string> = {
+  dog: "chiens",
+  cat: "chats",
+  horse: "chevaux",
+  bird: "oiseaux",
+  rodent: "rongeurs",
+  fish: "poissons",
+  reptile: "reptiles",
+  farm_animal: "animaux de ferme",
+  nac: "NAC",
+};
+
+/**
+ * Lot RCH4 : « 1 chien », « 2 chats », « 3 chevaux ». Null si l'espèce est
+ * inconnue ou le nombre nul (ne rien afficher).
+ */
+export const petSpeciesCountLabel = (value: string | null | undefined, count: number): string | null => {
+  if (!value || !Number.isFinite(count) || count <= 0) return null;
+  const word = count > 1 ? PET_SPECIES_PLURAL_LOWER[value] : PET_SPECIES_LABELS_LOWER[value];
+  return word ? `${count} ${word}` : null;
+};

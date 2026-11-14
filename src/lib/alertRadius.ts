@@ -53,3 +53,26 @@ export function showMutualAidRadiusLine(
   if (!alertTypes.includes("missions")) return false;
   return !(zoneType === "rayon" && typeof radiusKm === "number" && radiusKm <= MUTUAL_AID_MAX_RADIUS_KM);
 }
+
+/**
+ * Lot RCH4 (14/11/2026, arène « page Recherche », décision 3 de Jérémie) :
+ * rayon d'alerte proposé depuis la recherche, jamais « France entière ».
+ * Distance déclarée d (rayon de mobilité du gardien) : 30 km si d ≤ 30,
+ * 50 km si d ≤ 50, sinon 100 km. Sans distance déclarée, 100 km. La valeur
+ * 30 par défaut du formulaire n'est pas une déclaration (doctrine affinité).
+ * Depuis un rayon de recherche, jamais moins de 30 km.
+ */
+export const SEARCH_ALERT_MIN_RADIUS_KM = 30;
+
+export function proposedAlertRadius(declaredKm: number | null | undefined): 30 | 50 | 100 {
+  if (typeof declaredKm !== "number" || !Number.isFinite(declaredKm) || declaredKm <= 0) return 100;
+  if (declaredKm <= 30) return 30;
+  if (declaredKm <= 50) return 50;
+  return 100;
+}
+
+export function searchAlertRadius(searchRadiusKm: number | null | undefined): 30 | 50 | 100 {
+  if (typeof searchRadiusKm !== "number" || !Number.isFinite(searchRadiusKm)) return 100;
+  const snapped = snapToAllowedRadius(Math.max(SEARCH_ALERT_MIN_RADIUS_KM, searchRadiusKm));
+  return (snapped < SEARCH_ALERT_MIN_RADIUS_KM ? SEARCH_ALERT_MIN_RADIUS_KM : snapped) as 30 | 50 | 100;
+}
