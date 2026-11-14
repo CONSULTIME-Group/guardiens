@@ -49,7 +49,7 @@ Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vou
 
 ## Optional
 
-- [Recherche de gardiens](/recherche): Outil de recherche (nécessite un compte).
+- [Gardiens à proximité](/recherche-gardiens): Les gardiens inscrits autour d'une ville, consultables sans compte.
 
 ## Key facts (citables)
 

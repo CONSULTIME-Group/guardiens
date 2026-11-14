@@ -16,6 +16,7 @@ import { endBootListings, takeBootListingsCounts } from "@/lib/listingsPrefetch"
 import type { ShownListState } from "@/components/search/SearchSitter";
 import InternationalShowcase from "@/components/listings/InternationalShowcase";
 import PastListingsSection from "@/components/listings/PastListingsSection";
+import SearchSeoFooter, { SEARCH_FAQ } from "@/components/search/SearchSeoFooter";
 
 const SearchSitter = lazyWithRetry(
   () => import("@/components/search/SearchSitter"),
@@ -66,6 +67,17 @@ export default function PublicListings() {
         { "@type": "ListItem", position: 1, name: BREADCRUMB_HOME, item: "https://guardiens.fr/" },
         { "@type": "ListItem", position: 2, name: BREADCRUMB_LISTINGS, item: CANONICAL },
       ],
+    },
+    // Lot RCH2 (14/11/2026) : la FAQ visible de /annonces est balisée ici ;
+    // elle n'existait que sur /search, en noindex.
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: SEARCH_FAQ.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
     },
   ];
 
@@ -235,6 +247,7 @@ export default function PublicListings() {
         </Suspense>
 
         <PastListingsSection />
+        <SearchSeoFooter />
 
         <InternationalShowcase />
 

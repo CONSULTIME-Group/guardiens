@@ -1852,6 +1852,7 @@
     "count_demo_other": "{{count}} exemples ci-dessous, en attendant de vraies annonces",
     "count_none_city": "Aucune annonce ouverte près de {{city}}",
     "count_none": "Aucune annonce ouverte sur ce périmètre",
+    "count_calm_radius": "Votre rayon de {{radius}} km est calme aujourd'hui. La plus proche à {{km}} km.",
     "sort_label": "Trier :",
     "sort_closest": "Plus proches",
     "sort_recent": "Plus récentes",

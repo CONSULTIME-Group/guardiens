@@ -394,10 +394,17 @@ const CityPage = () => {
  </div>
 
  <div className="flex flex-col sm:flex-row gap-3">
- <Link to={`/search?ville=${cityData.slug}`}>
+ {/* Lot RCH2 (14/11/2026) : /search est en noindex et montre des gardes ;
+ les gardiens se cherchent sur /recherche-gardiens, les gardes sur /annonces. */}
+ <Link to={`/recherche-gardiens?ville=${encodeURIComponent(cityData.name)}`}>
  <Button size="lg" className="gap-2">
  Voir les gardiens à {cityData.name}
  <ArrowRight className="h-4 w-4" />
+ </Button>
+ </Link>
+ <Link to={`/annonces?ville=${encodeURIComponent(cityData.name)}`}>
+ <Button size="lg" variant="outline" className="gap-2">
+ Voir les gardes autour de {cityData.name}
  </Button>
  </Link>
  {revised ? (
