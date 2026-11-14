@@ -709,6 +709,28 @@
           "sql": "SELECT schedule = '5,35 5-12 * * *' AS ok FROM cron.job WHERE jobname = 'sitter-daily-digest'"
         }
       ]
+    },
+    {
+      "migration": "0158_alr1_diffusion_position.sql",
+      "description": "Diffusion d'une annonce par sa position (propriétaire, commune de l'annonce, commune du profil), aucune diffusion sans position, rejeu à l'arrivée de la position, zone France entière en region + FR",
+      "checks": [
+        {
+          "name": "diffusion_par_position",
+          "sql": "SELECT position('alr1_diffusion_position' IN pg_get_functiondef('public.notify_sitters_for_sit(uuid)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "declencheur_appelle_la_diffusion",
+          "sql": "SELECT position('notify_sitters_for_sit' IN pg_get_functiondef('public.notify_sitters_on_new_sit()'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "rejeu_pose",
+          "sql": "SELECT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_profiles_rediffuse_on_location' AND tgrelid = 'public.profiles'::regclass AND NOT tgisinternal) AS ok"
+        },
+        {
+          "name": "diffusion_fermee_aux_membres",
+          "sql": "SELECT NOT has_function_privilege('authenticated', 'public.notify_sitters_for_sit(uuid)', 'EXECUTE') AND NOT has_function_privilege('anon', 'public.notify_sitters_for_sit(uuid)', 'EXECUTE') AS ok"
+        }
+      ]
     }
   ]
 }
