@@ -8,6 +8,7 @@ import { useAcceptApplication } from "@/hooks/useAcceptApplication";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { candidateDistanceKm } from "@/lib/candidateDistance";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { declineApplication, KIND_DECLINE_MESSAGES } from "@/lib/applicationDecline";
@@ -111,10 +112,17 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
 
     // Hydrate les fiches gardiens via la vue publique (RLS-safe).
     // NOTE: `last_name` n'est pas exposé par public_profiles, on l'omet (non consommé en aval).
-    const { data: sitterProfs } = await supabase
-      .from("public_profiles")
-      .select("id, first_name, city, avatar_url, bio, identity_verified, completed_sits_count, is_founder")
-      .in("id", sitterIds);
+    // Lot RCH5 : positions approchées (centre de la commune) pour dire la
+    // distance du candidat ; le propriétaire choisit le plus proche 6 fois sur 7.
+    const [{ data: sitterProfs }, { data: ownerPoint }] = await Promise.all([
+      supabase
+        .from("public_profiles")
+        .select("id, first_name, city, avatar_url, bio, identity_verified, completed_sits_count, is_founder, latitude_approx, longitude_approx")
+        .in("id", sitterIds),
+      user?.id
+        ? supabase.from("public_profiles").select("latitude_approx, longitude_approx").eq("id", user.id).maybeSingle()
+        : Promise.resolve({ data: null } as any),
+    ]);
     const sitterProfMap = new Map<string, any>();
     (sitterProfs ?? []).forEach((p: any) => sitterProfMap.set(p.id, p));
 
@@ -133,6 +141,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     }
     data.forEach((row: any) => {
       row.sitter = row.sitter_id ? sitterProfMap.get(row.sitter_id) ?? null : null;
+      row.distanceKm = candidateDistanceKm(ownerPoint as any, row.sitter);
     });
 
 
@@ -439,7 +448,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
               {sitter?.city && (
                 <span className="inline-flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
-                  {sitter.city}
+                  {sitter.city}{typeof app.distanceKm === "number" ? ` · ${app.distanceKm} km` : ""}
                 </span>
               )}
               <span>{completedSits} garde{completedSits !== 1 ? "s" : ""} sur Guardiens</span>

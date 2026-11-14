@@ -73,3 +73,15 @@ describe("RCH5 · ligne d'alerte toujours vraie", () => {
     expect(src).toContain("Présentez-vous, dites d'où vous venez, comment vous arrivez et à quelle date. Une rencontre avant la garde reste possible, si vous le souhaitez tous les deux.");
   });
 });
+
+import { candidateDistanceKm } from "@/lib/candidateDistance";
+describe("RCH5 · distance du candidat", () => {
+  it("entre centres de commune, arrondie, nulle sans position", () => {
+    const lyon = { latitude_approx: 45.764, longitude_approx: 4.8357 };
+    const vienne = { latitude_approx: 45.5255, longitude_approx: 4.8743 };
+    expect(candidateDistanceKm(lyon, vienne)).toBe(27);
+    expect(candidateDistanceKm(lyon, { latitude_approx: null, longitude_approx: 4 })).toBeNull();
+    expect(candidateDistanceKm(null, vienne)).toBeNull();
+    expect(readFileSync("src/components/sits/ApplicationsList.tsx", "utf8")).toContain('{sitter.city}{typeof app.distanceKm === "number" ? ` · ${app.distanceKm} km` : ""}');
+  });
+});
