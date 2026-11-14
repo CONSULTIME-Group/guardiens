@@ -103,8 +103,12 @@ describe("A2, entraide_premiere sur intention d'aide seulement", () => {
   });
 
   it("des mots d'entraide gardent le repli « Demander un coup de main »", () => {
-    const r = computeNextAction(ask("Je cherche quelqu'un pour une partie de scrabble"));
+    // Lot ALMA5 (14/11/2026) : une partie de scrabble est une sortie (décision
+    // de Jérémie du 14/11) ; l'exemple d'entraide devient le potager.
+    const r = computeNextAction(ask("Je cherche quelqu'un pour arroser mon potager"));
     expect(allPaths(r).some((p) => p.startsWith("/petites-missions/creer"))).toBe(true);
+    const jeu = computeNextAction(ask("Je cherche quelqu'un pour une partie de scrabble"));
+    expect(allPaths(jeu)).toContain("/sorties");
   });
 
   it("une intention d'aide garde le coup de main", () => {
