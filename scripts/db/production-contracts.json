@@ -741,6 +741,24 @@
           "sql": "SELECT count(*) = 1 AS ok FROM public.legal_document_versions WHERE document = 'cgu' AND version = '10' AND published_on = DATE '2026-11-14' AND effective_on = DATE '2026-12-14' AND requires_reaccept"
         }
       ]
+    },
+    {
+      "migration": "0160_alr6_reglage_desinscription.sql",
+      "description": "Le membre connecté lève sa propre désinscription totale (motif unsubscribe) en rallumant une famille d'emails",
+      "checks": [
+        {
+          "name": "fonction_presente",
+          "sql": "SELECT position('alr6_reglage_desinscription' IN pg_get_functiondef('public.lift_my_unsubscribe()'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "fermee_aux_visiteurs",
+          "sql": "SELECT NOT has_function_privilege('anon', 'public.lift_my_unsubscribe()', 'EXECUTE') AS ok"
+        },
+        {
+          "name": "ouverte_aux_membres",
+          "sql": "SELECT has_function_privilege('authenticated', 'public.lift_my_unsubscribe()', 'EXECUTE') AS ok"
+        }
+      ]
     }
   ]
 }

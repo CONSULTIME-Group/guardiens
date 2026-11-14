@@ -1616,7 +1616,10 @@ Deno.serve(async (req) => {
     const oneClickUrl = `https://${SENDER_DOMAIN.replace(/^notify\./, '')}`
     // Use the supabase function URL directly so one-click hits the API without a UI
     const apiBase = Deno.env.get('SUPABASE_URL') ?? `https://${SENDER_DOMAIN}`
-    const oneClick = `${apiBase}/functions/v1/handle-email-unsubscribe?token=${unsubscribeToken}${templateName === OUTING_ALERT_TEMPLATE ? '&scope=outing' : ''}`
+    // Lot ALR6 (14/11/2026) : le clic de la messagerie coupe la famille de
+    // l'email reçu (conseils, récapitulatifs ou alertes), jamais la messagerie
+    // ni les emails de service.
+    const oneClick = `${apiBase}/functions/v1/handle-email-unsubscribe?token=${unsubscribeToken}${templateName === OUTING_ALERT_TEMPLATE ? '&scope=outing' : `&category=${encodeURIComponent(String(category))}`}`
     headers['List-Unsubscribe'] = `<${oneClick}>, <${unsubAllUrl}>`
     headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click'
     void oneClickUrl
