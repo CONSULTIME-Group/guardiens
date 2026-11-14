@@ -956,10 +956,16 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  // Lot L1 : plus aucun élargissement automatique de zone. Un rayon vide
  // affiche le bandeau hors zone avec ses boutons d'élargissement explicites.
 
+ // Lot RCH1 (14/11/2026) : même règle d'affichage pour le bandeau et pour sa
+ // mesure. Avant, l'impression partait dès que la France comptait plus
+ // d'annonces que le rayon, bandeau affiché ou non (806 impressions de
+ // visiteurs sans ville en 30 jours, liste France à l'écran).
+ const outOfZoneShown = nearestShown.length === 0 && !searchError && viewMode !== "map" && tab === "sits" && !loading && zoneMode !== "france" && appliedZone !== "france" && densityCounts.france > (zoneMode === "dept" ? densityCounts.dept : zoneMode === "region" ? densityCounts.region : densityCounts.radius);
+
  // Track out-of-zone banner impression (déduplique par tab+zoneMode dans la session)
  const outOfZoneTrackedRef = useRef<Set<string>>(new Set());
   useEffect(() => {
- if (loading || deptCountsPending || tab !== "sits" || zoneMode === "france") return;
+ if (!outOfZoneShown || deptCountsPending) return;
  const delta = densityCounts.france - densityCounts.radius;
  if (delta <= 0) return;
  const key = `${tab}|${zoneMode}|${delta}`;
@@ -980,7 +986,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  city: city || null,
  },
  });
- }, [loading, deptCountsPending, tab, zoneMode, userPostalCode, densityCounts, radius, city]);
+ }, [outOfZoneShown, loading, deptCountsPending, tab, zoneMode, userPostalCode, densityCounts, radius, city]);
 
  const { crossTabCount, launchModeCount, nearbyZones, nearbyRegions } = useEmptyStateBreakdown({
   loading,
@@ -2133,7 +2139,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     {(() => {
       // En vue carte, ce bandeau pousse la carte hors du viewport : il reste
       // réservé à la vue liste.
-      const showOutOfZone = nearestShown.length === 0 && !searchError && viewMode !== "map" && tab === "sits" && !loading && zoneMode !== "france" && appliedZone !== "france" && densityCounts.france > (zoneMode === "dept" ? densityCounts.dept : zoneMode === "region" ? densityCounts.region : densityCounts.radius);
+      const showOutOfZone = outOfZoneShown;
       return showOutOfZone ? (
         <OutOfZoneBanner
           zoneMode={zoneMode}

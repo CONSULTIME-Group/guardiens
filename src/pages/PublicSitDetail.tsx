@@ -5,7 +5,8 @@
 import { calendarDate, daysBetween, daysFromToday, isPastDay } from "@/lib/calendarDate";
 import { Suspense, useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "@/i18n/react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
+import { viewFromState } from "@/lib/sitViewSource";
 import { stripGluedText } from "@/lib/sitSlugClean";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -57,6 +58,7 @@ const PublicSitDetail = () => {
  const { id: rawParam } = useParams<{ id: string }>();
  const param = rawParam?.replace(/[\s\u00A0\u200B-\u200D\uFEFF]+/g, "") || undefined;
  const navigate = useNavigate();
+  const location = useLocation();
  const { user, hasSession, activeRole } = useAuth();
  const { t } = useTranslation();
  const { hasAccess } = useSubscriptionAccess();
@@ -359,7 +361,7 @@ const PublicSitDetail = () => {
         // "proprio" (incluant "both" par défaut) : on reste sur l'aperçu public ;
         // les "both" voient un toggle pour basculer en vue gardien.
         if (resolvedViewer === "gardien") {
-          navigate(`/sits/${id}?from=share`, { replace: true });
+          navigate(`/sits/${id}?from=share`, { replace: true, state: location.state });
           return;
         }
 
@@ -372,6 +374,7 @@ const PublicSitDetail = () => {
               metadata: {
                 sit_id: id,
                 viewer_type: resolvedViewer,
+                from: viewFromState(location.state),
                 from_digest: !!attr,
                 digest_email_id: attr?.email_id ?? null,
               },

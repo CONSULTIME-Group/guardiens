@@ -204,7 +204,7 @@ const ProfileHero = (p: ProfileHeroProps) => {
       <div className="profile-notebook-page relative mx-auto flex max-w-6xl flex-col gap-5 py-6 pr-4 md:flex-row md:items-center md:gap-6 md:py-7 md:pr-6" data-hero-content data-hero-side={p.open || undefined}>
         {p.inNotebook && !p.open && artNode}
         <div className={p.inNotebook && p.open
-          ? "profile-hero-identity relative min-w-0 flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-8 lg:w-[400px] lg:shrink-0 lg:flex-col lg:items-stretch lg:justify-start lg:gap-5"
+          ? "profile-hero-identity relative min-w-0 flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-8 lg:w-[440px] lg:shrink-0 lg:flex-col lg:items-stretch lg:justify-start lg:gap-5"
           : p.inNotebook
           ? "profile-hero-identity relative min-w-0 flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-8"
           : "profile-hero-identity relative min-w-0 md:w-[360px] md:shrink-0"}>
@@ -236,7 +236,7 @@ const ProfileHero = (p: ProfileHeroProps) => {
               <p className="text-xs uppercase text-secondary font-body font-semibold">{eyebrow}</p>
               <div className="mt-0.5 flex flex-wrap items-center gap-1 min-w-0">
                 <h1 className={p.open
-                  ? "font-heading text-[32px] md:text-[42px] lg:text-[40px] font-semibold leading-tight text-foreground break-words min-w-0 max-w-full"
+                  ? "font-heading text-[32px] md:text-[42px] lg:text-[36px] font-semibold leading-tight text-foreground break-words min-w-0 max-w-full"
                   : "font-heading text-[32px] md:text-[42px] lg:text-[52px] font-semibold leading-tight text-foreground break-words min-w-0 max-w-full"}>
                   {p.firstName}
                 </h1>
