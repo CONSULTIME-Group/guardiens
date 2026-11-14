@@ -759,6 +759,20 @@
           "sql": "SELECT has_function_privilege('authenticated', 'public.lift_my_unsubscribe()', 'EXECUTE') AS ok"
         }
       ]
+    },
+    {
+      "migration": "0162_src2_canaux_sociaux.sql",
+      "description": "derive_signup_channel reconnaît TikTok, YouTube et Instagram comme canaux propres",
+      "checks": [
+        {
+          "name": "canaux_sociaux_presents",
+          "sql": "SELECT public.derive_signup_channel('{\"us\":\"tiktok\"}'::jsonb) = 'tiktok' AND public.derive_signup_channel('{\"us\":\"youtube\"}'::jsonb) = 'youtube' AND public.derive_signup_channel('{\"rd\":\"l.instagram.com\"}'::jsonb) = 'instagram' AS ok"
+        },
+        {
+          "name": "facebook_inchange",
+          "sql": "SELECT public.derive_signup_channel('{\"rd\":\"l.facebook.com\"}'::jsonb) = 'facebook' AS ok"
+        }
+      ]
     }
   ]
 }

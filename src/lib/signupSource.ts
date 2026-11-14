@@ -40,7 +40,7 @@ export interface SignupSource {
 
 export type SignupChannel =
   | "google_ads" | "facebook_ads" | "email" | "parrainage" | "facebook"
-  | "recherche_naturelle" | "ia" | "autre_site" | "direct";
+  | "instagram" | "youtube" | "tiktok" | "recherche_naturelle" | "ia" | "autre_site" | "direct";
 
 export const SIGNUP_SRC_PARAM = "signup_src";
 export const SIGNUP_SOURCE_SESSION_KEY = "guardiens_signup_source";
@@ -89,7 +89,12 @@ const ADS_HOST = /(^|\.)(google|bing|qwant|duckduckgo|ecosia)\./;
 const FACEBOOK_HOST = /(^|\.)(facebook|instagram|fb)\./;
 const AI_HOST = /(^|\.)(chatgpt|openai|perplexity|gemini|claude|copilot)\./;
 const PAID_MEDIUMS = ["cpc", "ppc", "paid", "paid_social", "paidsocial", "paid-social", "ads", "cpm"];
-const FACEBOOK_SOURCES = ["facebook", "fb", "instagram", "ig"];
+const FACEBOOK_SOURCES = ["facebook", "fb"];
+const INSTAGRAM_HOST = /(^|\.)instagram\./;
+const INSTAGRAM_SOURCES = ["instagram", "ig"];
+const YOUTUBE_HOST = /(^|\.)(youtube|youtu)\./;
+const YOUTUBE_SOURCES = ["youtube", "yt"];
+const TIKTOK_HOST = /(^|\.)tiktok\./;
 
 /**
  * Canal d'une source, par ordre de priorité. Même règle que la fonction
@@ -104,6 +109,9 @@ export function deriveSignupChannel(src: SignupSource | null | undefined): Signu
   if (s.ck === "fbclid" && PAID_MEDIUMS.includes(s.um ?? "")) return "facebook_ads";
   if (us === "email") return "email";
   if (s.rf === 1) return "parrainage";
+  if (us === "tiktok" || (s.rd && TIKTOK_HOST.test(rd))) return "tiktok";
+  if (YOUTUBE_SOURCES.includes(us) || (s.rd && YOUTUBE_HOST.test(rd))) return "youtube";
+  if (INSTAGRAM_SOURCES.includes(us) || (s.rd && INSTAGRAM_HOST.test(rd))) return "instagram";
   if (s.ck === "fbclid" || (s.rd && FACEBOOK_HOST.test(rd)) || FACEBOOK_SOURCES.includes(us)) return "facebook";
   if (!s.ck && s.rd && ADS_HOST.test(rd)) return "recherche_naturelle";
   if ((s.rd && AI_HOST.test(rd)) || /^(chatgpt|openai|perplexity|gemini|claude|copilot)/.test(us)) return "ia";
