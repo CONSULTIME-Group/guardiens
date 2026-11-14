@@ -13,7 +13,7 @@
  * /sits/create. Aucune alerte n'est tentée pour un visiteur. « Élargir à la
  * région » n'apparaît que pour un rayon ou un département.
  */
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { AlmaBubble } from "./AlmaBubble";
 import { Button } from "@/components/ui/button";
@@ -114,8 +114,14 @@ export function AlmaEmptySearchBubble({
   const shouldShow = hasFilters || radius < 100 || zoneMode === "radius";
   const showExpand = canExpandToRegion(zoneMode);
 
+  // Lot RCH1 (14/11/2026) : une impression par bulle montée. Avant, chaque
+  // changement de rayon, de zone ou de filtre en réémettait une (1 322 en
+  // 30 jours pour 43 membres).
+  const seenTrackedRef = useRef(false);
   useEffect(() => {
     if (!shouldShow || frequency === "silent") return;
+    if (seenTrackedRef.current) return;
+    seenTrackedRef.current = true;
     void trackEvent("alma_empty_search_bubble_seen", {
       source: "search_sitter",
       metadata: {

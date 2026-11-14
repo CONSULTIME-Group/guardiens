@@ -49,6 +49,11 @@ const PageViewTracker = () => {
 
     const now = Date.now();
     if (lastPath.current === path && now - lastEmitAt.current < 1500) return;
+    // Lot RCH1 (14/11/2026) : même chemin que la vue précédente = seuls les
+    // paramètres ont changé (filtre, tri, zone de la recherche). La vue reste
+    // émise, marquée kind « filter », pour que les comptes de visites ne la
+    // prennent plus pour une page vue de plus.
+    const sameAsPrevious = lastPath.current === path;
 
     lastPath.current = path;
     lastEmitAt.current = now;
@@ -57,6 +62,7 @@ const PageViewTracker = () => {
       source: location.pathname,
       metadata: {
         path: location.pathname,
+        ...(sameAsPrevious ? { kind: "filter" } : {}),
         // Lot SRC1 : la valeur d'un identifiant de clic publicitaire n'est jamais stockée.
         search: maskClickIds(location.search),
         referrer: typeof document !== "undefined" ? document.referrer || undefined : undefined,
