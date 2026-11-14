@@ -29,11 +29,11 @@ const AccessGateBanner = ({ level, profileCompletion, context = "guard", showIde
               Connectez-vous pour continuer
             </p>
             <p className="text-sm text-muted-foreground">
-              Inscrivez-vous, 0 €, pour accéder aux annonces et aux missions d'entraide.
+              Inscrivez-vous pour accéder aux annonces et aux missions d'entraide. Guardiens est gratuit.
             </p>
             <div className="flex gap-2">
               <Button size="sm" asChild>
-                <Link to="/inscription">S'inscrire, 0 €</Link>
+                <Link to="/inscription">Créer mon compte</Link>
               </Button>
               <Button size="sm" variant="outline" asChild>
                 <Link to="/login">Se connecter</Link>

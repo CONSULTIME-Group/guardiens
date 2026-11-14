@@ -150,7 +150,7 @@ const ActiveRolesSection = () => {
             <div className="space-y-0.5">
               <Label className="text-sm font-medium">Espace propriétaire</Label>
               <p className="text-xs text-muted-foreground">
-                Publier des annonces et trouver un gardien. 0 €.
+                Publier des annonces et trouver un gardien.
               </p>
             </div>
             <Switch
@@ -164,7 +164,7 @@ const ActiveRolesSection = () => {
             <div className="space-y-0.5">
               <Label className="text-sm font-medium">Espace gardien</Label>
               <p className="text-xs text-muted-foreground">
-                Postuler aux annonces et garder des animaux. 0 €.
+                Postuler aux annonces et garder des animaux.
               </p>
             </div>
             <Switch
