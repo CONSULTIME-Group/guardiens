@@ -1,3 +1,4 @@
+import { massOpenPixelHtml, withOpenPixel } from "../_shared/open-pixel.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
 import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
@@ -1334,9 +1335,9 @@ Deno.serve(async (req) => {
       const uiUrl = `https://guardiens.fr/unsubscribe?token=${token}`;
       const firstName = firstNameByEmail.get(email.toLowerCase()) ?? "";
       const personalizedSubject = personalize(subject, firstName);
-      const personalizedHtml = personalize(
-        htmlTemplate.replaceAll(UNSUB_TOKEN_PLACEHOLDER, token),
-        firstName,
+      const personalizedHtml = withOpenPixel(
+        personalize(htmlTemplate.replaceAll(UNSUB_TOKEN_PLACEHOLDER, token), firstName),
+        massOpenPixelHtml(SUPABASE_URL, campaignId, { token }),
       );
       return {
         from: SENDER_FROM,
@@ -1344,7 +1345,7 @@ Deno.serve(async (req) => {
         to: [email],
         subject: personalizedSubject,
         html: personalizedHtml,
-        tracking: { opens: true, clicks: true },
+        tracking: { opens: false, clicks: true },
         tags: [{ name: "campaign_id", value: campaignId }],
         headers: {
           "List-Unsubscribe": `<${oneClick}>, <${uiUrl}>`,

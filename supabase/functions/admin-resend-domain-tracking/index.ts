@@ -96,15 +96,17 @@ Deno.serve(async (req) => {
       return json({ action, domain: before.ok ? before.body : before, domains: summary })
     }
 
-    if (action !== 'enable-open') {
-      return json({ error: `Unknown action "${action}". Use "status" or "enable-open".` }, 400)
+    if (action !== 'enable-open' && action !== 'disable-open') {
+      return json({ error: `Unknown action "${action}". Use "status", "enable-open" or "disable-open".` }, 400)
     }
+    // Lot MAIL2 (14/11/2026) : « disable-open » coupe le pixel d'ouverture de
+    // Resend ; les ouvertures passent par le pixel maison (track-email-pixel).
 
     // --- PATCH open_tracking only (never click_tracking) ---
     const patchRes = await fetch(`${RESEND_API}/domains/${match.id}`, {
       method: 'PATCH',
       headers: resendHeaders,
-      body: JSON.stringify({ open_tracking: true }),
+      body: JSON.stringify({ open_tracking: action === 'enable-open' }),
     })
     const patchText = await patchRes.text()
     console.log(`[resend] PATCH open_tracking [${patchRes.status}]: ${patchText}`)

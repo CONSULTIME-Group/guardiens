@@ -1644,7 +1644,8 @@ Deno.serve(async (req) => {
     // suivi de Guardiens (pixel et /go). Le double suivi du prestataire
     // (second pixel, liens réécrits vers un domaine tiers) range l'email
     // parmi les promotions de Gmail.
-    tracking: PROVIDER_TRACKING_OFF.has(templateName) ? { opens: false, clicks: false } : { opens: true, clicks: true },
+    // Lot MAIL2 : ouvertures suivies par le seul pixel maison (track-email-pixel).
+    tracking: PROVIDER_TRACKING_OFF.has(templateName) ? { opens: false, clicks: false } : { opens: false, clicks: true },
   }
   if (Object.keys(headers).length > 0) {
     resendPayload.headers = headers
