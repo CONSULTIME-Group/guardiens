@@ -14,7 +14,7 @@ import { readFileSync } from 'node:fs';
 const { PGlite } = await import(process.env.PGLITE_MODULE || '@electric-sql/pglite');
 const db = new PGlite();
 const root = new URL('../', import.meta.url);
-const migration = readFileSync(new URL('drizzle/migrations/0158_alr1_diffusion_position.sql', root), 'utf8');
+const migration = readFileSync(new URL('drizzle/migrations/0160_alr1_diffusion_position.sql', root), 'utf8');
 const passed = [];
 
 await db.exec(`

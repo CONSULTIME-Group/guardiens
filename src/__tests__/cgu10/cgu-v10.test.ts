@@ -25,3 +25,13 @@ describe("CGU10, les sorties dans les CGU", () => {
     expect(body).toContain("14 décembre 2026");
   });
 });
+
+import { legalVersionHeading } from "@/lib/legalPageVersion";
+describe("COR1, en-tête de la v10 avant le 16/11", () => {
+  it("nomme la version applicable aujourd'hui puis la v9", () => {
+    expect(legalVersionHeading("cgu", "10", "2026-11-14")).toBe(
+      "Version 10, publiée le 14 novembre 2026, en vigueur le 14 décembre 2026. La version 8 s'applique jusqu'au 16 novembre 2026, puis la version 9 jusqu'à cette date.",
+    );
+    expect(legalVersionHeading("cgu", "10", "2026-11-20")).toContain("La version 9 reste applicable jusqu'à cette date.");
+  });
+});
