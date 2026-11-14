@@ -30,14 +30,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   MapPin, Star, SlidersHorizontal, MessageCircle, Zap,
   LayoutGrid, Map as MapIcon, ShieldCheck, Crosshair, CircleDot, Car, Calendar,
-  Bell, BellRing, Loader2, Share2, AlertCircle, RefreshCw
+  Loader2, Share2, AlertCircle, RefreshCw
 } from "lucide-react";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import { ILLUSTRATIONS } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { useToast } from "@/hooks/use-toast";
-import { ToastAction } from "@/components/ui/toast";
 import VerifiedBadge from "@/components/profile/VerifiedBadge";
 import EmergencyBadge from "@/components/profile/EmergencyBadge";
 import { getDeptCode, DEPT_NAMES, deptToRefPostalCode } from "@/lib/departments";
@@ -103,7 +101,6 @@ const SearchOwner = () => {
   const navigate = useNavigate();
   const { owner: viewerOwner } = useViewerOwnerForAffinity();
 
-  const { toast: toastUi } = useToast();
   const isMobile = useIsMobile();
   const [searchParams] = useSearchParams();
 
@@ -122,7 +119,9 @@ const SearchOwner = () => {
   // Pays de la ville choisie et centre fourni par la suggestion.
   const [cityCountry, setCityCountry] = useState<string | null>(null);
   const [cityCenter, setCityCenter] = useState<{ lat: number; lng: number } | null>(null);
-  const [radius, setRadius] = useState([15]);
+  // Lot RCH8 : 30 km par défaut (base du 14/11/2026 : à 15 km, 160 propriétaires
+  // situés sur 350 voient moins de 3 gardiens, 59 à 30 km).
+  const [radius, setRadius] = useState([30]);
   const [zoneMode, setZoneMode] = useState<ZoneMode>("radius");
   // Pays de recherche (ISO 2 lettres), null = « Tous les pays » : aucune
   // restriction de pays. Appliqué côté serveur, avant pagination.
@@ -173,8 +172,6 @@ const SearchOwner = () => {
   const [initialLoaded, setInitialLoaded] = useState(false);
 
   // Empty state intelligence
-  const [alertCreated, setAlertCreated] = useState(false);
-  const [isCreatingAlert, setIsCreatingAlert] = useState(false);
 
   // Popover open states (only one at a time)
   const [openPop, setOpenPop] = useState<string | null>(null);
@@ -487,7 +484,6 @@ const SearchOwner = () => {
   );
 
   // Reset alert state when zone changes
-  useEffect(() => { setAlertCreated(false); }, [city, radius, zoneMode]);
 
   // Reference postal code (selected city if available, else user CP)
   const getZoneRefPostalCode = (): string | null => cityPostalCode ?? userPostalCode;
@@ -519,150 +515,10 @@ const SearchOwner = () => {
     }
   };
 
-  // Alerte : anonyme → redirection propre vers l'inscription (vague 40).
-  const handleCreateAlertGated = () => {
-    if (!user) {
-      const target = `/recherche-gardiens${city ? `?city=${encodeURIComponent(city)}` : ""}`;
-      navigate(`/inscription?redirect=${encodeURIComponent(target)}`);
-      return;
-    }
-    void handleCreateAlert();
-  };
-
-  // Create sitter alert
-  const handleCreateAlert = async () => {
-    if ((!(zoneMode === "country" && selectedCountry === "FR") && !city) || alertCreated || isCreatingAlert) return;
-    setIsCreatingAlert(true);
-    trackEvent("search_empty_action", { source: "owner", metadata: { action: "create_alert", zone_mode: zoneMode } });
-
-    let usedRadius: number | null = null;
-    let savedScope = city;
-    let error: any = null;
-
-    if (zoneMode === "country" && selectedCountry === "FR") {
-      savedScope = "France entière";
-      const { data: existing } = await supabase
-        .from("alert_preferences")
-        .select("id")
-        .eq("active", true)
-        .eq("zone_type", "region")
-        .eq("region_code", "FR")
-        .contains("alert_types", ["gardes"])
-        .limit(1);
-
-      if (existing && existing.length > 0) {
-        error = { message: "DOUBLON" };
-      } else {
-        ({ error } = await supabase.rpc("create_alert_preference", {
-          p_label: "Gardes · France entière",
-          p_zone_type: "region",
-          p_city: null,
-          p_postal_code: null,
-          p_radius_km: null,
-          p_departement: null,
-          p_region_code: "FR",
-          p_alert_types: ["gardes"],
-          p_heure_envoi: "08:00",
-          p_frequence: "quotidien",
-        }));
-      }
-    } else if (zoneMode === "dept") {
-      const deptCode = getDeptCode(cityPostalCode ?? userPostalCode ?? null);
-      savedScope = deptCode ? `département ${deptCode}` : city;
-      if (!deptCode) {
-        error = { message: "INVALID_DEPARTMENT" };
-      } else {
-        const { data: existing } = await supabase
-          .from("alert_preferences")
-          .select("id")
-          .eq("active", true)
-          .eq("zone_type", "departement")
-          .eq("departement", deptCode)
-          .contains("alert_types", ["gardes"])
-          .limit(1);
-
-        if (existing && existing.length > 0) {
-          error = { message: "DOUBLON" };
-        } else {
-          ({ error } = await supabase.rpc("create_alert_preference", {
-            p_label: `Gardes · Département ${deptCode}`,
-            p_zone_type: "departement",
-            p_city: null,
-            p_postal_code: null,
-            p_radius_km: null,
-            p_departement: deptCode,
-            p_region_code: null,
-            p_alert_types: ["gardes"],
-            p_heure_envoi: "08:00",
-            p_frequence: "quotidien",
-          }));
-        }
-      }
-    } else {
-      // Snap au rayon autorisé le plus proche (la RPC n'accepte que 5/15/30/50/100)
-      usedRadius = snapToAllowedRadius(radius[0]);
-      ({ error } = await supabase.rpc("create_alert_from_search", {
-        p_city: city,
-        p_postal_code: cityPostalCode ?? null,
-        p_radius_km: usedRadius,
-      }));
-
-      // Fallback : si INVALID_RADIUS (désync UI / cache), on réessaye une fois avec 15 km par défaut
-      if (error && (error.message || "").includes("INVALID_RADIUS")) {
-        logger.warn("create_alert_from_search INVALID_RADIUS, retry with fallback", {
-          attempted: usedRadius,
-          original: radius[0],
-        });
-        usedRadius = 15;
-        ({ error } = await supabase.rpc("create_alert_from_search", {
-          p_city: city,
-          p_postal_code: cityPostalCode ?? null,
-          p_radius_km: usedRadius,
-        }));
-        if (!error) {
-          // Aligne l'UI sur le rayon réellement utilisé
-          setRadius([usedRadius]);
-        }
-      }
-    }
-
-    setIsCreatingAlert(false);
-    if (error) {
-      const msg = error.message || "";
-      if (msg.includes("DOUBLON")) {
-        toastUi({ title: "Vous avez déjà cette alerte", description: "Une alerte identique existe déjà pour cette zone." });
-        setAlertCreated(true);
-      } else if (msg.includes("MAX_ZONES") || msg.includes("Maximum 3")) {
-        toastUi({
-          variant: "destructive",
-          title: "Maximum atteint",
-          description: "Vous avez déjà 3 alertes actives. Supprimez-en une dans vos paramètres.",
-          action: <ToastAction altText="Gérer mes alertes" onClick={() => navigate("/settings")}>Gérer</ToastAction>,
-        });
-      } else if (msg.includes("INVALID_CITY")) {
-        toastUi({ variant: "destructive", title: "Ville requise", description: "Sélectionnez une ville avant de créer une alerte." });
-      } else if (msg.includes("INVALID_DEPARTMENT")) {
-        toastUi({ variant: "destructive", title: "Département indisponible", description: "Sélectionnez une ville avec code postal avant de créer cette alerte." });
-      } else if (msg.includes("INVALID_RADIUS")) {
-        toastUi({
-          variant: "destructive",
-          title: "Rayon non disponible",
-          description: "Choisissez un rayon parmi 5, 15, 30, 50 ou 100 km, puis réessayez.",
-        });
-      } else {
-        toastUi({ variant: "destructive", title: "Erreur", description: "Une erreur est survenue. Veuillez réessayer." });
-      }
-    } else {
-      toastUi({
-        title: "Alerte créée",
-        description: usedRadius
-          ? `Vous recevrez un e-mail dès qu'une nouvelle garde apparaît autour de ${city} (rayon ${usedRadius} km).`
-          : `Vous recevrez un e-mail dès qu'une nouvelle garde apparaît sur ${savedScope}.`,
-        action: <ToastAction altText="Personnaliser" onClick={() => navigate("/settings")}>Personnaliser</ToastAction>,
-      });
-      setAlertCreated(true);
-    }
-  };
+  // Lot RCH8 (14/11/2026) : l'« alerte nouveau gardien » du propriétaire
+  // créait une alerte de gardes (nouvelles annonces) : aucun email ne prévient
+  // d'un gardien inscrit. Elle est remplacée par la publication, qui part par
+  // email aux gardiens proches, et par l'élargissement du rayon.
 
   // Share invite link
   const handleShareInvite = async () => {
@@ -1532,18 +1388,6 @@ const SearchOwner = () => {
 
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            {city && (
-              <button
-                type="button"
-                onClick={alertCreated ? undefined : handleCreateAlertGated}
-                disabled={!city || isCreatingAlert}
-                aria-label={alertCreated ? "Alerte créée" : "Créer une alerte pour cette recherche"}
-                title={alertCreated ? "Alerte créée" : "Créer une alerte"}
-                className={`inline-flex items-center justify-center h-9 w-9 rounded-lg border transition-colors ${alertCreated ? "border-primary/40 bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary hover:text-primary"}`}
-              >
-                {isCreatingAlert ? <Loader2 className="h-4 w-4 animate-spin" /> : alertCreated ? <BellRing className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
-              </button>
-            )}
             <div className="flex items-center gap-1 border border-border rounded-lg p-0.5" role="group" aria-label="Mode d'affichage des résultats">
               <button
                 type="button"
@@ -1743,26 +1587,18 @@ const SearchOwner = () => {
                   </button>
                 )}
 
-                {/* Carte 2, Créer une alerte */}
-                <button
-                  onClick={handleCreateAlertGated}
-                  disabled={!city || alertCreated || isCreatingAlert}
-                  className="text-left p-4 rounded-xl border border-border bg-card hover:border-primary transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                {/* Carte 2 (lot RCH8) : l'annonce part par email aux gardiens proches. */}
+                <Link
+                  to={ownerPublishHref(!user, "recherche_gardiens")}
+                  onClick={() => { try { void trackEvent("owner_publish_bar_clicked", { source: "recherche_gardiens_empty", metadata: { radius_km: radius[0], zone_mode: zoneMode } }); } catch { /* mesure facultative */ } }}
+                  className="text-left p-4 rounded-xl border border-border bg-card hover:border-primary transition-colors"
+                  data-testid="owner-empty-publish"
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    {alertCreated ? <BellRing className="h-4 w-4 text-primary" /> : isCreatingAlert ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4 text-primary" />}
-                    <span className="font-medium text-sm">
-                      {alertCreated ? "Alerte créée" : "Me prévenir par e-mail"}
-                    </span>
+                    <span className="font-medium text-sm">Publier ma garde</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {!city
-                      ? "Renseignez une ville pour activer l'alerte."
-                      : alertCreated
-                        ? `Alerte active : un e-mail partira dès qu'un gardien rejoint la zone autour de ${city}.`
-                        : `Recevez un e-mail dès qu'un gardien s'inscrit près de ${city}.`}
-                  </p>
-                </button>
+                  <p className="text-xs text-muted-foreground">Votre annonce part par email aux gardiens proches de chez vous, dès sa publication.</p>
+                </Link>
 
                 {/* Carte 3, Inviter un voisin */}
                 <button
@@ -1806,35 +1642,24 @@ const SearchOwner = () => {
             </div>
           ) : (
             <>
-              {/* Bandeau alerte pied de liste : nudge terracotta doux avec le SEUL
-                  bouton primaire de la page. Masqué quand la zone est déjà bien
-                  peuplée (≥ 8 résultats) ou quand l'alerte a déjà été créée. */}
-              {city && !alertCreated && results.length > 0 && results.length < 8 && (
-                <div className="mb-5 rounded-[20px] border border-terra-border bg-terra-soft px-5 py-4 md:px-6 md:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-heading text-[16px] font-semibold text-foreground">
-                      Peu de gardiens correspondent encore&nbsp;?
+              {/* Lot RCH8 : peu de gardiens dans le rayon, on propose le palier suivant. */}
+              {city && zoneMode === "radius" && results.length > 0 && results.length < 8 && (() => {
+                const next = ALLOWED_ALERT_RADII.find((r) => r > radius[0]);
+                return next ? (
+                  <div className="mb-5 rounded-[20px] border border-terra-border bg-terra-soft px-5 py-4 md:px-6 md:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3" data-testid="owner-widen-radius">
+                    <p className="font-heading text-[16px] font-semibold text-foreground min-w-0">
+                      Voir aussi les gardiens à moins de {next} km de {city}.
                     </p>
-                    <p className="text-[13px] text-muted-foreground mt-1 leading-snug">
-                      Recevez un e-mail dès qu'un nouveau gardien rejoint la zone autour de&nbsp;{city}.
-                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setRadius([next])}
+                      className="shrink-0 inline-flex items-center justify-center min-h-11 rounded-full border border-primary px-5 text-[13px] font-semibold text-primary hover:bg-primary/5"
+                    >
+                      {t("search_results.expand_zone", { zone: `${next} km` })}
+                    </button>
                   </div>
-                  <button
-                    onClick={handleCreateAlertGated}
-                    disabled={isCreatingAlert}
-                    className="shrink-0 inline-flex items-center justify-center gap-2 min-h-11 rounded-full bg-primary px-5 py-2.5 text-[13px] font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    {isCreatingAlert ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Bell className="h-4 w-4" aria-hidden />}
-                    Créer mon alerte
-                  </button>
-                </div>
-              )}
-              {city && alertCreated && (
-                <div className="mb-5 flex items-center gap-2 rounded-[20px] border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary">
-                  <BellRing className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  Alerte créée, l'e-mail partira automatiquement.
-                </div>
-              )}
+                ) : null;
+              })()}
             {/* Lot RCH6 : la recherche de gardiens mène à l'annonce, qui part par email aux gardiens proches. */}
             {results.length > 0 && city && zoneMode === "radius" && (
               <div className="mb-5 rounded-[20px] border border-primary/20 bg-primary/[0.04] px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3" data-testid="owner-publish-bar">

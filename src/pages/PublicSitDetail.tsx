@@ -50,6 +50,7 @@ import { STARTED_SIT_NOTICE, isStartedOpenSit } from "@/lib/sitStarted";
 import { markMilestone } from "@/lib/perfMarks";
 import { takeSitPrefetch } from "@/lib/sitPrefetch";
 import { deptCodeFromPostal } from "@/lib/sitLocation";
+import { DEPT_NAMES } from "@/lib/departments";
 import { buildSitTitle } from "@/lib/seoTitle";
 
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
@@ -535,6 +536,11 @@ const PublicSitDetail = () => {
   // Source de vérité : la ville portée par l'annonce (résidence secondaire,
   // étranger), avec repli sur la ville du profil propriétaire.
   const sitCity = ((sit as any)?.city as string | undefined)?.trim() || owner?.city?.trim() || owner?.location_label || "";
+  // Lot RCH8 : département de la garde (annonce, sinon code postal du propriétaire).
+  const sitDeptCode = ownerCountry === "FR"
+    ? ((sit as any)?.departement_code as string | undefined)?.trim() || deptCodeFromPostal((owner as any)?.postal_code)
+    : null;
+  const sitRegion = sitDeptCode ? (DEPT_NAMES[sitDeptCode] ?? DEPT_NAMES[sitDeptCode.padStart(2, "0")] ?? null) : null;
   const cityForTitle = (sitCity && ownerCountry && ownerCountry !== "FR")
     ? `${sitCity} (${ownerCountry})`
     : (sitCity || "France");
@@ -613,7 +619,13 @@ const PublicSitDetail = () => {
  areaServed: {
    "@type": "City",
    name: cityForTitle,
-   address: { "@type": "PostalAddress", addressLocality: cityForTitle, addressCountry: "FR" },
+   // Lot RCH8 : région (département) et pays réels, lus par les moteurs.
+   address: {
+     "@type": "PostalAddress",
+     addressLocality: sitCity || cityForTitle,
+     ...(sitRegion && { addressRegion: sitRegion }),
+     addressCountry: ownerCountry || "FR",
+   },
  },
  offers: {
  "@type": "Offer",
