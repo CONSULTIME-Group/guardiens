@@ -17,6 +17,7 @@ import { slugify } from "@/lib/normalize";
 import { compressArticleCoverFile } from "@/lib/compressImage";
 import { trackEvent } from "@/lib/analytics";
 import { findUnknownPlaceholders, KNOWN_PLACEHOLDERS } from "@/lib/contentPlaceholders";
+import { ARTICLE_LINKS_MIN, articleLinkProblem, cleanArticleLinks, readArticleLinks, type ArticleLink } from "@/lib/admin/articleLinks";
 
 const ArticleEditor = () => {
   const navigate = useNavigate();
@@ -41,6 +42,8 @@ const ArticleEditor = () => {
     related_city: "",
     meta_title: "",
     meta_description: "",
+    hero_image_alt: "",
+    internal_links: [] as ArticleLink[],
     published: false,
     published_at: null as string | null,
   });
@@ -60,6 +63,8 @@ const ArticleEditor = () => {
           related_city: (data as any).related_city || "",
           meta_title: (data as any).meta_title || "",
           meta_description: (data as any).meta_description || "",
+          hero_image_alt: (data as any).hero_image_alt || "",
+          internal_links: readArticleLinks((data as any).internal_links),
           published: data.published || false,
           published_at: data.published_at,
         });
@@ -96,6 +101,13 @@ const ArticleEditor = () => {
       return;
     }
 
+    if (form.cover_image_url && !/^https:\/\//i.test(form.cover_image_url)) {
+      toast.error("L'adresse de la photo doit commencer par https://");
+      return;
+    }
+    const linkIssue = form.internal_links.map(articleLinkProblem).find(Boolean);
+    if (linkIssue) { toast.error("Liens vers d'autres pages : " + linkIssue); return; }
+
     setSaving(true);
     const shouldPublish = nextPublishedState(action, form.published);
     const record: any = {
@@ -110,6 +122,8 @@ const ArticleEditor = () => {
       related_city: form.related_city || null,
       meta_title: form.meta_title || null,
       meta_description: form.meta_description || null,
+      hero_image_alt: form.hero_image_alt.trim() || null,
+      internal_links: cleanArticleLinks(form.internal_links),
       published: shouldPublish,
       published_at: shouldPublish && !form.published_at ? new Date().toISOString() : form.published_at,
     };
@@ -263,6 +277,27 @@ const ArticleEditor = () => {
             </Button>
           )}
           <input id="cover-upload" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+          <div className="mt-3">
+            <Label htmlFor="cover-image-url">Adresse de la photo</Label>
+            <Input
+              id="cover-image-url"
+              value={form.cover_image_url}
+              onChange={e => updateField("cover_image_url", e.target.value.trim())}
+              placeholder="https://… (ou ajoutez un fichier ci-dessus)"
+              inputMode="url"
+            />
+          </div>
+          <div className="mt-3">
+            <Label htmlFor="hero-image-alt">Description de la photo</Label>
+            <Input
+              id="hero-image-alt"
+              value={form.hero_image_alt}
+              onChange={e => updateField("hero_image_alt", e.target.value)}
+              placeholder="Ce que montre la photo, en une phrase"
+              maxLength={200}
+            />
+            <p className="text-xs text-muted-foreground mt-1">Lue par Google et par les lecteurs d'écran.</p>
+          </div>
         </div>
 
         <div>
@@ -366,6 +401,60 @@ const ArticleEditor = () => {
             <Input value={form.related_city} onChange={e => updateField("related_city", e.target.value)} placeholder="Ex : Lyon" />
           </div>
         )}
+
+        <section aria-labelledby="internal-links-title" className="space-y-2 pt-2">
+          <h2 id="internal-links-title" className="text-sm font-medium">Liens vers d'autres pages du site</h2>
+          <p className="text-xs text-muted-foreground">
+            {ARTICLE_LINKS_MIN} liens au moins. Adresse qui commence par /, par exemple /actualites/rediger-bonne-annonce-house-sitting.
+          </p>
+          {form.internal_links.map((link, i) => {
+            const problem = articleLinkProblem(link);
+            return (
+              <div key={i} className="rounded-lg border border-border p-3 space-y-2" data-testid="internal-link-row">
+                <div className="grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2 gap-2">
+                  <div>
+                    <Label htmlFor={`link-text-${i}`} className="text-xs">Texte du lien</Label>
+                    <Input
+                      id={`link-text-${i}`}
+                      value={link.text}
+                      onChange={e => updateField("internal_links", form.internal_links.map((l, j) => j === i ? { ...l, text: e.target.value } : l))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`link-url-${i}`} className="text-xs">Adresse</Label>
+                    <Input
+                      id={`link-url-${i}`}
+                      value={link.url}
+                      inputMode="url"
+                      onChange={e => updateField("internal_links", form.internal_links.map((l, j) => j === i ? { ...l, url: e.target.value } : l))}
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <p className={`text-xs ${problem ? "text-destructive" : "text-muted-foreground"}`} role={problem ? "alert" : undefined}>
+                    {problem ?? " "}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => updateField("internal_links", form.internal_links.filter((_, j) => j !== i))}
+                  >
+                    Retirer
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => updateField("internal_links", [...form.internal_links, { text: "", url: "" }])}
+          >
+            Ajouter un lien
+          </Button>
+        </section>
 
         <details className="pt-2" open>
           <summary className="text-sm font-medium cursor-pointer">SEO</summary>
