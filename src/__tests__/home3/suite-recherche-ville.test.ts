@@ -17,9 +17,10 @@ describe("suite de la recherche de ville", () => {
     expect(home).toContain("min-h-11");
   });
 
-  it("sans garde ouverte dans la zone, les plus proches passent avant les annonces terminées", () => {
-    expect(search).toContain("!(activeReal.length === 0 && nearestShown.length > 0)");
-    expect(search.indexOf("<NearestOutsideSection")).toBeLessThan(search.indexOf('data-testid="past-after-nearest"'));
+  it("lot RCH3 : aucune annonce terminée n'est rendue, les plus proches ouvertes restent", () => {
+    expect(search).toContain("<NearestOutsideSection");
+    expect(search).not.toContain('data-testid="past-after-nearest"');
+    expect(search).toContain("let final = applySitClientFilters(rawResults).filter((s: any) => !isInactiveSit(s));");
   });
 
   it("écrit le nom de la ville proprement, dans le lien comme dans l'adresse", () => {

@@ -17,3 +17,5 @@ export declare function sitRichnessRejectionReason(
 ): "titre_trop_court" | "contenu_insuffisant" | null;
 export declare function isSitRichEnough(sit: SitRichnessInput | null | undefined): boolean;
 export declare function isClosedSitStatus(status: string | null | undefined): boolean;
+export declare function parisTodayForIndex(now?: Date): string;
+export declare function isSitEndDatePast(sit: { end_date?: string | null; [key: string]: unknown } | null | undefined, todayIso: string): boolean;

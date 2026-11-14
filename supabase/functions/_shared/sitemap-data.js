@@ -1,4 +1,4 @@
-import { sitRichnessRejectionReason } from "./sitIndexability.js";
+import { isSitEndDatePast, parisTodayForIndex, sitRichnessRejectionReason } from "./sitIndexability.js";
 import { isAssociationIndexable } from "./associationIndexability.js";
 import { isSitterProfileIndexable } from "./sitterProfileIndexability.js";
 import { liveMergedBreedTarget } from "./breeds/breedFicheMerges.js";
@@ -242,21 +242,24 @@ export async function collectSitemapData({ readAll, fetchOrCache, maxUpdatedAtWi
     // Annonces individuelles `/annonces/:id`, filtre qualité aligné avec
     // l'indexabilité côté client (PublicSitDetail) via la règle partagée
     // src/lib/sitIndexability.js : statut publié, candidatures ouvertes,
-    // titre ≥10 caractères, cumul de contenu rédigé ≥200 caractères.
+    // titre ≥10 caractères, cumul de contenu rédigé ≥200 caractères, date de
+    // fin non passée (lot RCH3 : une garde terminée encore publiée sort).
     fetchOrCache(
       "public_sits", cache,
       null, // relue à chaque build (SEO-3)
-      () => readAll("sits", "sits", "id, slug, title, updated_at, owner_message, daily_routine, specific_expectations", "id", q => q.eq("status", "published").eq("accepting_applications", true)),
+      () => readAll("sits", "sits", "id, slug, title, updated_at, end_date, owner_message, daily_routine, specific_expectations", "id", q => q.eq("status", "published").eq("accepting_applications", true)),
       rows => {
-        const rejected = { titre_trop_court: 0, contenu_insuffisant: 0 };
+        const rejected = { titre_trop_court: 0, contenu_insuffisant: 0, terminee: 0 };
+        const today = parisTodayForIndex();
         const kept = rows.filter(s => {
+          if (isSitEndDatePast(s, today)) { rejected.terminee += 1; return false; }
           const reason = sitRichnessRejectionReason(s);
           if (reason) { rejected[reason] += 1; return false; }
           return true;
         });
         console.log(
           `[sitemap] annonces : ${kept.length} retenues sur ${rows.length} · recalées : ` +
-          `titre trop court ${rejected.titre_trop_court}, contenu insuffisant ${rejected.contenu_insuffisant}`
+          `titre trop court ${rejected.titre_trop_court}, contenu insuffisant ${rejected.contenu_insuffisant}, terminée ${rejected.terminee}`
         );
         if (kept.length === 0 && rows.length > 0) {
           console.warn("[sitemap] ATTENTION : aucune annonce retenue alors que des annonces publiées existent.");

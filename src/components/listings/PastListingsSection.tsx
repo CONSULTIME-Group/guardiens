@@ -19,6 +19,8 @@ interface PastSit {
 }
 
 const LIMIT = 12;
+// Lot RCH3 : seules les gardes terminées depuis 90 jours au plus restent montrées.
+const MAX_AGE_DAYS = 90;
 
 const formatDate = (iso: string | null) => {
   if (!iso) return "";
@@ -36,12 +38,14 @@ export default function PastListingsSection() {
     let cancelled = false;
     (async () => {
       const todayIso = new Date().toISOString().slice(0, 10);
+      const sinceIso = new Date(Date.now() - MAX_AGE_DAYS * 86_400_000).toISOString().slice(0, 10);
       const { data } = await supabase
         .from("sits")
         .select("id, slug, title, city, start_date, end_date, cover_photo_url")
         .eq("status", "published")
         .not("end_date", "is", null)
         .lt("end_date", todayIso)
+        .gte("end_date", sinceIso)
         .order("end_date", { ascending: false })
         .limit(LIMIT);
       if (cancelled) return;

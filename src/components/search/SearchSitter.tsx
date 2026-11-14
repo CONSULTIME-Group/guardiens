@@ -692,7 +692,9 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  );
  const results = useMemo(() => {
    if (tab === "sits") {
-     let final = applySitClientFilters(rawResults);
+     // Lot RCH3 : les annonces fermées (pourvues, terminées, passées) restent
+     // lues mais ne s'affichent plus, ni en liste, ni sur la carte, ni dans l'ItemList.
+     let final = applySitClientFilters(rawResults).filter((s: any) => !isInactiveSit(s));
      final = sortResults(final, sort);
      const realCount = final.length;
      // Lot perf 19c : quand des gardes réelles proches s'affichent sous un
@@ -2776,26 +2778,16 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
         {results.map((item, idx) => renderCard(item, idx))}
       </div>
     ) : (() => {
-      // Groupement lecture : Disponibles → Exemples → Passées / Attribuées
+      // Lot RCH3 : seules les gardes ouvertes sont rendues.
       const activeReal = results.filter((r: any) => !r.is_demo && !r.isAssigned && !r.isCompleted && !r.isPast);
-      const inactive = results.filter((r: any) => !r.is_demo && (r.isAssigned || r.isCompleted || r.isPast));
       const visibleActive = activeReal.slice(0, visibleCount);
       const hasMore = visibleActive.length < activeReal.length;
       const gridCls = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-8 sm:gap-y-10";
-      const groupHeader = (title: string, count: number, sub?: string) => (
-        <div className="mb-4 flex items-baseline justify-between gap-3">
-          <h3 className="font-heading text-base sm:text-lg font-semibold text-foreground">
-            {title} <span className="text-muted-foreground font-normal">({count})</span>
-          </h3>
-          {sub && <p className="text-xs text-muted-foreground hidden sm:block">{sub}</p>}
-        </div>
-      );
       let globalIdx = 0;
       return (
         <>
           {visibleActive.length > 0 && (
             <section className="mb-10">
-              {inactive.length > 0 && groupHeader(t("search_results.group_available"), activeReal.length)}
               <div className={gridCls}>
                 {visibleActive.map((item) => renderCard(item, globalIdx++))}
               </div>
@@ -2812,19 +2804,6 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
             </section>
           )}
 
-          {/* Lot RECH1 : sans garde ouverte dans la zone, les gardes ouvertes les plus proches passent avant les annonces terminées (bloc rendu plus bas). */}
-          {inactive.length > 0 && !(activeReal.length === 0 && nearestShown.length > 0) && (
-            <section className="mb-10">
-              {groupHeader(
-                t("search_results.group_past"),
-                inactive.length,
-                t("search_results.group_past_sub"),
-              )}
-              <div className={gridCls}>
-                {inactive.map((item) => renderCard(item, globalIdx++))}
-              </div>
-            </section>
-          )}
         </>
       );
     })()}
@@ -2860,25 +2839,6 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
      trackEvent={trackEvent}
    />
  )}
- {/* Lot RECH1 : annonces terminées de la zone, après les gardes ouvertes les plus proches. */}
- {tab === "sits" && !searchError && !(loading && !refreshing) && nearestShown.length > 0 && (() => {
-   const openInZone = results.some((r: any) => !r.is_demo && !r.isAssigned && !r.isCompleted && !r.isPast);
-   const inactive = results.filter((r: any) => !r.is_demo && (r.isAssigned || r.isCompleted || r.isPast));
-   if (openInZone || inactive.length === 0) return null;
-   return (
-     <section className="mt-12 mb-10" data-testid="past-after-nearest">
-       <div className="mb-4 flex items-baseline justify-between gap-3">
-         <h3 className="font-heading text-base sm:text-lg font-semibold text-foreground">
-           {t("search_results.group_past")} <span className="text-muted-foreground font-normal">({inactive.length})</span>
-         </h3>
-         <p className="text-xs text-muted-foreground hidden sm:block">{t("search_results.group_past_sub")}</p>
-       </div>
-       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-8 sm:gap-y-10">
-         {inactive.map((item: any) => renderCard(item))}
-       </div>
-     </section>
-   );
- })()}
  </div>
  ) : (
  /* ─── Map view ─── */
