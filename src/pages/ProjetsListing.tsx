@@ -51,8 +51,14 @@ const PROJET_DEFAULT_RADIUS: RadiusKm = 250;
 const radiusLabel = (value: number) =>
   PROJET_RADIUS_CHOICES.find((c) => c.value === value)?.label ?? `${value} km`;
 
+/**
+ * Lot SORT14 (14/11/2026) : valeur du réglage « Autour de ». Un rayon national
+ * se lit « toute la France », sans code postal ; sinon « 69005 · 250 km ».
+ */
+export const projetPlaceSummary = (active: boolean, postal: string, radius: number) =>
+  !active || !Number.isFinite(radius) ? "toute la France" : `${postal} · ${radiusLabel(radius)}`;
+
 /** Lot SORT11 : idées de chantier, le formulaire s'ouvre avec le titre et la nature. */
-/** Lot SORT11 : idées de chantier */
 const PROJET_IDEAS: ReadonlyArray<HubIdea & { nature: string }> = [
   { key: "haie", label: "Planter une haie", image: spotJardin, nature: "jardin" },
   { key: "abri", label: "Construire un abri", image: spotBricolage, nature: "construction" },
@@ -239,7 +245,7 @@ const ProjetsListing = () => {
               <HubSettings>
                 <HubSetting
                   label="Autour de"
-                  value={proximity.active ? `${proximity.postal} · ${radiusLabel(radius)}` : "toute la France"}
+                  value={projetPlaceSummary(proximity.active, proximity.postal, radius)}
                   action={placeOpen ? "Fermer" : "Choisir"}
                   onClick={() => setPlaceOpen((open) => !open)}
                   expanded={placeOpen}
