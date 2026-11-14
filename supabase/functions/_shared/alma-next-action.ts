@@ -127,6 +127,9 @@ export function suggestSitTitle(question: string): string {
 // Lot L3 : « garde de » seul déclenchait sur « je cherche une garde de chien ».
 const DEPARTURE_INTENT = /(je pars|partir|depart|vacances|faire garder|garde de (mes|ma|mon|nos)|garder (mes|ma|mon|nos)|absence|absente?|trouver un gardien|week-end|weekend)/;
 
+/** Lot ALMA5 : envie de jouer, de sortir ou de rencontrer du monde. */
+export const OUTING_INTENT = /(jeux? de societe|belote|tarot|scrabble|echecs|partie de cartes|jouer aux cartes|randonnee|une rando|balade a plusieurs|sortir|une sortie|des sorties|rencontrer (du monde|des gens|d'autres)|me faire des amis|je m'ennuie|me sens seule?|faire du sport|partenaires? de)/;
+
 const withTitle = (path: string, title: string) => `${path}?titre=${encodeURIComponent(title)}`;
 
 export function sitIdFromPath(path?: string | null): string | null {
@@ -178,6 +181,16 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
         ? { label: "Passer en espace gardien", path: "/dashboard?espace=gardien", reason: "changer_espace" }
         : { label: "Passer en espace propriétaire", path: "/dashboard?espace=proprietaire", reason: "changer_espace" },
       chips: [],
+      placement,
+    };
+  }
+
+  // Lot ALMA5 (14/11/2026) : jouer, sortir, marcher à plusieurs, rencontrer
+  // des gens relève des sorties : voir celles d'à côté, puis en proposer une.
+  if (OUTING_INTENT.test(q) && !DEPARTURE_INTENT.test(q)) {
+    return {
+      action: { label: "Voir les sorties près de chez moi", path: "/sorties", reason: "sortie_voir" },
+      chips: [{ label: "Proposer une sortie", path: "/sorties/proposer" }],
       placement,
     };
   }

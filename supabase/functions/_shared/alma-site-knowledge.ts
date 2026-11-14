@@ -120,7 +120,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     label: "Entraide près de chez vous",
     purpose: "Les demandes de coup de main des gens du coin (besoin) et les offres de savoir-faire (offre), catégories animaux, jardin, maison, compétences, courses, trajets, compagnie ; un « je peux » suffit pour répondre, profil à 40 % minimum.",
     audience: "all",
-    triggers: ["entraide", "coup de main", "aider", "rendre service", "petite mission", "jardin", "potager", "courses", "marche", "trajet", "voiture", "echecs", "scrabble", "belote", "jeux de societe", "compagnie"],
+    triggers: ["entraide", "coup de main", "aider", "rendre service", "petite mission", "jardin", "potager", "courses", "marche", "trajet", "voiture", "compagnie"],
     opener: "Les coups de main demandés autour de vous sont dans L'entraide près de chez vous.",
     core: true,
   },
@@ -133,6 +133,37 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     triggers: ["j'ai besoin", "besoin d'aide", "je cherche de l'aide", "demander", "publier une demande", "quelqu'un pour"],
     opener: "Je vous propose le titre, la demande se publie depuis la page Demander un coup de main.",
     core: true,
+  },
+  // Lot ALMA5 (14/11/2026) : la rubrique Sorties, ouverte le 13/11.
+  {
+    key: "sorties",
+    path: "/sorties",
+    aliases: ["/sorties/:slug"],
+    label: "Sorties près de chez vous",
+    purpose: "Des moments à quelques-uns entre membres, avec des places comptées (2 à 20) : jeux de société, balades et randonnées, sorties avec les chiens, sport, jardin et potager, repas et cuisine, culture, ateliers. On s'inscrit d'un geste avec « Je viens », l'organisateur donne le rendez-vous par message. Une participation aux frais réels peut être indiquée, personne ne gagne d'argent à organiser.",
+    audience: "all",
+    triggers: ["sortie", "sorties", "jeux de societe", "belote", "tarot", "scrabble", "echecs", "partie de cartes", "randonnee", "rando", "balade", "sport", "velo", "course a pied", "rencontrer du monde", "rencontrer des gens", "sortir", "activite", "atelier", "repas partage", "se sentir seul", "je m'ennuie"],
+    opener: "Les sorties proposées autour de vous sont dans Sorties près de chez vous, avec le nombre de places restantes.",
+    core: true,
+  },
+  {
+    key: "sorties_proposer",
+    path: "/sorties/proposer",
+    label: "Proposer une sortie",
+    purpose: "Formulaire d'une sortie : l'activité, un titre, le jour et l'heure, le lieu (public, chez soi ou en ligne), le nombre de places et une participation aux frais facultative ; les membres proches sont prévenus à la publication.",
+    audience: "all",
+    triggers: ["proposer une sortie", "organiser une sortie", "organiser", "trouver des joueurs", "partenaires de jeu", "partenaire de belote", "faire une rando a plusieurs", "cherche des gens pour"],
+    opener: "Je vous propose le titre, la sortie se publie depuis la page Proposer une sortie.",
+    core: true,
+  },
+  {
+    key: "sorties_alertes",
+    path: "/sorties/alertes",
+    label: "Alertes sorties",
+    purpose: "Régler l'email qui prévient d'une nouvelle sortie près de chez soi : le rayon (mon quartier, 5 km, 15 km) ou l'arrêt de ces seules alertes.",
+    audience: "all",
+    triggers: ["alerte sortie", "alertes sorties", "ne plus recevoir les sorties", "rayon des sorties"],
+    opener: "Les alertes des sorties se règlent dans Alertes sorties.",
   },
   {
     key: "questions",
@@ -505,9 +536,6 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
  */
 export const ALMA_KNOWLEDGE_EXCLUDED_ROUTES: string[] = [
   "/", // accueil, Alma y est déjà
-  // Lot SORT1 (12/11/2026) : sorties derrière le drapeau « sorties », éteint.
-  // À décrire à Alma à l'ouverture de la rubrique.
-  "/sorties", "/sorties/proposer", "/sorties/:slug", "/sorties/alertes",
   "/publier", // lot SORT9 : écran de choix, sans contenu propre
   "*", // page introuvable
   // Légal

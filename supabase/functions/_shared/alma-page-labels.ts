@@ -29,6 +29,11 @@ export const ALMA_PAGE_LABELS: Record<string, string> = {
   "/profile?section=savoir-faire": "Mes savoir-faire",
   "/alma": "Mon parcours avec Alma",
   "/petites-missions/creer": "Demander un coup de main",
+  // Lot ALMA5 (14/11/2026) : la rubrique Sorties.
+  "/sorties": "Sorties près de chez vous",
+  "/sorties/:slug": "Une sortie",
+  "/sorties/proposer": "Proposer une sortie",
+  "/sorties/alertes": "Alertes sorties",
   "/petites-missions": "L'entraide près de chez vous",
   "/projets/publier": "Lancer un projet",
   "/projets": "Les projets",
