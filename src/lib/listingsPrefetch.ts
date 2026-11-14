@@ -56,7 +56,7 @@ export function endBootListings(): void {
 }
 
 /** Compteurs du haut de /annonces calculés par le premier affichage (lot perf 4). */
-export interface BootListingsCounts { openCount: number; citiesCount: number; intlCount: number }
+export interface BootListingsCounts { openCount: number; citiesCount: number; intlCount: number; weekCount?: number }
 
 /**
  * Lot perf 4 : compteurs posés par le premier affichage, repris par

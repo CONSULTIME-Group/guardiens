@@ -6,6 +6,7 @@ import PageMeta from "@/components/PageMeta";
 import { logger } from "@/lib/logger";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { ownerPublishHref } from "@/lib/almaVisitorSearch";
+import { formatSitPeriod } from "@/lib/dateRange";
 import ReportButton from "@/components/reports/ReportButton";
 import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity } from "@/lib/geocode";
@@ -76,7 +77,28 @@ type ViewMode = "list" | "map";
 const SearchOwnerMapView = lazyWithRetry(() => import("@/components/search/SearchOwnerMapView"), "SearchOwnerMapView");
 
 const SearchOwner = () => {
-  const { user, switchRole } = useAuth();
+  const { user, switchRole, activeRole } = useAuth();
+  // Lot RCH7 : garde ouverte du propriétaire connecté (mode propriétaire),
+  // pour proposer « Inviter » sur chaque carte plutôt que « Publier ».
+  const [myOpenSit, setMyOpenSit] = useState<{ id: string; start_date: string | null; end_date: string | null } | null>(null);
+  const isOwnerMode = !!user && (user.role === "owner" || (user.role === "both" && activeRole === "owner"));
+  useEffect(() => {
+    if (!isOwnerMode || !user?.id) { setMyOpenSit(null); return; }
+    let cancelled = false;
+    (async () => {
+      const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
+      const { data } = await supabase
+        .from("sits")
+        .select("id, start_date, end_date")
+        .eq("user_id", user.id)
+        .eq("status", "published")
+        .or(`end_date.is.null,end_date.gte.${today}`)
+        .order("start_date", { ascending: true })
+        .limit(1);
+      if (!cancelled) setMyOpenSit(((data as any[]) || [])[0] ?? null);
+    })();
+    return () => { cancelled = true; };
+  }, [isOwnerMode, user?.id]);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { owner: viewerOwner } = useViewerOwnerForAffinity();
@@ -1820,15 +1842,19 @@ const SearchOwner = () => {
                   <p className="font-heading text-[16px] font-semibold text-foreground">
                     {results.length} gardien{results.length > 1 ? "s" : ""} à proximité de {city}, à moins de {radius[0]} km.
                   </p>
-                  <p className="text-[13px] text-muted-foreground mt-1 leading-snug">Votre annonce part par email aux gardiens proches de chez vous.</p>
+                  <p className="text-[13px] text-muted-foreground mt-1 leading-snug">
+                    {myOpenSit
+                      ? `Votre garde${formatSitPeriod(myOpenSit.start_date, myOpenSit.end_date) ? ` du ${formatSitPeriod(myOpenSit.start_date, myOpenSit.end_date)}` : ""} est en ligne. Invitez les gardiens qui vous plaisent.`
+                      : "Votre annonce part par email aux gardiens proches de chez vous."}
+                  </p>
                 </div>
-                <Link
+                {!myOpenSit && <Link
                   to={ownerPublishHref(!user, "recherche_gardiens")}
                   onClick={() => { try { void trackEvent("owner_publish_bar_clicked", { source: "recherche_gardiens", metadata: { count: results.length, radius_km: radius[0] } }); } catch { /* mesure facultative */ } }}
                   className="shrink-0 inline-flex items-center justify-center min-h-11 rounded-full bg-primary px-5 text-[14px] font-semibold text-primary-foreground hover:bg-primary/90"
                 >
                   Publier ma garde
-                </Link>
+                </Link>}
               </div>
             )}
             {results.length > 0 && <OwnerAffinityBanner className="mb-4" />}
@@ -1850,6 +1876,7 @@ const SearchOwner = () => {
                     hasOwnerProfile={!!viewerOwner}
                     duplicateName={nameCounts[(publicFirstName(s.profile?.first_name) || "Gardien").toLowerCase()] > 1}
                     city={city}
+                    canInvite={!!myOpenSit}
                   />
                 ));
               })()}

@@ -26,6 +26,7 @@ import {
   Camera,
   ShieldCheck,
 } from "lucide-react";
+import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import AffinityRing from "@/components/matching/AffinityRing";
 import type { AffinityResult } from "@/lib/affinityScore";
@@ -45,6 +46,8 @@ interface SitterResultCardProps {
   hasOwnerProfile: boolean;
   duplicateName: boolean;
   city: string;
+  /** Lot RCH7 : le propriétaire a une garde en ligne, « Inviter » sous la carte. */
+  canInvite?: boolean;
 }
 
 const SitterResultCard = ({
@@ -54,6 +57,7 @@ const SitterResultCard = ({
   hasOwnerProfile,
   duplicateName,
   city,
+  canInvite = false,
 }: SitterResultCardProps) => {
   const [photoIdx, setPhotoIdx] = useState(0);
   const { user } = useAuth();
@@ -124,7 +128,7 @@ const SitterResultCard = ({
   };
 
   return (
-    <div className="group relative h-full">
+    <div className="group relative h-full flex flex-col">
       {/* Favori HORS du lien de carte (lot L4) : un lien dans un lien cassait
           le rendu, et le favori ne doit jamais ouvrir la fiche. Zone 44 px. */}
       <div className="absolute top-2 right-2 z-20 flex h-11 w-11 items-center justify-center">
@@ -133,7 +137,7 @@ const SitterResultCard = ({
     <Link
       to={`/gardiens/${sitter.user_id}`}
       aria-label={`Voir le profil de ${firstName}`}
-      className="relative bg-card rounded-[20px] overflow-hidden border border-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/40 transition-all flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="relative bg-card rounded-[20px] overflow-hidden border border-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/40 transition-all flex flex-col flex-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
 
       {/* Photo 4:3 avec mini-carrousel préservé */}
@@ -309,6 +313,16 @@ const SitterResultCard = ({
         </div>
       </div>
     </Link>
+    {canInvite && (
+      <div className="mt-2" data-testid="sitter-card-invite">
+        <InviteToMySitButton
+          sitter={{ id: sitter.user_id, first_name: sitter.profile?.first_name ?? null }}
+          label="Inviter sur ma garde"
+          source="recherche_gardiens"
+          className="w-full min-h-11"
+        />
+      </div>
+    )}
     </div>
   );
 };
