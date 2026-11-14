@@ -355,7 +355,7 @@ export const OUTING_COPY = {
   tabs: { entraide: "Entraide", sorties: "Sorties", projets: "Chantiers" },
   hubTitle: "Entraide & sorties",
   sortiesTitle: "Sorties près de chez vous",
-  sortiesIntro: "Une belote, une balade, une randonnée : des moments à quelques-uns, avec des places comptées.",
+  sortiesIntro: "Proposez un moment à partager : une belote, une balade, une randonnée. Vous fixez le jour, le lieu et le nombre de places, les membres proches s'inscrivent.",
   propose: "Proposer une sortie",
   join: "Je viens",
   leave: "Libérer ma place",

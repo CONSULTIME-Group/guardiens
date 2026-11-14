@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { HUB_ARTICLES } from "@/lib/hubArticles";
 import PageMeta from "@/components/PageMeta";
 import { SECTION_OG_IMAGES } from "@/data/siteConstants";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -44,8 +45,8 @@ import { capitalizeFirstName } from "@/lib/displayName";
 import { sortHelpers } from "@/lib/helperDisplay";
 import EntraideSortiesTabs from "@/components/outings/EntraideSortiesTabs";
 import { useOutingsEnabled } from "@/hooks/useOutingsEnabled";
-import { HUB_SHELL, HUB_TABS, HubHeader, HubSettingsLine } from "@/components/outings/HubHeader";
-import { ALERT_SETTINGS_PATH, radiusLineText, useMutualAidRadiusKm } from "@/components/entraide/MutualAidRadiusLine";
+import { HUB_SHELL, HUB_TABS, HubArticles, HubHeader, HubSetting, HubSettings, HubStat, HubWhy } from "@/components/outings/HubHeader";
+import { ALERT_SETTINGS_PATH, useMutualAidRadiusKm } from "@/components/entraide/MutualAidRadiusLine";
 
 const EntraideMap = lazy(() => import("@/components/entraide/EntraideMap"), "EntraideMap");
 
@@ -74,32 +75,32 @@ const HOW_STEPS = [
  * Lot SORT11 : même squelette que les onglets Sorties et Chantiers
  * (HubHeader), le chiffre en une ligne courte sous le bouton.
  */
-export const EntraideHubIntro = ({ countLine, showHelp, onNeed, onHelp, children }: {
+export const EntraideHubIntro = ({ countLine, avatars, showHelp, onNeed, onHelp, children }: {
   countLine: string | null;
+  avatars?: ReadonlyArray<string>;
   showHelp: boolean;
   onNeed: () => void;
   onHelp: () => void;
   children?: React.ReactNode;
-}) => (
-  <HubHeader
-    title="Entraide près de chez vous"
-    phrase="Le potager à arroser, les courses, un trajet, une partie de jeux de société : dites simplement ce qu'il vous faut."
-    actions={
-      <>
-        <Button size="lg" className="h-[52px] rounded-2xl text-base sm:h-12" onClick={onNeed}>Demander un coup de main</Button>
-        {showHelp && <Button size="lg" variant="outline" className="h-[52px] rounded-2xl text-base sm:h-12" onClick={onHelp}>Proposer mon aide</Button>}
-      </>
-    }
-    pulse={countLine ? (
-      <>
-        {countLine} ·{" "}
-        <a href="#entraide-helpers-title" className="-my-3 inline-block py-3 font-semibold text-primary underline underline-offset-4">Les voir</a>
-      </>
-    ) : null}
-  >
-    {children}
-  </HubHeader>
-);
+}) => {
+  // « 86 personnes prêtes à aider autour de Lyon » : le nombre en grand, le reste en libellé.
+  const [count, ...rest] = (countLine ?? "").split(" ");
+  return (
+    <HubHeader
+      title="Entraide près de chez vous"
+      phrase="Le potager à arroser, les courses, un trajet, un meuble à monter : dites simplement ce qu'il vous faut."
+      actions={
+        <>
+          <Button size="lg" className="h-[52px] rounded-2xl text-base sm:h-12" onClick={onNeed}>Demander un coup de main</Button>
+          {showHelp && <Button size="lg" variant="outline" className="h-[52px] rounded-2xl text-base sm:h-12" onClick={onHelp}>Proposer mon aide</Button>}
+        </>
+      }
+      stat={countLine ? <HubStat value={Number(count)} label={rest.join(" ")} href="#entraide-helpers-title" action="Les voir" avatars={avatars} /> : null}
+    >
+      {children}
+    </HubHeader>
+  );
+};
 
 export const EntraideHowItWorks = () => (
   <section className="mt-12" aria-labelledby="entraide-how-title">
@@ -160,6 +161,7 @@ const EntraideHub = () => {
   // Lot E11 : null tant que le membre n'a pas choisi ; sinon son choix.
   const [farOpen, setFarOpen] = useState<boolean | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [placeOpen, setPlaceOpen] = useState(false);
   const radiusKm = useMutualAidRadiusKm(!isAuthenticated ? false : profileLoaded ? profile?.available_for_help === true : null);
   const [counts, setCounts] = useState<Map<string, { given_count: number | null; received_count: number | null }>>(new Map());
   const [badges, setBadges] = useState<Map<string, MissionBadgeRow[]>>(new Map());
@@ -409,13 +411,6 @@ const EntraideHub = () => {
     }
   };
 
-  // Lot SORT11 : lieu, rayon et savoir-faire sur une ligne, détail replié.
-  const settingsSummary = [
-    originCity || "Votre position",
-    radiusKm !== null ? `${radiusKm} km` : null,
-    profile?.available_for_help === true ? "savoir-faire" : null,
-  ].filter(Boolean).join(" · ");
-
   const locationField = (
     <div className="flex max-w-md gap-2">
       <Input value={city} onChange={(event) => setCity(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void locate(); }} placeholder="Votre ville" aria-label="Votre ville" className="min-w-0" />
@@ -448,32 +443,28 @@ const EntraideHub = () => {
           <PageBreadcrumb items={[{ label: "Entraide" }]} />
           {/* Lot SORT1 : sous-onglets Entraide et Sorties, quand la rubrique est ouverte. */}
           {outingsOn && <div className={HUB_TABS}><EntraideSortiesTabs active="entraide" /></div>}
+          <HubWhy />
           <EntraideHubIntro
             countLine={pageLoading ? null : helpersPulseLine(nearHelpersCount, placeCity)}
+            avatars={sortedHelpers.map((helper) => helper.avatar_url).filter((url): url is string => Boolean(url)).slice(0, 3)}
             showHelp={!isAuthenticated || (profileLoaded && profile?.available_for_help !== true)}
             onNeed={goNeed}
             onHelp={goHelp}
           >
             {originPending ? null : origin ? (
-              <HubSettingsLine summary={settingsSummary} key={settingsSummary}>
-                <p>Changer de lieu :</p>
-                {locationField}
-                {radiusKm !== null && (
-                  <p>
-                    {radiusLineText(radiusKm)}{" "}
-                    <Link to={ALERT_SETTINGS_PATH} className="font-semibold text-primary underline underline-offset-4">Modifier le rayon</Link>
-                  </p>
-                )}
-                {profile?.available_for_help === true && (
-                  <p>
-                    <Link to="/profile?section=savoir-faire" className="font-semibold text-primary underline underline-offset-4">Mes savoir-faire</Link>
-                  </p>
-                )}
-              </HubSettingsLine>
+              <>
+                <HubSettings>
+                  <HubSetting label="Ville" value={originCity || "Votre position"} action={placeOpen ? "Fermer" : "Changer"} onClick={() => setPlaceOpen((open) => !open)} expanded={placeOpen} />
+                  {radiusKm !== null && <HubSetting label="Besoins reçus à" value={`${radiusKm} km`} action="Changer" to={ALERT_SETTINGS_PATH} />}
+                </HubSettings>
+                {placeOpen && locationField}
+              </>
             ) : locationField}
           </EntraideHubIntro>
 
           <EntraideIdeas onPick={pickIdea} />
+          {/* Lot SORT13 : le mode d'emploi se lit avant la liste, pour qui découvre ; un membre connecté va droit aux besoins. */}
+          {!isAuthenticated && <EntraideHowItWorks />}
 
           <section className="pt-2" aria-labelledby="entraide-needs-title">
             <div className="mt-6 flex items-center justify-between gap-3 sm:mt-8 sm:items-end">
@@ -558,12 +549,18 @@ const EntraideHub = () => {
             )}
           </section>
 
-          <EntraideHowItWorks />
-
           <section className="mt-14" aria-labelledby="entraide-helpers-title">
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">Le pouls de la communauté</p>
             <h2 id="entraide-helpers-title" className="mt-1 font-heading text-2xl font-semibold text-foreground">{helpersSectionTitle(nearHelpersCount, placeCity)}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">Aider, c'est aussi se faire du bien.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Aider, c'est aussi se faire du bien.
+              {profile?.available_for_help === true && (
+                <>
+                  {" "}Vous en faites partie :{" "}
+                  <Link to="/profile?section=savoir-faire" className="font-semibold text-primary underline underline-offset-4">mettre à jour mes savoir-faire</Link>.
+                </>
+              )}
+            </p>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               {visibleHelpers.map((helper) => (
                 <HelperCard
@@ -585,22 +582,23 @@ const EntraideHub = () => {
 
           <EntraideProofs origin={origin} />
 
-          <nav className="mt-10 border-y border-border py-4 text-sm text-muted-foreground" aria-label="Entraide dans votre ville">
-            <span>Dans votre ville : </span>
-            {MISSIONS_CITY_SLUGS.map((slug, index) => (
-              <span key={slug}>
-                {index > 0 && ", "}
-                <Link to={`/petites-missions/${slug}`} className="font-semibold text-primary underline-offset-4 hover:underline">{MISSIONS_CITIES[slug].cityName}</Link>
-              </span>
-            ))}
-          </nav>
+          <HubArticles articles={HUB_ARTICLES.entraide} />
 
-          <section className="mt-14 border-y border-border py-8" aria-labelledby="credoc-title">
-            <p className="text-sm font-semibold text-primary">54 %</p>
-            <h2 id="credoc-title" className="mt-1 font-heading text-xl font-semibold text-foreground">54 % des Français échangent régulièrement avec les gens qui habitent près de chez eux (CRÉDOC, Solitudes 2025).</h2>
-            <a className="mt-3 inline-block text-sm font-semibold text-primary underline underline-offset-4" href="/actualites/technologie-recreer-lien-pres-de-chez-soi">Lire l'article</a>
-          </section>
-          <EntraideFaq />
+          {/* Lot SORT13 : liens par ville et questions fréquentes servent à qui arrive de l'extérieur. */}
+          {!isAuthenticated && (
+            <>
+            <nav className="mt-10 border-y border-border py-4 text-sm text-muted-foreground" aria-label="Entraide dans votre ville">
+              <span>Dans votre ville : </span>
+              {MISSIONS_CITY_SLUGS.map((slug, index) => (
+                <span key={slug}>
+                  {index > 0 && ", "}
+                  <Link to={`/petites-missions/${slug}`} className="font-semibold text-primary underline-offset-4 hover:underline">{MISSIONS_CITIES[slug].cityName}</Link>
+                </span>
+              ))}
+            </nav>
+              <EntraideFaq />
+            </>
+          )}
           <CanHelpDialog
             open={confirmNeed !== null}
             firstName={confirmFirstName}

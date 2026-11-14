@@ -8,7 +8,7 @@ import spotJardin from "@/assets/missions/spot-jardin-160.webp";
 import spotBricolage from "@/assets/missions/spot-bricolage-160.webp";
 import spotChien from "@/assets/missions/spot-chien-160.webp";
 import spotCourses from "@/assets/missions/spot-courses-160.webp";
-import spotJeux from "@/assets/missions/spot-jeux-160.webp";
+import spotVerger from "@/assets/missions/spot-verger-160.webp";
 import spotTrajet from "@/assets/missions/spot-trajet-160.webp";
 import { ENTRAIDE_IDEAS, type EntraideIdeaKey } from "@/lib/entraideIdeas";
 import { HubIdeas } from "@/components/outings/HubHeader";
@@ -18,9 +18,9 @@ const IMAGES: Record<EntraideIdeaKey, string> = {
   courses: spotCourses,
   meuble: spotBricolage,
   chien: spotChien,
-  // Lot E22 (25/10/2026) : gouaches courses, jeux et trajet peintes.
+  // Lot E22 (25/10/2026) : gouaches courses et trajet peintes.
   trajet: spotTrajet,
-  jeux: spotJeux,
+  fruits: spotVerger,
 };
 
 const EntraideIdeas = ({ onPick }: { onPick: (key: EntraideIdeaKey, label: string) => void }) => (

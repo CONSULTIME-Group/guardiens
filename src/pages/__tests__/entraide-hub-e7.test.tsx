@@ -128,9 +128,9 @@ describe("Entraide, la page vue d'un membre", () => {
   it("prend l'origine dans le profil connecté, sans saisie de ville", async () => {
     renderHub();
     expect(await screen.findByRole("heading", { name: "Entraide près de chez vous" })).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByText(/19 personnes prêtes à aider autour de Lyon/)).toBeInTheDocument());
-    // Lot SORT11 : lieu, rayon et savoir-faire sur une ligne, détail replié.
-    const settings = screen.getByRole("button", { name: /Lyon.*Modifier/ });
+    await waitFor(() => expect(screen.getByTestId("hub-stat")).toHaveTextContent(/19\s*personnes prêtes à aider autour de Lyon/));
+    // Lot SORT13 : chaque réglage porte son nom (« Ville Lyon Changer »).
+    const settings = screen.getByRole("button", { name: /Ville.*Lyon.*Changer/ });
     expect(settings).toHaveAttribute("aria-expanded", "false");
     fireEvent.click(settings);
     expect(screen.getByRole("textbox", { name: "Votre ville" })).toBeVisible();
@@ -178,7 +178,7 @@ describe("Entraide, la page vue d'un membre", () => {
   it("une tuile d'idée ouvre le formulaire avec le titre écrit", async () => {
     renderHub();
     expect(await screen.findByRole("heading", { name: "Une idée pour commencer" })).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: /Arroser le potager|Faire les courses|Monter un meuble|Promener le chien|Un trajet|Une partie de jeux de société/ }).length).toBe(6);
+    expect(screen.getAllByRole("button", { name: /Arroser le potager|Faire les courses|Monter un meuble|Promener le chien|Un trajet|Ramasser les fruits/ }).length).toBe(6);
   });
 
   it("un seul bouton plein dans l'en-tête", async () => {

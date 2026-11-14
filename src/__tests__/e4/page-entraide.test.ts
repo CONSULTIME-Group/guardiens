@@ -58,7 +58,8 @@ describe("E4, chiffres", () => {
 describe("E4, branchements", () => {
   const hub = readFileSync("src/pages/EntraideHub.tsx", "utf8");
   it("ordre de la page", () => {
-    const order = ["<EntraideHubIntro", "<EntraideIdeas", 'id="entraide-needs-title"', "<EntraideHowItWorks", 'id="entraide-helpers-title"', "<EntraideFaq"];
+    // Lot SORT13 (14/11/2026) : « Comment ça se passe » se lit avant la liste, pour un visiteur seulement.
+    const order = ["<EntraideHubIntro", "<EntraideIdeas", "<EntraideHowItWorks", 'id="entraide-needs-title"', 'id="entraide-helpers-title"', "<EntraideFaq"];
     const positions = order.map((marker) => hub.indexOf(marker));
     for (const position of positions) expect(position).toBeGreaterThan(-1);
     expect([...positions].sort((a, b) => a - b)).toEqual(positions);

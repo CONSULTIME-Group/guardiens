@@ -11,7 +11,8 @@ export const ENTRAIDE_IDEAS = [
   { key: "meuble", label: "Monter un meuble", title: "Monter un meuble" },
   { key: "chien", label: "Promener le chien", title: "Promener le chien" },
   { key: "trajet", label: "Un trajet", title: "Un trajet en voiture" },
-  { key: "jeux", label: "Une partie de jeux de société", title: "Une partie de jeux de société" },
+  // Lot SORT13 (14/11/2026) : la partie de jeux de société est une sortie, elle quitte l'entraide.
+  { key: "fruits", label: "Ramasser les fruits", title: "Ramasser les fruits du jardin" },
 ] as const;
 
 export type EntraideIdeaKey = (typeof ENTRAIDE_IDEAS)[number]["key"];

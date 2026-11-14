@@ -37,7 +37,9 @@ describe("Lot E22, gouaches courses, jeux et trajet", () => {
     const src = read("src/components/entraide/EntraideIdeas.tsx");
     expect(src).toContain("courses: spotCourses");
     expect(src).toContain("trajet: spotTrajet");
-    expect(src).toContain("jeux: spotJeux");
+    // Lot SORT13 (14/11/2026) : la partie de jeux de société est une sortie, « Ramasser les fruits » la remplace.
+    expect(src).toContain("fruits: spotVerger");
+    expect(src).not.toContain("spotJeux");
     expect(src).not.toContain("spotBienetre");
   });
 });
