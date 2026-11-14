@@ -31,6 +31,7 @@ import FeedbackDialog from "@/components/feedback/FeedbackDialog";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import PremiumGateDialog from "@/components/premium/PremiumGateDialog";
 import ActivateRoleDialog from "@/components/premium/ActivateRoleDialog";
+import BrandWordmark from "./BrandWordmark";
 
 // ── Libellé de groupe de la barre latérale ──
 const GroupLabel = ({ label }: { label: string }) => (
@@ -127,8 +128,10 @@ export const Sidebar = ({ showHeaderBells = true }: { showHeaderBells?: boolean 
           aria-label="Guardiens, accueil"
           className="font-heading text-2xl font-bold tracking-tight rounded-md transition-colors hover:opacity-80"
         >
-          <span className="text-primary" aria-hidden="true">g</span>
-          <span className="text-foreground" aria-hidden="true">uardiens</span>
+          <BrandWordmark
+            heightClass="h-10 inline-block align-middle"
+            text={<><span className="text-primary" aria-hidden="true">g</span><span className="text-foreground" aria-hidden="true">uardiens</span></>}
+          />
           <span className="ml-1.5 text-[10px] font-medium tracking-wide text-foreground/35 align-middle select-none" aria-hidden="true">bêta</span>
         </Link>
         {showHeaderBells && <div className="flex items-center gap-1">

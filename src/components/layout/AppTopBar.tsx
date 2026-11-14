@@ -2,6 +2,7 @@ import { Suspense, useLayoutEffect, useRef, useState } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { Link } from "react-router-dom";
 import { BackButton } from "./BackButton";
+import BrandWordmark from "./BrandWordmark";
 import UserMenu from "./LazyUserMenu";
 
 const NotificationBell = lazy(() => import("./NotificationBell"));
@@ -72,8 +73,10 @@ export const AppTopBar = ({ standalone = false }: { standalone?: boolean }) => {
           aria-label="Guardiens, accueil"
           className="font-heading text-lg font-bold tracking-tight shrink-0 whitespace-nowrap"
         >
-          <span className="text-primary">g</span>
-          <span className="text-foreground">uardiens</span>
+          <BrandWordmark
+            heightClass="h-8"
+            text={<><span className="text-primary">g</span><span className="text-foreground">uardiens</span></>}
+          />
         </Link>
       </div>
       <div className="flex items-center gap-2 shrink-0">

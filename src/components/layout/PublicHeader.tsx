@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useInAppShell } from "./AppShellContext";
 import UserMenu from "./LazyUserMenu";
 import AppTopBar from "./AppTopBar";
+import BrandWordmark from "./BrandWordmark";
 import { useShellMode } from "./useShellMode";
 import { runAfterFirstPaint } from "@/lib/bootSchedule";
 
@@ -172,7 +173,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
     <header className="sticky top-0 z-50 max-w-[100vw] overflow-x-clip bg-background/80 backdrop-blur-md border-b border-border/50">
       <div ref={fixedBarRef} className="flex items-center justify-between gap-2 px-4 py-4 sm:px-6 min-[960px]:grid min-[960px]:grid-cols-[auto_minmax(0,1fr)_auto] min-[960px]:gap-x-6 min-[960px]:px-4 xl:gap-x-8 xl:px-8 2xl:px-[5%]">
         <Link to="/" aria-label="Guardiens, accueil" className="inline-flex min-h-[44px] items-center min-w-0 shrink-0 font-heading text-xl md:text-2xl font-bold">
-          <span aria-hidden="true"><span className="text-primary">g</span>uardiens</span>
+          <BrandWordmark heightClass="h-9 md:h-10" text={<span aria-hidden="true"><span className="text-primary">g</span>uardiens</span>} />
         </Link>
 
 

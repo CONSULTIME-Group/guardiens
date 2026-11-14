@@ -12,6 +12,7 @@ import "./i18n";
 import { runAfterFirstPaint, prefetchRouteChunk } from "./lib/bootSchedule";
 import { supabase } from "./integrations/supabase/client";
 import { guardRealtimeConnect } from "./lib/realtimeGuard";
+import { applySeasonalFavicon } from "./lib/seasonalBrand";
 
 // Lot P2, travaux gardés avant le rendu (justesse) :
 // - installDomTranslationGuard : protège le DOM contre la traduction du
@@ -26,6 +27,12 @@ installStorageFallback();
 // Lot F2 : un WebSocket refusé ne fait jamais tomber une page.
 guardRealtimeConnect(supabase);
 initPwaInstall();
+// Lot NOEL1 : favicon de saison (g au bonnet du 1er décembre au 6 janvier).
+try {
+  applySeasonalFavicon();
+} catch {
+  /* le favicon de l'année reste en place */
+}
 // Outil de débogage OAuth : jamais dans le parcours de production.
 if (import.meta.env.DEV) {
   void import("./lib/oauthLogger").then((m) => m.installOAuthDebugHelper());
