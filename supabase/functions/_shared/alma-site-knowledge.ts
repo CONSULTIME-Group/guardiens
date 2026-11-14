@@ -140,7 +140,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     path: "/sorties",
     aliases: ["/sorties/:slug"],
     label: "Sorties près de chez vous",
-    purpose: "Des moments à quelques-uns entre membres, avec des places comptées (2 à 20) : jeux de société, balades et randonnées, sorties avec les chiens, sport, jardin et potager, repas et cuisine, culture, ateliers. On s'inscrit d'un geste avec « Je viens », l'organisateur donne le rendez-vous par message. Gratuit par défaut, une participation aux frais peut être indiquée, personne ne gagne d'argent à organiser.",
+    purpose: "Des moments à quelques-uns entre membres, avec des places comptées (2 à 20) : jeux de société, balades et randonnées, sorties avec les chiens, sport, jardin et potager, repas et cuisine, culture, ateliers. On s'inscrit d'un geste avec « Je viens », l'organisateur donne le rendez-vous par message. Une participation aux frais réels peut être indiquée, personne ne gagne d'argent à organiser.",
     audience: "all",
     triggers: ["sortie", "sorties", "jeux de societe", "belote", "tarot", "scrabble", "echecs", "partie de cartes", "randonnee", "rando", "balade", "sport", "velo", "course a pied", "rencontrer du monde", "rencontrer des gens", "sortir", "activite", "atelier", "repas partage", "se sentir seul", "je m'ennuie"],
     opener: "Les sorties proposées autour de vous sont dans Sorties près de chez vous, avec le nombre de places restantes.",
