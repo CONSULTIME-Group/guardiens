@@ -35,3 +35,21 @@ describe("COR1, en-tête de la v10 avant le 16/11", () => {
     expect(legalVersionHeading("cgu", "10", "2026-11-20")).toContain("La version 9 reste applicable jusqu'à cette date.");
   });
 });
+
+describe("CGU10b, audit juridique du 14/11", () => {
+  const t = readFileSync("src/components/legal/TermsV10.tsx", "utf8");
+  it("ce qui se passe hors de la Plateforme relève des membres", () => {
+    expect(t).toContain("Hors de la Plateforme.</strong> Ce qui se déroule hors de la Plateforme relève des seuls membres concernés");
+    expect(t).toContain("d'un coup de main, d'une sortie ou d'une rencontre entre membres, ou à leur occasion");
+  });
+  it("mise en avant décrite et neutre, Alma sans valeur d'engagement", () => {
+    expect(t).toContain("«&nbsp;à la une&nbsp;» en page d'accueil, une seule à la fois");
+    expect(t).toContain("ils ne valent ni vérification ni recommandation");
+    expect(t).toContain("qui prévalent sur toute réponse différente");
+  });
+  it("concurrents et extraction, IA dans les contenus éditoriaux", () => {
+    expect(t).toContain("pour le compte d'un service concurrent");
+    expect(t).toContain("L.&nbsp;342-1 et L.&nbsp;342-2 du CPI");
+    expect(t).toContain("qui en porte la responsabilité éditoriale");
+  });
+});
