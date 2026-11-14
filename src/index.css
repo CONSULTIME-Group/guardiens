@@ -1230,7 +1230,7 @@
       padding-bottom: 0.5rem;
     }
     .profile-notebook-sheet.profile-open .profile-hero[data-hero-open] .profile-hero-identity {
-      width: 400px;
+      width: 440px;
       flex-shrink: 0;
     }
     .profile-notebook-sheet.profile-open .profile-hero[data-hero-open] [data-hero-gouache-side] {
