@@ -971,6 +971,20 @@
           "sql": "SELECT position('seob_arrivees' IN pg_get_functiondef('public.admin_landing_outcomes(date,date,text)'::regprocedure)) > 0 AS ok"
         }
       ]
+    },
+    {
+      "migration": "0173_seo_villes_titre.sql",
+      "description": "Pages villes : meta title « Garde de maison et d'animaux à {ville} », plus aucun « Home sitter à »",
+      "checks": [
+        {
+          "name": "plus_de_home_sitter_en_tete",
+          "sql": "SELECT NOT EXISTS (SELECT 1 FROM public.seo_city_pages WHERE meta_title LIKE 'Home sitter à % : %') AS ok"
+        },
+        {
+          "name": "gabarit_garde",
+          "sql": "SELECT count(*) >= 150 AS ok FROM public.seo_city_pages WHERE meta_title LIKE 'Garde de maison et d''animaux à %'"
+        }
+      ]
     }
   ]
 }

@@ -18,14 +18,15 @@ interface Props {
   ready?: boolean;
 }
 
+// Lot SEO-V1 (15/11/2026) : gabarit « Garde de maison et d'animaux à {ville} », comme en base
+// (drizzle/migrations/0173_seo_villes_titre.sql) ; « home sitter » revient à l'article définition.
 const META_TITLE_OVERRIDES: Record<string, string> = {
-  lyon: "Home sitter à Lyon : garde de chien, chat et maison",
-  annecy: "Home sitter à Annecy : garde de chien, chat et maison",
-  grenoble: "Home sitter à Grenoble : garde de chien, chat et maison",
-  chambery: "Home sitter à Chambéry : garde de maison et d'animaux",
-  "caluire-et-cuire": "Home sitter à Caluire-et-Cuire : garde de maison et d'animaux",
+  lyon: "Garde de maison et d'animaux à Lyon",
+  annecy: "Garde de maison et d'animaux à Annecy",
+  grenoble: "Garde de maison et d'animaux à Grenoble",
+  chambery: "Garde de maison et d'animaux à Chambéry",
+  "caluire-et-cuire": "Garde de maison et d'animaux à Caluire-et-Cuire",
 };
-
 const CityPageMeta = ({ city, noindex = false, metaTitle, ready }: Props) => {
   const title =
     (metaTitle && metaTitle.trim()) ||
