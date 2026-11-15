@@ -45,6 +45,7 @@ type AssociationRow = {
   association_type: string;
   city: string;
   postal_code: string | null;
+  address?: string | null;
   departement_code: string;
   species: string[];
   description: string;
@@ -105,6 +106,7 @@ const TEXT_FIELDS: Array<{ key: keyof AssociationRow; label: string }> = [
   { key: "name", label: "Nom" },
   { key: "city", label: "Ville" },
   { key: "postal_code", label: "Code postal" },
+  { key: "address", label: "Adresse postale (lieu ouvert au public uniquement)" },
   { key: "departement_code", label: "Code département" },
   { key: "siren", label: "SIREN" },
   { key: "rna", label: "RNA" },
@@ -201,6 +203,8 @@ export default function AdminAssociations() {
     const raw = (values as any).founded_year;
     (values as any).founded_year =
       raw === "" || raw === null || raw === undefined ? null : Number(raw) || null;
+    // L'adresse vide devient NULL : la base la réserve aux lieux ouverts au public.
+    (values as any).address = String((values as any).address ?? "").trim() || null;
     const ok = await persist(id, values as any);
     setSaving(false);
     if (ok) {

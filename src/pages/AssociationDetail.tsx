@@ -29,6 +29,7 @@ import {
   associationNeedLabel,
   associationSpeciesLabel,
   associationTypeLabel,
+  isAnimalAssociationType,
 } from "@/lib/associationLabels";
 import { AssociationFaq } from "@/components/associations/AssociationFaq";
 import VolunteerCountByDepartment from "@/components/associations/VolunteerCountByDepartment";
@@ -259,7 +260,7 @@ export default function AssociationDetail() {
       {
         "@type": "ListItem",
         position: 2,
-        name: "Associations et refuges",
+        name: "Associations",
         item: `${SITE_URL}/associations`,
       },
       { "@type": "ListItem", position: 3, name: data.name, item: canonical },
@@ -294,7 +295,7 @@ export default function AssociationDetail() {
       <div className="container mx-auto px-4 py-6 md:py-10 max-w-6xl min-w-0">
         <nav aria-label="Fil d'Ariane" className="mb-4 text-sm text-muted-foreground">
           <Link to="/associations" className="hover:underline">
-            Associations et refuges
+            Associations
           </Link>
           <span aria-hidden="true"> › </span>
           <span className="text-foreground">{data.name}</span>
@@ -642,11 +643,14 @@ export default function AssociationDetail() {
         {data.departement_slug && (
           <section className="rounded-2xl border border-border bg-pastel-honey/60 p-5">
             <h2 className="font-heading text-xl font-semibold text-foreground">
-              Partir en laissant vos animaux entre de bonnes mains
+              {isAnimalAssociationType(data.association_type)
+                ? "Partir en laissant vos animaux entre de bonnes mains"
+                : "Partir l'esprit tranquille"}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Bénévoles et familles d'accueil partent aussi en vacances. Sur Guardiens, un gardien du
-              coin veille sur votre maison et vos animaux pendant votre absence.
+              {isAnimalAssociationType(data.association_type)
+                ? "Bénévoles et familles d'accueil partent aussi en vacances. Sur Guardiens, un gardien du coin veille sur votre maison et vos animaux pendant votre absence."
+                : "Chantier, sortie ou week-end loin de chez vous : sur Guardiens, un gardien du coin veille sur votre maison et vos animaux pendant votre absence."}
             </p>
             <VolunteerCountByDepartment
               departementCode={data.departement_code}
