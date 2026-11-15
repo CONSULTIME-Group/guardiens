@@ -73,11 +73,22 @@ function search(pattern: string): string[] {
   }
 }
 
+/**
+ * Fiches d'associations listées dans public/llms.txt (scripts/generate-sitemap.mjs,
+ * régénéré depuis la base) : nom, accroche et territoire appartiennent à
+ * l'association (« bénévolat sans engagement » d'AFE décrit son bénévolat, pas
+ * une offre de Guardiens). Le reste de llms.txt reste scanné.
+ */
+function isThirdPartyAssociationLine(rgLine: string): boolean {
+  return rgLine.startsWith("public/llms.txt:") && rgLine.includes("](/associations/");
+}
+
 describe("Vocabulaire marketing proscrit", () => {
   it("aucune formulation en « sans ... » ni promesse de gratuité perpétuelle dans le contenu public", () => {
     const findings: string[] = [];
     for (const { label, pattern } of FORBIDDEN) {
       for (const line of search(pattern)) {
+        if (isThirdPartyAssociationLine(line)) continue;
         findings.push(`[${label}] ${line.trim().slice(0, 200)}`);
       }
     }

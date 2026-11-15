@@ -186,12 +186,23 @@ const FILE_CONTENTS: { file: string; raw: string }[] = scannedFiles().map((file)
   raw: readFileSync(file, "utf8"),
 }));
 
-function scan(patterns: RegExp[], excludes: Set<string>, allowBadgeNames = false): string[] {
+/**
+ * Fiches d'associations listées dans public/llms.txt (régénéré depuis la base) :
+ * « LPO Auvergne-Rhône-Alpes » est un nom propre et le territoire d'une
+ * association est un fait qui lui appartient. Exemptées du seul positionnement
+ * national (allowAssociationLines), jamais de la revendication « vérifiés ».
+ */
+function isAssociationListingLine(file: string, line: string): boolean {
+  return file === "public/llms.txt" && line.includes("](/associations/");
+}
+
+function scan(patterns: RegExp[], excludes: Set<string>, allowBadgeNames = false, allowAssociationLines = false): string[] {
   const hits: string[] = [];
   for (const { file, raw } of FILE_CONTENTS) {
     if (excludes.has(file)) continue;
     const source = allowBadgeNames ? removeAllowedBadgeNames(raw) : raw;
     source.split("\n").forEach((line, index) => {
+      if (allowAssociationLines && isAssociationListingLine(file, line)) return;
       if (patterns.some((pattern) => pattern.test(line))) {
         hits.push(`${file}:${index + 1}:${line.trim()}`);
       }
@@ -243,8 +254,8 @@ describe("Énumération de promesses « Identité vérifiée »", () => {
 describe("Positionnement national", () => {
   it("ne mentionne ni AURA, ni Auvergne-Rhône-Alpes, ni « votre région »", () => {
     const hits = [
-      ...scan([/\bAURA\b/], EXCLUDE_REGION),
-      ...scan([/Auvergne-Rhône-Alpes/i, /votre région/i], EXCLUDE_REGION),
+      ...scan([/\bAURA\b/], EXCLUDE_REGION, false, true),
+      ...scan([/Auvergne-Rhône-Alpes/i, /votre région/i], EXCLUDE_REGION, false, true),
     ];
     if (hits.length > 0) {
       throw new Error(
