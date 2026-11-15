@@ -28,7 +28,8 @@ describe("TRF1 · P3 et P4 · chiffres et libellés", () => {
   it("Facebook compte exactement et dit sa période", () => {
     const s = readFileSync("src/components/admin/analytics/FacebookReferralCard.tsx", "utf8");
     expect(s).toContain('{ count: "exact", head: true }');
-    expect(s).toContain("Arrivées depuis Facebook");
+    // Lot TRF-3 : la tuile compte des pages ouvertes, plusieurs par visite.
+    expect(s).toContain("Pages ouvertes depuis Facebook");
   });
   it("Acquisition IA sans tuile Facebook, libellé juste", () => {
     const s = readFileSync("src/pages/admin/_components/dashboard/AiAcquisitionCard.tsx", "utf8");

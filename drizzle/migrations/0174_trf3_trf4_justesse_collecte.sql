@@ -164,6 +164,12 @@ BEGIN
 END;
 $function$;
 
+-- Droits inchangés, redits ici (verrou Y2) : lecture par l'équipe, contrôle has_role dans la fonction.
+REVOKE ALL ON FUNCTION public.admin_signup_sources(date, date) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_signup_sources(date, date) TO authenticated, service_role;
+REVOKE ALL ON FUNCTION public.admin_channel_leads(date, date) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_channel_leads(date, date) TO authenticated, service_role;
+
 -- Motif d'un échec d'inscription : code posé par le formulaire, sinon lu dans le message.
 CREATE OR REPLACE FUNCTION public.trf3_signup_failure_code(p_meta jsonb)
  RETURNS text
