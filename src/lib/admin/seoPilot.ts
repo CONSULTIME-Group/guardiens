@@ -59,6 +59,10 @@ export interface TemplateRow {
   inSitemap: number;
   /** Pages distinctes affichées au moins une fois par Google (sitemap ou non). */
   seen: number;
+  /** Lot TRF-3 : pages du sitemap affichées par Google (numérateur de « n / sitemap »). */
+  seenInSitemap: number;
+  /** Lot TRF-3 : pages affichées par Google qui sont hors sitemap (anciennes adresses, redirections). */
+  offSitemap: number;
   impressions: number;
   clicks: number;
   ctr: number;
@@ -77,7 +81,7 @@ export function templateTable(sitemap: string[], totals: Map<string, PageTotals>
   const rows = new Map<PageTemplate, TemplateRow>();
   const get = (t: PageTemplate) => {
     let r = rows.get(t);
-    if (!r) { r = { template: t, inSitemap: 0, seen: 0, impressions: 0, clicks: 0, ctr: 0, unseen: [] }; rows.set(t, r); }
+    if (!r) { r = { template: t, inSitemap: 0, seen: 0, seenInSitemap: 0, offSitemap: 0, impressions: 0, clicks: 0, ctr: 0, unseen: [] }; rows.set(t, r); }
     return r;
   };
   const inSitemap = new Set(sitemap);
@@ -90,6 +94,7 @@ export function templateTable(sitemap: string[], totals: Map<string, PageTotals>
     if (t.impressions <= 0) continue;
     const r = get(pageTemplate(path));
     r.seen++;
+    if (inSitemap.has(path)) r.seenInSitemap++; else r.offSitemap++;
     r.impressions += t.impressions;
     r.clicks += t.clicks;
   }

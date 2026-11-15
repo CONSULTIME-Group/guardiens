@@ -56,9 +56,22 @@ const BLOCK_LABELS: Record<string, string> = {
   too_common: "Mot de passe trop commun",
   too_weak: "Mot de passe trop faible",
   terms_unchecked: "CGU non cochées",
+  // Lot TRF-3 : libellé du blocage posé par le formulaire depuis le lot COOK1.
+  terms_not_accepted: "Conditions à cocher avant l'envoi",
   email_invalid: "Email invalide",
   step_1_terms_unchecked_click_continue: "Continuer sans CGU (étape 1)",
   unknown: "Autre",
+};
+
+// Lot TRF-3 (15/11/2026) : motifs d'échec en clair. Le formulaire écrit
+// error_code ; la lecture SQL le rend depuis la migration 0174.
+export const SIGNUP_FAILURE_LABELS: Record<string, string> = {
+  weak_password: "Mot de passe refusé (présent dans une liste de mots de passe divulgués)",
+  already_registered: "Un compte existe déjà avec cet email",
+  rate_limited: "Second envoi dans la minute (le premier avait créé le compte)",
+  invalid_email: "Adresse email invalide",
+  timeout: "Délai dépassé",
+  unknown: "Autre motif",
 };
 
 // Baseline pré-fix (juin 2026), à comparer aux valeurs actuelles.
@@ -203,7 +216,7 @@ export default function AdminSignupFunnelTab() {
       {targets && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Cibles vs baseline (juin 2026)</CardTitle>
+            <CardTitle className="text-base">Repères du formulaire (référence : juin 2026)</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
@@ -251,8 +264,7 @@ export default function AdminSignupFunnelTab() {
           lui est propre : blocages, échecs, sous-étapes du formulaire. */}
       <Card data-testid="single-funnel-note">
         <CardContent className="py-4 text-sm text-muted-foreground">
-          L'entonnoir d'inscription chiffré est dans l'onglet{" "}
-          <a href="/admin/traffic?tab=interne" className="font-semibold text-primary underline underline-offset-2">Activation interne</a>.
+          L'entonnoir d'inscription chiffré se lit en haut de cet onglet (« Activation interne »).
           Ici : blocages du formulaire, échecs et sous-étapes.
         </CardContent>
       </Card>
@@ -302,7 +314,7 @@ export default function AdminSignupFunnelTab() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Code d'erreur</TableHead>
+                  <TableHead>Motif</TableHead>
                   <TableHead className="text-right">Volume</TableHead>
                   <TableHead className="text-right">Dernière occurrence</TableHead>
                 </TableRow>
@@ -310,7 +322,7 @@ export default function AdminSignupFunnelTab() {
               <TableBody>
                 {data.failed_by_code.map((r) => (
                   <TableRow key={r.code}>
-                    <TableCell>{adminLabel(r.code)}</TableCell>
+                    <TableCell>{SIGNUP_FAILURE_LABELS[r.code] ?? adminLabel(r.code)}</TableCell>
                     <TableCell className="text-right">{r.volume.toLocaleString("fr-FR")}</TableCell>
                     <TableCell className="text-right">
                       {r.last_seen ? new Date(r.last_seen).toLocaleString("fr-FR") : "·"}
@@ -336,7 +348,7 @@ export default function AdminSignupFunnelTab() {
           ) : data ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground">Meter password vu</p>
+                <p className="text-xs text-muted-foreground">Jauge du mot de passe affichée</p>
                 <p className="text-2xl font-semibold">
                   {data.features.password_meter_seen.toLocaleString("fr-FR")}
                 </p>

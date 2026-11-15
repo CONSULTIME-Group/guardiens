@@ -127,7 +127,10 @@ export function SeoTemplatesCard({ totals, period }: { totals: Map<string, PageT
                         </button>
                       </td>
                       <td className={`${TD} ${weak ? "font-semibold" : ""}`}>
-                        {sitemap ? `${r.seen} / ${r.inSitemap}` : r.seen}
+                        {sitemap ? `${r.seenInSitemap} / ${r.inSitemap}` : r.seen}
+                        {sitemap && r.offSitemap > 0 && (
+                          <span className="block text-[11px] font-normal text-muted-foreground">+ {r.offSitemap} hors sitemap</span>
+                        )}
                       </td>
                       <td className={`${TD} hidden sm:table-cell`}>{fmtInt(r.impressions)}</td>
                       <td className={TD}>{fmtInt(r.clicks)}</td>

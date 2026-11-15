@@ -16,8 +16,11 @@ const STEPS: { key: string; label: string }[] = [
   { key: "signup_role_selected", label: "Rôle sélectionné" },
   { key: "signup_email_entered", label: "Email saisi" },
   { key: "signup_password_entered", label: "Mot de passe saisi" },
-  { key: "signup_submit_clicked", label: "Envoi cliqué" },
 ];
+
+// Lot TRF-3 : « Envoi cliqué » compte des clics (un visiteur reclique après une
+// case oubliée ou un mot de passe refusé) : lu à part, hors de l'entonnoir.
+const SUBMIT_KEY = "signup_submit_clicked";
 
 export function SignupFormSubStepsFunnel() {
   const since = useMemo(
@@ -42,14 +45,15 @@ export function SignupFormSubStepsFunnel() {
   );
 
   const max = stats[0]?.count ?? 0;
+  const submitClicks = Number(rows.find((r) => r.event_type === SUBMIT_KEY)?.n ?? 0);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Sous-étapes du formulaire d'inscription (30 j)</CardTitle>
         <p className="text-xs text-muted-foreground">
-          Utilisateurs uniques par étape. Le drop d'une ligne à la suivante indique
-          où l'on perd le prospect dans le formulaire.
+          Visiteurs par étape. La baisse d'une ligne à la suivante montre où le
+          formulaire perd des visiteurs. Un compte Google saute l'email et le mot de passe.
         </p>
       </CardHeader>
       <CardContent>
@@ -89,11 +93,12 @@ export function SignupFormSubStepsFunnel() {
                 </div>
               );
             })}
+            <p className="pt-2 text-xs text-muted-foreground" data-testid="substeps-submit-clicks">
+              {`Clics sur « Envoyer » : ${submitClicks.toLocaleString("fr-FR")}. Ce nombre compte chaque clic, reprises comprises après une case oubliée ou un mot de passe refusé.`}
+            </p>
             {stats.every((s) => s.count === 0) && (
               <p className="mt-3 text-xs text-muted-foreground">
-                Aucun événement sur cette période. Vérifiez que les 5 events
-                (`signup_page_loaded`, `signup_role_selected`, `signup_email_entered`,
-                `signup_password_entered`, `signup_submit_clicked`) sont bien déployés.
+                Aucun événement sur cette période.
               </p>
             )}
           </div>

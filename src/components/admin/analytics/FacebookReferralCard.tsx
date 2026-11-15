@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Facebook, ThumbsUp, Meh, MessageSquare, X as XIcon } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
+import { cleanLandingPath } from "@/lib/admin/channelLeads";
 
 interface Props {
   rangeDays: 1 | 7 | 30;
@@ -69,7 +70,8 @@ const FacebookReferralCard = ({ rangeDays }: Props) => {
 
     const landingPaths: Record<string, number> = {};
     for (const l of landings) {
-      const p = l.metadata?.landing_path || l.source || "(?)";
+      // Lot TRF-3 : chemin seul, le texte collé à la suite d'un lien partagé est retiré.
+      const p = cleanLandingPath(l.metadata?.landing_path || l.source || "(?)");
       landingPaths[p] = (landingPaths[p] || 0) + 1;
     }
     const topPaths = Object.entries(landingPaths)
@@ -100,7 +102,7 @@ const FacebookReferralCard = ({ rangeDays }: Props) => {
           Trafic Facebook (commentaires)
         </CardTitle>
         <p className="text-xs text-muted-foreground">
-          Arrivées par les liens des commentaires Facebook, {rangeDays === 1 ? "24 dernières heures" : `${rangeDays} derniers jours`}.
+          Arrivées par les liens des commentaires Facebook, {rangeDays === 1 ? "24 dernières heures" : `${rangeDays} derniers jours`}. Chaque page ouverte avec un lien Facebook compte : une même visite peut en compter plusieurs. Les visites comptées une fois se lisent dans l'onglet Leads.
         </p>
       </CardHeader>
       <CardContent>
@@ -120,7 +122,7 @@ const FacebookReferralCard = ({ rangeDays }: Props) => {
           <div className="space-y-5">
             {/* KPIs */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Kpi label="Arrivées depuis Facebook" value={stats.landings} />
+              <Kpi label="Pages ouvertes depuis Facebook" value={stats.landings} />
               <Kpi label="Retours" value={stats.feedbacks} hint={`${stats.responseRate}% de réponse`} />
               <Kpi label="Fermés" value={stats.dismissed} />
               <Kpi label="Commentaires" value={stats.comments.length} />

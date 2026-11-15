@@ -96,8 +96,9 @@ export const AiAcquisitionCard = () => {
       <CardHeader>
         <CardTitle>Acquisition IA</CardTitle>
         <p className="text-sm text-muted-foreground mt-1">
-          Trafic entrant depuis les assistants IA génératifs sur 30 jours glissants. Les nouveaux
-          inscrits venus d'une IA se lisent dans « Inscriptions par canal ».
+          Pages ouvertes depuis un assistant IA sur 30 jours glissants : une même visite en compte
+          plusieurs. Les visites comptées une fois (depuis le 13/11/2026) et les inscrits qu'elles
+          donnent se lisent dans le tableau « Pages d'arrivée des assistants IA » plus bas.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -110,7 +111,7 @@ export const AiAcquisitionCard = () => {
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              <Stat label="Atterrissages IA" value={stats.total} hint="30 derniers jours" />
+              <Stat label="Pages ouvertes depuis une IA" value={stats.total} hint="30 derniers jours, plusieurs par visite" />
               <Stat label="Visiteurs identifiés" value={stats.identifiedUsers} hint="rattachés à un compte" />
               <Stat label="Visiteurs IA retrouvés au compte" value={stats.signups} hint="inscription ou accueil terminé, anciens membres compris" />
               <Stat

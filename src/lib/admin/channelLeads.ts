@@ -3,7 +3,7 @@
  * de /admin/traffic, lu par admin_channel_leads (drizzle 0166).
  * Règles pures : normalisation, regroupement par canal, campagnes.
  */
-import { signupChannelLabel } from "@/lib/admin/signupSources";
+import { signupChannelLabel, signupSourceRange } from "@/lib/admin/signupSources";
 
 export interface ChannelLeadRow {
   channel: string;
@@ -23,9 +23,41 @@ export interface ChannelLeads {
   channels: (ChannelLeadRow & { label: string; campaigns: ChannelLeadRow[] })[];
 }
 
-export const LEADS_PERIODS = [7, 30, 90] as const;
+/**
+ * Lot TRF-3 (15/11/2026) : premier jour où la source d'inscription est
+ * enregistrée (2 inscrits sur 5 le 12/11, tous à partir du 13/11). Avant,
+ * tout inscrit tombe dans « Inconnu » : 202 sur 228 à 30 jours le 15/11.
+ */
+export const LEADS_TRACKING_START = "2026-11-12";
+export const LEADS_PERIODS = ["suivi", 7, 30, 90] as const;
 export type LeadsPeriod = (typeof LEADS_PERIODS)[number];
-export const DEFAULT_LEADS_PERIOD: LeadsPeriod = 30;
+/** Période d'ouverture : depuis le début du suivi, où la source est connue. */
+export const DEFAULT_LEADS_PERIOD: LeadsPeriod = "suivi";
+
+export function leadsPeriodLabel(p: LeadsPeriod): string {
+  if (p !== "suivi") return `${p} jours`;
+  const [, m, d] = LEADS_TRACKING_START.split("-");
+  return `Depuis le suivi (${d}/${m})`;
+}
+
+/** Bornes en jours de Paris ; « suivi » part du premier jour de collecte. */
+export function leadsRange(p: LeadsPeriod, now = new Date()): { from: string; to: string } {
+  const r = signupSourceRange(p === "suivi" ? 1 : p, now);
+  return p === "suivi" ? { from: LEADS_TRACKING_START, to: r.to } : r;
+}
+
+export interface LeadsCoverage { signups: number; known: number; share: number; publishedMembers: number; publishedKnown: number }
+
+/** Part des inscrits de la période dont la source est enregistrée. */
+export function leadsCoverage(channels: ChannelLeadRow[]): LeadsCoverage {
+  let signups = 0, known = 0, publishedMembers = 0, publishedKnown = 0;
+  for (const c of channels) {
+    signups += c.signups;
+    publishedMembers += c.publishedMembers;
+    if (c.channel !== "inconnu") { known += c.signups; publishedKnown += c.publishedMembers; }
+  }
+  return { signups, known, share: signups > 0 ? known / signups : 0, publishedMembers, publishedKnown };
+}
 
 /** Réseaux sociaux toujours affichés, même à zéro : c'est la question posée. */
 export const SOCIAL_CHANNELS = ["facebook", "instagram", "youtube", "tiktok"] as const;
@@ -72,9 +104,12 @@ export function buildChannelLeads(raw: unknown): ChannelLeads {
     for (let i = 0; i < ra.length; i++) if (ra[i] !== rb[i]) return rb[i] - ra[i];
     return a.channel.localeCompare(b.channel);
   };
-  const channels = [...totals.values()].sort(byRank).map((t) => ({
+  // Lot TRF-3 : « Inconnu » (source non enregistrée) se lit en dernier.
+  const byChannel = (a: ChannelLeadRow, b: ChannelLeadRow) =>
+    a.channel === "inconnu" ? (b.channel === "inconnu" ? 0 : 1) : b.channel === "inconnu" ? -1 : byRank(a, b);
+  const channels = [...totals.values()].sort(byChannel).map((t) => ({
     ...t,
-    label: signupChannelLabel(t.channel),
+    label: t.channel === "inconnu" ? "Source non enregistrée" : signupChannelLabel(t.channel),
     campaigns: rows
       .filter((x) => x.isCampaign && x.channel === t.channel)
       .sort((a, b) => (a.campaign === null ? 1 : b.campaign === null ? -1 : byRank(a, b))),
@@ -83,3 +118,13 @@ export function buildChannelLeads(raw: unknown): ChannelLeads {
 }
 
 export const campaignLabel = (campaign: string | null): string => campaign ?? "sans campagne";
+
+/**
+ * Lot TRF-3 : chemin d'arrivée sans le texte collé à la suite d'un lien
+ * partagé (« …f5e13dPartagez »). Les chemins du site sont en minuscules.
+ */
+export function cleanLandingPath(path: string): string {
+  const m = /^\/[a-z0-9\-/_.~%]*/.exec(path.split(/[?#]/)[0]);
+  if (!m) return path;
+  return m[0].length > 1 ? m[0].replace(/\/+$/, "") : m[0];
+}
