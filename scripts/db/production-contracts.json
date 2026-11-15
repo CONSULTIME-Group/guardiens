@@ -919,6 +919,16 @@
           "sql": "SELECT NOT EXISTS (SELECT 1 FROM public.animal_associations WHERE slug IN ('restos-du-coeur-rhone','fne-rhone','lpo-auvergne-rhone-alpes','mountain-wilderness-france','concordia-chantiers-benevoles','rempart-chantiers-patrimoine') AND (siren !~ '^[0-9]{9}$' OR rna !~ '^W[0-9]{9}$' OR char_length(description) < 150 OR address IS NOT NULL)) AS ok"
         }
       ]
+    },
+    {
+      "migration": "0169_asso4_repere_adresse.sql",
+      "description": "Le Repère affiche son adresse de siège (lieu-dit Le Petit Goupille)",
+      "checks": [
+        {
+          "name": "repere_adresse_renseignee",
+          "sql": "SELECT address = 'Lieu-dit Le Petit Goupille' AS ok FROM public.animal_associations WHERE slug='le-repere-champeon'"
+        }
+      ]
     }
   ]
 }
