@@ -128,3 +128,11 @@ describe("SEO-B, écran", () => {
     expect(fn).toContain("queryTopPages:");
   });
 });
+
+describe("SEO-B2, téléphone", () => {
+  it("les actions prioritaires s'empilent sous 640 px avec un bouton de 44 px", () => {
+    const src = read("src/components/admin/seo/PriorityActions.tsx");
+    expect(src).toContain("flex flex-col sm:flex-row");
+    expect(src).toContain("min-h-11 sm:min-h-0 sm:h-7");
+  });
+});

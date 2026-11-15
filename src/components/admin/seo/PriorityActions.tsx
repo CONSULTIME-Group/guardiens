@@ -51,18 +51,18 @@ const PriorityActions = ({ actions }: PriorityActionsProps) => {
               return (
                 <li
                   key={item.article.slug}
-                  className="flex items-center justify-between gap-3 py-2 border-b last:border-b-0"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 py-2 border-b last:border-b-0"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex items-start sm:items-center gap-3 min-w-0">
                     <Badge variant="outline" className={`text-[10px] shrink-0 ${config.badgeClass}`}>
                       {config.label}
                     </Badge>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium truncate">{item.article.title || item.article.slug}</p>
+                      <p className="text-sm font-medium sm:truncate">{item.article.title || item.article.slug}</p>
                       <p className="text-xs text-muted-foreground">{reasonOf(item)} · Search Console</p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" className="shrink-0 h-7 text-xs" asChild>
+                  <Button variant="outline" size="sm" className="shrink-0 min-h-11 sm:min-h-0 sm:h-7 text-xs self-start sm:self-auto" asChild>
                     <a href={`/admin/articles?slug=${item.article.slug}`}>Titre et description</a>
                   </Button>
                 </li>
