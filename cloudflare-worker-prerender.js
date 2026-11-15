@@ -701,6 +701,11 @@ function alignBotHtml(response, cssHref) {
       },
     });
     rewriter.on('meta[name="googlebot"]', { element(el) { el.remove(); } });
+    // v7.8 (15/11/2026) : la copie servie aux robots ne cite plus les scripts du
+    // build. Cloudflare AI Crawl Control, 7 jours au 15/11 : 8 860 réponses 404
+    // sur 24 000 requêtes de robots, sur d'anciens fichiers /assets/*.js cités
+    // par des copies Prerender de 7 jours. Le JSON-LD (sans src) reste.
+    rewriter.on('script[src^="/assets/"]', { element(el) { el.remove(); } });
     if (cssHref) {
       rewriter.on('link[rel="stylesheet"]', {
         element(el) {
@@ -880,7 +885,18 @@ const guardiensWorker = {
       );
     };
 
-    if (!shouldPrerender) return serveOrigin('bypass');
+    if (!shouldPrerender) {
+      // v7.8 (15/11/2026) : connexion, inscription et espace privé reçus par un
+      // robot portent noindex (l'origine leur sert la page vide de l'application,
+      // titre de l'accueil, sans balise robots).
+      if (isBot && reasons.includes('non-indexable-route')) {
+        const r = await serveOrigin('bypass');
+        const o = new Response(r.body, r);
+        o.headers.set('x-robots-tag', 'noindex');
+        return o;
+      }
+      return serveOrigin('bypass');
+    }
 
     if (debug) console.log('[Prerender] Bot, UA: "' + ua + '", URL: ' + url);
 
