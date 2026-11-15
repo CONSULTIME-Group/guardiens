@@ -60,7 +60,7 @@ export function SignupSourcesCard() {
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          Comptes créés sur la période (jours de Paris), rangés par canal d'arrivée. « Inconnu » : compte créé sans source enregistrée (avant ce suivi, ou arrivée perdue en route). Une annonce compte dès sa première mise en ligne.
+          Comptes créés sur la période (jours de Paris), rangés par canal d'arrivée. « Inconnu » : compte créé sans source enregistrée (avant le 12/11/2026, ou arrivée perdue en route). Même compte que l'onglet Leads : comptes supprimés et équipe exclus. Une annonce compte dès sa première mise en ligne.
         </p>
       </CardHeader>
       <CardContent>

@@ -1,5 +1,6 @@
 import { requireAdminOrServiceRole } from '../_shared/require-admin.ts'
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { buildSnapshotRows, shouldSnapshot } from "../_shared/gsc-snapshot.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -476,6 +477,30 @@ Deno.serve(async (req) => {
         },
         { onConflict: "cache_key" }
       );
+
+    // Lot TRF-4 : relevé hebdomadaire par page et par requête (seo_gsc_snapshots).
+    // Un échec du relevé laisse la réponse intacte.
+    try {
+      const { data: last } = await supabase
+        .from("seo_gsc_snapshots")
+        .select("period_end")
+        .order("period_end", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (shouldSnapshot(last?.period_end ?? null, gscEnd)) {
+        const periodDays = Math.round((Date.parse(gscEnd) - Date.parse(gscStart)) / 86_400_000) + 1;
+        const rows = buildSnapshotRows(result.gsc, gscEnd, periodDays);
+        for (let i = 0; i < rows.length; i += 500) {
+          const { error: snapError } = await supabase
+            .from("seo_gsc_snapshots")
+            .upsert(rows.slice(i, i + 500), { onConflict: "period_end,kind,key" });
+          if (snapError) throw snapError;
+        }
+        console.log(`seo_gsc_snapshots : ${rows.length} lignes au ${gscEnd}`);
+      }
+    } catch (snapError) {
+      console.error("seo_gsc_snapshots :", snapError);
+    }
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

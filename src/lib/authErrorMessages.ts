@@ -15,6 +15,22 @@ export interface AuthErrorInfo {
   code: string;
 }
 
+/**
+ * Lot INS-1 (15/11/2026) : texte affiché quand le contrôle des fuites refuse
+ * un mot de passe (27 des 46 échecs d'inscription relevés sur 30 jours).
+ */
+export const REFUSED_PASSWORD_MESSAGE =
+  "Ce mot de passe figure dans une liste de mots de passe divulgués sur internet. Choisissez-en un autre, ou prenez celui que nous vous proposons : vous pourrez le changer ensuite.";
+
+/**
+ * Lot INS-1 : « For security purposes, you can only request this after N
+ * seconds ». À l'inscription, ce délai suit un premier envoi réussi : le
+ * compte existe et l'email de confirmation est parti.
+ */
+export function isSignupCooldown(message: string | null | undefined): boolean {
+  return /only request this after \d+ seconds?/i.test(message || "");
+}
+
 const norm = (s: unknown): string =>
   typeof s === "string" ? s.toLowerCase() : "";
 

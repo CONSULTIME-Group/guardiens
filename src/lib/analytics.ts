@@ -762,5 +762,9 @@ export function mapSignupError(message: string | undefined | null): string {
   if (m === "timeout") {
     return "timeout";
   }
+  // Lot INS-1 : second envoi dans la minute, ou trop de demandes.
+  if (m.includes("for security purposes") || m.includes("rate limit") || m.includes("too many requests")) {
+    return "rate_limited";
+  }
   return "unknown";
 }

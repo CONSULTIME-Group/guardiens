@@ -465,7 +465,7 @@ const AdminAnalytics = () => {
                 <ConversionTile
                   label="Onboarding → 1ère action"
                   value={kpis.deepActivationRate}
-                  hint={`${funnelCounts.first_action || 0} / ${funnelCounts.onboarding_completed || 0}`}
+                  hint={`${funnelCounts.first_action || 0} membres / ${funnelCounts.onboarding_completed || 0} onboardings terminés (événements, anciens comptes compris)`}
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-3">
@@ -479,7 +479,7 @@ const AdminAnalytics = () => {
 
           {/* Lot A10 : l'entonnoir d'inscription unique vit dans l'onglet « Entonnoir d'inscription » (Entonnoir chiffré, 8 étapes, agrégat SQL). */}
           <p className="text-xs text-muted-foreground">
-            L'entonnoir d'inscription complet, de la page vue à la première action, se trouve dans l'onglet « Entonnoir d'inscription ».
+Les blocages, les échecs et les sous-étapes du formulaire d'inscription se lisent plus bas, sous « Formulaire d'inscription ».
           </p>
 
           {/* Comparaison par rôle */}

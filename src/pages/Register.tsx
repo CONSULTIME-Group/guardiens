@@ -20,7 +20,7 @@ import { rememberLegalAcceptance } from "@/lib/legalAcceptance";
 import { sanitizeRedirect, buildRedirectQuery } from "@/lib/safeRedirect";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent, trackEventWithUserId, mapSignupError } from "@/lib/analytics";
-import { mapAuthError } from "@/lib/authErrorMessages";
+import { mapAuthError, isSignupCooldown, REFUSED_PASSWORD_MESSAGE } from "@/lib/authErrorMessages";
 import { Eye, EyeOff, MailCheck, ArrowLeft, ArrowUp } from "lucide-react";
 import { InAppBrowserBanner } from "@/components/auth/InAppBrowserBanner";
 import { AuthIllustrationPanel } from "@/components/auth/AuthIllustrationPanel";
@@ -153,6 +153,9 @@ const Register = () => {
  const [resendCooldown, setResendCooldown] = useState(0);
  const [resendCount, setResendCount] = useState(0);
  const [formError, setFormError] = useState<string | null>(null);
+ // Lot INS-1 (15/11/2026) : mot de passe refusé par le contrôle des fuites,
+ // gardé pour proposer un mot de passe sûr tant qu'il reste dans le champ.
+ const [refusedPassword, setRefusedPassword] = useState<string | null>(null);
  const [existingAccountOpen, setExistingAccountOpen] = useState(false);
  const [acceptedTerms, setAcceptedTerms] = useState(false);
  const [termsHighlighted, setTermsHighlighted] = useState(false);
@@ -359,6 +362,14 @@ const Register = () => {
  setStep("confirmation");
  } catch (error: any) {
  const rawMessage = error?.message || "unknown";
+ // Lot INS-1 : second envoi dans la minute. Le compte est créé et l'email de
+ // confirmation est parti au premier envoi : l'écran de confirmation s'ouvre.
+ if (isSignupCooldown(rawMessage)) {
+  try { trackEvent("signup_resubmitted_in_cooldown" as any, { source: "/inscription", metadata: { role: selectedRole } }); } catch {}
+  setFormError(null);
+  setStep("confirmation");
+  return;
+ }
  // Toujours logger le brut pour diagnostiquer les catch-all silencieux
  // eslint-disable-next-line no-console
  console.error("signup_failed_raw", { message: rawMessage, code: error?.code, status: error?.status, name: error?.name });
@@ -382,7 +393,15 @@ const Register = () => {
  setExistingAccountOpen(true);
  } else {
  // Toujours persistant, jamais toast éphémère : l'utilisateur doit pouvoir relire.
- setFormError(`${info.title}. ${info.description ?? ""}`.trim());
+ if (info.code === "weak_password") {
+  // Lot INS-1 : le message dit quoi faire et propose un mot de passe sûr.
+  setRefusedPassword(password);
+  setShowPassword(true);
+  setFormError(REFUSED_PASSWORD_MESSAGE);
+  setTimeout(() => document.getElementById("password")?.focus(), 50);
+ } else {
+  setFormError(`${info.title}. ${info.description ?? ""}`.trim());
+ }
  }
  }
  } finally {
@@ -925,9 +944,26 @@ const Register = () => {
    <PasswordStrengthMeter password={password} isCommon={isObviouslyWeak(password)} />
 
    {formError && (
-     <p role="alert" aria-live="polite" className="text-sm text-destructive bg-destructive/5 border border-destructive/30 rounded-md px-3 py-2">
-       {formError}
-     </p>
+     <div role="alert" aria-live="polite" data-testid="signup-form-error" className="text-sm text-destructive bg-destructive/5 border border-destructive/30 rounded-md px-3 py-2 space-y-2">
+       <p>{formError}</p>
+       {refusedPassword !== null && refusedPassword === password && (
+         <Button
+           type="button"
+           variant="outline"
+           data-testid="signup-suggest-after-refusal"
+           className="min-h-11 w-full sm:w-auto"
+           onClick={() => {
+             setPassword(generateSuggestedPassword());
+             setShowPassword(true);
+             setRefusedPassword(null);
+             setFormError(null);
+             try { trackEvent("signup_password_generated_used" as any, { source: "/inscription", metadata: { after: "weak_password" } }); } catch {}
+           }}
+         >
+           Utiliser un mot de passe proposé
+         </Button>
+       )}
+     </div>
    )}
   </div>
 

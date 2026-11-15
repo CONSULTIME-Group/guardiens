@@ -27,6 +27,8 @@ export const SIGNUP_CHANNEL_LABELS: Record<string, string> = {
   ia: "Assistants IA",
   autre_site: "Autre site",
   direct: "Accès direct",
+  // Lot TRF-3 : accès direct d'un membre déjà connecté (onglet Leads, colonne Visites).
+  retour_membre: "Retours de membres connectés",
   inconnu: "Inconnu",
 };
 
@@ -39,7 +41,7 @@ const parisDay = (d: Date): string =>
   new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
 
 /** Jours de Paris, bornes comprises : aujourd'hui et les (N - 1) jours d'avant. */
-export function signupSourceRange(days: SignupSourcePeriod, now = new Date()): { from: string; to: string } {
+export function signupSourceRange(days: number, now = new Date()): { from: string; to: string } {
   const start = new Date(now.getTime() - (days - 1) * 86_400_000);
   return { from: parisDay(start), to: parisDay(now) };
 }

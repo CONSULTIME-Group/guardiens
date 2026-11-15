@@ -985,6 +985,32 @@
           "sql": "SELECT count(*) >= 150 AS ok FROM public.seo_city_pages WHERE meta_title LIKE 'Garde de maison et d''animaux à %'"
         }
       ]
+    },
+    {
+      "migration": "0174_trf3_trf4_justesse_collecte.sql",
+      "description": "Admin Trafic : retours de membres à part, cohorte commune, motifs d'échec réels, relevé hebdomadaire Search Console et journal des actions SEO",
+      "checks": [
+        {
+          "name": "retour_membre",
+          "sql": "SELECT position('trf3_retour_membre' IN pg_get_functiondef('public.admin_channel_leads(date,date)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "cohorte_commune",
+          "sql": "SELECT position('account_status' IN pg_get_functiondef('public.admin_signup_sources(date,date)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "motifs_echec",
+          "sql": "SELECT position('trf3_motifs_echec' IN pg_get_functiondef('public.get_signup_funnel_metrics(integer)'::regprocedure)) > 0 AND public.trf3_signup_failure_code('{\"error_code\":\"unknown\",\"error_message\":\"For security purposes, you can only request this after 5 seconds.\"}'::jsonb) = 'rate_limited' AND public.trf3_signup_failure_code('{\"error_code\":\"weak_password\"}'::jsonb) = 'weak_password' AS ok"
+        },
+        {
+          "name": "tables_collecte",
+          "sql": "SELECT to_regclass('public.seo_gsc_snapshots') IS NOT NULL AND to_regclass('public.seo_action_log') IS NOT NULL AND (SELECT relrowsecurity FROM pg_class WHERE oid = 'public.seo_action_log'::regclass) AND (SELECT relrowsecurity FROM pg_class WHERE oid = 'public.seo_gsc_snapshots'::regclass) AS ok"
+        },
+        {
+          "name": "journal_articles",
+          "sql": "SELECT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trf4_log_article_meta' AND NOT tgisinternal) AND NOT has_table_privilege('anon', 'public.seo_action_log', 'SELECT') AS ok"
+        }
+      ]
     }
   ]
 }

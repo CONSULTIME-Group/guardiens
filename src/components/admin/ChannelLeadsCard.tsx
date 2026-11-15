@@ -11,12 +11,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
-import { signupSourceRange } from "@/lib/admin/signupSources";
 import {
   DEFAULT_LEADS_PERIOD,
   LEADS_PERIODS,
   buildChannelLeads,
   campaignLabel,
+  leadsCoverage,
+  leadsPeriodLabel,
+  leadsRange,
   type LeadsPeriod,
 } from "@/lib/admin/channelLeads";
 import { cn } from "@/lib/utils";
@@ -26,7 +28,7 @@ const fmt = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
 export function ChannelLeadsCard() {
   const [days, setDays] = useState<LeadsPeriod>(DEFAULT_LEADS_PERIOD);
   const [open, setOpen] = useState<string | null>(null);
-  const range = signupSourceRange(days);
+  const range = leadsRange(days);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["admin-channel-leads", range.from, range.to],
@@ -41,10 +43,8 @@ export function ChannelLeadsCard() {
     },
   });
 
-  const periodLabel = `${days} jours`;
-  const publishedFromKnown = data?.channels
-    .filter((c) => c.channel !== "inconnu")
-    .reduce((s, c) => s + c.publishedMembers, 0) ?? 0;
+  const periodLabel = leadsPeriodLabel(days);
+  const coverage = leadsCoverage(data?.channels ?? []);
 
   return (
     <div className="space-y-4" data-testid="channel-leads">
@@ -53,7 +53,7 @@ export function ChannelLeadsCard() {
           {LEADS_PERIODS.map((d) => (
             <Button key={d} type="button" size="sm" className="min-h-11 md:min-h-9"
               variant={d === days ? "default" : "outline"} aria-pressed={d === days} onClick={() => setDays(d)}>
-              {d} jours
+              {leadsPeriodLabel(d)}
             </Button>
           ))}
         </div>
@@ -70,7 +70,7 @@ export function ChannelLeadsCard() {
               <p className="text-xs text-primary">Annonces de garde publiées · {periodLabel}</p>
               <p className="font-heading text-4xl font-semibold text-primary tabular-nums">{fmt(data.sitsPublished)}</p>
               <p className="mt-1 text-sm text-primary">
-                {`Dont ${fmt(publishedFromKnown)} par des membres inscrits sur la période, source connue.`}
+                {`${fmt(coverage.publishedMembers)} membre${coverage.publishedMembers > 1 ? "s" : ""} inscrit${coverage.publishedMembers > 1 ? "s" : ""} sur la période ${coverage.publishedMembers > 1 ? "ont" : "a"} publié une annonce, dont ${fmt(coverage.publishedKnown)} avec une source enregistrée.`}
               </p>
             </CardContent>
           </Card>
@@ -80,6 +80,9 @@ export function ChannelLeadsCard() {
               <CardTitle className="text-base">D'où viennent les nouveaux membres</CardTitle>
               <p className="text-xs text-muted-foreground">
                 Visites : première page de chaque visite, tous visiteurs (suivi des visites depuis le 13/11/2026). Inscrits : comptes créés, canal enregistré à l'inscription. Touchez un réseau pour voir ses publications.
+              </p>
+              <p className="text-xs font-medium text-foreground" data-testid="leads-coverage">
+                {`Source enregistrée pour ${fmt(coverage.known)} inscrit${coverage.known > 1 ? "s" : ""} sur ${fmt(coverage.signups)} (${Math.round(coverage.share * 100)} %). La source s'enregistre depuis le 12/11/2026.`}
               </p>
             </CardHeader>
             <CardContent className="overflow-x-auto">
