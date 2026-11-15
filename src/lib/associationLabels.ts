@@ -114,3 +114,9 @@ export const ASSOCIATION_NEED_CTA_LABELS: Record<string, string> = {
 
 export const associationNeedCtaLabel = (value: string): string =>
   ASSOCIATION_NEED_CTA_LABELS[value] ?? ASSOCIATION_NEED_CTA_LABELS.autre;
+
+/** Lieu affiché : la ville seule quand elle porte le nom du département (Paris). */
+export const associationPlaceLabel = (city: string, departementName: string): string =>
+  !departementName || city.trim().toLowerCase() === departementName.trim().toLowerCase()
+    ? city
+    : `${city}, ${departementName}`;

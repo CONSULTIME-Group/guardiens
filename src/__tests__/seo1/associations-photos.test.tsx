@@ -25,7 +25,7 @@ const base = {
   instagram_url: null, donation_url: null, adoption_url: null, volunteer_url: null,
   photos: [photo], photo_credit: "Refuge", verified_at: "2026-10-01", updated_at: "2026-10-01",
   logo_url: "https://asso.example/logo.png", tagline: null, founded_year: null, key_figures: [],
-  press: [], needs_details: [{ need: "benevoles", detail: "Deux bénévoles le samedi" }], siren: null, legal_form: null,
+  press: [], needs_details: [{ need: "benevoles", detail: "Deux bénévoles le samedi" }], siren: null, legal_form: null, address: null,
 } satisfies Omit<PublicAssociation, "photos_authorized">;
 
 describe("associationMedia", () => {

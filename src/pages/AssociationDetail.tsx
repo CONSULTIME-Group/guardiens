@@ -11,6 +11,14 @@ import { buildOgImageUrl } from "@/lib/ogImage";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Share2 } from "lucide-react";
+import { associationNeedChipLabel, associationPlaceLabel } from "@/lib/associationLabels";
 import { isAssociationIndexable } from "@/lib/associationIndexability";
 import { associationLocalActions } from "@/lib/localUsefulActions";
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
@@ -106,6 +114,41 @@ export const buildAssociationFaq = (
   return items;
 };
 
+const ShareMenu = ({
+  onWhatsApp,
+  onFacebook,
+  onCopy,
+}: {
+  onWhatsApp: string;
+  onFacebook: string;
+  onCopy: () => void;
+}) => (
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button variant="outline" className="w-full gap-2">
+        <Share2 className="h-4 w-4" aria-hidden="true" />
+        Partager
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuItem asChild className="min-h-11">
+        <a href={onWhatsApp} target="_blank" rel="noopener">
+          WhatsApp
+        </a>
+      </DropdownMenuItem>
+      <DropdownMenuItem asChild className="min-h-11">
+        <a href={onFacebook} target="_blank" rel="noopener">
+          Facebook
+        </a>
+      </DropdownMenuItem>
+      <DropdownMenuItem className="min-h-11" onSelect={onCopy}>
+        Copier le lien
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+);
+
+
 export default function AssociationDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { hash } = useLocation();
@@ -200,6 +243,7 @@ export default function AssociationDetail() {
     areaServed: { "@type": "AdministrativeArea", name: data.departement_name },
     address: {
       "@type": "PostalAddress",
+      ...(data.address ? { streetAddress: data.address } : {}),
       addressLocality: data.city,
       ...(data.postal_code ? { postalCode: data.postal_code } : {}),
       addressCountry: "FR",
@@ -247,54 +291,87 @@ export default function AssociationDetail() {
         ready={!isLoading}
       />
 
-      <div className="container mx-auto px-4 py-6 md:py-10 max-w-4xl min-w-0">
+      <div className="container mx-auto px-4 py-6 md:py-10 max-w-6xl min-w-0">
+        <nav aria-label="Fil d'Ariane" className="mb-4 text-sm text-muted-foreground">
+          <Link to="/associations" className="hover:underline">
+            Associations et refuges
+          </Link>
+          <span aria-hidden="true"> › </span>
+          <span className="text-foreground">{data.name}</span>
+        </nav>
+
         {/* 1. En tête */}
-        <header className="mb-6 flex items-start gap-4">
-          <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm">
+        <header className="mb-8 flex flex-col gap-6 rounded-3xl border border-border bg-card p-5 md:flex-row md:items-center md:p-8">
+          <span className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-border bg-white md:h-28 md:w-28">
             {logoUrl && !logoFailed ? (
               <img
                 src={logoUrl}
                 alt={`Logo de ${data.name}`}
-                width={64}
-                height={64}
+                width={112}
+                height={112}
                 decoding="async"
                 onError={() => setLogoFailed(true)}
-                className="h-full w-full object-contain"
+                className="h-full w-full object-contain p-2"
               />
             ) : (
-              <span className="text-sm font-semibold text-muted-foreground">
+              <span className="font-heading text-3xl font-bold text-pastel-sage-ink">
                 {associationInitials(data.name)}
               </span>
             )}
           </span>
-          <div className="min-w-0">
-            <h1 className="text-2xl md:text-4xl font-display font-bold">{data.name}</h1>
-            {data.tagline && (
-              <p className="mt-1 text-base text-foreground/80">{data.tagline}</p>
-            )}
-            <p className="mt-2 text-muted-foreground">
-              {typeLabel} · {data.city}, {data.departement_name}
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="mb-3 flex flex-wrap gap-2">
+              <span className="rounded-full bg-pastel-sage px-3 py-1 text-[13px] font-medium text-pastel-sage-ink">
+                {typeLabel}
+              </span>
               {data.siren && (
                 <a
                   href={`https://annuaire-entreprises.data.gouv.fr/entreprise/${data.siren}`}
                   target="_blank"
                   rel="noopener"
                   title={`SIREN ${formatSiren(data.siren)}`}
-                  className="inline-flex rounded-full border border-border bg-muted/40 px-3 py-1 text-xs text-muted-foreground hover:bg-muted"
+                  className="rounded-full bg-muted px-3 py-1 text-[13px] text-muted-foreground hover:bg-muted/70"
                 >
                   Association déclarée
                 </a>
               )}
               {data.photos_authorized && (
-                <span className="inline-flex rounded-full border border-border bg-muted/40 px-3 py-1 text-xs text-muted-foreground">
+                <span className="rounded-full bg-muted px-3 py-1 text-[13px] text-muted-foreground">
                   Fiche validée par l'association
                 </span>
               )}
+              {data.needs?.[0] && associationNeedChipLabel(data.needs[0]) && (
+                <span className="rounded-full bg-pastel-peach px-3 py-1 text-[13px] font-medium text-pastel-peach-ink">
+                  {associationNeedChipLabel(data.needs[0])}
+                </span>
+              )}
             </div>
+            <h1 className="text-3xl md:text-4xl font-display font-bold leading-tight">{data.name}</h1>
+            {data.tagline && (
+              <p className="mt-2 text-lg leading-relaxed text-muted-foreground">{data.tagline}</p>
+            )}
+            <p className="mt-2 text-[15px] text-muted-foreground">
+              {associationPlaceLabel(data.city, data.departement_name)}
+            </p>
+          </div>
+          <div className="flex w-full flex-col gap-2.5 md:w-56">
+            {data.donation_url && (
+              <Button asChild>
+                <a href={data.donation_url} target="_blank" rel="noopener">
+                  Faire un don
+                </a>
+              </Button>
+            )}
+            <ShareMenu
+              onWhatsApp={`https://wa.me/?text=${encodeURIComponent(`${shareText} ${canonical}`)}`}
+              onFacebook={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonical)}`}
+              onCopy={copyLink}
+            />
           </div>
         </header>
+
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+          <div className="min-w-0 flex-1">
 
         {/* 2. Chiffres clés */}
         {keyFigures.length > 0 && (
@@ -445,10 +522,10 @@ export default function AssociationDetail() {
           )
         )}
 
-        {/* 6. Ils en parlent */}
+        {/* 6. Pour en savoir plus */}
         {press.length > 0 && (
           <section className="mt-8">
-            <h2 className="font-heading text-xl font-semibold text-foreground">Ils en parlent</h2>
+            <h2 className="font-heading text-xl font-semibold text-foreground">Pour en savoir plus</h2>
             <ul className="mt-3 space-y-3">
               {press.map((article, i) => (
                 <li key={`${article.url ?? article.title}-${i}`}>
@@ -474,88 +551,96 @@ export default function AssociationDetail() {
           </section>
         )}
 
-        {/* 7. Soutenir */}
-        <section className="mt-8 rounded-2xl border border-border bg-card p-5 md:p-6">
-          <h2 className="font-heading text-xl font-semibold text-foreground">
-            Soutenir {data.name}
-          </h2>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {data.donation_url && (
-              <Button asChild size="sm">
-                <a href={data.donation_url} target="_blank" rel="noopener">
-                  Faire un don
-                </a>
-              </Button>
-            )}
-            {data.volunteer_url && (
-              <Button asChild size="sm" variant="outline">
-                <a href={data.volunteer_url} target="_blank" rel="noopener">
-                  Devenir bénévole
-                </a>
-              </Button>
-            )}
-            {data.adoption_url && (
-              <Button asChild size="sm" variant="outline">
-                <a href={data.adoption_url} target="_blank" rel="noopener">
-                  Voir les animaux à adopter
-                </a>
-              </Button>
-            )}
           </div>
-          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm">
-            {data.website_url && (
-              <a href={data.website_url} target="_blank" rel="noopener" className="text-primary underline">
-                Site de l'association
-              </a>
-            )}
-            {data.facebook_url && (
-              <a href={data.facebook_url} target="_blank" rel="noopener" className="text-primary underline">
-                Facebook
-              </a>
-            )}
-            {data.instagram_url && (
-              <a href={data.instagram_url} target="_blank" rel="noopener" className="text-primary underline">
-                Instagram
-              </a>
-            )}
-          </div>
-          <p className="mt-4 text-xs text-muted-foreground">
-            Le don se fait directement auprès de l'association, sur sa propre page.
-          </p>
 
-          <div className="mt-5 border-t border-border pt-4">
-            <p className="text-sm text-muted-foreground">
-              Partager cette fiche aide l'association à se faire connaître.
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Button asChild size="sm" variant="outline">
-                <a
-                  href={`https://wa.me/?text=${encodeURIComponent(`${shareText} ${canonical}`)}`}
-                  target="_blank"
-                  rel="noopener"
-                >
-                  Partager sur WhatsApp
-                </a>
-              </Button>
-              <Button asChild size="sm" variant="outline">
-                <a
-                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonical)}`}
-                  target="_blank"
-                  rel="noopener"
-                >
-                  Partager sur Facebook
-                </a>
-              </Button>
-              <Button size="sm" variant="outline" onClick={copyLink}>
-                Copier le lien
-              </Button>
-            </div>
-          </div>
-        </section>
+          <aside className="w-full shrink-0 space-y-4 lg:sticky lg:top-24 lg:w-[340px]">
+            {/* 7. Infos pratiques */}
+            <section className="rounded-2xl border border-border bg-card p-5">
+              <h2 className="font-heading text-xl font-semibold text-foreground">Infos pratiques</h2>
+              <dl className="mt-3 space-y-3 text-[15px]">
+                <div>
+                  <dt className="text-xs text-muted-foreground">{data.address ? "Adresse" : "Où"}</dt>
+                  <dd className="mt-0.5 text-foreground">
+                    {data.address ? `${data.address}, ` : ""}
+                    {data.postal_code ? `${data.postal_code} ` : ""}
+                    {data.city}
+                    {associationPlaceLabel(data.city, data.departement_name) !== data.city
+                      ? `, ${data.departement_name}`
+                      : ""}
+                  </dd>
+                </div>
+                {(data.website_url || data.facebook_url || data.instagram_url) && (
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Liens</dt>
+                    <dd className="mt-0.5 flex flex-wrap gap-x-3 gap-y-1">
+                      {data.website_url && (
+                        <a href={data.website_url} target="_blank" rel="noopener" className="text-primary underline">
+                          Site de l'association
+                        </a>
+                      )}
+                      {data.facebook_url && (
+                        <a href={data.facebook_url} target="_blank" rel="noopener" className="text-primary underline">
+                          Facebook
+                        </a>
+                      )}
+                      {data.instagram_url && (
+                        <a href={data.instagram_url} target="_blank" rel="noopener" className="text-primary underline">
+                          Instagram
+                        </a>
+                      )}
+                    </dd>
+                  </div>
+                )}
+                {data.siren && (
+                  <div>
+                    <dt className="text-xs text-muted-foreground">SIREN</dt>
+                    <dd className="mt-0.5 text-foreground">{formatSiren(data.siren)}</dd>
+                  </div>
+                )}
+              </dl>
+              <p className="mt-4 text-xs text-muted-foreground">
+                Informations vérifiées le {longFrenchDate(data.verified_at)}.
+              </p>
+            </section>
+
+            {/* 8. Soutenir */}
+            {(data.donation_url || data.volunteer_url || data.adoption_url) && (
+              <section className="rounded-2xl border border-border bg-pastel-sage/60 p-5">
+                <h2 className="font-heading text-xl font-semibold text-pastel-sage-ink">
+                  Soutenir {data.name}
+                </h2>
+                <p className="mt-2 text-sm text-pastel-sage-ink">
+                  Le don se fait directement auprès de l'association, sur sa propre page.
+                </p>
+                <div className="mt-4 flex flex-col gap-2">
+                  {data.donation_url && (
+                    <Button asChild>
+                      <a href={data.donation_url} target="_blank" rel="noopener">
+                        Faire un don
+                      </a>
+                    </Button>
+                  )}
+                  {data.volunteer_url && (
+                    <Button asChild variant="outline" className="bg-background">
+                      <a href={data.volunteer_url} target="_blank" rel="noopener">
+                        Devenir bénévole
+                      </a>
+                    </Button>
+                  )}
+                  {data.adoption_url && (
+                    <Button asChild variant="outline" className="bg-background">
+                      <a href={data.adoption_url} target="_blank" rel="noopener">
+                        Voir les animaux à adopter
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              </section>
+            )}
 
         {/* 8. Maillage gardiens */}
         {data.departement_slug && (
-          <section className="mt-8 rounded-2xl border border-border bg-muted/40 p-5 md:p-6">
+          <section className="rounded-2xl border border-border bg-pastel-honey/60 p-5">
             <h2 className="font-heading text-xl font-semibold text-foreground">
               Partir en laissant vos animaux entre de bonnes mains
             </h2>
@@ -574,6 +659,8 @@ export default function AssociationDetail() {
             </Button>
           </section>
         )}
+          </aside>
+        </div>
 
         {/* 9. Questions fréquentes */}
         <AssociationFaq items={faqItems} />
