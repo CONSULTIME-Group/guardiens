@@ -45,3 +45,11 @@ describe("SUPPR3 · place du menu", () => {
     expect(card.match(/<ActionsMenu/g)?.length).toBe(1);
   });
 });
+
+describe("SUPPR3b · largeur de la carte", () => {
+  it("le corps de la carte se resserre, un long titre se tronque", () => {
+    // Relevé du 15/11/2026 à 390 px : « Garde de maison à Paris, du 2024-08-14
+    // au 2024-08-18 » poussait le bouton Gérer à 457 px, hors de l'écran.
+    expect(readFileSync("src/pages/Sits.tsx", "utf8")).toContain('<div className="flex-1 min-w-0 p-4">');
+  });
+});
