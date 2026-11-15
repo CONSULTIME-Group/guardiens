@@ -953,6 +953,24 @@
           "sql": "SELECT bool_and(address IS NULL AND siren IS NOT NULL AND char_length(description)>=150 AND char_length(tagline)<=120) AS ok FROM public.animal_associations WHERE slug IN ('emmaus-lyon','coup-de-pouce-universite-lyon','on-the-green-road','eco-garde-rhone','afe-apprendre-le-francais-ensemble-lyon')"
         }
       ]
+    },
+    {
+      "migration": "0172_seob_arrivees.sql",
+      "description": "Onglet SEO et IA : arrivées Google et IA par type de page, lecture réservée à l'équipe et au rôle service",
+      "checks": [
+        {
+          "name": "type_de_page",
+          "sql": "SELECT public.seob_page_template('/house-sitting/lyon') = 'villes' AND public.seob_page_template('/house-sitting') = 'autres' AND public.seob_page_template('/actualites/a#prix') = 'articles' AS ok"
+        },
+        {
+          "name": "lecture_equipe",
+          "sql": "SELECT COALESCE(has_function_privilege('authenticated', to_regprocedure('public.admin_landing_outcomes(date,date,text)'), 'EXECUTE') AND NOT has_function_privilege('anon', to_regprocedure('public.admin_landing_outcomes(date,date,text)'), 'EXECUTE'), false) AS ok"
+        },
+        {
+          "name": "repere",
+          "sql": "SELECT position('seob_arrivees' IN pg_get_functiondef('public.admin_landing_outcomes(date,date,text)'::regprocedure)) > 0 AS ok"
+        }
+      ]
     }
   ]
 }

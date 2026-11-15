@@ -115,7 +115,7 @@ describe("SEO-A, écrans", () => {
     expect(src).toContain("useSeoArticles");
     expect(src).toContain("<PriorityActions actions={seoActions} />");
     expect(src).toContain("<TopArticlesTable rows={topArticleRows} />");
-    expect(src).toContain("pagesWithImpressions(allGscPages)");
+    expect(src).toContain("aggregatePages(allGscPages)");
   });
 
   it("la liste sans impression ne pousse que les articles indexables", () => {
