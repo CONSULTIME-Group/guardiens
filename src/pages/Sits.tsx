@@ -8,7 +8,7 @@ import {
   MapPin, Clock, MoreHorizontal, XCircle, CheckCircle,
   Image as ImageIcon, ChevronRight, Archive, Trash2, RefreshCw,
   AlertTriangle, Pencil, Lock, MessageCircle,
-  KeyRound, Home, ClipboardList, X, Copy, Check, Loader2, Search,
+  KeyRound, Home, ClipboardList, X, Copy, Check, Loader2, Search, EyeOff,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -1625,15 +1625,7 @@ const SitCard = ({
                 )}
                 {displayStatus.label}
               </span>
-              {isOwner && (
-                <ActionsMenu
-                  sit={sit}
-                  effectiveStatus={effectiveStatus}
-                  onArchive={onArchive}
-                  onDelete={onDelete}
-                  onRepublish={onRepublish}
-                />
-              )}
+
             </div>
           </div>
 
@@ -1730,6 +1722,18 @@ const SitCard = ({
           {/* Quick actions */}
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             <QuickActions sit={sit} isOwner={isOwner} effectiveStatus={effectiveStatus} onRepublish={onRepublish} onOpenGuide={onOpenGuide} onWithdraw={onWithdraw} />
+            {/* Lot SUPPR3 : « Gérer » en bout de ligne d'actions, le titre garde sa largeur sur téléphone. */}
+            {isOwner && (
+              <div className="ml-auto">
+                <ActionsMenu
+                  sit={sit}
+                  effectiveStatus={effectiveStatus}
+                  onArchive={onArchive}
+                  onDelete={onDelete}
+                  onRepublish={onRepublish}
+                />
+              </div>
+            )}
           </div>
 
         </div>
@@ -1862,9 +1866,6 @@ const QuickActions = ({
             En attente de candidatures
           </span>
         )}
-        <Link to={`/sits/${sit.id}/edit`} className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>
-          <Pencil className="h-3.5 w-3.5" /> Modifier
-        </Link>
       </>
     );
   }
@@ -1979,11 +1980,17 @@ const ActionsMenu = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
+        {/* Lot SUPPR3 (15/11/2026) : Modifier, Dépublier et Supprimer vivent ici
+            (choix de Jérémie), le menu porte donc un mot, « Gérer », et une
+            cible de 44 px : un menu d'icône seule n'avait pas été trouvé. */}
         <button
-          className="p-1.5 rounded-md hover:bg-accent transition-colors"
-          aria-label="Actions sur l'annonce"
+          type="button"
+          className="min-h-11 inline-flex items-center gap-1.5 px-3 rounded-xl border border-border text-sm font-medium text-foreground/80 hover:bg-accent transition-colors"
+          aria-label="Gérer l'annonce : modifier, dépublier, supprimer"
+          data-testid="sit-card-manage"
         >
-          <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+          Gérer
+          <MoreHorizontal className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
@@ -2005,6 +2012,13 @@ const ActionsMenu = ({
           <DropdownMenuItem asChild>
             <Link to={`/house-guide/${sit.property_id}`} className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" /> Guide de la maison
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {effectiveStatus === "published" && (
+          <DropdownMenuItem asChild>
+            <Link to={`/sits/${sit.id}#depublier`} className="flex items-center gap-2">
+              <EyeOff className="h-4 w-4" /> Dépublier
             </Link>
           </DropdownMenuItem>
         )}
