@@ -49,8 +49,8 @@ const MoreContent = ({ focusCrons = false }: { focusCrons?: boolean }) => {
  * Vue d'ensemble admin. Lot ADM10 (22/10/2026, maquette Claude Design
  * validée par Jérémie) : trois questions, dans l'ordre.
  * 1. Le site fonctionne ?  (voyants, puis signaux techniques repliés)
- * 2. Ce qui vous attend aujourd'hui  (départ sous 7 jours, puis ce que seul
- *    un fondateur peut faire ; chaque ligne ouvre ses cartes d'action)
+ * 2. Ce qui vous attend  (lot VE-1, 15/11/2026 : une ligne par personne ou
+ *    par annonce, aujourd'hui puis cette semaine ; le bouton fait le geste)
  * 3. Guardiens avance ?  (quatre chiffres reliés à l'objectif)
  * Puis « Le système s'en charge » (relances automatiques, synthèse du lundi)
  * et, replié, activité récente, animation, tendances, tâches planifiées, IA.

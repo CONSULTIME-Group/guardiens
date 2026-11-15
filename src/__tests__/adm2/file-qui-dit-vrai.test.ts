@@ -48,7 +48,8 @@ describe("Aucun bouton qui ferme sans agir", () => {
     }
     const dialog = read("src/pages/admin/_components/users/WriteToMemberDialog.tsx");
     // onSent seulement sur envoi accepté : jamais dans l'annulation.
-    expect(dialog.match(/onSent\?\.\(\)/g)?.length).toBe(2);
+    // Lot VE-2 : troisième envoi accepté, par la messagerie Guardiens.
+    expect(dialog.match(/onSent\?\.\(\)/g)?.length).toBe(3);
   });
 
   it("le propriétaire de l'annonce est lu dans les métadonnées du groupe", () => {

@@ -62,12 +62,11 @@ export const NoApplicationsCard = ({ signal }: Props) => {
                 {canBroadcast ? (
                   <>
                     {" · "}
-                    {eligible} gardien{eligible > 1 ? "s" : ""} éligible
-                    {eligible > 1 ? "s" : ""} dans un rayon de{" "}
+                    {eligible} gardien{eligible > 1 ? "s" : ""} à proximité, dans un rayon de{" "}
                     {m.eligible_radius_km ?? 30} km
                   </>
                 ) : (
-                  <> · aucun gardien éligible à proximité</>
+                  <> · rayon de diffusion à élargir</>
                 )}
               </p>
               <div className="flex flex-wrap gap-2 pt-1">
@@ -77,7 +76,7 @@ export const NoApplicationsCard = ({ signal }: Props) => {
                   disabled={!canBroadcast}
                 >
                   <Send className="h-4 w-4 mr-2" />
-                  Broadcast aux gardiens
+                  Prévenir les gardiens à proximité
                 </Button>
                 <IgnoreSignalsButton ids={[signal.id]} />
               </div>

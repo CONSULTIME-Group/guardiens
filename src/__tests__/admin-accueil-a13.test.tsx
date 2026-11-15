@@ -109,7 +109,7 @@ describe("Vue d'ensemble", () => {
     renderOverview();
     expect(await screen.findByText("Candidatures sans réponse")).toBeInTheDocument(); // liquidité intacte
     await waitFor(() => expect(screen.getAllByText("Chiffre indisponible").length).toBeGreaterThanOrEqual(2));
-    expect(screen.getByText("Ce qui vous attend aujourd'hui")).toBeInTheDocument();
+    expect(screen.getByText("Ce qui vous attend")).toBeInTheDocument();
   });
 
   it("Tendances : recharts en import différé seulement", () => {

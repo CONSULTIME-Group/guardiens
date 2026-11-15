@@ -61,6 +61,7 @@ import { workListBadgeText, workListBadgeLabel } from "@/hooks/useWorkList";
 import { markAdminNewsSeen, newsKeyForPath, readNewsSince, NEWS_DEFAULT_WINDOW_MS } from "@/hooks/useAdminNews";
 import { SystemSection, TechnicalSignalsLine, TodaySection } from "@/pages/admin/_components/dashboard/PilotageBlocks";
 import { SiteHealthStrip } from "@/pages/admin/_components/dashboard/SiteHealthStrip";
+import { buildGestures } from "@/lib/admin/gestures";
 import { IgnoreSignalsButton, ignoreConfirmTitle } from "@/components/admin/signals/IgnoreSignalsButton";
 import { isMondayInParis, shortDetectedAt, technicalFamiliesText } from "@/lib/admin/overviewText";
 import {
@@ -93,7 +94,8 @@ const RAW: WorkListRaw = {
     { key: "ai", label: "IA", state: "ok", detail: "Normal", link: null },
   ],
 };
-const LINES = buildWorkList(RAW).items.length;
+// Lot VE-1 : la pastille compte les lignes de la vue d'ensemble, une par personne ou par annonce.
+const LINES = buildGestures(buildWorkList(RAW)).length;
 
 const wrap = (ui: React.ReactNode, path = "/admin") => {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -113,7 +115,7 @@ beforeEach(() => {
 describe("pastille unique = longueur de la liste", () => {
   it("texte : nombre de lignes, « ? » en échec ou liste vide incomplète, rien si tout est à jour", () => {
     const m = buildWorkList(RAW);
-    expect(workListBadgeText(m, false)).toBe(String(m.items.length));
+    expect(workListBadgeText(m, false)).toBe(String(LINES));
     expect(workListBadgeText(null, true)).toBe("?");
     expect(workListBadgeText(null, false)).toBeNull();
     expect(workListBadgeText(buildWorkList({ sources: { queues: false } }), false)).toBe("?");
@@ -262,9 +264,11 @@ describe("la liste : « Voir » sur chaque ligne", () => {
     const lines = await screen.findAllByTestId("pilotage-line");
     expect(lines).toHaveLength(LINES);
     for (const l of lines) {
-      // Lot ADM16 : les liens des éléments nommés s'ajoutent, le bouton reste « Voir ».
+      // Lot VE-1 : un seul bouton principal par ligne, et il porte le verbe du geste, jamais « Voir ».
       const buttons = [...l.querySelectorAll("button, a")].filter((b) => !b.closest('[data-testid="pilotage-elements"]'));
-      expect(buttons.map((b) => b.textContent)).toEqual(["Voir"]);
+      expect(buttons).toHaveLength(1);
+      expect(buttons[0].textContent).not.toBe("Voir");
+      expect((buttons[0].textContent ?? "").length).toBeGreaterThan(3);
     }
     expect(screen.getByTestId("pilotage-count").textContent).toBe(`${LINES} choses à faire`);
   });

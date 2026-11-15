@@ -224,6 +224,7 @@ vi.mock("@/hooks/useAdmin", () => ({ useAdmin: () => ({ isAdmin: true, loading: 
 vi.mock("@/lib/admin/readError", async (orig) => ({ ...(await orig<Record<string, unknown>>()), reportAdminReadError: vi.fn() }));
 
 import { TodaySection } from "@/pages/admin/_components/dashboard/PilotageBlocks";
+import { buildGestures } from "@/lib/admin/gestures";
 
 const renderToday = () => {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -239,7 +240,8 @@ describe("vue d'ensemble rendue", () => {
     expect(await screen.findByText("Répondre à 2 messages de contact")).toBeTruthy();
     const lines = screen.getAllByTestId("pilotage-line");
     expect(screen.getByTestId("pilotage-count").textContent).toBe(`${lines.length} choses à faire`);
-    expect(lines).toHaveLength(buildWorkList(RAW).items.length);
+    // Lot VE-1 : une ligne par personne ou par annonce.
+    expect(lines).toHaveLength(buildGestures(buildWorkList(RAW)).length);
     expect(rpcSpy).toHaveBeenCalledTimes(1);
     expect(rpcSpy).toHaveBeenCalledWith("admin_work_list");
     // Une ligne sans signal mène à sa file.
