@@ -20295,6 +20295,10 @@ export type Database = {
       }
       admin_get_user_email: { Args: { p_user_id: string }; Returns: string }
       admin_human_queues: { Args: never; Returns: Json }
+      admin_landing_outcomes: {
+        Args: { p_channel: string; p_from: string; p_to: string }
+        Returns: Json
+      }
       admin_liquidity_snapshot: { Args: never; Returns: Json }
       admin_list_conversations: {
         Args: {
@@ -22098,6 +22102,7 @@ export type Database = {
       }
       seo_release_consumer: { Args: { p_holder: string }; Returns: undefined }
       seo_reserve_render: { Args: { p_holder: string }; Returns: boolean }
+      seob_page_template: { Args: { p_path: string }; Returns: string }
       set_email_preferences_by_token: {
         Args: {
           p_alert: boolean
