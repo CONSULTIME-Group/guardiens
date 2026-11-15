@@ -10,7 +10,6 @@ interface AiStats {
   identifiedUsers: number;
   signups: number;
   conversionRate: number;
-  fbTotal: number;
 }
 
 const ENGINE_LABELS: Record<string, string> = {
@@ -38,18 +37,13 @@ export const AiAcquisitionCard = () => {
       try {
         const since = new Date(Date.now() - 30 * 86400_000).toISOString();
 
-        const [ai, fb] = await Promise.all([
-          supabase
-            .from("analytics_events")
-            .select("user_id, metadata, created_at")
-            .eq("event_type", "ai_referral_landing")
-            .gte("created_at", since),
-          supabase
-            .from("analytics_events")
-            .select("*", { count: "exact", head: true })
-            .eq("event_type", "fb_referral_landing")
-            .gte("created_at", since),
-        ]);
+        // Lot TRF1 (P4) : la tuile Facebook quitte cette carte, elle doublait
+        // « Arrivées depuis Facebook » sur une autre période.
+        const ai = await supabase
+          .from("analytics_events")
+          .select("user_id, metadata, created_at")
+          .eq("event_type", "ai_referral_landing")
+          .gte("created_at", since);
 
         const rows = ai.data ?? [];
         const counts = new Map<string, number>();
@@ -87,7 +81,6 @@ export const AiAcquisitionCard = () => {
           identifiedUsers: users.size,
           signups,
           conversionRate: total > 0 ? (signups / total) * 100 : 0,
-          fbTotal: fb.count ?? 0,
         });
       } finally {
         if (mounted) setLoading(false);
@@ -103,30 +96,29 @@ export const AiAcquisitionCard = () => {
       <CardHeader>
         <CardTitle>Acquisition IA</CardTitle>
         <p className="text-sm text-muted-foreground mt-1">
-          Trafic entrant depuis les assistants IA génératifs sur 30 jours glissants, et inscriptions
-          attribuées.
+          Trafic entrant depuis les assistants IA génératifs sur 30 jours glissants. Les nouveaux
+          inscrits venus d'une IA se lisent dans « Inscriptions par canal ».
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
         {loading || !stats ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {Array.from({ length: 5 }).map((_, i) => (
               <Skeleton key={i} className="h-20 rounded-lg" />
             ))}
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               <Stat label="Atterrissages IA" value={stats.total} hint="30 derniers jours" />
               <Stat label="Visiteurs identifiés" value={stats.identifiedUsers} hint="rattachés à un compte" />
-              <Stat label="Inscriptions attribuées" value={stats.signups} hint="signup ou onboarding" />
+              <Stat label="Visiteurs IA retrouvés au compte" value={stats.signups} hint="inscription ou accueil terminé, anciens membres compris" />
               <Stat
-                label="Taux de conversion IA"
+                label="Part retrouvée au compte"
                 value={stats.conversionRate}
                 suffix=" %"
                 decimals={1}
               />
-              <Stat label="Atterrissages Facebook" value={stats.fbTotal} hint="ordre de grandeur" />
             </div>
 
             <div>
@@ -138,7 +130,7 @@ export const AiAcquisitionCard = () => {
                   Aucun atterrissage IA enregistré sur la période.
                 </p>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                   {stats.byEngine.map((e) => (
                     <Stat
                       key={e.engine}

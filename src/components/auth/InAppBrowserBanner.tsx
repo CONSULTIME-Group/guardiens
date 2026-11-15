@@ -11,6 +11,7 @@
 import { forwardRef, useMemo, useState } from "react";
 import { ExternalLink, Copy, Check, X } from "lucide-react";
 import { isInAppBrowser } from "@/lib/inAppBrowser";
+import { withSignupSrcParam } from "@/lib/signupSource";
 
 interface InAppBrowserBannerProps {
   /** URL à proposer d'ouvrir. Par défaut : URL courante. */
@@ -26,8 +27,11 @@ export const InAppBrowserBanner = forwardRef<HTMLDivElement, InAppBrowserBannerP
 
     if (!inApp || dismissed) return null;
 
+    // Lot TRF1 (P1, 15/11/2026) : l'adresse copiée emporte la source de la
+    // visite (signup_src), sinon l'arrivée depuis Instagram ou TikTok devient
+    // « direct » une fois ouverte dans Safari ou Chrome.
     const targetUrl =
-      url ?? (typeof window !== "undefined" ? window.location.href : "https://guardiens.fr");
+      url ?? (typeof window !== "undefined" ? withSignupSrcParam(window.location.href) : "https://guardiens.fr");
 
     const handleCopy = async () => {
       try {
