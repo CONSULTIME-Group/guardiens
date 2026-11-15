@@ -130,7 +130,7 @@ async function main() {
     const assocLines = associations
       .map(a => `- [${a._name}](${a.loc}) : ${a._summary}, ${a._city} (${a._dept}).`)
       .join("\n");
-    const assocBlock = `<!-- associations:start -->\n## Associations et refuges\n\n${assocLines}\n<!-- associations:end -->`;
+    const assocBlock = `<!-- associations:start -->\n## Associations à soutenir\n\n${assocLines}\n<!-- associations:end -->`;
     llms = /<!-- associations:start -->[\s\S]*?<!-- associations:end -->/.test(llms)
       ? llms.replace(/<!-- associations:start -->[\s\S]*?<!-- associations:end -->/, assocBlock)
       : `${llms.trimEnd()}\n\n${assocBlock}\n`;

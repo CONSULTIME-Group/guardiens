@@ -836,7 +836,47 @@
         },
         {
           "name": "aucune_adresse_hors_lieu_public",
-          "sql": "SELECT NOT EXISTS (SELECT 1 FROM public.animal_associations WHERE address IS NOT NULL AND association_type NOT IN ('refuge','sanctuaire','faune_sauvage')) AS ok"
+          "sql": "SELECT NOT EXISTS (SELECT 1 FROM public.animal_associations WHERE address IS NOT NULL AND association_type NOT IN ('refuge','sanctuaire','faune_sauvage','partage')) AS ok"
+        }
+      ]
+    },
+    {
+      "migration": "0166_asso4_nouveaux_themes.sql",
+      "description": "La table des associations accepte les types chantier, nature, partage, solidarite, randonnee et le besoin participants",
+      "checks": [
+        {
+          "name": "types_nouveaux_acceptes",
+          "sql": "SELECT pg_get_constraintdef(oid) LIKE '%chantier%' AND pg_get_constraintdef(oid) LIKE '%nature%' AND pg_get_constraintdef(oid) LIKE '%partage%' AND pg_get_constraintdef(oid) LIKE '%solidarite%' AND pg_get_constraintdef(oid) LIKE '%randonnee%' AS ok FROM pg_constraint WHERE conname='animal_associations_association_type_check' AND conrelid='public.animal_associations'::regclass"
+        },
+        {
+          "name": "besoin_participants_accepte",
+          "sql": "SELECT pg_get_constraintdef(oid) LIKE '%participants%' AS ok FROM pg_constraint WHERE conname='animal_associations_needs_check' AND conrelid='public.animal_associations'::regclass"
+        },
+        {
+          "name": "adresse_lieux_publics_partage",
+          "sql": "SELECT pg_get_constraintdef(oid) LIKE '%partage%' AS ok FROM pg_constraint WHERE conname='animal_associations_address_lieu_public' AND conrelid='public.animal_associations'::regclass"
+        },
+        {
+          "name": "types_animaux_conserves",
+          "sql": "SELECT NOT EXISTS (SELECT 1 FROM public.animal_associations WHERE association_type NOT IN ('refuge','sanctuaire','familles_accueil','faune_sauvage','autre','chantier','nature','partage','solidarite','randonnee')) AS ok"
+        }
+      ]
+    },
+    {
+      "migration": "0167_asso4_vague1_fiches.sql",
+      "description": "Onze associations hors animaux publiées, chacune avec SIREN, RNA, description d'au moins 150 caractères et besoin daté ou actionnable",
+      "checks": [
+        {
+          "name": "onze_fiches_vague1_publiees",
+          "sql": "SELECT count(*) = 11 AS ok FROM public.animal_associations WHERE status='published' AND slug IN ('banque-alimentaire-du-rhone','world-cleanup-day-france','conservatoire-espaces-naturels-isere','compagnons-batisseurs-rhone-alpes','ressourcerie-creative-de-lyon','le-passe-jardins','arthropologia','mountain-riders','club-alpin-francais-lyon-villeurbanne','espace-nature-isere','petits-freres-des-pauvres-lyon')"
+        },
+        {
+          "name": "fiches_hors_animaux_avec_identifiants",
+          "sql": "SELECT NOT EXISTS (SELECT 1 FROM public.animal_associations WHERE association_type IN ('chantier','nature','partage','solidarite','randonnee') AND (siren !~ '^[0-9]{9}$' OR rna !~ '^W[0-9]{9}$' OR char_length(description) < 150)) AS ok"
+        },
+        {
+          "name": "adresse_de_rue_hors_animaux_limitee_aux_lieux_publics",
+          "sql": "SELECT NOT EXISTS (SELECT 1 FROM public.animal_associations WHERE association_type IN ('chantier','nature','solidarite','randonnee') AND address IS NOT NULL) AS ok"
         }
       ]
     }

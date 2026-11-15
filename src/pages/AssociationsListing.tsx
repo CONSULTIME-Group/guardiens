@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import PageMeta from "@/components/PageMeta";
 import { SECTION_OG_IMAGES } from "@/data/siteConstants";
@@ -11,12 +11,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   ASSOCIATION_NEEDS_VALUES,
   ASSOCIATION_SPECIES_VALUES,
+  ASSOCIATION_THEMES,
   ASSOCIATION_TYPE_VALUES,
   associationInitials,
   associationNeedChipLabel,
   associationNeedLabel,
   associationPlaceLabel,
   associationSpeciesLabel,
+  associationThemeRank,
   associationTypeLabel,
 } from "@/lib/associationLabels";
 import { ASSOCIATIONS_FAQ, faqPageJsonLd } from "@/lib/associationFaq";
@@ -29,17 +31,18 @@ import {
 } from "@/components/associations/types";
 import { associationMedia } from "@/lib/associationMedia";
 
-const META_TITLE = "Associations et refuges pour animaux en France | Guardiens";
+const META_TITLE = "Associations à soutenir : animaux, nature, solidarité | Guardiens";
 const META_DESCRIPTION =
-  "Refuges, sanctuaires, familles d'accueil et centres de soins pour la faune sauvage : découvrez des associations de protection animale, leurs besoins et les moyens de les soutenir.";
+  "Refuges pour animaux, chantiers participatifs, nature, jardins partagés, solidarité et randonnées : des associations à soutenir, leurs besoins du moment et comment les aider.";
 
 const NEED_CHIP_CLASS: Record<string, string> = {
   benevoles: "bg-pastel-peach text-pastel-peach-ink",
   familles_accueil: "bg-pastel-sage text-pastel-sage-ink",
   dons: "bg-pastel-honey text-pastel-honey-ink",
+  participants: "bg-pastel-sage text-pastel-sage-ink",
 };
 
-/** Rang d'affichage : besoin de bénévoles d'abord, puis le type de structure, puis le nom. */
+/** Rang d'affichage : le thème (animaux en premier), puis le besoin de bénévoles, le type de structure, le nom. */
 const TYPE_RANK: Record<string, number> = {
   faune_sauvage: 0,
   refuge: 1,
@@ -49,6 +52,9 @@ const TYPE_RANK: Record<string, number> = {
 };
 
 const sortAssociations = (a: PublicAssociation, b: PublicAssociation) => {
+  const themeA = associationThemeRank(a.association_type);
+  const themeB = associationThemeRank(b.association_type);
+  if (themeA !== themeB) return themeA - themeB;
   const needA = a.needs?.includes("benevoles") ? 0 : 1;
   const needB = b.needs?.includes("benevoles") ? 0 : 1;
   if (needA !== needB) return needA - needB;
@@ -125,6 +131,12 @@ const AssociationCard = ({ association }: { association: PublicAssociation }) =>
 };
 
 export default function AssociationsListing() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const themeParam = searchParams.get("theme");
+  const theme = ASSOCIATION_THEMES.some((t) => t.key === themeParam) ? (themeParam as string) : "all";
+  const themeTypes: readonly string[] =
+    ASSOCIATION_THEMES.find((t) => t.key === theme)?.types ?? ASSOCIATION_TYPE_VALUES;
+  const showSpecies = theme === "all" || theme === "animaux";
   const [departement, setDepartement] = useState<string>("all");
   const [type, setType] = useState<string>("all");
   const [species, setSpecies] = useState<string>("all");
@@ -148,9 +160,19 @@ export default function AssociationsListing() {
     return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0], "fr"));
   }, [associations]);
 
+  const chooseTheme = (key: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (key === "all") next.delete("theme");
+    else next.set("theme", key);
+    setSearchParams(next, { replace: true });
+    setType("all");
+    setSpecies("all");
+  };
+
   const filtered = useMemo(
     () =>
       associations.filter((a) => {
+        if (theme !== "all" && !themeTypes.includes(a.association_type)) return false;
         if (departement !== "all" && a.departement_code !== departement) return false;
         if (type !== "all" && a.association_type !== type) return false;
         if (species !== "all" && !a.species.includes(species)) return false;
@@ -158,7 +180,7 @@ export default function AssociationsListing() {
         return true;
       })
       .sort(sortAssociations),
-    [associations, departement, type, species, need],
+    [associations, theme, departement, type, species, need],
   );
 
   const indexable = associations.filter((a) => isAssociationIndexable(a));
@@ -169,13 +191,13 @@ export default function AssociationsListing() {
     {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
-      name: "Associations et refuges pour animaux",
+      name: "Associations à soutenir",
       description: META_DESCRIPTION,
       url: `${SITE_URL}/associations`,
       inLanguage: "fr",
       mainEntity: {
         "@type": "ItemList",
-        name: "Associations de protection animale présentées par Guardiens",
+        name: "Associations présentées par Guardiens",
         numberOfItems: indexable.length,
         itemListOrder: "https://schema.org/ItemListOrderAscending",
         itemListElement: indexable.slice(0, 100).map((a, i) => ({
@@ -205,7 +227,7 @@ export default function AssociationsListing() {
         {
           "@type": "ListItem",
           position: 2,
-          name: "Associations et refuges",
+          name: "Associations",
           item: `${SITE_URL}/associations`,
         },
       ],
@@ -231,18 +253,40 @@ export default function AssociationsListing() {
       <div className="container mx-auto px-4 py-6 md:py-10 max-w-6xl min-w-0">
         <header className="mb-6 md:mb-8">
           <h1 className="text-2xl md:text-4xl font-display font-bold">
-            Associations et refuges pour animaux
+            Associations à soutenir près de chez vous
           </h1>
           <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-3xl">
-            Cet espace fait connaître des associations de protection animale auprès des membres de
-            Guardiens. Pour chacune, vous trouvez son activité et ce dont elle a besoin
-            aujourd'hui : des bénévoles, des dons, des familles d'accueil. Vous êtes une
+            Cet espace fait connaître des associations auprès des membres de Guardiens : protection
+            animale, chantiers participatifs, nature, jardins partagés, solidarité et randonnées.
+            Pour chacune, vous trouvez son activité et ce dont elle a besoin aujourd'hui : des
+            bénévoles, des dons, des familles d'accueil, des participants. Vous êtes une
             association ? Présentez la vôtre, l'espace est ouvert à toutes.
           </p>
           <Button asChild size="sm" className="mt-4">
             <Link to="/contact?sujet=association">Présenter mon association</Link>
           </Button>
         </header>
+
+        <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Thème">
+          {[{ key: "all", label: "Toutes" }, ...ASSOCIATION_THEMES].map((t) => {
+            const active = theme === t.key;
+            return (
+              <button
+                key={t.key}
+                type="button"
+                aria-pressed={active}
+                onClick={() => chooseTheme(t.key)}
+                className={`min-h-10 rounded-full border px-4 text-sm font-medium transition-colors ${
+                  active
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-background text-foreground hover:bg-muted/40"
+                }`}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
 
         <div className="mb-6 flex flex-col gap-2 md:flex-row">
           <select
@@ -265,25 +309,27 @@ export default function AssociationsListing() {
             aria-label="Type d'association"
           >
             <option value="all">Tous les types</option>
-            {ASSOCIATION_TYPE_VALUES.map((v) => (
+            {ASSOCIATION_TYPE_VALUES.filter((v) => themeTypes.includes(v)).map((v) => (
               <option key={v} value={v}>
                 {associationTypeLabel(v)}
               </option>
             ))}
           </select>
-          <select
-            value={species}
-            onChange={(e) => setSpecies(e.target.value)}
-            className={selectClass}
-            aria-label="Espèce accueillie"
-          >
-            <option value="all">Toutes les espèces</option>
-            {ASSOCIATION_SPECIES_VALUES.map((v) => (
-              <option key={v} value={v}>
-                {associationSpeciesLabel(v)}
-              </option>
-            ))}
-          </select>
+          {showSpecies && (
+            <select
+              value={species}
+              onChange={(e) => setSpecies(e.target.value)}
+              className={selectClass}
+              aria-label="Espèce accueillie"
+            >
+              <option value="all">Toutes les espèces</option>
+              {ASSOCIATION_SPECIES_VALUES.map((v) => (
+                <option key={v} value={v}>
+                  {associationSpeciesLabel(v)}
+                </option>
+              ))}
+            </select>
+          )}
           <select
             value={need}
             onChange={(e) => setNeed(e.target.value)}
