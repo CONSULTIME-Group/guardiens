@@ -549,7 +549,7 @@ const AdminAnalytics = () => {
           {/* Top pages */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Top sources de pages vues</CardTitle>
+              <CardTitle className="text-base">Pages les plus vues</CardTitle>
               <p className="text-xs text-muted-foreground mt-1">
                 Chemins normalisés (UUID/slug regroupés sous <code className="text-foreground/70">:id</code> / <code className="text-foreground/70">:slug</code>)
               </p>

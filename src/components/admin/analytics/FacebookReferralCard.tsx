@@ -18,6 +18,8 @@ interface Row {
 
 const FacebookReferralCard = ({ rangeDays }: Props) => {
   const [rows, setRows] = useState<Row[] | null>(null);
+  // Lot TRF1 (P3) : compte exact des arrivées, la liste reste bornée à 1 000 lignes.
+  const [landingCount, setLandingCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,6 +28,12 @@ const FacebookReferralCard = ({ rangeDays }: Props) => {
 
     (async () => {
       const since = startOfDay(subDays(new Date(), rangeDays - 1)).toISOString();
+      const countRes = await supabase
+        .from("analytics_events")
+        .select("id", { count: "exact", head: true })
+        .eq("event_type", "fb_referral_landing")
+        .gte("created_at", since);
+      if (!cancelled) setLandingCount(countRes.error ? null : countRes.count ?? 0);
       const { data, error } = await supabase
         .from("analytics_events")
         .select("event_type, metadata, source, created_at")
@@ -68,12 +76,13 @@ const FacebookReferralCard = ({ rangeDays }: Props) => {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5);
 
-    const responseRate = landings.length
-      ? Math.round((feedbacks.length / landings.length) * 100)
+    const landingTotal = landingCount ?? landings.length;
+    const responseRate = landingTotal
+      ? Math.round((feedbacks.length / landingTotal) * 100)
       : 0;
 
     return {
-      landings: landings.length,
+      landings: landingTotal,
       feedbacks: feedbacks.length,
       dismissed: dismissed.length,
       reactions,
@@ -81,7 +90,7 @@ const FacebookReferralCard = ({ rangeDays }: Props) => {
       topPaths,
       responseRate,
     };
-  }, [rows]);
+  }, [rows, landingCount]);
 
   return (
     <Card>
@@ -90,6 +99,9 @@ const FacebookReferralCard = ({ rangeDays }: Props) => {
           <Facebook className="h-5 w-5 text-primary" />
           Trafic Facebook (commentaires)
         </CardTitle>
+        <p className="text-xs text-muted-foreground">
+          Arrivées par les liens des commentaires Facebook, {rangeDays === 1 ? "24 dernières heures" : `${rangeDays} derniers jours`}.
+        </p>
       </CardHeader>
       <CardContent>
         {loading || !stats ? (
@@ -108,7 +120,7 @@ const FacebookReferralCard = ({ rangeDays }: Props) => {
           <div className="space-y-5">
             {/* KPIs */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Kpi label="Visites FB" value={stats.landings} />
+              <Kpi label="Arrivées depuis Facebook" value={stats.landings} />
               <Kpi label="Retours" value={stats.feedbacks} hint={`${stats.responseRate}% de réponse`} />
               <Kpi label="Fermés" value={stats.dismissed} />
               <Kpi label="Commentaires" value={stats.comments.length} />
