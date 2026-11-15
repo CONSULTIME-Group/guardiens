@@ -907,6 +907,14 @@ const EditSit = () => {
         </div>
       </fieldset>
 
+      {/* Lot SUPPR2 (15/11/2026) : dépublier et supprimer vivent sur la fiche,
+          dans « Gérer cette garde » ; le formulaire y mène directement. */}
+      <div className="mt-6 rounded-xl border border-border bg-muted/30 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3" data-testid="edit-sit-remove-link">
+        <p className="text-sm text-muted-foreground">Retirer cette annonce : dépublier ou supprimer se fait depuis sa fiche.</p>
+        <Link to={`/sits/${id}#gerer-cette-garde`} className="inline-flex min-h-11 items-center justify-center rounded-full border border-border bg-background px-4 text-sm font-medium hover:border-primary">
+          Dépublier ou supprimer l'annonce
+        </Link>
+      </div>
 
       {/* Confirmation : modification de dates sur garde confirmée */}
       <AlertDialog open={confirmDatesOpen} onOpenChange={setConfirmDatesOpen}>

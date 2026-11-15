@@ -71,9 +71,9 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     // Lot L6 : la page d'une candidature reçue, ouverte depuis la notification.
     aliases: ["/candidatures/:id"],
     label: "Mes annonces et candidatures reçues",
-    purpose: "Les annonces du propriétaire, leurs brouillons, les candidatures reçues à ouvrir, accepter ou décliner, puis l'accord de garde signé des deux côtés.",
+    purpose: "Les annonces du propriétaire, leurs brouillons, les candidatures reçues à ouvrir, accepter ou décliner, puis l'accord de garde signé des deux côtés. Pour retirer une annonce : ouvrir sa fiche depuis Mes annonces, bloc « Gérer cette garde » en bas de la fiche, boutons « Dépublier l'annonce » (retour en brouillon, plus visible des gardiens) et « Supprimer l'annonce » ; le formulaire de modification y renvoie par un lien en bas de page.",
     audience: "owner",
-    triggers: ["mes annonces", "candidatures recues", "brouillon", "accepter", "accord de garde", "accord"],
+    triggers: ["mes annonces", "candidatures recues", "brouillon", "accepter", "accord de garde", "accord", "supprimer mon annonce", "supprimer l'annonce", "supprimer une annonce", "retirer mon annonce", "depublier", "rendre invisible", "masquer mon annonce", "cacher mon annonce"],
     opener: "Vos annonces et les candidatures reçues sont dans Mes annonces.",
   },
   {
