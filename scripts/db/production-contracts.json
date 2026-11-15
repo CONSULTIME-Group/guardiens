@@ -929,6 +929,16 @@
           "sql": "SELECT address = 'Lieu-dit Le Petit Goupille' AS ok FROM public.animal_associations WHERE slug='le-repere-champeon'"
         }
       ]
+    },
+    {
+      "migration": "0170_asso_contact_emails.sql",
+      "description": "Emails de contact publics renseignés pour 18 fiches associations (hors Arche du Val de Sambre, formulaire seul)",
+      "checks": [
+        {
+          "name": "emails_contact_renseignes",
+          "sql": "SELECT count(*)=18 AS ok FROM public.animal_associations WHERE contact_email IS NOT NULL AND slug IN ('1000-moustaches','arthropologia','banque-alimentaire-du-rhone','club-alpin-francais-lyon-villeurbanne','compagnons-batisseurs-rhone-alpes','concordia-chantiers-benevoles','conservatoire-espaces-naturels-isere','espace-nature-isere','fne-rhone','le-passe-jardins','lpo-auvergne-rhone-alpes','mountain-riders','mountain-wilderness-france','petits-freres-des-pauvres-lyon','rempart-chantiers-patrimoine','ressourcerie-creative-de-lyon','restos-du-coeur-rhone','world-cleanup-day-france')"
+        }
+      ]
     }
   ]
 }
