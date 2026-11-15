@@ -795,6 +795,28 @@
           "sql": "SELECT public.my_alert_email_state() = 'off' AS ok"
         }
       ]
+    },
+    {
+      "migration": "0164_asso1_logos_photos_retour.sql",
+      "description": "La vue publique des associations sert photos et logo sauf refus de l'association",
+      "checks": [
+        {
+          "name": "regle_refus_presente",
+          "sql": "SELECT position('''refused''' IN pg_get_viewdef('public.public_animal_associations'::regclass)) > 0 AS ok"
+        },
+        {
+          "name": "logos_servis_sans_refus",
+          "sql": "SELECT count(*) FILTER (WHERE logo_url IS NOT NULL) > 0 AS ok FROM public.public_animal_associations"
+        },
+        {
+          "name": "photos_authorized_inchange",
+          "sql": "SELECT NOT EXISTS (SELECT 1 FROM public.public_animal_associations v JOIN public.animal_associations a ON a.id = v.id WHERE v.photos_authorized <> (a.consent_status = 'granted')) AS ok"
+        },
+        {
+          "name": "refus_sans_image",
+          "sql": "SELECT NOT EXISTS (SELECT 1 FROM public.public_animal_associations v JOIN public.animal_associations a ON a.id = v.id WHERE a.consent_status = 'refused' AND (jsonb_array_length(v.photos) > 0 OR v.logo_url IS NOT NULL)) AS ok"
+        }
+      ]
     }
   ]
 }
