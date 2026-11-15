@@ -160,7 +160,7 @@ const AdminSEO = ({ extraTools }: { extraTools?: React.ReactNode } = {}) => {
       <SeoActionJournal log={actionLog} />
 
       {gscAvailable && gsc && (
-        <details className="rounded-2xl border bg-card px-4" data-testid="seo-detail-google" open>
+        <details className="rounded-2xl border bg-card px-4" data-testid="seo-detail-google">
           <summary className="min-h-11 flex items-center text-base font-semibold cursor-pointer">Chiffres Google et types de page</summary>
           <div className="space-y-6 pb-4 pt-2">
             <SeoGoogleKpis current={gsc.current} previous={gsc.previous} period={gscPeriod} queries={gsc.allQueries} />
