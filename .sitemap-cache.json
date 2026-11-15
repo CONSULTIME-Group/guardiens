@@ -14,24 +14,24 @@
       "fetchedAt": "2026-10-14T09:50:39.489Z"
     },
     "public_animal_associations_v2": {
-      "head": "2026-11-10T21:26:45.605339+00:00|11",
-      "fetchedAt": "2026-11-13T07:34:59.726Z"
+      "head": "2026-11-15T18:06:15.411465+00:00|33",
+      "fetchedAt": "2026-11-15T19:29:03.532Z"
     },
     "articles": {
       "head": "2026-11-12T11:40:12.146425+00:00|134",
       "fetchedAt": "2026-11-13T07:34:59.631Z"
     },
     "city_guides": {
-      "head": "2026-11-13T06:55:05.563248+00:00|122",
-      "fetchedAt": "2026-11-13T07:34:59.556Z"
+      "head": "2026-11-15T00:25:06.478102+00:00|123",
+      "fetchedAt": "2026-11-15T19:29:03.531Z"
     },
     "seo_department_pages_v2": {
-      "head": "2026-11-13T04:07:00.206449+00:00|103#2026-11-13T04:05:00.559801+00:00|172",
-      "fetchedAt": "2026-11-13T07:34:59.675Z"
+      "head": "2026-11-15T04:07:00.186497+00:00|103#2026-11-15T04:05:00.426499+00:00|172",
+      "fetchedAt": "2026-11-15T19:29:03.537Z"
     },
     "seo_city_pages_v2": {
-      "head": "2026-11-13T04:05:00.559801+00:00|172",
-      "fetchedAt": "2026-11-13T07:34:59.580Z"
+      "head": "2026-11-15T04:05:00.426499+00:00|172",
+      "fetchedAt": "2026-11-15T19:29:03.542Z"
     }
   },
   "entries": {
@@ -2123,6 +2123,66 @@
         "_dept": "Loire-Atlantique"
       },
       {
+        "loc": "/associations/rempart-chantiers-patrimoine",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "REMPART",
+        "_summary": "Chantiers de bénévoles pour restaurer le patrimoine, ouverts à tous les âges, partout en France.",
+        "_city": "Paris",
+        "_dept": "Paris"
+      },
+      {
+        "loc": "/associations/fne-rhone",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "France Nature Environnement Rhône (FNE Rhône)",
+        "_summary": "Chantiers écovolontaires, suivis de biodiversité et événements nature dans le Rhône et la métropole de Lyon.",
+        "_city": "Villeurbanne",
+        "_dept": "Rhône"
+      },
+      {
+        "loc": "/associations/petits-freres-des-pauvres-lyon",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Les Petits Frères des Pauvres (équipes de Lyon)",
+        "_summary": "Visites régulières et temps conviviaux auprès de personnes âgées isolées, à Lyon et dans le Rhône.",
+        "_city": "Lyon",
+        "_dept": "Rhône"
+      },
+      {
+        "loc": "/associations/on-the-green-road",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "On The Green Road",
+        "_summary": "Voyages locaux à pied, à vélo ou en train, festival du voyage engagé et projets citoyens à Lyon.",
+        "_city": "Lyon",
+        "_dept": "Rhône"
+      },
+      {
+        "loc": "/associations/world-cleanup-day-france",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "World Cleanup Day France",
+        "_summary": "La mobilisation citoyenne contre les déchets abandonnés, chaque année autour du 20 septembre, près de chez vous.",
+        "_city": "Lille",
+        "_dept": "Nord"
+      },
+      {
+        "loc": "/associations/eco-garde-rhone",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Éco-garde Rhône",
+        "_summary": "Éco-gardes bénévoles qui surveillent et font découvrir les espaces naturels sensibles du Rhône.",
+        "_city": "Lyon",
+        "_dept": "Rhône"
+      },
+      {
         "loc": "/associations/arche-du-val-de-sambre",
         "lastmod": null,
         "changefreq": "monthly",
@@ -2143,6 +2203,16 @@
         "_dept": "Bouches-du-Rhône"
       },
       {
+        "loc": "/associations/club-alpin-francais-lyon-villeurbanne",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Club Alpin Français de Lyon-Villeurbanne",
+        "_summary": "Randonnée, escalade, ski de randonnée et alpinisme avec des encadrants bénévoles, carte découverte de 3 jours.",
+        "_city": "Villeurbanne",
+        "_dept": "Rhône"
+      },
+      {
         "loc": "/associations/chats-d-oc-du-castera",
         "lastmod": null,
         "changefreq": "monthly",
@@ -2151,6 +2221,46 @@
         "_summary": "Au Castéra, des bénévoles transforment les chats errants en chats libres : 200 stérilisations en 2025.",
         "_city": "Le Castéra",
         "_dept": "Haute-Garonne"
+      },
+      {
+        "loc": "/associations/compagnons-batisseurs-rhone-alpes",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Compagnons Bâtisseurs Rhône-Alpes",
+        "_summary": "Chantiers d'auto-réhabilitation et ateliers bricolage pour mieux habiter, dans le Rhône, l'Isère et la Drôme.",
+        "_city": "Oullins-Pierre-Bénite",
+        "_dept": "Rhône"
+      },
+      {
+        "loc": "/associations/arthropologia",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Arthropologia",
+        "_summary": "Association naturaliste lyonnaise pour la protection des insectes : sorties, ateliers et sciences participatives.",
+        "_city": "La Tour-de-Salvagny",
+        "_dept": "Rhône"
+      },
+      {
+        "loc": "/associations/coup-de-pouce-universite-lyon",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Coup de Pouce Université (CPU)",
+        "_summary": "Cours de français, soutien et repas partagés pour des étudiants internationaux, avec des bénévoles à Lyon 7e.",
+        "_city": "Lyon",
+        "_dept": "Rhône"
+      },
+      {
+        "loc": "/associations/lpo-auvergne-rhone-alpes",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "LPO Auvergne-Rhône-Alpes",
+        "_summary": "Six façons d'agir pour la biodiversité, du suivi des oiseaux au secours des animaux sauvages, partout dans la région.",
+        "_city": "Lyon",
+        "_dept": "Rhône"
       },
       {
         "loc": "/associations/kitties-in-paris",
@@ -2163,6 +2273,16 @@
         "_dept": "Paris"
       },
       {
+        "loc": "/associations/ressourcerie-creative-de-lyon",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "La Ressourcerie Créative de Lyon",
+        "_summary": "Boutique de réemploi et ateliers à Lyon 7e, portés par des bénévoles qui donnent le temps qu'ils veulent.",
+        "_city": "Lyon",
+        "_dept": "Rhône"
+      },
+      {
         "loc": "/associations/canistory",
         "lastmod": null,
         "changefreq": "monthly",
@@ -2171,6 +2291,26 @@
         "_summary": "Des chiens et des chats de France et de Roumanie, accompagnés jusqu'à l'adoption par des bénévoles alsaciens.",
         "_city": "Lampertheim",
         "_dept": "Bas-Rhin"
+      },
+      {
+        "loc": "/associations/conservatoire-espaces-naturels-isere",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Conservatoire d'espaces naturels Isère (CEN Isère)",
+        "_summary": "Chantiers nature et suivis naturalistes en Isère, ouverts aux bénévoles depuis 2024.",
+        "_city": "Saint-Égrève",
+        "_dept": "Isère"
+      },
+      {
+        "loc": "/associations/concordia-chantiers-benevoles",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Concordia",
+        "_summary": "Chantiers internationaux de bénévoles en France et dans le monde, ouverts à tous, avec une délégation à Lyon.",
+        "_city": "Paris",
+        "_dept": "Paris"
       },
       {
         "loc": "/associations/le-repere-champeon",
@@ -2183,6 +2323,36 @@
         "_dept": "Mayenne"
       },
       {
+        "loc": "/associations/espace-nature-isere",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Espace Nature Isère",
+        "_summary": "Protection de la nature dans le Sud-Grésivaudan : chantiers écologiques, animations et festival L'Avenir au Naturel.",
+        "_city": "L'Albenc",
+        "_dept": "Isère"
+      },
+      {
+        "loc": "/associations/mountain-wilderness-france",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Mountain Wilderness France",
+        "_summary": "Défense de la montagne, groupes locaux de bénévoles et chantiers de démantèlement d'installations abandonnées.",
+        "_city": "Grenoble",
+        "_dept": "Isère"
+      },
+      {
+        "loc": "/associations/le-passe-jardins",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Le Passe-Jardins",
+        "_summary": "Le réseau des jardins partagés d'Auvergne-Rhône-Alpes : création, formation et animation depuis 1998.",
+        "_city": "Lyon",
+        "_dept": "Rhône"
+      },
+      {
         "loc": "/associations/des-coeurs-a-sauver",
         "lastmod": null,
         "changefreq": "monthly",
@@ -2191,6 +2361,16 @@
         "_summary": "Une équipe entièrement bénévole qui secourt plus de 300 animaux par an autour d'Annecy.",
         "_city": "Sevrier",
         "_dept": "Haute-Savoie"
+      },
+      {
+        "loc": "/associations/emmaus-lyon",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Emmaüs Lyon",
+        "_summary": "Communauté d'accueil et trois espaces de vente solidaires : bénévoles du mardi au samedi, dons d'objets bienvenus.",
+        "_city": "Vénissieux",
+        "_dept": "Rhône"
       },
       {
         "loc": "/associations/la-chat-hyeres",
@@ -2221,6 +2401,46 @@
         "_summary": "À Grenoble depuis 2003, des bénévoles veillent sur 1 500 chats libres et trouvent une famille aux chats recueillis.",
         "_city": "Grenoble",
         "_dept": "Isère"
+      },
+      {
+        "loc": "/associations/restos-du-coeur-rhone",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Les Restos du Cœur du Rhône",
+        "_summary": "Aide alimentaire et accompagnement dans 27 centres du Rhône, avec des missions pour tous les emplois du temps.",
+        "_city": "Lyon",
+        "_dept": "Rhône"
+      },
+      {
+        "loc": "/associations/afe-apprendre-le-francais-ensemble-lyon",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "AFE, Apprendre le Français Ensemble",
+        "_summary": "Ateliers de français chaque lundi soir à Lyon 3e pour personnes nouvellement arrivées, bénévolat sans engagement.",
+        "_city": "Lyon",
+        "_dept": "Rhône"
+      },
+      {
+        "loc": "/associations/banque-alimentaire-du-rhone",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Banque Alimentaire du Rhône",
+        "_summary": "Collecte et redistribue des denrées dans le Rhône et la métropole de Lyon, avec des bénévoles toute l'année.",
+        "_city": "Décines-Charpieu",
+        "_dept": "Rhône"
+      },
+      {
+        "loc": "/associations/mountain-riders",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.7",
+        "_name": "Mountain Riders",
+        "_summary": "Éducation à la transition écologique en montagne : ramassages Montagne Zéro Déchet ouverts au public.",
+        "_city": "Chambéry",
+        "_dept": "Savoie"
       }
     ],
     "articles": [
@@ -3081,6 +3301,12 @@
       {
         "loc": "/guides/papeete",
         "lastmod": "2026-10-14",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/santeny",
+        "lastmod": "2026-11-15",
         "changefreq": "weekly",
         "priority": "0.7"
       },
