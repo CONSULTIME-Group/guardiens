@@ -6,22 +6,22 @@ import { SECTION_OG_IMAGES } from "@/data/siteConstants";
 import { SITE_URL } from "@/lib/seo";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  ASSOCIATION_NEEDS_VALUES,
   ASSOCIATION_SPECIES_VALUES,
   ASSOCIATION_TYPE_VALUES,
   associationInitials,
   associationNeedChipLabel,
+  associationNeedLabel,
+  associationPlaceLabel,
   associationSpeciesLabel,
   associationTypeLabel,
 } from "@/lib/associationLabels";
 import { ASSOCIATIONS_FAQ, faqPageJsonLd } from "@/lib/associationFaq";
 import { AssociationFaq } from "@/components/associations/AssociationFaq";
-import VolunteerCountByDepartment from "@/components/associations/VolunteerCountByDepartment";
 import VolunteerInviteBlock from "@/components/associations/VolunteerInviteBlock";
-import AssociationNeedsHighlight from "@/components/associations/AssociationNeedsHighlight";
 import { isAssociationIndexable } from "@/lib/associationIndexability";
 import {
   PUBLIC_ASSOCIATION_COLUMNS,
@@ -33,75 +33,92 @@ const META_TITLE = "Associations et refuges pour animaux en France | Guardiens";
 const META_DESCRIPTION =
   "Refuges, sanctuaires, familles d'accueil et centres de soins pour la faune sauvage : découvrez des associations de protection animale, leurs besoins et les moyens de les soutenir.";
 
+const NEED_CHIP_CLASS: Record<string, string> = {
+  benevoles: "bg-pastel-peach text-pastel-peach-ink",
+  familles_accueil: "bg-pastel-sage text-pastel-sage-ink",
+  dons: "bg-pastel-honey text-pastel-honey-ink",
+};
+
+/** Rang d'affichage : besoin de bénévoles d'abord, puis le type de structure, puis le nom. */
+const TYPE_RANK: Record<string, number> = {
+  faune_sauvage: 0,
+  refuge: 1,
+  sanctuaire: 2,
+  familles_accueil: 3,
+  autre: 4,
+};
+
+const sortAssociations = (a: PublicAssociation, b: PublicAssociation) => {
+  const needA = a.needs?.includes("benevoles") ? 0 : 1;
+  const needB = b.needs?.includes("benevoles") ? 0 : 1;
+  if (needA !== needB) return needA - needB;
+  const typeA = TYPE_RANK[a.association_type] ?? 4;
+  const typeB = TYPE_RANK[b.association_type] ?? 4;
+  if (typeA !== typeB) return typeA - typeB;
+  return a.name.localeCompare(b.name, "fr");
+};
+
 const AssociationCard = ({ association }: { association: PublicAssociation }) => {
-  const [photoFailed, setPhotoFailed] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
-  // Lot SEO1 : photo et logo seulement avec l'accord de l'association.
+  // Lot ASSO-1 : logo servi tant que l'association n'a pas refusé.
   const media = associationMedia(association);
-  const cover = media.photos[0];
   const firstNeed = association.needs?.[0];
   const needChip = firstNeed ? associationNeedChipLabel(firstNeed) : "";
+  const summary = association.tagline || association.description;
 
   return (
-    <Link to={`/associations/${association.slug}`} className="block group">
-      <Card className="h-full overflow-hidden transition-shadow group-hover:shadow-md">
-        <div className="relative aspect-[16/9] w-full bg-muted overflow-hidden flex items-center justify-center">
-          {cover && !photoFailed ? (
-            <img
-              src={cover.url}
-              alt={cover.alt || association.name}
-              loading="lazy"
-              decoding="async"
-              onError={() => setPhotoFailed(true)}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <span className="font-display text-2xl font-bold text-muted-foreground">
-              {associationInitials(association.name)}
-            </span>
-          )}
-          <span className="absolute bottom-2 left-2 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-background shadow-sm">
+    <Link to={`/associations/${association.slug}`} className="group block">
+      <Card className="flex h-full flex-col gap-3 rounded-2xl p-5 transition-shadow group-hover:shadow-md">
+        <div className="flex items-center gap-3.5">
+          <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border bg-white">
             {media.logoUrl && !logoFailed ? (
               <img
                 src={media.logoUrl}
                 alt={`Logo de ${association.name}`}
-                width={40}
-                height={40}
+                width={64}
+                height={64}
                 loading="lazy"
                 decoding="async"
                 onError={() => setLogoFailed(true)}
-                className="h-full w-full object-contain"
+                className="h-full w-full object-contain p-1.5"
               />
             ) : (
-              <span className="text-[11px] font-semibold text-muted-foreground">
+              <span className="font-heading text-xl font-bold text-pastel-sage-ink">
                 {associationInitials(association.name)}
               </span>
             )}
           </span>
-        </div>
-        <CardContent className="p-4">
-          <h2 className="font-heading text-base font-semibold text-foreground">{association.name}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {associationTypeLabel(association.association_type)}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {association.city}, {association.departement_name}
-          </p>
-          {needChip && (
-            <p className="mt-2 inline-flex rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
-              {needChip}
+          <div className="min-w-0">
+            <h2 className="font-heading text-lg font-semibold leading-tight text-foreground">
+              {association.name}
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {associationPlaceLabel(association.city, association.departement_name)}
             </p>
+          </div>
+        </div>
+        {summary && (
+          <p className="line-clamp-3 text-[15px] leading-relaxed text-foreground">{summary}</p>
+        )}
+        <div className="mt-auto flex flex-wrap gap-2">
+          {needChip && (
+            <span
+              className={`rounded-full px-2.5 py-1 text-[13px] font-medium ${
+                NEED_CHIP_CLASS[firstNeed] ?? "bg-muted text-muted-foreground"
+              }`}
+            >
+              {needChip}
+            </span>
           )}
-          {association.species.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {association.species.map((s) => (
-                <Badge key={s} variant="secondary" className="text-xs">
-                  {associationSpeciesLabel(s)}
-                </Badge>
-              ))}
-            </div>
-          )}
-        </CardContent>
+          <span className="rounded-full bg-muted px-2.5 py-1 text-[13px] text-muted-foreground">
+            {associationTypeLabel(association.association_type)}
+          </span>
+        </div>
+        {association.species.length > 0 && (
+          <p className="text-[13px] text-muted-foreground">
+            {association.species.map((sp) => associationSpeciesLabel(sp)).join(" · ")}
+          </p>
+        )}
       </Card>
     </Link>
   );
@@ -111,6 +128,7 @@ export default function AssociationsListing() {
   const [departement, setDepartement] = useState<string>("all");
   const [type, setType] = useState<string>("all");
   const [species, setSpecies] = useState<string>("all");
+  const [need, setNeed] = useState<string>("all");
 
   const { data: associations = [], isLoading } = useQuery<PublicAssociation[]>({
     queryKey: ["public-associations"],
@@ -136,25 +154,16 @@ export default function AssociationsListing() {
         if (departement !== "all" && a.departement_code !== departement) return false;
         if (type !== "all" && a.association_type !== type) return false;
         if (species !== "all" && !a.species.includes(species)) return false;
+        if (need !== "all" && !(a.needs ?? []).includes(need)) return false;
         return true;
-      }),
-    [associations, departement, type, species],
+      })
+      .sort(sortAssociations),
+    [associations, departement, type, species, need],
   );
 
   const indexable = associations.filter((a) => isAssociationIndexable(a));
 
-  const noFilter = departement === "all" && type === "all" && species === "all";
-
-  /** Groupes par département, triés sur le nom du département. */
-  const grouped = useMemo(() => {
-    const map = new Map<string, PublicAssociation[]>();
-    filtered.forEach((a) => {
-      const list = map.get(a.departement_name) ?? [];
-      list.push(a);
-      map.set(a.departement_name, list);
-    });
-    return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0], "fr"));
-  }, [filtered]);
+  const departementCount = new Set(filtered.map((a) => a.departement_code)).size;
 
   const jsonLd = [
     {
@@ -275,47 +284,43 @@ export default function AssociationsListing() {
               </option>
             ))}
           </select>
+          <select
+            value={need}
+            onChange={(e) => setNeed(e.target.value)}
+            className={selectClass}
+            aria-label="Besoin de l'association"
+          >
+            <option value="all">Tous les besoins</option>
+            {ASSOCIATION_NEEDS_VALUES.map((v) => (
+              <option key={v} value={v}>
+                {associationNeedLabel(v)}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {!isLoading && <AssociationNeedsHighlight associations={associations} />}
+        <p className="mb-4 text-sm text-muted-foreground" aria-live="polite">
+          {isLoading
+            ? "Chargement des associations"
+            : `${filtered.length} ${filtered.length > 1 ? "associations" : "association"}, ${departementCount} ${departementCount > 1 ? "départements" : "département"}`}
+        </p>
 
         {isLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {[0, 1, 2].map((i) => (
-              <Skeleton key={i} className="h-64 rounded-xl" />
+              <Skeleton key={i} className="h-56 rounded-2xl" />
             ))}
           </div>
         ) : filtered.length > 0 ? (
-          noFilter ? (
-            <div className="space-y-10">
-              {grouped.map(([departementName, list]) => (
-                <section key={departementName}>
-                  <h2 className="mb-2 font-heading text-lg md:text-xl font-semibold text-foreground">
-                    Associations de protection animale : {departementName}
-                  </h2>
-                  <VolunteerCountByDepartment
-                    departementCode={list[0]?.departement_code}
-                    className="mb-4"
-                  />
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {list.map((a) => (
-                      <AssociationCard key={a.id} association={a} />
-                    ))}
-                  </div>
-                </section>
-              ))}
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((a) => (
-                <AssociationCard key={a.id} association={a} />
-              ))}
-            </div>
-          )
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((a) => (
+              <AssociationCard key={a.id} association={a} />
+            ))}
+          </div>
         ) : (
           <p className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
-            Les premières fiches arrivent. Revenez bientôt pour découvrir les associations
-            présentées ici.
+            Aucune association ne correspond à ces filtres. Les premières fiches arrivent, revenez
+            bientôt pour découvrir les associations présentées ici.
           </p>
         )}
 

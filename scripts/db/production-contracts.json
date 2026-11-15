@@ -817,6 +817,28 @@
           "sql": "SELECT NOT EXISTS (SELECT 1 FROM public.public_animal_associations v JOIN public.animal_associations a ON a.id = v.id WHERE a.consent_status = 'refused' AND (jsonb_array_length(v.photos) > 0 OR v.logo_url IS NOT NULL)) AS ok"
         }
       ]
+    },
+    {
+      "migration": "0165_asso3_adresse_postale.sql",
+      "description": "La fiche association porte une adresse postale réservée aux lieux ouverts au public",
+      "checks": [
+        {
+          "name": "colonne_address_table",
+          "sql": "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='animal_associations' AND column_name='address') AS ok"
+        },
+        {
+          "name": "colonne_address_vue",
+          "sql": "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='public_animal_associations' AND column_name='address') AS ok"
+        },
+        {
+          "name": "regle_lieu_public",
+          "sql": "SELECT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='animal_associations_address_lieu_public' AND conrelid='public.animal_associations'::regclass) AS ok"
+        },
+        {
+          "name": "aucune_adresse_hors_lieu_public",
+          "sql": "SELECT NOT EXISTS (SELECT 1 FROM public.animal_associations WHERE address IS NOT NULL AND association_type NOT IN ('refuge','sanctuaire','faune_sauvage')) AS ok"
+        }
+      ]
     }
   ]
 }
