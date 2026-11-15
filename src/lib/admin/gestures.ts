@@ -51,6 +51,8 @@ export interface Gesture {
   /** Second geste d'écriture, en lien (propriétaire d'une annonce sans candidature). */
   secondaryWrite?: GestureWrite & { label: string };
   children?: Gesture[];
+  /** Lot VE-5 : la carte d'action du signal reste accessible sous « Autres gestes ». */
+  moreActions?: boolean;
   sort: number;
 }
 
@@ -218,6 +220,23 @@ export function buildGestures(model: WorkListModel | null | undefined, now: numb
         : str(m.first_name) || str(m.title) || str(m.excerpt));
       const single = groups.size === 1;
       const own = elementLinkOf(signals[0]);
+      const profile = profileOf(signals[0]);
+      const first = str(m.first_name);
+      // Lot VE-5 : meilleur gardien endormi, le bouton écrit ; le boost reste sous « Autres gestes ».
+      if (item.type === "dormant_top_sitter" && profile) {
+        const quiet = Number(m.days_since_last_application ?? 0) || 0;
+        const reviews = Number(m.reviews_count ?? 0) || 0;
+        out.push({
+          key: `${item.key}:${key}`, bucket: isToday(item) ? "today" : "week", family: item.family,
+          title: `${first || "Un gardien très apprécié"} a cessé de candidater`,
+          detail: [reviews > 0 ? `${reviews} avis` : "", Number(m.avg_rating) ? `note de ${String(m.avg_rating).replace(".", ",")} sur 5` : "", quiet > 0 ? `dernière candidature il y a ${quiet} jours` : ""].filter(Boolean).join(", ").replace(/^./, (c) => c.toUpperCase()) + ".",
+          chip: item.deadline, tone: item.tone, kind: "write", actionLabel: first ? `Écrire à ${first}` : "Écrire au gardien",
+          links: own ? [{ label: "Sa fiche", to: own }] : [],
+          signals, write: { userId: profile, firstName: first, topic: "dormant_sitter" }, moreActions: true,
+          sort: new Date(signals[0].detected_at).getTime(),
+        });
+        continue;
+      }
       out.push({
         key: `${item.key}:${key}`, bucket: isToday(item) ? "today" : "week", family: item.family,
         title: single ? item.title : workCopy(item.type).title(1),
@@ -225,6 +244,10 @@ export function buildGestures(model: WorkListModel | null | undefined, now: numb
         chip: item.deadline, tone: item.tone, kind: "card", actionLabel: item.action || "Traiter",
         links: own ? [{ label: sitId ? "L'annonce" : "Sa fiche", to: own }] : [],
         signals, sort: new Date(signals[0].detected_at).getTime(),
+        // Lot VE-5 : compte à examiner, un mot de bienvenue en second geste.
+        secondaryWrite: item.type === "suspicious_account" && profile
+          ? { userId: profile, firstName: first, topic: "account_welcome", label: first ? `Écrire à ${first}` : "Écrire au membre" }
+          : undefined,
       });
     }
   }

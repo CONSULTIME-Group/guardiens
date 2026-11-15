@@ -167,3 +167,49 @@ describe("VE-2 et VE-3 : câblage", () => {
     expect(readFileSync("src/components/admin/signals/NoApplicationsCard.tsx", "utf8")).not.toContain("Broadcast aux");
   });
 });
+
+describe("VE-5 : gabarits complétés et chiffres filtrés", () => {
+  const raw: WorkListRaw = {
+    sources: { signals: true, sits: true, queues: true, relances: true, health: true },
+    signals: [
+      { id: "t", signal_type: "dormant_top_sitter", severity: "warning", entity_type: "profile", entity_id: "g1", detected_at: "2026-11-10T08:00:00Z", metadata: { first_name: "Nicolas", avg_rating: 4.9, reviews_count: 6, days_since_last_application: 62 } },
+      { id: "u", signal_type: "suspicious_account", severity: "warning", entity_type: "profile", entity_id: "p7", detected_at: "2026-11-15T08:00:00Z", metadata: { signal: "many_reports", first_name: "Paul" } },
+    ],
+    sits: [], queues: [], relances_failed_7d: 0, health: [],
+  };
+  const list = buildGestures(buildWorkList(raw, NOW), NOW);
+
+  it("meilleur gardien endormi : le bouton écrit, la carte reste sous « Autres gestes »", () => {
+    const g = list.find((x) => x.write?.topic === "dormant_sitter")!;
+    expect(g.kind).toBe("write");
+    expect(g.actionLabel).toBe("Écrire à Nicolas");
+    expect(g.moreActions).toBe(true);
+    expect(g.detail).toBe("6 avis, note de 4,9 sur 5, dernière candidature il y a 62 jours.");
+  });
+
+  it("compte à examiner : la carte reste le geste principal, un mot de bienvenue en second", () => {
+    const g = list.find((x) => x.signals[0].id === "u")!;
+    expect(g.kind).toBe("card");
+    expect(g.secondaryWrite).toMatchObject({ userId: "p7", topic: "account_welcome", label: "Écrire à Paul" });
+  });
+
+  it("deux nouveaux sujets, trois versions chacun, mêmes règles", () => {
+    for (const t of ["dormant_sitter", "account_welcome"] as const) {
+      const d = memberMessageDrafts(t, { name: "Nicolas", daysQuiet: 62 });
+      expect(new Set(d.map((x) => x.body)).size).toBe(3);
+      for (const x of d) {
+        expect(x.body.startsWith("Bonjour Nicolas,")).toBe(true);
+        expect(`${x.subject}${x.body}`).not.toMatch(/[\u2014\u2013]|undefined|null/);
+      }
+    }
+    expect(memberMessageDrafts("dormant_sitter", { daysQuiet: 62 })[0].body).toContain("il y a 62 jours");
+  });
+
+  it("les chiffres de la vue d'ensemble ouvrent une liste filtrée", () => {
+    const blocks = readFileSync("src/pages/admin/_components/dashboard/PilotageBlocks.tsx", "utf8");
+    expect(blocks).toContain('"/admin/listings?filter=awaiting_reply"');
+    expect(blocks).toContain('"/admin/users?new=7"');
+    expect(readFileSync("src/lib/admin/listingSituation.ts", "utf8")).toContain('awaiting_reply: "Candidatures sans réponse, garde à venir"');
+    expect(readFileSync("src/pages/admin/AdminUsers.tsx", "utf8")).toContain('urlParams.get("new")');
+  });
+});
