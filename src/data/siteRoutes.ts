@@ -326,9 +326,9 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
  path: "/associations",
- title: "Associations et refuges de protection animale | Guardiens",
- metaDescription: "Refuges, sanctuaires, réseaux de familles d'accueil et centres de soins faune sauvage, présentés par l'équipe Guardiens, avec leurs besoins et leur page de dons.",
- h1: "Associations et refuges de protection animale",
+ title: "Associations à soutenir : animaux, nature, solidarité | Guardiens",
+ metaDescription: "Refuges pour animaux, chantiers participatifs, nature, jardins partagés, solidarité et randonnées : des associations à soutenir, leurs besoins du moment et comment les aider.",
+ h1: "Associations à soutenir près de chez vous",
  sitemapPriority: "0.8",
  changeFreq: "weekly",
  ogImage: "https://guardiens.fr/og/og-associations.jpg",

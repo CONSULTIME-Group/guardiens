@@ -38,7 +38,7 @@ const DepartmentAssociations = ({
   return (
     <section className="max-w-5xl mx-auto px-4 py-8 border-t border-border">
       <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
-        Associations de protection animale
+        Associations à soutenir près de chez vous
       </h2>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {data.map((a) => (
