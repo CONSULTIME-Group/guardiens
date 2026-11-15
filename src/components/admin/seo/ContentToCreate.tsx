@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 interface TypeCount { category: string; count: number }
 
 const TYPE_OBJECTIVES = [
-  { label: "Pages villes", filter: (c: string) => c === "ville", goal: 10, priority: "high" as const },
+  { label: "Articles villes", filter: (c: string) => c === "ville", goal: 10, priority: "high" as const },
   { label: "Races", filter: (c: string) => c === "guide_race", goal: 15, priority: "medium" as const },
   { label: "Guides locaux", filter: (c: string) => c === "guide_local", goal: 15, priority: "medium" as const },
   { label: "Vie locale", filter: (c: string) => c === "vie_locale", goal: 10, priority: "low" as const },
@@ -163,6 +163,30 @@ const ContentToCreate = () => {
                   </TableRow>
                 );
               })}
+              {/* Lot TRF2 : les types s'additionnent au total des articles publiés. */}
+              {(() => {
+                const total = typeCounts.reduce((sum, t) => sum + t.count, 0);
+                const listed = TYPE_OBJECTIVES.reduce((sum, o) => sum + getCountForObjective(o.filter), 0);
+                return (
+                  <>
+                    {total > listed && (
+                      <TableRow data-testid="content-other-categories">
+                        <TableCell className="font-medium">Autres catégories</TableCell>
+                        <TableCell className="text-right">{total - listed}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">·</TableCell>
+                        <TableCell className="text-right">·</TableCell>
+                        <TableCell />
+                        <TableCell />
+                      </TableRow>
+                    )}
+                    <TableRow data-testid="content-total">
+                      <TableCell className="font-semibold">Total publiés</TableCell>
+                      <TableCell className="text-right font-semibold">{total}</TableCell>
+                      <TableCell /><TableCell /><TableCell /><TableCell />
+                    </TableRow>
+                  </>
+                );
+              })()}
             </TableBody>
           </Table>
         </CardContent>

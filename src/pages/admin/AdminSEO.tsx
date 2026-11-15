@@ -14,18 +14,13 @@ import PriorityActions from "@/components/admin/seo/PriorityActions";
 import ContentToCreate, { PRIORITY_ARTICLES } from "@/components/admin/seo/ContentToCreate";
 import GSCQueriesTable from "@/components/admin/seo/GSCQueriesTable";
 import TrafficSources from "@/components/admin/seo/TrafficSources";
-import ArticleCtaPerformance from "@/components/admin/seo/ArticleCtaPerformance";
 import IndexNowPanel from "@/components/admin/seo/IndexNowPanel";
 import IndexNowHistory from "@/components/admin/seo/IndexNowHistory";
-import CannibalizationCard from "@/components/admin/seo/CannibalizationCard";
 import BingVisibilityCard from "@/components/admin/seo/BingVisibilityCard";
 import BingKpiRow from "@/components/admin/seo/BingKpiRow";
-import BingOnlyQueriesCard from "@/components/admin/seo/BingOnlyQueriesCard";
 import BingBacklinksCard from "@/components/admin/seo/BingBacklinksCard";
 import NoImpressionActionable from "@/components/admin/seo/NoImpressionActionable";
 import UrlInspectionCard from "@/components/admin/seo/UrlInspectionCard";
-import CoreWebVitalsCard from "@/components/admin/seo/CoreWebVitalsCard";
-import GA4DiagnosticCard from "@/components/admin/seo/GA4DiagnosticCard";
 import { AcquisitionPilotCard } from "@/pages/admin/_components/dashboard/AcquisitionPilotCard";
 import AiAcquisitionCard from "@/pages/admin/_components/dashboard/AiAcquisitionCard";
 import { useSeoData, type GSCRow } from "@/hooks/useSeoData";
@@ -200,7 +195,6 @@ const AdminSEO = () => {
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground border-b pb-2">Trafic & audience</h2>
 
-        <GA4DiagnosticCard />
 
 
         {/* Lot A10 : visiteurs, temps moyen et sources figurent une seule fois, dans la synthèse en tête de page. */}
@@ -344,23 +338,11 @@ const AdminSEO = () => {
           </Card>
         )}
 
-        {/* Requêtes uniquement Bing, différentiel vs Google */}
-        <BingOnlyQueriesCard gscQueries={gsc?.topQueries} />
-
-        {/* Cannibalisation */}
-        <CannibalizationCard topQueries={gsc?.topQueries} topPages={gsc?.topPages} />
-
         {/* Bing détail (graph + top requêtes + top pages) */}
         <BingVisibilityCard period={bingPeriod} />
 
         {/* Backlinks Bing */}
         <BingBacklinksCard />
-      </section>
-
-      {/* SECTION, Performance technique (Core Web Vitals) */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground border-b pb-2">Performance technique</h2>
-        <CoreWebVitalsCard />
       </section>
 
       {/* SECTION, Indexation push */}
@@ -376,14 +358,6 @@ const AdminSEO = () => {
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground border-b pb-2">Contenu à créer</h2>
         <ContentToCreate />
-      </section>
-
-      {/* SECTION, Performance CTAs articles */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground border-b pb-2">
-          Performance CTAs articles
-        </h2>
-        <ArticleCtaPerformance />
       </section>
 
       {/* SECTION, Pilotage acquisition (déplacé de la vue d'ensemble) */}

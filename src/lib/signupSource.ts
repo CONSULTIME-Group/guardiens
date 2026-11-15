@@ -14,6 +14,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { getStoredConsent } from "@/lib/cookieConsent";
+import { inAppHost, type InAppHost } from "@/lib/inAppBrowser";
 
 export const CLICK_ID_TYPES = ["gclid", "gbraid", "wbraid", "fbclid", "msclkid"] as const;
 export type ClickIdType = (typeof CLICK_ID_TYPES)[number];
@@ -36,7 +37,11 @@ export interface SignupSource {
   rf?: 1;
   /** Heure de la première page vue (ISO). */
   ts?: string;
+  /** Lot TRF2 : application hôte du navigateur intégré (instagram, tiktok, facebook). */
+  ap?: InAppHost;
 }
+
+const IN_APP_HOSTS: readonly string[] = ["instagram", "tiktok", "facebook"];
 
 export type SignupChannel =
   | "google_ads" | "facebook_ads" | "email" | "parrainage" | "facebook"
@@ -65,7 +70,7 @@ const referrerDomain = (referrer: string | null | undefined): string | undefined
 };
 
 /** Construit la source d'une arrivée. Fonction pure. */
-export function buildSignupSource(input: { search: string; pathname: string; referrer?: string | null; now?: Date }): SignupSource {
+export function buildSignupSource(input: { search: string; pathname: string; referrer?: string | null; now?: Date; ap?: InAppHost }): SignupSource {
   const params = new URLSearchParams(input.search || "");
   const src: SignupSource = {};
   const us = cleanValue(params.get("utm_source"), 80);
@@ -81,6 +86,7 @@ export function buildSignupSource(input: { search: string; pathname: string; ref
   const lp = (input.pathname || "/").split(/[?#]/)[0].slice(0, 200);
   src.lp = lp.startsWith("/") ? lp : "/";
   if (params.has("ref")) src.rf = 1;
+  if (input.ap && IN_APP_HOSTS.includes(input.ap)) src.ap = input.ap;
   src.ts = (input.now ?? new Date()).toISOString();
   return src;
 }
@@ -112,6 +118,10 @@ export function deriveSignupChannel(src: SignupSource | null | undefined): Signu
   if (us === "tiktok" || (s.rd && TIKTOK_HOST.test(rd))) return "tiktok";
   if (YOUTUBE_SOURCES.includes(us) || (s.rd && YOUTUBE_HOST.test(rd))) return "youtube";
   if (INSTAGRAM_SOURCES.includes(us) || (s.rd && INSTAGRAM_HOST.test(rd))) return "instagram";
+  // Lot TRF2 : l'application hôte départage un clic sans utm.
+  if (s.ap === "instagram" && !us) return "instagram";
+  if (s.ap === "tiktok" && !us) return "tiktok";
+  if (s.ap === "facebook" && !us) return "facebook";
   if (s.ck === "fbclid" || (s.rd && FACEBOOK_HOST.test(rd)) || FACEBOOK_SOURCES.includes(us)) return "facebook";
   if (!s.ck && s.rd && ADS_HOST.test(rd)) return "recherche_naturelle";
   if ((s.rd && AI_HOST.test(rd)) || /^(chatgpt|openai|perplexity|gemini|claude|copilot)/.test(us)) return "ia";
@@ -150,6 +160,7 @@ export function decodeSignupSource(raw: string | null | undefined): SignupSource
     if (typeof p.lp === "string" && p.lp.startsWith("/")) out.lp = p.lp.split(/[?#]/)[0].slice(0, 200);
     if (p.rf === 1) out.rf = 1;
     if (typeof p.ts === "string" && Number.isFinite(Date.parse(p.ts))) out.ts = p.ts;
+    if (typeof p.ap === "string" && IN_APP_HOSTS.includes(p.ap)) out.ap = p.ap as InAppHost;
     return out;
   } catch {
     return null;
@@ -210,7 +221,7 @@ const readUrlSource = (): SignupSource | null => {
  */
 export function captureSignupSource(input: { search: string; pathname: string; referrer?: string | null }): void {
   if (typeof window === "undefined" || memorySource) return;
-  memorySource = readUrlSource() ?? readSessionSource() ?? buildSignupSource(input);
+  memorySource = readUrlSource() ?? readSessionSource() ?? buildSignupSource({ ...input, ap: inAppHost() });
   persistIfAllowed();
   if (!consentListening) {
     consentListening = true;

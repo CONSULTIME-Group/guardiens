@@ -71,3 +71,19 @@ export function getAuthFieldAttrs(
     spellCheck: false,
   };
 }
+
+/**
+ * Lot TRF2 (15/11/2026) : application hôte d'un navigateur intégré, pour la
+ * source d'arrivée (clé « ap »). Instagram avant Facebook : l'agent
+ * d'Instagram porte aussi les marques de Facebook.
+ */
+export type InAppHost = "instagram" | "tiktok" | "facebook";
+
+export function inAppHost(userAgent?: string): InAppHost | undefined {
+  const ua = userAgent ?? (typeof navigator !== "undefined" ? navigator.userAgent : "");
+  if (!ua) return undefined;
+  if (/Instagram/i.test(ua)) return "instagram";
+  if (/BytedanceWebview|TikTok|musical_ly/i.test(ua)) return "tiktok";
+  if (/FB_IAB|FBAN|FBAV/i.test(ua)) return "facebook";
+  return undefined;
+}
