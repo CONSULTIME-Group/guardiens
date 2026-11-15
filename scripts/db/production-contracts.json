@@ -1011,6 +1011,24 @@
           "sql": "SELECT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trf4_log_article_meta' AND NOT tgisinternal) AND NOT has_table_privilege('anon', 'public.seo_action_log', 'SELECT') AS ok"
         }
       ]
+    },
+    {
+      "migration": "0115_seob_arrivees.sql",
+      "description": "Copie de 0172_seob_arrivees.sql écrite par l'outil de migration Lovable et citée par drizzle/migrations/meta/_journal.json : mêmes contrôles",
+      "checks": [
+        {
+          "name": "type_de_page",
+          "sql": "SELECT public.seob_page_template('/house-sitting/lyon') = 'villes' AND public.seob_page_template('/house-sitting') = 'autres' AND public.seob_page_template('/actualites/a#prix') = 'articles' AS ok"
+        },
+        {
+          "name": "lecture_equipe",
+          "sql": "SELECT COALESCE(has_function_privilege('authenticated', to_regprocedure('public.admin_landing_outcomes(date,date,text)'), 'EXECUTE') AND NOT has_function_privilege('anon', to_regprocedure('public.admin_landing_outcomes(date,date,text)'), 'EXECUTE'), false) AS ok"
+        },
+        {
+          "name": "repere",
+          "sql": "SELECT position('seob_arrivees' IN pg_get_functiondef('public.admin_landing_outcomes(date,date,text)'::regprocedure)) > 0 AS ok"
+        }
+      ]
     }
   ]
 }
