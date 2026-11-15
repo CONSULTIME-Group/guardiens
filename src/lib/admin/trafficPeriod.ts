@@ -23,6 +23,17 @@ export function trafficPeriodDays(p: TrafficPeriod, now = new Date()): number {
   return Math.max(1, Math.ceil((now.getTime() - start) / 86_400_000));
 }
 
+/**
+ * Durée exacte de la période, en jours décimaux : « suivi » part du 12/11/2026
+ * à minuit, heure de Paris. Sert les fenêtres glissantes (onglet Entonnoir),
+ * pour compter les mêmes inscrits que l'onglet Leads.
+ */
+export function trafficPeriodSpanDays(p: TrafficPeriod, now = new Date()): number {
+  if (p !== "suivi") return p;
+  const start = Date.parse(`${LEADS_TRACKING_START}T00:00:00+01:00`);
+  return Math.max(1 / 24, (now.getTime() - start) / 86_400_000);
+}
+
 export function trafficPeriodShortLabel(p: TrafficPeriod): string {
   return p === "suivi" ? "Depuis le suivi" : `${p} j`;
 }

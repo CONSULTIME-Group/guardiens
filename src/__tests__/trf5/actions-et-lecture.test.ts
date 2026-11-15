@@ -5,7 +5,7 @@ import {
   recentActionsByPath, reviewDate, type SeoLogEntry,
 } from "@/lib/admin/seoActionLog";
 import { buildBrakes } from "@/lib/admin/signupBrakes";
-import { trafficPeriodDays, trafficPeriodFromParam, trafficPeriodPhrase } from "@/lib/admin/trafficPeriod";
+import { trafficPeriodDays, trafficPeriodFromParam, trafficPeriodPhrase, trafficPeriodSpanDays } from "@/lib/admin/trafficPeriod";
 import { funnelPhrase, leadsPhrase, seoPhrase } from "@/lib/admin/trafficSynthesis";
 
 const entry = (over: Partial<SeoLogEntry>): SeoLogEntry => ({
@@ -71,6 +71,9 @@ describe("TRF-6, période commune et synthèses", () => {
     expect(trafficPeriodFromParam("12")).toBe("suivi");
     expect(trafficPeriodDays("suivi", new Date("2026-11-15T22:00:00Z"))).toBe(4);
     expect(trafficPeriodPhrase(30)).toBe("en 30 jours");
+    // Fenêtre exacte depuis le 12/11 à minuit, heure de Paris : mêmes inscrits que l'onglet Leads.
+    expect(trafficPeriodSpanDays("suivi", new Date("2026-11-15T23:30:00Z"))).toBeCloseTo(4.02, 1);
+    expect(trafficPeriodSpanDays(7)).toBe(7);
   });
   it("écrit les trois phrases", () => {
     const ch = (channel: string, label: string, signups: number) => ({ channel, label, campaign: null, isCampaign: false, visits: 0, signups, publishedMembers: 0, applicants: 0, helpers: 0, outingMembers: 0 });

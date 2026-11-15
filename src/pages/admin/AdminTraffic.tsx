@@ -12,7 +12,7 @@ import { formatDurationFr, periodLabel, fmtInt } from "@/lib/admin/seoMetrics";
 import { Button } from "@/components/ui/button";
 import { leadsRange } from "@/lib/admin/channelLeads";
 import {
-  DEFAULT_TRAFFIC_PERIOD, TRAFFIC_PERIODS, TRAFFIC_PERIOD_PARAM, trafficPeriodDays, trafficPeriodFromParam,
+  DEFAULT_TRAFFIC_PERIOD, TRAFFIC_PERIODS, TRAFFIC_PERIOD_PARAM, trafficPeriodDays, trafficPeriodFromParam, trafficPeriodSpanDays,
   trafficPeriodPhrase, trafficPeriodShortLabel, type TrafficPeriod,
 } from "@/lib/admin/trafficPeriod";
 
@@ -126,6 +126,8 @@ const AdminTraffic = () => {
   // Lot TRF-6 : période commune, portée par l'adresse (?periode=).
   const period = trafficPeriodFromParam(params.get(TRAFFIC_PERIOD_PARAM));
   const days = trafficPeriodDays(period);
+  // Durée exacte, figée par période : une valeur recalculée à chaque rendu relancerait la lecture.
+  const spanDays = useMemo(() => trafficPeriodSpanDays(period), [period]);
   const setPeriod = (p: TrafficPeriod) => {
     const next = new URLSearchParams(params);
     if (p === DEFAULT_TRAFFIC_PERIOD) next.delete(TRAFFIC_PERIOD_PARAM);
@@ -200,7 +202,7 @@ const AdminTraffic = () => {
           {/* Lot TRF-6 : synthèse et parcours, puis les freins, puis le détail replié. Profils remplis et
               installation de l'application se lisent dans « Vue d'ensemble », rubrique Activation. */}
           <Suspense fallback={fallback}>
-            <AdminAnalytics days={days} periodPhrase={trafficPeriodPhrase(period)} hideActivation />
+            <AdminAnalytics days={spanDays} periodPhrase={trafficPeriodPhrase(period)} hideActivation />
           </Suspense>
           <Suspense fallback={fallback}>
             <SignupBrakesCard days={days} />
