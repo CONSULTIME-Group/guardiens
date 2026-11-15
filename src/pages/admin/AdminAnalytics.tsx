@@ -437,7 +437,7 @@ const AdminAnalytics = ({ days, periodPhrase, hideActivation = false }: AdminAna
               value={totalInscrits}
               delta={null}
               icon={Users}
-              hint={range === 1 ? "Comptes non supprimés, 24 dernières heures" : `Comptes non supprimés, ${range} derniers jours glissants`}
+              hint={range === 1 ? "Comptes non supprimés, 24 dernières heures" : `Comptes non supprimés, ${Math.ceil(range)} derniers jours${Number.isInteger(range) ? " glissants" : ", depuis le début du suivi"}`}
             />
             <StatCard
               label="Pages vues"
@@ -617,7 +617,7 @@ Les blocages, les échecs et les sous-étapes du formulaire d'inscription se lis
             </CardContent>
           </Card>
 
-          <FacebookReferralCard rangeDays={range} />
+          <FacebookReferralCard rangeDays={Math.ceil(range)} />
           {!hideActivation && (
           <Card>
             <CardHeader><CardTitle>Installation de Guardiens</CardTitle></CardHeader>
