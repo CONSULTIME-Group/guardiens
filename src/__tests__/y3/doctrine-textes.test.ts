@@ -102,9 +102,8 @@ describe("Y3 · Guardiens est gratuit, dit simplement", () => {
     it(`${f} : aucune gratuité restreinte ni vocabulaire d'abonnement`, () => {
       // Le bloc des associations de llms.txt décrit des tiers (lot ASSO-4) :
       // « bénévolat sans engagement » y parle de l'association, pas de Guardiens.
-      const src = stripComments(read(f)).replace(
-        /<!-- associations:start -->[\s\S]*?<!-- associations:end -->/,
-        "",
+      const src = stripComments(
+        read(f).replace(/<!-- associations:start -->[\s\S]*?<!-- associations:end -->/, ""),
       );
       for (const re of RESTRICTED) expect(src, `${f} ${re}`).not.toMatch(re);
     });
