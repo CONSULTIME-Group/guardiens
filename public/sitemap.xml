@@ -36,6 +36,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/sorties</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/projets</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -1725,6 +1730,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/guides/santeny</loc>
+    <lastmod>2026-11-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/guides/montcaret</loc>
     <lastmod>2026-11-13</lastmod>
     <changefreq>weekly</changefreq>
@@ -3070,6 +3081,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/187cca6a-250f-474b-8af0-66b8d67daca7</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/18e3f379-914f-4156-991e-55fc491135a3</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3236,6 +3252,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/4ec98758-f8ba-46b4-a07b-cc6b98e580d4</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/4f1b5f16-1e28-4024-9981-bfb519925542</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3465,6 +3486,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/825a7ffb-e0c4-4433-9cc4-81f1a53a4d43</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/827ce63a-e584-4e4b-a5c6-c559f4ad6c99</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3501,6 +3527,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/8ad21973-3723-4dfe-941b-76ce6c8e843d</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/8b07e20f-3c93-4425-85da-c0b92568934a</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3760,11 +3791,6 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/gardiens/ce1c4c51-5187-4e8d-8444-73734d34f68a</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/gardiens/ce36a6ce-f175-4f76-878e-3329830dfc25</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3945,11 +3971,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/gardiannage-de-maison-proche-du-zooparc-de-beauval-et-des-ch-villentrois-0a6da6</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/annonces/garde-de-deux-jeunes-chattes-louve-et-ltna-de-6-mois-quissac-en-quercy-24ea5a</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -4025,6 +4046,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/annonces/garde-d-un-chien-et-d-un-chat-a-santeny-fin-decembre-ef18ce</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/annonces/une-garde-de-2-chiens-et-1-chat-saint-vulbas-f5e13d</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -4060,12 +4086,37 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/projets/chantier-participatif-de-plantation</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://guardiens.fr/associations/1000-moustaches</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/associations/1000-moustaches</loc>
+    <loc>https://guardiens.fr/associations/rempart-chantiers-patrimoine</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/fne-rhone</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/petits-freres-des-pauvres-lyon</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/on-the-green-road</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/world-cleanup-day-france</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/eco-garde-rhone</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -4080,7 +4131,32 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/associations/club-alpin-francais-lyon-villeurbanne</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/associations/chats-d-oc-du-castera</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/compagnons-batisseurs-rhone-alpes</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/arthropologia</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/coup-de-pouce-universite-lyon</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/lpo-auvergne-rhone-alpes</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -4090,7 +4166,22 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/associations/ressourcerie-creative-de-lyon</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/associations/canistory</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/conservatoire-espaces-naturels-isere</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/concordia-chantiers-benevoles</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -4100,7 +4191,27 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/associations/espace-nature-isere</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/mountain-wilderness-france</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/le-passe-jardins</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/associations/des-coeurs-a-sauver</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/emmaus-lyon</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -4116,6 +4227,26 @@
   </url>
   <url>
     <loc>https://guardiens.fr/associations/cosa-animalia-grenoble</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/restos-du-coeur-rhone</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/afe-apprendre-le-francais-ensemble-lyon</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/banque-alimentaire-du-rhone</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/associations/mountain-riders</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

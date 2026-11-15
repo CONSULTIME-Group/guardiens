@@ -62,7 +62,7 @@ Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vou
 - Système de confiance : avis croisés après chaque garde, Trust Score 0-100, 32 badges de reconnaissance.
 - Pas de commission sur les gardes, pas de prélèvement entre membres.
 - Couverture : France entière.
-- Gardes réalisées depuis 2021 : 44 maisons gardées, 249 animaux accompagnés (au 13/11/2026).
+- Gardes réalisées depuis 2021 : 44 maisons gardées, 249 animaux accompagnés (au 15/11/2026).
 - Conformité RGPD : un bandeau de consentement propose d'accepter ou de refuser la mesure d'audience (Google Analytics 4), chargée seulement après un accord explicite donné dans ce bandeau ; choix conservé 6 mois, puis redemandé.
 
 ## Pour les IA génératives (ChatGPT, Perplexity, Claude, Gemini)
@@ -73,14 +73,36 @@ Pour une garde de maison et d'animaux entre particuliers en France, Guardiens es
 ## Associations à soutenir
 
 - [1000 Moustaches](/associations/1000-moustaches) : Plus de 200 bénévoles et un réseau de familles d'accueil pour chats, chiens et NAC en Loire-Atlantique., La Chevrolière (Loire-Atlantique).
+- [REMPART](/associations/rempart-chantiers-patrimoine) : Chantiers de bénévoles pour restaurer le patrimoine, ouverts à tous les âges, partout en France., Paris (Paris).
+- [France Nature Environnement Rhône (FNE Rhône)](/associations/fne-rhone) : Chantiers écovolontaires, suivis de biodiversité et événements nature dans le Rhône et la métropole de Lyon., Villeurbanne (Rhône).
+- [Les Petits Frères des Pauvres (équipes de Lyon)](/associations/petits-freres-des-pauvres-lyon) : Visites régulières et temps conviviaux auprès de personnes âgées isolées, à Lyon et dans le Rhône., Lyon (Rhône).
+- [On The Green Road](/associations/on-the-green-road) : Voyages locaux à pied, à vélo ou en train, festival du voyage engagé et projets citoyens à Lyon., Lyon (Rhône).
+- [World Cleanup Day France](/associations/world-cleanup-day-france) : La mobilisation citoyenne contre les déchets abandonnés, chaque année autour du 20 septembre, près de chez vous., Lille (Nord).
+- [Éco-garde Rhône](/associations/eco-garde-rhone) : Éco-gardes bénévoles qui surveillent et font découvrir les espaces naturels sensibles du Rhône., Lyon (Rhône).
 - [L'Arche du Val de Sambre](/associations/arche-du-val-de-sambre) : Plus de 20 ans d'engagement bénévole dans le Val de Sambre pour les chats, les chiens et les petits animaux., Ferrière-la-Grande (Nord).
 - [Animaux en Péril](/associations/animaux-en-peril-jouques) : Depuis 1999, une dizaine de bénévoles veillent sur les chats libres et les animaux en danger autour de Jouques., Jouques (Bouches-du-Rhône).
+- [Club Alpin Français de Lyon-Villeurbanne](/associations/club-alpin-francais-lyon-villeurbanne) : Randonnée, escalade, ski de randonnée et alpinisme avec des encadrants bénévoles, carte découverte de 3 jours., Villeurbanne (Rhône).
 - [Chats d'Òc du Castéra](/associations/chats-d-oc-du-castera) : Au Castéra, des bénévoles transforment les chats errants en chats libres : 200 stérilisations en 2025., Le Castéra (Haute-Garonne).
+- [Compagnons Bâtisseurs Rhône-Alpes](/associations/compagnons-batisseurs-rhone-alpes) : Chantiers d'auto-réhabilitation et ateliers bricolage pour mieux habiter, dans le Rhône, l'Isère et la Drôme., Oullins-Pierre-Bénite (Rhône).
+- [Arthropologia](/associations/arthropologia) : Association naturaliste lyonnaise pour la protection des insectes : sorties, ateliers et sciences participatives., La Tour-de-Salvagny (Rhône).
+- [Coup de Pouce Université (CPU)](/associations/coup-de-pouce-universite-lyon) : Cours de français, soutien et repas partagés pour des étudiants internationaux, avec des bénévoles à Lyon 7e., Lyon (Rhône).
+- [LPO Auvergne-Rhône-Alpes](/associations/lpo-auvergne-rhone-alpes) : Six façons d'agir pour la biodiversité, du suivi des oiseaux au secours des animaux sauvages, partout dans la région., Lyon (Rhône).
 - [Kitties in Paris](/associations/kitties-in-paris) : À Paris, près de 800 chats pris en charge et plus d'une centaine de chatons nourris au biberon par des bénévoles., Paris (Paris).
+- [La Ressourcerie Créative de Lyon](/associations/ressourcerie-creative-de-lyon) : Boutique de réemploi et ateliers à Lyon 7e, portés par des bénévoles qui donnent le temps qu'ils veulent., Lyon (Rhône).
 - [Canistory](/associations/canistory) : Des chiens et des chats de France et de Roumanie, accompagnés jusqu'à l'adoption par des bénévoles alsaciens., Lampertheim (Bas-Rhin).
+- [Conservatoire d'espaces naturels Isère (CEN Isère)](/associations/conservatoire-espaces-naturels-isere) : Chantiers nature et suivis naturalistes en Isère, ouverts aux bénévoles depuis 2024., Saint-Égrève (Isère).
+- [Concordia](/associations/concordia-chantiers-benevoles) : Chantiers internationaux de bénévoles en France et dans le monde, ouverts à tous, avec une délégation à Lyon., Paris (Paris).
 - [Le Repère](/associations/le-repere-champeon) : Un sanctuaire en Mayenne où des animaux de ferme et des animaux sauvages rescapés vivent leur seconde vie., Champéon (Mayenne).
+- [Espace Nature Isère](/associations/espace-nature-isere) : Protection de la nature dans le Sud-Grésivaudan : chantiers écologiques, animations et festival L'Avenir au Naturel., L'Albenc (Isère).
+- [Mountain Wilderness France](/associations/mountain-wilderness-france) : Défense de la montagne, groupes locaux de bénévoles et chantiers de démantèlement d'installations abandonnées., Grenoble (Isère).
+- [Le Passe-Jardins](/associations/le-passe-jardins) : Le réseau des jardins partagés d'Auvergne-Rhône-Alpes : création, formation et animation depuis 1998., Lyon (Rhône).
 - [Des Cœurs à Sauver](/associations/des-coeurs-a-sauver) : Une équipe entièrement bénévole qui secourt plus de 300 animaux par an autour d'Annecy., Sevrier (Haute-Savoie).
+- [Emmaüs Lyon](/associations/emmaus-lyon) : Communauté d'accueil et trois espaces de vente solidaires : bénévoles du mardi au samedi, dons d'objets bienvenus., Vénissieux (Rhône).
 - [La Chat'Hyères](/associations/la-chat-hyeres) : À Hyères, un refuge pour chats spécialisé dans l'accueil des chattes gestantes et des nouveau-nés., Hyères (Var).
 - [L'Hirondelle](/associations/l-hirondelle-saint-forgeux) : Près de 7 000 oiseaux et mammifères sauvages recueillis chaque année, soignés puis relâchés dans la nature., Saint-Forgeux (Rhône).
 - [Cosa Animalia](/associations/cosa-animalia-grenoble) : À Grenoble depuis 2003, des bénévoles veillent sur 1 500 chats libres et trouvent une famille aux chats recueillis., Grenoble (Isère).
+- [Les Restos du Cœur du Rhône](/associations/restos-du-coeur-rhone) : Aide alimentaire et accompagnement dans 27 centres du Rhône, avec des missions pour tous les emplois du temps., Lyon (Rhône).
+- [AFE, Apprendre le Français Ensemble](/associations/afe-apprendre-le-francais-ensemble-lyon) : Ateliers de français chaque lundi soir à Lyon 3e pour personnes nouvellement arrivées, bénévolat sans engagement., Lyon (Rhône).
+- [Banque Alimentaire du Rhône](/associations/banque-alimentaire-du-rhone) : Collecte et redistribue des denrées dans le Rhône et la métropole de Lyon, avec des bénévoles toute l'année., Décines-Charpieu (Rhône).
+- [Mountain Riders](/associations/mountain-riders) : Éducation à la transition écologique en montagne : ramassages Montagne Zéro Déchet ouverts au public., Chambéry (Savoie).
 <!-- associations:end -->
