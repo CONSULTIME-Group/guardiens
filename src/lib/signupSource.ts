@@ -119,10 +119,14 @@ export function deriveSignupChannel(src: SignupSource | null | undefined): Signu
   return "direct";
 }
 
-/** JSON compact, 300 caractères au plus : les champs longs tombent d'abord. */
+/**
+ * JSON compact, 300 caractères au plus. Le chemin d'entrée tombe d'abord ;
+ * la campagne (publication d'origine) et la source tombent en dernier
+ * (lot TRF1, P2 : la campagne tombait en premier).
+ */
 export function encodeSignupSource(src: SignupSource): string {
   const copy: SignupSource = { ...src };
-  for (const drop of ["uc", "lp", "rd", "um", "us"] as const) {
+  for (const drop of ["lp", "um", "rd", "uc", "us"] as const) {
     if (JSON.stringify(copy).length <= SIGNUP_SRC_MAX_LENGTH) break;
     delete copy[drop];
   }

@@ -7,8 +7,8 @@
 -- Lignes déjà écrites : inchangées (le canal est figé à l'inscription).
 -- Rejouable. Repère : src2_canaux_sociaux.
 --
--- MIGRATION ÉCRITE, NON APPLIQUÉE : à appliquer par le processus de
--- docs/database-deployment.md après validation de Jérémie.
+-- Appliquée en production (contrôle du 15/11/2026, lot TRF1 : la fonction en
+-- base rend instagram, tiktok et youtube).
 
 CREATE OR REPLACE FUNCTION public.derive_signup_channel(p jsonb)
 RETURNS text
