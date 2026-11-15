@@ -1,11 +1,14 @@
 /**
- * Images publiques d'une association (lot SEO1, 19/10/2026).
+ * Images publiques d'une association (lot SEO1 du 19/10/2026, règle rétablie
+ * par le lot ASSO-1 du 15/11/2026, décision de Jérémie : retour au 10/09).
  *
- * Photos et logo s'affichent seulement quand l'association a donné son accord
- * (photos_authorized, vrai quand animal_associations.consent_status vaut
- * « granted »). Sinon la page montre les initiales. Les images se chargent
- * avec la politique de référent par défaut du navigateur : le site d'origine
- * voit que la page Guardiens les affiche.
+ * Photos et logo s'affichent tant que l'association n'a pas refusé. Un refus
+ * (consent_status « refused ») vide les deux dans la vue publique
+ * public_animal_associations, côté base : ce module affiche ce que la vue sert.
+ * photos_authorized (accord reçu, consent_status « granted ») ne gouverne plus
+ * l'affichage : il sert au badge « Fiche validée », au crédit des photos et à
+ * l'image de partage. Les images se chargent avec la politique de référent par
+ * défaut du navigateur : le site d'origine voit que la page Guardiens les affiche.
  */
 import { normalizePhotos, type AssociationPhoto } from "@/components/associations/types";
 
@@ -16,13 +19,13 @@ export interface AssociationMediaInput {
 }
 
 export interface AssociationMedia {
-  /** Photos affichables, vides tant que l'accord manque. */
+  /** Photos affichables, vides après un refus (la vue les vide). */
   photos: AssociationPhoto[];
-  /** Logo affichable, null tant que l'accord manque. */
+  /** Logo affichable, null après un refus (la vue le vide) ou sans logo connu. */
   logoUrl: string | null;
 }
 
 export function associationMedia(a: AssociationMediaInput | null | undefined): AssociationMedia {
-  if (!a || a.photos_authorized !== true) return { photos: [], logoUrl: null };
+  if (!a) return { photos: [], logoUrl: null };
   return { photos: normalizePhotos(a.photos), logoUrl: a.logo_url || null };
 }
