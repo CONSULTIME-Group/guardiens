@@ -43,10 +43,8 @@ const formatDuration = formatDurationFr;
 const SeoSynthesis = () => {
   const { data, loading } = useSeoData();
   const ga4 = data?.ga4;
-  const gsc = data?.gsc;
 
   const ga4Period = periodLabel(data?.period?.ga4Start, data?.period?.ga4End, "30 jours");
-  const gscPeriod = periodLabel(data?.period?.gscStart, data?.period?.gscEnd, "Search Console");
   const kpis = useMemo(() => ([
     {
       title: "Sessions",
@@ -62,13 +60,7 @@ const SeoSynthesis = () => {
       subtitle: `${ga4Period} · GA4`,
       change: ga4?.previous ? pctChange(ga4.current.activeUsers, ga4.previous.activeUsers) : undefined,
     },
-    {
-      title: "Clics SEO",
-      icon: <MousePointerClick className="h-4 w-4 text-primary" />,
-      value: gsc ? fmtInt(gsc.current.clicks) : "·",
-      subtitle: gscPeriod,
-      change: gsc?.previous ? pctChange(gsc.current.clicks, gsc.previous.clicks) : undefined,
-    },
+    // Lot SEO-A : les clics Google se lisent une seule fois, dans « Visibilité SEO » plus bas.
     {
       title: "Temps moyen",
       icon: <Timer className="h-4 w-4 text-primary" />,
@@ -76,7 +68,7 @@ const SeoSynthesis = () => {
       subtitle: `Par session · ${ga4Period}`,
       change: ga4?.previous ? pctChange(ga4.current.averageSessionDuration, ga4.previous.averageSessionDuration) : undefined,
     },
-  ]), [ga4, gsc, ga4Period, gscPeriod]);
+  ]), [ga4, ga4Period]);
 
   return (
     <div className="space-y-6">
@@ -95,7 +87,7 @@ const SeoSynthesis = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {kpis.map((k) => (
               <MetricCard
                 key={k.title}

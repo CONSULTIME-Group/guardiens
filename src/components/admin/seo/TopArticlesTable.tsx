@@ -1,25 +1,16 @@
-import { adminLabel } from "@/lib/admin/labels";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { ExternalLink, AlertCircle } from "lucide-react";
-import type { GSCRow } from "@/hooks/useSeoData";
-
-interface Article {
-  slug: string;
-  title: string;
-  category: string;
-  published_at: string | null;
-  created_at: string;
-}
+import { ExternalLink } from "lucide-react";
+import { ARTICLE_CATEGORIES } from "@/lib/admin/articleCategories";
+import type { TopArticleRow } from "@/lib/admin/seoMetrics";
 
 interface TopArticlesTableProps {
-  topPages: GSCRow[];
+  /** Lot SEO-A : dix articles les plus cliqués, lus sur la liste complète des pages (topArticles). */
+  rows: TopArticleRow[];
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -45,93 +36,15 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 
-const TopArticlesTable = ({ topPages }: TopArticlesTableProps) => {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const load = async () => {
-      const { data } = await supabase
-        .from("articles")
-        .select("slug, title, category, published_at, created_at")
-        .eq("published", true);
-      setArticles(data || []);
-      setLoading(false);
-    };
-    load();
-  }, []);
-
-  if (loading) return null;
-
-  const articleMap = new Map<string, Article>();
-  articles.forEach((a) => articleMap.set(a.slug, a));
-
-  const hasGSC = topPages && topPages.length > 0;
-
-  // Cross-match GSC pages with articles
-  type MergedRow = {
-    article: Article;
-    clicks: number;
-    impressions: number;
-    ctr: number;
-    position: number;
-    hasGSC: boolean;
-  };
-
-  let mergedRows: MergedRow[] = [];
-
-  if (hasGSC) {
-    const seen = new Set<string>();
-    topPages.forEach((row) => {
-      const url = row.keys?.[0] || "";
-      const path = url
-        .replace("https://guardiens.fr", "")
-        .replace("https://www.guardiens.fr", "");
-      const match = path.match(/^\/actualites\/(.+?)$/);
-      if (!match) return;
-      const slug = match[1];
-      const article = articleMap.get(slug);
-      if (!article || seen.has(slug)) return;
-      seen.add(slug);
-      mergedRows.push({
-        article,
-        clicks: row.clicks,
-        impressions: row.impressions,
-        ctr: row.ctr,
-        position: row.position,
-        hasGSC: true,
-      });
-    });
-    // Sort by clicks desc
-    mergedRows.sort((a, b) => b.clicks - a.clicks);
-    mergedRows = mergedRows.slice(0, 10);
-  }
-
-  // Fallback: show latest articles if no GSC data
-  if (mergedRows.length === 0) {
-    const sorted = [...articles]
-      .sort((a, b) => new Date(b.published_at || b.created_at).getTime() - new Date(a.published_at || a.created_at).getTime())
-      .slice(0, 10);
-    mergedRows = sorted.map((a) => ({
-      article: a,
-      clicks: 0,
-      impressions: 0,
-      ctr: 0,
-      position: 0,
-      hasGSC: false,
-    }));
-  }
+const TopArticlesTable = ({ rows }: TopArticlesTableProps) => {
+  const mergedRows = rows.map((r) => ({ ...r, hasGSC: true }));
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Top 10 articles par trafic</CardTitle>
-          {!hasGSC && (
-            <Badge variant="outline" className="text-warning border-warning/30 gap-1">
-              <AlertCircle className="h-3 w-3" /> GSC en cours de synchronisation
-            </Badge>
-          )}
+          <CardTitle className="text-lg">Articles les plus cliqués</CardTitle>
+
         </div>
       </CardHeader>
       <CardContent>
@@ -158,7 +71,7 @@ const TopArticlesTable = ({ topPages }: TopArticlesTableProps) => {
                     ? "text-warning font-bold"
                     : "text-destructive font-bold";
 
-              const posColor = !row.hasGSC
+              const posColor = row.position === null
                 ? ""
                 : row.position <= 3
                   ? "bg-success text-white"
@@ -167,7 +80,7 @@ const TopArticlesTable = ({ topPages }: TopArticlesTableProps) => {
                     : "bg-destructive text-white";
 
               const catClass = CATEGORY_COLORS[row.article.category] || "bg-muted text-muted-foreground";
-              const catLabel = CATEGORY_LABELS[row.article.category] || adminLabel(row.article.category);
+              const catLabel = CATEGORY_LABELS[row.article.category] || ARTICLE_CATEGORIES[row.article.category] || row.article.category;
 
               return (
                 <TableRow key={row.article.slug}>
@@ -193,18 +106,18 @@ const TopArticlesTable = ({ topPages }: TopArticlesTableProps) => {
                     {row.hasGSC ? row.clicks : "·"}
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">
-                    {row.hasGSC ? row.impressions.toLocaleString() : "·"}
+                    {row.impressions.toLocaleString("fr-FR")}
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">
-                    {row.hasGSC ? `${(row.ctr * 100).toFixed(1)}%` : "·"}
+                    {`${(row.ctr * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`}
                   </TableCell>
                   <TableCell className="text-center">
-                    {row.hasGSC ? (
+                    {row.position !== null ? (
                       <Badge className={`text-xs ${posColor}`}>
                         {Math.round(row.position * 10) / 10}
                       </Badge>
                     ) : (
-                      ","
+                      <span className="text-muted-foreground" title="Position lue pour les 25 premières pages seulement">·</span>
                     )}
                   </TableCell>
                   <TableCell>

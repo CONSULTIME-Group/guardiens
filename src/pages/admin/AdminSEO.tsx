@@ -25,7 +25,11 @@ import { AcquisitionPilotCard } from "@/pages/admin/_components/dashboard/Acquis
 import AiAcquisitionCard from "@/pages/admin/_components/dashboard/AiAcquisitionCard";
 import { useSeoData, type GSCRow } from "@/hooks/useSeoData";
 import type { BingPeriodDays } from "@/hooks/useBingData";
-import { articlesWithoutImpressions, pagesFromSeo, formatDurationFr, periodLabel, organicSessions, fmtInt } from "@/lib/admin/seoMetrics";
+import {
+  articlesWithoutImpressions, pagesFromSeo, formatDurationFr, periodLabel, organicSessions, fmtInt,
+  aggregatePages, pagesWithImpressions, positionsFromTopPages, priorityActions, topArticles,
+} from "@/lib/admin/seoMetrics";
+import { useSeoArticles } from "@/hooks/useSeoArticles";
 import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
@@ -55,8 +59,9 @@ const AdminSEO = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [articleStats, setArticleStats] = useState<{ published: number; total: number } | null>(null);
   const [profileCount, setProfileCount] = useState<number | null>(null);
-  const [existingSlugs, setExistingSlugs] = useState<Set<string>>(new Set());
-  const [publishedArticles, setPublishedArticles] = useState<{ slug: string; published_at: string | null }[]>([]);
+  // Lot SEO-A : articles publiés avec leur statut Google, lus une fois pour tout l'onglet.
+  const { articles: seoArticles, allSlugs: existingSlugs } = useSeoArticles();
+  const publishedArticles = seoArticles ?? [];
   const [bingPeriod, setBingPeriod] = useState<BingPeriodDays>(28);
 
   useEffect(() => {
@@ -78,17 +83,8 @@ const AdminSEO = () => {
       if (error) { reportAdminReadError("Trafic : profils inscrits", error); setProfileCount(null); return; }
       setProfileCount(count ?? 0);
     };
-    const fetchExistingSlugs = async () => {
-      const { data, error } = await supabase.from("articles").select("slug, published_at, published").order("id").range(0, 9999);
-      if (error) { reportAdminReadError("Trafic : articles publiés", error); return; }
-      if (data) {
-        setExistingSlugs(new Set(data.map((a) => a.slug)));
-        setPublishedArticles(data.filter((a) => a.published).map((a) => ({ slug: a.slug, published_at: a.published_at })));
-      }
-    };
     fetchArticleStats();
     fetchProfileCount();
-    fetchExistingSlugs();
   }, []);
 
   const handleRefresh = async () => {
@@ -129,8 +125,15 @@ const AdminSEO = () => {
 
   // Lot A10 : liste complète des pages Google (plus de top 25) et chemin /actualites/.
   const allGscPages = pagesFromSeo(gsc);
-  const pagesWithGSC = gscAvailable ? allGscPages.filter((p) => p.impressions > 0).length : null;
-  const noImpressionCount = gscAvailable ? articlesWithoutImpressions(publishedArticles, allGscPages).length : null;
+  // Lot SEO-A : pages comptées une fois (ancres et anciens ?lang= regroupés), articles indexables seulement.
+  const pagesWithGSC = gscAvailable ? pagesWithImpressions(allGscPages) : null;
+  const noImpressionCount = gscAvailable && seoArticles
+    ? articlesWithoutImpressions(seoArticles, allGscPages).filter((a) => a.status === "indexable").length
+    : null;
+  const pageTotals = aggregatePages(allGscPages);
+  const pagePositions = positionsFromTopPages(gsc?.topPages);
+  const seoActions = seoArticles ? priorityActions(seoArticles, pageTotals, pagePositions) : [];
+  const topArticleRows = seoArticles ? topArticles(seoArticles, pageTotals, pagePositions) : [];
   const organic = organicSessions(ga4?.channels);
   const gscPeriod = periodLabel(seoData?.period?.gscStart, seoData?.period?.gscEnd, "Période GSC");
   const ga4Period = periodLabel(seoData?.period?.ga4Start, seoData?.period?.ga4End, "Période GA4");
@@ -172,13 +175,13 @@ const AdminSEO = () => {
             title="Pages avec données GSC"
             icon={<Eye className="h-4 w-4 text-primary" />}
             value={pagesWithGSC !== null ? pagesWithGSC.toString() : "·"}
-            subtitle={gscAvailable ? `Pages avec au moins 1 impression · ${gscPeriod}` : "GSC non disponible"}
+            subtitle={gscAvailable ? `Pages distinctes avec au moins 1 impression · ${gscPeriod}` : "GSC non disponible"}
           />
           <MetricCard
             title="Sans impression après 7 j"
             icon={<FileText className="h-4 w-4 text-primary" />}
             value={noImpressionCount !== null ? noImpressionCount.toString() : "·"}
-            subtitle={noImpressionCount !== null ? "Contenus publiés >7j sans impression · GSC" : "GSC non disponible"}
+            subtitle={noImpressionCount !== null ? "Articles indexables publiés depuis plus de 7 j, jamais affichés · GSC" : "GSC non disponible"}
           />
           <MetricCard
             title="Contenus à créer"
@@ -283,8 +286,8 @@ const AdminSEO = () => {
 
 
         {/* Priority actions, remonté juste après les KPIs car le plus actionnable */}
-        {gsc?.topPages && (
-          <PriorityActions topPages={gsc.topPages} />
+        {gscAvailable && seoArticles && (
+          <PriorityActions actions={seoActions} />
         )}
 
         {/* Actionnable : articles sans impression GSC après 7j, avec push IndexNow 1-clic */}
@@ -295,7 +298,7 @@ const AdminSEO = () => {
 
         {/* Top articles, conditional */}
         {gscAvailable ? (
-          <TopArticlesTable topPages={gsc?.topPages || []} />
+          <TopArticlesTable rows={topArticleRows} />
         ) : (
           !loading && (
             <Card>

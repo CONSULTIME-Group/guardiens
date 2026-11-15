@@ -4,10 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { articlesWithoutImpressions, type PageImpressions } from "@/lib/admin/seoMetrics";
+import {
+  articlesWithoutImpressions,
+  countByStatus,
+  type PageImpressions,
+  type SeoArticle,
+} from "@/lib/admin/seoMetrics";
 
 interface Props {
-  publishedArticles: { slug: string; published_at: string | null }[];
+  /** Lot SEO-A : articles publiés avec leur statut Google (useSeoArticles). */
+  publishedArticles: SeoArticle[];
   /** Liste complète des pages Google (lot A10), undefined si GSC indisponible. */
   pages: PageImpressions[] | undefined;
 }
@@ -20,10 +26,17 @@ export default function NoImpressionActionable({ publishedArticles, pages }: Pro
   const [busy, setBusy] = useState<string | null>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
 
-  const orphans = useMemo(
-    () => (pages ? articlesWithoutImpressions(publishedArticles, pages) : []),
-    [publishedArticles, pages],
-  );
+  // Lot SEO-A : seuls les articles indexables sont attendus dans Google ;
+  // redirigés, noindex et canoniques ailleurs sont comptés à part, jamais poussés.
+  const { orphans, setAside } = useMemo(() => {
+    if (!pages) return { orphans: [] as SeoArticle[], setAside: countByStatus([]) };
+    const without = articlesWithoutImpressions(publishedArticles, pages);
+    return {
+      orphans: without.filter((a) => a.status === "indexable"),
+      setAside: countByStatus(without.filter((a) => a.status !== "indexable")),
+    };
+  }, [publishedArticles, pages]);
+  const asideTotal = setAside.redirige + setAside.noindex + setAside.canonique_ailleurs;
 
   const pushOne = async (slug: string) => {
     setBusy(slug);
@@ -69,8 +82,13 @@ export default function NoImpressionActionable({ publishedArticles, pages }: Pro
         <div>
           <CardTitle className="text-lg">Articles sans impression Google après 7 jours</CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            {orphans.length.toLocaleString("fr-FR")} article{orphans.length > 1 ? "s" : ""} publié{orphans.length > 1 ? "s" : ""} depuis &gt;7 jours, jamais affiché{orphans.length > 1 ? "s" : ""} dans Google.
+            {orphans.length.toLocaleString("fr-FR")} article{orphans.length > 1 ? "s" : ""} indexable{orphans.length > 1 ? "s" : ""}, publié{orphans.length > 1 ? "s" : ""} depuis plus de 7 jours, jamais affiché{orphans.length > 1 ? "s" : ""} dans Google sur la période.
           </p>
+          {asideTotal > 0 && (
+            <p className="text-xs text-muted-foreground mt-1" data-testid="no-impression-set-aside">
+              Hors liste, par choix : {setAside.redirige} redirigé{setAside.redirige > 1 ? "s" : ""}, {setAside.noindex} en noindex, {setAside.canonique_ailleurs} canonique{setAside.canonique_ailleurs > 1 ? "s" : ""} vers une autre page.
+            </p>
+          )}
         </div>
         <Button onClick={pushAll} disabled={bulkBusy} size="sm">
           <Send className="h-3.5 w-3.5 mr-1.5" />

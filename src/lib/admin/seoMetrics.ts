@@ -4,11 +4,72 @@
 
 /** Slug d'article depuis une URL Google (articles publiés sous /actualites/, ancien chemin /articles/). */
 export function articleSlugFromUrl(url: string): string {
+  return pagePath(url).replace(/^\/(articles|actualites)\//, "");
+}
+
+/**
+ * Lot SEO-A : chemin d'une page Google sans domaine, sans ancre (#prix) ni
+ * paramètre (?lang=en), sans barre finale. Search Console compte séparément
+ * les liens d'ancre et les anciennes variantes ?lang= (redirigées depuis) :
+ * on les regroupe sur la page réelle.
+ */
+export function pagePath(url: string): string {
+  let path = url;
   try {
-    return new URL(url).pathname.replace(/^\/(articles|actualites)\//, "").replace(/\/$/, "");
+    path = new URL(url).pathname;
   } catch {
-    return url;
+    path = url.replace(/^https?:\/\/[^/]+/, "").replace(/[#?].*$/, "");
   }
+  if (path.length > 1) path = path.replace(/\/$/, "");
+  return path || "/";
+}
+
+export interface PageTotals { clicks: number; impressions: number }
+
+/** Lot SEO-A : clics et impressions par chemin réel (ancres et paramètres regroupés). */
+export function aggregatePages(pages: { page: string; impressions: number; clicks?: number }[]): Map<string, PageTotals> {
+  const out = new Map<string, PageTotals>();
+  for (const p of pages) {
+    const key = pagePath(p.page);
+    const cur = out.get(key) ?? { clicks: 0, impressions: 0 };
+    cur.clicks += p.clicks ?? 0;
+    cur.impressions += p.impressions;
+    out.set(key, cur);
+  }
+  return out;
+}
+
+/** Nombre de pages distinctes affichées au moins une fois par Google. */
+export function pagesWithImpressions(pages: { page: string; impressions: number; clicks?: number }[]): number {
+  let n = 0;
+  for (const t of aggregatePages(pages).values()) if (t.impressions > 0) n++;
+  return n;
+}
+
+export type ArticleIndexStatus = "indexable" | "redirige" | "noindex" | "canonique_ailleurs";
+
+export const ARTICLE_INDEX_STATUS_LABELS: Record<ArticleIndexStatus, string> = {
+  indexable: "indexable",
+  redirige: "redirigé",
+  noindex: "noindex",
+  canonique_ailleurs: "canonique vers une autre page",
+};
+
+/**
+ * Lot SEO-A : statut d'un article publié tel que Google le voit, avec les
+ * mêmes règles que le sitemap : redirection en base (table redirects),
+ * noindex, ou canonique qui pointe vers une autre adresse. Seuls les articles
+ * « indexable » ont vocation à apparaître dans Google.
+ */
+export function articleIndexStatus(
+  a: { slug: string; noindex?: boolean | null; canonical_url?: string | null },
+  redirectedSlugs: Set<string>,
+): ArticleIndexStatus {
+  if (redirectedSlugs.has(a.slug)) return "redirige";
+  if (a.noindex === true) return "noindex";
+  const canon = (a.canonical_url ?? "").trim();
+  if (canon && pagePath(canon) !== `/actualites/${a.slug}`) return "canonique_ailleurs";
+  return "indexable";
 }
 
 export interface PageImpressions { page: string; impressions: number }
@@ -63,3 +124,91 @@ export function organicSessions(channels: { channel: string; sessions: number }[
 }
 
 export const fmtInt = (n: number) => n.toLocaleString("fr-FR");
+
+export interface SeoArticle {
+  slug: string;
+  title: string;
+  category: string;
+  published_at: string | null;
+  created_at: string;
+  status: ArticleIndexStatus;
+}
+
+export interface PagePosition { position: number; ctr: number }
+
+/** Positions connues (Search Console ne les renvoie que pour les 25 premières pages en cache). */
+export function positionsFromTopPages(rows: { keys?: string[]; position: number; ctr: number }[] | undefined): Map<string, PagePosition> {
+  const out = new Map<string, PagePosition>();
+  for (const r of rows ?? []) {
+    const key = pagePath(r.keys?.[0] ?? "");
+    if (!out.has(key)) out.set(key, { position: r.position, ctr: r.ctr });
+  }
+  return out;
+}
+
+export type SeoActionKind = "loin" | "titre";
+
+export interface SeoAction {
+  article: SeoArticle;
+  kind: SeoActionKind;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  position: number | null;
+}
+
+/** Seuils des actions prioritaires : assez d'impressions pour juger, taux de clic faible. */
+export const SEO_ACTION_MIN_IMPRESSIONS = 100;
+export const SEO_ACTION_MAX_CTR = 0.01;
+
+/**
+ * Lot SEO-A : actions prioritaires sur les articles indexables, une seule par
+ * article, triées par impressions. « loin » : position connue au-delà de 20 ;
+ * « titre » : Google montre l'article mais on clique peu, le titre et la
+ * description sont le levier. Les articles sans impression ont leur propre bloc.
+ */
+export function priorityActions(
+  articles: SeoArticle[],
+  totals: Map<string, PageTotals>,
+  positions: Map<string, PagePosition>,
+  limit = 8,
+): SeoAction[] {
+  const out: SeoAction[] = [];
+  for (const a of articles) {
+    if (a.status !== "indexable") continue;
+    const path = `/actualites/${a.slug}`;
+    const t = totals.get(path);
+    if (!t || t.impressions < SEO_ACTION_MIN_IMPRESSIONS) continue;
+    const ctr = t.clicks / t.impressions;
+    if (ctr >= SEO_ACTION_MAX_CTR) continue;
+    const position = positions.get(path)?.position ?? null;
+    out.push({ article: a, kind: position !== null && position > 20 ? "loin" : "titre", impressions: t.impressions, clicks: t.clicks, ctr, position });
+  }
+  return out.sort((x, y) => y.impressions - x.impressions).slice(0, limit);
+}
+
+export interface TopArticleRow { article: SeoArticle; clicks: number; impressions: number; ctr: number; position: number | null }
+
+/** Lot SEO-A : dix articles les plus cliqués, sur la liste complète des pages Google. */
+export function topArticles(
+  articles: SeoArticle[],
+  totals: Map<string, PageTotals>,
+  positions: Map<string, PagePosition>,
+  limit = 10,
+): TopArticleRow[] {
+  const rows: TopArticleRow[] = [];
+  for (const a of articles) {
+    const path = `/actualites/${a.slug}`;
+    const t = totals.get(path);
+    if (!t || t.impressions === 0) continue;
+    rows.push({ article: a, clicks: t.clicks, impressions: t.impressions, ctr: t.clicks / t.impressions, position: positions.get(path)?.position ?? null });
+  }
+  return rows.sort((x, y) => y.clicks - x.clicks || y.impressions - x.impressions).slice(0, limit);
+}
+
+/** Lot SEO-A : répartition des articles publiés par statut Google. */
+export function countByStatus(articles: { status: ArticleIndexStatus }[]): Record<ArticleIndexStatus, number> {
+  const out: Record<ArticleIndexStatus, number> = { indexable: 0, redirige: 0, noindex: 0, canonique_ailleurs: 0 };
+  for (const a of articles) out[a.status]++;
+  return out;
+}
