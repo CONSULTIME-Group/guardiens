@@ -10053,6 +10053,7 @@ export type Database = {
       }
       animal_associations: {
         Row: {
+          address: string | null
           adoption_url: string | null
           association_type: string
           city: string
@@ -10096,6 +10097,7 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          address?: string | null
           adoption_url?: string | null
           association_type: string
           city: string
@@ -10139,6 +10141,7 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          address?: string | null
           adoption_url?: string | null
           association_type?: string
           city?: string
@@ -18840,6 +18843,7 @@ export type Database = {
       }
       public_animal_associations: {
         Row: {
+          address: string | null
           adoption_url: string | null
           association_type: string | null
           city: string | null
