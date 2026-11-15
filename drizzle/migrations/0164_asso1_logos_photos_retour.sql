@@ -56,3 +56,5 @@ CREATE OR REPLACE VIEW public.public_animal_associations AS
      JOIN departements d ON d.code = a.departement_code
      LEFT JOIN seo_department_pages sdp ON lower(sdp.department) = lower(d.nom) AND sdp.published = true
   WHERE a.status = 'published'::text;
+
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.public_animal_associations FROM anon, authenticated;
