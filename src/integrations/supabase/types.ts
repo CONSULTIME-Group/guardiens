@@ -20026,6 +20026,10 @@ export type Database = {
           views: number
         }[]
       }
+      admin_channel_leads: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
+      }
       admin_conversation_hidden_messages: {
         Args: { p_conversation_id: string }
         Returns: {
@@ -22150,6 +22154,11 @@ export type Database = {
           cleared: number
           marked: number
         }[]
+      }
+      trf2_page_view_source: { Args: { p_meta: Json }; Returns: Json }
+      trf2_search_param: {
+        Args: { p_key: string; p_max: number; p_search: string }
+        Returns: string
       }
       trigger_indexnow_push: {
         Args: { _path: string; _source: string }
