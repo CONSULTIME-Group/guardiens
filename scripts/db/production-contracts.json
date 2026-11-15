@@ -905,6 +905,20 @@
           "sql": "SELECT to_regclass('public.analytics_events_page_view_visit_idx') IS NOT NULL AS ok"
         }
       ]
+    },
+    {
+      "migration": "0168_asso4_vague2_fiches.sql",
+      "description": "Six associations hors animaux publiées en vague 2, chacune avec SIREN, RNA, description d'au moins 150 caractères et sans adresse de rue",
+      "checks": [
+        {
+          "name": "six_fiches_vague2_publiees",
+          "sql": "SELECT count(*) = 6 AS ok FROM public.animal_associations WHERE status='published' AND slug IN ('restos-du-coeur-rhone','fne-rhone','lpo-auvergne-rhone-alpes','mountain-wilderness-france','concordia-chantiers-benevoles','rempart-chantiers-patrimoine')"
+        },
+        {
+          "name": "fiches_vague2_identifiants_et_sans_adresse",
+          "sql": "SELECT NOT EXISTS (SELECT 1 FROM public.animal_associations WHERE slug IN ('restos-du-coeur-rhone','fne-rhone','lpo-auvergne-rhone-alpes','mountain-wilderness-france','concordia-chantiers-benevoles','rempart-chantiers-patrimoine') AND (siren !~ '^[0-9]{9}$' OR rna !~ '^W[0-9]{9}$' OR char_length(description) < 150 OR address IS NOT NULL)) AS ok"
+        }
+      ]
     }
   ]
 }
