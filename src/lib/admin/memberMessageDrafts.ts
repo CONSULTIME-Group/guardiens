@@ -14,7 +14,7 @@ export interface MemberDraft {
   body: string;
 }
 
-export type MemberDraftTopic = "alma_help" | "alma_churn" | "no_applications";
+export type MemberDraftTopic = "alma_help" | "alma_churn" | "no_applications" | "dormant_sitter" | "account_welcome";
 
 export interface MemberDraftContext {
   /** Prénom du destinataire ; vide quand il est inconnu. */
@@ -29,6 +29,8 @@ export interface MemberDraftContext {
   /** Gardiens à proximité de l'annonce. */
   sittersNearby?: number | null;
   daysPublished?: number | null;
+  /** Jours depuis la dernière candidature d'un gardien. */
+  daysQuiet?: number | null;
 }
 
 const hello = (name?: string | null) => (name?.trim() ? `Bonjour ${name.trim()},` : "Bonjour,");
@@ -151,10 +153,80 @@ const noApplications = (c: MemberDraftContext): MemberDraft[] => {
   ];
 };
 
+const dormantSitter = (c: MemberDraftContext): MemberDraft[] => {
+  const quiet = c.daysQuiet && c.daysQuiet > 30 ? `Votre dernière candidature date d'il y a ${c.daysQuiet} jours` : "Votre dernière candidature date d'il y a quelque temps";
+  const LINK = "Le lien ci-dessous ouvre les annonces du moment.";
+  return [
+    {
+      subject: "De nouvelles gardes vous attendent",
+      body: join([
+        hello(c.name),
+        `Je suis Jérémie, l'un des deux fondateurs de Guardiens. Les propriétaires ont beaucoup apprécié vos gardes, et je voulais vous le dire. ${quiet}, alors je prends de vos nouvelles.`,
+        "De nouvelles annonces sont arrivées ces dernières semaines, en France et au-delà. Votre profil compte parmi ceux que les propriétaires aiment recevoir.",
+        `${LINK} ${READ_YOU}`,
+        CLOSING,
+      ]),
+    },
+    {
+      subject: "Un petit mot de Guardiens",
+      body: join([
+        hello(c.name),
+        `${quiet}. Tout va bien de votre côté ?`,
+        "Si vos disponibilités ont changé, mettez simplement à jour votre profil : les propriétaires voient ainsi quand vous êtes libre. Et si une région vous fait envie, dites-la-moi, je vous signale volontiers les annonces qui y paraissent.",
+        `${LINK} ${READ_YOU}`,
+        CLOSING,
+      ]),
+    },
+    {
+      subject: "Merci pour vos gardes",
+      body: join([
+        hello(c.name),
+        "Vos gardes ont laissé d'excellents souvenirs aux propriétaires, merci pour le soin que vous y mettez.",
+        `${quiet}. Si quelque chose vous a freiné sur le site, racontez-le-moi : votre retour nous aide à l'améliorer pour tous les gardiens.`,
+        `${LINK} Je vous lis avec plaisir.`,
+        CLOSING,
+      ]),
+    },
+  ];
+};
+
+const accountWelcome = (c: MemberDraftContext): MemberDraft[] => [
+  {
+    subject: "Bienvenue sur Guardiens",
+    body: join([
+      hello(c.name),
+      "Je suis Jérémie, l'un des deux fondateurs de Guardiens. Bienvenue parmi nous, et merci pour votre première candidature.",
+      "Un profil complet met les propriétaires en confiance : une photo, quelques lignes sur vous et votre expérience avec les animaux, et la vérification d'identité. Ces trois éléments font souvent la différence.",
+      READ_YOU,
+      CLOSING,
+    ]),
+  },
+  {
+    subject: "Ravi de vous compter parmi nous",
+    body: join([
+      hello(c.name),
+      "Bienvenue sur Guardiens. J'ai vu votre inscription et votre candidature, vous démarrez sur les chapeaux de roue.",
+      "Pour mieux vous connaître, dites-moi en deux lignes ce qui vous amène : vos animaux préférés, les régions qui vous attirent, vos expériences de garde. Je vous lis avec plaisir.",
+      CLOSING,
+    ]),
+  },
+  {
+    subject: "Un mot de bienvenue",
+    body: join([
+      hello(c.name),
+      "Merci d'avoir rejoint Guardiens. Je suis Jérémie, je réponds personnellement aux nouveaux membres.",
+      "Complétez votre profil quand vous avez un moment (photo, présentation, vérification d'identité) : les propriétaires répondent plus volontiers aux gardiens qu'ils peuvent découvrir. Une question sur le site ? Répondez simplement à ce message.",
+      CLOSING,
+    ]),
+  },
+];
+
 const BUILDERS: Record<MemberDraftTopic, (c: MemberDraftContext) => MemberDraft[]> = {
   alma_help: almaHelp,
   alma_churn: almaChurn,
   no_applications: noApplications,
+  dormant_sitter: dormantSitter,
+  account_welcome: accountWelcome,
 };
 
 /** Les trois versions d'un sujet, la première proposée à l'ouverture. */

@@ -86,7 +86,7 @@ async function almaContextLines(g: Gesture): Promise<string[]> {
 /** Cible du composeur pour une ligne « Écrire à… » : contexte, trois versions, messagerie d'abord. */
 async function writeTargetOf(g: Gesture, w: GestureWrite, closes: boolean): Promise<WriteToMemberTarget> {
   const m = g.signals[0]?.metadata ?? {};
-  const alma = w.topic !== "no_applications";
+  const alma = w.topic === "alma_help" || w.topic === "alma_churn";
   const drafts = memberMessageDrafts(w.topic, {
     name: w.firstName,
     quote: g.quote,
@@ -95,10 +95,11 @@ async function writeTargetOf(g: Gesture, w: GestureWrite, closes: boolean): Prom
     startsWhen: g.chip.startsWith("Départ ") ? g.chip.replace(/^Départ /, "") : null,
     sittersNearby: Number(m.eligible_sitters_count ?? 0) || 0,
     daysPublished: Number(m.days_since_published ?? 0) || 0,
+    daysQuiet: Number(m.days_since_last_application ?? 0) || 0,
   });
   return {
     userId: w.userId,
-    userName: w.firstName || (alma ? "ce membre" : "le propriétaire"),
+    userName: w.firstName || (w.topic === "no_applications" ? "le propriétaire" : "ce membre"),
     sitId: w.sitId,
     drafts,
     channel: "message",
@@ -119,6 +120,7 @@ const GestureRow = ({ g, sitMap, last, onWrite }: {
   onWrite: (g: Gesture, w: GestureWrite, closes: boolean) => void;
 }) => {
   const [open, setOpen] = useState(false);
+  const [more, setMore] = useState(false);
   const [broadcast, setBroadcast] = useState(false);
   const qc = useQueryClient();
   const id = `pilotage-${g.key.replace(/[^a-z0-9_-]/gi, "-")}`;
@@ -130,7 +132,7 @@ const GestureRow = ({ g, sitMap, last, onWrite }: {
           <p className="text-[15px] font-semibold text-foreground">{g.title}</p>
           <p className="mt-0.5 text-[13px] text-muted-foreground">{g.detail}</p>
           {g.quote && <p className="mt-1.5 inline-block rounded-lg bg-muted/60 px-3 py-2 text-sm text-foreground">« {g.quote.slice(0, 200)} »</p>}
-          {(g.links.length > 0 || g.secondaryWrite || g.kind === "write" || g.kind === "broadcast") && (
+          {(g.links.length > 0 || g.secondaryWrite || g.moreActions || g.kind === "write" || g.kind === "broadcast") && (
             <ul className="mt-1.5 flex flex-wrap gap-x-4 gap-y-0" data-testid="pilotage-elements">
               {g.links.slice(0, ELEMENT_LINKS_SHOWN).map((l) => (
                 <li key={l.to + l.label}><Link to={l.to} className={LINK_CLASS}>{l.label}</Link></li>
@@ -138,7 +140,10 @@ const GestureRow = ({ g, sitMap, last, onWrite }: {
               {g.secondaryWrite && (
                 <li><button type="button" className={LINK_CLASS} onClick={() => onWrite(g, g.secondaryWrite!, false)}>{g.secondaryWrite.label}</button></li>
               )}
-              {(g.kind === "write" || g.kind === "broadcast") && (
+              {g.moreActions && (
+                <li><button type="button" className={LINK_CLASS} aria-expanded={more} onClick={() => setMore((v) => !v)}>{more ? "Replier" : "Autres gestes"}</button></li>
+              )}
+              {(g.kind === "write" || g.kind === "broadcast") && !g.moreActions && (
                 <li><IgnoreSignalsButton ids={g.signals.map((s) => s.id)} label="Classer sans agir" /></li>
               )}
             </ul>
@@ -157,7 +162,7 @@ const GestureRow = ({ g, sitMap, last, onWrite }: {
           </Button>
         )}
       </div>
-      {g.kind === "card" && open && <div id={id}><LineDetail signals={g.signals} sitMap={sitMap} /></div>}
+      {((g.kind === "card" && open) || (g.moreActions && more)) && <div id={id}><LineDetail signals={g.signals} sitMap={sitMap} /></div>}
       {g.kind === "more" && open && (
         <ul id={id} className="border-t border-border/70 bg-muted/20">
           {(g.children ?? []).map((c, i) => <GestureRow key={c.key} g={c} sitMap={sitMap} last={i === (g.children?.length ?? 0) - 1} onWrite={onWrite} />)}
@@ -290,7 +295,7 @@ export const ProgressSection = () => {
           label="Candidatures sans réponse"
           value={val(liq.isLoading, liq.error, liq.data?.pending_applications)}
           hint={liq.data && liq.data.pending_applications > 0 && liq.data.pending_oldest_days !== null ? `Plus ancienne : ${liq.data.pending_oldest_days} j` : undefined}
-          onClick={() => navigate("/admin/listings")}
+          onClick={() => navigate("/admin/listings?filter=awaiting_reply")}
         />
         <KpiTile
           label="Gardes confirmées à venir"
@@ -302,7 +307,7 @@ export const ProgressSection = () => {
           label="Inscrits, 7 jours"
           value={val(kf.isLoading, kf.error, kf.data?.newThisWeek)}
           hint={kf.data ? `${kf.data.newPrevWeek} la semaine d'avant` : undefined}
-          onClick={() => navigate("/admin/users")}
+          onClick={() => navigate("/admin/users?new=7")}
         />
       </div>
     </section>

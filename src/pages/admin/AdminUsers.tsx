@@ -108,6 +108,8 @@ const AdminUsers = () => {
   // ?user= ou ?id= : filtre la liste sur ce membre (liens depuis les autres écrans).
   const [urlParams, setUrlParams] = useSearchParams();
   const focusUserId = urlParams.get("user") || urlParams.get("id");
+  // Lot VE-5 : ?new=7 montre les inscrits des 7 derniers jours (tuile de la vue d'ensemble).
+  const newDays = Math.min(90, Math.max(0, Number(urlParams.get("new")) || 0));
   const clearFocus = () => {
     const next = new URLSearchParams(urlParams);
     next.delete("user");
@@ -233,6 +235,7 @@ const AdminUsers = () => {
   /** Filtres de la liste, repris tels quels par l'export. */
   const applyListFilters = (query: any) => {
     if (focusUserId) return query.eq("id", focusUserId);
+    if (newDays > 0) query = query.gte("created_at", new Date(Date.now() - newDays * 86_400_000).toISOString());
     query = applyMemberStatusFilter(query, filterStatus);
     if (filterRole !== "all") query = query.eq("role", filterRole as any);
     // Lot A10 : un statut vide compte comme « Non vérifié ».
@@ -311,7 +314,7 @@ const AdminUsers = () => {
     setUsers(enriched);
     setTotal(count ?? 0);
     setLoading(false);
-  }, [filterRole, filterVerification, filterDept, filterCountry, filterStatus, searchDebounced, page, focusUserId]);
+  }, [filterRole, filterVerification, filterDept, filterCountry, filterStatus, searchDebounced, page, focusUserId, newDays]);
 
   // Debounce search 300ms
   useEffect(() => {
@@ -806,6 +809,14 @@ const AdminUsers = () => {
       <p className="text-xs text-muted-foreground -mt-3">Comptes supprimés comptés à part. Nouveaux : 7 derniers jours glissants.</p>
 
 
+      {newDays > 0 && !focusUserId && (
+        <UrlFilterNotice
+          label={`Inscrits depuis ${newDays} jours`}
+          notFound={false}
+          notFoundText=""
+          onClear={() => { const next = new URLSearchParams(urlParams); next.delete("new"); setUrlParams(next, { replace: true }); }}
+        />
+      )}
       {focusUserId && (
         <UrlFilterNotice
           label="Filtré sur un membre"
