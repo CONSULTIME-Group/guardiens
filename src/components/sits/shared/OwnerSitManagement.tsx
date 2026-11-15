@@ -5,7 +5,8 @@
  * Affiché en bas de la page d'annonce pour ne pas polluer la lecture,
  * mais visuellement clair (pas un lien tertiaire microscopique).
  */
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Pencil, Share2, XCircle, BookOpen, Settings2, Archive, RotateCcw, Trash2 } from "lucide-react";
 
@@ -42,9 +43,19 @@ const OwnerSitManagement = ({
   canRemove,
   onRemoveClick,
 }: OwnerSitManagementProps) => {
+  // Lot SUPPR2 : #gerer-cette-garde (Alma, formulaire de modification) amène ici.
+  const location = useLocation();
+  const ref = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (location.hash !== "#gerer-cette-garde") return;
+    const t = window.setTimeout(() => ref.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+    return () => window.clearTimeout(t);
+  }, [location.hash]);
   return (
     <section
-      className="mt-10 mb-6 rounded-xl border border-border bg-muted/30 p-5 md:p-6"
+      ref={ref}
+      id="gerer-cette-garde"
+      className="mt-10 mb-6 rounded-xl border border-border bg-muted/30 p-5 md:p-6 scroll-mt-24"
       aria-labelledby="owner-management-title"
     >
       <div className="flex items-center gap-2 mb-1">

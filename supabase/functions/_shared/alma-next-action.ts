@@ -132,6 +132,13 @@ export const OUTING_INTENT = /(jeux? de societe|belote|tarot|scrabble|echecs|par
 
 const withTitle = (path: string, title: string) => `${path}?titre=${encodeURIComponent(title)}`;
 
+/** Lot SUPPR2 : retirer, dépublier, masquer ou supprimer son annonce (texte replié, sans accents). */
+export const REMOVE_SIT_INTENT = /\b(supprim\w*|retir\w*|depubli\w*|masqu\w*|cach\w*|enlev\w*|invisible|desactiv\w*)\b[^.?!]{0,40}\b(annonce|garde)\b|\b(annonce|garde)\b[^.?!]{0,40}\b(supprim\w*|retir\w*|depubli\w*|masqu\w*|invisible|enlev\w*)\b|\bdepublier\b/;
+/** Lot SUPPR2 : verbe de retrait seul, sur la fiche de sa propre annonce. */
+const REMOVE_VERB = /\b(supprim\w*|retir\w*|depubli\w*|masqu\w*|enlev\w*|invisible)\b/;
+/** Lot SUPPR2 : mots d'un projet à plusieurs. */
+const PROJECT_WORDS = /\b(projet|chantier|a plusieurs|collectif|ensemble|haie|jardin partage|potager partage)\b/;
+
 export function sitIdFromPath(path?: string | null): string | null {
   const m = (path || "").match(/^\/(?:sits|annonces)\/([^/?#]+)$/);
   if (!m || m[1] === "create" || m[1] === "international") return null;
@@ -191,6 +198,19 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
     return {
       action: { label: "Voir les sorties près de chez moi", path: "/sorties", reason: "sortie_voir" },
       chips: [{ label: "Proposer une sortie", path: "/sorties/proposer" }],
+      placement,
+    };
+  }
+
+  // Lot SUPPR2 (15/11/2026) : retirer, dépublier ou supprimer son annonce mène
+  // au bloc « Gérer cette garde » de sa fiche (base du 14/11 : une propriétaire
+  // a demandé trois fois et reçu « Lancer un projet à plusieurs »).
+  const viewedOwn = input.viewedSit && facts.annonces_publiees.some((a) => a.sit_id === input.viewedSit!.id) ? input.viewedSit.id : null;
+  if (facts.annonces_publiees.length && (REMOVE_SIT_INTENT.test(q) || (viewedOwn && REMOVE_VERB.test(q)))) {
+    const sitId = viewedOwn ?? facts.annonces_publiees[0].sit_id;
+    return {
+      action: { label: "Retirer mon annonce", path: `/sits/${sitId}#gerer-cette-garde`, reason: "retirer_annonce" },
+      chips: [],
       placement,
     };
   }
@@ -262,7 +282,10 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
   // ou des mots d'entraide ; avant, il partait pour tous (6 propositions à
   // des propriétaires contre 0 annonce de garde, base du 14/10/2026).
   else if (entraideAsked) candidates.push({ label: "Demander un coup de main", path: withTitle("/petites-missions/creer", suggestMissionTitle(input.question)), reason: "entraide_premiere" });
-  if (!inventory.projets.length) candidates.push({ label: "Lancer un projet à plusieurs", path: withTitle("/projets/publier", "Planter une haie à plusieurs"), reason: "projet_premier" });
+  // Lot SUPPR2 : un premier projet seulement quand la personne en parle ou demande de l'aide.
+  if (!inventory.projets.length) {
+    if (PROJECT_WORDS.test(q) || entraideAsked) candidates.push({ label: "Lancer un projet à plusieurs", path: withTitle("/projets/publier", "Planter une haie à plusieurs"), reason: "projet_premier" });
+  }
   else candidates.push({ label: `Voir « ${inventory.projets[0].titre} »`, path: inventory.projets[0].lien, reason: "projet_proche" });
   const question = inventory.questions_sans_reponse[0];
   if (question) candidates.push({ label: `Répondre à la question « ${question.titre} »`, path: question.lien, reason: "question_sans_reponse" });
