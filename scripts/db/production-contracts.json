@@ -939,6 +939,20 @@
           "sql": "SELECT count(*)=18 AS ok FROM public.animal_associations WHERE contact_email IS NOT NULL AND slug IN ('1000-moustaches','arthropologia','banque-alimentaire-du-rhone','club-alpin-francais-lyon-villeurbanne','compagnons-batisseurs-rhone-alpes','concordia-chantiers-benevoles','conservatoire-espaces-naturels-isere','espace-nature-isere','fne-rhone','le-passe-jardins','lpo-auvergne-rhone-alpes','mountain-riders','mountain-wilderness-france','petits-freres-des-pauvres-lyon','rempart-chantiers-patrimoine','ressourcerie-creative-de-lyon','restos-du-coeur-rhone','world-cleanup-day-france')"
         }
       ]
+    },
+    {
+      "migration": "0171_asso4_vague3_fiches.sql",
+      "description": "Cinq fiches de la vague 3 (Emmaüs Lyon, Coup de Pouce Université, On The Green Road, Éco-garde Rhône, AFE Lyon) publiées",
+      "checks": [
+        {
+          "name": "cinq_fiches_vague3_publiees",
+          "sql": "SELECT count(*)=5 AS ok FROM public.animal_associations WHERE status='published' AND slug IN ('emmaus-lyon','coup-de-pouce-universite-lyon','on-the-green-road','eco-garde-rhone','afe-apprendre-le-francais-ensemble-lyon')"
+        },
+        {
+          "name": "fiches_vague3_sans_adresse_et_avec_identifiants",
+          "sql": "SELECT bool_and(address IS NULL AND siren IS NOT NULL AND char_length(description)>=150 AND char_length(tagline)<=120) AS ok FROM public.animal_associations WHERE slug IN ('emmaus-lyon','coup-de-pouce-universite-lyon','on-the-green-road','eco-garde-rhone','afe-apprendre-le-francais-ensemble-lyon')"
+        }
+      ]
     }
   ]
 }
