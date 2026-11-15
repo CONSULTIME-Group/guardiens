@@ -7,6 +7,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { PRESS_ARTICLE_URL } from "@/data/siteConstants";
 import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
 import { MISSIONS_CITY_INDEX } from "@/data/missionsCityIndex";
+import { SOCIAL_LINKS } from "@/data/socialLinks";
+import { SocialIcon } from "@/components/share/SocialIcon";
 
 export interface FooterLocalContext {
   /** Nom du département de la page consultée, par exemple « Var ». */
@@ -193,6 +195,23 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
             <p className="font-body text-sm text-white/70">
               {t("footer.tagline")}
             </p>
+            {/* Lot SOC2 : les comptes officiels, une icône par réseau, cible 44 px. */}
+            <ul aria-label="Guardiens sur les réseaux sociaux" className="mt-2 -ml-2.5 flex items-center gap-1">
+              {SOCIAL_LINKS.map((s) => (
+                <li key={s.name}>
+                  <a
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer me"
+                    aria-label={`${s.label} (nouvel onglet)`}
+                    title={s.name}
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full text-white/75 hover:text-white hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  >
+                    <SocialIcon name={s.name} className="h-5 w-5" />
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
           {/* Mobile : pile verticale, une entrée par ligne, cible 44 px, aucun
               séparateur. Desktop : ligne unique avec séparateurs. Ordre légal :
