@@ -7,7 +7,7 @@ import { fr } from "date-fns/locale";
 import { cleanLandingPath } from "@/lib/admin/channelLeads";
 
 interface Props {
-  rangeDays: 1 | 7 | 30;
+  rangeDays: number;
 }
 
 interface Row {

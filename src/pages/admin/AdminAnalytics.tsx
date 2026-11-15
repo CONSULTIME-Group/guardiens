@@ -14,10 +14,12 @@ import { format, subDays, startOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import FacebookReferralCard from "@/components/admin/analytics/FacebookReferralCard";
 import ProfileCompletionCohortsCard from "@/components/admin/analytics/ProfileCompletionCohortsCard";
+import TabSynthesis from "@/components/admin/traffic/TabSynthesis";
+import { funnelPhrase } from "@/lib/admin/trafficSynthesis";
 import { measureBreakNotice } from "@/lib/admin/measureBreak";
 import { distinctCohortPeople, rateOf, ONBOARDING_DEFINITION, ONBOARDING_END_EVENT_TYPES, isOnboardingEndEvent } from "@/lib/admin/trueCounts";
 
-type Range = 1 | 7 | 30;
+type Range = number;
 type RoleFilter = "all" | "owner" | "sitter" | "both";
 
 interface DailyStat {
@@ -60,8 +62,18 @@ const ROLE_TABLE_STEPS = FUNNEL_STEPS.filter((s) => !ROLE_AGNOSTIC_EVENTS.has(s.
 interface FunnelCounts { [key: string]: number; }
 interface TopPage { path: string; views: number; }
 
-const AdminAnalytics = () => {
-  const [range, setRange] = useState<Range>(7);
+interface AdminAnalyticsProps {
+  /** Lot TRF-6 : période commune de /admin/traffic, en jours. */
+  days?: number;
+  /** Lot TRF-6 : phrase de synthèse en tête, à la place du titre. */
+  periodPhrase?: string;
+  /** Lot TRF-6 : profils remplis et installation de l'application se lisent dans « Vue d'ensemble ». */
+  hideActivation?: boolean;
+}
+
+const AdminAnalytics = ({ days, periodPhrase, hideActivation = false }: AdminAnalyticsProps = {}) => {
+  const [ownRange, setRange] = useState<Range>(7);
+  const range = days ?? ownRange;
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [loading, setLoading] = useState(true);
   const [daily, setDaily] = useState<DailyStat[]>([]);
@@ -353,13 +365,13 @@ const AdminAnalytics = () => {
               <TabsTrigger value="both">Les deux</TabsTrigger>
             </TabsList>
           </Tabs>
-          <Tabs value={String(range)} onValueChange={(v) => setRange(Number(v) as Range)}>
+          {days === undefined && <Tabs value={String(range)} onValueChange={(v) => setRange(Number(v) as Range)}>
             <TabsList>
               <TabsTrigger value="1">24h</TabsTrigger>
               <TabsTrigger value="7">7 jours</TabsTrigger>
               <TabsTrigger value="30">30 jours</TabsTrigger>
             </TabsList>
-          </Tabs>
+          </Tabs>}
         </div>
       </div>
 
@@ -407,6 +419,17 @@ const AdminAnalytics = () => {
         </div>
       ) : (
         <>
+          {periodPhrase && (
+            <TabSynthesis
+              testid="funnel-synthesis"
+              phrase={funnelPhrase(funnelCounts.signup_started || 0, totalInscrits, funnelCounts.first_action || 0, periodPhrase)}
+              kpis={[
+                { label: "Démarrées", value: String(funnelCounts.signup_started || 0), hint: "inscriptions" },
+                { label: "Comptes créés", value: String(totalInscrits), hint: `${kpis.signupConversionRate} % des démarrées` },
+                { label: "Première action", value: String(funnelCounts.first_action || 0), hint: `${kpis.globalConversion} % des démarrées` },
+              ]}
+            />
+          )}
           {/* Stat cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard
@@ -475,7 +498,7 @@ const AdminAnalytics = () => {
           </Card>
 
           {/* Lot ONB1 : remplissage du profil par rôle, comptes de 7 jours et plus. */}
-          <ProfileCompletionCohortsCard />
+          {!hideActivation && <ProfileCompletionCohortsCard />}
 
           {/* Lot A10 : l'entonnoir d'inscription unique vit dans l'onglet « Entonnoir d'inscription » (Entonnoir chiffré, 8 étapes, agrégat SQL). */}
           <p className="text-xs text-muted-foreground">
@@ -595,6 +618,7 @@ Les blocages, les échecs et les sous-étapes du formulaire d'inscription se lis
           </Card>
 
           <FacebookReferralCard rangeDays={range} />
+          {!hideActivation && (
           <Card>
             <CardHeader><CardTitle>Installation de Guardiens</CardTitle></CardHeader>
             <CardContent className="space-y-4">
@@ -613,6 +637,7 @@ Les blocages, les échecs et les sous-étapes du formulaire d'inscription se lis
               <p className="text-xs text-muted-foreground">Les confirmations dépendent du navigateur : les installations manuelles sur iPhone s'ajoutent à part. Les ouvertures sont comptées une fois par session et par compte connecté, en sessions plutôt qu'en utilisateurs uniques. Un clic ou « Je l'ai déjà installée » compte comme une déclaration, la confirmation vient du navigateur.</p>
             </CardContent>
           </Card>
+          )}
         </>
       )}
     </div>

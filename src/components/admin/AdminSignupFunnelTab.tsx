@@ -138,8 +138,10 @@ function downloadCsv(m: Metrics) {
   URL.revokeObjectURL(url);
 }
 
-export default function AdminSignupFunnelTab() {
-  const [period, setPeriod] = useState<Period>(30);
+export default function AdminSignupFunnelTab({ days }: { days?: number } = {}) {
+  const [ownPeriod, setPeriod] = useState<Period>(30);
+  // Lot TRF-6 : la période commune de /admin/traffic l'emporte quand elle est fournie.
+  const period = (days ?? ownPeriod) as Period;
   const [data, setData] = useState<Metrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -190,7 +192,7 @@ export default function AdminSignupFunnelTab() {
             )}
           </div>
           <div className="flex items-center gap-2">
-            {([7, 30, 90] as Period[]).map((p) => (
+            {days === undefined && ([7, 30, 90] as Period[]).map((p) => (
               <Button
                 key={p}
                 size="sm"

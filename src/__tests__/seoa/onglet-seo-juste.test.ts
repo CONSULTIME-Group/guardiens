@@ -113,7 +113,7 @@ describe("SEO-A, écrans", () => {
   it("l'onglet SEO passe par les statuts d'articles et la liste complète", () => {
     const src = read("src/pages/admin/AdminSEO.tsx");
     expect(src).toContain("useSeoArticles");
-    expect(src).toContain("<PriorityActions actions={seoActions} />");
+    expect(src).toContain("<PriorityActions actions={seoActions} log={actionLog} />");
     expect(src).toContain("<TopArticlesTable rows={topArticleRows} />");
     expect(src).toContain("aggregatePages(allGscPages)");
   });

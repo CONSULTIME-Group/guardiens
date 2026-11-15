@@ -1,4 +1,6 @@
 import { Suspense, useEffect, useRef, useState } from "react";
+import ProfileCompletionCohortsCard from "@/components/admin/analytics/ProfileCompletionCohortsCard";
+import AppInstallCard from "@/components/admin/analytics/AppInstallCard";
 import { useSearchParams } from "react-router-dom";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
@@ -39,6 +41,12 @@ const MoreContent = ({ focusCrons = false }: { focusCrons?: boolean }) => {
       <Suspense fallback={<LoadingState label="Chargement des tendances…" />}>
         <TrendsPanel />
       </Suspense>
+      {/* Lot TRF-6 (15/11/2026) : profils remplis et installation de l'application, venus de /admin/traffic. */}
+      <section className="space-y-4" data-testid="overview-activation" id="activation">
+        <h2 className="text-lg font-semibold text-foreground border-b pb-2">Activation</h2>
+        <ProfileCompletionCohortsCard />
+        <AppInstallCard />
+      </section>
       <div ref={cronsRef} id="taches-planifiees" className="scroll-mt-20"><CronHealthCard /></div>
       <ActivityAnalysisCard analysis={analysis} loading={loading} error={error} refreshing={refreshing} onRefresh={refresh} />
     </div>

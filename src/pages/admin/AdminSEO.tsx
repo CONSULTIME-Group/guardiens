@@ -24,6 +24,12 @@ import {
   aggregatePages, positionsFromTopPages, priorityActions, topArticles,
 } from "@/lib/admin/seoMetrics";
 import { useSeoArticles } from "@/hooks/useSeoArticles";
+import { useSeoActionLog } from "@/hooks/useSeoActionLog";
+import { frDay, nextReview, recentActionsByPath } from "@/lib/admin/seoActionLog";
+import { nonBrandClicks } from "@/lib/admin/seoPilot";
+import { seoPhrase } from "@/lib/admin/trafficSynthesis";
+import TabSynthesis from "@/components/admin/traffic/TabSynthesis";
+import SeoActionJournal from "@/components/admin/seo/SeoActionJournal";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 function downloadCsv(filename: string, rows: GSCRow[]) {
@@ -44,6 +50,8 @@ const AdminSEO = ({ extraTools }: { extraTools?: React.ReactNode } = {}) => {
   const [refreshing, setRefreshing] = useState(false);
   // Lot SEO-A : articles publiés avec leur statut Google, lus une fois pour tout l'onglet.
   const { articles: seoArticles } = useSeoArticles();
+  const { data: actionLog = [] } = useSeoActionLog();
+  const nextReviewDate = nextReview(actionLog);
   const publishedArticles = seoArticles ?? [];
   const [bingPeriod, setBingPeriod] = useState<BingPeriodDays>(28);
 
@@ -119,45 +127,78 @@ const AdminSEO = ({ extraTools }: { extraTools?: React.ReactNode } = {}) => {
         </Card>
       )}
 
-      {/* Lot SEO-B : Google d'abord, ce qui fait venir des membres ensuite, les outils repliés en fin d'onglet. */}
+      {/* Lot TRF-6 (15/11/2026, maquette validée) : une phrase, les chiffres Google, puis ce qu'il y a à faire.
+          Les lectures détaillées (types de page, arrivées, requêtes) se déplient. */}
       {gscAvailable && gsc && (
-        <SeoGoogleKpis
-          current={gsc.current}
-          previous={gsc.previous}
-          period={gscPeriod}
-          queries={gsc.allQueries}
+        <TabSynthesis
+          testid="seo-synthesis"
+          phrase={seoPhrase({
+            clicks: gsc.current.clicks,
+            previousClicks: gsc.previous?.clicks ?? null,
+            nonBrand: nonBrandClicks(gsc.current.clicks, gsc.allQueries ?? []),
+            period: gscPeriod,
+            treated: recentActionsByPath(actionLog).size,
+            nextReview: nextReviewDate ? frDay(nextReviewDate) : null,
+          })}
+          kpis={[
+            { label: "Clics", value: fmtInt(gsc.current.clicks) },
+            { label: "Impressions", value: fmtInt(gsc.current.impressions) },
+            { label: "Position", value: gsc.current.position.toLocaleString("fr-FR", { maximumFractionDigits: 1 }) },
+          ]}
         />
       )}
 
-      {gscAvailable && <SeoTemplatesCard totals={pageTotals} period={gscPeriod} />}
+      {gscAvailable && seoArticles && <PriorityActions actions={seoActions} log={actionLog} />}
 
-      <LandingOutcomesCard
-        channel="recherche_naturelle"
-        title="Ce que Google fait venir"
-        intro="Visites arrivées depuis Google sur 30 jours et ce qu'elles deviennent, par page d'arrivée (même règle que l'onglet Leads ; visites suivies depuis le 13/11/2026, inscrits depuis le 12/11/2026)."
-        testid="seo-landings-google"
+      <NoImpressionActionable
+        publishedArticles={publishedArticles}
+        pages={gscAvailable ? allGscPages : undefined}
+        totals={pageTotals}
+        log={actionLog}
       />
 
-      {gscAvailable && gsc && <StrikingQueriesCard queries={gsc.allQueries} topPages={gsc.queryTopPages} />}
+      <SeoActionJournal log={actionLog} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {gscAvailable && seoArticles && <PriorityActions actions={seoActions} />}
-        <NoImpressionActionable
-          publishedArticles={publishedArticles}
-          pages={gscAvailable ? allGscPages : undefined}
-        />
-      </div>
+      {gscAvailable && gsc && (
+        <details className="rounded-2xl border bg-card px-4" data-testid="seo-detail-google" open>
+          <summary className="min-h-11 flex items-center text-base font-semibold cursor-pointer">Chiffres Google et types de page</summary>
+          <div className="space-y-6 pb-4 pt-2">
+            <SeoGoogleKpis current={gsc.current} previous={gsc.previous} period={gscPeriod} queries={gsc.allQueries} />
+            <SeoTemplatesCard totals={pageTotals} period={gscPeriod} />
+          </div>
+        </details>
+      )}
 
-      <section className="space-y-4" data-testid="seo-ai">
-        <h2 className="text-lg font-semibold text-foreground border-b pb-2">Assistants IA</h2>
-        <AiAcquisitionCard />
-        <LandingOutcomesCard
-          channel="ia"
-          title="Pages d'arrivée des assistants IA"
-          intro="Visites arrivées depuis ChatGPT, Perplexity, Gemini ou Claude sur 30 jours, par page d'arrivée, et les inscrits qu'elles donnent."
-          testid="seo-landings-ia"
-        />
-      </section>
+      <details className="rounded-2xl border bg-card px-4" data-testid="seo-detail-landings">
+        <summary className="min-h-11 flex items-center text-base font-semibold cursor-pointer">Ce que Google et les assistants IA font venir</summary>
+        <div className="space-y-6 pb-4 pt-2">
+          <LandingOutcomesCard
+            channel="recherche_naturelle"
+            title="Ce que Google fait venir"
+            intro="Visites arrivées depuis Google sur 30 jours et ce qu'elles deviennent, par page d'arrivée (même règle que l'onglet Leads ; visites suivies depuis le 13/11/2026, inscrits depuis le 12/11/2026)."
+            testid="seo-landings-google"
+          />
+          <section className="space-y-4" data-testid="seo-ai">
+            <h2 className="text-lg font-semibold text-foreground border-b pb-2">Assistants IA</h2>
+            <AiAcquisitionCard />
+            <LandingOutcomesCard
+              channel="ia"
+              title="Pages d'arrivée des assistants IA"
+              intro="Visites arrivées depuis ChatGPT, Perplexity, Gemini ou Claude sur 30 jours, par page d'arrivée, et les inscrits qu'elles donnent."
+              testid="seo-landings-ia"
+            />
+          </section>
+        </div>
+      </details>
+
+      {gscAvailable && gsc && (
+        <details className="rounded-2xl border bg-card px-4" data-testid="seo-detail-queries">
+          <summary className="min-h-11 flex items-center text-base font-semibold cursor-pointer">Requêtes à portée de la première page</summary>
+          <div className="pb-4 pt-2">
+            <StrikingQueriesCard queries={gsc.allQueries} topPages={gsc.queryTopPages} />
+          </div>
+        </details>
+      )}
 
       <details className="rounded-2xl border bg-card px-4" data-testid="seo-tools">
         <summary className="min-h-11 flex items-center text-base font-semibold cursor-pointer">
