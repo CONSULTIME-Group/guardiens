@@ -15,6 +15,8 @@ const root = new URL('../', import.meta.url);
 const migration = readFileSync(new URL('drizzle/migrations/0144_src1_source_inscription.sql', root), 'utf8');
 // Lot SRC2 : 0162 ajoute YouTube, TikTok et Instagram au calcul du canal.
 const migrationSrc2 = readFileSync(new URL('drizzle/migrations/0162_src2_canaux_sociaux.sql', root), 'utf8');
+// Lot TRF2 : 0164 ajoute l'application hôte (ap) au calcul du canal.
+const migrationTrf2 = readFileSync(new URL('drizzle/migrations/0164_trf2_leads.sql', root), 'utf8');
 const cases = JSON.parse(readFileSync(new URL('src/__tests__/src1/channel-cases.json', root), 'utf8'));
 const passed = [];
 
@@ -34,6 +36,7 @@ await db.exec(`
   CREATE TABLE public.owner_profiles(user_id uuid PRIMARY KEY);
   CREATE TABLE public.sits(id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid, published_at timestamptz);
   CREATE TABLE public.user_roles(user_id uuid, role public.app_role);
+  CREATE TABLE public.analytics_events(id uuid PRIMARY KEY DEFAULT gen_random_uuid(), event_type text, user_id uuid, metadata jsonb, created_at timestamptz NOT NULL DEFAULT now());
   CREATE FUNCTION public.has_role(_user_id uuid, _role public.app_role) RETURNS boolean LANGUAGE sql STABLE AS $$
     SELECT EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = _user_id AND role = _role)
   $$;
@@ -43,6 +46,7 @@ await db.exec(migration);
 await db.exec(migration);
 await db.exec(migrationSrc2);
 await db.exec(migrationSrc2);
+await db.exec(migrationTrf2);
 await db.exec(`
   CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();

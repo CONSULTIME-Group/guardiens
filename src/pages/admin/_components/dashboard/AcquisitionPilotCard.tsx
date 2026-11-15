@@ -80,7 +80,7 @@ export const AcquisitionPilotCard = () => {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            <Stat label="Pages ville" value={stats.cityPages} hint="/ 150 cibles" />
+            <Stat label="Pages villes SEO" value={stats.cityPages} hint="/ 150 cibles" />
             <Stat label="Pages dépt." value={stats.departmentPages} hint="/ 96 cibles" />
             <Stat label="Fiches race" value={stats.breedProfiles} hint="/ 60 cibles" />
             <Stat label="Articles publiés" value={stats.articles} />

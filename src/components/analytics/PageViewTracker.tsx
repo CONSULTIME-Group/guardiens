@@ -1,3 +1,4 @@
+import { inAppHost } from "@/lib/inAppBrowser";
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
@@ -66,6 +67,8 @@ const PageViewTracker = () => {
         // Lot SRC1 : la valeur d'un identifiant de clic publicitaire n'est jamais stockée.
         search: maskClickIds(location.search),
         referrer: typeof document !== "undefined" ? document.referrer || undefined : undefined,
+        // Lot TRF2 : application hôte (Instagram, TikTok, Facebook), lue par admin_channel_leads.
+        ap: inAppHost(),
       },
     });
 

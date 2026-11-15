@@ -14,8 +14,17 @@ const AdminAnalytics = lazy(() => import("./AdminAnalytics"), "AdminAnalytics");
 const AdminSEO = lazy(() => import("./AdminSEO"), "AdminSEO");
 const AdminSignupFunnelTab = lazy(() => import("@/components/admin/AdminSignupFunnelTab"), "AdminSignupFunnelTab");
 const SignupSourcesCard = lazy(() => import("@/components/admin/SignupSourcesCard"), "SignupSourcesCard");
+const ChannelLeadsCard = lazy(() => import("@/components/admin/ChannelLeadsCard"), "ChannelLeadsCard");
 const Step0AbandonsCard = lazy(() => import("@/components/admin/Step0AbandonsCard"), "Step0AbandonsCard");
 const SignupFormSubStepsFunnel = lazy(() => import("@/components/admin/SignupFormSubStepsFunnel"), "SignupFormSubStepsFunnel");
+
+export type TrafficTab = "leads" | "entonnoir" | "seo";
+
+export function trafficTabFromParam(param: string | null): TrafficTab {
+  if (param === "entonnoir" || param === "interne" || param === "signup-funnel") return "entonnoir";
+  if (param === "seo" || param === "acquisition") return "seo";
+  return "leads";
+}
 
 function pctChange(current: number, previous: number): number | undefined {
   if (previous === 0 && current === 0) return 0;
@@ -25,13 +34,13 @@ function pctChange(current: number, previous: number): number | undefined {
 
 const formatDuration = formatDurationFr;
 
-const AdminTraffic = () => {
-  const [params, setParams] = useSearchParams();
-  const tabParam = params.get("tab");
-  const tab =
-    tabParam === "acquisition" || tabParam === "signup-funnel"
-      ? tabParam
-      : "interne";
+/**
+ * Synthèse GA4 et Search Console, onglet « SEO et IA » (lot TRF2) : lue
+ * seulement quand l'onglet est ouvert. GA4 ne voit que les visiteurs qui
+ * acceptent la mesure d'audience ; les onglets Leads et Entonnoir lisent la
+ * mesure du site.
+ */
+const SeoSynthesis = () => {
   const { data, loading } = useSeoData();
   const ga4 = data?.ga4;
   const gsc = data?.gsc;
@@ -71,14 +80,9 @@ const AdminTraffic = () => {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader
-        title="Trafic"
-        description="Synthèse du trafic entrant, entonnoir d'activation interne et acquisition SEO."
-      />
       <p className="text-xs text-muted-foreground rounded-lg border border-border bg-muted/40 px-3 py-2">
-        Depuis le bandeau de consentement, les chiffres GA4 couvrent seulement les visiteurs qui ont accepté la mesure d'audience. L'entonnoir interne et Search Console restent complets.
+        Depuis le bandeau de consentement, les chiffres GA4 couvrent seulement les visiteurs qui ont accepté la mesure d'audience. Les onglets Leads et Entonnoir et Search Console restent complets.
       </p>
-
       {/* Bloc synthèse trafic */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
@@ -108,31 +112,55 @@ const AdminTraffic = () => {
         <TrafficSources channels={ga4?.channels} loading={loading && !data} />
       </section>
 
-      {/* Onglets détails */}
+    </div>
+  );
+};
+
+const AdminTraffic = () => {
+  const [params, setParams] = useSearchParams();
+  const tabParam = params.get("tab");
+  // Lot TRF2 (15/11/2026) : trois onglets, Leads par défaut. Les anciens
+  // liens ?tab= restent valides (interne et signup-funnel : Entonnoir ;
+  // acquisition : SEO et IA).
+  const tab = trafficTabFromParam(tabParam);
+
+  return (
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Trafic"
+        description="D'où viennent les membres qui agissent, ce qui bloque l'inscription, et la visibilité dans les moteurs."
+      />
+
       <Tabs
         value={tab}
         onValueChange={(v) => {
           const next = new URLSearchParams(params);
-          if (v === "interne") next.delete("tab");
+          if (v === "leads") next.delete("tab");
           else next.set("tab", v);
           setParams(next, { replace: true });
         }}
       >
         <div className="overflow-x-auto -mx-1 px-1">
         <TabsList className="w-max">
-          <TabsTrigger value="interne">
-            <Eye className="h-4 w-4 mr-2" /> Trafic interne et entonnoir
+          <TabsTrigger value="leads" className="min-h-11 md:min-h-9">
+            <Users className="h-4 w-4 mr-2" /> Leads
           </TabsTrigger>
-          <TabsTrigger value="acquisition">
-            <MousePointerClick className="h-4 w-4 mr-2" /> Acquisition SEO
+          <TabsTrigger value="entonnoir" className="min-h-11 md:min-h-9">
+            <Eye className="h-4 w-4 mr-2" /> Entonnoir
           </TabsTrigger>
-          <TabsTrigger value="signup-funnel">
-            <Users className="h-4 w-4 mr-2" /> Formulaire d'inscription
+          <TabsTrigger value="seo" className="min-h-11 md:min-h-9">
+            <MousePointerClick className="h-4 w-4 mr-2" /> SEO et IA
           </TabsTrigger>
         </TabsList>
         </div>
 
-        <TabsContent value="interne" className="mt-6 space-y-6">
+        <TabsContent value="leads" className="mt-6">
+          <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
+            <ChannelLeadsCard />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="entonnoir" className="mt-6 space-y-6">
           <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
             <AdminAnalytics />
           </Suspense>
@@ -140,25 +168,23 @@ const AdminTraffic = () => {
           <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
             <Step0AbandonsCard />
           </Suspense>
-        </TabsContent>
-
-        <TabsContent value="acquisition" className="mt-6">
-          <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
-            <AdminSEO />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="signup-funnel" className="mt-6 space-y-6">
-          {/* Lot SRC1 : inscriptions par canal d'arrivée, comptées depuis profiles. */}
+          <h2 className="text-lg font-semibold text-foreground border-b pb-2">Formulaire d'inscription</h2>
+          {/* Lot SRC1 : inscriptions par canal d'arrivée, comptées depuis profiles (rôles, comptes Google ou email). */}
           <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
             <SignupSourcesCard />
           </Suspense>
           <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
             <AdminSignupFunnelTab />
           </Suspense>
-          {/* Lot A10 : entonnoir unique = « Entonnoir chiffré » ci-dessus. Ce bloc détaille seulement l'étape formulaire. */}
           <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
             <SignupFormSubStepsFunnel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="seo" className="mt-6 space-y-6">
+          <SeoSynthesis />
+          <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
+            <AdminSEO />
           </Suspense>
         </TabsContent>
       </Tabs>

@@ -795,6 +795,32 @@
           "sql": "SELECT public.my_alert_email_state() = 'off' AS ok"
         }
       ]
+    },
+    {
+      "migration": "0164_trf2_leads.sql",
+      "description": "Onglet Leads de /admin/traffic : application hôte dans le canal, lecture des leads par réseau réservée à l'équipe et au rôle service",
+      "checks": [
+        {
+          "name": "application_hote",
+          "sql": "SELECT public.derive_signup_channel('{\"ck\":\"fbclid\",\"ap\":\"instagram\"}'::jsonb) = 'instagram' AS ok"
+        },
+        {
+          "name": "facebook_inchange",
+          "sql": "SELECT public.derive_signup_channel('{\"ck\":\"fbclid\"}'::jsonb) = 'facebook' AS ok"
+        },
+        {
+          "name": "lecture_equipe",
+          "sql": "SELECT COALESCE(has_function_privilege('authenticated', to_regprocedure('public.admin_channel_leads(date,date)'), 'EXECUTE') AND NOT has_function_privilege('anon', to_regprocedure('public.admin_channel_leads(date,date)'), 'EXECUTE'), false) AS ok"
+        },
+        {
+          "name": "repere",
+          "sql": "SELECT position('trf2_leads' IN pg_get_functiondef('public.admin_channel_leads(date,date)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "index_visites",
+          "sql": "SELECT to_regclass('public.analytics_events_page_view_visit_idx') IS NOT NULL AS ok"
+        }
+      ]
     }
   ]
 }

@@ -73,11 +73,8 @@ describe("ADM17, Trafic : une fenêtre, un entonnoir", () => {
     expect(src("src/pages/admin/AdminTraffic.tsx")).toContain("Formulaire d'inscription");
   });
 
-  it("dernier événement reçu, et non le dernier test GA4", () => {
-    const g = src("src/components/admin/seo/GA4DiagnosticCard.tsx");
-    const fn = g.slice(g.indexOf("const fetchLocalLast"), g.indexOf("const fetchLocalLast") + 500);
-    expect(fn).not.toContain("admin_ga4_diag_test");
-    expect(g).toContain("Dernier événement reçu par le site");
+  it("le diagnostic GA4 a quitté Trafic (lot TRF2, 15/11/2026)", () => {
+    expect(src("src/pages/admin/AdminSEO.tsx")).not.toContain("GA4DiagnosticCard");
   });
 });
 
