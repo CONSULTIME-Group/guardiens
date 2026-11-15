@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,6 @@ import {
   autoBreakdown,
   hebdoBreakdown,
   unavailableSentence,
-  WORK_FAMILY_LABELS,
-  WORK_FAMILY_ORDER,
   type PilotageSignal,
   type WorkItem,
 } from "@/lib/admin/pilotage";
@@ -23,6 +21,12 @@ import type { AdminSignalBase } from "@/components/admin/signals/signalGrouping"
 import type { SitInfo } from "@/components/admin/signals/SitSignalGroupCard";
 import { AUTO_RELANCE_TEMPLATES } from "../../../../../supabase/functions/_shared/admin-signal-config.ts";
 import { renderEntry } from "./signalEntries";
+import { buildGestures, gesturesSentence, type Gesture, type GestureWrite } from "@/lib/admin/gestures";
+import { memberMessageDrafts } from "@/lib/admin/memberMessageDrafts";
+import { BroadcastSitDialog } from "@/components/admin/signals/BroadcastSitDialog";
+import type { AdminSignal as BroadcastSignal } from "@/components/admin/signals/NoApplicationsCard";
+import { IgnoreSignalsButton } from "@/components/admin/signals/IgnoreSignalsButton";
+import { WriteToMemberDialog, type WriteToMemberTarget } from "../users/WriteToMemberDialog";
 import { useKeyFigures, useListingFlow } from "./useDashboardData";
 import { useLiquiditySnapshot } from "./LiquidityBlock";
 
@@ -54,78 +58,136 @@ const TONE_CLASS: Record<WorkItem["tone"], string> = {
   normal: "text-muted-foreground",
 };
 
-/** Éléments nommés montrés sur une ligne, au plus (lot ADM16). */
+/** Liens nommés montrés sur une ligne, au plus (lot ADM16). */
 export const ELEMENT_LINKS_SHOWN = 3;
 
-/**
- * Lot ADM16 (lot 4 de l'arène) : chaque élément nommé d'une ligne s'ouvre en
- * un toucher (annonce, besoin, fiche du membre), sans passer par la file.
- */
-const ElementLinks = ({ line }: { line: WorkItem }) => {
-  const own = (line.elements ?? []).filter((e) => e.link && e.link !== line.link);
-  if (own.length === 0) return null;
-  const shown = own.slice(0, ELEMENT_LINKS_SHOWN);
-  const rest = own.length - shown.length;
-  return (
-    <ul className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1" data-testid="pilotage-elements">
-      {shown.map((e) => (
-        <li key={`${e.link}|${e.label}`}>
-          <Link to={e.link} className="inline-flex min-h-11 sm:min-h-8 items-center text-[13px] font-semibold text-primary underline underline-offset-2">
-            {e.label.length > 60 ? `${e.label.slice(0, 57).trimEnd()}…` : e.label}
-          </Link>
-        </li>
-      ))}
-      {rest > 0 && <li className="inline-flex min-h-11 sm:min-h-8 items-center text-[13px] text-muted-foreground">et {rest} {rest > 1 ? "autres" : "autre"}</li>}
-    </ul>
-  );
-};
+const LINK_CLASS = "inline-flex min-h-11 items-center text-[13px] font-semibold text-primary underline underline-offset-2";
+const PRIMARY_CLASS = "min-h-11 w-full rounded-full px-5 font-bold sm:w-auto";
+
+/** Ce que le membre a écrit à Alma ce jour-là, pour le rappeler au-dessus du message. */
+async function almaContextLines(g: Gesture): Promise<string[]> {
+  const fallback = g.quote ? [`${g.detail} Son message : « ${g.quote} »`] : [g.detail];
+  const userId = g.write?.userId;
+  const oldest = g.signals.map((s) => s.detected_at).sort()[0];
+  if (!userId || !oldest) return fallback;
+  const from = new Date(new Date(oldest).getTime() - 6 * 3_600_000).toISOString();
+  const { data, error } = await supabase
+    .from("alma_conversations")
+    .select("question, created_at")
+    .eq("user_id", userId)
+    .gte("created_at", from)
+    .order("created_at", { ascending: true })
+    .limit(6);
+  const asked = (data ?? []).map((r) => (typeof r.question === "string" ? r.question.trim() : "")).filter(Boolean);
+  if (error || asked.length === 0) return fallback;
+  return [g.detail, `Ses messages à Alma : ${asked.map((q) => `« ${q.slice(0, 160)} »`).join(", ")}.`];
+}
+
+/** Cible du composeur pour une ligne « Écrire à… » : contexte, trois versions, messagerie d'abord. */
+async function writeTargetOf(g: Gesture, w: GestureWrite, closes: boolean): Promise<WriteToMemberTarget> {
+  const m = g.signals[0]?.metadata ?? {};
+  const alma = w.topic !== "no_applications";
+  const drafts = memberMessageDrafts(w.topic, {
+    name: w.firstName,
+    quote: g.quote,
+    subjectHint: alma && Array.isArray(m.messages) ? (m.messages as { bug_item?: string }[])[0]?.bug_item : null,
+    city: typeof m.sit_city === "string" ? m.sit_city : null,
+    startsWhen: g.chip.startsWith("Départ ") ? g.chip.replace(/^Départ /, "") : null,
+    sittersNearby: Number(m.eligible_sitters_count ?? 0) || 0,
+    daysPublished: Number(m.days_since_published ?? 0) || 0,
+  });
+  return {
+    userId: w.userId,
+    userName: w.firstName || (alma ? "ce membre" : "le propriétaire"),
+    sitId: w.sitId,
+    drafts,
+    channel: "message",
+    context: { lines: alma ? await almaContextLines(g) : [g.title, g.detail], link: alma ? { label: "Les échanges avec Alma", to: "/admin/alma" } : undefined },
+    signalIds: closes ? g.signals.map((s) => s.id) : undefined,
+  };
+}
 
 /**
- * Une ligne de la liste : la phrase dit quoi faire, le bouton « Voir » montre
- * où (lot ADM14, lot A V4 : le bouton ne promet plus une action qu'il ne fait
- * pas). Un signal ou plus déplie ses cartes d'action ; une ligne sans signal
- * (voyant, file des membres, relances) mène à sa file.
+ * Lot VE-1 : une ligne = une personne ou une annonce. Le bouton porte le
+ * verbe et fait le geste sur place : écrire (message prêt), prévenir les
+ * gardiens (diffusion), ouvrir la file, ou déplier la carte d'action du signal.
  */
-const LineRow = ({ line, sitMap, last }: { line: WorkItem; sitMap: Map<string, SitInfo>; last: boolean }) => {
+const GestureRow = ({ g, sitMap, last, onWrite }: {
+  g: Gesture;
+  sitMap: Map<string, SitInfo>;
+  last: boolean;
+  onWrite: (g: Gesture, w: GestureWrite, closes: boolean) => void;
+}) => {
   const [open, setOpen] = useState(false);
-  const id = `pilotage-${line.key.replace(/[^a-z0-9_-]/gi, "-")}`;
-  const unfolds = line.signals.length > 0;
+  const [broadcast, setBroadcast] = useState(false);
+  const qc = useQueryClient();
+  const id = `pilotage-${g.key.replace(/[^a-z0-9_-]/gi, "-")}`;
+  const unfolds = g.kind === "card" || g.kind === "more";
   return (
-    <li className={last ? "" : "border-b border-border/70"} data-testid="pilotage-line" data-family={line.family}>
+    <li className={last ? "" : "border-b border-border/70"} data-testid="pilotage-line" data-family={g.family} data-kind={g.kind}>
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-4 sm:px-5">
         <div className="min-w-0 flex-[1_1_320px]">
-          <p className="text-[15px] font-semibold text-foreground">{line.title}</p>
-          <p className="mt-0.5 text-[13px] text-muted-foreground">{line.detail}</p>
-          <ElementLinks line={line} />
+          <p className="text-[15px] font-semibold text-foreground">{g.title}</p>
+          <p className="mt-0.5 text-[13px] text-muted-foreground">{g.detail}</p>
+          {g.quote && <p className="mt-1.5 inline-block rounded-lg bg-muted/60 px-3 py-2 text-sm text-foreground">« {g.quote.slice(0, 200)} »</p>}
+          {(g.links.length > 0 || g.secondaryWrite || g.kind === "write" || g.kind === "broadcast") && (
+            <ul className="mt-1.5 flex flex-wrap gap-x-4 gap-y-0" data-testid="pilotage-elements">
+              {g.links.slice(0, ELEMENT_LINKS_SHOWN).map((l) => (
+                <li key={l.to + l.label}><Link to={l.to} className={LINK_CLASS}>{l.label}</Link></li>
+              ))}
+              {g.secondaryWrite && (
+                <li><button type="button" className={LINK_CLASS} onClick={() => onWrite(g, g.secondaryWrite!, false)}>{g.secondaryWrite.label}</button></li>
+              )}
+              {(g.kind === "write" || g.kind === "broadcast") && (
+                <li><IgnoreSignalsButton ids={g.signals.map((s) => s.id)} label="Classer sans agir" /></li>
+              )}
+            </ul>
+          )}
         </div>
-        <span className={`text-[13px] ${TONE_CLASS[line.tone]}`}>{line.deadline}</span>
-        {unfolds ? (
-          <Button
-            variant="outline"
-            className="min-h-11 rounded-full px-5 font-bold"
-            aria-expanded={open}
-            aria-controls={id}
-            onClick={() => setOpen((o) => !o)}
-          >
-            {open ? "Replier" : "Voir"}
-          </Button>
+        <span className={`text-[13px] ${TONE_CLASS[g.tone]}`}>{g.chip}</span>
+        {g.kind === "link" ? (
+          <Button asChild variant="outline" className={PRIMARY_CLASS}><Link to={g.link ?? "/admin"}>{g.actionLabel}</Link></Button>
+        ) : g.kind === "write" ? (
+          <Button className={PRIMARY_CLASS} onClick={() => g.write && onWrite(g, g.write, true)}>{g.actionLabel}</Button>
+        ) : g.kind === "broadcast" ? (
+          <Button className={PRIMARY_CLASS} onClick={() => setBroadcast(true)}>{g.actionLabel}</Button>
         ) : (
-          <Button asChild variant="outline" className="min-h-11 rounded-full px-5 font-bold">
-            <Link to={line.link}>Voir</Link>
+          <Button variant="outline" className={PRIMARY_CLASS} aria-expanded={open} aria-controls={id} onClick={() => setOpen((o) => !o)}>
+            {open ? "Replier" : g.actionLabel}
           </Button>
         )}
       </div>
-      {unfolds && open && <div id={id}><LineDetail signals={line.signals} sitMap={sitMap} /></div>}
+      {g.kind === "card" && open && <div id={id}><LineDetail signals={g.signals} sitMap={sitMap} /></div>}
+      {g.kind === "more" && open && (
+        <ul id={id} className="border-t border-border/70 bg-muted/20">
+          {(g.children ?? []).map((c, i) => <GestureRow key={c.key} g={c} sitMap={sitMap} last={i === (g.children?.length ?? 0) - 1} onWrite={onWrite} />)}
+        </ul>
+      )}
+      {g.kind === "broadcast" && broadcast && (
+        <BroadcastSitDialog
+          open={broadcast}
+          onOpenChange={setBroadcast}
+          signal={g.signals[0] as unknown as BroadcastSignal}
+          onSent={() => { void qc.invalidateQueries({ queryKey: ["admin_dashboard_snapshot"] }); }}
+        />
+      )}
     </li>
   );
 };
 
-const LineGroup = ({ label, lines, sitMap, urgent }: { label: string; lines: WorkItem[]; sitMap: Map<string, SitInfo>; urgent?: boolean }) => (
-  <div className="overflow-hidden rounded-2xl border border-border bg-card" data-testid="pilotage-group">
-    <p className={`border-b border-border/70 px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] sm:px-5 ${urgent ? "bg-destructive/5 text-destructive" : "text-muted-foreground"}`}>
-      {label}
+const BUCKET_LABELS = { today: "Aujourd'hui", week: "Cette semaine" } as const;
+
+const GestureGroup = ({ bucket, rows, sitMap, onWrite }: {
+  bucket: "today" | "week";
+  rows: Gesture[];
+  sitMap: Map<string, SitInfo>;
+  onWrite: (g: Gesture, w: GestureWrite, closes: boolean) => void;
+}) => (
+  <div className="overflow-hidden rounded-2xl border border-border bg-card" data-testid="pilotage-group" data-bucket={bucket}>
+    <p className={`border-b border-border/70 px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] sm:px-5 ${bucket === "today" ? "bg-destructive/5 text-destructive" : "text-muted-foreground"}`}>
+      {BUCKET_LABELS[bucket]}
     </p>
-    <ul>{lines.map((l, i) => <LineRow key={l.key} line={l} sitMap={sitMap} last={i === lines.length - 1} />)}</ul>
+    <ul>{rows.map((g, i) => <GestureRow key={g.key} g={g} sitMap={sitMap} last={i === rows.length - 1} onWrite={onWrite} />)}</ul>
   </div>
 );
 
@@ -155,20 +217,24 @@ export const TechnicalSignalsLine = () => {
   );
 };
 
-/** Question 2 : ce qui vous attend aujourd'hui, la liste de travail entière. */
+/** Question 2 : ce qui vous attend, une ligne par personne ou par annonce (lot VE-1). */
 export const TodaySection = () => {
   const { flagEnabled, flagLoading, model, sitMap, loading, error } = usePilotage();
+  const [writeTarget, setWriteTarget] = useState<WriteToMemberTarget | null>(null);
   if (flagLoading) return null;
-  const items = model?.items ?? [];
-  const lineCount = items.length;
-  const membresWaiting = items.some((i) => i.family === "membres");
+  const gestures = buildGestures(model);
+  const membresWaiting = (model?.items ?? []).some((i) => i.family === "membres");
+  const onWrite = (g: Gesture, w: GestureWrite, closes: boolean) => {
+    void writeTargetOf(g, w, closes).then(setWriteTarget);
+  };
 
   return (
     <section aria-labelledby="pilotage-today" className="space-y-3.5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="pilotage-today" className="font-heading text-2xl font-semibold">Ce qui vous attend aujourd'hui</h2>
-        {model && <p className="text-sm text-muted-foreground" data-testid="pilotage-count">{workListCountText(lineCount)}</p>}
+        <h2 id="pilotage-today" className="font-heading text-2xl font-semibold">Ce qui vous attend</h2>
+        {model && <p className="text-sm text-muted-foreground" data-testid="pilotage-count">{workListCountText(gestures.length)}</p>}
       </div>
+      {model && !error && <p className="text-[15px] text-foreground" data-testid="pilotage-sentence">{gesturesSentence(gestures)}</p>}
 
       {!flagEnabled && (
         <p className="text-sm text-foreground" data-testid="signals-disabled">
@@ -186,20 +252,10 @@ export const TodaySection = () => {
           {model.unavailable.length > 0 && (
             <p className="text-sm font-semibold text-destructive" data-testid="pilotage-unavailable">{unavailableSentence(model.unavailable)}</p>
           )}
-          {WORK_FAMILY_ORDER.map((family) => {
-            const lines = items.filter((i) => i.family === family);
-            if (lines.length === 0) return null;
-            return (
-              <LineGroup
-                key={family}
-                label={WORK_FAMILY_LABELS[family]}
-                lines={lines}
-                sitMap={sitMap}
-                urgent={family === "depart" || family === "site"}
-              />
-            );
+          {(["today", "week"] as const).map((bucket) => {
+            const rows = gestures.filter((g) => g.bucket === bucket);
+            return rows.length === 0 ? null : <GestureGroup key={bucket} bucket={bucket} rows={rows} sitMap={sitMap} onWrite={onWrite} />;
           })}
-          {lineCount === 0 && model.unavailable.length === 0 && <p className="text-sm text-foreground">Tout est à jour aujourd'hui.</p>}
           {!membresWaiting && !model.unavailable.includes("queues") && (
             <p className="text-sm text-muted-foreground" data-testid="waiting-members">
               Tous les membres ont leur réponse.
@@ -207,6 +263,7 @@ export const TodaySection = () => {
           )}
         </>
       )}
+      <WriteToMemberDialog target={writeTarget} onClose={() => setWriteTarget(null)} />
     </section>
   );
 };

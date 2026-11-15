@@ -330,6 +330,10 @@ function urgentCopy(type: string, sits: number, days: number): { title: string; 
 
 const DAY = 86_400_000
 
+/** Compte signalé pour le seul motif « candidature rapide après l'inscription ». */
+export const isFastApply = (s: PilotageSignal): boolean =>
+  s.signal_type === 'suspicious_account' && s.metadata?.signal === 'fast_apply'
+
 /** Ordre des natures pour les tests et l'email : une seule source. */
 export const natureOf = (type: string): SignalNature => signalNature(type)
 
@@ -356,7 +360,9 @@ export function buildPilotage(
     // gardien dans le rayon (sévérité « info ») ; c'est elle qui a le plus
     // besoin d'une diffusion large (Vabres-l'Abbaye, 09/11/2026).
     if (s.severity === 'info' && s.signal_type !== 'no_applications') continue
-    const nature = signalNature(s.signal_type)
+    // Lot VE-4 (15/11/2026) : une candidature dans l'heure qui suit l'inscription
+    // est le comportement recherché (75 signaux ignorés sur 77) : synthèse du lundi.
+    const nature = isFastApply(s) ? 'hebdo' : signalNature(s.signal_type)
     const start = startOf(s)
     // Garde commencée : plus aucune action avant le départ (règle ADM1).
     if (sitIdOf(s) && SIT_TIMED_TYPES.has(s.signal_type) && isSitStarted(start, now)) continue
@@ -627,6 +633,7 @@ export const HEBDO_LABELS: Record<string, string> = {
   city_coverage_gap: 'couverture des villes',
   city_seo_tension: 'tension SEO des villes',
   alma_unanswered: 'questions sans réponse d\'Alma',
+  suspicious_account: 'candidatures dans l\'heure qui suit l\'inscription',
 }
 
 export function hebdoBreakdown(hebdo: { type: string; count: number }[]): string {

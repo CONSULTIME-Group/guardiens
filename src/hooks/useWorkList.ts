@@ -6,6 +6,7 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { ADMIN_BADGES_REFRESH_EVENT } from "@/hooks/useAdminBadges";
 import { reportAdminReadError } from "@/lib/admin/readError";
 import { buildWorkList, type WorkListModel, type WorkListRaw } from "@/lib/admin/pilotage";
+import { buildGestures } from "@/lib/admin/gestures";
 
 /**
  * Lot ADM14 (lot 3 du plan de l'arène admin du 09/11/2026) : la liste de
@@ -69,7 +70,8 @@ export function useWorkList(adminConfirmed?: boolean): WorkListState {
  */
 export function workListBadgeText(model: WorkListModel | null, failed: boolean): string | null {
   if (!model) return failed ? "?" : null;
-  const n = model.items.length;
+  // Lot VE-1 : la pastille compte les lignes de la vue d'ensemble (une par personne ou par annonce).
+  const n = buildGestures(model).length;
   if (n === 0) return model.unavailable.length > 0 ? "?" : null;
   return String(n);
 }

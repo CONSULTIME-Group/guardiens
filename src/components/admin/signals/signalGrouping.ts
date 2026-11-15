@@ -85,6 +85,11 @@ export function signalListLink(s: AdminSignalBase): string {
       return "/admin/reports";
     case "message":
       return "/admin/messages";
+    // Lot VE-3 : un signal de contenu mène aux articles, une ville à ses pages, jamais à la page d'où l'on vient.
+    case "content":
+      return "/admin/articles";
+    case "city":
+      return "/admin/city-pages";
     default:
       return "/admin";
   }
