@@ -48,8 +48,8 @@ describe("TRF2 · onglets", () => {
     }
   });
   it("un nom par objet : articles villes et pages villes SEO", () => {
-    expect(readFileSync("src/components/admin/seo/ContentToCreate.tsx", "utf8")).toContain('label: "Articles villes"');
-    expect(readFileSync("src/components/admin/seo/ContentToCreate.tsx", "utf8")).toContain("Total publiés");
+    // Lot SEO-B : « Contenu à créer » (liste écrite en dur) quitte l'onglet, remplacé par « Où Google nous voit ».
+    expect(existsSync("src/components/admin/seo/ContentToCreate.tsx")).toBe(false);
     expect(readFileSync("src/pages/admin/_components/dashboard/AcquisitionPilotCard.tsx", "utf8")).toContain("Pages villes SEO");
   });
 });

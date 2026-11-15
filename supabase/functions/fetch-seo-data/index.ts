@@ -241,9 +241,9 @@ async function fetchAllGSCPages(
   accessToken: string,
   startDate: string,
   endDate: string,
-): Promise<{ page: string; clicks: number; impressions: number }[]> {
+): Promise<{ page: string; clicks: number; impressions: number; position: number }[]> {
   const PAGE = 25000;
-  const out: { page: string; clicks: number; impressions: number }[] = [];
+  const out: { page: string; clicks: number; impressions: number; position: number }[] = [];
   for (let startRow = 0; startRow < 1_000_000; startRow += PAGE) {
     const res = await fetch(
       `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(GSC_SITE_URL)}/searchAnalytics/query`,
@@ -256,9 +256,48 @@ async function fetchAllGSCPages(
     if (!res.ok) throw new Error(`GSC pages [${res.status}]: ${await res.text()}`);
     const data = await res.json();
     const rows = (data.rows || []) as any[];
-    for (const r of rows) out.push({ page: r.keys?.[0] ?? "", clicks: r.clicks || 0, impressions: r.impressions || 0 });
+    // Lot SEO-B : la position de chaque page sert les actions et le tableau par type de page.
+    for (const r of rows) out.push({ page: r.keys?.[0] ?? "", clicks: r.clicks || 0, impressions: r.impressions || 0, position: r.position || 0 });
     if (rows.length < PAGE) break;
   }
+  return out;
+}
+
+/**
+ * Lot SEO-B : page qui ressort pour chaque requête vue au moins 20 fois
+ * (la plus cliquée, puis la plus affichée), lue sur le couple requête × page.
+ * Sert le bloc « À portée de la première page » de l'onglet SEO.
+ */
+async function fetchQueryTopPages(
+  accessToken: string,
+  startDate: string,
+  endDate: string,
+): Promise<Record<string, string>> {
+  const res = await fetch(
+    `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(GSC_SITE_URL)}/searchAnalytics/query`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ startDate, endDate, dimensions: ["query", "page"], rowLimit: 25000 }),
+    },
+  );
+  if (!res.ok) throw new Error(`GSC requêtes × pages [${res.status}]: ${await res.text()}`);
+  const data = await res.json();
+  const best = new Map<string, { page: string; clicks: number; impressions: number }>();
+  const totals = new Map<string, number>();
+  for (const r of (data.rows || []) as any[]) {
+    const query = r.keys?.[0] ?? "";
+    const page = r.keys?.[1] ?? "";
+    const clicks = r.clicks || 0;
+    const impressions = r.impressions || 0;
+    totals.set(query, (totals.get(query) ?? 0) + impressions);
+    const cur = best.get(query);
+    if (!cur || clicks > cur.clicks || (clicks === cur.clicks && impressions > cur.impressions)) {
+      best.set(query, { page, clicks, impressions });
+    }
+  }
+  const out: Record<string, string> = {};
+  for (const [query, b] of best) if ((totals.get(query) ?? 0) >= 20) out[query] = b.page;
   return out;
 }
 
@@ -383,6 +422,8 @@ Deno.serve(async (req) => {
       ga4Previous,
       ga4Channels,
       gscAllPages,
+      gscAllQueries,
+      gscQueryTopPages,
     ] = await Promise.all([
       fetchGSCData(accessToken, gscStart, gscEnd),
       fetchGSCData(accessToken, gscPrevStart, gscPrevEnd),
@@ -392,6 +433,12 @@ Deno.serve(async (req) => {
       fetchGA4Data(accessToken, ga4PropertyId, ga4PrevStart, ga4PrevEnd, false),
       fetchGA4Channels(accessToken, ga4PropertyId, ga4Start, ga4End),
       fetchAllGSCPages(accessToken, gscStart, gscEnd),
+      // Lot SEO-B : toutes les requêtes (marque et hors marque, requêtes à portée).
+      fetchGSCData(accessToken, gscStart, gscEnd, ["query"], 25000),
+      fetchQueryTopPages(accessToken, gscStart, gscEnd).catch((e) => {
+        console.error("fetch-seo-data query pages:", e);
+        return null;
+      }),
     ]);
 
     const result = {
@@ -408,6 +455,9 @@ Deno.serve(async (req) => {
         topQueries: gscTopQueries.rows,
         // Lot A10 : liste complète des pages affichées par Google, sans plafond.
         allPages: gscAllPages,
+        // Lot SEO-B : toutes les requêtes, et la page qui ressort par requête (null si la lecture a échoué).
+        allQueries: gscAllQueries.rows.map((r) => ({ query: r.keys?.[0] ?? "", clicks: r.clicks, impressions: r.impressions, position: r.position })),
+        queryTopPages: gscQueryTopPages,
       },
       // Lot A10 : bornes exactes des périodes, pour un libellé juste à l'écran.
       period: { gscStart, gscEnd, ga4Start, ga4End },

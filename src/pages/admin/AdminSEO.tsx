@@ -1,19 +1,13 @@
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Globe, Users, MousePointerClick, Eye, Timer, FileText,
-  UserCheck, ExternalLink, AlertCircle, BarChart3,
-} from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Users, ExternalLink, AlertCircle } from "lucide-react";
 import MetricCard from "@/components/admin/seo/MetricCard";
 import StatusBar from "@/components/admin/seo/StatusBar";
 import TopArticlesTable from "@/components/admin/seo/TopArticlesTable";
 import PriorityActions from "@/components/admin/seo/PriorityActions";
-import ContentToCreate, { PRIORITY_ARTICLES } from "@/components/admin/seo/ContentToCreate";
 import GSCQueriesTable from "@/components/admin/seo/GSCQueriesTable";
-import TrafficSources from "@/components/admin/seo/TrafficSources";
 import IndexNowPanel from "@/components/admin/seo/IndexNowPanel";
 import IndexNowHistory from "@/components/admin/seo/IndexNowHistory";
 import BingVisibilityCard from "@/components/admin/seo/BingVisibilityCard";
@@ -21,16 +15,15 @@ import BingKpiRow from "@/components/admin/seo/BingKpiRow";
 import BingBacklinksCard from "@/components/admin/seo/BingBacklinksCard";
 import NoImpressionActionable from "@/components/admin/seo/NoImpressionActionable";
 import UrlInspectionCard from "@/components/admin/seo/UrlInspectionCard";
-import { AcquisitionPilotCard } from "@/pages/admin/_components/dashboard/AcquisitionPilotCard";
+import { LandingOutcomesCard, SeoGoogleKpis, SeoTemplatesCard, StrikingQueriesCard } from "@/components/admin/seo/SeoPilotBlocks";
 import AiAcquisitionCard from "@/pages/admin/_components/dashboard/AiAcquisitionCard";
 import { useSeoData, type GSCRow } from "@/hooks/useSeoData";
 import type { BingPeriodDays } from "@/hooks/useBingData";
 import {
-  articlesWithoutImpressions, pagesFromSeo, formatDurationFr, periodLabel, organicSessions, fmtInt,
-  aggregatePages, pagesWithImpressions, positionsFromTopPages, priorityActions, topArticles,
+  pagesFromSeo, periodLabel, organicSessions, fmtInt,
+  aggregatePages, positionsFromTopPages, priorityActions, topArticles,
 } from "@/lib/admin/seoMetrics";
 import { useSeoArticles } from "@/hooks/useSeoArticles";
-import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 function downloadCsv(filename: string, rows: GSCRow[]) {
@@ -46,46 +39,13 @@ function downloadCsv(filename: string, rows: GSCRow[]) {
   URL.revokeObjectURL(url);
 }
 
-function pctChange(current: number, previous: number): number | undefined {
-  if (previous === 0 && current === 0) return 0;
-  if (previous === 0) return undefined;
-  return ((current - previous) / previous) * 100;
-}
-
-const formatDuration = formatDurationFr;
-
-const AdminSEO = () => {
+const AdminSEO = ({ extraTools }: { extraTools?: React.ReactNode } = {}) => {
   const { data: seoData, loading, error, refresh } = useSeoData();
   const [refreshing, setRefreshing] = useState(false);
-  const [articleStats, setArticleStats] = useState<{ published: number; total: number } | null>(null);
-  const [profileCount, setProfileCount] = useState<number | null>(null);
   // Lot SEO-A : articles publiés avec leur statut Google, lus une fois pour tout l'onglet.
-  const { articles: seoArticles, allSlugs: existingSlugs } = useSeoArticles();
+  const { articles: seoArticles } = useSeoArticles();
   const publishedArticles = seoArticles ?? [];
   const [bingPeriod, setBingPeriod] = useState<BingPeriodDays>(28);
-
-  useEffect(() => {
-    const fetchArticleStats = async () => {
-      const { count: published } = await supabase
-        .from("articles")
-        .select("id", { count: "exact", head: true })
-        .eq("published", true);
-      const { count: total } = await supabase
-        .from("articles")
-        .select("id", { count: "exact", head: true });
-      setArticleStats({ published: published ?? 0, total: total ?? 0 });
-    };
-    const fetchProfileCount = async () => {
-      const { count, error } = await supabase
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .or("account_status.is.null,account_status.neq.deleted");
-      if (error) { reportAdminReadError("Trafic : profils inscrits", error); setProfileCount(null); return; }
-      setProfileCount(count ?? 0);
-    };
-    fetchArticleStats();
-    fetchProfileCount();
-  }, []);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -125,21 +85,19 @@ const AdminSEO = () => {
 
   // Lot A10 : liste complète des pages Google (plus de top 25) et chemin /actualites/.
   const allGscPages = pagesFromSeo(gsc);
-  // Lot SEO-A : pages comptées une fois (ancres et anciens ?lang= regroupés), articles indexables seulement.
-  const pagesWithGSC = gscAvailable ? pagesWithImpressions(allGscPages) : null;
-  const noImpressionCount = gscAvailable && seoArticles
-    ? articlesWithoutImpressions(seoArticles, allGscPages).filter((a) => a.status === "indexable").length
-    : null;
+  // Lot SEO-A : pages comptées une fois (ancres et anciens ?lang= regroupés).
   const pageTotals = aggregatePages(allGscPages);
-  const pagePositions = positionsFromTopPages(gsc?.topPages);
+  // Lot SEO-B : la liste complète porte désormais la position de chaque page ; les 25 premières servent de repli.
+  const pagePositions = positionsFromTopPages([
+    ...(gsc?.allPages ?? []).filter((p) => typeof p.position === "number").map((p) => ({ keys: [p.page], position: p.position as number, ctr: p.impressions > 0 ? p.clicks / p.impressions : 0 })),
+    ...(gsc?.topPages ?? []),
+  ]);
   const seoActions = seoArticles ? priorityActions(seoArticles, pageTotals, pagePositions) : [];
   const topArticleRows = seoArticles ? topArticles(seoArticles, pageTotals, pagePositions) : [];
   const organic = organicSessions(ga4?.channels);
   const gscPeriod = periodLabel(seoData?.period?.gscStart, seoData?.period?.gscEnd, "Période GSC");
   const ga4Period = periodLabel(seoData?.period?.ga4Start, seoData?.period?.ga4End, "Période GA4");
 
-  // Compute KPI 4: Priority articles to create
-  const priorityToCreate = PRIORITY_ARTICLES.filter((a) => !existingSlugs.has(a.slug)).length;
 
   return (
     <div className="space-y-6">
@@ -161,214 +119,133 @@ const AdminSEO = () => {
         </Card>
       )}
 
-      {/* BLOC 2, Top KPIs */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground">Vue d'ensemble</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <MetricCard
-            title="Sessions organiques"
-            icon={<Users className="h-4 w-4 text-primary" />}
-            value={organic !== null ? fmtInt(organic) : "·"}
-            subtitle={`${ga4Period} · canal Organic Search · GA4`}
-          />
-          <MetricCard
-            title="Pages avec données GSC"
-            icon={<Eye className="h-4 w-4 text-primary" />}
-            value={pagesWithGSC !== null ? pagesWithGSC.toString() : "·"}
-            subtitle={gscAvailable ? `Pages distinctes avec au moins 1 impression · ${gscPeriod}` : "GSC non disponible"}
-          />
-          <MetricCard
-            title="Sans impression après 7 j"
-            icon={<FileText className="h-4 w-4 text-primary" />}
-            value={noImpressionCount !== null ? noImpressionCount.toString() : "·"}
-            subtitle={noImpressionCount !== null ? "Articles indexables publiés depuis plus de 7 j, jamais affichés · GSC" : "GSC non disponible"}
-          />
-          <MetricCard
-            title="Contenus à créer"
-            icon={<BarChart3 className="h-4 w-4 text-primary" />}
-            value={priorityToCreate > 0 ? priorityToCreate.toString() : "·"}
-            subtitle="Articles prioritaires manquants"
-          />
-        </div>
-      </section>
+      {/* Lot SEO-B : Google d'abord, ce qui fait venir des membres ensuite, les outils repliés en fin d'onglet. */}
+      {gscAvailable && gsc && (
+        <SeoGoogleKpis
+          current={gsc.current}
+          previous={gsc.previous}
+          period={gscPeriod}
+          queries={gsc.allQueries}
+        />
+      )}
 
-      {/* ══════════════════════════════════════════ */}
-      {/* SECTION, Trafic & audience (GA4)         */}
-      {/* ══════════════════════════════════════════ */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground border-b pb-2">Trafic & audience</h2>
+      {gscAvailable && <SeoTemplatesCard totals={pageTotals} period={gscPeriod} />}
 
+      <LandingOutcomesCard
+        channel="recherche_naturelle"
+        title="Ce que Google fait venir"
+        intro="Visites arrivées depuis Google sur 30 jours et ce qu'elles deviennent, par page d'arrivée (même règle que l'onglet Leads ; visites suivies depuis le 13/11/2026, inscrits depuis le 12/11/2026)."
+        testid="seo-landings-google"
+      />
 
+      {gscAvailable && gsc && <StrikingQueriesCard queries={gsc.allQueries} topPages={gsc.queryTopPages} />}
 
-        {/* Lot A10 : visiteurs, temps moyen et sources figurent une seule fois, dans la synthèse en tête de page. */}
-        {/* Sessions GA4 chart */}
-        {ga4 && ga4.current.sessionsByDay.length > 0 && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Sessions GA4 par jour ({ga4Period})</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-32 flex items-end gap-[2px]">
-                {ga4.current.sessionsByDay.map((d, i) => {
-                  const max = Math.max(...ga4.current.sessionsByDay.map((x) => x.sessions), 1);
-                  const height = (d.sessions / max) * 100;
-                  return (
-                    <div
-                      key={i}
-                      className="flex-1 bg-primary/60 hover:bg-primary rounded-t transition-colors relative group cursor-default"
-                      style={{ height: `${Math.max(2, height)}%` }}
-                    >
-                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                        {d.date.replace(/(\d{4})(\d{2})(\d{2})/, "$3/$2")}, {d.sessions}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-      </section>
-
-      {/* ══════════════════════════════════════════ */}
-      {/* SECTION, Visibilité SEO (GSC + Bing)     */}
-      {/* ══════════════════════════════════════════ */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground border-b pb-2">Visibilité SEO</h2>
-
-        {/* GSC KPIs */}
-        {gscAvailable && gsc && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <MetricCard
-              title="Clics GSC"
-              icon={<MousePointerClick className="h-4 w-4 text-primary" />}
-              value={fmtInt(gsc.current.clicks)}
-              subtitle={gscPeriod}
-              change={pctChange(gsc.current.clicks, gsc.previous.clicks)}
-            />
-            <MetricCard
-              title="Impressions GSC"
-              icon={<Eye className="h-4 w-4 text-primary" />}
-              value={fmtInt(gsc.current.impressions)}
-              subtitle={gscPeriod}
-              change={pctChange(gsc.current.impressions, gsc.previous.impressions)}
-            />
-            <MetricCard
-              title="Position moyenne"
-              icon={<Globe className="h-4 w-4 text-primary" />}
-              value={gsc.current.position.toLocaleString("fr-FR", { maximumFractionDigits: 1 })}
-              subtitle="Plus bas = mieux · GSC"
-              change={pctChange(gsc.current.position, gsc.previous.position)}
-              invertChange
-            />
-          </div>
-        )}
-
-        {/* Sélecteur de période, applique aux KPIs Bing + graph */}
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <p className="text-xs text-muted-foreground">Période Bing</p>
-          <ToggleGroup
-            type="single"
-            size="sm"
-            value={String(bingPeriod)}
-            onValueChange={(v) => v && setBingPeriod(Number(v) as BingPeriodDays)}
-            className="border rounded-md"
-          >
-            <ToggleGroupItem value="7" className="text-xs px-3">7j</ToggleGroupItem>
-            <ToggleGroupItem value="28" className="text-xs px-3">28j</ToggleGroupItem>
-            <ToggleGroupItem value="90" className="text-xs px-3">90j</ToggleGroupItem>
-          </ToggleGroup>
-        </div>
-
-        {/* Bing KPIs, alignés sur GSC */}
-        <BingKpiRow period={bingPeriod} />
-
-
-        {/* Priority actions, remonté juste après les KPIs car le plus actionnable */}
-        {gscAvailable && seoArticles && (
-          <PriorityActions actions={seoActions} />
-        )}
-
-        {/* Actionnable : articles sans impression GSC après 7j, avec push IndexNow 1-clic */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {gscAvailable && seoArticles && <PriorityActions actions={seoActions} />}
         <NoImpressionActionable
           publishedArticles={publishedArticles}
           pages={gscAvailable ? allGscPages : undefined}
         />
+      </div>
 
-        {/* Top articles, conditional */}
-        {gscAvailable ? (
-          <TopArticlesTable rows={topArticleRows} />
-        ) : (
-          !loading && (
+      <section className="space-y-4" data-testid="seo-ai">
+        <h2 className="text-lg font-semibold text-foreground border-b pb-2">Assistants IA</h2>
+        <AiAcquisitionCard />
+        <LandingOutcomesCard
+          channel="ia"
+          title="Pages d'arrivée des assistants IA"
+          intro="Visites arrivées depuis ChatGPT, Perplexity, Gemini ou Claude sur 30 jours, par page d'arrivée, et les inscrits qu'elles donnent."
+          testid="seo-landings-ia"
+        />
+      </section>
+
+      <details className="rounded-2xl border bg-card px-4" data-testid="seo-tools">
+        <summary className="min-h-11 flex items-center text-base font-semibold cursor-pointer">
+          Outils et autres sources : GA4, Bing, IndexNow, inspection d'URL, requêtes et articles détaillés
+        </summary>
+        <div className="space-y-6 pb-4 pt-2">
+          {extraTools}
+
+          <MetricCard
+            title="Sessions organiques"
+            icon={<Users className="h-4 w-4 text-primary" />}
+            value={organic !== null ? fmtInt(organic) : "·"}
+            subtitle={`${ga4Period} · canal Organic Search · GA4, visiteurs qui acceptent la mesure`}
+          />
+
+          {ga4 && ga4.current.sessionsByDay.length > 0 && (
             <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Top articles par trafic</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Sessions GA4 par jour ({ga4Period})</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="py-8 text-center space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    Données GSC insuffisantes pour classer les contenus.
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Les données apparaîtront une fois la synchronisation GSC complète.
-                  </p>
+                <div className="h-32 flex items-end gap-[2px]">
+                  {ga4.current.sessionsByDay.map((d, i) => {
+                    const max = Math.max(...ga4.current.sessionsByDay.map((x) => x.sessions), 1);
+                    const height = (d.sessions / max) * 100;
+                    return (
+                      <div
+                        key={i}
+                        className="flex-1 bg-primary/60 hover:bg-primary rounded-t transition-colors relative group cursor-default"
+                        style={{ height: `${Math.max(2, height)}%` }}
+                      >
+                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                          {d.date.replace(/(\d{4})(\d{2})(\d{2})/, "$3/$2")}, {d.sessions}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
-          )
-        )}
+          )}
 
-        {/* Top queries GSC */}
-        {gsc && gsc.topQueries && gsc.topQueries.length > 0 && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg">Top 10 requêtes GSC</CardTitle>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => downloadCsv("gsc-queries.csv", gsc.topQueries)}>
-                  Export CSV
-                </Button>
-                {gsc.topPages && (
-                  <Button variant="outline" size="sm" onClick={() => downloadCsv("gsc-pages.csv", gsc.topPages)}>
-                    Export pages
+          {gscAvailable && <TopArticlesTable rows={topArticleRows} />}
+
+          {gsc && gsc.topQueries && gsc.topQueries.length > 0 && (
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-lg">Top 10 requêtes Google</CardTitle>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => downloadCsv("gsc-queries.csv", gsc.topQueries)}>
+                    Export CSV
                   </Button>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <GSCQueriesTable rows={gsc.topQueries} />
-            </CardContent>
-          </Card>
-        )}
+                  {gsc.topPages && (
+                    <Button variant="outline" size="sm" onClick={() => downloadCsv("gsc-pages.csv", gsc.topPages)}>
+                      Export pages
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <GSCQueriesTable rows={gsc.topQueries} />
+              </CardContent>
+            </Card>
+          )}
 
-        {/* Bing détail (graph + top requêtes + top pages) */}
-        <BingVisibilityCard period={bingPeriod} />
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <p className="text-xs text-muted-foreground">Période Bing</p>
+            <ToggleGroup
+              type="single"
+              size="sm"
+              value={String(bingPeriod)}
+              onValueChange={(v) => v && setBingPeriod(Number(v) as BingPeriodDays)}
+              className="border rounded-md"
+            >
+              <ToggleGroupItem value="7" className="text-xs px-3">7j</ToggleGroupItem>
+              <ToggleGroupItem value="28" className="text-xs px-3">28j</ToggleGroupItem>
+              <ToggleGroupItem value="90" className="text-xs px-3">90j</ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+          <BingKpiRow period={bingPeriod} />
+          <BingVisibilityCard period={bingPeriod} />
+          <BingBacklinksCard />
 
-        {/* Backlinks Bing */}
-        <BingBacklinksCard />
-      </section>
-
-      {/* SECTION, Indexation push */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground border-b pb-2">Indexation</h2>
-        <UrlInspectionCard />
-        <IndexNowPanel />
-        <IndexNowHistory />
-      </section>
-
-
-      {/* SECTION, Contenu à créer */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground border-b pb-2">Contenu à créer</h2>
-        <ContentToCreate />
-      </section>
-
-      {/* SECTION, Pilotage acquisition (déplacé de la vue d'ensemble) */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground border-b pb-2">Pilotage acquisition</h2>
-        <AcquisitionPilotCard />
-        <AiAcquisitionCard />
-      </section>
+          <UrlInspectionCard />
+          <IndexNowPanel />
+          <IndexNowHistory />
+        </div>
+      </details>
 
       {/* Quick links */}
       <div className="flex flex-wrap gap-3 pb-6">

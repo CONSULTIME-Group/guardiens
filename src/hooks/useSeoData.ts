@@ -39,7 +39,11 @@ export interface SeoData {
     topPages: GSCRow[];
     topQueries: GSCRow[];
     /** Lot A10 : toutes les pages affichées par Google, sans plafond. */
-    allPages?: { page: string; clicks: number; impressions: number }[];
+    allPages?: { page: string; clicks: number; impressions: number; position?: number }[];
+    /** Lot SEO-B : toutes les requêtes de la période (absent tant que fetch-seo-data n'est pas redéployée). */
+    allQueries?: { query: string; clicks: number; impressions: number; position: number }[];
+    /** Lot SEO-B : page qui ressort par requête vue au moins 20 fois ; null si la lecture a échoué. */
+    queryTopPages?: Record<string, string> | null;
   };
   /** Lot A10 : bornes exactes des périodes (AAAA-MM-JJ). */
   period?: { gscStart: string; gscEnd: string; ga4Start: string; ga4End: string };

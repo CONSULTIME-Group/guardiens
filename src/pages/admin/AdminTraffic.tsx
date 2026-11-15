@@ -12,6 +12,7 @@ import { formatDurationFr, periodLabel, fmtInt } from "@/lib/admin/seoMetrics";
 
 const AdminAnalytics = lazy(() => import("./AdminAnalytics"), "AdminAnalytics");
 const AdminSEO = lazy(() => import("./AdminSEO"), "AdminSEO");
+const AcquisitionPilotCard = lazy(() => import("@/pages/admin/_components/dashboard/AcquisitionPilotCard").then((m) => ({ default: m.AcquisitionPilotCard })), "AcquisitionPilotCard");
 const AdminSignupFunnelTab = lazy(() => import("@/components/admin/AdminSignupFunnelTab"), "AdminSignupFunnelTab");
 const SignupSourcesCard = lazy(() => import("@/components/admin/SignupSourcesCard"), "SignupSourcesCard");
 const ChannelLeadsCard = lazy(() => import("@/components/admin/ChannelLeadsCard"), "ChannelLeadsCard");
@@ -146,9 +147,13 @@ const AdminTraffic = () => {
         </TabsList>
         </div>
 
-        <TabsContent value="leads" className="mt-6">
+        <TabsContent value="leads" className="mt-6 space-y-6">
           <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
             <ChannelLeadsCard />
+          </Suspense>
+          {/* Lot SEO-B : pages villes, IndexNow, cycles de vie et sorties quittent l'onglet SEO. */}
+          <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
+            <AcquisitionPilotCard />
           </Suspense>
         </TabsContent>
 
@@ -174,9 +179,9 @@ const AdminTraffic = () => {
         </TabsContent>
 
         <TabsContent value="seo" className="mt-6 space-y-6">
-          <SeoSynthesis />
+          {/* Lot SEO-B : la synthèse GA4 rejoint les outils repliés en fin d'onglet. */}
           <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
-            <AdminSEO />
+            <AdminSEO extraTools={<SeoSynthesis />} />
           </Suspense>
         </TabsContent>
       </Tabs>
