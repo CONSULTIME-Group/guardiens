@@ -232,7 +232,7 @@ describe("lecture admin", () => {
     expect(signupSourceRange(7, new Date("2026-11-12T08:00:00Z"))).toEqual({ from: "2026-11-06", to: "2026-11-12" });
   });
   it("le bloc vit sur /admin/traffic", () => {
-    expect(read("src/pages/admin/AdminTraffic.tsx")).toContain("<SignupSourcesCard />");
+    expect(read("src/pages/admin/AdminTraffic.tsx")).toContain("<SignupSourcesCard range={leadsRange(period)} />");
   });
 });
 

@@ -19,9 +19,10 @@ import {
   type SignupSourcePeriod,
 } from "@/lib/admin/signupSources";
 
-export function SignupSourcesCard() {
+export function SignupSourcesCard({ range: sharedRange }: { range?: { from: string; to: string } } = {}) {
   const [days, setDays] = useState<SignupSourcePeriod>(30);
-  const range = signupSourceRange(days);
+  // Lot TRF-6 : la période commune de /admin/traffic l'emporte quand elle est fournie.
+  const range = sharedRange ?? signupSourceRange(days);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["admin-signup-sources", range.from, range.to],
@@ -44,7 +45,7 @@ export function SignupSourcesCard() {
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <CardTitle className="text-base">Inscriptions par canal</CardTitle>
-          <div className="flex gap-1" role="group" aria-label="Période">
+          {!sharedRange && <div className="flex gap-1" role="group" aria-label="Période">
             {SIGNUP_SOURCE_PERIODS.map((d) => (
               <Button
                 key={d}
@@ -57,7 +58,7 @@ export function SignupSourcesCard() {
                 {d} jours
               </Button>
             ))}
-          </div>
+          </div>}
         </div>
         <p className="text-xs text-muted-foreground">
           Comptes créés sur la période (jours de Paris), rangés par canal d'arrivée. « Inconnu » : compte créé sans source enregistrée (avant le 12/11/2026, ou arrivée perdue en route). Même compte que l'onglet Leads : comptes supprimés et équipe exclus. Une annonce compte dès sa première mise en ligne.

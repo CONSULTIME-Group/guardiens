@@ -22,11 +22,54 @@ import {
   type LeadsPeriod,
 } from "@/lib/admin/channelLeads";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import TabSynthesis from "@/components/admin/traffic/TabSynthesis";
+import { SHORT_LINK_BY_CHANNEL, publicationShortLink } from "@/lib/admin/seoActionLog";
+import { leadsPhrase, totalVisits } from "@/lib/admin/trafficSynthesis";
+import { trafficPeriodPhrase } from "@/lib/admin/trafficPeriod";
 
 const fmt = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
 
-export function ChannelLeadsCard() {
-  const [days, setDays] = useState<LeadsPeriod>(DEFAULT_LEADS_PERIOD);
+/** Lot TRF-5 : lien court d'une publication, à coller dans la publication (guardiens.fr/fb?utm_campaign=…). */
+function ShortLinkBuilder({ channel, label }: { channel: string; label: string }) {
+  const [name, setName] = useState("");
+  const link = publicationShortLink(channel, name);
+  const copy = async () => {
+    if (!link) return;
+    try { await navigator.clipboard.writeText(link); toast.success("Lien copié."); }
+    catch { toast.error("Copie impossible, sélectionnez le lien à la main."); }
+  };
+  return (
+    <div className="space-y-2" data-testid={`leads-shortlink-${channel}`}>
+      <label htmlFor={`pub-${channel}`} className="block text-xs font-medium text-foreground">
+        Lien court pour une publication {label}
+      </label>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <input id={`pub-${channel}`} value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom de la publication, par exemple : groupe Toulon 16/11"
+          className="min-h-11 flex-1 min-w-0 rounded-md border border-input bg-background px-3 text-sm" />
+        <Button type="button" className="min-h-11" disabled={!link} onClick={copy}>Copier le lien</Button>
+      </div>
+      <p className="text-xs text-muted-foreground break-all">
+        {link ?? "Le lien se compose avec le nom saisi. La publication apparaît dans ce tableau dès sa première visite."}
+      </p>
+    </div>
+  );
+}
+
+function exportLeadsCsv(channels: { label: string; visits: number; signups: number; publishedMembers: number; applicants: number; helpers: number; outingMembers: number }[]) {
+  const head = ["reseau", "visites", "inscrits", "annonces", "candidatures", "coups_de_main", "sorties"];
+  const lines = channels.map((c) => [`"${c.label.replace(/"/g, '""')}"`, c.visits, c.signups, c.publishedMembers, c.applicants, c.helpers, c.outingMembers].join(","));
+  const blob = new Blob(["\ufeff" + [head.join(","), ...lines].join("\n")], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "guardiens-leads-par-reseau.csv"; a.click();
+  URL.revokeObjectURL(url);
+}
+
+export function ChannelLeadsCard({ period }: { period?: LeadsPeriod } = {}) {
+  const [ownDays, setDays] = useState<LeadsPeriod>(DEFAULT_LEADS_PERIOD);
+  // Lot TRF-6 : la période commune de /admin/traffic l'emporte quand elle est fournie.
+  const days = period ?? ownDays;
   const [open, setOpen] = useState<string | null>(null);
   const range = leadsRange(days);
 
@@ -43,12 +86,11 @@ export function ChannelLeadsCard() {
     },
   });
 
-  const periodLabel = leadsPeriodLabel(days);
   const coverage = leadsCoverage(data?.channels ?? []);
 
   return (
     <div className="space-y-4" data-testid="channel-leads">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      {!period && <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex gap-1" role="group" aria-label="Période">
           {LEADS_PERIODS.map((d) => (
             <Button key={d} type="button" size="sm" className="min-h-11 md:min-h-9"
@@ -57,24 +99,23 @@ export function ChannelLeadsCard() {
             </Button>
           ))}
         </div>
-      </div>
+      </div>}
 
       {isLoading ? (
         <div className="py-10 flex items-center justify-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" /></div>
       ) : isError || !data ? (
         <p className="py-6 text-center text-sm text-destructive">{UNAVAILABLE_LABEL}</p>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-[320px_1fr] lg:items-start">
-          <Card className="border-primary/30 bg-primary/5" data-testid="leads-hero">
-            <CardContent className="pt-6">
-              <p className="text-xs text-primary">Annonces de garde publiées · {periodLabel}</p>
-              <p className="font-heading text-4xl font-semibold text-primary tabular-nums">{fmt(data.sitsPublished)}</p>
-              <p className="mt-1 text-sm text-primary">
-                {`${fmt(coverage.publishedMembers)} membre${coverage.publishedMembers > 1 ? "s" : ""} inscrit${coverage.publishedMembers > 1 ? "s" : ""} sur la période ${coverage.publishedMembers > 1 ? "ont" : "a"} publié une annonce, dont ${fmt(coverage.publishedKnown)} avec une source enregistrée.`}
-              </p>
-            </CardContent>
-          </Card>
-
+        <div className="space-y-4">
+          <TabSynthesis
+            testid="leads-synthesis"
+            phrase={leadsPhrase(data.channels, trafficPeriodPhrase(days))}
+            kpis={[
+              { label: "Inscrits", value: fmt(coverage.signups), hint: `source connue : ${Math.round(coverage.share * 100)} %` },
+              { label: "Annonces de garde", value: fmt(data.sitsPublished), hint: "publiées sur la période" },
+              { label: "Visites", value: fmt(totalVisits(data.channels)), hint: "suivies depuis le 13/11" },
+            ]}
+          />
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base">D'où viennent les nouveaux membres</CardTitle>
@@ -100,7 +141,8 @@ export function ChannelLeadsCard() {
                 </thead>
                 <tbody>
                   {data.channels.map((c) => {
-                    const expandable = c.campaigns.length > 0;
+                    const social = c.channel in SHORT_LINK_BY_CHANNEL;
+                    const expandable = c.campaigns.length > 0 || social;
                     const isOpen = open === c.channel;
                     return (
                       <Fragment key={c.channel}>
@@ -134,12 +176,20 @@ export function ChannelLeadsCard() {
                             <td className="hidden pl-2 text-right tabular-nums md:table-cell">{fmt(k.outingMembers)}</td>
                           </tr>
                         ))}
+                        {isOpen && social && (
+                          <tr className="border-b bg-muted/40">
+                            <td colSpan={7} className="py-3 px-4"><ShortLinkBuilder channel={c.channel} label={c.label} /></td>
+                          </tr>
+                        )}
                       </Fragment>
                     );
                   })}
                 </tbody>
               </table>
               <p className="mt-3 text-xs text-muted-foreground md:hidden">Candidatures, coups de main et sorties s'affichent sur un écran plus large.</p>
+              <Button type="button" variant="outline" className="mt-3 min-h-11 md:min-h-9" onClick={() => exportLeadsCsv(data.channels)} data-testid="leads-csv">
+                Exporter en CSV
+              </Button>
             </CardContent>
           </Card>
         </div>

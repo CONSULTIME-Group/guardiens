@@ -22,10 +22,10 @@ const STEPS: { key: string; label: string }[] = [
 // case oubliée ou un mot de passe refusé) : lu à part, hors de l'entonnoir.
 const SUBMIT_KEY = "signup_submit_clicked";
 
-export function SignupFormSubStepsFunnel() {
+export function SignupFormSubStepsFunnel({ days = 30 }: { days?: number } = {}) {
   const since = useMemo(
-    () => new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString(),
-    [],
+    () => new Date(Date.now() - days * 24 * 3600 * 1000).toISOString(),
+    [days],
   );
 
   // Lot A10 : agrégat SQL (membres uniques plus événements anonymes), sans plafond.
@@ -50,7 +50,7 @@ export function SignupFormSubStepsFunnel() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Sous-étapes du formulaire d'inscription (30 j)</CardTitle>
+        <CardTitle className="text-base">Sous-étapes du formulaire d'inscription ({days} j)</CardTitle>
         <p className="text-xs text-muted-foreground">
           Visiteurs par étape. La baisse d'une ligne à la suivante montre où le
           formulaire perd des visiteurs. Un compte Google saute l'email et le mot de passe.

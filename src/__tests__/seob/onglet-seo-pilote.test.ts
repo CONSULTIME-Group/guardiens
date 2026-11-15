@@ -103,8 +103,8 @@ describe("SEO-B, arrivées", () => {
 
 describe("SEO-B, écran", () => {
   const seo = read("src/pages/admin/AdminSEO.tsx");
-  it("ordre : Google, types de page, arrivées Google, requêtes à portée, actions, IA, outils repliés", () => {
-    const order = ["<SeoGoogleKpis", "<SeoTemplatesCard", 'channel="recherche_naturelle"', "<StrikingQueriesCard", "<PriorityActions", 'data-testid="seo-ai"', 'channel="ia"', 'data-testid="seo-tools"'];
+  it("ordre (lot TRF-6) : synthèse, actions, articles jamais vus, journal, puis le détail replié et les outils", () => {
+    const order = ['testid="seo-synthesis"', "<PriorityActions", "<NoImpressionActionable", "<SeoActionJournal", "<SeoGoogleKpis", "<SeoTemplatesCard", 'channel="recherche_naturelle"', 'data-testid="seo-ai"', 'channel="ia"', "<StrikingQueriesCard", 'data-testid="seo-tools"'];
     const idx = order.map((k) => seo.indexOf(k));
     idx.forEach((i) => expect(i).toBeGreaterThan(-1));
     expect([...idx].sort((a, b) => a - b)).toEqual(idx);
@@ -133,6 +133,6 @@ describe("SEO-B2, téléphone", () => {
   it("les actions prioritaires s'empilent sous 640 px avec un bouton de 44 px", () => {
     const src = read("src/components/admin/seo/PriorityActions.tsx");
     expect(src).toContain("flex flex-col sm:flex-row");
-    expect(src).toContain("min-h-11 sm:min-h-0 sm:h-7");
+    expect(src).toContain("min-h-11 sm:min-h-9");
   });
 });
