@@ -61,10 +61,11 @@ export interface PublicAssociation {
   needs_details: AssociationNeedDetail[];
   siren: string | null;
   legal_form: string | null;
+  address: string | null;
 }
 
 export const PUBLIC_ASSOCIATION_COLUMNS =
-  "id, slug, name, association_type, city, postal_code, departement_code, departement_name, departement_slug, species, description, needs, website_url, facebook_url, instagram_url, donation_url, adoption_url, volunteer_url, photos, photo_credit, photos_authorized, verified_at, updated_at, logo_url, tagline, founded_year, key_figures, press, needs_details, siren, legal_form";
+  "id, slug, name, association_type, city, postal_code, departement_code, departement_name, departement_slug, species, description, needs, website_url, facebook_url, instagram_url, donation_url, adoption_url, volunteer_url, photos, photo_credit, photos_authorized, verified_at, updated_at, logo_url, tagline, founded_year, key_figures, press, needs_details, siren, legal_form, address";
 
 export const normalizePhotos = (value: unknown): AssociationPhoto[] =>
   Array.isArray(value)

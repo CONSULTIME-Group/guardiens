@@ -1,6 +1,6 @@
 // Test SQL du lot TRF2 (15/11/2026) : onglet Leads de /admin/traffic.
 //
-// Base éphémère (PGlite) : migrations 0144, 0162 puis 0164, deux fois chacune
+// Base éphémère (PGlite) : migrations 0144, 0162 puis 0166, deux fois chacune
 // (rejouables). Contrôle : application hôte dans le canal (mêmes cas que le
 // site), visites rangées par la première page vue de chaque visite, inscrits
 // égaux aux profils créés hors comptes supprimés et admins, premières actions,
@@ -41,7 +41,7 @@ await db.exec(`
   CREATE TABLE public.outings(id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organizer_id uuid, status text);
   CREATE TABLE public.outing_attendees(outing_id uuid, user_id uuid);
 `);
-for (const f of ['0144_src1_source_inscription.sql', '0162_src2_canaux_sociaux.sql', '0164_trf2_leads.sql']) {
+for (const f of ['0144_src1_source_inscription.sql', '0162_src2_canaux_sociaux.sql', '0166_trf2_leads.sql']) {
   await db.exec(read(`drizzle/migrations/${f}`));
   await db.exec(read(`drizzle/migrations/${f}`));
 }

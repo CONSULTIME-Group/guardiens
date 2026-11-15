@@ -15,8 +15,8 @@ const root = new URL('../', import.meta.url);
 const migration = readFileSync(new URL('drizzle/migrations/0144_src1_source_inscription.sql', root), 'utf8');
 // Lot SRC2 : 0162 ajoute YouTube, TikTok et Instagram au calcul du canal.
 const migrationSrc2 = readFileSync(new URL('drizzle/migrations/0162_src2_canaux_sociaux.sql', root), 'utf8');
-// Lot TRF2 : 0164 ajoute l'application hôte (ap) au calcul du canal.
-const migrationTrf2 = readFileSync(new URL('drizzle/migrations/0164_trf2_leads.sql', root), 'utf8');
+// Lot TRF2 : 0166 ajoute l'application hôte (ap) au calcul du canal.
+const migrationTrf2 = readFileSync(new URL('drizzle/migrations/0166_trf2_leads.sql', root), 'utf8');
 const cases = JSON.parse(readFileSync(new URL('src/__tests__/src1/channel-cases.json', root), 'utf8'));
 const passed = [];
 

@@ -1,6 +1,6 @@
 /**
  * Lot TRF2 (15/11/2026, arène claude/arene/2026-11-15-trafic) : onglet Leads
- * de /admin/traffic, lu par admin_channel_leads (drizzle 0164).
+ * de /admin/traffic, lu par admin_channel_leads (drizzle 0166).
  * Règles pures : normalisation, regroupement par canal, campagnes.
  */
 import { signupChannelLabel } from "@/lib/admin/signupSources";
