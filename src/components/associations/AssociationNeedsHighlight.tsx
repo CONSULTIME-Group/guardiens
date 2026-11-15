@@ -5,7 +5,7 @@ import { associationInitials, associationNeedChipLabel } from "@/lib/association
 import type { PublicAssociation } from "@/components/associations/types";
 import { associationMedia } from "@/lib/associationMedia";
 
-const ELIGIBLE_NEEDS = ["benevoles", "familles_accueil"] as const;
+const ELIGIBLE_NEEDS = ["benevoles", "familles_accueil", "participants"] as const;
 const MAX_ENTRIES = 8;
 
 interface AssociationNeedsHighlightProps {
@@ -15,7 +15,7 @@ interface AssociationNeedsHighlightProps {
 /**
  * Bloc « Ce que les associations cherchent en ce moment ».
  *
- * Rassemble les appels à bénévoles et aux familles d'accueil des fiches
+ * Rassemble les appels à bénévoles, aux familles d'accueil et aux participants des fiches
  * vérifiées récemment. Une seule entrée par association, huit au maximum.
  */
 export const AssociationNeedsHighlight = ({ associations }: AssociationNeedsHighlightProps) => {

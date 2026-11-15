@@ -1,7 +1,8 @@
 /**
  * send-association-consent-email
  *
- * Envoie la demande d'accord à une association de protection animale, un
+ * Envoie la demande d'accord à une association (protection animale, nature,
+ * chantiers, solidarité, randonnées), un
  * destinataire par appel. Messages individuels adressés à des organisations,
  * hors membres : cet envoi ne passe donc pas par email-cap.
  *
