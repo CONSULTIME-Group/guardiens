@@ -1535,7 +1535,7 @@ const SitCard = ({
           )}
         </div>
 
-        <div className="flex-1 p-4">
+        <div className="flex-1 min-w-0 p-4">
           {/* Top row */}
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
