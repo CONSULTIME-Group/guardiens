@@ -796,6 +796,67 @@
       outline-offset: 2px;
     }
   }
+  /* Lot ART1 (16/11/2026) : sous 640 px, un tableau de 2 à 4 colonnes
+     s'affiche en cartes empilées (src/lib/articleTableCards.ts pose le nom
+     de colonne en data-label). Plus de défilement latéral ni de colonne
+     coupée au téléphone. */
+  @media (max-width: 639px) {
+    .article-rich-content .article-table-cards {
+      overflow-x: visible;
+      background: none;
+    }
+    .article-rich-content .article-table-cards > table,
+    .article-guide .article-table-cards > table {
+      display: block;
+      width: 100%;
+      min-width: 0;
+    }
+    .article-rich-content .article-table-cards thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+    .article-rich-content .article-table-cards tbody {
+      display: block;
+    }
+    .article-rich-content .article-table-cards tr {
+      display: block;
+      margin-bottom: 0.75rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid hsl(var(--border));
+      border-radius: 0.75rem;
+      background: hsl(var(--card));
+    }
+    .article-rich-content .article-table-cards td {
+      display: block;
+      padding: 0.375rem 0;
+      border-bottom: 0;
+      line-height: 1.45;
+    }
+    .article-rich-content .article-table-cards td::before {
+      content: attr(data-label);
+      display: block;
+      margin-bottom: 0.125rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: hsl(var(--muted-foreground));
+    }
+    .article-rich-content .article-table-cards td:first-child {
+      padding-top: 0;
+      padding-bottom: 0.5rem;
+      font-weight: 600;
+      color: hsl(var(--foreground));
+    }
+    .article-rich-content .article-table-cards td:first-child::before {
+      content: none;
+    }
+    .article-guide .article-table-hint-cards {
+      display: none;
+    }
+  }
 
   /* ───────────────────────── Notebook card (vignettes en spirale) ─────────────────────────
      Effet "carnet" pour les vignettes hero : ombre douce projetée, légère rotation
