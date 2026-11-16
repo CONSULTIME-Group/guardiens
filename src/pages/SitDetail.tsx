@@ -124,6 +124,8 @@ const SitDetail = () => {
   const [hasApplied, setHasApplied] = useState(false);
   // Lot X3a (B-03) : statut de la candidature du visiteur (null sans candidature).
   const [myApplicationStatus, setMyApplicationStatus] = useState<string | null>(null);
+  // Lot CAND1 : dates d'arrivée et d'ouverture de la candidature, pour l'accusé de réception.
+  const [myApplicationTimes, setMyApplicationTimes] = useState<{ createdAt: string | null; viewedAt: string | null } | null>(null);
   const [hasReviewedThisSit, setHasReviewedThisSit] = useState(false);
   const [initialLogementOverride, setInitialLogementOverride] = useState("");
   const [initialAnimauxOverride, setInitialAnimauxOverride] = useState("");
@@ -327,7 +329,7 @@ const SitDetail = () => {
           supabase.from("sitter_profiles").select("*").eq("user_id", user.id).limit(1),
           supabase
             .from("applications")
-            .select("id, status")
+            .select("id, status, created_at, viewed_at")
             .eq("sit_id", sitId)
             .eq("sitter_id", user.id)
             .limit(1),
@@ -342,6 +344,10 @@ const SitDetail = () => {
         if (appRes.data?.[0]) {
           setHasApplied(true);
           setMyApplicationStatus(((appRes.data[0] as any).status as string | undefined) ?? null);
+          setMyApplicationTimes({
+            createdAt: ((appRes.data[0] as any).created_at as string | undefined) ?? null,
+            viewedAt: ((appRes.data[0] as any).viewed_at as string | undefined) ?? null,
+          });
         }
         setHasReviewedThisSit(!!reviewRes.data?.[0]);
       }
@@ -485,6 +491,7 @@ const SitDetail = () => {
           setHasApplied={setHasApplied}
           myApplicationStatus={myApplicationStatus}
           setMyApplicationStatus={setMyApplicationStatus}
+          myApplicationTimes={myApplicationTimes}
           hasReviewedThisSit={hasReviewedThisSit}
           sitterProfile={sitterProfile}
           currentUserId={user?.id || ""}
