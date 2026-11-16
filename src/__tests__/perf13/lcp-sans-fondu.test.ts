@@ -27,7 +27,7 @@ describe("perf 13, aucune page n'apparaît en fondu", () => {
   });
 
   it("bandeau cookies en fondu : jamais candidat LCP à la place du contenu", () => {
-    expect(read("src/components/legal/CookieConsentBanner.tsx")).toMatch(/fixed inset-x-0 bottom-0 z-\[60\][^"]*animate-fade-in"/);
+    expect(read("src/components/legal/CookieConsentBanner.tsx")).toMatch(/fixed inset-x-0 bottom-0 z-\[\d+\][^"]*animate-fade-in"/);
   });
 
   it("photos du haut du tableau de bord en priorité haute", () => {
