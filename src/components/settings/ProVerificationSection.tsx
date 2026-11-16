@@ -15,8 +15,10 @@ import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
  *
  * Périmètre volontairement réduit à la seule déclaration : la spécialité
  * renseignée bascule `profiles.pro_status` en `declared` par déclencheur.
- * Cette déclaration sert la modération du positionnement entre particuliers
- * (signalement d'un tarif évoqué sans statut déclaré), elle reste interne.
+ * La spécialité déclarée s'affiche aux propriétaires (badge et ligne
+ * « Professionnel » des candidatures, CGU article 10 bis). Le texte de la
+ * section rappelle le cadre de l'article 6.3 des CGU : chaque garde est un
+ * échange bénévole et gratuit entre particuliers (lot PRO1, 16/11/2026).
  */
 
 type ProStatus = "none" | "declared" | "pending" | "verified" | "rejected";
@@ -92,10 +94,14 @@ const ProVerificationSection = ({ user }: { user: any }) => {
         </div>
         <div className="flex-1 min-w-0">
           <h2 className="font-heading text-xl font-bold text-foreground">Statut professionnel</h2>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-1" data-testid="pro-status-intro">
             Vous exercez une activité animalière déclarée (éducateur, vétérinaire, toiletteur, comportementaliste,
-            pension agréée) ? Indiquez votre spécialité : les échanges où vous évoquez vos tarifs restent lisibles
-            par l'équipe comme une activité professionnelle assumée.
+            pension agréée) ? Indiquez votre spécialité : elle informe les propriétaires de votre expérience. Sur
+            Guardiens, chaque garde est un échange bénévole et gratuit entre particuliers (
+            <a href="/cgu" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+              CGU, article 6.3
+            </a>
+            ). Votre activité professionnelle se mène hors de Guardiens.
           </p>
         </div>
         {proStatus === "declared" && (
