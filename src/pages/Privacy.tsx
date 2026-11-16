@@ -66,6 +66,7 @@ const Privacy = () => {
             <li>Assistance par Alma, aides à la rédaction, analyse de la qualité des photos : exécution du contrat</li>
             <li>Amélioration du service, statistiques anonymisées : intérêt légitime</li>
             <li>Mesure du canal d'arrivée à l'inscription : intérêt légitime. Nous enregistrons le canal par lequel vous êtes arrivé (par exemple un moteur de recherche ou une publicité) pour mesurer nos actions, sans identifiant publicitaire.</li>
+            <li>Réponse à « Comment avez-vous connu Guardiens ? » : consentement. Cette question est facultative. Votre réponse sert à savoir où parler de Guardiens et reste réservée à l'équipe.</li>
             <li>Obligations comptables et fiscales : obligation légale (art. 6.1.c)</li>
           </ul>
 

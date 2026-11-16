@@ -34,6 +34,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { departmentCodeFromPostal } from "@/lib/postalDepartment";
 import ChipSelect from "@/components/profile/ChipSelect";
+import DeclaredSourceQuestion from "@/components/onboarding/DeclaredSourceQuestion";
+import { recordDeclaredSource, type DeclaredSource } from "@/lib/declaredSource";
 import {
   SITTER_ANIMAL_TYPES_OPTIONS,
   SITTER_TYPE_OPTIONS,
@@ -58,6 +60,8 @@ const OnboardingAffinity = () => {
   const { user, refreshProfile, logout } = useAuth();
   const { enabled: flagEnabled, loading: flagLoading } = useFeatureFlag("mandatory_affinity_onboarding");
   const status = useAffinityOnboardingStatus();
+  // Lot SRC4 : réponse facultative, enregistrée après les écritures du profil.
+  const [declaredSource, setDeclaredSource] = useState<DeclaredSource | null>(null);
 
   // Sortie du parcours : on respecte la destination d'origine quand elle
   // existe (tunnel de création d'annonce d'un propriétaire fraîchement
@@ -375,6 +379,14 @@ const OnboardingAffinity = () => {
         const { error } = await supabase.from("owner_profiles").upsert(writes.owner as any, { onConflict: "user_id" });
         if (error) throw error;
       }
+      // Lot SRC4 : une mesure n'empêche jamais d'avancer (recordDeclaredSource ne lève pas).
+      if (declaredSource) {
+        const recorded = await recordDeclaredSource(supabase as any, declaredSource, "accueil");
+        void trackEvent("declared_source_answered" as any, {
+          source: "/onboarding/affinity",
+          metadata: { answer: declaredSource, recorded },
+        });
+      }
       completedRef.current = true;
       await invalidateMyOnboardingStatus(user.id);
       const duration = startedAtRef.current
@@ -649,6 +661,10 @@ const OnboardingAffinity = () => {
                   </>
                 )}
               </section>
+            )}
+
+            {chosenRole && (
+              <DeclaredSourceQuestion value={declaredSource} onChange={setDeclaredSource} disabled={saving} />
             )}
 
             <div className="space-y-2 pt-2">

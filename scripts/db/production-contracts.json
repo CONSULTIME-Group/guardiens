@@ -1047,6 +1047,28 @@
           "sql": "SELECT p.prosecdef AND has_function_privilege('anon', p.oid, 'EXECUTE') AND has_function_privilege('authenticated', p.oid, 'EXECUTE') AND has_function_privilege('service_role', p.oid, 'EXECUTE') AS ok FROM pg_proc p WHERE p.oid = 'public.get_content_stats(text,text)'::regprocedure"
         }
       ]
+    },
+    {
+      "migration": "0176_src4_source_declaree.sql",
+      "description": "Réponse déclarée à « Comment avez-vous connu Guardiens ? » : table fermée aux membres, écriture unique par le membre connecté, lecture réservée à l'équipe",
+      "checks": [
+        {
+          "name": "table_source_declaree",
+          "sql": "SELECT to_regclass('public.profile_declared_sources') IS NOT NULL AS ok"
+        },
+        {
+          "name": "table_fermee_aux_membres",
+          "sql": "SELECT NOT has_table_privilege('authenticated', 'public.profile_declared_sources', 'SELECT') AND NOT has_table_privilege('anon', 'public.profile_declared_sources', 'SELECT') AS ok"
+        },
+        {
+          "name": "ecriture_membre",
+          "sql": "SELECT COALESCE(has_function_privilege('authenticated', to_regprocedure('public.record_declared_source(text,text)'), 'EXECUTE') AND NOT has_function_privilege('anon', to_regprocedure('public.record_declared_source(text,text)'), 'EXECUTE'), false) AS ok"
+        },
+        {
+          "name": "lecture_equipe",
+          "sql": "SELECT COALESCE(has_function_privilege('authenticated', to_regprocedure('public.admin_declared_sources(date,date)'), 'EXECUTE') AND NOT has_function_privilege('anon', to_regprocedure('public.admin_declared_sources(date,date)'), 'EXECUTE'), false) AS ok"
+        }
+      ]
     }
   ]
 }

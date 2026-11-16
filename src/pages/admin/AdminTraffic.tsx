@@ -21,6 +21,7 @@ const AdminSEO = lazy(() => import("./AdminSEO"), "AdminSEO");
 const AcquisitionPilotCard = lazy(() => import("@/pages/admin/_components/dashboard/AcquisitionPilotCard").then((m) => ({ default: m.AcquisitionPilotCard })), "AcquisitionPilotCard");
 const AdminSignupFunnelTab = lazy(() => import("@/components/admin/AdminSignupFunnelTab"), "AdminSignupFunnelTab");
 const SignupSourcesCard = lazy(() => import("@/components/admin/SignupSourcesCard"), "SignupSourcesCard");
+const DeclaredSourcesCard = lazy(() => import("@/components/admin/DeclaredSourcesCard"), "DeclaredSourcesCard");
 const ChannelLeadsCard = lazy(() => import("@/components/admin/ChannelLeadsCard"), "ChannelLeadsCard");
 const SignupBrakesCard = lazy(() => import("@/components/admin/traffic/SignupBrakesCard"), "SignupBrakesCard");
 const Step0AbandonsCard = lazy(() => import("@/components/admin/Step0AbandonsCard"), "Step0AbandonsCard");
@@ -226,6 +227,12 @@ const AdminTraffic = () => {
               <Suspense fallback={fallback}>
                 <SignupSourcesCard range={leadsRange(period)} />
               </Suspense>
+              {/* Lot SRC4 : réponse déclarée à « Comment avez-vous connu Guardiens ? ». */}
+              <div className="mt-4">
+                <Suspense fallback={fallback}>
+                  <DeclaredSourcesCard range={leadsRange(period)} />
+                </Suspense>
+              </div>
             </div>
           </details>
           <details className="rounded-2xl border bg-card px-4" data-testid="funnel-detail-sits">
