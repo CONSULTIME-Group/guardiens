@@ -826,7 +826,7 @@ const PublicSitView = ({
 
     {/* ── Sticky CTA mobile (< lg) pour visiteurs non connectés ou abonnés ── */}
     {accepting && !isClosed && !isAuthenticated && (
-      <div className="lg:hidden fixed bottom-[var(--bottom-nav-h,0px)] left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]">
+      <div className="lg:hidden fixed bottom-[calc(var(--bottom-nav-h,0px)+var(--cookie-banner-h,0px))] left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]">
         <Link
           to={`/inscription?role=sitter&redirect=${encodeURIComponent(redirect)}`}
           className="block"
@@ -838,7 +838,7 @@ const PublicSitView = ({
       </div>
     )}
     {accepting && !isClosed && isAuthenticated && !hasApplied && hasAccess && onApply && (
-      <div className="lg:hidden fixed bottom-[var(--bottom-nav-h,0px)] left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]">
+      <div className="lg:hidden fixed bottom-[calc(var(--bottom-nav-h,0px)+var(--cookie-banner-h,0px))] left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]">
         <Button
           onClick={onApply}
           className="w-full rounded-full font-bold text-base shadow-lg shadow-primary/20"

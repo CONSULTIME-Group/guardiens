@@ -383,6 +383,13 @@ const RegisterRedirect = () => {
   return <Navigate to={`/inscription${location.search}${location.hash}`} replace />;
 };
 
+// Lot BAS1 (16/11/2026) : /entraide répondait par la page 404, la rubrique
+// vit sur /petites-missions. Paramètres et ancre conservés.
+const EntraideRedirect = () => {
+  const location = useLocation();
+  return <Navigate to={`/petites-missions${location.search}${location.hash}`} replace />;
+};
+
 const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, user, loading, authTimeout } = useAuth();
   const location = useLocation();
@@ -696,6 +703,7 @@ const AppRoutes = () => {
       <Route path="/go" element={<EmailClickRedirect />} />
       <Route path="/acces" element={<EmailDeepLink />} />
       <Route path="/candidature/reponse" element={<ApplicationQuickAction />} />
+      <Route path="/entraide" element={<EntraideRedirect />} />
       <Route path="/entraide/je-peux" element={<MissionQuickCanHelp />} />
       <Route path="/entraide/choisir" element={<MissionChooseHelper />} />
       <Route path="/ma-ligne" element={<MaLigne />} />

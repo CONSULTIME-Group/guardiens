@@ -460,7 +460,7 @@ export const BottomNav = () => {
 
       <nav
         ref={pillRef}
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+        className="md:hidden fixed bottom-[var(--cookie-banner-h,0px)] left-0 right-0 z-50 pointer-events-none px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
         aria-label="Navigation mobile"
       >
         <div
