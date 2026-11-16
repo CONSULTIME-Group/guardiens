@@ -11,6 +11,7 @@ import { inferMissionCategory } from "@/lib/missionCategories";
 import { fetchUpcomingOutings } from "@/lib/outingsData";
 import { outingDateLabel } from "@/lib/outings";
 import outingVisual from "@/assets/missions/spot-jeux-480.webp";
+import { visibleToPublic } from "../../../supabase/functions/_shared/missionSensitivity.js";
 
 interface HomeListing {
   id: string;
@@ -236,14 +237,15 @@ export default function LiveListingsStrip({ origin = null, profileOrigin = null,
     let active = true;
     void supabase
       .from("public_small_missions")
-      .select("id, slug, title, city, postal_code, date_needed, photos, latitude, longitude, created_at")
+      .select("id, slug, title, description, city, postal_code, date_needed, photos, latitude, longitude, created_at")
       .eq("status", "open")
       .eq("mission_type", "besoin")
       .order("created_at", { ascending: false })
       .limit(40)
       .then(({ data }) => {
         if (!active) return;
-        setMissions((data ?? []).map((mission) => ({
+        // Lot ES-S : la vitrine de l'accueil est publique, un besoin qui dit une détresse personnelle n'y figure pas.
+        setMissions((data ?? []).filter((mission) => visibleToPublic(mission, false)).map((mission) => ({
           id: String(mission.id),
           kind: "besoin",
           title: mission.title || "Coup de main",

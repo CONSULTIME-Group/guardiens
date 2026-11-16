@@ -38,6 +38,14 @@ export function helpersPulseLine(count: number, city: string | null): string | n
   return city === "vous" ? `${people} autour de chez vous` : `${people} autour de ${city}`;
 }
 
+/** Lot ES1 (décision 5 du conseil du 16/11/2026) : fenêtre d'activité du chiffre de l'en-tête. */
+export const ACTIVE_WINDOW_DAYS = 30;
+
+/** Lot ES1 : libellé du chiffre de l'en-tête, le lieu se lit dans la ligne de réglage. */
+export function activeHelpersLabel(count: number): string {
+  return count === 1 ? "personne active ce mois-ci" : "personnes actives ce mois-ci";
+}
+
 /** Titre de la section des personnes. */
 export function helpersSectionTitle(count: number, city: string | null): string {
   if (!city) return "Prêts à aider sur Guardiens";

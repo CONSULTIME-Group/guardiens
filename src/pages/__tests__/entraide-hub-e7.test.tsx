@@ -115,6 +115,8 @@ describe("Entraide, la page vue d'un membre", () => {
         latitude_approx: 45.75 + index / 100,
         longitude_approx: 4.85,
         helps_with: "Arroser les plantes",
+        // Lot ES1 : le chiffre de l'en-tête compte les personnes actives sur 30 jours.
+        last_active_on: index % 2 === 0 ? new Date().toISOString().slice(0, 10) : "2026-01-01",
       })),
       public_mission_response_counts: [],
       profiles: [{ city: "Lyon", latitude: LYON[0], longitude: LYON[1], available_for_help: true }],
@@ -128,9 +130,10 @@ describe("Entraide, la page vue d'un membre", () => {
   it("prend l'origine dans le profil connecté, sans saisie de ville", async () => {
     renderHub();
     expect(await screen.findByRole("heading", { name: "Entraide près de chez vous" })).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByTestId("hub-stat")).toHaveTextContent(/19\s*personnes prêtes à aider autour de Lyon/));
-    // Lot SORT13 : chaque réglage porte son nom (« Ville Lyon Changer »).
-    const settings = screen.getByRole("button", { name: /Ville.*Lyon.*Changer/ });
+    // Lot ES1 : seules les personnes actives sur 30 jours comptent (9 sur 19, « moi » exclu).
+    await waitFor(() => expect(screen.getByTestId("hub-stat-line")).toHaveTextContent(/9\s*personnes actives ce mois-ci/));
+    // Lot ENT-MOB1 puis ES1 : une ligne qui dit le lieu et le geste, à toutes les largeurs.
+    const settings = screen.getByRole("button", { name: /Autour de.*Lyon.*Changer/ });
     expect(settings).toHaveAttribute("aria-expanded", "false");
     fireEvent.click(settings);
     expect(screen.getByRole("textbox", { name: "Votre ville" })).toBeVisible();
@@ -177,11 +180,11 @@ describe("Entraide, la page vue d'un membre", () => {
 
   it("une tuile d'idée ouvre le formulaire avec le titre écrit", async () => {
     renderHub();
-    // Lot ENT-MOB1 : les idées sont rendues deux fois, en tête à partir de 768 px et après la liste au téléphone (CSS).
+    // Lot ES1 : les idées sont rendues une seule fois, dans la colonne de droite du corps commun.
     const headings = await screen.findAllByRole("heading", { name: "Une idée pour commencer" });
-    expect(headings).toHaveLength(2);
+    expect(headings).toHaveLength(1);
     const top = headings[0].closest("section") as HTMLElement;
-    expect(top.className).toContain("hidden md:block");
+    expect(top.closest('[data-testid="hub-body-after"]')).not.toBeNull();
     expect(within(top).getAllByRole("button", { name: /Arroser le potager|Faire les courses|Monter un meuble|Promener le chien|Un trajet|Ramasser les fruits/ }).length).toBe(6);
   });
 

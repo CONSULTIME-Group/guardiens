@@ -302,7 +302,7 @@ export async function collectSitemapData({ readAll, fetchOrCache, maxUpdatedAtWi
       "small_missions_entraide_v1", cache,
       null, // contenu et dates dépendent du temps : relue à chaque build
       () => readAll("public_small_missions:entraide", "public_small_missions",
-        "id, slug, description, status, mission_type, date_needed, end_date, created_at", "id",
+        "id, slug, title, description, status, mission_type, date_needed, end_date, created_at", "id",
         q => q.eq("status", "open").not("slug", "is", null).neq("category", "projet")),
       rows => rows.filter(m => isIndexableEntraideMission(m, today)).map(m => ({
         loc: `/petites-missions/${m.slug}`,

@@ -11,6 +11,7 @@ import type { HubArticle } from "@/lib/hubArticles";
  * réglages nommés un par un.
  * Lot ENT-MOB1 (16/11/2026) : sous 768 px, une phrase courte (phraseShort),
  * un seul bouton, le chiffre en une ligne et les réglages en une ligne.
+ * Lot ES1 (16/11/2026) : même règle à l'ordinateur, la phrase longue y définit l'onglet.
  */
 export const HubHeader = ({ title, phrase, phraseShort, actions, stat, children }: {
   title: string;
@@ -30,7 +31,7 @@ export const HubHeader = ({ title, phrase, phraseShort, actions, stat, children 
         </>
       ) : phrase}
     </p>
-    <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-stretch">
+    <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6">
       {actions}
       {stat}
     </div>
@@ -39,46 +40,22 @@ export const HubHeader = ({ title, phrase, phraseShort, actions, stat, children 
 );
 
 /**
- * Lot SORT13 : le chiffre de l'onglet, en bloc visible à côté du bouton
- * (« 86 personnes prêtes à aider autour de Lyon »). Le bloc entier est le lien.
+ * Lot SORT13 : le chiffre de l'onglet. Lot ENT-MOB1 au téléphone puis lot ES1
+ * (16/11/2026) à toutes les largeurs : une ligne, le nombre en gras (plus grand
+ * à partir de 768 px), le libellé court et le geste second au bout de la ligne
+ * (« Proposer mon aide »). Le lieu se lit dans la ligne de réglage.
  */
-export const HubStat = ({ value, label, mobileLabel, href, to, action, avatars = [], aside }: {
+export const HubStat = ({ value, label, href, to, aside }: {
   value: number;
   label: string;
-  /** Lot ENT-MOB1 : libellé de la ligne courte du téléphone (le lieu se lit dans la ligne de réglage). */
-  mobileLabel?: string;
   href?: string;
   to?: string;
-  action?: string;
-  avatars?: ReadonlyArray<string>;
-  /** Lot ENT-MOB1 : geste second posé au bout de la ligne du téléphone (« Proposer mon aide »). */
   aside?: ReactNode;
 }) => {
-  const body = (
-    <>
-      <span className="font-heading text-3xl font-bold leading-none text-primary">{value}</span>
-      <span className="min-w-0 flex-1 text-sm font-medium leading-snug text-foreground">{label}</span>
-      {avatars.length > 0 && (
-        <span aria-hidden="true" className="hidden shrink-0 -space-x-2 sm:flex">
-          {avatars.slice(0, 3).map((src) => (
-            <img key={src} src={src} alt="" width={32} height={32} loading="lazy" decoding="async" className="h-8 w-8 rounded-full border-2 border-card object-cover" />
-          ))}
-        </span>
-      )}
-      {action && <span className="shrink-0 text-sm font-semibold text-primary underline underline-offset-4">{action}</span>}
-    </>
-  );
-  const shell = "hidden min-h-[52px] items-center gap-3 rounded-2xl border border-primary/25 bg-primary/5 px-4 py-2 no-underline sm:min-h-12 md:flex";
-  const block = to
-    ? <Link to={to} className={shell} data-testid="hub-stat">{body}</Link>
-    : href
-      ? <a href={href} className={shell} data-testid="hub-stat">{body}</a>
-      : <p className={shell} data-testid="hub-stat">{body}</p>;
-  // Sous 768 px : une ligne de texte, le nombre en gras, sans bloc ni avatars.
-  const lineBody = <><b className="font-semibold">{value}</b> {mobileLabel ?? label}</>;
-  const lineText = "inline-flex min-h-11 min-w-0 items-center gap-1 text-sm text-foreground no-underline";
-  const line = (
-    <div className="flex items-center justify-between gap-3 md:hidden" data-testid="hub-stat-line">
+  const lineBody = <><b className="font-semibold md:font-heading md:text-xl md:font-bold md:text-primary">{value}</b> {label}</>;
+  const lineText = "inline-flex min-h-11 min-w-0 items-center gap-1 text-sm text-foreground no-underline md:text-base";
+  return (
+    <div className="flex items-center justify-between gap-3 md:justify-start md:gap-6" data-testid="hub-stat-line">
       {to
         ? <Link to={to} className={lineText}><span>{lineBody}</span></Link>
         : href
@@ -87,41 +64,12 @@ export const HubStat = ({ value, label, mobileLabel, href, to, action, avatars =
       {aside}
     </div>
   );
-  return <>{block}{line}</>;
 };
 
 /**
- * Lot SORT13 : les réglages de l'onglet, un par ligne courte, chacun avec
- * son nom, sa valeur et son geste (« Ville : Lyon · Changer »).
- */
-export const HubSetting = ({ label, value, action, to, onClick, expanded }: {
-  label: string;
-  value: string;
-  action: string;
-  to?: string;
-  onClick?: () => void;
-  expanded?: boolean;
-}) => {
-  const body = (
-    <>
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-semibold text-foreground">{value}</span>
-      <span className="font-semibold text-primary underline underline-offset-4">{action}</span>
-    </>
-  );
-  const shell = "inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-card px-4 text-sm no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
-  return to
-    ? <Link to={to} className={shell} data-testid="hub-setting">{body}</Link>
-    : <button type="button" onClick={onClick} aria-expanded={expanded} className={shell} data-testid="hub-setting">{body}</button>;
-};
-
-export const HubSettings = ({ children }: { children: ReactNode }) => (
-  <div className="hidden flex-wrap items-center gap-2 md:flex" data-testid="hub-settings">{children}</div>
-);
-
-/**
- * Lot ENT-MOB1 (16/11/2026) : sous 768 px, les réglages tiennent en une
- * ligne (« Autour de Lyon, 30 km · Changer »), cible de 44 px.
+ * Lot ENT-MOB1 (16/11/2026), étendu à toutes les largeurs par le lot ES1 :
+ * les réglages tiennent en une ligne (« Autour de Lyon, 30 km · Changer »),
+ * cible de 44 px, 448 px au plus à l'ordinateur.
  */
 export const HubSettingsLine = ({ summary, action, to, onClick, expanded }: {
   summary: ReactNode;
@@ -139,19 +87,19 @@ export const HubSettingsLine = ({ summary, action, to, onClick, expanded }: {
       <span className="shrink-0 font-semibold text-primary">{action}</span>
     </>
   );
-  const shell = "flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-border bg-card px-3.5 text-left text-sm text-foreground no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden";
+  const shell = "flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-border bg-card px-3.5 text-left text-sm text-foreground no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:max-w-md";
   return to
     ? <Link to={to} className={shell} data-testid="hub-settings-line">{body}</Link>
     : <button type="button" onClick={onClick} aria-expanded={expanded} className={shell} data-testid="hub-settings-line">{body}</button>;
 };
 
 /**
- * Lot SORT13 : pourquoi cette rubrique, en tête des trois onglets. Les deux
- * chiffres viennent de l'étude citée dans l'article du journal.
+ * Lot SORT13 : pourquoi cette rubrique. Le chiffre vient de l'étude citée dans
+ * l'article du journal.
  */
-export const HubWhy = ({ placement = "top" }: { placement?: "top" | "end" }) => (
-  // Lot ENT-MOB1 : en tête à partir de 768 px ; sous 768 px, en fin de page (placement « end »).
-  <aside className={`${placement === "end" ? "mt-10 flex md:hidden" : "mt-4 hidden md:flex"} items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 sm:gap-4 sm:px-5`} aria-label="Pourquoi cette rubrique" data-testid="hub-why">
+export const HubWhy = () => (
+  // Lot ES1 (16/11/2026) : une seule fois, sous la liste, à toutes les largeurs (décision 4 du conseil du 16/11).
+  <aside className="mt-10 flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 sm:gap-4 sm:px-5 md:max-w-3xl" aria-label="Pourquoi cette rubrique" data-testid="hub-why">
     <span className="shrink-0 font-heading text-2xl font-bold leading-none text-primary sm:text-4xl">24&nbsp;%</span>
     <p className="min-w-0 text-[13px] leading-snug text-foreground sm:text-sm sm:leading-relaxed">
       des personnes en France se sentent seules souvent ou presque tous les jours (CRÉDOC, étude Solitudes 2025). Un coup de main, une sortie, un chantier : trois raisons simples de se parler entre gens du coin.{" "}
@@ -166,23 +114,26 @@ export interface HubIdea {
   image: string;
 }
 
-/** « Une idée pour commencer » : mêmes vignettes dans les trois onglets. */
-export const HubIdeas = ({ id, ideas, onPick, placement = "top" }: {
+/**
+ * « Une idée pour commencer » : mêmes vignettes dans les trois onglets.
+ * Lot ES1 (16/11/2026) : une seule fois dans la page, après la liste au
+ * téléphone, dans la colonne de droite à partir de 1 024 px (HubBody), en
+ * pastilles sur deux colonnes.
+ */
+export const HubIdeas = ({ id, ideas, onPick }: {
   id: string;
   ideas: ReadonlyArray<HubIdea>;
   onPick: (idea: HubIdea) => void;
-  /** Lot ENT-MOB1 : « top » avant la liste à partir de 768 px, « end » après la liste sous 768 px. */
-  placement?: "top" | "end";
 }) => (
-  <section className={placement === "end" ? "mt-8 md:hidden" : "mt-5 hidden md:block"} aria-labelledby={id} data-testid="hub-ideas">
-    <h2 id={id} className="text-sm font-semibold text-foreground">Une idée pour commencer</h2>
-    <ul className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-6">
+  <section aria-labelledby={id} data-testid="hub-ideas">
+    <h2 id={id} className="text-sm font-semibold text-foreground lg:font-heading lg:text-lg">Une idée pour commencer</h2>
+    <ul className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-2 lg:gap-2">
       {ideas.map((idea) => (
         <li key={idea.key} className="shrink-0 sm:h-full">
           <button
             type="button"
             onClick={() => onPick(idea)}
-            className="flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full border border-border bg-card py-1 pl-1 pr-3 text-left text-sm font-medium text-foreground transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-full sm:w-full sm:flex-col sm:items-start sm:whitespace-normal sm:rounded-lg sm:p-3"
+            className="flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full border border-border bg-card py-1 pl-1 pr-3 text-left text-sm font-medium text-foreground transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-full sm:w-full sm:flex-col sm:items-start sm:whitespace-normal sm:rounded-lg sm:p-3 lg:flex-row lg:items-center lg:rounded-full lg:py-1 lg:pl-1 lg:pr-3"
           >
             <img
               src={idea.image}
@@ -190,7 +141,7 @@ export const HubIdeas = ({ id, ideas, onPick, placement = "top" }: {
               width={80}
               height={80}
               decoding="async"
-              className="h-9 w-9 shrink-0 rounded-full object-cover sm:h-16 sm:w-16 sm:rounded-md"
+              className="h-9 w-9 shrink-0 rounded-full object-cover sm:h-16 sm:w-16 sm:rounded-md lg:h-9 lg:w-9 lg:rounded-full"
             />
             <span className="leading-snug">{idea.label}</span>
           </button>
@@ -228,6 +179,20 @@ export const HubArticles = ({ articles }: { articles: ReadonlyArray<HubArticle> 
   </section>
 );
 
-/** Enveloppe commune : même largeur et mêmes marges dans les trois onglets. */
-export const HUB_SHELL = "mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8";
+/**
+ * Lot ES1 (16/11/2026) : corps commun des trois onglets, un seul arbre de page.
+ * Au téléphone et jusqu'à 1 023 px : « before » (mode d'emploi du visiteur),
+ * la liste, puis « after » (idées). À partir de 1 024 px : la liste à gauche,
+ * « before » puis « after » dans une colonne de 320 px à droite.
+ */
+export const HubBody = ({ before, list, after }: { before?: ReactNode; list: ReactNode; after?: ReactNode }) => (
+  <div className="mt-6 grid gap-8 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-x-10 lg:gap-y-6" data-testid="hub-body">
+    {before ? <div className="min-w-0 lg:col-start-2 lg:row-start-1" data-testid="hub-body-before">{before}</div> : null}
+    <div className="min-w-0 lg:col-start-1 lg:row-span-2 lg:row-start-1" data-testid="hub-body-list">{list}</div>
+    {after ? <div className="min-w-0 lg:col-start-2 lg:row-start-2" data-testid="hub-body-after">{after}</div> : null}
+  </div>
+);
+
+/** Enveloppe commune : même largeur et mêmes marges dans les trois onglets (lot ES1 : 1 152 px pour la colonne de droite). */
+export const HUB_SHELL = "mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8";
 export const HUB_TABS = "mt-3 w-full max-w-md";

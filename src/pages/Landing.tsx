@@ -16,20 +16,12 @@ import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
 import { UsagesSection } from "@/components/landing/UsagesSection";
 import { ServiceAfterServiceSection } from "@/components/landing/ServiceAfterServiceSection";
 import { HomeProximitySearch, type HomeOrigin } from "@/components/landing/HomeProximitySearch";
-import familyGardes from "@/assets/aquarelles/univers-gardes-320.webp";
-import familyEntraide from "@/assets/aquarelles/univers-entraide-320.webp";
-import familySorties from "@/assets/missions/spot-jeux-480.webp";
 
 /** Lot HOME1 : les trois familles présentées sous les chiffres. */
-const HOME_FAMILIES = [
-  { key: "garde", to: "/annonces", image: familyGardes },
-  { key: "entraide", to: "/petites-missions", image: familyEntraide },
-  { key: "sorties", to: "/sorties", image: familySorties },
-] as const;
 import { LivedItSection } from "@/components/landing/LivedItSection";
 import { LandingTocBar } from "@/components/landing/LandingTocBar";
+import { HomeFamilies } from "@/components/landing/HomeFamilies";
 import HomeJsonLd from "@/components/landing/HomeJsonLd";
-import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { ConfianceSection } from "@/components/landing/ConfianceSection";
 import { ManifesteSection } from "@/components/landing/ManifesteSection";
 import { ChoisirSection } from "@/components/landing/ChoisirSection";
@@ -286,31 +278,9 @@ const Landing = () => {
                   </div>
                 ))}
               </dl>
-              {/* Lot HOME1 : les trois familles de Guardiens, dites une fois,
-                  sous les chiffres. Le titre porte les mots recherchés. */}
-              <h2 className="mx-auto mt-8 md:mt-10 max-w-3xl text-center font-heading text-xl md:text-2xl font-semibold text-foreground text-balance">
-                {t("landing.families.title")}
-              </h2>
-              <p className="mx-auto mt-3 max-w-2xl text-center font-body text-sm md:text-base leading-relaxed text-muted-foreground">
-                {t("landing.hero.lede")}
-              </p>
-              <ul className="mt-5 md:mt-6 grid gap-4 md:grid-cols-3 md:gap-6">
-                {HOME_FAMILIES.map((family) => (
-                  <li key={family.key}>
-                    <Link
-                      to={family.to}
-                      onClick={() => { void trackEvent("home_family_clicked", { metadata: { family: family.key } }); }}
-                      className="flex h-full items-center gap-4 rounded-2xl border border-border/70 bg-card p-4 md:flex-col md:items-start md:gap-3 md:p-6 transition-shadow hover:shadow-md"
-                    >
-                      <img src={family.image} alt="" aria-hidden="true" width={320} height={320} loading="lazy" decoding="async" className="h-20 w-20 flex-none object-contain md:h-28 md:w-28" />
-                      <span className="flex flex-col gap-1">
-                        <span className="font-heading text-lg md:text-xl font-semibold text-foreground">{t(`landing.families.${family.key}_title`)}</span>
-                        <span className="font-body text-sm md:text-[15px] leading-relaxed text-muted-foreground">{t(`landing.families.${family.key}_text`)}</span>
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              {/* Lot HOME1 puis ES-HOME (16/11/2026) : les trois familles, une phrase,
+                  un chiffre vivant et un seul geste chacune ; remplace aussi « Comment ça marche ». */}
+              <HomeFamilies />
             </div>
          </section>
        )}
@@ -322,8 +292,6 @@ const Landing = () => {
       {/* ═══════════════ SOMMAIRE DE PAGE, maillage interne ═══════════════ */}
       <LandingTocBar />
 
-
-      <HowItWorksSection />
 
       <ServiceAfterServiceSection />
 

@@ -5,6 +5,7 @@ import {
 
 export interface SitemapMission {
   slug?: string | null;
+  title?: string | null;
   description?: string | null;
   status?: string | null;
   mission_type?: string | null;

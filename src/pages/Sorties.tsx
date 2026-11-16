@@ -5,7 +5,7 @@ import PageMeta from "@/components/PageMeta";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import EntraideSortiesTabs from "@/components/outings/EntraideSortiesTabs";
-import { HUB_SHELL, HUB_TABS, HubArticles, HubHeader, HubIdeas, HubSetting, HubSettings, HubSettingsLine, HubStat, HubWhy } from "@/components/outings/HubHeader";
+import { HUB_SHELL, HUB_TABS, HubArticles, HubBody, HubHeader, HubIdeas, HubSettingsLine, HubStat, HubWhy } from "@/components/outings/HubHeader";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import OutingCard from "@/components/outings/OutingCard";
 import { useAuth } from "@/contexts/AuthContext";
@@ -83,7 +83,6 @@ const Sorties = () => {
         {/* Lot ENT-MOB1 : fil d'Ariane visible à partir de 768 px, son JSON-LD reste servi partout. */}
         <div className="hidden md:block"><PageBreadcrumb items={[{ label: "Sorties" }]} /></div>
         <div className={HUB_TABS}><EntraideSortiesTabs active="sorties" /></div>
-        <HubWhy />
         {preview && (
           <p role="status" className="mt-3 rounded-xl bg-accent/40 px-4 py-3 text-sm">
             Aperçu réservé à l'équipe : la rubrique s'ouvre aux membres quand le réglage « sorties » est allumé.
@@ -98,26 +97,26 @@ const Sorties = () => {
               <Link to={proposeHref} onClick={() => trackEvent("outing_propose_clicked", { source: "sorties_tab" })}>{OUTING_COPY.propose}</Link>
             </Button>
           }
-          stat={loading || failed || upcoming === 0 ? null : <HubStat value={upcoming} label={upcoming === 1 ? "sortie à venir près de chez vous" : "sorties à venir près de chez vous"} mobileLabel={upcoming === 1 ? "sortie à venir" : "sorties à venir"} href="#sorties-liste" action="Les voir" />}
+          stat={loading || failed || upcoming === 0 ? null : <HubStat value={upcoming} label={upcoming === 1 ? "sortie à venir" : "sorties à venir"} href="#sorties-liste" />}
         >
-          {isAuthenticated && (
-            <HubSettings>
-              <HubSetting label="Ville" value={memberCity || "à renseigner"} action="Changer" to="/profile" />
-              <HubSetting label="Alertes sorties" value="autour de chez vous" action="Régler" to="/settings?section=alerts" />
-            </HubSettings>
-          )}
+          {/* Lot ES1 : une ligne à toutes les largeurs ; l'alerte sorties se règle dans Paramètres (ENT-MOB1). */}
           {isAuthenticated && (
             <HubSettingsLine summary={<>Autour de <b className="font-semibold">{memberCity || "chez vous"}</b></>} action="Changer" to="/profile" />
           )}
         </HubHeader>
-        <HubIdeas
-          id="sorties-ideas-title"
-          ideas={OUTING_CATEGORIES.slice(0, 6).map((c) => ({ key: c.value, label: c.label, image: c.art }))}
-          onPick={(idea) => pickIdea(idea.key)}
-        />
       </div>
 
-      <h2 id="sorties-liste" className="mt-2 scroll-mt-24 font-heading text-xl font-semibold text-foreground sm:text-2xl">Sorties à venir</h2>
+      <HubBody
+        after={
+          <HubIdeas
+            id="sorties-ideas-title"
+            ideas={OUTING_CATEGORIES.slice(0, 6).map((c) => ({ key: c.value, label: c.label, image: c.art }))}
+            onPick={(idea) => pickIdea(idea.key)}
+          />
+        }
+        list={
+      <div className="flex flex-col gap-4">
+      <h2 id="sorties-liste" className="scroll-mt-24 font-heading text-xl font-semibold text-foreground sm:text-2xl">Sorties à venir</h2>
 
       {usedCategories.length > 1 && (
         <div className="flex flex-wrap gap-2" role="group" aria-label="Activités">
@@ -168,14 +167,10 @@ const Sorties = () => {
           {far.map((o) => <OutingCard key={o.id} outing={o} />)}
         </section>
       )}
-      {/* Lot ENT-MOB1 : sous 768 px, idées et pourquoi viennent après la liste. */}
-      <HubIdeas
-        id="sorties-ideas-end-title"
-        placement="end"
-        ideas={OUTING_CATEGORIES.slice(0, 6).map((c) => ({ key: c.value, label: c.label, image: c.art }))}
-        onPick={(idea) => pickIdea(idea.key)}
+      </div>
+        }
       />
-      <HubWhy placement="end" />
+      <HubWhy />
       <HubArticles articles={HUB_ARTICLES.sorties} />
     </div>
   );
