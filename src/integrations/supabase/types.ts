@@ -32,6 +32,96 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_article_cadre_juridique_20261116: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_article_expat_20261017: {
         Row: {
           admin_notes: string | null
@@ -593,6 +683,96 @@ export type Database = {
           id?: string | null
           saved_at?: string | null
           slug?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_audit5_20261116: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -16585,6 +16765,39 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_action_log: {
+        Row: {
+          actor: string | null
+          after: Json | null
+          before: Json | null
+          created_at: string
+          id: string
+          kind: string
+          note: string | null
+          path: string
+        }
+        Insert: {
+          actor?: string | null
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          id?: string
+          kind: string
+          note?: string | null
+          path: string
+        }
+        Update: {
+          actor?: string | null
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          path?: string
+        }
+        Relationships: []
+      }
       seo_cache: {
         Row: {
           cache_key: string
@@ -16774,6 +16987,42 @@ export type Database = {
           sitter_count?: number
           slug?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      seo_gsc_snapshots: {
+        Row: {
+          clicks: number
+          created_at: string
+          impressions: number
+          key: string
+          kind: string
+          period_days: number
+          period_end: string
+          position: number | null
+          top_page: string | null
+        }
+        Insert: {
+          clicks?: number
+          created_at?: string
+          impressions?: number
+          key: string
+          kind: string
+          period_days?: number
+          period_end: string
+          position?: number | null
+          top_page?: string | null
+        }
+        Update: {
+          clicks?: number
+          created_at?: string
+          impressions?: number
+          key?: string
+          kind?: string
+          period_days?: number
+          period_end?: string
+          position?: number | null
+          top_page?: string | null
         }
         Relationships: []
       }
@@ -22165,6 +22414,7 @@ export type Database = {
         Args: { p_key: string; p_max: number; p_search: string }
         Returns: string
       }
+      trf3_signup_failure_code: { Args: { p_meta: Json }; Returns: string }
       trigger_indexnow_push: {
         Args: { _path: string; _source: string }
         Returns: undefined
