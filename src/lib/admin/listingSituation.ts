@@ -155,7 +155,7 @@ export function listingCity(l: { city?: string | null; owner?: { city?: string |
 
 /** Filtres de la page Annonces. Les anciens identifiants restent valides. */
 export const LISTING_FILTERS = [
-  "published", "recent", "to_staff", "awaiting_reply", "started_waiting", "ready", "preparing", "withdrawn", "draft", "closed", "hidden", "cancelled_only", "cancelled", "no_draft", "all",
+  "published", "recent", "waiting_long", "departure_soon", "to_staff", "awaiting_reply", "started_waiting", "ready", "preparing", "withdrawn", "draft", "closed", "hidden", "cancelled_only", "cancelled", "no_draft", "all",
 ] as const;
 export type ListingFilter = typeof LISTING_FILTERS[number];
 
@@ -163,6 +163,8 @@ export const LISTING_FILTER_LABELS: Record<ListingFilter, string> = {
   published: "Cherchent un gardien (par défaut)",
   recent: "Publiées depuis 7 jours",
   to_staff: "Sans candidature depuis 48 h",
+  waiting_long: "Candidats en attente depuis plus de 7 jours",
+  departure_soon: "Départ sous 14 jours, gardien à confirmer",
   awaiting_reply: "Candidatures sans réponse, garde à venir",
   started_waiting: "Commencées, candidats en attente",
   ready: "Brouillons prêts à publier",
@@ -193,6 +195,8 @@ export function listingFilterScope(f: ListingFilter): ListingQueryScope {
     case "published":
     case "to_staff":
     case "awaiting_reply":
+    case "waiting_long":
+    case "departure_soon":
     case "started_waiting": return { status: "published" };
     case "recent": return { publishedSinceDays: 7 };
     // Lot ADM3 : brouillons jamais retirés ; la complétude est jugée ensuite (draftReadiness).
