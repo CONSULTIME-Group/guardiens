@@ -576,7 +576,7 @@ const SitterProfile = () => {
 
       {/* Sticky save bar, desktop : ne s'affiche que si modifications en cours, et démarre après la sidebar (256px). */}
       <TooltipProvider delayDuration={200}>
-        <div className={`fixed left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border bottom-[var(--bottom-nav-h,0px)] md:bottom-0 md:left-64 before:pointer-events-none before:content-[''] before:absolute before:left-0 before:right-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-background before:to-transparent ${(!dirty && !saving && !saved) ? "md:hidden" : ""}`}>
+        <div className={`fixed left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border bottom-[calc(var(--bottom-nav-h,0px)+var(--cookie-banner-h,0px))] md:bottom-[var(--cookie-banner-h,0px)] md:left-64 before:pointer-events-none before:content-[''] before:absolute before:left-0 before:right-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-background before:to-transparent ${(!dirty && !saving && !saved) ? "md:hidden" : ""}`}>
           <ProfileProgressStrip
             completion={liveScore}
             nextIncomplete={(() => {

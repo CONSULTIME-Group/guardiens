@@ -946,7 +946,7 @@ function AlmaDockInner() {
         "left-3 right-3 md:left-auto md:right-6",
         // Mobile : au-dessus de la BottomNav (h-16 + safe-area) avec marge.
         // Desktop : simple marge basse (pas de BottomNav).
-        "bottom-[calc(env(safe-area-inset-bottom,0px)+5.5rem)] md:bottom-6",
+        "bottom-[calc(env(safe-area-inset-bottom,0px)+5.5rem+var(--cookie-banner-h,0px))] md:bottom-[calc(1.5rem+var(--cookie-banner-h,0px))]",
       )}
     >
       {expanded && (

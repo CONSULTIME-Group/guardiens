@@ -1973,7 +1973,7 @@ const SmallMissionDetail = () => {
     </div>
       {/* Barre basse mobile (lot E18) : le même geste « Je peux », qui ouvre la fenêtre. */}
       {!isAuthor && mission.status === "open" && canApplyMissions && !hasResponded && (
-        <div className="lg:hidden fixed bottom-[var(--bottom-nav-h,0px)] md:bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]" data-testid="mission-sticky-bar">
+        <div className="lg:hidden fixed bottom-[calc(var(--bottom-nav-h,0px)+var(--cookie-banner-h,0px))] md:bottom-[var(--cookie-banner-h,0px)] left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-8px_24px_-12px_hsl(var(--foreground)/0.15)]" data-testid="mission-sticky-bar">
           {responsesCapReached ? (
             <p className="text-sm text-center text-muted-foreground leading-relaxed">
               Besoin complet pour l'instant. {responsesCapMessage}

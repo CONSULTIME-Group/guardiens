@@ -286,7 +286,7 @@ export default function ApplicationDetail() {
       </main>
 
       {open && (
-        <footer className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur" data-testid="application-actions">
+        <footer className="fixed inset-x-0 bottom-[var(--cookie-banner-h,0px)] z-40 border-t border-border bg-background/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur" data-testid="application-actions">
           <div className="mx-auto w-full max-w-[640px]">
             <button
               type="button"
@@ -317,7 +317,7 @@ export default function ApplicationDetail() {
       )}
 
       {app!.status === "accepted" && (
-        <footer className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur">
+        <footer className="fixed inset-x-0 bottom-[var(--cookie-banner-h,0px)] z-40 border-t border-border bg-background/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur">
           <div className="mx-auto w-full max-w-[640px]">
             <button
               type="button"

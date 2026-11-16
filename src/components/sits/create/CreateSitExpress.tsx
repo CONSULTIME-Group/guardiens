@@ -195,7 +195,7 @@ const CreateSitExpress = (p: CreateSitExpressProps) => {
         </section>
       </main>
 
-      <footer className="fixed inset-x-0 bottom-[var(--bottom-nav-h,0px)] z-40 md:bottom-0 border-t border-border bg-background/95 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur">
+      <footer className="fixed inset-x-0 bottom-[calc(var(--bottom-nav-h,0px)+var(--cookie-banner-h,0px))] z-40 md:bottom-[var(--cookie-banner-h,0px)] border-t border-border bg-background/95 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur">
         <div className="mx-auto w-full max-w-[640px]">
           {footerBlockers.length > 0 && (
             <ul className="mb-2 space-y-0.5 text-[13.5px] text-muted-foreground" data-testid="express-blockers">

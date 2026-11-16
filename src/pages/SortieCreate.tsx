@@ -285,7 +285,7 @@ const SortieCreate = () => {
         )}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card px-5 py-3">
+      <div className="fixed inset-x-0 bottom-[var(--cookie-banner-h,0px)] z-30 border-t border-border bg-card px-5 py-3">
         <Button type="submit" size="lg" disabled={submitting} className="mx-auto flex h-[52px] w-full max-w-2xl rounded-2xl text-base">
           {submitting ? "Enregistrement…" : editing ? "Enregistrer" : "Publier ma sortie"}
         </Button>
