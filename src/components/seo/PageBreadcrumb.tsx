@@ -61,7 +61,7 @@ const PageBreadcrumb = ({ items }: PageBreadcrumbProps) => {
   return (
     <>
       <Head>
-        <script type="application/ld+json">{JSON.stringify(schema)}</script>
+        <script type="application/ld+json" data-head-key="breadcrumb">{JSON.stringify(schema)}</script>
       </Head>
 
       <nav

@@ -87,6 +87,17 @@ const Head = ({ children }: { children: ReactNode }) => {
         el.setAttribute(k === "className" ? "class" : k, v);
       }
       if (tag.kind === "script") el.textContent = tag.text;
+      // Lot ES4 (16/11/2026) : un balisage JSON-LD déjà présent dans <head> (copie
+      // figée, second montage) est retiré avant d'être réécrit ; une clé data-head-key
+      // garde un seul exemplaire d'une notion (fil d'Ariane), quel que soit son texte.
+      if (tag.kind === "script" && tag.attrs.type === "application/ld+json") {
+        const key = tag.attrs["data-head-key"];
+        document.head.querySelectorAll('script[type="application/ld+json"]').forEach((existing) => {
+          if (created.includes(existing)) return;
+          const sameKey = key && existing.getAttribute("data-head-key") === key;
+          if (sameKey || existing.textContent === tag.text) existing.remove();
+        });
+      }
       el.setAttribute("data-head", marker);
       document.head.appendChild(el);
       created.push(el);
