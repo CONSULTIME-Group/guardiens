@@ -28,6 +28,7 @@ import ArticleCoverFallback from "@/components/news/ArticleCoverFallback";
 import { resolveAuthors } from "@/data/authors";
 import { trackEvent } from "@/lib/analytics";
 import { useContentStats } from "@/hooks/useContentStats";
+import { findCitySlug } from "@/lib/articleCityLookup";
 import { SITTER_PRICE_NUMERIC, SITTER_PRICE_CURRENCY, SITTER_PRICE_START_ISO } from "@/lib/pricing";
 import { withOrganizationGraph } from "@/lib/seo/organizationNode";
 
@@ -434,25 +435,16 @@ export default function ArticleDetail() {
  // Cross-link: city guide
  if (art.city) {
  try {
- const { data: guide } = await supabase
-.from("city_guides")
-.select("slug")
-.eq("published", true)
-.ilike("city", `%${art.city}%`)
-.maybeSingle();
- if (guide) commit(() => setCityGuideSlug((guide as any).slug));
+ // Ville exacte d'abord, puis recherche partielle bornée (findCitySlug) :
+ // « Lyon » ne doit pas tomber sur « Monts du Lyonnais », ni en erreur.
+ const guideSlug = await findCitySlug(supabase, "city_guides", art.city);
+ if (guideSlug) commit(() => setCityGuideSlug(guideSlug));
 
- const { data: cp } = await supabase
-.from("seo_city_pages")
-.select("slug")
-.eq("published", true)
-.not("slug", "like", "test-%")
-.ilike("city", `%${art.city}%`)
-.maybeSingle();
+ const pageSlug = await findCitySlug(supabase, "seo_city_pages", art.city);
  // Slug et fin de recherche dans la même mise à jour : au rendu suivant,
  // useContentStats part déjà sur la portée ville (isLoading vrai).
  commit(() => {
-   if (cp) setCityPageSlug((cp as any).slug);
+   if (pageSlug) setCityPageSlug(pageSlug);
    setCityLookupDone(true);
  });
  } catch {

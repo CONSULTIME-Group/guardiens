@@ -30,16 +30,23 @@ const state = vi.hoisted(() => ({
 vi.mock("@/integrations/supabase/client", () => {
   const builder = (table: string) => {
     const b: Record<string, unknown> = {};
-    for (const m of ["select", "eq", "neq", "in", "not", "ilike", "contains", "limit", "order"]) {
+    let pattern = "";
+    for (const m of ["select", "eq", "neq", "in", "not", "contains", "limit", "order"]) {
       b[m] = () => b;
     }
+    b.ilike = (_col: string, value: string) => { pattern = value; return b; };
     b.maybeSingle = () => {
       if (table === "articles") return Promise.resolve({ data: state.article, error: null });
-      if (table === "seo_city_pages") return state.cityPage!.promise;
       return Promise.resolve({ data: null, error: null });
     };
-    b.then = (onFulfilled: (v: unknown) => unknown, onRejected?: (e: unknown) => unknown) =>
-      Promise.resolve({ data: [], error: null }).then(onFulfilled, onRejected);
+    b.then = (onFulfilled: (v: unknown) => unknown, onRejected?: (e: unknown) => unknown) => {
+      // Recherche exacte de la page ville : réponse tenue par le test.
+      // Recherche partielle (%…%) : aucune ligne.
+      const res = table === "seo_city_pages" && !pattern.startsWith("%")
+        ? state.cityPage!.promise
+        : Promise.resolve({ data: [], error: null });
+      return res.then(onFulfilled, onRejected);
+    };
     return b;
   };
   return {
@@ -116,7 +123,7 @@ describe("STAT1, ArticleDetail : prerenderReady attend la portée ville", () => 
     expect(state.readyLog.every((r) => r === false)).toBe(true);
 
     // seo_city_pages répond : la portée ville part, ready reste faux.
-    await act(async () => { state.cityPage!.resolve({ data: { slug: "lyon" }, error: null }); });
+    await act(async () => { state.cityPage!.resolve({ data: [{ slug: "lyon", city: "Lyon" }], error: null }); });
     await act(async () => { await new Promise((r) => setTimeout(r, 30)); });
     expect(state.readyLog.every((r) => r === false)).toBe(true);
 
@@ -136,7 +143,7 @@ describe("STAT1, ArticleDetail : prerenderReady attend la portée ville", () => 
     await act(async () => { await new Promise((r) => setTimeout(r, 30)); });
     expect(state.readyLog.every((r) => r === false)).toBe(true);
 
-    await act(async () => { state.cityPage!.resolve({ data: null, error: null }); });
+    await act(async () => { state.cityPage!.resolve({ data: [], error: null }); });
     await waitFor(() => expect(state.readyLog.at(-1)).toBe(true));
   });
 
