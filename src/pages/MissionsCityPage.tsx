@@ -15,6 +15,7 @@ import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { MISSIONS_CITIES } from "@/data/missionsCityContent";
 import { sortHelpers } from "@/lib/helperDisplay";
 import { ENTRAIDE_ACTIVITY_VIEW, isEntraideCityIndexable } from "@/lib/entraideCityIndexability";
+import { visibleToPublic } from "../../supabase/functions/_shared/missionSensitivity.js";
 
 /**
  * Lot SEO-E : douze personnes au plus dans le HTML servi (Lyon en servait 80),
@@ -96,7 +97,7 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
       const [cityIndexable, profiles, needsResult, helpersResult, countsResult] = await Promise.all([
         fetchCityIndexable(c.slug).catch(() => true),
         fetchAvailableProfiles(),
-        supabase.from("public_small_missions").select("id, slug, title, city, date_needed, end_date, latitude, longitude, photos, sit_mode").eq("status", "open").eq("mission_type", "besoin").order("created_at", { ascending: false }),
+        supabase.from("public_small_missions").select("id, slug, title, description, city, date_needed, end_date, latitude, longitude, photos, sit_mode").eq("status", "open").eq("mission_type", "besoin").order("created_at", { ascending: false }),
         supabase.from("public_helpers").select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, helps_with, competences, last_active_on"),
         supabase.from("public_mission_response_counts").select("mission_id, response_count"),
       ]);
@@ -109,7 +110,9 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
       const localNeeds = (needsResult.data || [])
         .filter((row) => {
           const date = row.end_date || row.date_needed;
+          // Lot ES-S : page publique et indexée, un besoin qui dit une détresse personnelle n'y figure pas.
           return (!date || new Date(date) >= today)
+            && visibleToPublic(row, false)
             && isInsideRadius(c.coordinates, c.radiusKm, row.latitude, row.longitude);
         })
         .map((row) => ({ ...row, response_count: counts.get(row.id) || 0 })) as EntraideNeed[];

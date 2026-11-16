@@ -47,6 +47,7 @@ import EntraideSortiesTabs from "@/components/outings/EntraideSortiesTabs";
 import { useOutingsEnabled } from "@/hooks/useOutingsEnabled";
 import { HUB_SHELL, HUB_TABS, HubArticles, HubHeader, HubSetting, HubSettings, HubSettingsLine, HubStat, HubWhy } from "@/components/outings/HubHeader";
 import { ALERT_SETTINGS_PATH, useMutualAidRadiusKm } from "@/components/entraide/MutualAidRadiusLine";
+import { visibleToPublic } from "../../supabase/functions/_shared/missionSensitivity.js";
 
 const EntraideMap = lazy(() => import("@/components/entraide/EntraideMap"), "EntraideMap");
 
@@ -245,8 +246,12 @@ const EntraideHub = () => {
   const helperDistance = useCallback((helper: PublicHelper) => distanceFrom(origin, helper.latitude_approx, helper.longitude_approx), [origin]);
 
   const sortedNeeds = useMemo(
-    () => (origin ? sortByDistance(needs, needDistance) : needs),
-    [needs, origin, needDistance],
+    () => {
+      // Lot ES-S : un besoin qui dit une détresse personnelle reste entre membres connectés.
+      const shown = needs.filter((need) => visibleToPublic(need, isAuthenticated));
+      return origin ? sortByDistance(shown, needDistance) : shown;
+    },
+    [needs, origin, needDistance, isAuthenticated],
   );
   const sortedHelpers = useMemo(
     () => {

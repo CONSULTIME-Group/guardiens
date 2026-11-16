@@ -1,5 +1,9 @@
+import { isSensitiveMissionText } from "./missionSensitivity.js";
+
 export function isIndexableEntraideMission(mission, now = new Date()) {
   if (mission.status !== "open" || !mission.slug || (mission.description?.trim().length ?? 0) < 200) return false;
+  // Lot ES-S : un besoin qui dit une détresse personnelle n'est jamais indexé.
+  if (isSensitiveMissionText(mission.title, mission.description)) return false;
   if (mission.mission_type === "offre") return true;
   const deadline = mission.end_date || mission.date_needed;
   return !deadline || new Date(deadline).getTime() >= now.getTime();
