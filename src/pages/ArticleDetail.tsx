@@ -323,6 +323,12 @@ export default function ArticleDetail() {
  const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
   const [cityGuideSlug, setCityGuideSlug] = useState<string | null>(null);
   const [cityPageSlug, setCityPageSlug] = useState<string | null>(null);
+  // Lot STAT1 : vrai quand la portée ville est connue (article sans ville, ou
+  // lecture de seo_city_pages répondue, page trouvée ou non, ou en échec).
+  // Tant qu'elle est fausse, PageMeta garde prerenderReady à false : sinon
+  // Prerender figeait l'article avec les seules clés globales et retirait les
+  // clés ville (« Aujourd'hui,  gardiens sont inscrits »).
+  const [cityLookupDone, setCityLookupDone] = useState(false);
 
   // Variables dynamiques de contenu (placeholders {{...}}). Le scope ville
   // n'est demandé que si l'article est rattaché à une page ville publiée.
@@ -334,7 +340,7 @@ export default function ArticleDetail() {
   let cancelled = false;
   const commit = (update: () => void) => { if (!cancelled) update(); };
   setLoading(true); setLoadFailed(false); setArticle(null); setCanonicalRedirect(null);
-  setRelatedArticles([]); setCityGuideSlug(null); setCityPageSlug(null);
+  setRelatedArticles([]); setCityGuideSlug(null); setCityPageSlug(null); setCityLookupDone(false);
   if (!slug) { setLoading(false); return; }
   const fetchAll = async () => {
     // 1) Vérifier la table redirects (source de vérité unique).
@@ -371,6 +377,7 @@ export default function ArticleDetail() {
  commit(() => setLoading(false));
 
  if (!art) return;
+ if (!art.city) commit(() => setCityLookupDone(true));
 
       // Hub & spoke maillage interne :
       // 1) liens sortants déclarés dans internal_links pointant vers /actualites/*
@@ -426,6 +433,7 @@ export default function ArticleDetail() {
 
  // Cross-link: city guide
  if (art.city) {
+ try {
  const { data: guide } = await supabase
 .from("city_guides")
 .select("slug")
@@ -441,7 +449,16 @@ export default function ArticleDetail() {
 .not("slug", "like", "test-%")
 .ilike("city", `%${art.city}%`)
 .maybeSingle();
- if (cp) commit(() => setCityPageSlug((cp as any).slug));
+ // Slug et fin de recherche dans la même mise à jour : au rendu suivant,
+ // useContentStats part déjà sur la portée ville (isLoading vrai).
+ commit(() => {
+   if (cp) setCityPageSlug((cp as any).slug);
+   setCityLookupDone(true);
+ });
+ } catch {
+ // Lecture de la ville en échec : l'article reste lisible, portée globale.
+ commit(() => setCityLookupDone(true));
+ }
  }
  };
   void fetchAll().catch(() => { commit(() => setLoadFailed(true)); commit(() => setLoading(false)); });
@@ -561,7 +578,7 @@ export default function ArticleDetail() {
     author={article.author_name}
     noindex={article.noindex === true}
     canonical={article.canonical_url || undefined}
-    ready={!contentStatsLoading}
+    ready={cityLookupDone && !contentStatsLoading}
     extraMeta={isGuide && article.hero_image_alt ? [
       { attr: "property", key: "og:image:alt", content: article.hero_image_alt },
       { attr: "name", key: "twitter:image:alt", content: article.hero_image_alt },
