@@ -1029,6 +1029,24 @@
           "sql": "SELECT position('seob_arrivees' IN pg_get_functiondef('public.admin_landing_outcomes(date,date,text)'::regprocedure)) > 0 AS ok"
         }
       ]
+    },
+    {
+      "migration": "0175_stat1_chiffres_dynamiques.sql",
+      "description": "get_content_stats : cinq clés globales d'avis, de gardes terminées et d'accords de garde, droits inchangés (anon compris)",
+      "checks": [
+        {
+          "name": "repere",
+          "sql": "SELECT position('stat1_chiffres_dynamiques' IN pg_get_functiondef('public.get_content_stats(text,text)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "cinq_cles",
+          "sql": "SELECT public.get_content_stats() ?& ARRAY['avis_publies','note_moyenne_avis','gardes_terminees','accords_acceptes','gardes_avec_accord'] AS ok"
+        },
+        {
+          "name": "droits_conserves",
+          "sql": "SELECT p.prosecdef AND has_function_privilege('anon', p.oid, 'EXECUTE') AND has_function_privilege('authenticated', p.oid, 'EXECUTE') AND has_function_privilege('service_role', p.oid, 'EXECUTE') AS ok FROM pg_proc p WHERE p.oid = 'public.get_content_stats(text,text)'::regprocedure"
+        }
+      ]
     }
   ]
 }

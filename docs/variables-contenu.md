@@ -44,6 +44,11 @@ Les nombres sont affichés au format français avec séparateur de milliers
 | `breed_profiles` | Fiches races |
 | `villes_couvertes` | Pages villes publiées et indexables |
 | `departements_couverts` | Pages départements publiées et indexables |
+| `avis_publies` | Avis publiés (avis d'annulation exclus) |
+| `note_moyenne_avis` | Note moyenne de ces avis, au dixième (affichée « 5 » ou « 4,8 ») |
+| `gardes_terminees` | Gardes non annulées, avec un gardien accepté, terminées avant aujourd'hui |
+| `accords_acceptes` | Accords de garde acceptés (un par signataire) |
+| `gardes_avec_accord` | Gardes portant au moins un accord de garde accepté |
 
 ## Clés ville (pages villes, ou article rattaché à une ville couverte)
 
