@@ -1,5 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
+import { withCronRunLog } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,7 +19,7 @@ interface Threshold {
 
 interface Breach { metric: string; value: number; threshold: number; detail?: string }
 
-Deno.serve(async (req) => {
+Deno.serve(withCronRunLog("email-delivery-daily", async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   const denied = await requireCronCaller(req, corsHeaders, "email-delivery-daily");
   if (denied) return denied;
@@ -175,4 +176,4 @@ Deno.serve(async (req) => {
     snapshot: { snapshotDate, window_days: t.window_days, sent, delivered, opened, clicked, bounced, complained, bounce_rate, open_rate, click_rate, complaint_rate, defer_markers_excluded: deferMarkers },
     breaches, alert_sent: alertSent,
   }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-})
+}));

@@ -9,6 +9,7 @@
  * - Sticky apply bar + ApplicationModal
  * - Bouton "Annuler ma participation" si gardien candidat sur garde confirmée
  */
+import { applicationReceiptLine } from "@/lib/applicationReceipt";
 import OwnerResponsePendingNote from "@/components/sits/OwnerResponsePendingNote";
 import { calendarDate, daysBetween } from "@/lib/calendarDate";
 import { useState, useEffect } from "react";
@@ -69,6 +70,8 @@ interface SitterSitViewProps {
   /** Lot X3a (B-03) : statut de la candidature du visiteur, null sans candidature. */
   myApplicationStatus?: string | null;
   setMyApplicationStatus?: (s: string | null) => void;
+  /** Lot CAND1 : arrivée et ouverture de la candidature, null avant lecture. */
+  myApplicationTimes?: { createdAt: string | null; viewedAt: string | null } | null;
   hasReviewedThisSit: boolean;
   sitterProfile: any;
   currentUserId: string;
@@ -90,6 +93,7 @@ const SitterSitView = ({
   setHasApplied,
   myApplicationStatus = null,
   setMyApplicationStatus = () => {},
+  myApplicationTimes = null,
   hasReviewedThisSit,
   sitterProfile,
   currentUserId,
@@ -99,6 +103,13 @@ const SitterSitView = ({
   // ne concernent que le gardien retenu ; un candidat non retenu lit que le
   // propriétaire a choisi un autre gardien.
   const presence = sitterPresenceOnSit(sit.status, myApplicationStatus);
+  // Lot CAND1 : accusé de réception lu sous « Candidature envoyée ».
+  const receiptLine = applicationReceiptLine({
+    ownerFirstName: owner?.first_name,
+    createdAt: myApplicationTimes?.createdAt,
+    viewedAt: myApplicationTimes?.viewedAt,
+    status: myApplicationStatus,
+  });
   const isChosenSitter = presence === "chosen";
   const { t } = useTranslation();
   // Lecture directe du profil, supprime les props `userRole`/`userFirstName`
@@ -439,6 +450,9 @@ const SitterSitView = ({
                     {/* Lot NOTIF1 : la réponse du propriétaire arrive sur ce téléphone. */}
                     {/* Lot REL1 : mention lue par le seul candidat (option B). */}
                     <OwnerResponsePendingNote sitId={sit.id} applicationStatus={myApplicationStatus} className="text-left" />
+                    {receiptLine && (
+                      <p className="text-sm text-muted-foreground" data-testid="application-receipt-line">{receiptLine}</p>
+                    )}
                     <PushMomentOffer moment="application_sent" className="text-left md:max-w-md" />
                   </div>
                 ) : !canApplyGuards ? (

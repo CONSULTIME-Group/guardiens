@@ -2,13 +2,14 @@
 // Triggered by pg_cron every day at 08:00 Europe/Paris (06:00 UTC in winter, 05:00 UTC in summer — we use 07:00 UTC as a stable compromise).
 
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
+import { withCronRunLog } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-Deno.serve(async (req) => {
+Deno.serve(withCronRunLog("send-analysis-requests-digest", async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   // Auth guard: only accept the service-role key (used by pg_cron via pg_net).
@@ -92,4 +93,4 @@ Deno.serve(async (req) => {
     status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
-});
+}));

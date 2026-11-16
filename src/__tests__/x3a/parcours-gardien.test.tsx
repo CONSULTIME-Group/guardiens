@@ -173,7 +173,7 @@ describe("X3a, B-03 : candidat non retenu sur une garde confirmée", () => {
     expect(src).toMatch(/const canSitterCancel =\s+!isPast &&\s+isChosenSitter &&/);
     expect(src).toContain('otherSitterChosen={presence === "other_chosen"}');
     const page = read("src/pages/SitDetail.tsx");
-    expect(page).toContain('.select("id, status")');
+    expect(page).toContain('.select("id, status, created_at, viewed_at")');
     expect(page).toContain("myApplicationStatus={myApplicationStatus}");
   });
 });

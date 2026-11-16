@@ -6,6 +6,7 @@
 // d'envoi existante (send-transactional-email).
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+import { withCronRunLog } from "../_shared/cron-run-log.ts";
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -21,7 +22,7 @@ const isServiceRoleRequest = (req: Request): boolean => {
   return Boolean(SERVICE_ROLE) && token === SERVICE_ROLE
 }
 
-Deno.serve(async (req) => {
+Deno.serve(withCronRunLog("alert-content-quality", async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   if (!isServiceRoleRequest(req)) {
@@ -159,4 +160,4 @@ Deno.serve(async (req) => {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
-})
+}));
