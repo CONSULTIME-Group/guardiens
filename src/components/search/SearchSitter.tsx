@@ -2939,7 +2939,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
        piloté par ChromeVisibility et le masquer toucherait un comportement
        partagé aux autres pages. */}
    {isMobile && tab === "sits" && availableSitsCount > 0 && (
-    <div className={`fixed left-1/2 -translate-x-1/2 z-[1200] sm:hidden ${viewMode === "map" ? "bottom-[calc(var(--bottom-nav-h,0px)+9.5rem+env(safe-area-inset-bottom))]" : "bottom-[calc(var(--bottom-nav-h,0px)+14px+env(safe-area-inset-bottom))]"}`}>
+    <div className={`fixed left-1/2 -translate-x-1/2 z-[1200] sm:hidden ${viewMode === "map" ? "bottom-[calc(var(--bottom-nav-h,0px)+var(--cookie-banner-h,0px)+9.5rem+env(safe-area-inset-bottom))]" : "bottom-[calc(var(--bottom-nav-h,0px)+var(--cookie-banner-h,0px)+14px+env(safe-area-inset-bottom))]"}`}>
       <button
         onClick={() => setViewMode(viewMode === "list" ? "map" : "list")}
         className="inline-flex items-center gap-2 rounded-full bg-foreground text-background shadow-xl px-5 py-3 text-sm font-semibold transition-transform active:scale-95"

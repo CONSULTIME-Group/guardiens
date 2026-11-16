@@ -338,6 +338,13 @@
     overflow-x: clip;
   }
 
+  /* Lot BAS1 (16/11/2026) : tant que le bandeau cookies est ouvert, le bas de
+     chaque page peut défiler au dessus de lui (variable posée par le bandeau,
+     0px une fois fermé, donc aucun changement sans bandeau). */
+  #root {
+    padding-bottom: var(--cookie-banner-h, 0px);
+  }
+
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
   }

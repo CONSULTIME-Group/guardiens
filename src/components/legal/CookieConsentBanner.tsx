@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -31,6 +31,14 @@ export const COOKIE_BANNER_TEXT = {
   regionLabel: "Cookies",
 } as const;
 
+/**
+ * Lot BAS1 (16/11/2026) : hauteur réelle du bandeau ouvert, publiée sur
+ * <html> pour que les éléments fixés en bas d'écran (bouton « Carte », barres
+ * de candidature, barre de navigation basse) et le bas des pages se placent
+ * au dessus de lui. Vaut 0px dès que le bandeau est fermé ou démonté.
+ */
+export const COOKIE_BANNER_HEIGHT_VAR = "--cookie-banner-h";
+
 /** Trois boutons de même poids : 44 px, même contour, texte sur une ligne à 360 px. */
 const COMPACT_BUTTON = "h-11 w-full whitespace-nowrap rounded-full px-1 text-[13px] font-medium";
 
@@ -45,6 +53,29 @@ export function CookieConsentBanner() {
   const [analytics, setAnalytics] = useState(false);
   const [ads, setAds] = useState(false);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const bannerRef = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    const el = bannerRef.current;
+    if (!open || !el) {
+      root.style.setProperty(COOKIE_BANNER_HEIGHT_VAR, "0px");
+      return;
+    }
+    const apply = () => {
+      root.style.setProperty(COOKIE_BANNER_HEIGHT_VAR, `${Math.round(el.getBoundingClientRect().height)}px`);
+    };
+    apply();
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(apply) : null;
+    ro?.observe(el);
+    window.addEventListener("resize", apply);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", apply);
+      root.style.setProperty(COOKIE_BANNER_HEIGHT_VAR, "0px");
+    };
+  }, [open, customizing]);
 
   useEffect(() => {
     setOpen(shouldShowBanner());
@@ -77,11 +108,12 @@ export function CookieConsentBanner() {
   if (!customizing) {
     return (
       <section
+        ref={bannerRef}
         role="region"
         aria-label={t.regionLabel}
         data-testid="cookie-banner"
         data-compact="true"
-        className="fixed inset-x-0 bottom-0 z-[60] px-3 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] animate-fade-in"
+        className="fixed inset-x-0 bottom-0 z-[1300] px-3 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] animate-fade-in"
       >
         <div className="mx-auto flex max-w-3xl flex-col gap-1.5 rounded-2xl border border-border bg-card p-2.5 text-card-foreground shadow-lg">
           <p className="text-[13px] leading-[18px] text-muted-foreground font-body">
@@ -108,10 +140,11 @@ export function CookieConsentBanner() {
 
   return (
     <section
+      ref={bannerRef}
       role="region"
       aria-labelledby="cookie-banner-title"
       data-testid="cookie-banner"
-      className="fixed inset-x-0 bottom-0 z-[60] max-h-[100dvh] overflow-y-auto p-3 sm:p-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] animate-fade-in"
+      className="fixed inset-x-0 bottom-0 z-[1300] max-h-[100dvh] overflow-y-auto p-3 sm:p-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] animate-fade-in"
     >
       <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-card text-card-foreground shadow-lg p-4 sm:p-5">
         <h2
