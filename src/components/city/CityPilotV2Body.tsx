@@ -18,6 +18,7 @@ import { trackEvent } from "@/lib/analytics";
 import { departmentIn } from "@/lib/departmentGrammar";
 import { wikimediaThumb } from "@/lib/wikimediaThumb";
 import { LEGAL_HOME_OWNER_ARTICLE_SLUG } from "@/components/articles/ArticleRenderer";
+import { cityAt, cityOf } from "@/lib/cityGrammar";
 import { pilotProofLine, type PilotGuide } from "@/data/cityPilotV2";
 
 /**
@@ -145,7 +146,7 @@ const CityPilotV2Body = ({ page, intro, guide, faq, editorial, cover, department
       {/* Étapes */}
       <section className="max-w-5xl mx-auto px-4 py-10 border-t border-border" data-testid="city-v2-steps">
         <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-6">
-          Comment se passe une garde à {page.city}
+          Comment se passe une garde {cityAt(page.city)}
         </h2>
         <ol className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
           {STEPS.map((s, i) => (
@@ -216,7 +217,7 @@ const CityPilotV2Body = ({ page, intro, guide, faq, editorial, cover, department
       <section className="max-w-5xl mx-auto px-4 py-8 border-t border-border" data-testid="city-v2-links">
         <h2 className="font-heading text-2xl font-bold text-foreground mb-4">Pour aller plus loin</h2>
         <div className="grid gap-3 sm:grid-cols-2">
-          <LinkCard to={`/recherche-gardiens?ville=${encodeURIComponent(page.city)}`} icon={Search} title={`Les gardiens autour de ${page.city}`} text="Profils, avis et rayon d'intervention" />
+          <LinkCard to={`/recherche-gardiens?ville=${encodeURIComponent(page.city)}`} icon={Search} title={`Les gardiens autour ${cityOf(page.city)}`} text="Profils, avis et rayon d'intervention" />
           {departmentPage && (
             <LinkCard to={`/departement/${departmentPage.slug}`} icon={Building2} title={`House-sitting ${departmentIn(departmentPage.department)}`} text="Toutes les villes du département" />
           )}
@@ -233,7 +234,7 @@ const CityPilotV2Body = ({ page, intro, guide, faq, editorial, cover, department
       {/* FAQ unique */}
       <section className="max-w-5xl mx-auto px-4 py-10 border-t border-border" data-testid="city-v2-faq">
         <h2 className="font-heading text-2xl font-bold text-foreground mb-6">
-          Questions fréquentes sur le home sitting à {page.city}
+          Questions fréquentes sur le home sitting {cityAt(page.city)}
         </h2>
         <Accordion type="single" collapsible className="w-full">
           {faq.map((f, i) => (
@@ -253,7 +254,7 @@ const CityPilotV2Body = ({ page, intro, guide, faq, editorial, cover, department
       {/* Appel final */}
       <section className="max-w-5xl mx-auto px-4 py-14 text-center">
         <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-3">
-          Vous partez bientôt de {page.city} ?
+          Vous partez bientôt {cityOf(page.city)} ?
         </h2>
         <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
           Décrivez votre logement, vos animaux et vos dates : votre annonce part aux gardiens proches de chez vous.
