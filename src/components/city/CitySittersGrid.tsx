@@ -9,6 +9,7 @@ import { avatarImageUrl } from "@/lib/storageImage";
 import { postalMatchesDepartment } from "@/lib/postalDepartment";
 import { publicFirstName } from "@/lib/displayName";
 import { pickNearbySitters, buildCityIlikeOrFilter } from "@/lib/cityProximity";
+import { cityAt, cityOf } from "@/lib/cityGrammar";
 import aquarelleBonjour from "@/assets/aquarelles/arrivee-bonjour-360.webp";
 
 interface Props {
@@ -197,16 +198,16 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
       <div className="mb-8">
         <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-2">
           {hasResidents
-            ? `Gardiens inscrits à ${city}`
+            ? `Gardiens inscrits ${cityAt(city)}`
             : nearby.length > 0
-              ? `Gardiens qui interviennent à ${city}`
-              : `Soyez le premier gardien à ${city}`}
+              ? `Gardiens qui interviennent ${cityAt(city)}`
+              : `Soyez le premier gardien ${cityAt(city)}`}
         </h2>
         <p className="text-muted-foreground">
           {hasResidents
             ? "Profils publics. L'écusson « Identité vérifiée » apparaît sur les profils dont la pièce d'identité a été validée."
             : nearby.length > 0
-              ? `Ces gardiens n'habitent pas ${city} mais leur rayon d'intervention la couvre.`
+              ? `Leur rayon d'intervention couvre ${city}.`
               : "Le réseau se construit. Rejoignez les premiers gardiens, Guardiens est gratuit."}
         </p>
       </div>
@@ -240,8 +241,8 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
                     src={avatarImageUrl(s.avatar_url, 64)}
                     alt={
                       isNearby
-                        ? `${displayName}, gardien qui intervient à ${city}`
-                        : `${displayName} gardien à ${city}`
+                        ? `${displayName}, gardien qui intervient ${cityAt(city)}`
+                        : `${displayName} gardien ${cityAt(city)}`
                     }
                     className="w-full h-full object-cover"
                     loading="lazy"
@@ -283,10 +284,10 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
             <ShieldCheck className="h-6 w-6 text-primary shrink-0" />
             <p className="text-sm text-foreground">
               {hasResidents
-                ? `Échangez avec un gardien de ${city}.`
+                ? `Échangez avec un gardien ${cityOf(city)}.`
                 : nearby.length > 0
-                  ? `Échangez avec un gardien qui intervient à ${city}.`
-                  : `Devenez gardien à ${city} et accédez aux annonces près de chez vous.`}
+                  ? `Échangez avec un gardien qui intervient ${cityAt(city)}.`
+                  : `Devenez gardien ${cityAt(city)} et accédez aux annonces près de chez vous.`}
             </p>
           </div>
           <div className="flex gap-2 shrink-0">

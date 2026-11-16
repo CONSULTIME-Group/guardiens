@@ -10,6 +10,8 @@
  * La FAQ visible et le JSON-LD FAQPage lisent la même liste.
  */
 
+import { cityAt, cityOf } from "@/lib/cityGrammar";
+
 export interface PilotGuideSource {
   label: string;
   url: string;
@@ -368,12 +370,12 @@ export interface ResolvedCityV2 {
 export function resolveCityV2(slug: string, city: string, dbIntro?: string | null): ResolvedCityV2 {
   const local = CITY_PILOT_V2[slug] ?? null;
   const intro = sentences(dbIntro ?? "");
-  const fallback = `Sur Guardiens, vous publiez votre garde à ${city} et les gardiens proches de chez vous postulent.`;
+  const fallback = `Sur Guardiens, vous publiez votre garde ${cityAt(city)} et les gardiens proches de chez vous postulent.`;
   const cityLine = local?.cityLine ?? intro[0] ?? fallback;
   const rest = local?.cityLine ? intro : intro.slice(1);
   const localFaq =
     local?.localFaq ??
-    (local?.walkAnswer ? [{ q: `Où promener un chien à ${city} ?`, a: local.walkAnswer }] : []);
+    (local?.walkAnswer ? [{ q: `Où promener un chien ${cityAt(city)} ?`, a: local.walkAnswer }] : []);
   return {
     cityLine,
     introRest: rest.length ? rest.join(" ") : null,
@@ -384,8 +386,8 @@ export function resolveCityV2(slug: string, city: string, dbIntro?: string | nul
 
 /** Ouverture commune du gabarit v2 : « home sitting » dans la première phrase. */
 export function pilotIntro(city: string, v2: { cityLine?: string }): string {
-  const line = v2.cityLine ?? `Sur Guardiens, vous publiez votre garde à ${city} et les gardiens proches de chez vous postulent.`;
-  return `Le home sitting à ${city}, c'est confier sa maison et ses animaux à un gardien qui s'installe chez vous pendant votre absence. Vos animaux gardent leurs habitudes, votre maison reste habitée. ${line}`;
+  const line = v2.cityLine ?? `Sur Guardiens, vous publiez votre garde ${cityAt(city)} et les gardiens proches de chez vous postulent.`;
+  return `Le home sitting ${cityAt(city)}, c'est confier sa maison et ses animaux à un gardien qui s'installe chez vous pendant votre absence. Vos animaux gardent leurs habitudes, votre maison reste habitée. ${line}`;
 }
 
 /** FAQ du gabarit v2 : une seule liste, visible et JSON-LD. */
@@ -397,20 +399,20 @@ export function pilotFaq(
     v2.localFaq && v2.localFaq.length
       ? v2.localFaq
       : v2.walkAnswer
-        ? [{ q: `Où promener un chien à ${city} ?`, a: v2.walkAnswer }]
+        ? [{ q: `Où promener un chien ${cityAt(city)} ?`, a: v2.walkAnswer }]
         : [
             {
-              q: `Comment trouver un gardien à ${city} ?`,
+              q: `Comment trouver un gardien ${cityAt(city)} ?`,
               a: "Publiez votre garde : l'annonce part par email aux gardiens proches de chez vous. Lisez leurs profils et leurs avis, puis échangez par la messagerie avant de choisir.",
             },
           ];
   return [
     {
-      q: `Faut-il rencontrer le gardien avant la garde à ${city} ?`,
+      q: `Faut-il rencontrer le gardien avant la garde ${cityAt(city)} ?`,
       a: "La rencontre est facultative. Vous échangez par la messagerie et vous vous voyez avant le départ si vous le souhaitez, chez vous ou en visio.",
     },
     {
-      q: `Combien coûte Guardiens à ${city} ?`,
+      q: `Combien coûte Guardiens ${cityAt(city)} ?`,
       a: "Guardiens est gratuit. Les frais liés à la garde, nourriture des animaux ou soins par exemple, se règlent entre vous sur justificatifs.",
     },
     ...local,
@@ -457,7 +459,7 @@ export function pilotProofLine(city: string, residents: number, nearby: number):
   const total = r + n;
   if (total === 0) return null;
   const g = (k: number) => `${k} gardien${k > 1 ? "s" : ""}`;
-  if (n === 0) return `${g(r)} à ${city}`;
-  if (r === 0) return `${g(n)} à proximité de ${city}`;
-  return `${g(total)} à proximité de ${city}, dont ${r} en ville`;
+  if (n === 0) return `${g(r)} ${cityAt(city)}`;
+  if (r === 0) return `${g(n)} à proximité ${cityOf(city)}`;
+  return `${g(total)} à proximité ${cityOf(city)}, dont ${r} en ville`;
 }
