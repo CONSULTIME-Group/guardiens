@@ -9,6 +9,7 @@ import { avatarImageUrl } from "@/lib/storageImage";
 import { postalMatchesDepartment } from "@/lib/postalDepartment";
 import { publicFirstName } from "@/lib/displayName";
 import { pickNearbySitters, buildCityIlikeOrFilter } from "@/lib/cityProximity";
+import aquarelleBonjour from "@/assets/aquarelles/arrivee-bonjour-360.webp";
 
 interface Props {
   city: string;
@@ -35,6 +36,12 @@ interface Props {
    */
   cityLat?: number | null;
   cityLng?: number | null;
+  /**
+   * Lot VIL1 (gabarit ville v2) : carte entière cliquable, aquarelle à la
+   * place de l'initiale quand le gardien n'a pas de photo, lien « Voir tous
+   * les gardiens » vers /recherche-gardiens?ville=.
+   */
+  variant?: "legacy" | "v2";
 }
 
 interface SitterRow {
@@ -69,7 +76,8 @@ const LNG_DELTA = 3.5;
  * cartes portent le marqueur « Intervient dans le secteur » : un gardien de
  * proximité n'est jamais présenté comme habitant la commune.
  */
-const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, cityLat, cityLng }: Props) => {
+const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, cityLat, cityLng, variant = "legacy" }: Props) => {
+  const v2 = variant === "v2";
   // Communes réellement recherchées : la liste agrégée si elle est fournie
   // et non vide, sinon le seul libellé de la page.
   const residentCities = (aggregateCities ?? []).map((c) => c.trim()).filter(Boolean);
@@ -214,7 +222,12 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
             <Link
               key={s.id}
               to={`/gardiens/${s.id}`}
-              className="group flex flex-col items-center text-center"
+              data-testid={v2 ? "city-sitter-card" : undefined}
+              className={
+                v2
+                  ? "group flex flex-col items-center text-center rounded-2xl border border-border bg-card p-3 min-h-11 hover:border-primary hover:shadow-sm transition"
+                  : "group flex flex-col items-center text-center"
+              }
             >
               <TrustHaloAvatar
                 verified={s.identity_verified === true}
@@ -231,6 +244,14 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
                         : `${displayName} gardien à ${city}`
                     }
                     className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                ) : v2 ? (
+                  <img
+                    src={aquarelleBonjour}
+                    alt=""
+                    data-testid="city-sitter-watercolor"
+                    className="w-full h-full object-cover bg-muted"
                     loading="lazy"
                   />
                 ) : (
@@ -270,7 +291,13 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
           </div>
           <div className="flex gap-2 shrink-0">
             {hasAny && (
-              <Link to={citySlug ? `/search?ville=${citySlug}` : "/search"}>
+              <Link
+                to={
+                  v2
+                    ? `/recherche-gardiens?ville=${encodeURIComponent(city)}`
+                    : citySlug ? `/search?ville=${citySlug}` : "/search"
+                }
+              >
                 <Button variant="outline" size="sm" className="gap-2">
                   Voir tous les gardiens
                   <ArrowRight className="h-4 w-4" />

@@ -16,7 +16,7 @@ export const VISITOR_ALERT_PARAM = "alerte";
 export const VISITOR_OWNER_PUBLISH_SIGNUP_URL = `/inscription?role=owner&redirect=${encodeURIComponent("/sits/create")}`;
 
 /** Lot RCH6 : « Publier ma garde » avec son origine mesurée (?via=), visiteur ou membre. */
-export function ownerPublishHref(isVisitor: boolean, via: "recherche_gardiens" | "annonces"): string {
+export function ownerPublishHref(isVisitor: boolean, via: "recherche_gardiens" | "annonces" | "ville"): string {
   const target = `/sits/create?via=${via}`;
   return isVisitor ? `/inscription?role=owner&redirect=${encodeURIComponent(target)}` : target;
 }
