@@ -114,7 +114,7 @@ describe("écran", () => {
   });
   it("la barre de navigation basse est masquée sur le formulaire (lot ANN1e)", () => {
     expect(page).toContain("useHideBottomNav(true);");
-    expect(page).toContain("bottom-[var(--bottom-nav-h,0px)]");
+    expect(page).toContain("bottom-[calc(var(--bottom-nav-h,0px)+var(--cookie-banner-h,0px))]");
   });
   it("« À mon domicile » est choisi d'office", () => {
     expect(page).toContain('useState<"home" | "away" | null>("home")');
