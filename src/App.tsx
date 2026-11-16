@@ -16,6 +16,7 @@ import { SHORT_LINKS } from "@/lib/shortLinks";
 import { BrowserRouter, Route, Routes, Navigate, useParams, useLocation, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
+import LegacyProjetRedirect from "@/components/seo/LegacyProjetRedirect";
 
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -385,9 +386,19 @@ const RegisterRedirect = () => {
 
 // Lot BAS1 (16/11/2026) : /entraide répondait par la page 404, la rubrique
 // vit sur /petites-missions. Paramètres et ancre conservés.
+// Lot ES4 (16/11/2026) : /entraide rendait une 404 aux robots (Prerender suivait la
+// redirection côté client sans code HTTP). 301 déclaré à Prerender, paramètres gardés
+// pour le navigateur seulement.
 const RedirectEntraide = () => {
   const location = useLocation();
-  return <Navigate to={`/petites-missions${location.search}${location.hash}`} replace />;
+  return (
+    <LegacyProjetRedirect
+      target="/petites-missions"
+      browserTarget={`/petites-missions${location.search}${location.hash}`}
+      title="Entraide et sorties près de chez vous"
+      description="L'entraide et les sorties de Guardiens se trouvent sur la page Entraide & sorties."
+    />
+  );
 };
 
 const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {

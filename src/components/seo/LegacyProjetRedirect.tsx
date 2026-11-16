@@ -9,7 +9,18 @@ import { SITE_ORIGIN } from "@/lib/projetSeo";
  * Navigateur : remplacement côté client, ce n'est pas un 301 HTTP.
  * Les paramètres de suivi ne passent pas dans la cible permanente.
  */
-const LegacyProjetRedirect = ({ target, title = "Projet participatif", description = "Ce projet participatif a changé d'adresse." }: { target: string; title?: string; description?: string }) => {
+const LegacyProjetRedirect = ({
+  target,
+  title = "Projet participatif",
+  description = "Ce projet participatif a changé d'adresse.",
+  browserTarget,
+}: {
+  target: string;
+  title?: string;
+  description?: string;
+  /** Lot ES4 : adresse du remplacement côté navigateur (paramètres gardés), la cible permanente reste propre. */
+  browserTarget?: string;
+}) => {
   const isPrerender =
     typeof navigator !== "undefined" && /Prerender/i.test(navigator.userAgent);
   return (
@@ -22,7 +33,7 @@ const LegacyProjetRedirect = ({ target, title = "Projet participatif", descripti
         statusCode={301}
         prerenderHeader={`Location: ${SITE_ORIGIN}${target}`}
       />
-      {!isPrerender && <Navigate to={target} replace />}
+      {!isPrerender && <Navigate to={browserTarget ?? target} replace />}
     </>
   );
 };

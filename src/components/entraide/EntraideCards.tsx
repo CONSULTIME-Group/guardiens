@@ -82,7 +82,7 @@ export const NeedCard = ({ need, distance, showDistance, compact = false }: {
         <div className={`overflow-hidden rounded-md border border-border bg-muted ${compact ? "mb-3" : "mb-4"}`}>
           <img
             src={photo}
-            alt={need.title}
+            alt="" /* Lot ES4 : le titre du besoin suit en H3, une alt identique le faisait lire deux fois. */
             width={640}
             height={480}
             loading="lazy"
@@ -94,7 +94,7 @@ export const NeedCard = ({ need, distance, showDistance, compact = false }: {
         <div className={`overflow-hidden rounded-md border border-border bg-muted ${compact ? "mb-3" : "mb-4"}`}>
           <img
             src={avatarImageUrl(authorAvatar, 640)}
-            alt={authorName ? `Portrait de ${authorName}, auteur de l'annonce` : "Portrait de l'auteur de l'annonce"}
+            alt={authorName ? `Portrait de ${authorName}, auteur du besoin` : "Portrait de l'auteur du besoin"}
             width={640}
             height={480}
             loading="lazy"
@@ -180,7 +180,7 @@ export const NeedRow = ({ need, distance, state, onCanHelp, pending = false }: {
       {photo ? (
         <img
           src={photo}
-          alt={need.title}
+          alt="" /* Lot ES4 : le titre du besoin suit en H3, une alt identique le faisait lire deux fois. */
           width={72}
           height={72}
           loading="lazy"
@@ -190,7 +190,7 @@ export const NeedRow = ({ need, distance, state, onCanHelp, pending = false }: {
       ) : authorAvatar ? (
         <img
           src={avatarImageUrl(authorAvatar, 144)}
-          alt={authorName ? `Portrait de ${authorName}, auteur de l'annonce` : "Portrait de l'auteur de l'annonce"}
+          alt={authorName ? `Portrait de ${authorName}, auteur du besoin` : "Portrait de l'auteur du besoin"}
           width={72}
           height={72}
           loading="lazy"

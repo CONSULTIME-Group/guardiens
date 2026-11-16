@@ -24,12 +24,13 @@ const renderNeed = (need: EntraideNeed) =>
   );
 
 describe("Lot E6 partie 3, photos des besoins", () => {
-  it("affiche la première photo en tête de carte, ratio 4:3, chargement différé, alt égal au titre", () => {
+  it("affiche la première photo en tête de carte, ratio 4:3, chargement différé, alt vide (lot ES4 : le titre suit en H3)", () => {
     const html = renderNeed({ ...baseNeed, photos: ["https://example.com/photo1.webp", "https://example.com/photo2.webp"] });
     expect(html).toContain('src="https://example.com/photo1.webp"');
     expect(html).not.toContain("photo2.webp");
     expect(html).toContain('loading="lazy"');
-    expect(html).toContain('alt="Nourrir le chat pendant mes vacances"');
+    expect(html).toContain('alt=""');
+    expect(html).not.toContain('alt="Nourrir le chat pendant mes vacances"');
     expect(html).toMatch(/aspect-\[4\/3\]/);
   });
 
