@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { X, ThumbsUp, Meh, MessageSquare, Check } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
+import { FB_CARD_BOTTOM_GAP_PX, FB_CARD_HEIGHT_VAR } from "@/lib/facebookCardHeight";
 
 const FLAG_KEY = "fb_ref_active";          // posée par FacebookReferralTracker
 const SEEN_KEY = "fb_ref_feedback_seen";   // localStorage, ne pas re-prompter avant 30j
@@ -46,6 +47,36 @@ const FacebookReferralFeedback = () => {
   const [askingDismiss, setAskingDismiss] = useState(false);
   const [dismissReason, setDismissReason] = useState<DismissReason | null>(null);
   const [dismissComment, setDismissComment] = useState("");
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Lot BAS3 : tant que la carte est affichée, sa place (hauteur et écart)
+  // est publiée pour que le bouton « Carte » se pose au-dessus d'elle.
+  useLayoutEffect(() => {
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    const el = cardRef.current;
+    const set = (value: string) => {
+      if (root.style.getPropertyValue(FB_CARD_HEIGHT_VAR) !== value) {
+        root.style.setProperty(FB_CARD_HEIGHT_VAR, value);
+      }
+    };
+    if (!visible || !el) {
+      set("0px");
+      return;
+    }
+    const apply = () => {
+      set(`${Math.round(el.getBoundingClientRect().height) + FB_CARD_BOTTOM_GAP_PX}px`);
+    };
+    apply();
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(apply) : null;
+    ro?.observe(el);
+    window.addEventListener("resize", apply);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", apply);
+      set("0px");
+    };
+  }, [visible]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -151,6 +182,8 @@ const FacebookReferralFeedback = () => {
 
   return (
     <div
+      ref={cardRef}
+      data-testid="fb-referral-card"
       className={cn(
         "fixed z-[60] bottom-[calc(1rem+var(--cookie-banner-h,0px))] right-4 left-4 sm:left-auto sm:max-w-sm",
         "animate-in slide-in-from-bottom-4 fade-in duration-300"
