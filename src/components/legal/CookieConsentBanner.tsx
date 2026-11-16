@@ -9,6 +9,7 @@ import {
   shouldShowBanner,
   isBotUserAgent,
 } from "@/lib/cookieConsent";
+import { COOKIE_BANNER_HEIGHT_EVENT, COOKIE_BANNER_HEIGHT_VAR } from "@/lib/cookieBannerHeight";
 
 /** Textes du bandeau (lot C1, volet publicitaire ajouté le 31/10/2026). */
 export const COOKIE_BANNER_TEXT = {
@@ -31,13 +32,13 @@ export const COOKIE_BANNER_TEXT = {
   regionLabel: "Cookies",
 } as const;
 
-/**
- * Lot BAS1 (16/11/2026) : hauteur réelle du bandeau ouvert, publiée sur
- * <html> pour que les éléments fixés en bas d'écran (bouton « Carte », barres
- * de candidature, barre de navigation basse) et le bas des pages se placent
- * au dessus de lui. Vaut 0px dès que le bandeau est fermé ou démonté.
- */
-export const COOKIE_BANNER_HEIGHT_VAR = "--cookie-banner-h";
+export { COOKIE_BANNER_HEIGHT_VAR, COOKIE_BANNER_HEIGHT_EVENT };
+
+function setBannerHeight(root: HTMLElement, value: string) {
+  if (root.style.getPropertyValue(COOKIE_BANNER_HEIGHT_VAR) === value) return;
+  root.style.setProperty(COOKIE_BANNER_HEIGHT_VAR, value);
+  window.dispatchEvent(new Event(COOKIE_BANNER_HEIGHT_EVENT));
+}
 
 /** Trois boutons de même poids : 44 px, même contour, texte sur une ligne à 360 px. */
 const COMPACT_BUTTON = "h-11 w-full whitespace-nowrap rounded-full px-1 text-[13px] font-medium";
@@ -60,11 +61,11 @@ export function CookieConsentBanner() {
     const root = document.documentElement;
     const el = bannerRef.current;
     if (!open || !el) {
-      root.style.setProperty(COOKIE_BANNER_HEIGHT_VAR, "0px");
+      setBannerHeight(root, "0px");
       return;
     }
     const apply = () => {
-      root.style.setProperty(COOKIE_BANNER_HEIGHT_VAR, `${Math.round(el.getBoundingClientRect().height)}px`);
+      setBannerHeight(root, `${Math.round(el.getBoundingClientRect().height)}px`);
     };
     apply();
     const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(apply) : null;
@@ -73,7 +74,7 @@ export function CookieConsentBanner() {
     return () => {
       ro?.disconnect();
       window.removeEventListener("resize", apply);
-      root.style.setProperty(COOKIE_BANNER_HEIGHT_VAR, "0px");
+      setBannerHeight(root, "0px");
     };
   }, [open, customizing]);
 

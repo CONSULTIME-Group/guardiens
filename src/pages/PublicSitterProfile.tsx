@@ -2789,7 +2789,7 @@ export default function PublicSitterProfile() {
       )}
       {activeTab !== 'gardien' && !heroCtaVisible && (() => {
         const baseCls =
-          "lg:hidden fixed left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg bottom-[var(--bottom-nav-h,0px)]";
+          "lg:hidden fixed left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg bottom-[calc(var(--bottom-nav-h,0px)+var(--cookie-banner-h,0px))]";
         const btnCls =
           "flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words";
         const mutedCls =

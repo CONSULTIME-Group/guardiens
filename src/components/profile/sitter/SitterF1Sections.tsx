@@ -252,7 +252,7 @@ export const SitterStickyBar = ({
   return (
     <div
       data-sitter-sticky-bar
-      className="lg:hidden fixed left-0 right-0 z-40 bottom-[var(--bottom-nav-h,0px)] bg-card border-t border-border px-3 pt-2 pb-[calc(8px+env(safe-area-inset-bottom))]"
+      className="lg:hidden fixed left-0 right-0 z-40 bottom-[calc(var(--bottom-nav-h,0px)+var(--cookie-banner-h,0px))] bg-card border-t border-border px-3 pt-2 pb-[calc(8px+env(safe-area-inset-bottom))]"
     >
       <div className="flex items-center gap-3 min-w-0">
         <Avatar className="w-10 h-10 shrink-0">

@@ -152,7 +152,7 @@ const FacebookReferralFeedback = () => {
   return (
     <div
       className={cn(
-        "fixed z-[60] bottom-4 right-4 left-4 sm:left-auto sm:max-w-sm",
+        "fixed z-[60] bottom-[calc(1rem+var(--cookie-banner-h,0px))] right-4 left-4 sm:left-auto sm:max-w-sm",
         "animate-in slide-in-from-bottom-4 fade-in duration-300"
       )}
       role="dialog"

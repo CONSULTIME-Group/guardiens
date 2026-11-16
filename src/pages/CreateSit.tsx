@@ -3611,7 +3611,7 @@ const CreateSit = () => {
           d'un transform (même identité) deviendrait bloc conteneur des
           descendants position:fixed. */}
       <div
-        className="fixed inset-x-0 bg-card border-t border-border z-40 bottom-[var(--bottom-nav-h,0px)] md:bottom-0 pb-[max(1rem,env(safe-area-inset-bottom))]"
+        className="fixed inset-x-0 bg-card border-t border-border z-40 bottom-[calc(var(--bottom-nav-h,0px)+var(--cookie-banner-h,0px))] md:bottom-[var(--cookie-banner-h,0px)] pb-[max(1rem,env(safe-area-inset-bottom))]"
       >
         <div className="max-w-3xl mx-auto px-4 pt-3 space-y-2">
           {/* Blockers on last step only */}

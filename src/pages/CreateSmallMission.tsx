@@ -1170,7 +1170,7 @@ const CreateSmallMission = () => {
 
       {/* CTA sticky au-dessus de la BottomNav */}
       {(accessLoading || canPublish) && (
-        <div ref={actionBarRef} className="fixed bottom-[var(--bottom-nav-h,0px)] inset-x-0 bg-card/95 backdrop-blur border-t border-border px-4 py-3 z-40 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div ref={actionBarRef} className="fixed bottom-[calc(var(--bottom-nav-h,0px)+var(--cookie-banner-h,0px))] inset-x-0 bg-card/95 backdrop-blur border-t border-border px-4 py-3 z-40 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <div className="max-w-2xl mx-auto space-y-2">
             {step === 3 && identityRecommended && <IdentityRecommendedHint compact />}
             {step === 3 && audienceCount !== null && (

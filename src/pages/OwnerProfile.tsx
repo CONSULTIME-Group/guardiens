@@ -474,7 +474,7 @@ const OwnerProfilePage = () => {
       {/* Sticky save bar, mobile : visible en permanence (avec strip de progression).
           Desktop : ne s'affiche que si modifications en cours, et démarre après la sidebar (256px). */}
       <TooltipProvider delayDuration={200}>
-        <div className={`fixed bottom-[var(--bottom-nav-h,0px)] md:bottom-0 left-0 right-0 md:left-64 z-40 bg-background/95 backdrop-blur-sm border-t border-border before:pointer-events-none before:content-[''] before:absolute before:left-0 before:right-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-background before:to-transparent ${(!dirty && !saving && !saved) ? (liveScore >= 100 ? "hidden" : "md:hidden") : ""}`}>
+        <div className={`fixed bottom-[calc(var(--bottom-nav-h,0px)+var(--cookie-banner-h,0px))] md:bottom-[var(--cookie-banner-h,0px)] left-0 right-0 md:left-64 z-40 bg-background/95 backdrop-blur-sm border-t border-border before:pointer-events-none before:content-[''] before:absolute before:left-0 before:right-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-background before:to-transparent ${(!dirty && !saving && !saved) ? (liveScore >= 100 ? "hidden" : "md:hidden") : ""}`}>
           <ProfileProgressStrip
             completion={liveScore}
             nextIncomplete={(() => {
