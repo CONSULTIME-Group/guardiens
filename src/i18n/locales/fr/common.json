@@ -2,7 +2,7 @@
   "nav": {
     "listings": "Annonces en cours",
     "listings_short": "Annonces",
-    "small_missions": "Entraide",
+    "small_missions": "Entraide & sorties",
     "associations": "Associations",
     "projets": "Projets",
     "pros": "Pros animaliers",
@@ -24,7 +24,7 @@
       "local_guides": "Guides locaux",
       "resources": "Ressources",
       "guardiens": "Guardiens",
-      "mutual_aid": "Entraide"
+      "mutual_aid": "Entraide & sorties"
     },
     "links": {
       "all_guides": "Tous les guides",
@@ -48,7 +48,8 @@
       "all_mutual_aid": "Toute l'entraide",
       "mutual_aid_city": "Entraide à {{city}}",
       "associations": "Associations",
-      "projects": "Chantiers participatifs"
+      "projects": "Chantiers participatifs",
+      "outings": "Sorties près de chez vous"
     },
     "tagline": "House-sitting de proximité",
     "version": "Guardiens · Version bêta · {{year}}",

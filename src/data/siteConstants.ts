@@ -19,6 +19,11 @@ export const SECTION_OG_IMAGES = {
     url: `${SITE_URL}/og/og-entraide.jpg`,
     alt: "Illustration aquarelle de deux mains qui se passent un pot de terre",
   },
+  // Lot ES2 (16/11/2026) : l'aperçu des posts vers /sorties montrait « maison et chien ».
+  sorties: {
+    url: `${SITE_URL}/og/og-sorties.jpg`,
+    alt: "Illustration aquarelle de deux personnes qui jouent aux cartes à une table de café",
+  },
   associations: {
     url: `${SITE_URL}/og/og-associations.jpg`,
     alt: "Illustration aquarelle d'un chien en laisse et d'un chat assis",

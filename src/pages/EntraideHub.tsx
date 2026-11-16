@@ -57,6 +57,11 @@ const FAQ = [
   { question: "Que faire quand le fil est calme ?", answer: "Décrivez votre besoin. Il part vers les membres disponibles les plus proches et reste visible dans le fil." },
   { question: "Faut-il payer pour utiliser l'Entraide ?", answer: "Guardiens est gratuit. Entre membres, l'échange se fait en services ou en attentions, convenus ensemble." },
   { question: "Quelle différence avec une garde de maison ?", answer: "L'Entraide répond à un besoin court et ponctuel. Une garde de maison couvre un séjour de plusieurs jours sur place." },
+  // Lot ES3 (16/11/2026, conseil Entraide & sorties) : les questions que se pose un visiteur, réponses courtes et complètes.
+  { question: "Quels coups de main peut-on demander ?", answer: "Le potager à arroser, les courses, un trajet, un meuble à monter, des fruits à ramasser, un chien à promener. La garde d'enfants reste en dehors de l'entraide." },
+  { question: "Faut-il se rencontrer ?", answer: "La rencontre se décide entre vous, après un échange par la messagerie de Guardiens. Un coup de main peut aussi se résumer à un panier déposé ou à un trajet partagé." },
+  { question: "Comment savoir à qui l'on s'adresse ?", answer: "Chaque membre a un profil avec sa présentation et les avis reçus après un échange. Vous lisez le profil, vous échangez par message, puis vous choisissez avec qui avancer." },
+  { question: "Où proposer une belote ou une balade ?", answer: "Dans l'onglet Sorties : vous choisissez l'activité, le jour, le lieu et le nombre de places, et les membres proches s'inscrivent." },
 ] as const;
 
 const faqSchema = {
@@ -445,8 +450,8 @@ const EntraideHub = () => {
   return (
     <>
       <PageMeta
-        title="Entraide entre particuliers : coups de main près de chez vous | Guardiens"
-        description="Jardinage, courses, trajets, une partie de belote : demandez ou proposez un coup de main près de chez vous. Guardiens est gratuit."
+        title="Entraide et sorties près de chez vous | Guardiens"
+        description="Coups de main entre gens du coin (potager, courses, trajets) et sorties à plusieurs (belote, balade, randonnée) près de chez vous. Guardiens est gratuit."
         path="/petites-missions"
         ready={!pageLoading}
         jsonLd={[faqSchema]}
@@ -456,7 +461,7 @@ const EntraideHub = () => {
       <div className="min-w-0 bg-background pb-24">
         <div className={HUB_SHELL}>
           {/* Lot ENT-MOB1 : fil d'Ariane visible à partir de 768 px, son JSON-LD reste servi partout. */}
-          <div className="hidden md:block"><PageBreadcrumb items={[{ label: "Entraide" }]} /></div>
+          <div className="hidden md:block"><PageBreadcrumb items={[{ label: "Entraide & sorties" }]} /></div>
           {/* Lot SORT1 : sous-onglets Entraide et Sorties, quand la rubrique est ouverte. */}
           {outingsOn && <div className={HUB_TABS}><EntraideSortiesTabs active="entraide" /></div>}
           <EntraideHubIntro
