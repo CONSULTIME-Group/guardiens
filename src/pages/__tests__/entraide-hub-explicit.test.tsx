@@ -32,7 +32,11 @@ describe("EntraideHub, contenu explicite (lot E4)", () => {
     expect(screen.getByText(/^Guardiens est gratuit\. Entre membres/)).toBeInTheDocument();
     expect(screen.queryByText("Résiliable à tout moment")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Demander un coup de main" }));
-    fireEvent.click(screen.getByRole("button", { name: "Proposer mon aide" }));
+    // Lot ENT-MOB1 : bouton contour à partir de 768 px, lien au téléphone (même geste, deux rendus CSS).
+    const help = screen.getAllByRole("button", { name: "Proposer mon aide" });
+    expect(help).toHaveLength(2);
+    expect(help[1]).toHaveAttribute("data-testid", "entraide-help-link");
+    fireEvent.click(help[0]);
     expect(onNeed).toHaveBeenCalledOnce();
     expect(onHelp).toHaveBeenCalledOnce();
   });

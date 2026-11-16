@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -177,8 +177,12 @@ describe("Entraide, la page vue d'un membre", () => {
 
   it("une tuile d'idée ouvre le formulaire avec le titre écrit", async () => {
     renderHub();
-    expect(await screen.findByRole("heading", { name: "Une idée pour commencer" })).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: /Arroser le potager|Faire les courses|Monter un meuble|Promener le chien|Un trajet|Ramasser les fruits/ }).length).toBe(6);
+    // Lot ENT-MOB1 : les idées sont rendues deux fois, en tête à partir de 768 px et après la liste au téléphone (CSS).
+    const headings = await screen.findAllByRole("heading", { name: "Une idée pour commencer" });
+    expect(headings).toHaveLength(2);
+    const top = headings[0].closest("section") as HTMLElement;
+    expect(top.className).toContain("hidden md:block");
+    expect(within(top).getAllByRole("button", { name: /Arroser le potager|Faire les courses|Monter un meuble|Promener le chien|Un trajet|Ramasser les fruits/ }).length).toBe(6);
   });
 
   it("un seul bouton plein dans l'en-tête", async () => {
