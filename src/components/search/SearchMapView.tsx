@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { COOKIE_BANNER_HEIGHT_EVENT } from "@/components/legal/CookieConsentBanner";
 import MapErrorBoundary from "@/components/shared/MapErrorBoundary";
 import { MapContainer, TileLayer, Marker, useMap, ZoomControl } from "react-leaflet";
 import L from "leaflet";
@@ -84,16 +85,21 @@ const MapSizeSync = ({ height }: { height: number }) => {
 };
 
 /** Réserve basse en pixels, sous la carte, selon la disposition. */
-const bottomReserve = (isMobile: boolean): number => {
-  if (!isMobile) return 16;
-  let navHeight = 0;
-  if (typeof window !== "undefined") {
-    const raw = getComputedStyle(document.documentElement).getPropertyValue("--bottom-nav-h");
-    const parsed = parseFloat(raw);
-    if (Number.isFinite(parsed)) navHeight = parsed;
-  }
+const cssPx = (name: string): number => {
+  if (typeof window === "undefined") return 0;
+  const parsed = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name));
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+/**
+ * Réserve basse en pixels, sous la carte, selon la disposition. Lot BAS2 : la
+ * hauteur du bandeau cookies ouvert s'ajoute (0 px une fois fermé).
+ */
+export const bottomReserve = (isMobile: boolean): number => {
+  const banner = cssPx("--cookie-banner-h");
+  if (!isMobile) return 16 + banner;
   // 88 px couvrent le dock d'Alma et le bouton de bascule vers la liste.
-  return navHeight + 88;
+  return cssPx("--bottom-nav-h") + 88 + banner;
 };
 
 interface SearchMapViewProps {
@@ -141,9 +147,11 @@ const SearchMapView = ({
     measure();
     window.addEventListener("resize", measure);
     window.addEventListener("orientationchange", measure);
+    window.addEventListener(COOKIE_BANNER_HEIGHT_EVENT, measure);
     return () => {
       window.removeEventListener("resize", measure);
       window.removeEventListener("orientationchange", measure);
+      window.removeEventListener(COOKIE_BANNER_HEIGHT_EVENT, measure);
     };
   }, [isMobile]);
 

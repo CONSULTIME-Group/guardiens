@@ -39,6 +39,15 @@ export const COOKIE_BANNER_TEXT = {
  */
 export const COOKIE_BANNER_HEIGHT_VAR = "--cookie-banner-h";
 
+/** Lot BAS2 : prévient les éléments qui mesurent leur place (carte des annonces) quand la hauteur change. */
+export const COOKIE_BANNER_HEIGHT_EVENT = "guardiens:cookie-banner-height";
+
+function setBannerHeight(root: HTMLElement, value: string) {
+  if (root.style.getPropertyValue(COOKIE_BANNER_HEIGHT_VAR) === value) return;
+  root.style.setProperty(COOKIE_BANNER_HEIGHT_VAR, value);
+  window.dispatchEvent(new Event(COOKIE_BANNER_HEIGHT_EVENT));
+}
+
 /** Trois boutons de même poids : 44 px, même contour, texte sur une ligne à 360 px. */
 const COMPACT_BUTTON = "h-11 w-full whitespace-nowrap rounded-full px-1 text-[13px] font-medium";
 
@@ -60,11 +69,11 @@ export function CookieConsentBanner() {
     const root = document.documentElement;
     const el = bannerRef.current;
     if (!open || !el) {
-      root.style.setProperty(COOKIE_BANNER_HEIGHT_VAR, "0px");
+      setBannerHeight(root, "0px");
       return;
     }
     const apply = () => {
-      root.style.setProperty(COOKIE_BANNER_HEIGHT_VAR, `${Math.round(el.getBoundingClientRect().height)}px`);
+      setBannerHeight(root, `${Math.round(el.getBoundingClientRect().height)}px`);
     };
     apply();
     const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(apply) : null;
@@ -73,7 +82,7 @@ export function CookieConsentBanner() {
     return () => {
       ro?.disconnect();
       window.removeEventListener("resize", apply);
-      root.style.setProperty(COOKIE_BANNER_HEIGHT_VAR, "0px");
+      setBannerHeight(root, "0px");
     };
   }, [open, customizing]);
 
