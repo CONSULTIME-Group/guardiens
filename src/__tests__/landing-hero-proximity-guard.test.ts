@@ -34,7 +34,7 @@ describe("landing.hero, entraide près de chez soi", () => {
     );
     expect(landing["families.entraide_text"]).toContain("chantier participatif");
     expect(landing["hero.lede"]).toBe(
-      "Quelqu'un pour garder votre maison et vos animaux quand vous partez. Quelqu'un pour une partie de belote, un chien à promener ou le potager à arroser le reste de l'année.",
+      "Quelqu'un pour garder votre maison et vos animaux quand vous partez. Quelqu'un pour un coup de main, une balade ou une partie de belote le reste de l'année. La rencontre se décide entre vous.",
     );
   });
 

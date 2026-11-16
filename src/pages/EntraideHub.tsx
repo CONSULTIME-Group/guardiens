@@ -27,7 +27,8 @@ import {
 } from "@/lib/entraideHubModel";
 import {
   HELPERS_FIRST_SHOWN,
-  helpersPulseLine,
+  ACTIVE_WINDOW_DAYS,
+  activeHelpersLabel,
   helpersMore,
   farNeedsLabel,
   farNeedsHeading,
@@ -45,7 +46,7 @@ import { capitalizeFirstName } from "@/lib/displayName";
 import { sortHelpers } from "@/lib/helperDisplay";
 import EntraideSortiesTabs from "@/components/outings/EntraideSortiesTabs";
 import { useOutingsEnabled } from "@/hooks/useOutingsEnabled";
-import { HUB_SHELL, HUB_TABS, HubArticles, HubHeader, HubSetting, HubSettings, HubSettingsLine, HubStat, HubWhy } from "@/components/outings/HubHeader";
+import { HUB_SHELL, HUB_TABS, HubArticles, HubBody, HubHeader, HubSettingsLine, HubStat, HubWhy } from "@/components/outings/HubHeader";
 import { ALERT_SETTINGS_PATH, useMutualAidRadiusKm } from "@/components/entraide/MutualAidRadiusLine";
 import { visibleToPublic } from "../../supabase/functions/_shared/missionSensitivity.js";
 
@@ -76,38 +77,29 @@ const HOW_STEPS = [
  * Lot SORT11 : même squelette que les onglets Sorties et Chantiers
  * (HubHeader), le chiffre en une ligne courte sous le bouton.
  */
-export const EntraideHubIntro = ({ countLine, mobileCountLabel, avatars, showHelp, onNeed, onHelp, children }: {
-  countLine: string | null;
-  /** Lot ENT-MOB1 : libellé court du téléphone (« personnes prêtes à aider »), le lieu se lit dans la ligne de réglage. */
-  mobileCountLabel?: string;
-  avatars?: ReadonlyArray<string>;
+export const EntraideHubIntro = ({ activeCount, showHelp, onNeed, onHelp, children }: {
+  /** Lot ES1 (décision 5 du conseil du 16/11) : personnes prêtes à aider actives sur 30 jours, dans le rayon quand le lieu est connu. */
+  activeCount: number | null;
   showHelp: boolean;
   onNeed: () => void;
   onHelp: () => void;
   children?: React.ReactNode;
 }) => {
-  // « 86 personnes prêtes à aider autour de Lyon » : le nombre en grand, le reste en libellé.
-  const [count, ...rest] = (countLine ?? "").split(" ");
-  // Lot ENT-MOB1 : sous 768 px, « Proposer mon aide » devient un lien au bout de la ligne du chiffre.
+  // Lot ENT-MOB1 puis ES1 : « Proposer mon aide » est un lien au bout de la ligne du chiffre, à toutes les largeurs.
   const helpLink = showHelp ? (
-    <button type="button" onClick={onHelp} className="inline-flex min-h-11 shrink-0 items-center text-sm font-semibold text-primary underline-offset-4 hover:underline" data-testid="entraide-help-link">
+    <button type="button" onClick={onHelp} className="inline-flex min-h-11 shrink-0 items-center text-sm font-semibold text-primary underline-offset-4 hover:underline md:text-base" data-testid="entraide-help-link">
       Proposer mon aide
     </button>
   ) : null;
   return (
     <HubHeader
       title="Entraide près de chez vous"
-      phrase="Le potager à arroser, les courses, un trajet, un meuble à monter : dites simplement ce qu'il vous faut."
+      phrase="Des coups de main entre gens du coin, gratuits entre membres : un potager, des courses, un trajet. Vous dites ce qu'il vous faut, les personnes proches répondent."
       phraseShort="Un potager, des courses, un trajet : dites ce qu'il vous faut."
-      actions={
-        <>
-          <Button size="lg" className="h-[52px] rounded-2xl text-base sm:h-12" onClick={onNeed}>Demander un coup de main</Button>
-          {showHelp && <Button size="lg" variant="outline" className="hidden h-[52px] rounded-2xl text-base sm:h-12 md:inline-flex" onClick={onHelp}>Proposer mon aide</Button>}
-        </>
-      }
-      stat={countLine
-        ? <HubStat value={Number(count)} label={rest.join(" ")} mobileLabel={mobileCountLabel} href="#entraide-helpers-title" action="Les voir" avatars={avatars} aside={helpLink} />
-        : helpLink ? <div className="flex justify-end md:hidden">{helpLink}</div> : null}
+      actions={<Button size="lg" className="h-[52px] rounded-2xl text-base sm:h-12" onClick={onNeed}>Demander un coup de main</Button>}
+      stat={activeCount !== null && activeCount > 0
+        ? <HubStat value={activeCount} label={activeHelpersLabel(activeCount)} href="#entraide-helpers-title" aside={helpLink} />
+        : helpLink ? <div className="flex justify-end md:justify-start">{helpLink}</div> : null}
     >
       {children}
     </HubHeader>
@@ -115,9 +107,10 @@ export const EntraideHubIntro = ({ countLine, mobileCountLabel, avatars, showHel
 };
 
 export const EntraideHowItWorks = () => (
-  <section className="mt-12" aria-labelledby="entraide-how-title">
-    <h2 id="entraide-how-title" className="font-heading text-2xl font-semibold text-foreground">Comment ça se passe</h2>
-    <ol className="mt-5 grid gap-4 sm:grid-cols-3">
+  // Lot ES1 : avant la liste au téléphone, en tête de la colonne de droite à partir de 1 024 px.
+  <section className="rounded-2xl border border-border bg-card p-4 sm:p-5" aria-labelledby="entraide-how-title">
+    <h2 id="entraide-how-title" className="font-heading text-xl font-semibold text-foreground lg:text-lg">Comment ça se passe</h2>
+    <ol className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
       {HOW_STEPS.map((step, index) => (
         <li key={step} className="flex gap-3 text-sm leading-relaxed text-muted-foreground">
           <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary font-heading text-sm font-semibold text-secondary-foreground">{index + 1}</span>
@@ -308,6 +301,12 @@ const EntraideHub = () => {
     () => (origin ? sortedHelpers.filter((helper) => { const d = helperDistance(helper); return d !== null && d <= NEARBY_THRESHOLD_KM; }).length : sortedHelpers.length),
     [sortedHelpers, origin, helperDistance],
   );
+  // Lot ES1 (décision 5 du conseil du 16/11) : le chiffre affiché compte les personnes actives sur 30 jours.
+  const activeHelpersCount = useMemo(() => {
+    const since = Date.now() - ACTIVE_WINDOW_DAYS * 86_400_000;
+    const near = origin ? sortedHelpers.filter((helper) => { const d = helperDistance(helper); return d !== null && d <= NEARBY_THRESHOLD_KM; }) : sortedHelpers;
+    return near.filter((helper) => helper.last_active_on && Date.parse(`${helper.last_active_on.slice(0, 10)}T00:00:00Z`) >= since).length;
+  }, [sortedHelpers, origin, helperDistance]);
   // « vous » quand la position est connue sans nom de ville.
   const placeCity = origin ? originCity || "vous" : null;
   const helpersMoreAction = helpersMore(helpersShown, nearHelpersCount, sortedHelpers.length, HELPERS_PAGE_SIZE);
@@ -460,44 +459,39 @@ const EntraideHub = () => {
           <div className="hidden md:block"><PageBreadcrumb items={[{ label: "Entraide" }]} /></div>
           {/* Lot SORT1 : sous-onglets Entraide et Sorties, quand la rubrique est ouverte. */}
           {outingsOn && <div className={HUB_TABS}><EntraideSortiesTabs active="entraide" /></div>}
-          <HubWhy />
           <EntraideHubIntro
-            countLine={pageLoading ? null : helpersPulseLine(nearHelpersCount, placeCity)}
-            mobileCountLabel={nearHelpersCount === 1 ? "personne prête à aider" : "personnes prêtes à aider"}
-            avatars={sortedHelpers.map((helper) => helper.avatar_url).filter((url): url is string => Boolean(url)).slice(0, 3)}
+            activeCount={pageLoading ? null : activeHelpersCount}
             showHelp={!isAuthenticated || (profileLoaded && profile?.available_for_help !== true)}
             onNeed={goNeed}
             onHelp={goHelp}
           >
-            {originPending ? null : origin ? (
+            {/* Lot ES1 : lieu et rayon sur une ligne à toutes les largeurs ; sans lieu, la ligne ouvre le champ ville. */}
+            {originPending ? null : (
               <>
-                <HubSettings>
-                  <HubSetting label="Ville" value={originCity || "Votre position"} action={placeOpen ? "Fermer" : "Changer"} onClick={() => setPlaceOpen((open) => !open)} expanded={placeOpen} />
-                  {radiusKm !== null && <HubSetting label="Besoins reçus à" value={`${radiusKm} km`} action="Changer" to={ALERT_SETTINGS_PATH} />}
-                </HubSettings>
-                {/* Lot ENT-MOB1 : sous 768 px, lieu et rayon sur une ligne. */}
                 <HubSettingsLine
-                  summary={<>Autour de <b className="font-semibold">{originCity || "votre position"}</b>{radiusKm !== null && <>, <b className="font-semibold">{radiusKm} km</b></>}</>}
-                  action={placeOpen ? "Fermer" : "Changer"}
+                  summary={origin
+                    ? <>Autour de <b className="font-semibold">{originCity || "votre position"}</b>{radiusKm !== null && <>, <b className="font-semibold">{radiusKm} km</b></>}</>
+                    : <>Autour de <b className="font-semibold">votre ville</b></>}
+                  action={placeOpen ? "Fermer" : origin ? "Changer" : "Choisir"}
                   onClick={() => setPlaceOpen((open) => !open)}
                   expanded={placeOpen}
                 />
                 {placeOpen && locationField}
-                {placeOpen && radiusKm !== null && (
-                  <Link to={ALERT_SETTINGS_PATH} className="inline-flex min-h-11 items-center text-sm font-semibold text-primary underline-offset-4 hover:underline md:hidden">
+                {placeOpen && origin && radiusKm !== null && (
+                  <Link to={ALERT_SETTINGS_PATH} className="inline-flex min-h-11 items-center text-sm font-semibold text-primary underline-offset-4 hover:underline">
                     Changer le rayon des besoins reçus ({radiusKm} km)
                   </Link>
                 )}
               </>
-            ) : locationField}
+            )}
           </EntraideHubIntro>
 
-          <EntraideIdeas onPick={pickIdea} />
-          {/* Lot SORT13 : le mode d'emploi se lit avant la liste, pour qui découvre ; un membre connecté va droit aux besoins. */}
-          {!isAuthenticated && <EntraideHowItWorks />}
-
-          <section className="pt-2" aria-labelledby="entraide-needs-title">
-            <div className="mt-6 flex items-center justify-between gap-3 sm:mt-8 sm:items-end">
+          <HubBody
+            before={!isAuthenticated ? <EntraideHowItWorks /> : undefined}
+            after={<EntraideIdeas onPick={pickIdea} />}
+            list={
+          <section aria-labelledby="entraide-needs-title">
+            <div className="flex items-center justify-between gap-3 sm:items-end">
               <div className="min-w-0">
                 <h2 id="entraide-needs-title" className="font-heading text-xl font-semibold text-foreground sm:text-2xl">Besoins ouverts</h2>
                 {placeCity && <p className="hidden text-sm text-muted-foreground sm:block">Autour de {placeCity}</p>}
@@ -578,8 +572,8 @@ const EntraideHub = () => {
               </>
             )}
           </section>
-          {/* Lot ENT-MOB1 : sous 768 px, les idées viennent après la liste. */}
-          <EntraideIdeas onPick={pickIdea} placement="end" />
+            }
+          />
 
           <section className="mt-14" aria-labelledby="entraide-helpers-title">
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">Le pouls de la communauté</p>
@@ -614,7 +608,7 @@ const EntraideHub = () => {
 
           <EntraideProofs origin={origin} />
 
-          <HubWhy placement="end" />
+          <HubWhy />
 
           <HubArticles articles={HUB_ARTICLES.entraide} />
 

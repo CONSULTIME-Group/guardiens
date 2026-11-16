@@ -1,7 +1,7 @@
 import EntraideSortiesTabs from "@/components/outings/EntraideSortiesTabs";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { HUB_SHELL, HUB_TABS, HubArticles, HubHeader, HubIdeas, HubSetting, HubSettings, HubSettingsLine, HubStat, HubWhy, type HubIdea } from "@/components/outings/HubHeader";
+import { HUB_SHELL, HUB_TABS, HubArticles, HubBody, HubHeader, HubIdeas, HubSettingsLine, HubStat, HubWhy, type HubIdea } from "@/components/outings/HubHeader";
 import spotJardin from "@/assets/missions/spot-jardin-160.webp";
 import spotBricolage from "@/assets/missions/spot-bricolage-160.webp";
 import spotVerger from "@/assets/missions/spot-verger-160.webp";
@@ -232,8 +232,6 @@ const ProjetsListing = () => {
         <div className="hidden md:block"><PageBreadcrumb items={[{ label: "Projets participatifs" }]} /></div>
         {/* Lot HOME1 : les projets sont une forme d'entraide, mêmes onglets. */}
         <div className={HUB_TABS}><EntraideSortiesTabs active="projets" /></div>
-        <HubWhy />
-
         {/* Lot SORT11 : même en-tête que les onglets Entraide et Sorties. */}
         <HubHeader
           title="Chantiers près de chez vous"
@@ -244,19 +242,10 @@ const ProjetsListing = () => {
               <Link to="/projets/publier">Proposer un chantier</Link>
             </Button>
           }
-          stat={loading || loadError || projets.length === 0 ? null : <HubStat value={projets.length} label={projets.length === 1 ? "chantier ouvert" : "chantiers ouverts"} href="#projets-resultats" action="Les voir" />}
+          stat={loading || loadError || projets.length === 0 ? null : <HubStat value={projets.length} label={projets.length === 1 ? "chantier ouvert" : "chantiers ouverts"} href="#projets-resultats" />}
         >
           {!loading && projets.length > 0 && (
             <>
-              <HubSettings>
-                <HubSetting
-                  label="Autour de"
-                  value={projetPlaceSummary(proximity.active, proximity.postal, radius)}
-                  action={placeOpen ? "Fermer" : "Choisir"}
-                  onClick={() => setPlaceOpen((open) => !open)}
-                  expanded={placeOpen}
-                />
-              </HubSettings>
               <HubSettingsLine
                 summary={<>Autour de <b className="font-semibold">{projetPlaceSummary(proximity.active, proximity.postal, radius)}</b></>}
                 action={placeOpen ? "Fermer" : "Choisir"}
@@ -295,13 +284,12 @@ const ProjetsListing = () => {
             </>
           )}
         </HubHeader>
-        <HubIdeas
-          id="projets-ideas-title"
-          ideas={PROJET_IDEAS}
-          onPick={pickProjetIdea}
-        />
 
-        <h2 id="projets-resultats" className="mb-5 mt-8 scroll-mt-24 font-heading text-xl font-semibold text-foreground sm:text-2xl">Chantiers ouverts</h2>
+        <HubBody
+          after={<HubIdeas id="projets-ideas-title" ideas={PROJET_IDEAS} onPick={pickProjetIdea} />}
+          list={
+        <div>
+        <h2 id="projets-resultats" className="mb-5 scroll-mt-24 font-heading text-xl font-semibold text-foreground sm:text-2xl">Chantiers ouverts</h2>
 
         {loading ? (
           <div className="h-40" aria-busy="true" />
@@ -380,9 +368,10 @@ const ProjetsListing = () => {
           </section>
         )}
 
-        {/* Lot ENT-MOB1 : sous 768 px, idées et pourquoi viennent après la liste. */}
-        <HubIdeas id="projets-ideas-end-title" placement="end" ideas={PROJET_IDEAS} onPick={pickProjetIdea} />
-        <HubWhy placement="end" />
+        </div>
+          }
+        />
+        <HubWhy />
         <HubArticles articles={HUB_ARTICLES.projets} />
         {/* Lot SORT13 : le texte de présentation et les questions fréquentes servent à qui arrive de l'extérieur. */}
         {!isAuthenticated && <ProjetsEditorial />}

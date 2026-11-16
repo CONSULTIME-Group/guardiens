@@ -67,7 +67,7 @@
       "eyebrow": "Gardes · Coups de main · Urgences",
       "title_main": "Près de chez vous, il y a toujours quelqu'un.",
       "motto": "Tout commence par un échange, et finit par une rencontre.",
-      "lede": "Quelqu'un pour garder votre maison et vos animaux quand vous partez. Quelqu'un pour une partie de belote, un chien à promener ou le potager à arroser le reste de l'année.",
+      "lede": "Quelqu'un pour garder votre maison et vos animaux quand vous partez. Quelqu'un pour un coup de main, une balade ou une partie de belote le reste de l'année. La rencontre se décide entre vous.",
       "cta_owner": "Publier mon annonce de garde",
       "cta_sitter": "Demander un coup de main",
       "cta_aid": "Je cherche ou je propose un coup de main →",
@@ -389,11 +389,17 @@
     "families": {
       "title": "Garde d'animaux à domicile, garde de maison, entraide et sorties près de chez vous : tout est gratuit.",
       "garde_title": "Garde de maison et d'animaux",
-      "garde_text": "Un gardien s'installe chez vous pendant votre absence. Vos animaux restent à la maison.",
-      "entraide_title": "Entraide",
-      "entraide_text": "Un coup de main entre deux personnes, ou un chantier participatif à plusieurs : un potager à arroser, des courses, une haie à planter.",
+      "garde_text": "Vous publiez vos dates, des gardiens proches postulent, vous choisissez. Vos animaux restent à la maison.",
+      "garde_cta": "Publier mon annonce de garde",
+      "garde_list": "Voir les gardes",
+      "entraide_title": "Entraide et chantiers",
+      "entraide_text": "Un potager à arroser, des courses, un trajet, ou un chantier participatif à plusieurs : les personnes proches répondent « Je peux », vous convenez ensemble de la suite.",
+      "entraide_cta": "Demander un coup de main",
+      "entraide_list": "Voir les coups de main",
       "sorties_title": "Sorties",
-      "sorties_text": "Une balade, une partie de belote, un jeu de société, à plusieurs."
+      "sorties_text": "Une belote à quatre, une randonnée à huit : vous fixez le jour et les places, les membres proches s'inscrivent.",
+      "sorties_cta": "Proposer une sortie",
+      "sorties_list": "Voir les sorties"
     },
     "manifesto": {
       "lead": "On a gardé 37 maisons en cinq ans.",

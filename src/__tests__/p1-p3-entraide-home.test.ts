@@ -6,7 +6,6 @@ import banner from "@/components/messages/MissionChooseBanner?raw";
 import messages from "@/pages/Messages?raw";
 import card from "@/components/missions/MissionResponseCard?raw";
 import registry from "../../supabase/functions/_shared/transactional-email-templates/registry.ts?raw";
-import how from "@/components/landing/HowItWorksSection?raw";
 import sas from "@/components/landing/ServiceAfterServiceSection?raw";
 import final from "@/components/landing/FinalCtaSection?raw";
 import { liveListingsTitle } from "@/components/landing/LiveListingsStrip";
@@ -34,7 +33,6 @@ describe("P2", () => {
 });
 describe("P3", () => {
   it("cartes, bloc vert, visiteurs", () => {
-    expect(how).toContain("Un coup de main en un clic, par exemple :");
     expect(sas).not.toContain("Promenades de chiens à Lyon");
     expect(sas).not.toContain("howto-step");
     expect(final).toContain("!isAuthenticated && (");

@@ -23,10 +23,9 @@ const IMAGES: Record<EntraideIdeaKey, string> = {
   fruits: spotVerger,
 };
 
-const EntraideIdeas = ({ onPick, placement = "top" }: { onPick: (key: EntraideIdeaKey, label: string) => void; placement?: "top" | "end" }) => (
+const EntraideIdeas = ({ onPick }: { onPick: (key: EntraideIdeaKey, label: string) => void }) => (
   <HubIdeas
-    id={placement === "end" ? "entraide-ideas-end-title" : "entraide-ideas-title"}
-    placement={placement}
+    id="entraide-ideas-title"
     ideas={ENTRAIDE_IDEAS.map((idea) => ({ key: idea.key, label: idea.label, image: IMAGES[idea.key] }))}
     onPick={(picked) => {
       const idea = ENTRAIDE_IDEAS.find((row) => row.key === picked.key);

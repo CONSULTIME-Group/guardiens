@@ -19,7 +19,9 @@ describe("SORT11, même squelette", () => {
       expect(src, page).toContain("HUB_SHELL");
       expect(src, page).toContain("<div className={HUB_TABS}><EntraideSortiesTabs");
       expect(src, page).toContain("<HubHeader");
-      expect(src, page).toContain("<HubSettings>");
+      // Lot ES1 (16/11/2026) : réglages en une ligne et corps commun à toutes les largeurs.
+      expect(src, page).toContain("<HubSettingsLine");
+      expect(src, page).toContain("<HubBody");
       expect(src, page).toContain("<HubWhy />");
       expect(src, page).toContain("<HubArticles articles={HUB_ARTICLES.");
     }
@@ -57,21 +59,23 @@ describe("SORT11, même squelette", () => {
     expect(helpersPulseLine(0, "Lyon")).toBeNull();
   });
 
-  it("lot SORT13 : chaque réglage porte son nom, sa valeur et son geste, cible de 44 px", () => {
+  it("lot SORT13 puis ES1 : les réglages tiennent en une ligne qui dit le lieu et le geste, cible de 44 px", () => {
     const header = read("src/components/outings/HubHeader.tsx");
-    expect(header).toContain("export const HubSetting =");
+    expect(header).toContain("export const HubSettingsLine =");
+    expect(header).not.toContain("export const HubSetting =");
     expect(header).toContain("min-h-11");
     expect(header).toContain("aria-expanded={expanded}");
     const hub = read("src/pages/EntraideHub.tsx");
-    expect(hub).toContain('<HubSetting label="Ville"');
-    expect(hub).toContain('label="Besoins reçus à"');
+    expect(hub).toContain("<>Autour de <b className=\"font-semibold\">votre ville</b></>");
+    expect(hub).toContain("Changer le rayon des besoins reçus");
     // Les savoir-faire se règlent depuis la section des personnes qui aident.
     expect(hub.indexOf("mettre à jour mes savoir-faire")).toBeGreaterThan(hub.indexOf('id="entraide-helpers-title"'));
   });
 
-  it("lot SORT13 : le chiffre est un bloc visible, le pourquoi cite une étude sourcée", () => {
+  it("lot SORT13 puis ES1 : le chiffre tient en une ligne, plus grand à l'ordinateur, le pourquoi cite une étude sourcée", () => {
     const header = read("src/components/outings/HubHeader.tsx");
-    expect(header).toContain('data-testid="hub-stat"');
+    expect(header).toContain('data-testid="hub-stat-line"');
+    expect(header).toContain("md:text-xl md:font-bold md:text-primary");
     expect(header).toContain("(CRÉDOC, étude Solitudes 2025)");
     expect(header).toContain("/actualites/technologie-recreer-lien-pres-de-chez-soi");
     // L'ancien « 54 % » n'avait aucune source dans l'article cité.
@@ -80,7 +84,7 @@ describe("SORT11, même squelette", () => {
 
   it("lot SORT13 : un membre connecté va droit au contenu, questions fréquentes et liens par ville restent pour le visiteur", () => {
     const hub = read("src/pages/EntraideHub.tsx");
-    expect(hub).toContain("{!isAuthenticated && <EntraideHowItWorks />}");
+    expect(hub).toContain("before={!isAuthenticated ? <EntraideHowItWorks /> : undefined}");
     expect(hub).toMatch(/\{!isAuthenticated && \(\s*<>\s*<nav[^>]*aria-label="Entraide dans votre ville"/);
     expect(read("src/pages/ProjetsListing.tsx")).toContain("{!isAuthenticated && <ProjetsEditorial />}");
   });

@@ -59,7 +59,8 @@ describe("E4, branchements", () => {
   const hub = readFileSync("src/pages/EntraideHub.tsx", "utf8");
   it("ordre de la page", () => {
     // Lot SORT13 (14/11/2026) : « Comment ça se passe » se lit avant la liste, pour un visiteur seulement.
-    const order = ["<EntraideHubIntro", "<EntraideIdeas", "<EntraideHowItWorks", 'id="entraide-needs-title"', 'id="entraide-helpers-title"', "<EntraideFaq"];
+    // Lot ES1 (16/11/2026) : HubBody place le mode d'emploi (before) et les idées (after) autour de la liste.
+    const order = ["<EntraideHubIntro", "<EntraideHowItWorks", "<EntraideIdeas", 'id="entraide-needs-title"', 'id="entraide-helpers-title"', "<EntraideFaq"];
     const positions = order.map((marker) => hub.indexOf(marker));
     for (const position of positions) expect(position).toBeGreaterThan(-1);
     expect([...positions].sort((a, b) => a - b)).toEqual(positions);
@@ -75,7 +76,7 @@ describe("E4, branchements", () => {
   });
   it("membre : chiffres et besoins attendent son lieu", () => {
     expect(hub).toContain("const originPending = isAuthenticated && !profileLoaded;");
-    expect(hub).toContain("countLine={pageLoading ? null");
+    expect(hub).toContain("activeCount={pageLoading ? null");
   });
   it("retour d'inscription : ?contact= ouvre la conversation", () => {
     expect(hub).toContain('searchParams.get("contact")');

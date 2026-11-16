@@ -7,12 +7,12 @@ vi.mock("@/components/missions/ExchangeHowItWorks", () => ({
   default: () => <section aria-label="Comment ça marche">Comment ça marche</section>,
 }));
 
-const renderContent = (showHelp: boolean, countLine: string | null = null) => {
+const renderContent = (showHelp: boolean, activeCount: number | null = null) => {
   const onNeed = vi.fn();
   const onHelp = vi.fn();
   render(
     <MemoryRouter>
-      <EntraideHubIntro countLine={countLine} showHelp={showHelp} onNeed={onNeed} onHelp={onHelp} />
+      <EntraideHubIntro activeCount={activeCount} showHelp={showHelp} onNeed={onNeed} onHelp={onHelp} />
       <EntraideHowItWorks />
       <EntraideFaq />
     </MemoryRouter>,
@@ -24,7 +24,9 @@ describe("EntraideHub, contenu explicite (lot E4)", () => {
   it("présente le modèle complet aux visiteurs sans compte", () => {
     const { onNeed, onHelp } = renderContent(true);
     expect(screen.getByRole("heading", { level: 1, name: "Entraide près de chez vous" })).toBeInTheDocument();
-    expect(screen.getByText(/Le potager à arroser, les courses, un trajet/)).toBeInTheDocument();
+    // Lot ES1 : la phrase de l'ordinateur définit l'onglet, la phrase courte reste au téléphone.
+    expect(screen.getByText(/Des coups de main entre gens du coin, gratuits entre membres/)).toBeInTheDocument();
+    expect(screen.getByTestId("hub-phrase-short")).toHaveTextContent("Un potager, des courses, un trajet");
     expect(screen.getByText(/dix à la fois/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Comment ça se passe" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Questions fréquentes" })).toBeInTheDocument();
@@ -32,25 +34,23 @@ describe("EntraideHub, contenu explicite (lot E4)", () => {
     expect(screen.getByText(/^Guardiens est gratuit\. Entre membres/)).toBeInTheDocument();
     expect(screen.queryByText("Résiliable à tout moment")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Demander un coup de main" }));
-    // Lot ENT-MOB1 : bouton contour à partir de 768 px, lien au téléphone (même geste, deux rendus CSS).
+    // Lot ES1 : « Proposer mon aide » est un seul lien, à toutes les largeurs.
     const help = screen.getAllByRole("button", { name: "Proposer mon aide" });
-    expect(help).toHaveLength(2);
-    expect(help[1]).toHaveAttribute("data-testid", "entraide-help-link");
+    expect(help).toHaveLength(1);
+    expect(help[0]).toHaveAttribute("data-testid", "entraide-help-link");
     fireEvent.click(help[0]);
     expect(onNeed).toHaveBeenCalledOnce();
     expect(onHelp).toHaveBeenCalledOnce();
   });
 
   it("une personne qui aide déjà voit un seul bouton, la ville et le nombre", () => {
-    renderContent(false, "78 personnes prêtes à aider autour de Lyon");
+    renderContent(false, 78);
     expect(screen.getByRole("button", { name: "Demander un coup de main" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Proposer mon aide" })).not.toBeInTheDocument();
-    // Lot SORT13 : le chiffre en grand dans un bloc qui mène aux personnes.
-    const stat = screen.getByTestId("hub-stat");
-    expect(stat).toHaveAttribute("href", "#entraide-helpers-title");
-    expect(stat).toHaveTextContent("78");
-    expect(stat).toHaveTextContent("personnes prêtes à aider autour de Lyon");
-    expect(stat).toHaveTextContent("Les voir");
+    // Lot ES1 (décision 5 du conseil du 16/11) : une ligne, les personnes actives ce mois-ci, lien vers les personnes.
+    const stat = screen.getByTestId("hub-stat-line");
+    expect(stat).toHaveTextContent("78 personnes actives ce mois-ci");
+    expect(stat.querySelector("a")).toHaveAttribute("href", "#entraide-helpers-title");
   });
 
   it("aucune tournure négative dans la FAQ", async () => {
