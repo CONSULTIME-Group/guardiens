@@ -41,7 +41,8 @@ export function readFormPrefill(params: URLSearchParams, limits: FormPrefillLimi
 
 /** Lot A3 : origines de publication mesurées (liste fermée). */
 // Lot RCH6 : « recherche_gardiens » (barre de /recherche-gardiens) et « annonces » (ligne propriétaire de /annonces).
-export const PUBLISH_VIA_VALUES = ["alma", "recherche_gardiens", "annonces"] as const;
+// Lot VIL1 : « ville » (bouton « Publier ma garde » des pages villes du pilote v2).
+export const PUBLISH_VIA_VALUES = ["alma", "recherche_gardiens", "annonces", "ville"] as const;
 export type PublishVia = (typeof PUBLISH_VIA_VALUES)[number];
 
 /**

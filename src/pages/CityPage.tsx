@@ -33,6 +33,8 @@ import { CITIES } from "@/data/cities";
 import { useCityStats } from "@/hooks/useCityStats";
 import { getCityContent, REVISED_CITY_SLUGS } from "@/data/cityContent";
 import { DB_CITY_REVISIONS } from "@/data/dbCityRevisions";
+import { getCityPilotV2, pilotFaq } from "@/data/cityPilotV2";
+import CityPilotV2Body from "@/components/city/CityPilotV2Body";
 import { GUIDE_OVERRIDES } from "@/data/guideOverrides";
 import CityPageMeta from "@/components/seo/CityPageMeta";
 import PageMeta from "@/components/PageMeta";
@@ -755,7 +757,9 @@ const CityPage = () => {
      dbPage.nearby_sitter_count ?? 0
    );
   const dbRevision = DB_CITY_REVISIONS[dbPage.slug];
-  const dbFaqItems = dbRevision ? dbRevision.faq : [
+  // Lot VIL1 : pilote du gabarit v2, liste fermée (src/data/cityPilotV2.ts).
+  const dbPilot = getCityPilotV2(dbPage.slug);
+  const dbFaqItems = dbPilot ? pilotFaq(dbPage.city, dbPilot) : dbRevision ? dbRevision.faq : [
     {
       q: `Comment trouver un gardien de maison à ${dbPage.city} ?`,
       a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${dbPage.city} et ses environs postulent directement. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson sur les profils avant de choisir.`,
@@ -844,6 +848,17 @@ const CityPage = () => {
         />
       )}
 
+      {dbPilot ? (
+        <CityPilotV2Body
+          page={dbPage}
+          pilot={dbPilot}
+          faq={dbFaqItems}
+          dbContent={dbInterpolated.content}
+          departmentCode={dbDepartmentCode ?? null}
+          departmentPage={departmentPage ?? null}
+          cityGuide={cityGuide ?? null}
+        />
+      ) : (
       <div className="min-h-screen bg-background">
         <PageBreadcrumb items={[
           { label: "Nos villes", href: "/house-sitting" },
@@ -1018,6 +1033,7 @@ const CityPage = () => {
  </p>
  </section>
  </div>
+      )}
  </>
  );
 };
