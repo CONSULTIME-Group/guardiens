@@ -2,6 +2,7 @@
  * Faits de la fiche gardien publique (lot F1). Logique pure, testée.
  */
 import { reviewDatesLine } from "@/lib/reviewDates";
+import { lifePaceLabel } from "@/lib/profileMatchingOptions";
 
 const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
@@ -49,7 +50,9 @@ export function homeFactLabel(ownAnimals: string[] | null | undefined, lifePace:
     const label = /chat/.test(detail) ? "un chat" : /chien/.test(detail) ? "un chien" : "d'autres animaux";
     if (!parts.includes(label)) parts.push(label);
   }
-  const pace = String(lifePace ?? "").trim().toLowerCase();
+  // Lot FG2 : libellé de LIFE_PACE_OPTIONS (« équilibré »), jamais la valeur
+  // enregistrée (« equilibre », 505 fiches publiques le 16/11/2026).
+  const pace = lifePaceLabel(String(lifePace ?? "").trim().toLowerCase()).toLowerCase();
   if (pace) parts.push(`un rythme ${pace}`);
   return cap(parts.join(", "));
 }

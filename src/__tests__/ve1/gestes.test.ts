@@ -60,7 +60,8 @@ describe("VE-1 : une ligne, un geste", () => {
     const a = byKey("sit:a");
     expect(a.bucket).toBe("today");
     expect(a.kind).toBe("broadcast");
-    expect(a.actionLabel).toBe("Prévenir les 2 gardiens");
+    expect(a.actionLabel).toBe("Diffuser l'annonce");
+    expect(a.detail).toContain("2 gardiens à proximité");
     expect(a.chip).toBe("Départ dans 8 jours");
     expect(a.secondaryWrite?.userId).toBe("o-a");
     expect(byKey("sit:b").bucket).toBe("week");
@@ -68,7 +69,8 @@ describe("VE-1 : une ligne, un geste", () => {
     expect(far.kind).toBe("more");
     expect(far.children?.map((c) => c.key)).toEqual(["sit:c", "sit:d"]);
     expect(far.actionLabel).toBe("Afficher les 2");
-    expect(far.children?.[1].actionLabel).toBe("Élargir la diffusion");
+    expect(far.children?.[1].actionLabel).toBe("Diffuser l'annonce");
+    expect(far.children?.[1].detail).toContain("Rayon de diffusion à élargir");
   });
 
   it("une file sans signal garde sa phrase, le bouton reprend son verbe", () => {

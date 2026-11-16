@@ -5,6 +5,7 @@
  * Flux : preview (compte + liste) → confirmation explicite (saisie du nombre
  * exact) → send. Aucun envoi tant que l'admin ne clique pas sur Envoyer.
  */
+import { proximityEmptyText } from "@/lib/admin/proximityEmpty";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -53,6 +54,8 @@ interface PreviewRecipient {
 }
 interface PreviewData {
   count: number;
+  /** Gardiens du rayon déjà servis pour cette annonce, ou dans les 7 derniers jours. */
+  excluded_recent?: number;
   author_first_name: string;
   sit: {
     id: string;
@@ -320,8 +323,8 @@ const ListingProximityCard = ({
           </p>
 
           {preview.count === 0 ? (
-            <p className="text-sm text-muted-foreground pt-2">
-              Aucun gardien dans ce rayon.
+            <p className="text-sm text-muted-foreground pt-2" data-testid="proximity-empty">
+              {proximityEmptyText(preview.excluded_recent, radiusKm)}
             </p>
           ) : (
             <>

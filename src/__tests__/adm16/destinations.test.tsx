@@ -114,7 +114,7 @@ describe("ADM16, chiffres et libellés", () => {
   it("Annonces : Diffuser visible sur « Sans candidature » et dans la fiche", () => {
     const src = readFileSync("src/pages/admin/AdminListings.tsx", "utf8");
     expect(src).toContain('data-testid="row-broadcast"');
-    expect(src).toContain("Message dans la messagerie");
+    expect(src).toContain('data-testid="row-write-owner"');
     expect(src).toContain("trafficError ?");
   });
 });

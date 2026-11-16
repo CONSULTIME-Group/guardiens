@@ -17,6 +17,25 @@ export const V2Heading = ({ children, id }: { children: ReactNode; id?: string }
 );
 
 /* ── La présentation, en lettre ───────────────────────────────────── */
+/**
+ * Lot FG2 (16/11/2026) : la lettre réunit motivation et présentation, une
+ * seule fois quand l'une reprend l'autre (texte identique, ou contenu dans
+ * l'autre à la ponctuation et aux espaces près). Relevé du 16/11/2026 : 5
+ * fiches publiques affichaient la même présentation deux fois de suite.
+ */
+export function sitterLetterText(motivation: string, bio: string): string {
+  const m = (motivation ?? "").trim();
+  const b = (bio ?? "").trim();
+  const norm = (t: string) => t.toLowerCase().replace(/[\s\p{P}]+/gu, " ").trim();
+  const nm = norm(m);
+  const nb = norm(b);
+  if (!nm) return b;
+  if (!nb) return m;
+  if (nm === nb || nm.includes(nb)) return m;
+  if (nb.includes(nm)) return b;
+  return `${m}\n\n${b}`;
+}
+
 export const SitterLetter = ({
   firstName,
   motivation,
@@ -29,7 +48,7 @@ export const SitterLetter = ({
   /** Aperçu de sa propre fiche : invitation à écrire sa présentation. */
   ownPreview: boolean;
 }) => {
-  const full = [motivation, bio].filter(Boolean).join("\n\n");
+  const full = sitterLetterText(motivation, bio);
   if (!full && !ownPreview) return null;
   return (
     <section aria-labelledby="qui-est" className="relative rounded-[22px] border border-border bg-card px-6 pb-7 pt-8 md:px-12 md:pb-10 md:pt-11" data-profile-letter>
