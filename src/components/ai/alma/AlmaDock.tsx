@@ -20,6 +20,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation, useNavigate } from "react-router-dom";
 import { isAlmaPillHiddenOn } from "@/lib/alma/dockPillVisibility";
+import { isArticleReadingPath, useArticleReadingCollapse } from "@/lib/alma/readingCollapse";
 
 import { ChevronDown, X, MoreHorizontal, Check, EyeOff, Lightbulb, Route, MessageCircle, Mail } from "lucide-react";
 import { openAlmaHumanContact, sendAlmaReplyChip } from "@/lib/alma/conversation-store";
@@ -263,6 +264,12 @@ function AlmaDockInner() {
   // tableau de bord ou panneau ouvert, pour garder le budget de /dashboard.
   const pillHiddenHere = isAlmaPillHiddenOn(location.pathname);
   const compactHere = /^\/(recherche-gardiens|search|annonces(\/international)?)\/?$/.test(location.pathname);
+  // Lot ART1 : pendant la lecture d'un article au téléphone, la pastille se
+  // réduit à l'avatar et à la mention IA, et revient entière en remontant.
+  const readingCollapsed = useArticleReadingCollapse(
+    !expanded && isArticleReadingPath(location.pathname),
+    location.pathname,
+  );
   const { bond } = useAlmaBond(expanded || !pillHiddenHere);
   const bondLine = bondHeaderLine(bond, todayParis());
   const moment = useAlmaMoment({
@@ -1119,7 +1126,19 @@ function AlmaDockInner() {
           )}
         </div>
 
+        {/* Lot ART1 : en lecture, l'avatar garde la mention IA (règlement
+            européen sur l'IA, article 50, lot L4). */}
+        {readingCollapsed && (
+          <span
+            data-testid="alma-reading-ia"
+            className="pr-1 text-[10px] font-semibold text-muted-foreground"
+            title="Alma, compagne IA de Guardiens"
+          >
+            IA
+          </span>
+        )}
         {/* Label Alma / stade (déclencheur du panneau) */}
+        {!readingCollapsed && (
         <button
           type="button"
           tabIndex={-1}
@@ -1149,11 +1168,12 @@ function AlmaDockInner() {
             <span className="text-[10px] font-medium text-muted-foreground">votre assistante</span>
           )}
         </button>
+        )}
 
         {/* N4 : porte d'entrée visible de la conversation. Elle reste
             affichée en mode silencieux, le silence portant sur les messages
             spontanés d'Alma, pas sur la possibilité de lui parler. */}
-{!compactDock && (
+{!compactDock && !readingCollapsed && (
         <>
         <button
           type="button"
@@ -1171,6 +1191,7 @@ function AlmaDockInner() {
 
 
         {/* Menu unique : parcours, conseil, fréquence, masquer. */}
+        {!readingCollapsed && (
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <button
@@ -1272,6 +1293,7 @@ function AlmaDockInner() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        )}
 
         {expanded && whisper && (
           <button
