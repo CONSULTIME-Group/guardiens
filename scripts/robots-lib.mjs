@@ -71,6 +71,19 @@ export const SEO_TOOLS = ["DataForSeoBot", "AhrefsBot", "SemrushBot"];
 export const SCRAPERS_BLOCKED = ["ByteSpider", "cohere-ai"];
 export const TRACKING_DISALLOW = ["/*?*utm_", "/*?*sessionid="];
 
+// Robots d'aperçu de lien (lot SOC3, 16/11/2026). Ils lisent l'adresse
+// exacte qu'un membre ou une page publie, paramètres de campagne compris,
+// pour construire l'aperçu (titre, image). Soumis au groupe *, ils lisaient
+// Disallow: /*?*utm_ et refusaient tout lien balisé : débogueur de partage
+// de Facebook, 403 et aperçu vide « guardiens.fr ». Ils n'indexent rien,
+// donc les paramètres de suivi leur restent ouverts ; le reste des règles
+// est identique au groupe *.
+export const LINK_PREVIEW_BOTS = [
+  "facebookexternalhit", "Facebot", "Twitterbot", "LinkedInBot", "WhatsApp",
+  "Slackbot", "TelegramBot", "Discordbot", "Pinterestbot",
+];
+export const PREVIEW_DISALLOW = TRACKING_DISALLOW.filter((p) => !p.includes("utm_"));
+
 export function buildRobotsTxt({ siteUrl, privatePaths, sitemapUrl }) {
   const blocked = privatePaths.filter((p) =>
     CRAWLABLE_NOINDEX.some((c) => p === c || p === `${c}/`),
@@ -98,6 +111,14 @@ export function buildRobotsTxt({ siteUrl, privatePaths, sitemapUrl }) {
     "User-agent: *",
     "Allow: /",
     ...TRACKING_DISALLOW.map((p) => `Disallow: ${p}`),
+    "# Espace authentifie et endpoints systeme",
+    ...privatePaths.map((p) => `Disallow: ${p}`),
+    "",
+    "# Apercus de liens (reseaux et messageries) : memes regles, liens de campagne",
+    "# (utm_) explorables, sinon l'apercu d'un lien balise sort vide.",
+    ...LINK_PREVIEW_BOTS.map((ua) => `User-agent: ${ua}`),
+    "Allow: /",
+    ...PREVIEW_DISALLOW.map((p) => `Disallow: ${p}`),
     "# Espace authentifie et endpoints systeme",
     ...privatePaths.map((p) => `Disallow: ${p}`),
     "",

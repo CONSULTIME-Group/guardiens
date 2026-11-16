@@ -62,6 +62,39 @@ Disallow: /unsubscribe
 Disallow: /test-accord
 Disallow: /auth/
 
+# Apercus de liens (reseaux et messageries) : memes regles, liens de campagne
+# (utm_) explorables, sinon l'apercu d'un lien balise sort vide.
+User-agent: facebookexternalhit
+User-agent: Facebot
+User-agent: Twitterbot
+User-agent: LinkedInBot
+User-agent: WhatsApp
+User-agent: Slackbot
+User-agent: TelegramBot
+User-agent: Discordbot
+User-agent: Pinterestbot
+Allow: /
+Disallow: /*?*sessionid=
+# Espace authentifie et endpoints systeme
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /messages
+Disallow: /mon-abonnement
+Disallow: /notifications
+Disallow: /sits
+Disallow: /review/
+Disallow: /house-guide/
+Disallow: /profile
+Disallow: /owner-profile
+Disallow: /favoris
+Disallow: /mes-avis
+Disallow: /settings
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /unsubscribe
+Disallow: /test-accord
+Disallow: /auth/
+
 # Pages publiques noindex (/login, /inscription, /search, /recherche,
 # /recherche-gardiens, fiches /gardiens/:id non eligibles) : volontairement
 # explorables, sinon leur balise noindex ne serait jamais lue.
