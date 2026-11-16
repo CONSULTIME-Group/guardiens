@@ -8991,6 +8991,102 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_seo_city_pages_vil3_20261116: {
+        Row: {
+          active_sits_count: number | null
+          aggregate_cities: string[] | null
+          allow_nearby_indexing: boolean | null
+          canonical_url: string | null
+          city: string | null
+          content: string | null
+          content_updated_at: string | null
+          cover_image_url: string | null
+          created_at: string | null
+          department: string | null
+          excerpt: string | null
+          geocode_attempts: number | null
+          geocoded_at: string | null
+          h1_title: string | null
+          hero_image_alt: string | null
+          id: string | null
+          intro_text: string | null
+          latitude: number | null
+          longitude: number | null
+          meta_description: string | null
+          meta_title: string | null
+          nearby_sitter_count: number | null
+          noindex: boolean | null
+          published: boolean | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          sitter_count: number | null
+          slug: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          active_sits_count?: number | null
+          aggregate_cities?: string[] | null
+          allow_nearby_indexing?: boolean | null
+          canonical_url?: string | null
+          city?: string | null
+          content?: string | null
+          content_updated_at?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          department?: string | null
+          excerpt?: string | null
+          geocode_attempts?: number | null
+          geocoded_at?: string | null
+          h1_title?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          intro_text?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          meta_description?: string | null
+          meta_title?: string | null
+          nearby_sitter_count?: number | null
+          noindex?: boolean | null
+          published?: boolean | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          sitter_count?: number | null
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          active_sits_count?: number | null
+          aggregate_cities?: string[] | null
+          allow_nearby_indexing?: boolean | null
+          canonical_url?: string | null
+          city?: string | null
+          content?: string | null
+          content_updated_at?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          department?: string | null
+          excerpt?: string | null
+          geocode_attempts?: number | null
+          geocoded_at?: string | null
+          h1_title?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          intro_text?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          meta_description?: string | null
+          meta_title?: string | null
+          nearby_sitter_count?: number | null
+          noindex?: boolean | null
+          published?: boolean | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          sitter_count?: number | null
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_seo_family_state_20261003_2130: {
         Row: {
           family: string | null
