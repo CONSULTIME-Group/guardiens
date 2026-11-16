@@ -1,7 +1,7 @@
 import EntraideSortiesTabs from "@/components/outings/EntraideSortiesTabs";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { HUB_SHELL, HUB_TABS, HubArticles, HubHeader, HubIdeas, HubSetting, HubSettings, HubStat, HubWhy, type HubIdea } from "@/components/outings/HubHeader";
+import { HUB_SHELL, HUB_TABS, HubArticles, HubHeader, HubIdeas, HubSetting, HubSettings, HubSettingsLine, HubStat, HubWhy, type HubIdea } from "@/components/outings/HubHeader";
 import spotJardin from "@/assets/missions/spot-jardin-160.webp";
 import spotBricolage from "@/assets/missions/spot-bricolage-160.webp";
 import spotVerger from "@/assets/missions/spot-verger-160.webp";
@@ -121,6 +121,10 @@ const ProjetsEditorial = () => (
 
 const ProjetsListing = () => {
   const navigate = useNavigate();
+  const pickProjetIdea = (idea: HubIdea) => {
+    const nature = PROJET_IDEAS.find((row) => row.key === idea.key)?.nature ?? "autre";
+    navigate(`/projets/publier?titre=${encodeURIComponent(idea.label)}&categorie=${nature}`);
+  };
   const [placeOpen, setPlaceOpen] = useState(false);
   const { isAuthenticated } = useAuth();
   const [projets, setProjets] = useState<any[]>([]);
@@ -224,7 +228,8 @@ const ProjetsListing = () => {
       />
 
       <div className={`${HUB_SHELL} pb-24`}>
-        <PageBreadcrumb items={[{ label: "Projets participatifs" }]} />
+        {/* Lot ENT-MOB1 : fil d'Ariane visible à partir de 768 px, son JSON-LD reste servi partout. */}
+        <div className="hidden md:block"><PageBreadcrumb items={[{ label: "Projets participatifs" }]} /></div>
         {/* Lot HOME1 : les projets sont une forme d'entraide, mêmes onglets. */}
         <div className={HUB_TABS}><EntraideSortiesTabs active="projets" /></div>
         <HubWhy />
@@ -233,6 +238,7 @@ const ProjetsListing = () => {
         <HubHeader
           title="Chantiers près de chez vous"
           phrase="Planter une haie, construire un abri, remettre un lieu en état : des projets participatifs à réaliser à plusieurs."
+          phraseShort="Planter une haie, construire un abri : des projets à réaliser à plusieurs."
           actions={
             <Button asChild size="lg" className="h-[52px] rounded-2xl text-base sm:h-12">
               <Link to="/projets/publier">Proposer un chantier</Link>
@@ -251,6 +257,12 @@ const ProjetsListing = () => {
                   expanded={placeOpen}
                 />
               </HubSettings>
+              <HubSettingsLine
+                summary={<>Autour de <b className="font-semibold">{projetPlaceSummary(proximity.active, proximity.postal, radius)}</b></>}
+                action={placeOpen ? "Fermer" : "Choisir"}
+                onClick={() => setPlaceOpen((open) => !open)}
+                expanded={placeOpen}
+              />
               {placeOpen && (
               <div className="flex flex-wrap items-center gap-3">
                 <ProximityFilter
@@ -286,10 +298,7 @@ const ProjetsListing = () => {
         <HubIdeas
           id="projets-ideas-title"
           ideas={PROJET_IDEAS}
-          onPick={(idea) => {
-            const nature = PROJET_IDEAS.find((row) => row.key === idea.key)?.nature ?? "autre";
-            navigate(`/projets/publier?titre=${encodeURIComponent(idea.label)}&categorie=${nature}`);
-          }}
+          onPick={pickProjetIdea}
         />
 
         <h2 id="projets-resultats" className="mb-5 mt-8 scroll-mt-24 font-heading text-xl font-semibold text-foreground sm:text-2xl">Chantiers ouverts</h2>
@@ -371,6 +380,9 @@ const ProjetsListing = () => {
           </section>
         )}
 
+        {/* Lot ENT-MOB1 : sous 768 px, idées et pourquoi viennent après la liste. */}
+        <HubIdeas id="projets-ideas-end-title" placement="end" ideas={PROJET_IDEAS} onPick={pickProjetIdea} />
+        <HubWhy placement="end" />
         <HubArticles articles={HUB_ARTICLES.projets} />
         {/* Lot SORT13 : le texte de présentation et les questions fréquentes servent à qui arrive de l'extérieur. */}
         {!isAuthenticated && <ProjetsEditorial />}

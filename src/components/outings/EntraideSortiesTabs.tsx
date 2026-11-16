@@ -13,7 +13,7 @@ const EntraideSortiesTabs = ({ active }: { active: "entraide" | "sorties" | "pro
       <Link
         to={to}
         aria-current={current ? "page" : undefined}
-        className={`flex h-12 items-center justify-center rounded-xl text-base no-underline ${
+        className={`flex h-11 items-center justify-center rounded-xl md:h-12 text-base no-underline ${
           current ? "bg-card font-semibold text-foreground shadow-sm" : "font-medium text-muted-foreground hover:text-foreground"
         }`}
       >

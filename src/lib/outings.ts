@@ -355,6 +355,8 @@ export const OUTING_COPY = {
   tabs: { entraide: "Entraide", sorties: "Sorties", projets: "Chantiers" },
   hubTitle: "Entraide & sorties",
   sortiesTitle: "Sorties près de chez vous",
+  /** Lot ENT-MOB1 : phrase de l'onglet sous 768 px. */
+  sortiesIntroShort: "Une belote, une balade : proposez un moment, les membres proches s'inscrivent.",
   sortiesIntro: "Proposez un moment à partager : une belote, une balade, une randonnée. Vous fixez le jour, le lieu et le nombre de places, les membres proches s'inscrivent.",
   propose: "Proposer une sortie",
   join: "Je viens",
