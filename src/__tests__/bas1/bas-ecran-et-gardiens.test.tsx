@@ -141,7 +141,7 @@ describe("(c) éléments du bas d'écran adossés au bandeau", () => {
 
   it("/entraide mène à /petites-missions, paramètres gardés", () => {
     const app = read("src/App.tsx");
-    expect(app).toContain('<Route path="/entraide" element={<EntraideRedirect />} />');
+    expect(app).toContain('<Route path="/entraide" element={<RedirectEntraide />} />');
     expect(app).toContain("`/petites-missions${location.search}${location.hash}`");
   });
 
