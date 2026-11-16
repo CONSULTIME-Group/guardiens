@@ -102,6 +102,32 @@ const skipped = new Map<number, string>();
 const pendingExtra = new Map<number, ViewExtra>();
 let listener: Listener | null = null;
 
+/**
+ * Lot perf 20 : vues du document, de la plus ancienne à la plus récente (30
+ * au plus), pour ranger une interaction sous la page où elle a eu lieu.
+ */
+const VIEW_HISTORY_MAX = 30;
+let viewHistory: PerfView[] = [{ ...view }];
+function rememberView(v: PerfView) {
+  const last = viewHistory[viewHistory.length - 1];
+  if (last && last.seq === v.seq) viewHistory[viewHistory.length - 1] = { ...v };
+  else viewHistory.push({ ...v });
+  if (viewHistory.length > VIEW_HISTORY_MAX) viewHistory = viewHistory.slice(-VIEW_HISTORY_MAX);
+}
+
+/**
+ * Lot perf 20 : vue affichée au moment `t` (performance.now()), la plus
+ * récente commencée avant ou à `t`. Une interaction qui précède toute vue
+ * connue (historique tronqué) retombe sur la plus ancienne gardée.
+ */
+export function perfViewAt(t: number): PerfView {
+  syncWithUrl();
+  for (let i = viewHistory.length - 1; i >= 0; i--) {
+    if (viewHistory[i].start <= t) return { ...viewHistory[i] };
+  }
+  return { ...(viewHistory[0] ?? view) };
+}
+
 /** Vue courante (copie). */
 export function currentPerfView(): PerfView {
   return { ...view };
@@ -120,11 +146,13 @@ export function markNavigation(path: string, at?: number): void {
   const fresh = change !== undefined && t - change.at < 30_000 && change.at >= view.start;
   if (at === undefined && fresh && change.replace) {
     view = { ...view, path };
+    rememberView(view);
     return;
   }
   const start = at ?? (fresh ? change.at : t);
   listener?.onViewEnd({ ...view }, start);
   view = { seq: view.seq + 1, nav: "soft", path, start };
+  rememberView(view);
   marked = new Set();
 }
 
@@ -202,6 +230,7 @@ export function subscribePerfMarks(l: Listener): () => void {
 /** Réservé aux tests. */
 export function __resetPerfMarks(path = "/"): void {
   view = { seq: 0, nav: "hard", path, start: 0 };
+  viewHistory = [{ ...view }];
   marked = new Set();
   buffer.length = 0;
   skipped.clear();

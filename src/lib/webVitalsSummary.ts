@@ -37,11 +37,19 @@ export function p75(values: number[]): number | null {
 
 const DEVICES: SummaryDevice[] = ["mobile", "tablet", "desktop"];
 
+/**
+ * Lot perf 20 : page de l'interaction (attr.page de l'INP) si elle est
+ * lisible, sinon le chemin d'arrivée de la ligne (mesures d'avant le lot).
+ */
+export function inpPage(page: unknown, path: string): string {
+  return typeof page === "string" && page.startsWith("/") && page.length <= 120 ? page : path;
+}
+
 export function summarizeVitals(rows: VitalRow[], topN = 10): { paths: PathSummary[]; measures: number } {
   const acc = new Map<string, { total: number; v: Record<string, number[]>; empty: Record<SummaryDevice, number> }>();
   let measures = 0;
   for (const r of rows) {
-    const m = r.metadata as { host?: unknown; path?: unknown; device?: unknown; metrics?: Record<string, { value?: unknown; rating?: unknown; attr?: { outcome?: unknown } }> } | null;
+    const m = r.metadata as { host?: unknown; path?: unknown; device?: unknown; metrics?: Record<string, { value?: unknown; rating?: unknown; attr?: { outcome?: unknown; page?: unknown } }> } | null;
     if (!m || m.host !== SUMMARY_HOST || typeof m.path !== "string" || !DEVICES.includes(m.device as SummaryDevice) || !m.metrics) continue;
     measures++;
     const e = acc.get(m.path) ?? { total: 0, v: {}, empty: { mobile: 0, tablet: 0, desktop: 0 } };
@@ -54,7 +62,15 @@ export function summarizeVitals(rows: VitalRow[], topN = 10): { paths: PathSumma
         : m.metrics[k];
       if (k === "CONTENT" && entry?.rating === "abandoned") continue;
       const val = entry?.value;
-      if (typeof val === "number" && Number.isFinite(val)) (e.v[`${m.device}:${k}`] ??= []).push(val);
+      if (typeof val !== "number" || !Number.isFinite(val)) continue;
+      // Lot perf 20 : l'INP compte pour la page où le geste a eu lieu.
+      const page = k === "INP" ? inpPage(m.metrics.INP?.attr?.page, m.path) : m.path;
+      if (page === m.path) (e.v[`${m.device}:${k}`] ??= []).push(val);
+      else {
+        const other = acc.get(page) ?? { total: 0, v: {}, empty: { mobile: 0, tablet: 0, desktop: 0 } };
+        (other.v[`${m.device}:${k}`] ??= []).push(val);
+        acc.set(page, other);
+      }
     }
     acc.set(m.path, e);
   }

@@ -42,9 +42,15 @@
  * GESTURE_CARD mesure la carte après un geste ; la ligne porte triggers
  * (motifs des recherches, « 1:init,2:radius », 6 au plus), same_key
  * (relances évitées) et gesture. fitVitalPayload retire triggers en premier.
+ *
+ * Lot perf 20 (16/11/2026) : l'INP est la pire interaction de tout le
+ * document, navigations internes comprises, mais la ligne porte le chemin
+ * d'arrivée. L'attribution ajoute page (gabarit de la vue affichée au moment
+ * du geste, perfViewAt) et page_nav (hard ou soft) ; la carte admin range
+ * l'INP sous cette page (summarizeVitals).
  */
 import { onCLS, onINP, onFCP, onLCP, onTTFB, type MetricWithAttribution } from "web-vitals/attribution";
-import { currentPerfView, subscribePerfMarks, type Milestone, type PerfView } from "@/lib/perfMarks";
+import { currentPerfView, perfViewAt, subscribePerfMarks, type Milestone, type PerfView } from "@/lib/perfMarks";
 import { trackEventBeacon } from "@/lib/analytics";
 import { BUILD_ID } from "@/lib/buildInfo";
 import { isBotUserAgent } from "@/lib/cookieConsent";
@@ -375,7 +381,10 @@ export function pusherCandidate(node: Node | null): string | undefined {
 }
 
 /** Attribution réduite : élément et phases du LCP, cible du plus grand décalage. Sans URL ni jeton. */
-export function vitalAttribution(m: MetricWithAttribution): VitalEntry["attr"] | undefined {
+export function vitalAttribution(
+  m: MetricWithAttribution,
+  viewAt: (t: number) => Pick<PerfView, "path" | "nav"> = perfViewAt,
+): VitalEntry["attr"] | undefined {
   const a = (m as unknown as { attribution?: Record<string, unknown> }).attribution;
   if (!a) return undefined;
   if (m.name === "LCP") {
@@ -429,6 +438,18 @@ export function vitalAttribution(m: MetricWithAttribution): VitalEntry["attr"] |
       if (typeof v === "number" && Number.isFinite(v)) out[key] = Math.round(v);
     }
     if (typeof a.loadState === "string") out.load_state = a.loadState;
+    // Lot perf 20 : l'INP vaut pour tout le document et part sous la page
+    // d'arrivée ; page et page_nav disent où le geste a eu lieu (vue affichée
+    // à interactionTime), une navigation interne comprise.
+    if (typeof a.interactionTime === "number" && Number.isFinite(a.interactionTime)) {
+      try {
+        const v = viewAt(a.interactionTime);
+        if (v?.path) {
+          out.page = normalizeVitalPath(v.path);
+          out.page_nav = v.nav;
+        }
+      } catch { /* vue introuvable */ }
+    }
     return Object.keys(out).length ? out : undefined;
   }
   return undefined;
