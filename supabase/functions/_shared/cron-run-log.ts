@@ -142,6 +142,31 @@ export function runMetricsFromBody(body: unknown, httpStatus: number): Record<st
 }
 
 /**
+ * Lot JOURN2 (16/11/2026) : appel planifié authentifié par le secret partagé
+ * GEOCODE_PROFILE_SECRET (en-tête x-geocode-secret), comme les tâches des
+ * guides et des pages villes. Sert seulement à décider d'écrire au journal.
+ */
+export function isGeocodeSecretCall(req: Request): boolean {
+  const secret = Deno.env.get("GEOCODE_PROFILE_SECRET");
+  return !!secret && req.headers.get("x-geocode-secret") === secret;
+}
+
+/** Lot JOURN2 : reconnaître un appel planifié autrement que par la clé de service. */
+export interface CronLogOptions {
+  isScheduledCall?: (req: Request) => boolean;
+}
+
+/** Appel à journaliser : clé de service, ou repère propre à la fonction. */
+export function isScheduledCronCall(req: Request, options?: CronLogOptions): boolean {
+  if (isServiceRoleCall(req)) return true;
+  try {
+    return options?.isScheduledCall ? options.isScheduledCall(req) === true : false;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Lot ADM8 : journalise chaque appel planifié d'une fonction qui n'écrivait
  * rien dans cron_run_log. Seuls les appels avec la clé de service comptent
  * (les aperçus lancés depuis l'admin restent hors journal). Réponse 2xx sans
@@ -150,9 +175,10 @@ export function runMetricsFromBody(body: unknown, httpStatus: number): Record<st
 export function withCronRunLog(
   edgeName: string,
   handler: (req: Request) => Promise<Response>,
+  options?: CronLogOptions,
 ): (req: Request) => Promise<Response> {
   return async (req: Request): Promise<Response> => {
-    if (req.method === "OPTIONS" || !isServiceRoleCall(req)) return handler(req);
+    if (req.method === "OPTIONS" || !isScheduledCronCall(req, options)) return handler(req);
     // Nom littéral passé par l'appelant (garde edge-cron-run-log-usage).
     const config = { edgeName: String(edgeName) };
     const run = await startCronRun(config.edgeName);
@@ -200,9 +226,10 @@ export function withCronFailureLog(
   edgeName: string,
   handler: (req: Request) => Promise<Response>,
   windowMinutes: number,
+  options?: CronLogOptions,
 ): (req: Request) => Promise<Response> {
   return async (req: Request): Promise<Response> => {
-    if (req.method === "OPTIONS" || !isServiceRoleCall(req)) return handler(req);
+    if (req.method === "OPTIONS" || !isScheduledCronCall(req, options)) return handler(req);
     const name = typeof edgeName === "string" && /^[a-z0-9-]+$/.test(edgeName) ? edgeName : "invalid-edge-name";
     const startedAt = new Date();
     const write = async (status: "success" | "failed", metrics: Record<string, unknown>, errorMessage?: string) => {

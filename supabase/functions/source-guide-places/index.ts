@@ -23,6 +23,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 import { advanceGuide } from "../_shared/guide-places/pipeline.ts";
+import { withCronFailureLog, isGeocodeSecretCall } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -48,7 +49,7 @@ const LOCK_MS = 3 * 60 * 1000;
 const COLS =
   "id, slug, city, postal_code, department, country, latitude, longitude, published, publish_when_sourced, places_sourced_at, places_source_attempted_at, places_source_passes, places_source_report, pipeline_lock_until";
 
-Deno.serve(async (req) => {
+Deno.serve(withCronFailureLog("source-guide-places", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const secret = Deno.env.get("GEOCODE_PROFILE_SECRET");
@@ -167,4 +168,4 @@ Deno.serve(async (req) => {
   if (runtime?.waitUntil) runtime.waitUntil(task);
   else await task;
   return json({ lance: true, slugs, dry_run: dryRun }, 202);
-});
+}, 2, { isScheduledCall: isGeocodeSecretCall }));

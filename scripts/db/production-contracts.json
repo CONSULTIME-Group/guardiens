@@ -128,7 +128,7 @@
       "checks": [
         {
           "name": "recapitulatifs_deux_saisons",
-          "sql": "SELECT (SELECT count(*) FROM cron.job WHERE active AND ((jobname = 'alert-digest-12h' AND schedule = '0 10,11 * * *') OR (jobname = 'alert-digest-18h' AND schedule = '0 16,17 * * *') OR (jobname = 'nearby-daily-digest' AND schedule = '5 6-11 * * *'))) = 3 AS ok"
+          "sql": "SELECT (SELECT count(*) FROM cron.job WHERE active AND ((jobname = 'alert-digest-12h' AND schedule ~ '^[0-9]{1,2} 10,11 \\* \\* \\*$') OR (jobname = 'alert-digest-18h' AND schedule ~ '^[0-9]{1,2} 16,17 \\* \\* \\*$') OR (jobname = 'nearby-daily-digest' AND schedule ~ '^[0-9]{1,2} 6-11 \\* \\* \\*$'))) = 3 AS ok"
         }
       ]
     },
@@ -706,7 +706,7 @@
       "checks": [
         {
           "name": "horaire_demi_heure",
-          "sql": "SELECT schedule = '5,35 5-12 * * *' AS ok FROM cron.job WHERE jobname = 'sitter-daily-digest'"
+          "sql": "SELECT schedule IN ('5,35 5-12 * * *', '6,36 5-12 * * *') AS ok FROM cron.job WHERE jobname = 'sitter-daily-digest'"
         }
       ]
     },
@@ -1081,6 +1081,20 @@
         {
           "name": "definer_et_anon_exclu",
           "sql": "SELECT p.prosecdef AND NOT has_function_privilege('anon', p.oid, 'EXECUTE') AS ok FROM pg_proc p WHERE p.oid = 'public.admin_get_listings_waiting(uuid[])'::regprocedure"
+        }
+      ]
+    },
+    {
+      "migration": "0178_journ2_taches_journalisees.sql",
+      "description": "Tâches appelées par pg_net hors des minutes multiples de 5 (délais DNS du 16/11/2026) et six fonctions journalisées suivies par admin_cron_health",
+      "checks": [
+        {
+          "name": "sante_repere",
+          "sql": "SELECT position('journ2_taches_journalisees' IN pg_get_functiondef('public.admin_cron_health()'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "aucun_appel_pg_net_minute_multiple_de_5",
+          "sql": "SELECT NOT EXISTS (SELECT 1 FROM cron.job j WHERE j.active AND j.command ILIKE '%net.http_post%' AND j.schedule <> '* * * * *' AND (split_part(j.schedule, ' ', 1) LIKE '*%' OR EXISTS (SELECT 1 FROM unnest(string_to_array(split_part(j.schedule, ' ', 1), ',')) m WHERE m ~ '^[0-9]+$' AND m::int % 5 = 0))) AS ok"
         }
       ]
     }

@@ -28,7 +28,9 @@ describe("journal des tâches d'emails très fréquentes", () => {
     expect(body).toContain('await write("failed", metrics, bodyError ? String(bodyError) : `HTTP ${res.status}`)');
     expect(body).toContain('await write("failed", {}, describeError(e))');
     expect(body).toContain("} else if (isHeartbeatMinute(startedAt, windowMinutes)) {");
-    expect(body).toContain("if (req.method === \"OPTIONS\" || !isServiceRoleCall(req)) return handler(req);");
+    // Lot JOURN2 : la clé de service reste le repère par défaut (isScheduledCronCall).
+    expect(body).toContain("if (req.method === \"OPTIONS\" || !isScheduledCronCall(req, options)) return handler(req);");
+    expect(helper).toContain("if (isServiceRoleCall(req)) return true;");
     // Aucune ligne ouverte en début de passage : pas de startCronRun ici.
     expect(body).not.toContain("startCronRun(");
   });

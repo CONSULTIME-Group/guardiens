@@ -16,6 +16,7 @@
  *   - Service role pour lire/écrire (bypass RLS).
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { withCronFailureLog, isGeocodeSecretCall } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -54,7 +55,7 @@ interface BanFeature {
   properties: { citycode?: string };
 }
 
-Deno.serve(async (req) => {
+Deno.serve(withCronFailureLog("geocode-city-pages", async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
@@ -194,4 +195,4 @@ Deno.serve(async (req) => {
   } catch (e) {
     return json({ error: String(e) }, 500);
   }
-});
+}, 10, { isScheduledCall: isGeocodeSecretCall }));
