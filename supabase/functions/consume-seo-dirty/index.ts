@@ -83,13 +83,28 @@ interface DirtyAcknowledgement {
 interface RecacheResult { ok: boolean; status: number | null; detail: string; deferred?: boolean; duplicate?: boolean }
 type Recacher = (url: string) => Promise<RecacheResult>;
 
+/**
+ * Lot RCM1 (16/11/2026) : Prerender garde une copie par appareil, et un
+ * recache sans adaptiveType ne refait que la copie ordinateur. Google indexe
+ * la copie téléphone (Googlebot smartphone) : le 16/11/2026, 6 pages villes
+ * sur 6 lues servaient encore l'ancien titre à Googlebot téléphone, le
+ * nouveau à Googlebot ordinateur. Un recache refait donc la copie téléphone ;
+ * la copie ordinateur se refait à son expiration (7 jours), même nombre de
+ * rendus.
+ */
+const RECACHE_ADAPTIVE_TYPE = "mobile";
+
+function recacheBody(url: string, token: string) {
+  return { prerenderToken: token, url, adaptiveType: RECACHE_ADAPTIVE_TYPE };
+}
+
 async function requestRecache(url: string, token: string): Promise<RecacheResult> {
   try {
     const r = await fetch("https://api.prerender.io/recache", {
       method: "POST",
       signal: AbortSignal.timeout(20_000),
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prerenderToken: token, url }),
+      body: JSON.stringify(recacheBody(url, token)),
     });
     const text = (await r.text()).slice(0, 500);
     return { ok: r.ok, status: r.status, detail: text };
