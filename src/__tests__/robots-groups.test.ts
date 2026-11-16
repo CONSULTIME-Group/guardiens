@@ -34,6 +34,17 @@ describe("robots.txt, interprétation par groupe le plus spécifique", () => {
     for (const ua of ALLOWED_UAS) for (const p of sitemapPaths) expect(isAllowed(robots, ua, p), `${ua} ${p}`).toBe(true);
   });
 
+  it.each(["facebookexternalhit/1.1", "Twitterbot", "LinkedInBot", "WhatsApp/2.23", "Slackbot-LinkExpanding"])(
+    "%s : lien de campagne explorable, chemins privés bloqués (lot SOC3)",
+    (ua) => {
+      expect(isAllowed(robots, ua, "/actualites/garde-chien-faire-garder-son-chien?utm_source=facebook&utm_campaign=garde-s47")).toBe(true);
+      expect(isAllowed(robots, ua, "/annonces/x?utm_campaign=y")).toBe(true);
+      expect(isAllowed(robots, ua, "/tarifs?sessionid=1")).toBe(false);
+      for (const p of PRIVATE) expect(isAllowed(robots, ua, p), `${ua} ${p}`).toBe(false);
+      for (const p of PUBLIC_NOINDEX) expect(isAllowed(robots, ua, p), `${ua} ${p}`).toBe(true);
+    },
+  );
+
   it("ByteSpider et cohere-ai bloqués partout", () => {
     for (const ua of ["ByteSpider", "cohere-ai"]) {
       expect(isAllowed(robots, ua, "/")).toBe(false);
