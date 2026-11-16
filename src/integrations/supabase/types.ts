@@ -8967,6 +8967,30 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_seo_city_pages_urgence_20261116: {
+        Row: {
+          content: string | null
+          id: string | null
+          saved_at: string | null
+          slug: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          content?: string | null
+          id?: string | null
+          saved_at?: string | null
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string | null
+          id?: string | null
+          saved_at?: string | null
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_seo_family_state_20261003_2130: {
         Row: {
           family: string | null
@@ -15593,6 +15617,63 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_declared_sources: {
+        Row: {
+          answer: string
+          context: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          context: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          context?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_declared_sources_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "profile_declared_sources_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_declared_sources_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_helpers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_declared_sources_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_declared_sources_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+        ]
+      }
       profile_moderation: {
         Row: {
           admin_notes: string | null
@@ -20388,6 +20469,14 @@ export type Database = {
       admin_cron_health: { Args: never; Returns: Json }
       admin_dashboard_snapshot: { Args: never; Returns: Json }
       admin_dashboard_summary: { Args: never; Returns: Json }
+      admin_declared_sources: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          answer: string
+          members: number
+          with_published_sit: number
+        }[]
+      }
       admin_draft_email_preferences: {
         Args: { p_owner_ids: string[] }
         Returns: {
@@ -20531,6 +20620,14 @@ export type Database = {
           unique_member_view_count: number
           unique_view_count: number
           view_count: number
+        }[]
+      }
+      admin_get_listings_waiting: {
+        Args: { p_sit_ids: string[] }
+        Returns: {
+          oldest_waiting_at: string
+          sit_id: string
+          waiting_count: number
         }[]
       }
       admin_get_member_card: { Args: { p_user_id: string }; Returns: Json }
@@ -22245,6 +22342,10 @@ export type Database = {
           _source: string
         }
         Returns: undefined
+      }
+      record_declared_source: {
+        Args: { p_answer: string; p_context: string }
+        Returns: boolean
       }
       record_legal_acceptance_for: {
         Args: { p_source: string; p_user: string }
