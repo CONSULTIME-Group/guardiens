@@ -164,7 +164,9 @@ function noApplicationGesture(sitId: string, signals: PilotageSignal[], model: W
       chip: days !== null ? `Départ ${departureLabel(days)}` : "Cette semaine",
       tone: today ? "urgent" : "normal",
       kind: "broadcast",
-      actionLabel: eligible > 1 ? `Prévenir les ${eligible} gardiens` : eligible === 1 ? "Prévenir le gardien" : "Élargir la diffusion",
+      // Lot ANN-3 : le nombre de gardiens du coin inclut ceux déjà prévenus,
+      // le bouton dit donc le geste, la fenêtre de diffusion dit qui le recevra.
+      actionLabel: "Diffuser l'annonce",
       links: [{ label: "L'annonce", to: `/admin/listings?sit=${encodeURIComponent(sitId)}` }],
       signals,
       secondaryWrite: ownerId

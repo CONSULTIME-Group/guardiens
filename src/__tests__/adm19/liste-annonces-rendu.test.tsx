@@ -119,4 +119,27 @@ describe("liste des annonces, rendu", () => {
     expect(await within(row).findByTestId("row-broadcast")).toBeTruthy();
     expect(within(row).getByTestId("row-messages").textContent).toBe("0");
   });
+  it("ANN-5 : au téléphone, une carte par annonce avec ses gestes, sans tableau", async () => {
+    const before = window.innerWidth;
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 375 });
+    try {
+      rows.sits = [sit("c1", "Maison de campagne", 3)];
+      stats.length = 0;
+      stats.push(stat("c1", {}));
+      const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      render(
+        <QueryClientProvider client={qc}>
+          <MemoryRouter initialEntries={["/admin/listings?filter=published"]}><AdminListings /></MemoryRouter>
+        </QueryClientProvider>,
+      );
+      const cards = await screen.findAllByTestId("listing-card");
+      expect(cards).toHaveLength(1);
+      expect(screen.queryByRole("table")).toBeNull();
+      expect(within(cards[0]).getByText("Maison de campagne")).toBeTruthy();
+      expect(await within(cards[0]).findByTestId("row-broadcast")).toBeTruthy();
+      expect(within(cards[0]).getByTestId("row-write-owner").textContent).toContain("Écrire à Camille");
+    } finally {
+      Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: before });
+    }
+  });
 });
