@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
-import { COOKIE_BANNER_HEIGHT_EVENT } from "@/components/legal/CookieConsentBanner";
+import { COOKIE_BANNER_HEIGHT_EVENT, COOKIE_BANNER_HEIGHT_VAR } from "@/lib/cookieBannerHeight";
 import MapErrorBoundary from "@/components/shared/MapErrorBoundary";
 import { MapContainer, TileLayer, Marker, useMap, ZoomControl } from "react-leaflet";
 import L from "leaflet";
@@ -96,7 +96,7 @@ const cssPx = (name: string): number => {
  * hauteur du bandeau cookies ouvert s'ajoute (0 px une fois fermé).
  */
 export const bottomReserve = (isMobile: boolean): number => {
-  const banner = cssPx("--cookie-banner-h");
+  const banner = cssPx(COOKIE_BANNER_HEIGHT_VAR);
   if (!isMobile) return 16 + banner;
   // 88 px couvrent le dock d'Alma et le bouton de bascule vers la liste.
   return cssPx("--bottom-nav-h") + 88 + banner;

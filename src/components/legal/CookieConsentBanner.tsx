@@ -9,6 +9,7 @@ import {
   shouldShowBanner,
   isBotUserAgent,
 } from "@/lib/cookieConsent";
+import { COOKIE_BANNER_HEIGHT_EVENT, COOKIE_BANNER_HEIGHT_VAR } from "@/lib/cookieBannerHeight";
 
 /** Textes du bandeau (lot C1, volet publicitaire ajouté le 31/10/2026). */
 export const COOKIE_BANNER_TEXT = {
@@ -31,16 +32,7 @@ export const COOKIE_BANNER_TEXT = {
   regionLabel: "Cookies",
 } as const;
 
-/**
- * Lot BAS1 (16/11/2026) : hauteur réelle du bandeau ouvert, publiée sur
- * <html> pour que les éléments fixés en bas d'écran (bouton « Carte », barres
- * de candidature, barre de navigation basse) et le bas des pages se placent
- * au dessus de lui. Vaut 0px dès que le bandeau est fermé ou démonté.
- */
-export const COOKIE_BANNER_HEIGHT_VAR = "--cookie-banner-h";
-
-/** Lot BAS2 : prévient les éléments qui mesurent leur place (carte des annonces) quand la hauteur change. */
-export const COOKIE_BANNER_HEIGHT_EVENT = "guardiens:cookie-banner-height";
+export { COOKIE_BANNER_HEIGHT_VAR, COOKIE_BANNER_HEIGHT_EVENT };
 
 function setBannerHeight(root: HTMLElement, value: string) {
   if (root.style.getPropertyValue(COOKIE_BANNER_HEIGHT_VAR) === value) return;
