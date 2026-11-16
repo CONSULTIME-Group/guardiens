@@ -35,6 +35,8 @@ function harness(options: { signal?: boolean; noServiceKey?: boolean; readError?
     require: (specifier: string) => {
       if (specifier.endsWith("/cors")) return { corsHeaders: { "Access-Control-Allow-Origin": "*" } };
       if (specifier.includes("supabase-js")) return { createClient };
+      // Lot JOURN2 : le journal des passages est hors du périmètre de ce test.
+      if (specifier.endsWith("/cron-run-log.ts")) return { withCronRunLog: (_name: string, fn: typeof handler) => fn };
       throw new Error(`Unexpected import ${specifier}`);
     },
   });

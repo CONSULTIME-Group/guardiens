@@ -13,7 +13,7 @@
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
-import { startCronRun } from "../_shared/cron-run-log.ts";
+import { withCronRunLog } from "../_shared/cron-run-log.ts";
 import { isMeetupDue, isMeetupSendingHour, MEETUP_PROMPT_TITLE, meetupPromptBody } from "../_shared/mission-meetup.ts";
 
 const corsHeaders = {
@@ -46,7 +46,7 @@ async function sendEmail(payload: Record<string, unknown>) {
   return res.ok;
 }
 
-Deno.serve(async (req) => {
+Deno.serve(withCronRunLog("send-mission-meetup-prompt", async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const denied = await requireCronCaller(req, corsHeaders, "send-mission-meetup-prompt");
@@ -166,16 +166,11 @@ Deno.serve(async (req) => {
       details.push({ mission_id: mission.id, people: people.length });
     }
 
-    if (prompted > 0) {
-      const run = await startCronRun("send-mission-meetup-prompt");
-      await run.finish("success", { missions_prompted: prompted, emails_sent: emails, details });
-    }
-
+    // Lot JOURN2 : chaque passage planifié est écrit par withCronRunLog
+    // (missions_prompted et emails_sent repris de la réponse), une seule ligne.
     return json({ ok: true, missions_prompted: prompted, emails_sent: emails, details });
   } catch (e) {
-    const run = await startCronRun("send-mission-meetup-prompt");
-    await run.fail(e);
     console.error("[send-mission-meetup-prompt] fatal", e);
     return json({ ok: false, error: String(e) }, 500);
   }
-});
+}));
