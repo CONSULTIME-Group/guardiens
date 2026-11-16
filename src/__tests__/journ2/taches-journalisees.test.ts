@@ -122,7 +122,9 @@ describe("JOURN2, horaires des tâches pg_net", () => {
       "source-guide-places",
     ]) {
       expect(sql).toMatch(new RegExp(`\\('${name}', \\d+, '`));
-      expect(sql).toContain(`('${name}', timestamptz '2026-11-17 08:00:00+00')`);
+      // La tâche hebdomadaire ne repasse que le lundi 23/11 : grâce au 24/11.
+      const grace = name === "alert-content-quality" ? "2026-11-24" : "2026-11-17";
+      expect(sql).toContain(`('${name}', timestamptz '${grace} 08:00:00+00')`);
     }
     expect(sql).not.toMatch(/\('enrich-guide-places-osm', \d+, '/);
   });

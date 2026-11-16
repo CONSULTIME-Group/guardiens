@@ -131,7 +131,7 @@ BEGIN
       ('geocode-city-pages', 60, 'Géocodage des pages villes'),
       ('source-guide-places', 60, 'Génération des guides locaux')$n$);
   d := replace(d, a_grace, a_grace || $n$,
-      ('alert-content-quality', timestamptz '2026-11-17 08:00:00+00'),
+      ('alert-content-quality', timestamptz '2026-11-24 08:00:00+00'),
       ('send-analysis-requests-digest', timestamptz '2026-11-17 08:00:00+00'),
       ('email-delivery-daily', timestamptz '2026-11-17 08:00:00+00'),
       ('send-mission-meetup-prompt', timestamptz '2026-11-17 08:00:00+00'),
