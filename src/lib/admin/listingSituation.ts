@@ -160,7 +160,7 @@ export const LISTING_FILTERS = [
 export type ListingFilter = typeof LISTING_FILTERS[number];
 
 export const LISTING_FILTER_LABELS: Record<ListingFilter, string> = {
-  published: "Cherchent un gardien (par défaut)",
+  published: "En ligne, cherchent un gardien",
   recent: "Publiées depuis 7 jours",
   to_staff: "Sans candidature depuis 48 h",
   waiting_long: "Candidats en attente depuis plus de 7 jours",
@@ -178,6 +178,15 @@ export const LISTING_FILTER_LABELS: Record<ListingFilter, string> = {
   no_draft: "Tout sauf préparation et retirées",
   all: "Tous les états",
 };
+
+/**
+ * Lot ANN-3 (16/11/2026) : la liste déroulante propose 8 choix. Les filtres
+ * d'urgence passent par les compteurs en tête de page ; les autres
+ * identifiants restent valides dans l'adresse (?filter=).
+ */
+export const LISTING_FILTER_MENU = [
+  "published", "recent", "ready", "preparing", "withdrawn", "closed", "cancelled", "all",
+] as const satisfies readonly ListingFilter[];
 
 export interface ListingQueryScope {
   /** Lot ADM3 : dernière publication dans les N derniers jours, tout statut. */

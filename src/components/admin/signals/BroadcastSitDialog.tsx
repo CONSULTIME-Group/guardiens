@@ -1,3 +1,4 @@
+import { proximityEmptyText } from "@/lib/admin/proximityEmpty";
 import { useEffect, useState } from "react";
 import { Loader2, Search, Send, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
@@ -44,6 +45,8 @@ interface Props {
 
 interface PreviewData {
   count: number;
+  /** Gardiens du rayon déjà servis pour cette annonce, ou dans les 7 derniers jours. */
+  excluded_recent?: number;
   author_first_name?: string;
   sit?: {
     id: string;
@@ -261,8 +264,8 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
                   </ul>
                 </div>
               ) : (
-                <p className="px-3 py-4 text-sm text-muted-foreground">
-                  Aucun gardien éligible dans ce rayon.
+                <p className="px-3 py-4 text-sm text-muted-foreground" data-testid="proximity-empty">
+                  {proximityEmptyText(preview.excluded_recent, radiusKm)}
                 </p>
               )}
               {preview.truncated && (

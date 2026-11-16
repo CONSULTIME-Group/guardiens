@@ -98,7 +98,7 @@ describe("Détails retiré, une action utile à la place", () => {
     // Même règle que le signal et la pastille : en ligne depuis 48 h, départ à venir, aucune candidature active.
     expect(LISTINGS).toContain("isListingToStaff({ ...listing, activeApplications: st.applications })");
     expect(LISTINGS).toContain('data-testid="row-broadcast"');
-    expect(LISTINGS).toContain("Fiche du membre");
+    expect(LISTINGS).toContain("Fiche du propriétaire");
   });
 
   it("Entraide : plus de fiche Détails, Diffuser sur un besoin ouvert sans envoi réussi, sinon Voir", () => {
