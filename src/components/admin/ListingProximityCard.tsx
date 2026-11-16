@@ -6,6 +6,7 @@
  * exact) → send. Aucun envoi tant que l'admin ne clique pas sur Envoyer.
  */
 import { useState, useEffect, useRef } from "react";
+import { proximityReachLine } from "@/lib/admin/proximityReach";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -53,6 +54,7 @@ interface PreviewRecipient {
 }
 interface PreviewData {
   count: number;
+  excluded_recent?: number;
   author_first_name: string;
   sit: {
     id: string;
@@ -293,6 +295,11 @@ const ListingProximityCard = ({
             <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-primary font-medium">
               {preview.count} gardien{preview.count > 1 ? "s" : ""} ciblé{preview.count > 1 ? "s" : ""}
             </span>
+            {proximityReachLine(preview.count, preview.excluded_recent) && (
+              <span className="basis-full text-xs text-muted-foreground" data-testid="proximity-reach-line">
+                {proximityReachLine(preview.count, preview.excluded_recent)}
+              </span>
+            )}
             {preview.sit.date_range && (
               <span className="inline-flex items-center rounded-full bg-muted/60 px-2.5 py-1 text-muted-foreground">
                 {preview.sit.date_range}

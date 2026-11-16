@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, Search, Send, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { proximityReachLine } from "@/lib/admin/proximityReach";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -44,6 +45,7 @@ interface Props {
 
 interface PreviewData {
   count: number;
+  excluded_recent?: number;
   author_first_name?: string;
   sit?: {
     id: string;
@@ -235,6 +237,11 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
                   {preview.count} destinataire{preview.count > 1 ? "s" : ""} ciblé
                   {preview.count > 1 ? "s" : ""}
                 </p>
+                {proximityReachLine(preview.count, preview.excluded_recent) && (
+                  <p className="text-xs text-muted-foreground mt-0.5" data-testid="proximity-reach-line">
+                    {proximityReachLine(preview.count, preview.excluded_recent)}
+                  </p>
+                )}
                 {preview.subject && (
                   <p
                     className="text-xs text-muted-foreground mt-0.5 truncate"
