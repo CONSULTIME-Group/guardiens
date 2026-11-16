@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Building2, Compass, Plus, ShieldCheck, Siren, Scale, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,7 @@ import { trackEvent } from "@/lib/analytics";
 import { departmentIn } from "@/lib/departmentGrammar";
 import { wikimediaThumb } from "@/lib/wikimediaThumb";
 import { LEGAL_HOME_OWNER_ARTICLE_SLUG } from "@/components/articles/ArticleRenderer";
-import { pilotIntro, pilotProofLine, type CityPilotV2 } from "@/data/cityPilotV2";
+import { pilotProofLine, type PilotGuide } from "@/data/cityPilotV2";
 
 /**
  * Lot VIL1 (16/11/2026) : gabarit ville v2, maquette Claude Design
@@ -44,10 +45,17 @@ export interface CityPilotV2Page {
 
 interface Props {
   page: CityPilotV2Page;
-  pilot: CityPilotV2;
+  /** Intro de l'écran 1, qui commence par « Le home sitting à {ville} ». */
+  intro: string;
+  guide: PilotGuide | null;
   faq: { q: string; a: string }[];
-  /** Corps éditorial en base, rendu quand la ville n'a pas de guide vérifié. */
-  dbContent: string | null;
+  /**
+   * Corps éditorial (base ou contenu statique), rendu après le guide
+   * sourcé ou à sa place.
+   */
+  editorial: ReactNode | null;
+  /** Image de tête : vignette Wikimedia en base, ou image importée. */
+  cover?: { src: string; alt: string; original?: string | null } | null;
   departmentCode: string | null;
   departmentPage: { slug: string; department: string } | null;
   cityGuide: { slug: string; city: string } | null;
@@ -60,11 +68,10 @@ const STEPS = [
   { title: "Partez l'esprit léger", text: "Votre gardien s'installe et suit le guide de la maison." },
 ];
 
-const CityPilotV2Body = ({ page, pilot, faq, dbContent, departmentCode, departmentPage, cityGuide }: Props) => {
+const CityPilotV2Body = ({ page, intro, guide, faq, editorial, cover, departmentCode, departmentPage, cityGuide }: Props) => {
   const { user } = useAuth();
   const publishHref = ownerPublishHref(!user, "ville");
   const proof = pilotProofLine(page.city, page.sitter_count ?? 0, page.nearby_sitter_count ?? 0);
-  const guide = pilot.guide;
 
   const onPublish = (place: "hero" | "final") => {
     try {
@@ -85,7 +92,7 @@ const CityPilotV2Body = ({ page, pilot, faq, dbContent, departmentCode, departme
       <section className="max-w-5xl mx-auto px-4 pt-4 pb-10" data-testid="city-v2-hero">
         <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground mb-4">{page.h1_title}</h1>
         <p className="text-lg text-foreground/80 max-w-3xl leading-relaxed mb-5" data-testid="city-v2-intro">
-          {pilotIntro(page.city, pilot)}
+          {intro}
         </p>
         {proof && (
           <p className="inline-flex items-center gap-2 rounded-full bg-pastel-sage px-4 py-2 text-[15px] font-medium text-pastel-sage-ink mb-6" data-testid="city-v2-proof">
@@ -102,18 +109,19 @@ const CityPilotV2Body = ({ page, pilot, faq, dbContent, departmentCode, departme
           </Link>
           <p className="text-sm text-muted-foreground sm:self-center">Guardiens est gratuit.</p>
         </div>
-        {page.cover_image_url && (
+        {cover && (
           <img
-            src={wikimediaThumb(page.cover_image_url)}
-            alt={page.hero_image_alt || `Vue de ${page.city}`}
+            src={cover.src}
+            alt={cover.alt}
             loading="eager"
             fetchPriority="high"
             decoding="async"
             onError={(e) => {
+              // Vignette refusée : l'original prend le relais une fois.
               const img = e.currentTarget as HTMLImageElement;
-              if (img.dataset.fallback !== "1" && page.cover_image_url && img.src !== page.cover_image_url) {
+              if (img.dataset.fallback !== "1" && cover.original && img.src !== cover.original) {
                 img.dataset.fallback = "1";
-                img.src = page.cover_image_url;
+                img.src = cover.original;
                 return;
               }
               img.style.display = "none";
@@ -152,8 +160,8 @@ const CityPilotV2Body = ({ page, pilot, faq, dbContent, departmentCode, departme
         </ol>
       </section>
 
-      {/* Guide local */}
-      {guide ? (
+      {/* Guide local sourcé */}
+      {guide && (
         <section className="max-w-3xl mx-auto px-4 py-10 border-t border-border" data-testid="city-v2-guide">
           <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-3">{guide.title}</h2>
           <p className="text-foreground/80 leading-relaxed mb-6">{guide.intro}</p>
@@ -195,14 +203,13 @@ const CityPilotV2Body = ({ page, pilot, faq, dbContent, departmentCode, departme
             </ul>
           </div>
         </section>
-      ) : (
-        dbContent && (
-          <section className="max-w-3xl mx-auto px-4 py-10 border-t border-border" data-testid="city-v2-editorial">
-            <article className="prose prose-lg prose-neutral max-w-none prose-headings:font-heading prose-headings:text-foreground prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-5 prose-h3:text-xl prose-p:text-foreground/80 prose-li:text-foreground/80 prose-a:text-primary">
-              <MarkdownBody>{dbContent}</MarkdownBody>
-            </article>
-          </section>
-        )
+      )}
+
+      {/* Corps éditorial local (base ou statique), sections redondantes retirées */}
+      {editorial && (
+        <section className="max-w-3xl mx-auto px-4 py-10 border-t border-border" data-testid="city-v2-editorial">
+          {editorial}
+        </section>
       )}
 
       {/* Liens */}

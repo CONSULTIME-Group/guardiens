@@ -33,7 +33,7 @@ import { CITIES } from "@/data/cities";
 import { useCityStats } from "@/hooks/useCityStats";
 import { getCityContent, REVISED_CITY_SLUGS } from "@/data/cityContent";
 import { DB_CITY_REVISIONS } from "@/data/dbCityRevisions";
-import { getCityPilotV2, pilotFaq } from "@/data/cityPilotV2";
+import { isCityV2Active, pilotFaq, pilotIntro, resolveCityV2, trimCityEditorial, V2_REDUNDANT_SECTION } from "@/data/cityPilotV2";
 import CityPilotV2Body from "@/components/city/CityPilotV2Body";
 import { GUIDE_OVERRIDES } from "@/data/guideOverrides";
 import CityPageMeta from "@/components/seo/CityPageMeta";
@@ -58,6 +58,17 @@ import { useContentStats } from "@/hooks/useContentStats";
 import { interpolatePlaceholders } from "@/lib/contentPlaceholders";
 import { slugify } from "@/lib/normalize";
 import { useDepartmentPageExists } from "@/hooks/useDepartmentPageExists";
+
+/** Lot VIL2 : corps éditorial en base dans le gabarit v2 (intro restante, puis sections locales). */
+const CityV2Editorial = ({ introRest, markdown }: { introRest: string | null; markdown: string | null }) => {
+  if (!introRest && !markdown) return null;
+  return (
+    <article className="prose prose-lg prose-neutral max-w-none prose-headings:font-heading prose-headings:text-foreground prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-5 prose-h3:text-xl prose-p:text-foreground/80 prose-li:text-foreground/80 prose-a:text-primary">
+      {introRest && <p>{introRest}</p>}
+      {markdown && <MarkdownBody>{markdown}</MarkdownBody>}
+    </article>
+  );
+};
 
 const CityPage = () => {
  const { slug } = useParams<{ slug: string }>();
@@ -288,6 +299,44 @@ const CityPage = () => {
   }, [slug, cityData, seoCounts, dbLoading, dbPage]);
 
  // ── STATIC CITY DATA PATH ──
+ // Lot VIL2 : les villes statiques passent au gabarit v2 (même rendu que les
+ // pages en base). Contenus statiques repris, sections redondantes retirées.
+ if (cityData && isCityV2Active(cityData.slug)) {
+  const v2 = resolveCityV2(cityData.slug, cityData.name, null);
+  const v2Faq = pilotFaq(cityData.name, v2);
+  const sections = (cityContent?.articleSections ?? []).filter(
+   (sec) => !V2_REDUNDANT_SECTION.test(sec.title.trim()),
+  );
+  const heroSrc = CITY_HERO_IMAGES[cityData.slug];
+  return (
+   <>
+    <CityPageMeta city={cityData} ready={!contentStatsLoading} />
+    <CitySchemaOrg city={cityData} faqItems={v2Faq} />
+    <CityPilotV2Body
+     page={{
+      slug: cityData.slug,
+      city: cityData.name,
+      department: cityData.department,
+      h1_title: cityData.h1,
+      sitter_count: seoCounts?.sitter_count ?? 0,
+      nearby_sitter_count: seoCounts?.nearby_sitter_count ?? 0,
+      latitude: cityData.coordinates.lat,
+      longitude: cityData.coordinates.lng,
+     }}
+     intro={pilotIntro(cityData.name, v2)}
+     guide={v2.guide}
+     faq={v2Faq}
+     cover={heroSrc ? { src: heroSrc, alt: cityContent?.heroAlt || cityData.heroImageAlt || `Vue de ${cityData.name}` } : null}
+     editorial={
+      sections.length ? <CityArticleBody sections={sections} /> : <LocalSpotsGrid city={cityData} />
+     }
+     departmentCode={cityData.departmentCode}
+     departmentPage={departmentPageExists && departmentSlug ? { slug: departmentSlug, department: cityData.department } : null}
+     cityGuide={cityGuide ?? null}
+    />
+   </>
+  );
+ }
  if (cityData) {
  const content = cityContent;
  const staticNearbyMention = buildNearbyMention(
@@ -757,9 +806,12 @@ const CityPage = () => {
      dbPage.nearby_sitter_count ?? 0
    );
   const dbRevision = DB_CITY_REVISIONS[dbPage.slug];
-  // Lot VIL1 : pilote du gabarit v2, liste fermée (src/data/cityPilotV2.ts).
-  const dbPilot = getCityPilotV2(dbPage.slug);
-  const dbFaqItems = dbPilot ? pilotFaq(dbPage.city, dbPilot) : dbRevision ? dbRevision.faq : [
+  // Lot VIL2 : gabarit v2 pour toute page ville en base, témoins du pilote
+  // VIL1 sur l'ancien gabarit jusqu'au 14/12/2026 (src/data/cityPilotV2.ts).
+  const dbV2 = isCityV2Active(dbPage.slug)
+    ? resolveCityV2(dbPage.slug, dbPage.city, dbInterpolated.intro)
+    : null;
+  const dbFaqItems = dbV2 ? pilotFaq(dbPage.city, dbV2) : dbRevision ? dbRevision.faq : [
     {
       q: `Comment trouver un gardien de maison à ${dbPage.city} ?`,
       a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${dbPage.city} et ses environs postulent directement. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson sur les profils avant de choisir.`,
@@ -848,12 +900,26 @@ const CityPage = () => {
         />
       )}
 
-      {dbPilot ? (
+      {dbV2 ? (
         <CityPilotV2Body
           page={dbPage}
-          pilot={dbPilot}
+          intro={pilotIntro(dbPage.city, dbV2)}
+          guide={dbV2.guide}
           faq={dbFaqItems}
-          dbContent={dbInterpolated.content}
+          cover={
+            dbPage.cover_image_url
+              ? {
+                  src: wikimediaThumb(dbPage.cover_image_url),
+                  alt: dbPage.hero_image_alt || `Vue de ${dbPage.city}`,
+                  original: dbPage.cover_image_url,
+                }
+              : null
+          }
+          editorial={
+            dbV2.guide ? null : (
+              <CityV2Editorial introRest={dbV2.introRest} markdown={trimCityEditorial(dbInterpolated.content)} />
+            )
+          }
           departmentCode={dbDepartmentCode ?? null}
           departmentPage={departmentPage ?? null}
           cityGuide={cityGuide ?? null}
