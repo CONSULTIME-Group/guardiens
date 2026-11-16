@@ -104,6 +104,7 @@ import OwnerVisitorLine from "@/components/search/listing/OwnerVisitorLine";
 import { isRadiusDeclared } from "@/lib/searchRadius";
 import { itemListPlace, itemListSpecies } from "@/lib/itemListFacts";
 import { ownerPublishHref } from "@/lib/almaVisitorSearch";
+import { settleComplements, reportComplementFailures } from "@/lib/complementReads";
 import { applyOpenSitFilter, checkGeocodedPoint, communeDeptFromCoords, pointUsable, fetchAllPages, fetchInChunks, isEndedSit, isFrancePlace, isOpenSit, isPastSit, isWithinRadius, parisTodayIso, resolveSitPlace, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -1277,28 +1278,22 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
      fetchInChunks<any>(ownerIds, (chunk, from, to) =>
        supabase.from("public_owner_profiles").select("user_id, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").in("user_id", chunk).order("user_id", { ascending: true }).range(from, to) as any),
    ]);
-   if (ownersRes.error || galleryRes.error) {
-     console.error("[SearchSitter] Erreur hydratation propriétaires:", ownersRes.error || galleryRes.error);
-     return { ...empty, error: "Impossible de charger les informations des propriétaires." };
-   }
-   if (petsRes.error) {
-     console.error("[SearchSitter] Erreur chargement pets:", petsRes.error);
-     return { ...empty, error: "Impossible de charger les animaux." };
-   }
-   if (reviewsRes.error) {
-     console.error("[SearchSitter] Erreur chargement reviews:", reviewsRes.error);
-     return { ...empty, error: "Impossible de charger les avis." };
-   }
-   if (badgesRes.error) {
-     console.error("[SearchSitter] Erreur chargement badges:", badgesRes.error);
-     return { ...empty, error: "Impossible de charger les badges." };
-   }
-   if (ownerProfRes.error) {
-     console.error("[SearchSitter] Erreur chargement owner_profiles:", ownerProfRes.error);
-     return { ...empty, error: "Impossible de charger les profils propriétaires." };
-   }
-   const galleryRows = [...(galleryRes.data || [])].sort((a: any, b: any) => (a.position ?? 0) - (b.position ?? 0));
-   const ownerMap = new Map((ownersRes.data || []).map((o: any) => [o.id, o]));
+   // Lot BAS2 (16/11/2026) : seule la lecture des annonces peut afficher une
+   // erreur. Fiches des propriétaires, photos du logement, animaux, avis,
+   // écussons et profils propriétaires sont des compléments : une source en
+   // erreur reste vide, la liste s'affiche, et l'erreur part une fois par
+   // chargement dans le journal, sans message à l'écran.
+   const { rows: comp, failed: compFailed } = settleComplements({
+     public_profiles: ownersRes,
+     owner_gallery: galleryRes,
+     public_pets: petsRes,
+     reviews: reviewsRes,
+     public_badge_attributions: badgesRes,
+     public_owner_profiles: ownerProfRes,
+   });
+   reportComplementFailures("SearchSitter", compFailed);
+   const galleryRows = [...comp.owner_gallery].sort((a: any, b: any) => (a.position ?? 0) - (b.position ?? 0));
+   const ownerMap = new Map(comp.public_profiles.map((o: any) => [o.id, o]));
    // Repli d'affichage : on retient la photo de LIEU la mieux placée
    // (logement, jardin, puis quartier), jamais une photo d'animal en priorité.
    const galleryByOwner = new Map<string, any[]>();
@@ -1320,7 +1315,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
        ownerGalleryFirstPhoto: galleryFirstMap.get(s.user_id) || null,
      }));
    }
-   return { error: null, items, truncated, petsRows: petsRes.data || [], reviewsRows: reviewsRes.data || [], badgesRows: badgesRes.data || [], ownerProfRows: ownerProfRes.data || [] };
+   return { error: null, items, truncated, petsRows: comp.public_pets, reviewsRows: comp.reviews, badgesRows: comp.public_badge_attributions, ownerProfRows: comp.public_owner_profiles };
    } catch (e) {
      console.error("[SearchSitter] Erreur chargement annonces:", e);
      return { ...empty, error: "Impossible de charger les annonces." };
@@ -1483,12 +1478,13 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
       .from("public_profiles")
       .select("id, first_name, avatar_url, city, postal_code, identity_verified, is_founder")
       .in("id", ownerIds);
-    if (ownersError) {
-      console.error("[SearchSitter] Erreur hydratation propriétaires (missions):", ownersError);
-      setSearchError("Impossible de charger les informations des propriétaires.");
-      return;
-    }
-    const ownerMap = new Map<string, any>((owners || []).map((o: any) => [o.id, o]));
+    // Lot BAS2 : la fiche des personnes qui publient est un complément, une
+    // lecture en échec laisse la liste s'afficher sans prénom ni photo.
+    const { rows: missionComp, failed: missionCompFailed } = settleComplements({
+      public_profiles: { data: owners, error: ownersError },
+    });
+    reportComplementFailures("SearchSitter missions", missionCompFailed);
+    const ownerMap = new Map<string, any>(missionComp.public_profiles.map((o: any) => [o.id, o]));
     items = items.map((m: any) => ({ ...m, owner: ownerMap.get(m.user_id) || null }));
   }
   // Note: missionTypeFilter / missionCategoryFilter / verifiedOnly / sort / demos
