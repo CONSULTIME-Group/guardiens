@@ -36,7 +36,7 @@ export default function WebVitalsCard() {
       <CardHeader>
         <CardTitle>Vitesse ressentie</CardTitle>
         <CardDescription>
-          Site public guardiens.fr, 7 derniers jours, 75e centile (3 visites sur 4 font mieux). Affichage principal (LCP), réactivité (INP), plus longue tâche des 10 premières secondes.
+          Site public guardiens.fr, 7 derniers jours, 75e centile (3 visites sur 4 font mieux). Affichage principal (LCP), réactivité (INP, rangée sous la page où le geste a eu lieu), plus longue tâche des 10 premières secondes.
           {summary ? ` ${summary.measures.toLocaleString("fr-FR")} mesures.` : ""}
           {q.data && q.data.length >= MAX_ROWS ? ` Limité aux ${MAX_ROWS.toLocaleString("fr-FR")} plus récentes.` : ""}
           {" "}« Après un geste » : de l'élargissement ou du changement de lieu à la première carte. « Issue vide » : vues dont la première recherche n'a rendu aucune carte.
