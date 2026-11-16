@@ -102,7 +102,7 @@ export const HubWhy = () => (
   <aside className="mt-10 flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 sm:gap-4 sm:px-5 md:max-w-3xl" aria-label="Pourquoi cette rubrique" data-testid="hub-why">
     <span className="shrink-0 font-heading text-2xl font-bold leading-none text-primary sm:text-4xl">24&nbsp;%</span>
     <p className="min-w-0 text-[13px] leading-snug text-foreground sm:text-sm sm:leading-relaxed">
-      des personnes en France se sentent seules souvent ou presque tous les jours (CRÉDOC, étude Solitudes 2025). Un coup de main, une sortie, un chantier : trois raisons simples de se parler entre gens du coin.{" "}
+      des personnes en France se sentent seules souvent ou presque tous les jours, et près d'un tiers (32 %) a des liens dans un seul cercle au plus : famille, amis, travail, entourage proche ou associations (CRÉDOC pour la Fondation de France, étude Solitudes 2025, enquête de juillet 2025 auprès de plus de 3 000 personnes). Un coup de main, une sortie, un chantier : trois raisons simples de se parler entre gens du coin.{" "}
       <Link to="/actualites/technologie-recreer-lien-pres-de-chez-soi" className="font-semibold text-primary underline underline-offset-4">Lire l'article</Link>
     </p>
   </aside>

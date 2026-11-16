@@ -76,7 +76,7 @@ describe("SORT11, même squelette", () => {
     const header = read("src/components/outings/HubHeader.tsx");
     expect(header).toContain('data-testid="hub-stat-line"');
     expect(header).toContain("md:text-xl md:font-bold md:text-primary");
-    expect(header).toContain("(CRÉDOC, étude Solitudes 2025)");
+    expect(header).toContain("(CRÉDOC pour la Fondation de France, étude Solitudes 2025");
     expect(header).toContain("/actualites/technologie-recreer-lien-pres-de-chez-soi");
     // L'ancien « 54 % » n'avait aucune source dans l'article cité.
     for (const page of PAGES) expect(read(page), page).not.toContain("54 %");

@@ -50,7 +50,10 @@ const FORBIDDEN = [
 
 /** Notions verrouillées : une clé de référence, et ses clés jumelles. */
 const LOCKED_GROUPS: Record<string, string[]> = {
-  entraide: ["nav.small_missions", "footer.links.small_missions", "landing.alma_tips.types.mutual_aid_tip"],
+  // Lot ES2 (16/11/2026) : la rubrique (menu, colonne du pied de page) s'appelle « Entraide & sorties » ;
+  // « Entraide » reste le nom du type de conseil d'Alma et du lien de pied de page.
+  entraide: ["footer.links.small_missions", "landing.alma_tips.types.mutual_aid_tip"],
+  entraide_sorties: ["nav.small_missions", "footer.sections.mutual_aid"],
   journal: ["nav.news", "footer.links.articles", "news.title", "news.breadcrumb"],
   guides: [
     "nav.guides",

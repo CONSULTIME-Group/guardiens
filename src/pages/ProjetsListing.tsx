@@ -229,7 +229,7 @@ const ProjetsListing = () => {
 
       <div className={`${HUB_SHELL} pb-24`}>
         {/* Lot ENT-MOB1 : fil d'Ariane visible à partir de 768 px, son JSON-LD reste servi partout. */}
-        <div className="hidden md:block"><PageBreadcrumb items={[{ label: "Projets participatifs" }]} /></div>
+        <div className="hidden md:block"><PageBreadcrumb items={[{ label: "Entraide & sorties", href: "/petites-missions" }, { label: "Chantiers participatifs" }]} /></div>
         {/* Lot HOME1 : les projets sont une forme d'entraide, mêmes onglets. */}
         <div className={HUB_TABS}><EntraideSortiesTabs active="projets" /></div>
         {/* Lot SORT11 : même en-tête que les onglets Entraide et Sorties. */}

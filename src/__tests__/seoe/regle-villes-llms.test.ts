@@ -156,10 +156,11 @@ describe("llms.txt décrit l'entraide actuelle", () => {
 
   it("coups de main près de chez soi, exemples du projet, « Je peux », phrase d'échange du modèle A, gratuité", () => {
     expect(llms).toContain("coups de main près de chez soi");
-    for (const word of ["jardinage", "potager", "courses", "trajets", "jeux de société"]) expect(llms).toContain(word);
+    // Lot ES2 (16/11/2026) : la belote est une sortie (lot SORT13), elle quitte la liste des coups de main.
+    for (const word of ["jardinage", "potager", "courses", "trajets", "belote"]) expect(llms).toContain(word);
     expect(llms).toContain("« Je peux »");
     expect(llms).toContain(FIXED_EXCHANGE_OFFER);
-    expect(llms).toContain("- [Entraide](/petites-missions):");
+    expect(llms).toContain("- [Entraide & sorties](/petites-missions):");
     expect(llms).toContain("Guardiens est gratuit");
   });
 

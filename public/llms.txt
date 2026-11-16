@@ -2,7 +2,7 @@
 
 > Plateforme de garde d'animaux à domicile, de maison et de jardin en France. Guardiens est gratuit : mise en relation entre propriétaires d'animaux et gardiens de confiance habitant près de chez vous, et entraide entre particuliers : des coups de main près de chez soi.
 
-Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. L'entraide, ce sont des coups de main près de chez soi : jardinage, potager, courses, trajets, jeux de société. Une personne décrit son besoin, les gens du coin répondent « Je peux », et elle choisit avec qui échanger. En retour : un merci, un café, ou un coup de main quand ce sera votre tour. Vous voyez ça ensemble. La rencontre reste facultative, et les séjours de plusieurs jours relèvent de la garde de maison.
+Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. L'entraide, ce sont des coups de main près de chez soi : jardinage, potager, courses, trajets. Les sorties réunissent des membres proches autour d'une belote, d'une balade ou d'une randonnée. Une personne décrit son besoin, les gens du coin répondent « Je peux », et elle choisit avec qui échanger. En retour : un merci, un café, ou un coup de main quand ce sera votre tour. Vous voyez ça ensemble. La rencontre reste facultative, et les séjours de plusieurs jours relèvent de la garde de maison.
 
 ## Pages principales
 
@@ -12,7 +12,7 @@ Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vou
 - [Observatoire](/observatoire-garde-animaux): Chiffres-clés sur la garde d'animaux à domicile en France, datapoints sourcés.
 - [FAQ](/faq): Réponses aux questions fréquentes, fonctionnement, sécurité, entraide.
 - [Actualités](/actualites): Articles de fond sur la garde d'animaux, le house-sitting et la vie de la plateforme.
-- [Entraide](/petites-missions): Coups de main près de chez soi entre particuliers (jardinage, potager, courses, trajets, jeux de société) : une personne décrit son besoin, les gens du coin répondent « Je peux ». En retour : un merci, un café, ou un coup de main quand ce sera votre tour. Vous voyez ça ensemble. Guardiens est gratuit.
+- [Entraide & sorties](/petites-missions): Coups de main près de chez soi entre particuliers (jardinage, potager, courses, trajets) : une personne décrit son besoin, les gens du coin répondent « Je peux ». En retour : un merci, un café, ou un coup de main quand ce sera votre tour. Vous voyez ça ensemble. Guardiens est gratuit.
 <!-- entraide-villes:start -->
 - [Entraide à Lyon](/petites-missions/lyon): coups de main près de chez soi autour de Lyon, besoins déposés et personnes qui disent « Je peux ».
 - [Entraide à Marseille](/petites-missions/marseille): coups de main près de chez soi autour de Marseille, besoins déposés et personnes qui disent « Je peux ».
@@ -22,7 +22,7 @@ Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vou
 - [Entraide à Grenoble](/petites-missions/grenoble): coups de main près de chez soi autour de Grenoble, besoins déposés et personnes qui disent « Je peux ».
 - [Entraide à Bordeaux](/petites-missions/bordeaux): coups de main près de chez soi autour de Bordeaux, besoins déposés et personnes qui disent « Je peux ».
 <!-- entraide-villes:end -->
-- [Sorties](/sorties): Sorties et parties entre membres près de chez soi (belote, balade, vélo, randonnée, atelier), avec des places comptées. Chaque membre peut en proposer une.
+- [Sorties](/sorties): Sorties et parties entre membres près de chez soi (belote, balade, sport, randonnée, atelier), avec des places comptées. Chaque membre peut en proposer une.
 - [Projets participatifs](/projets): Projets à réaliser ensemble (plantation, construction, remise en état), participation selon ses envies et ses disponibilités.
 - [Gardien d'urgence](/gardien-urgence): Le réseau de gardiens d'urgence, ouvert dès que chaque secteur compte assez de gardiens expérimentés.
 - [Devenir home-sitter](/devenir-home-sitter): Guide pour devenir gardien à domicile sur Guardiens.
@@ -57,7 +57,7 @@ Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vou
 - Éditeur : Jérémie Martinot, SIRET 894 864 040 00015.
 - Modèle : Guardiens est gratuit pour tous les membres, aucune commission prélevée sur les gardes.
 - Évolution : Guardiens est gratuit aujourd'hui, ses coûts sont pris en charge par ses fondateurs. Une contribution sera demandée plus tard aux membres satisfaits, annoncée à l'avance par email.
-- Entraide entre particuliers : coups de main près de chez soi (jardinage, potager, courses, trajets, jeux de société), réponse en un geste avec « Je peux ». En retour : un merci, un café, ou un coup de main quand ce sera votre tour. Vous voyez ça ensemble.
+- Entraide entre particuliers : coups de main près de chez soi (jardinage, potager, courses, trajets), réponse en un geste avec « Je peux ». En retour : un merci, un café, ou un coup de main quand ce sera votre tour. Vous voyez ça ensemble.
 - Vérification d'identité : ouverte à tous les membres, propriétaires comme gardiens. La pièce d'identité envoyée est analysée automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Cette vérification n'est pas un préalable au dépôt d'une annonce ou d'une candidature, et elle ne concerne pas tous les profils.
 - Système de confiance : avis croisés après chaque garde, Trust Score 0-100, 32 badges de reconnaissance.
 - Pas de commission sur les gardes, pas de prélèvement entre membres.

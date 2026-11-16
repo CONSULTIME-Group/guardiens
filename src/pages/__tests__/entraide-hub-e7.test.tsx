@@ -254,7 +254,7 @@ describe("Entraide, la page vue d'un membre", () => {
     const meta = await screen.findByTestId("page-meta");
     expect(meta.textContent).toContain("FAQPage");
     expect(meta.textContent).not.toContain("Person");
-    expect(meta.getAttribute("data-description")).toBe("Jardinage, courses, trajets, une partie de belote : demandez ou proposez un coup de main près de chez vous. Guardiens est gratuit.");
+    expect(meta.getAttribute("data-description")).toBe("Coups de main entre gens du coin (potager, courses, trajets) et sorties à plusieurs (belote, balade, randonnée) près de chez vous. Guardiens est gratuit.");
     expect(meta.getAttribute("data-description")).not.toMatch(/voisin/i);
   });
 

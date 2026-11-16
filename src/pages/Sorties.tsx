@@ -15,6 +15,7 @@ import { fetchUpcomingOutings } from "@/lib/outingsData";
 import { OUTING_CATEGORIES, OUTING_COPY, outingCategory, type OutingCategory, type PublicOuting } from "@/lib/outings";
 import { capitalizeFirstName } from "@/lib/displayName";
 import { trackEvent } from "@/lib/analytics";
+import { SECTION_OG_IMAGES } from "@/data/siteConstants";
 
 /** Lot SORT1 : onglet Sorties de la rubrique « Entraide & sorties ». */
 const Sorties = () => {
@@ -78,10 +79,12 @@ const Sorties = () => {
         description="Belote, balade, sport, atelier : des moments à quelques-uns entre membres Guardiens, avec des places comptées. Guardiens est gratuit."
         path="/sorties"
         noindex={preview}
+        image={SECTION_OG_IMAGES.sorties.url}
+        imageAlt={SECTION_OG_IMAGES.sorties.alt}
       />
       <div>
         {/* Lot ENT-MOB1 : fil d'Ariane visible à partir de 768 px, son JSON-LD reste servi partout. */}
-        <div className="hidden md:block"><PageBreadcrumb items={[{ label: "Sorties" }]} /></div>
+        <div className="hidden md:block"><PageBreadcrumb items={[{ label: "Entraide & sorties", href: "/petites-missions" }, { label: "Sorties" }]} /></div>
         <div className={HUB_TABS}><EntraideSortiesTabs active="sorties" /></div>
         {preview && (
           <p role="status" className="mt-3 rounded-xl bg-accent/40 px-4 py-3 text-sm">
