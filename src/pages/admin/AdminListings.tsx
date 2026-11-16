@@ -50,6 +50,8 @@ import { resolveSitStatusBadge, type SitStatusBadgeVariant } from "@/lib/sitStat
 import { unpublishReasonAdminLabel } from "@/lib/unpublishReason";
 import { calendarDate } from "@/lib/calendarDate";
 import { isListingToStaff } from "@/lib/admin/listingToStaff";
+import { compareUrgency, listingUrgency, matchesCounter, URGENCY_COUNTERS, type Urgency, type UrgencyInput } from "@/lib/admin/listingUrgency";
+import { memberMessageDrafts, type MemberDraftTopic } from "@/lib/admin/memberMessageDrafts";
 import { isPastDay } from "@/lib/calendarDate";
 import { isListingStartedWaiting } from "@/lib/admin/listingStartedWaiting";
 import { useAuth } from "@/contexts/AuthContext";
@@ -327,6 +329,33 @@ const AdminListings = () => {
     return () => { cancelled = true; };
   }, [listings, statsNonce]);
 
+  // Lot ANN-1 : candidatures qui attendent une réponse, et la plus ancienne, par annonce.
+  const [waiting, setWaiting] = useState<Record<string, { count: number; oldest: string | null }> | null>(null);
+  useEffect(() => {
+    setWaiting(null);
+    const ids = listings.filter((l) => l.status === "published").map((l) => l.id);
+    if (!ids.length) { setWaiting({}); return; }
+    let cancelled = false;
+    supabase.rpc("admin_get_listings_waiting" as any, { p_sit_ids: ids }).then(({ data, error }) => {
+      if (cancelled) return;
+      if (error) { console.error("admin_get_listings_waiting:", error); setWaiting({}); return; }
+      const map: Record<string, { count: number; oldest: string | null }> = {};
+      (data as any[] || []).forEach((r) => { map[r.sit_id] = { count: Number(r.waiting_count) || 0, oldest: r.oldest_waiting_at ?? null }; });
+      setWaiting(map);
+    });
+    return () => { cancelled = true; };
+  }, [listings, statsNonce]);
+  const [sortBy, setSortBy] = useState<"urgency" | "created">("urgency");
+  const urgencyInput = (l: any): UrgencyInput | null => {
+    const st = stats[l.id];
+    if (!st || !waiting) return null;
+    return { ...l, activeApplications: st.applications, waiting: waiting[l.id]?.count ?? 0, oldestWaitingAt: waiting[l.id]?.oldest ?? null };
+  };
+  const urgencyOf = (l: any): Urgency | null => {
+    const input = urgencyInput(l);
+    return input ? listingUrgency(input) : null;
+  };
+
   const openTraffic = async (listing: any) => {
     setTrafficListing(listing);
     setTrafficOpen(true);
@@ -509,6 +538,11 @@ const AdminListings = () => {
       // candidature active.
       if (!isListingToStaff({ ...l, activeApplications: stats[l.id].applications })) return false;
     }
+    // Lot ANN-1 : compteurs en tête de page, mêmes règles que les phrases du jour.
+    if ((filterStatus === "waiting_long" || filterStatus === "departure_soon") && !focusSitId && !focusOwnerId) {
+      const input = urgencyInput(l);
+      if (!input || !matchesCounter(filterStatus, listingUrgency(input), input)) return false;
+    }
     // Lot VE-5 : annonces dont des candidats attendent une réponse, garde à venir (tuile de la vue d'ensemble).
     if (filterStatus === "awaiting_reply" && !focusSitId && !focusOwnerId) {
       if (!stats[l.id]) return false;
@@ -521,6 +555,84 @@ const AdminListings = () => {
     }
     return true;
   });
+
+  // Lot ANN-1 : les annonces en ligne se rangent par urgence (rang, départ, attente).
+  const urgencyReady = !!waiting && statsReady && !statsError;
+  const PUBLISHED_SCOPE = ["published", "waiting_long", "departure_soon", "to_staff", "awaiting_reply", "started_waiting"];
+  const inPublishedScope = PUBLISHED_SCOPE.includes(filterStatus);
+  if (sortBy === "urgency" && urgencyReady && inPublishedScope && !focusSitId && !focusOwnerId) {
+    filtered.sort((a, b) => compareUrgency(urgencyOf(a), urgencyOf(b)));
+  }
+  const counterCounts = inPublishedScope && urgencyReady && !focusSitId && !focusOwnerId
+    ? (filterStatus === "published"
+      ? Object.fromEntries(URGENCY_COUNTERS.map((c) => [c.filter, listings.filter((l) => { const i = urgencyInput(l); return !!i && matchesCounter(c.filter, listingUrgency(i), i); }).length]))
+      : null)
+    : null;
+  const [lastCounts, setLastCounts] = useState<Record<string, number> | null>(null);
+  if (counterCounts && JSON.stringify(counterCounts) !== JSON.stringify(lastCounts)) setLastCounts(counterCounts);
+  const shownCounts = counterCounts ?? (inPublishedScope ? lastCounts : null);
+  const selectFilter = (v: string) => {
+    setFilterStatus(v as ListingFilter);
+    setPage(0);
+    const next = new URLSearchParams(urlParams);
+    next.set("filter", v);
+    setUrlParams(next, { replace: true });
+  };
+  const ownerTopicOf = (u: Urgency | null): MemberDraftTopic | null =>
+    !u ? null : u.key === "started" ? "owner_started" : u.gesture === "broadcast" ? "no_applications" : (u.waitingDays !== null ? "owner_waiting" : null);
+  const MONTHS_FR = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+  const frDayOf = (d?: string | null) => {
+    if (!d) return null;
+    const c = calendarDate(d);
+    return `${c.getDate() === 1 ? "1er" : c.getDate()} ${MONTHS_FR[c.getMonth()]}`;
+  };
+  const whenOf = (u: Urgency | null) =>
+    u?.daysToStart == null || u.daysToStart < 0 ? null : u.daysToStart === 0 ? "aujourd'hui" : u.daysToStart === 1 ? "demain" : `dans ${u.daysToStart} jours`;
+  /** Lot ANN-2 : « Écrire au propriétaire » s'ouvre avec la situation et un texte prêt. */
+  const writeOwner = (listing: any) => {
+    const u = urgencyOf(listing);
+    const topic = ownerTopicOf(u);
+    const first = (listing.owner?.first_name ?? "").trim();
+    const ownerName = `${listing.owner?.first_name || ""} ${listing.owner?.last_name || ""}`.trim();
+    const city = listingCity(listing).city || null;
+    const w = waiting?.[listing.id];
+    if (!topic) { setWriteTarget({ userId: listing.user_id, userName: ownerName || "ce membre", sitId: listing.id, channel: "message" }); return; }
+    const st = stats[listing.id];
+    const published = listing.published_at ? Math.floor((Date.now() - Date.parse(listing.published_at)) / 86_400_000) : 0;
+    setWriteTarget({
+      userId: listing.user_id,
+      userName: first || ownerName || "le propriétaire",
+      sitId: listing.id,
+      channel: "message",
+      drafts: memberMessageDrafts(topic, {
+        name: first, city, startsWhen: whenOf(u), startedOn: frDayOf(listing.start_date),
+        waitingCount: w?.count ?? 0, waitingDays: u?.waitingDays ?? null,
+        daysPublished: published, sittersNearby: null,
+      }),
+      context: {
+        lines: [
+          `${listing.title || "Annonce sans titre"}${city ? `, ${city}` : ""}${listing.start_date ? `, du ${frDayOf(listing.start_date)}${listing.end_date ? ` au ${frDayOf(listing.end_date)}` : ""}` : ""}.`,
+          `${u?.phrase ?? ""}.${st ? ` ${st.views} vues.` : ""}`,
+        ],
+      },
+    });
+  };
+  /** Lot ANN-2 : écrire à un candidat qui attend, depuis la fenêtre des candidatures. */
+  const writeCandidate = (listing: any, c: { sitterId: string; firstName: string }) => {
+    const u = urgencyOf(listing);
+    setWriteTarget({
+      userId: c.sitterId,
+      userName: c.firstName || "ce gardien",
+      sitId: listing.id,
+      channel: "message",
+      drafts: memberMessageDrafts("candidate_started", {
+        name: c.firstName, city: listingCity(listing).city || null, ownerName: (listing.owner?.first_name ?? "").trim(),
+        startedOn: u?.key === "started" ? frDayOf(listing.start_date) : null, startsWhen: whenOf(u),
+      }),
+      context: { lines: [`Candidature à « ${listing.title || "Annonce sans titre"} ».`, u?.phrase ? `${u.phrase}.` : ""].filter(Boolean) },
+    });
+  };
+  const drillListing = drillSit ? listings.find((l) => l.id === drillSit.id) : null;
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages - 1);
@@ -660,48 +772,28 @@ const AdminListings = () => {
         </Button>
       </div>
 
-      {/* Répartition complète : la somme des cases égale le total. */}
-      {kpisError ? (
-        <ErrorState detail={`Répartition des annonces : ${kpisError}`} onRetry={loadKpis} />
-      ) : (
-        <div className="space-y-2">
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-            {[
-              { label: "Total annonces", value: kpis?.total },
-              ...SIT_BUCKETS_PRIMARY.map((b) => ({ label: b.label, value: kpis?.counts[b.key] })),
-              { label: "Créées ces 7 jours", value: kpis?.newLast7d },
-            ].map((k) => (
-              <Card key={k.label}>
-                <CardContent className="p-4">
-                  <p className="text-xs text-muted-foreground">{k.label}</p>
-                  <p className="text-2xl font-bold text-foreground mt-1">
-                    {k.value === undefined ? "·" : k.value.toLocaleString("fr-FR")}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          {kpis && (
-            <details className="rounded-lg border bg-card px-4 py-2 text-sm">
-              <summary className="cursor-pointer text-muted-foreground">
-                Autres états : {SIT_BUCKETS_SECONDARY.reduce((sum, b) => sum + kpis.counts[b.key], 0).toLocaleString("fr-FR")} annonces
-              </summary>
-              <ul className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1">
-                {SIT_BUCKETS_SECONDARY.filter((b) => b.key !== "unknown" || kpis.counts.unknown > 0).map((b) => (
-                  <li key={b.key} className="flex justify-between gap-2">
-                    <span className="text-muted-foreground">{b.label}</span>
-                    <span className="font-medium tabular-nums">{kpis.counts[b.key]}</span>
-                  </li>
-                ))}
-              </ul>
-            </details>
-          )}
+      {/* Lot ANN-1 : ce qui demande un geste, en tête de page. */}
+      {inPublishedScope && !focusSitId && !focusOwnerId && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5" data-testid="urgency-counters">
+          {URGENCY_COUNTERS.map((c) => {
+            const n = shownCounts?.[c.filter];
+            const on = filterStatus === c.filter;
+            const hot = (c.filter === "waiting_long" || c.filter === "departure_soon" || c.filter === "started_waiting") && (n ?? 0) > 0;
+            return (
+              <button
+                key={c.filter}
+                type="button"
+                aria-pressed={on}
+                onClick={() => selectFilter(c.filter)}
+                className={`min-h-11 rounded-2xl border bg-card p-4 text-left transition-colors hover:border-primary ${on ? "border-primary ring-1 ring-primary" : "border-border"}`}
+              >
+                <span className={`block font-heading text-3xl font-bold ${hot ? "text-destructive" : "text-foreground"}`}>{n === undefined ? "·" : n}</span>
+                <span className="mt-0.5 block text-sm text-foreground">{c.label}</span>
+              </button>
+            );
+          })}
         </div>
       )}
-
-      <DraftStatsPanel />
-      <DraftReminderConversionPanel />
-      <ListingExitsSection />
 
       {(focusSitId || focusOwnerId) && (
         <UrlFilterNotice
@@ -747,6 +839,15 @@ const AdminListings = () => {
             {LISTING_FILTERS.map((f) => <SelectItem key={f} value={f}>{LISTING_FILTER_LABELS[f]}</SelectItem>)}
           </SelectContent>
         </Select>
+        {inPublishedScope && (
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as "urgency" | "created")}>
+            <SelectTrigger className="w-[200px]" aria-label="Tri"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="urgency">Trier : urgence</SelectItem>
+              <SelectItem value="created">Trier : création</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
         {cities.length > 0 && (
           <Select value={filterCity} onValueChange={setFilterCity}>
             <SelectTrigger className="w-[160px]"><SelectValue placeholder="Ville" /></SelectTrigger>
@@ -758,29 +859,6 @@ const AdminListings = () => {
         )}
       </div>
 
-
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="font-medium">Totaux sur les annonces affichées :</span>
-          {listingsTruncated && (
-            <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-              Vue limitée aux 50 000 annonces les plus récentes, les totaux sont partiels
-            </span>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-2 text-xs">
-          <Badge variant="secondary">{countUnknown ? (statsError ? "Nombre indisponible" : "Nombre en chargement") : `${filtered.length} annonce${filtered.length > 1 ? "s" : ""}`}</Badge>
-          <Badge variant="outline">Vues : {totalViews}</Badge>
-          <Badge variant="outline">Membres uniques, somme par annonce (une personne peut compter plusieurs fois) : {totalUniques}</Badge>
-          <Badge variant="outline">Messages, somme : {totalMsg}</Badge>
-          <Badge variant="outline">Candidatures : {totalApps}</Badge>
-          {lastViewGlobal && (
-            <Badge variant="outline">
-              Dernière vue {formatDistanceToNow(new Date(lastViewGlobal), { addSuffix: true, locale: fr })}
-            </Badge>
-          )}
-        </div>
-      </div>
 
       <div className="rounded-lg border bg-card overflow-x-auto">
         <Table className="table-fixed min-w-[980px]">
@@ -819,7 +897,8 @@ const AdminListings = () => {
               const coverNotPlace = !coverUrl || animalPhotoUrls.has(coverUrl);
               const ownerName = `${listing.owner?.first_name || ""} ${listing.owner?.last_name || ""}`.trim();
               const liveUrl = listingLiveUrl(listing);
-              const contact = () => setWriteTarget({ userId: listing.user_id, userName: ownerName || "ce membre", sitId: listing.id });
+              const urg = urgencyOf(listing);
+              const ownerFirst = (listing.owner?.first_name ?? "").trim();
               return (
                 <TableRow key={listing.id}>
                   <TableCell className="min-w-0">
@@ -862,8 +941,15 @@ const AdminListings = () => {
                     )}
                   </TableCell>
                   <TableCell>
+                    {urg ? (
+                      <div data-testid="row-urgency" data-key={urg.key}>
+                        <p className={`text-sm font-semibold ${urg.tone === "urgent" ? "text-destructive" : urg.tone === "late" ? "text-secondary" : urg.tone === "good" ? "text-primary" : "text-foreground"}`}>{urg.phrase}</p>
+                        {urg.chip && <p className="text-[11px] text-muted-foreground mt-0.5">{urg.chip}</p>}
+                      </div>
+                    ) : (<>
                     <Badge variant={sit.tone}>{sit.label}</Badge>
                     {sit.detail && <p className="text-[11px] text-muted-foreground mt-0.5">{sit.detail}</p>}
+                    </>)}
                     {listing.status === "draft" && !listing.published_at && (() => {
                       const readiness = draftCtx && !draftCtxError ? draftReadiness(listing, draftCtx.get(listing.user_id), today) : null;
                       const followup = draftFollowups?.get(listing.id);
@@ -914,13 +1000,19 @@ const AdminListings = () => {
                           <Send className="h-4 w-4 mr-1" /> Publier à sa place
                         </Button>
                       )}
-                      {listing.status === "published" && (filterStatus === "to_staff" || focusSitId || (st && !statsError && isListingToStaff({ ...listing, activeApplications: st.applications }))) && (
+                      {listing.status === "published" && (urg?.gesture === "broadcast" || filterStatus === "to_staff" || focusSitId || (st && !statsError && isListingToStaff({ ...listing, activeApplications: st.applications }))) && (
                         <Button size="sm" onClick={() => setProximityListing(listing)} data-testid="row-broadcast">
-                          <Send className="h-4 w-4 mr-1" /> Diffuser
+                          <Send className="h-4 w-4 mr-1" /> Prévenir les gardiens
                         </Button>
                       )}
-                      <Button variant="ghost" size="sm" disabled={!listing.user_id} onClick={contact}>
-                        <Mail className="h-4 w-4 mr-1" /> Contacter
+                      <Button
+                        variant={urg?.gesture === "write_owner" ? "default" : "ghost"}
+                        size="sm"
+                        disabled={!listing.user_id}
+                        onClick={() => writeOwner(listing)}
+                        data-testid="row-write-owner"
+                      >
+                        <Mail className="h-4 w-4 mr-1" /> {ownerFirst ? `Écrire à ${ownerFirst.split(" ")[0]}` : "Écrire"}
                       </Button>
                       <Button variant="ghost" size="icon" onClick={() => setCoverListing(listing)} aria-label="Photo de couverture" title="Photo de couverture" data-testid="row-cover-picker">
                         <ImageIcon className="h-4 w-4" />
@@ -1014,6 +1106,78 @@ const AdminListings = () => {
         </div>
       )}
 
+
+      {/* Lot ANN-1 : les statistiques de la page passent sous la liste. */}
+      <details className="rounded-2xl border bg-card px-4 py-3" data-testid="listing-stats">
+        <summary className="cursor-pointer min-h-11 flex items-center font-heading text-base font-semibold">Statistiques de la page</summary>
+        <div className="mt-3 space-y-6">
+      {/* Répartition complète : la somme des cases égale le total. */}
+      {kpisError ? (
+        <ErrorState detail={`Répartition des annonces : ${kpisError}`} onRetry={loadKpis} />
+      ) : (
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+            {[
+              { label: "Total annonces", value: kpis?.total },
+              ...SIT_BUCKETS_PRIMARY.map((b) => ({ label: b.label, value: kpis?.counts[b.key] })),
+              { label: "Créées ces 7 jours", value: kpis?.newLast7d },
+            ].map((k) => (
+              <Card key={k.label}>
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground">{k.label}</p>
+                  <p className="text-2xl font-bold text-foreground mt-1">
+                    {k.value === undefined ? "·" : k.value.toLocaleString("fr-FR")}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          {kpis && (
+            <details className="rounded-lg border bg-card px-4 py-2 text-sm">
+              <summary className="cursor-pointer text-muted-foreground">
+                Autres états : {SIT_BUCKETS_SECONDARY.reduce((sum, b) => sum + kpis.counts[b.key], 0).toLocaleString("fr-FR")} annonces
+              </summary>
+              <ul className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1">
+                {SIT_BUCKETS_SECONDARY.filter((b) => b.key !== "unknown" || kpis.counts.unknown > 0).map((b) => (
+                  <li key={b.key} className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">{b.label}</span>
+                    <span className="font-medium tabular-nums">{kpis.counts[b.key]}</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+        </div>
+      )}
+
+      <DraftStatsPanel />
+      <DraftReminderConversionPanel />
+      <ListingExitsSection />
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="font-medium">Totaux sur les annonces affichées :</span>
+          {listingsTruncated && (
+            <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+              Vue limitée aux 50 000 annonces les plus récentes, les totaux sont partiels
+            </span>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2 text-xs">
+          <Badge variant="secondary">{countUnknown ? (statsError ? "Nombre indisponible" : "Nombre en chargement") : `${filtered.length} annonce${filtered.length > 1 ? "s" : ""}`}</Badge>
+          <Badge variant="outline">Vues : {totalViews}</Badge>
+          <Badge variant="outline">Membres uniques, somme par annonce (une personne peut compter plusieurs fois) : {totalUniques}</Badge>
+          <Badge variant="outline">Messages, somme : {totalMsg}</Badge>
+          <Badge variant="outline">Candidatures : {totalApps}</Badge>
+          {lastViewGlobal && (
+            <Badge variant="outline">
+              Dernière vue {formatDistanceToNow(new Date(lastViewGlobal), { addSuffix: true, locale: fr })}
+            </Badge>
+          )}
+        </div>
+      </div>
+
+        </div>
+      </details>
 
       {/* Traffic sheet */}
       <Sheet open={trafficOpen} onOpenChange={setTrafficOpen}>
@@ -1174,6 +1338,7 @@ const AdminListings = () => {
         sitId={drillSit?.id ?? null}
         sitTitle={drillSit?.title ?? null}
         initialTab={drillTab}
+        onWriteCandidate={drillListing ? (c) => { setDrillOpen(false); writeCandidate(drillListing, c); } : undefined}
       />
 
       {/* Photo de couverture (choix explicite administrateur) */}

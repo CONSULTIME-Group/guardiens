@@ -14,7 +14,7 @@ export interface MemberDraft {
   body: string;
 }
 
-export type MemberDraftTopic = "alma_help" | "alma_churn" | "no_applications" | "dormant_sitter" | "account_welcome";
+export type MemberDraftTopic = "alma_help" | "alma_churn" | "no_applications" | "dormant_sitter" | "account_welcome" | "owner_waiting" | "owner_started" | "candidate_started";
 
 export interface MemberDraftContext {
   /** Prénom du destinataire ; vide quand il est inconnu. */
@@ -31,6 +31,13 @@ export interface MemberDraftContext {
   daysPublished?: number | null;
   /** Jours depuis la dernière candidature d'un gardien. */
   daysQuiet?: number | null;
+  /** Lot ANN-2 : candidatures qui attendent une réponse, et depuis combien de jours. */
+  waitingCount?: number | null;
+  waitingDays?: number | null;
+  /** « le 1er novembre » : début d'une garde déjà commencée. */
+  startedOn?: string | null;
+  /** Prénom du propriétaire, pour écrire à un candidat. */
+  ownerName?: string | null;
 }
 
 const hello = (name?: string | null) => (name?.trim() ? `Bonjour ${name.trim()},` : "Bonjour,");
@@ -221,12 +228,136 @@ const accountWelcome = (c: MemberDraftContext): MemberDraft[] => [
   },
 ];
 
+const waitingLine = (c: MemberDraftContext) => {
+  const n = Math.max(1, Number(c.waitingCount) || 1);
+  const who = n > 1 ? `${n} gardiens attendent` : "Un gardien attend";
+  const since = c.waitingDays && c.waitingDays > 1 ? ` depuis ${c.waitingDays} jours` : "";
+  return `${who} une réponse de votre part${since}`;
+};
+const ANSWER_HOW = "Depuis votre messagerie, ouvrez la candidature qui vous inspire confiance : vous échangez, vous posez vos questions, et vous acceptez quand vous êtes prêt. Un appel en visio ou une rencontre avant la garde reste possible si vous le souhaitez.";
+const CLOSE_HOW = "Si vos plans ont changé, dépubliez votre annonce : chaque gardien est prévenu et se tourne vers une autre garde.";
+
+const ownerWaiting = (c: MemberDraftContext): MemberDraft[] => {
+  const starts = c.startsWhen ? ` Votre garde${inCity(c.city)} démarre ${c.startsWhen}.` : "";
+  return [
+    {
+      subject: `Votre annonce${inCity(c.city)} : des gardiens attendent votre réponse`,
+      body: join([
+        hello(c.name),
+        `${waitingLine(c)}.${starts} Je vous écris pour savoir où vous en êtes.`,
+        ANSWER_HOW,
+        CLOSE_HOW,
+        READ_YOU,
+        CLOSING,
+      ]),
+    },
+    {
+      subject: `Des candidatures pour votre annonce${inCity(c.city)}`,
+      body: join([
+        hello(c.name),
+        `Bonne nouvelle : votre annonce${inCity(c.city)} a trouvé preneurs. ${waitingLine(c)}.${starts}`,
+        "Les gardiens apprécient une réponse, même courte : un mot pour dire que vous réfléchissez suffit à les rassurer. Quand votre choix est fait, acceptez la candidature retenue depuis votre messagerie, les autres gardiens sont prévenus.",
+        `${CLOSE_HOW} ${READ_YOU}`,
+        CLOSING,
+      ]),
+    },
+    {
+      subject: "Un coup de main pour choisir votre gardien ?",
+      body: join([
+        hello(c.name),
+        `Je suis Jérémie, l'un des deux fondateurs de Guardiens. ${waitingLine(c)} pour votre annonce${inCity(c.city)}.${starts}`,
+        "Pour choisir sereinement, regardez leurs profils, leurs avis et leur présentation, puis échangez avec celles et ceux qui vous plaisent. Le score d'affinité vous aide à repérer les gardiens les plus proches de vos attentes.",
+        `${CLOSE_HOW} ${READ_YOU}`,
+        CLOSING,
+      ]),
+    },
+  ];
+};
+
+const ownerStarted = (c: MemberDraftContext): MemberDraft[] => {
+  const since = c.startedOn ? ` le ${c.startedOn}` : "";
+  return [
+    {
+      subject: `Votre garde${inCity(c.city)} : où en êtes-vous ?`,
+      body: join([
+        hello(c.name),
+        `Votre garde${inCity(c.city)} a commencé${since} et votre annonce est toujours en ligne. ${waitingLine(c)}.`,
+        "Si un gardien est déjà chez vous, confirmez-le depuis votre messagerie : la garde apparaît alors dans votre tableau de bord et les autres candidats sont prévenus.",
+        `${CLOSE_HOW} ${READ_YOU}`,
+        CLOSING,
+      ]),
+    },
+    {
+      subject: "Un petit point sur votre annonce",
+      body: join([
+        hello(c.name),
+        `Votre annonce${inCity(c.city)} est encore visible alors que la garde a démarré${since}. ${waitingLine(c)}, et je préfère vous l'écrire directement.`,
+        "Deux gestes suffisent : accepter le gardien retenu, ou dépublier l'annonce si vous avez trouvé une autre solution. Dans les deux cas, chaque candidat reçoit une réponse.",
+        `${READ_YOU}`,
+        CLOSING,
+      ]),
+    },
+    {
+      subject: "Votre garde a commencé",
+      body: join([
+        hello(c.name),
+        `J'espère que tout se passe bien depuis le début de votre garde${since}. ${waitingLine(c)} sur votre annonce${inCity(c.city)}.`,
+        "Un mot de votre part les libère pour d'autres gardes : acceptez la personne retenue depuis votre messagerie, ou dépubliez l'annonce si vos plans ont changé.",
+        READ_YOU,
+        CLOSING,
+      ]),
+    },
+  ];
+};
+
+const candidateStarted = (c: MemberDraftContext): MemberDraft[] => {
+  const owner = c.ownerName?.trim() ? c.ownerName.trim() : "le propriétaire";
+  const where = inCity(c.city);
+  const when = c.startedOn ? `, qui devait commencer le ${c.startedOn}` : c.startsWhen ? ` (départ ${c.startsWhen})` : "";
+  return [
+    {
+      subject: `Votre candidature${where}`,
+      body: join([
+        hello(c.name),
+        `Vous avez proposé votre aide pour la garde${where}${when}. Merci pour cette belle candidature.`,
+        `Nous avons relancé ${owner} de notre côté. La décision lui revient, et nous restons à vos côtés en attendant sa réponse.`,
+        "D'autres gardes vous attendent sur Guardiens : jetez un œil aux annonces du moment, votre profil plaît aux propriétaires.",
+        CLOSING,
+      ]),
+    },
+    {
+      subject: "Des nouvelles de votre candidature",
+      body: join([
+        hello(c.name),
+        `Je suis Jérémie, l'un des deux fondateurs de Guardiens. Votre candidature pour la garde${where}${when} attend toujours la réponse de ${owner}.`,
+        "Nous l'avons relancé de notre côté. Le choix lui appartient, et je préférais vous tenir informé plutôt que de vous laisser sans nouvelles.",
+        "En attendant, de nouvelles annonces arrivent chaque semaine sur Guardiens.",
+        CLOSING,
+      ]),
+    },
+    {
+      subject: "Merci pour votre patience",
+      body: join([
+        hello(c.name),
+        `Merci pour votre candidature à la garde${where}${when}.`,
+        `${cap1(owner)} prend le temps de répondre. Nous lui avons écrit pour l'y inviter, et la réponse lui revient entièrement.`,
+        `Votre disponibilité est précieuse : d'autres propriétaires cherchent un gardien en ce moment. ${READ_YOU}`,
+        CLOSING,
+      ]),
+    },
+  ];
+};
+const cap1 = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 const BUILDERS: Record<MemberDraftTopic, (c: MemberDraftContext) => MemberDraft[]> = {
   alma_help: almaHelp,
   alma_churn: almaChurn,
   no_applications: noApplications,
   dormant_sitter: dormantSitter,
   account_welcome: accountWelcome,
+  owner_waiting: ownerWaiting,
+  owner_started: ownerStarted,
+  candidate_started: candidateStarted,
 };
 
 /** Les trois versions d'un sujet, la première proposée à l'ouverture. */

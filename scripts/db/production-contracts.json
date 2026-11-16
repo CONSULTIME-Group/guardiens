@@ -1069,6 +1069,20 @@
           "sql": "SELECT COALESCE(has_function_privilege('authenticated', to_regprocedure('public.admin_declared_sources(date,date)'), 'EXECUTE') AND NOT has_function_privilege('anon', to_regprocedure('public.admin_declared_sources(date,date)'), 'EXECUTE'), false) AS ok"
         }
       ]
+    },
+    {
+      "migration": "0177_ann1_listings_waiting.sql",
+      "description": "admin_get_listings_waiting : candidatures en attente et plus ancienne par annonce, admin seulement",
+      "checks": [
+        {
+          "name": "repere",
+          "sql": "SELECT position('ann1_listings_waiting' IN pg_get_functiondef('public.admin_get_listings_waiting(uuid[])'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "definer_et_anon_exclu",
+          "sql": "SELECT p.prosecdef AND NOT has_function_privilege('anon', p.oid, 'EXECUTE') AS ok FROM pg_proc p WHERE p.oid = 'public.admin_get_listings_waiting(uuid[])'::regprocedure"
+        }
+      ]
     }
   ]
 }

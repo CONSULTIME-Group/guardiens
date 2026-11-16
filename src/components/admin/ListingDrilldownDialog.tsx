@@ -20,7 +20,11 @@ interface Props {
   sitId: string | null;
   sitTitle?: string | null;
   initialTab?: Tab;
+  /** Lot ANN-2 : écrire à un candidat qui attend, avec un texte prêt. */
+  onWriteCandidate?: (a: { sitterId: string; firstName: string }) => void;
 }
+
+const WAITING_STATUSES = new Set(["pending", "viewed", "discussing"]);
 
 interface Application {
   application_id: string;
@@ -73,7 +77,7 @@ const STATUS_LABEL: Record<string, { label: string; tone: "default" | "secondary
 };
 
 
-export const ListingDrilldownDialog = ({ open, onOpenChange, sitId, sitTitle, initialTab = "applications" }: Props) => {
+export const ListingDrilldownDialog = ({ open, onOpenChange, sitId, sitTitle, initialTab = "applications", onWriteCandidate }: Props) => {
   const [tab, setTab] = useState<Tab>(initialTab);
   const [apps, setApps] = useState<Application[]>([]);
   const [convs, setConvs] = useState<Conversation[]>([]);
@@ -186,6 +190,16 @@ export const ListingDrilldownDialog = ({ open, onOpenChange, sitId, sitTitle, in
                           <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">
                             {a.message}
                           </p>
+                        )}
+                        {onWriteCandidate && WAITING_STATUSES.has(a.status) && (
+                          <Button
+                            variant="outline"
+                            className="mt-2 min-h-11 rounded-full"
+                            data-testid="drill-write-candidate"
+                            onClick={() => onWriteCandidate({ sitterId: a.sitter_id, firstName: (a.first_name ?? "").trim() })}
+                          >
+                            Écrire à {(a.first_name ?? "").trim() || "ce gardien"}
+                          </Button>
                         )}
                       </div>
                     </div>
