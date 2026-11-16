@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { MapPin } from "lucide-react";
 import { storageImageUrl } from "@/lib/storageImage";
 import type { HubArticle } from "@/lib/hubArticles";
 
@@ -8,17 +9,27 @@ import type { HubArticle } from "@/lib/hubArticles";
  * « Entraide & sorties » (Entraide, Sorties, Chantiers).
  * Titre court, une phrase, le bouton et le chiffre côte à côte, puis les
  * réglages nommés un par un.
+ * Lot ENT-MOB1 (16/11/2026) : sous 768 px, une phrase courte (phraseShort),
+ * un seul bouton, le chiffre en une ligne et les réglages en une ligne.
  */
-export const HubHeader = ({ title, phrase, actions, stat, children }: {
+export const HubHeader = ({ title, phrase, phraseShort, actions, stat, children }: {
   title: string;
   phrase: ReactNode;
+  phraseShort?: ReactNode;
   actions: ReactNode;
   stat?: ReactNode;
   children?: ReactNode;
 }) => (
   <header className="flex flex-col gap-3 pt-4" data-testid="hub-header">
     <h1 className="font-heading text-2xl font-bold leading-tight text-foreground [text-wrap:balance] sm:text-4xl">{title}</h1>
-    <p className="max-w-2xl text-[15px] leading-relaxed text-muted-foreground sm:text-lg">{phrase}</p>
+    <p className="max-w-2xl text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
+      {phraseShort ? (
+        <>
+          <span className="md:hidden" data-testid="hub-phrase-short">{phraseShort}</span>
+          <span className="hidden md:inline">{phrase}</span>
+        </>
+      ) : phrase}
+    </p>
     <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-stretch">
       {actions}
       {stat}
@@ -31,13 +42,17 @@ export const HubHeader = ({ title, phrase, actions, stat, children }: {
  * Lot SORT13 : le chiffre de l'onglet, en bloc visible à côté du bouton
  * (« 86 personnes prêtes à aider autour de Lyon »). Le bloc entier est le lien.
  */
-export const HubStat = ({ value, label, href, to, action, avatars = [] }: {
+export const HubStat = ({ value, label, mobileLabel, href, to, action, avatars = [], aside }: {
   value: number;
   label: string;
+  /** Lot ENT-MOB1 : libellé de la ligne courte du téléphone (le lieu se lit dans la ligne de réglage). */
+  mobileLabel?: string;
   href?: string;
   to?: string;
   action?: string;
   avatars?: ReadonlyArray<string>;
+  /** Lot ENT-MOB1 : geste second posé au bout de la ligne du téléphone (« Proposer mon aide »). */
+  aside?: ReactNode;
 }) => {
   const body = (
     <>
@@ -53,10 +68,26 @@ export const HubStat = ({ value, label, href, to, action, avatars = [] }: {
       {action && <span className="shrink-0 text-sm font-semibold text-primary underline underline-offset-4">{action}</span>}
     </>
   );
-  const shell = "flex min-h-[52px] items-center gap-3 rounded-2xl border border-primary/25 bg-primary/5 px-4 py-2 no-underline sm:min-h-12";
-  if (to) return <Link to={to} className={shell} data-testid="hub-stat">{body}</Link>;
-  if (href) return <a href={href} className={shell} data-testid="hub-stat">{body}</a>;
-  return <p className={shell} data-testid="hub-stat">{body}</p>;
+  const shell = "hidden min-h-[52px] items-center gap-3 rounded-2xl border border-primary/25 bg-primary/5 px-4 py-2 no-underline sm:min-h-12 md:flex";
+  const block = to
+    ? <Link to={to} className={shell} data-testid="hub-stat">{body}</Link>
+    : href
+      ? <a href={href} className={shell} data-testid="hub-stat">{body}</a>
+      : <p className={shell} data-testid="hub-stat">{body}</p>;
+  // Sous 768 px : une ligne de texte, le nombre en gras, sans bloc ni avatars.
+  const lineBody = <><b className="font-semibold">{value}</b> {mobileLabel ?? label}</>;
+  const lineText = "inline-flex min-h-11 min-w-0 items-center gap-1 text-sm text-foreground no-underline";
+  const line = (
+    <div className="flex items-center justify-between gap-3 md:hidden" data-testid="hub-stat-line">
+      {to
+        ? <Link to={to} className={lineText}><span>{lineBody}</span></Link>
+        : href
+          ? <a href={href} className={lineText}><span>{lineBody}</span></a>
+          : <p className={lineText}><span>{lineBody}</span></p>}
+      {aside}
+    </div>
+  );
+  return <>{block}{line}</>;
 };
 
 /**
@@ -85,15 +116,42 @@ export const HubSetting = ({ label, value, action, to, onClick, expanded }: {
 };
 
 export const HubSettings = ({ children }: { children: ReactNode }) => (
-  <div className="flex flex-wrap items-center gap-2" data-testid="hub-settings">{children}</div>
+  <div className="hidden flex-wrap items-center gap-2 md:flex" data-testid="hub-settings">{children}</div>
 );
+
+/**
+ * Lot ENT-MOB1 (16/11/2026) : sous 768 px, les réglages tiennent en une
+ * ligne (« Autour de Lyon, 30 km · Changer »), cible de 44 px.
+ */
+export const HubSettingsLine = ({ summary, action, to, onClick, expanded }: {
+  summary: ReactNode;
+  action: string;
+  to?: string;
+  onClick?: () => void;
+  expanded?: boolean;
+}) => {
+  const body = (
+    <>
+      <span className="flex min-w-0 items-center gap-2">
+        <MapPin aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <span className="min-w-0 truncate">{summary}</span>
+      </span>
+      <span className="shrink-0 font-semibold text-primary">{action}</span>
+    </>
+  );
+  const shell = "flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-border bg-card px-3.5 text-left text-sm text-foreground no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden";
+  return to
+    ? <Link to={to} className={shell} data-testid="hub-settings-line">{body}</Link>
+    : <button type="button" onClick={onClick} aria-expanded={expanded} className={shell} data-testid="hub-settings-line">{body}</button>;
+};
 
 /**
  * Lot SORT13 : pourquoi cette rubrique, en tête des trois onglets. Les deux
  * chiffres viennent de l'étude citée dans l'article du journal.
  */
-export const HubWhy = () => (
-  <aside className="mt-4 flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 sm:gap-4 sm:px-5" aria-label="Pourquoi cette rubrique" data-testid="hub-why">
+export const HubWhy = ({ placement = "top" }: { placement?: "top" | "end" }) => (
+  // Lot ENT-MOB1 : en tête à partir de 768 px ; sous 768 px, en fin de page (placement « end »).
+  <aside className={`${placement === "end" ? "mt-10 flex md:hidden" : "mt-4 hidden md:flex"} items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 sm:gap-4 sm:px-5`} aria-label="Pourquoi cette rubrique" data-testid="hub-why">
     <span className="shrink-0 font-heading text-2xl font-bold leading-none text-primary sm:text-4xl">24&nbsp;%</span>
     <p className="min-w-0 text-[13px] leading-snug text-foreground sm:text-sm sm:leading-relaxed">
       des personnes en France se sentent seules souvent ou presque tous les jours (CRÉDOC, étude Solitudes 2025). Un coup de main, une sortie, un chantier : trois raisons simples de se parler entre gens du coin.{" "}
@@ -109,12 +167,14 @@ export interface HubIdea {
 }
 
 /** « Une idée pour commencer » : mêmes vignettes dans les trois onglets. */
-export const HubIdeas = ({ id, ideas, onPick }: {
+export const HubIdeas = ({ id, ideas, onPick, placement = "top" }: {
   id: string;
   ideas: ReadonlyArray<HubIdea>;
   onPick: (idea: HubIdea) => void;
+  /** Lot ENT-MOB1 : « top » avant la liste à partir de 768 px, « end » après la liste sous 768 px. */
+  placement?: "top" | "end";
 }) => (
-  <section className="mt-5" aria-labelledby={id} data-testid="hub-ideas">
+  <section className={placement === "end" ? "mt-8 md:hidden" : "mt-5 hidden md:block"} aria-labelledby={id} data-testid="hub-ideas">
     <h2 id={id} className="text-sm font-semibold text-foreground">Une idée pour commencer</h2>
     <ul className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-6">
       {ideas.map((idea) => (

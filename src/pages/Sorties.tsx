@@ -5,7 +5,7 @@ import PageMeta from "@/components/PageMeta";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import EntraideSortiesTabs from "@/components/outings/EntraideSortiesTabs";
-import { HUB_SHELL, HUB_TABS, HubArticles, HubHeader, HubIdeas, HubSetting, HubSettings, HubStat, HubWhy } from "@/components/outings/HubHeader";
+import { HUB_SHELL, HUB_TABS, HubArticles, HubHeader, HubIdeas, HubSetting, HubSettings, HubSettingsLine, HubStat, HubWhy } from "@/components/outings/HubHeader";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import OutingCard from "@/components/outings/OutingCard";
 import { useAuth } from "@/contexts/AuthContext";
@@ -80,7 +80,8 @@ const Sorties = () => {
         noindex={preview}
       />
       <div>
-        <PageBreadcrumb items={[{ label: "Sorties" }]} />
+        {/* Lot ENT-MOB1 : fil d'Ariane visible à partir de 768 px, son JSON-LD reste servi partout. */}
+        <div className="hidden md:block"><PageBreadcrumb items={[{ label: "Sorties" }]} /></div>
         <div className={HUB_TABS}><EntraideSortiesTabs active="sorties" /></div>
         <HubWhy />
         {preview && (
@@ -91,18 +92,22 @@ const Sorties = () => {
         <HubHeader
           title={OUTING_COPY.sortiesTitle}
           phrase={OUTING_COPY.sortiesIntro}
+          phraseShort={OUTING_COPY.sortiesIntroShort}
           actions={
             <Button asChild size="lg" className="h-[52px] rounded-2xl text-base sm:h-12">
               <Link to={proposeHref} onClick={() => trackEvent("outing_propose_clicked", { source: "sorties_tab" })}>{OUTING_COPY.propose}</Link>
             </Button>
           }
-          stat={loading || failed || upcoming === 0 ? null : <HubStat value={upcoming} label={upcoming === 1 ? "sortie à venir près de chez vous" : "sorties à venir près de chez vous"} href="#sorties-liste" action="Les voir" />}
+          stat={loading || failed || upcoming === 0 ? null : <HubStat value={upcoming} label={upcoming === 1 ? "sortie à venir près de chez vous" : "sorties à venir près de chez vous"} mobileLabel={upcoming === 1 ? "sortie à venir" : "sorties à venir"} href="#sorties-liste" action="Les voir" />}
         >
           {isAuthenticated && (
             <HubSettings>
               <HubSetting label="Ville" value={memberCity || "à renseigner"} action="Changer" to="/profile" />
               <HubSetting label="Alertes sorties" value="autour de chez vous" action="Régler" to="/settings?section=alerts" />
             </HubSettings>
+          )}
+          {isAuthenticated && (
+            <HubSettingsLine summary={<>Autour de <b className="font-semibold">{memberCity || "chez vous"}</b></>} action="Changer" to="/profile" />
           )}
         </HubHeader>
         <HubIdeas
@@ -163,6 +168,14 @@ const Sorties = () => {
           {far.map((o) => <OutingCard key={o.id} outing={o} />)}
         </section>
       )}
+      {/* Lot ENT-MOB1 : sous 768 px, idées et pourquoi viennent après la liste. */}
+      <HubIdeas
+        id="sorties-ideas-end-title"
+        placement="end"
+        ideas={OUTING_CATEGORIES.slice(0, 6).map((c) => ({ key: c.value, label: c.label, image: c.art }))}
+        onPick={(idea) => pickIdea(idea.key)}
+      />
+      <HubWhy placement="end" />
       <HubArticles articles={HUB_ARTICLES.sorties} />
     </div>
   );
