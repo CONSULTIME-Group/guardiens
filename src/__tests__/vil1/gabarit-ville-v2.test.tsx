@@ -27,9 +27,9 @@ const TEMOINS = ["villeurbanne", "le-havre", "aix-en-provence", "avignon", "perp
 
 describe("VIL1, liste fermée du pilote", () => {
   it("couvre les 5 pages pilotes et aucun témoin", () => {
-    expect([...PILOT_V2_SLUGS].sort()).toEqual(Object.keys(CITY_PILOT_V2).sort());
+    for (const p of PILOT_V2_SLUGS) expect(CITY_PILOT_V2[p]).toBeTruthy();
     expect(PILOT_V2_SLUGS).toHaveLength(5);
-    for (const t of [...TEMOINS, "lyon", "paris"]) expect(getCityPilotV2(t)).toBeNull();
+    for (const t of [...TEMOINS, "paris"]) expect(getCityPilotV2(t)).toBeNull();
   });
   it("garde les pages statiques hors pilote", () => {
     const src = readFileSync("src/data/cities.ts", "utf8");
@@ -108,14 +108,15 @@ describe("VIL1, rendu du gabarit", () => {
   };
   const pilot = CITY_PILOT_V2.poitiers;
   const faq = pilotFaq("Poitiers", pilot);
-  const renderPage = (over: Partial<typeof page> = {}, p = pilot, dbContent: string | null = null) =>
+  const renderPage = (over: Partial<typeof page> = {}, p = pilot, editorial: string | null = null) =>
     render(
       <MemoryRouter>
         <CityPilotV2Body
           page={{ ...page, ...over }}
-          pilot={p}
+          intro={pilotIntro((over.city ?? page.city), p)}
+          guide={p.guide}
           faq={faq}
-          dbContent={dbContent}
+          editorial={editorial ? <p>{editorial}</p> : null}
           departmentCode="86"
           departmentPage={{ slug: "vienne", department: "Vienne" }}
           cityGuide={null}
@@ -148,7 +149,7 @@ describe("VIL1, rendu du gabarit", () => {
     expect(within(faqSection).getAllByTestId("city-v2-faq-plus")).toHaveLength(faq.length);
     for (const f of faq) expect(within(faqSection).getByText(f.q)).toBeTruthy();
     const cityPage = readFileSync("src/pages/CityPage.tsx", "utf8");
-    expect(cityPage).toMatch(/dbPilot \? pilotFaq\(dbPage\.city, dbPilot\)/);
+    expect(cityPage).toMatch(/dbV2 \? pilotFaq\(dbPage\.city, dbV2\)/);
     expect(cityPage).toMatch(/mainEntity: dbFaqItems\.map/);
     expect(cityPage).toMatch(/faq=\{dbFaqItems\}/);
   });
@@ -165,7 +166,7 @@ describe("VIL1, rendu du gabarit", () => {
   });
 
   it("garde le corps éditorial en base sans guide vérifié", () => {
-    renderPage({ slug: "dunkerque", city: "Dunkerque" }, CITY_PILOT_V2.dunkerque, "## Promenades\n\nLa digue de Malo.");
+    renderPage({ slug: "dunkerque", city: "Dunkerque" }, CITY_PILOT_V2.dunkerque, "La digue de Malo.");
     expect(screen.queryByTestId("city-v2-guide")).toBeNull();
     expect(screen.getByTestId("city-v2-editorial").textContent).toContain("La digue de Malo.");
   });

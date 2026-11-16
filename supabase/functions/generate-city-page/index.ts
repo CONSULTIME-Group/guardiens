@@ -256,48 +256,28 @@ Répondez UNIQUEMENT en JSON strict :
 
 ${realDataBlock}
 
-Vous rédigez le CORPS markdown (1000 à 1300 mots) d'une landing page Guardiens pour ${city} (${department}).
+Vous rédigez le CORPS markdown (600 à 900 mots) d'une landing page Guardiens pour ${city} (${department}).
+
+Ce corps s'insère dans le gabarit v2 des pages villes (lot VIL2), qui porte déjà les étapes, la gratuité, les gardiens, les liens, la FAQ et l'appel final. N'écrivez donc ni étapes, ni prix, ni FAQ, ni histoire des fondateurs : seulement ce qui est propre à ${city}.
 
 Répondez UNIQUEMENT en markdown brut. PAS de JSON, PAS de \`\`\`, PAS de H1 (réservé au titre de page).
 
 Structure EXACTE :
 
-## Pourquoi ${city} a besoin d'une plateforme de garde de proximité
+## Pourquoi la garde de maison prend tout son sens à ${city}
 ### Une ville où les animaux font partie de la famille
 (paragraphe qualitatif, sans chiffre inventé)
 ### Un animal qui garde ses habitudes
 (paragraphe qualitatif : l'animal reste chez lui, ses repères et son rythme, sans comparaison avec d'autres solutions)
-### Le house-sitting, un échange entre voisins
-(paragraphe)
 
-## Comment fonctionne Guardiens à ${city}
-### Étape 1, Publiez votre annonce
-(paragraphe avec lien [tarifs](/tarifs))
-### Étape 2, Échangez avec les gardiens intéressés
-(paragraphe)
-### Étape 3, Confirmez la garde
-(paragraphe)
-### Étape 4, Partez l'esprit libre
-(paragraphe avec lien [gardien d'urgence](/gardien-urgence))
+## Les quartiers et environs de ${city}
+(paragraphe sur la manière dont une garde s'organise selon les secteurs : centre, quartiers résidentiels, communes voisines. Citez uniquement des noms présents dans DONNÉES LOCALES RÉELLES, sinon restez générique.)
 
 ## Où promener votre chien à ${city}
-(intro + citez UNIQUEMENT les parcs, espaces verts et sentiers figurant dans DONNÉES LOCALES RÉELLES, en **gras**, en expliquant en quoi ils sont adaptés aux gardes d'animaux. Si toutes ces listes sont 'non disponibles', restez générique sur les types de lieux de promenade sans nommer de lieu précis.)
+(intro + citez UNIQUEMENT les parcs, espaces verts et sentiers figurant dans DONNÉES LOCALES RÉELLES, en **gras**, en expliquant en quoi ils sont adaptés aux gardes d'animaux. Si toutes ces listes sont 'non disponibles', restez générique sur les types de lieux de promenade sans nommer de lieu précis. Aucune règle de laisse ou d'accès inventée : renvoyez à l'affichage à l'entrée des parcs.)
 
-
-## Propriétaires à ${city}, ce que Guardiens vous offre
-(5 à 6 bénéfices en **gras** suivis de 1-2 phrases : animal chez lui, maison vivante, rencontre possible si vous le souhaitez, accord de garde clair, profils détaillés et avis croisés)
-
-## Qui sont les gardiens à ${city}
-(intro + 4 profils en **gras** : retraités actifs, jeunes actifs en télétravail, familles, étudiants. Mentionnez les [petites missions](/petites-missions) pour les gardes courtes. Si aucun gardien n'est encore actif, présentez les profils recherchés et invitez à rejoindre les premiers, sans jamais écrire un nombre nul.)
-
-## Combien ça coûte à ${city}
-(un paragraphe factuel : Guardiens est gratuit, pour tous les membres. Lien [Gratuité](/tarifs). AUCUN montant, AUCUNE date, aucune comparaison.)
-
-## Notre histoire et notre engagement à ${city}
-(2-3 paragraphes : fondation Jérémie & Elisa, leur passion du house-sitting, déploiement en France, ${city} intégrée au maillage. AUCUNE date de lancement inventée, AUCUN chiffre de maisons ou d'animaux.)
-
-## Questions fréquentes des propriétaires à ${city}
-(5 à 6 questions au format **Question ?** + réponse 2-3 phrases : rencontre si les deux le souhaitent, urgence, animaux à besoins spécifiques, durée min/max, vérification d'identité, sécurité du logement. Aucune question sur les prix d'abonnement ou une date de fin de gratuité.)`;
+## Ce qu'il faut convenir avant de partir
+(paragraphe : clés, routines des animaux, vétérinaire habituel, personne relais. La rencontre avant la garde reste facultative, si vous le souhaitez tous les deux.)`;
 
     const callAI = async (p: string, jsonMode: boolean) => {
       const res = await fetch(LOVABLE_API_URL, {

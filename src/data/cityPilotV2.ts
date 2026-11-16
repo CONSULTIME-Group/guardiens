@@ -33,10 +33,12 @@ export interface PilotGuide {
 
 export interface CityPilotV2 {
   /** Phrase d'ouverture propre à la ville, après la définition du home sitting. */
-  cityLine: string;
+  cityLine?: string;
   guide: PilotGuide | null;
   /** Réponse locale à « Où promener un chien à X ? ». */
-  walkAnswer: string;
+  walkAnswer?: string;
+  /** Questions locales sourcées, à la place de la question de promenade. */
+  localFaq?: { q: string; a: string }[];
 }
 
 export const PILOT_V2_SLUGS = ["poitiers", "montreuil", "marseille", "dunkerque", "toulouse"] as const;
@@ -237,6 +239,80 @@ export const CITY_PILOT_V2: Record<string, CityPilotV2> = {
       "Au parc des Beaumonts, au parc Montreau ou au parc départemental Jean-Moulin Les Guilands. Dans les parcs départementaux, la laisse se détache uniquement dans les caniparcs, signalés sur les plans affichés aux entrées.",
     guide: null,
   },
+
+  // Lot VIL2 : pages refondues avant le pilote, questions locales déjà
+  // sourcées (src/data/cityContent.ts, src/data/dbCityRevisions.ts),
+  // reformulées en phrases affirmatives, faits inchangés.
+  lyon: {
+    cityLine:
+      "À Lyon, les berges du Rhône, le parc de la Tête d'Or et le parc Blandan rythment les sorties avec un chien.",
+    walkAnswer:
+      "La laisse est la règle en ville, berges du Rhône comprises. Des espaces canins de liberté et des aires canines accueillent les chiens, par exemple au parc de la Tête d'Or et au parc Blandan. Suivez les panneaux sur place.",
+    guide: null,
+  },
+  annecy: {
+    cityLine: "À Annecy, le lac et les sentiers alentour rythment les sorties, avec des règles de laisse propres à la ville.",
+    walkAnswer:
+      "La laisse est demandée en ville et en balade, et les plages du lac sont interdites aux chiens. Un arrêté municipal ouvre quelques sites aux chiens en liberté, du 1er juillet au 14 avril. Suivez les panneaux sur place.",
+    guide: null,
+  },
+  grenoble: {
+    cityLine: "À Grenoble, le parc Paul-Mistral et ses zones de liberté accueillent les sorties avec un chien.",
+    walkAnswer:
+      "Dans les zones de liberté signalées de certains parcs, comme le parc Paul-Mistral, avec un chien qui reste sous contrôle. Ailleurs, la laisse est la règle, et certains jardins sont interdits aux chiens.",
+    guide: null,
+  },
+  rennes: {
+    walkAnswer:
+      "Dans les espaces canins de la Ville, le chien se promène en liberté. Dans les autres parcs et jardins, il est admis tenu en laisse, selon la Ville et la Métropole de Rennes.",
+    guide: null,
+  },
+  bordeaux: {
+    walkAnswer:
+      "La présence des chiens suit le règlement des parcs et jardins de la Ville, et la règle change selon les lieux : lisez l'affichage à l'entrée de chaque parc avant d'y promener ou d'y lâcher un chien.",
+    guide: null,
+  },
+  "clermont-ferrand": {
+    localFaq: [
+      {
+        q: "Peut-on emmener un chien dans la Chaîne des Puys ?",
+        a: "Oui. Selon l'Office de tourisme, le chien reste tenu en laisse sur tout le périmètre Chaîne des Puys et faille de Limagne, et certains secteurs, comme le puy de Combegrasse, lui sont interdits même en laisse.",
+      },
+    ],
+    guide: null,
+  },
+  nice: {
+    localFaq: [
+      {
+        q: "Où aller à la plage avec un chien à Nice ?",
+        a: "Sur les plages que la Ville de Nice réserve aux chiens, la plage de la Lanterne et la plage de Lenval, aux heures les plus douces. Ailleurs, suivez la signalétique.",
+      },
+    ],
+    guide: null,
+  },
+  strasbourg: {
+    localFaq: [
+      {
+        q: "Où promener un chien à Strasbourg ?",
+        a: "Dans les aires d'ébats aménagées, le chien se promène en liberté. Sur la voie publique, la laisse est obligatoire dans toute la ville, selon la Ville et l'Eurométropole de Strasbourg.",
+      },
+      {
+        q: "Le chien peut-il prendre le tram ?",
+        a: "Oui : la Ville indique que les chiens, hors catégorie 1, voyagent gratuitement dans les trams. Un grand chien voyage tenu en laisse et muselé.",
+      },
+    ],
+    guide: null,
+  },
+  lille: {
+    walkAnswer:
+      "Dans les parcs ouverts aux chiens, dont la liste fixée par arrêté municipal est affichée sur place. Le chien y reste en laisse, et se promène en liberté dans les caniparcs, qui ont leur propre règlement.",
+    guide: null,
+  },
+  biarritz: {
+    walkAnswer:
+      "La Ville a créé un chemin d'environ 300 mètres pour chiens en liberté dans l'espace naturel de Mouriscot, entre l'allée Gabrielle Dorziat et la rue du Lavoir de Compère. Ailleurs dans les parcs, la laisse reste la règle.",
+    guide: null,
+  },
 };
 
 export function getCityPilotV2(slug: string | null | undefined): CityPilotV2 | null {
@@ -244,13 +320,90 @@ export function getCityPilotV2(slug: string | null | undefined): CityPilotV2 | n
   return CITY_PILOT_V2[slug] ?? null;
 }
 
+/**
+ * Lot VIL2 : témoins du pilote VIL1, gardés sur l'ancien gabarit jusqu'à la
+ * mesure à J+28, puis basculés d'eux-mêmes (date de Paris).
+ */
+export const CITY_V2_TEMOINS: ReadonlySet<string> = new Set([
+  "villeurbanne",
+  "le-havre",
+  "aix-en-provence",
+  "avignon",
+  "perpignan",
+]);
+export const CITY_V2_TEMOINS_UNTIL = "2026-12-14";
+
+function parisDay(now: Date): string {
+  return new Intl.DateTimeFormat("fr-CA", { timeZone: "Europe/Paris" }).format(now);
+}
+
+/** Gabarit v2 pour toute page ville, témoins compris à partir du 14/12/2026. */
+export function isCityV2Active(slug: string | null | undefined, now: Date = new Date()): boolean {
+  if (!slug) return false;
+  if (CITY_V2_TEMOINS.has(slug)) return parisDay(now) >= CITY_V2_TEMOINS_UNTIL;
+  return true;
+}
+
+/** Phrases d'un texte, découpées sur un point suivi d'une majuscule. */
+function sentences(text: string): string[] {
+  return text
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(/(?<=[.!?])\s+(?=[«A-ZÀ-ÖØ-Þ])/)
+    .filter(Boolean);
+}
+
+export interface ResolvedCityV2 {
+  cityLine: string;
+  /** Suite de l'intro en base, rendue en tête du corps éditorial. */
+  introRest: string | null;
+  localFaq: { q: string; a: string }[];
+  guide: PilotGuide | null;
+}
+
+/**
+ * Contenu v2 d'une ville : données locales sourcées quand elles existent,
+ * sinon première phrase de l'intro en base, sinon une phrase commune.
+ */
+export function resolveCityV2(slug: string, city: string, dbIntro?: string | null): ResolvedCityV2 {
+  const local = CITY_PILOT_V2[slug] ?? null;
+  const intro = sentences(dbIntro ?? "");
+  const fallback = `Sur Guardiens, vous publiez votre garde à ${city} et les gardiens proches de chez vous postulent.`;
+  const cityLine = local?.cityLine ?? intro[0] ?? fallback;
+  const rest = local?.cityLine ? intro : intro.slice(1);
+  const localFaq =
+    local?.localFaq ??
+    (local?.walkAnswer ? [{ q: `Où promener un chien à ${city} ?`, a: local.walkAnswer }] : []);
+  return {
+    cityLine,
+    introRest: rest.length ? rest.join(" ") : null,
+    localFaq,
+    guide: local?.guide ?? null,
+  };
+}
+
 /** Ouverture commune du gabarit v2 : « home sitting » dans la première phrase. */
-export function pilotIntro(city: string, pilot: CityPilotV2): string {
-  return `Le home sitting à ${city}, c'est confier sa maison et ses animaux à un gardien qui s'installe chez vous pendant votre absence. Vos animaux gardent leurs habitudes, votre maison reste habitée. ${pilot.cityLine}`;
+export function pilotIntro(city: string, v2: { cityLine?: string }): string {
+  const line = v2.cityLine ?? `Sur Guardiens, vous publiez votre garde à ${city} et les gardiens proches de chez vous postulent.`;
+  return `Le home sitting à ${city}, c'est confier sa maison et ses animaux à un gardien qui s'installe chez vous pendant votre absence. Vos animaux gardent leurs habitudes, votre maison reste habitée. ${line}`;
 }
 
 /** FAQ du gabarit v2 : une seule liste, visible et JSON-LD. */
-export function pilotFaq(city: string, pilot: CityPilotV2): { q: string; a: string }[] {
+export function pilotFaq(
+  city: string,
+  v2: { walkAnswer?: string; localFaq?: { q: string; a: string }[] },
+): { q: string; a: string }[] {
+  const local =
+    v2.localFaq && v2.localFaq.length
+      ? v2.localFaq
+      : v2.walkAnswer
+        ? [{ q: `Où promener un chien à ${city} ?`, a: v2.walkAnswer }]
+        : [
+            {
+              q: `Comment trouver un gardien à ${city} ?`,
+              a: "Publiez votre garde : l'annonce part par email aux gardiens proches de chez vous. Lisez leurs profils et leurs avis, puis échangez par la messagerie avant de choisir.",
+            },
+          ];
   return [
     {
       q: `Faut-il rencontrer le gardien avant la garde à ${city} ?`,
@@ -260,10 +413,7 @@ export function pilotFaq(city: string, pilot: CityPilotV2): { q: string; a: stri
       q: `Combien coûte Guardiens à ${city} ?`,
       a: "Guardiens est gratuit. Les frais liés à la garde, nourriture des animaux ou soins par exemple, se règlent entre vous sur justificatifs.",
     },
-    {
-      q: `Où promener un chien à ${city} ?`,
-      a: pilot.walkAnswer,
-    },
+    ...local,
     {
       q: "Que prévoir si un imprévu survient pendant la garde ?",
       a: "Le réseau des gardiens d'urgence ouvrira bientôt. D'ici là, convenez avec votre gardien d'une personne relais, un proche par exemple, et notez le vétérinaire habituel dans le guide de la maison.",
@@ -273,6 +423,27 @@ export function pilotFaq(city: string, pilot: CityPilotV2): { q: string; a: stri
       a: "Indiquez le traitement dans l'annonce, avec les horaires et le contact de votre vétérinaire. Les gardiens qui postulent savent ainsi à quoi s'engager, et vous en parlez ensemble avant de confirmer.",
     },
   ];
+}
+
+/**
+ * Sections du corps éditorial que le gabarit v2 porte déjà (étapes, prix,
+ * FAQ, compteur de gardiens, imprévus, histoire des fondateurs) : retirées
+ * à l'affichage pour garder une seule FAQ et un seul mode d'emploi. Le
+ * texte en base reste intact.
+ */
+export const V2_REDUNDANT_SECTION =
+  /^(comment (fonctionne|ça se passe|se déroule)|le déroul|ce qui se passe concrètement|questions fréquentes|combien (ça coûte|de gardiens)|tarifs guardiens|budget et frais|notre histoire|le décompte|pour aller plus loin|en cas d'imprévu|qui sont les gardiens|propriétaires (à|dans|de))/i;
+
+export function trimCityEditorial(markdown: string | null | undefined): string | null {
+  if (!markdown) return null;
+  const parts = markdown.split(/^(?=## )/m);
+  const kept = parts.filter((part) => {
+    const m = part.match(/^## (.+)$/m);
+    if (!m || !part.startsWith("## ")) return true;
+    return !V2_REDUNDANT_SECTION.test(m[1].trim());
+  });
+  const out = kept.join("").trim();
+  return out.length ? out : null;
 }
 
 /**
