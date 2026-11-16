@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { FOUNDERS_LETTER_SLUG } from "@/data/foundersLetter";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
+import { labelTableForCards } from "@/lib/articleTableCards";
 import { Search, TreePine, Users, CheckCircle2, Lightbulb, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
@@ -2492,7 +2493,10 @@ function stripLeadingH1(md: string): string {
 function wrapTables(html: string): string {
   return html.replace(
     /<table[\s\S]*?<\/table>/g,
-    (table) => `<div class="article-table-scroll" role="region" tabindex="0">${table}</div>`,
+    (table) => {
+      const { html: labelled, cards } = labelTableForCards(table);
+      return `<div class="article-table-scroll${cards ? " article-table-cards" : ""}" role="region" tabindex="0">${labelled}</div>`;
+    },
   );
 }
 
@@ -2564,8 +2568,11 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   if (isGuide) {
     html = hoistHeadingAnchors(html);
     html = html.replace(
-      /<div class="article-table-scroll" role="region" tabindex="0">/g,
-      '<p class="article-table-hint">Faites glisser le tableau pour voir toutes les colonnes.</p><div class="article-table-scroll" role="region" tabindex="0" aria-label="Tableau comparatif, défilement horizontal">',
+      /<div class="article-table-scroll( article-table-cards)?" role="region" tabindex="0">/g,
+      (_m, cards?: string) =>
+        cards
+          ? '<p class="article-table-hint article-table-hint-cards">Faites glisser le tableau pour voir toutes les colonnes.</p><div class="article-table-scroll article-table-cards" role="region" tabindex="0" aria-label="Tableau comparatif">'
+          : '<p class="article-table-hint">Faites glisser le tableau pour voir toutes les colonnes.</p><div class="article-table-scroll" role="region" tabindex="0" aria-label="Tableau comparatif, défilement horizontal">',
     );
   }
 
