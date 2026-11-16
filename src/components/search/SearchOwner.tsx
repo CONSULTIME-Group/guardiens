@@ -57,6 +57,7 @@ import { computeAffinityResultFull, speciesIntersects, type AffinityOwnerInput, 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { chunkArray } from "@/lib/chunkArray";
+import { settleEnrichment, reportEnrichmentFailures } from "@/lib/sitterEnrichment";
 import { publicFirstName } from "@/lib/displayName";
 
 
@@ -652,21 +653,25 @@ const SearchOwner = () => {
     ]);
     if (stale()) return;
 
-    const enrichError = [...badgeResults, ...emergencyResults, ...galleryResults, ...reviewResults].find((r: any) => r.error)?.error;
-    if (enrichError) {
-      console.error("[SearchOwner] Erreur enrichissement gardiens:", enrichError);
-      setSearchError("Impossible de charger les informations complètes des gardiens.");
-      setLoading(false);
-      return;
-    }
+    // Lot BAS1 (16/11/2026) : aucune lecture d'enrichissement ne bloque la
+    // liste. Une source en erreur reste vide, la liste s'affiche, et l'erreur
+    // part une fois par chargement dans le journal, sans message à l'écran.
+    const { rows: enrich, failed: enrichFailed } = settleEnrichment({
+      public_badge_attributions: badgeResults,
+      public_emergency_sitter_profiles: emergencyResults,
+      sitter_gallery: galleryResults,
+      reviews: reviewResults,
+      public_responsiveness: tierResults,
+      public_profiles: helpResults,
+    });
+    reportEnrichmentFailures(enrichFailed);
 
-    // Signaux secondaires : une panne les rend neutres, sans bloquer la liste.
-    const tierMap = new Map<string, string>(tierResults.flatMap((r: any) => r.error ? [] : r.data ?? []).map((t: any) => [t.user_id, t.tier]));
-    const helpSet = new Set<string>(helpResults.flatMap((r: any) => r.error ? [] : r.data ?? []).map((h: any) => h.id));
-    const emergencySet = new Set(emergencyResults.flatMap((r: any) => r.data ?? []).map((e: any) => e.user_id));
+    const tierMap = new Map<string, string>(enrich.public_responsiveness.map((t: any) => [t.user_id, t.tier]));
+    const helpSet = new Set<string>(enrich.public_profiles.map((h: any) => h.id));
+    const emergencySet = new Set(enrich.public_emergency_sitter_profiles.map((e: any) => e.user_id));
 
     const reviewsAgg = new Map<string, { sum: number; count: number }>();
-    reviewResults.flatMap((r: any) => r.data ?? []).forEach((r: any) => {
+    enrich.reviews.forEach((r: any) => {
       const cur = reviewsAgg.get(r.reviewee_id) || { sum: 0, count: 0 };
       cur.sum += r.overall_rating || 0;
       cur.count += 1;
@@ -674,7 +679,7 @@ const SearchOwner = () => {
     });
 
     const badgeMap = new Map<string, Map<string, number>>();
-    badgeResults.flatMap((r: any) => r.data ?? []).forEach((b: any) => {
+    enrich.public_badge_attributions.forEach((b: any) => {
       if (!badgeMap.has(b.user_id)) badgeMap.set(b.user_id, new Map());
       const m = badgeMap.get(b.user_id)!;
       m.set(b.badge_id, (m.get(b.badge_id) || 0) + 1);
@@ -682,7 +687,7 @@ const SearchOwner = () => {
 
     // Galerie : max 4 photos par gardien, avatar prépendu si présent.
     const photoMap = new Map<string, string[]>();
-    galleryResults.flatMap((r: any) => r.data ?? []).forEach((g: any) => {
+    enrich.sitter_gallery.forEach((g: any) => {
       const arr = photoMap.get(g.user_id) || [];
       if (arr.length < 4 && g.photo_url) arr.push(g.photo_url);
       photoMap.set(g.user_id, arr);
