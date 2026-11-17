@@ -45,6 +45,25 @@ import {
 } from "@/lib/proximityRadius";
 import { SitOwnerAbsenceNotice } from "@/components/admin/OwnerAbsenceBadge";
 import { Loader2, Search, Send, AlertTriangle } from "lucide-react";
+import { NATIONWIDE_RADIUS_KM } from "../../../supabase/functions/_shared/far-listing";
+import {
+  CUSTOM_HOOK_MAX,
+  CUSTOM_SUBJECT_MAX,
+  DEFAULT_AUDIENCE,
+  checkCustomHook,
+  checkCustomSubject,
+  suggestBroadcastTexts,
+  type BroadcastAudience,
+} from "../../../supabase/functions/_shared/proximity-broadcast";
+
+type BroadcastScope = "radius" | "national";
+
+/** Aucun destinataire en diffusion nationale : dit pourquoi, sans parler de rayon. */
+function nationalEmptyText(excludedRecent: number | null | undefined): string {
+  const n = Math.max(0, Number(excludedRecent) || 0);
+  if (n > 0) return `Les ${n} gardiens ciblés ont déjà reçu cette annonce. Choisissez « Tous les gardiens actifs » pour en toucher d'autres.`;
+  return "Aucun gardien actif dans cette audience. Choisissez « Tous les gardiens actifs » pour élargir.";
+}
 
 interface PreviewRecipient {
   first_name: string;
@@ -63,8 +82,13 @@ interface PreviewData {
     city: string | null;
     excerpt?: string;
     date_range?: string;
+    start_date?: string | null;
+    end_date?: string | null;
   };
   subject?: string;
+  /** Propriétaire à plus de 1 500 km de Paris : la diffusion nationale s'impose. */
+  owner_far?: boolean;
+  nationwide?: boolean;
   recipients: PreviewRecipient[];
   truncated: boolean;
 }
@@ -87,7 +111,20 @@ const ListingProximityCard = ({
   const [radiusKm, setRadiusKm] = useState<number>(clampRadiusInput(initialRadiusKm));
   // Lot P2 : au-delà de 200 km, le rayon se confirme explicitement dans le dialogue.
   const [radiusConfirmed, setRadiusConfirmed] = useState(false);
-  const radiusNeedsConfirm = needsRadiusConfirmation(radiusKm);
+  // Lot ANN-6 : deux modes. « Autour de l'annonce » (rayon) ou « Toute la France » (diffusion nationale ciblée).
+  const [scope, setScope] = useState<BroadcastScope>("radius");
+  const [audience, setAudience] = useState<BroadcastAudience>(DEFAULT_AUDIENCE);
+  const [customSubject, setCustomSubject] = useState("");
+  const [customHook, setCustomHook] = useState("");
+  const scopeTouchedRef = useRef(false);
+  const textsTouchedRef = useRef(false);
+  const autoSwitchedRef = useRef(false);
+  const national = scope === "national";
+  const effectiveRadiusKm = national ? NATIONWIDE_RADIUS_KM : radiusKm;
+  const subjectCheck = checkCustomSubject(national ? customSubject : "");
+  const hookCheck = checkCustomHook(national ? customHook : "");
+  const textError = subjectCheck.error || hookCheck.error;
+  const radiusNeedsConfirm = needsRadiusConfirmation(effectiveRadiusKm);
 
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -141,7 +178,25 @@ const ListingProximityCard = ({
     }
   };
 
-  const handlePreview = async () => {
+  const buildBody = (
+    mode: "preview" | "send",
+    ov?: { scope?: BroadcastScope; audience?: BroadcastAudience },
+  ) => {
+    const isNational = (ov?.scope ?? scope) === "national";
+    const body: Record<string, unknown> = {
+      mode,
+      sit_id: sitId,
+      radius_km: isNational ? NATIONWIDE_RADIUS_KM : radiusKm,
+    };
+    if (isNational) {
+      body.audience = ov?.audience ?? audience;
+      if (subjectCheck.value) body.custom_subject = subjectCheck.value;
+      if (hookCheck.value) body.custom_hook = hookCheck.value;
+    }
+    return body;
+  };
+
+  const handlePreview = async (ov?: { scope?: BroadcastScope; audience?: BroadcastAudience }) => {
     if (!sitId) {
       toast.error("sit_id manquant");
       return;
@@ -149,11 +204,12 @@ const ListingProximityCard = ({
     setLoading(true);
     setPreview(null);
     setWarningMessage(null);
+    let chained = false;
     try {
       const { data, error } = await supabase.functions.invoke(
         "send-listing-proximity",
         {
-          body: { mode: "preview", sit_id: sitId, radius_km: radiusKm },
+          body: buildBody("preview", ov),
         },
       );
       if (error || (data as { error?: string })?.error) {
@@ -161,11 +217,35 @@ const ListingProximityCard = ({
         setWarningMessage(await buildCoordsErrorMessage(msg));
         return;
       }
-      setPreview(data as PreviewData);
+      const pv = data as PreviewData;
+      setPreview(pv);
+      const nowNational = (ov?.scope ?? scope) === "national";
+      // Propriétaire loin de la France : le rayon autour de l'annonce ne touche
+      // personne, on passe seul en diffusion nationale (une fois, sauf choix explicite).
+      if (!nowNational && pv.owner_far && pv.count === 0 && !scopeTouchedRef.current && !autoSwitchedRef.current) {
+        autoSwitchedRef.current = true;
+        chained = true;
+        setScope("national");
+        void handlePreview({ scope: "national" });
+        return;
+      }
+      // Suggestions d'objet et d'accroche, une fois, tant que l'administrateur n'a rien écrit.
+      if (nowNational && !textsTouchedRef.current && pv.sit.city) {
+        const sug = suggestBroadcastTexts({
+          city: pv.sit.city,
+          ownerFirstName: pv.author_first_name,
+          startDate: pv.sit.start_date,
+          endDate: pv.sit.end_date,
+          dateRange: pv.sit.date_range,
+        });
+        textsTouchedRef.current = true;
+        setCustomSubject(sug.subject);
+        setCustomHook(sug.hook);
+      }
     } catch (err: unknown) {
       setWarningMessage((err as Error)?.message || "Erreur lors de l'aperçu");
     } finally {
-      setLoading(false);
+      if (!chained) setLoading(false);
     }
   };
 
@@ -178,7 +258,7 @@ const ListingProximityCard = ({
       const { data, error } = await supabase.functions.invoke(
         "send-listing-proximity",
         {
-          body: { mode: "send", sit_id: sitId, radius_km: radiusKm },
+          body: buildBody("send"),
         },
       );
       if (error || (data as { error?: string })?.error) {
@@ -220,8 +300,9 @@ const ListingProximityCard = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoPreview]);
 
-  const subject = preview?.subject
-    ?? (preview
+  const subject = (national && subjectCheck.value)
+    || preview?.subject
+    || (preview
       ? `${preview.author_first_name || "Un propriétaire"} cherche un gardien près de chez vous`
       : "");
 
@@ -232,10 +313,108 @@ const ListingProximityCard = ({
       ? "Aucun destinataire"
       : `Envoyer les ${recipientCount} email${recipientCount > 1 ? "s" : ""}`;
 
+  const chooseScope = (next: BroadcastScope) => {
+    if (next === scope) return;
+    scopeTouchedRef.current = true;
+    setScope(next);
+    setConfirmInput("");
+    setRadiusConfirmed(false);
+    void handlePreview({ scope: next });
+  };
+  const chooseAudience = (next: BroadcastAudience) => {
+    if (next === audience) return;
+    setAudience(next);
+    setConfirmInput("");
+    setRadiusConfirmed(false);
+    void handlePreview({ scope: "national", audience: next });
+  };
+
   const body = (
     <div className="flex-1 overflow-y-auto px-6 py-3 space-y-3 min-h-0">
+      <div role="group" aria-label="Portée de la diffusion" className="flex flex-wrap gap-2" data-testid="broadcast-scope">
+        <Button
+          type="button"
+          size="sm"
+          variant={national ? "outline" : "default"}
+          aria-pressed={!national}
+          onClick={() => chooseScope("radius")}
+          data-testid="scope-radius"
+        >
+          Autour de l'annonce
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant={national ? "default" : "outline"}
+          aria-pressed={national}
+          onClick={() => chooseScope("national")}
+          data-testid="scope-national"
+        >
+          Toute la France
+        </Button>
+      </div>
+
+      {national && (
+        <div className="space-y-3 rounded-md border border-border bg-muted/20 p-3" data-testid="national-options">
+          <p className="text-xs text-muted-foreground">
+            Diffusion nationale : les gardiens de toute la France, lieu renseigné ou non. Restent exclus les désabonnés, les adresses supprimées et les gardiens déjà servis pour cette annonce.
+          </p>
+          <fieldset className="space-y-1.5">
+            <legend className="text-xs font-medium">Qui recevra l'annonce</legend>
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="radio"
+                name="broadcast-audience"
+                className="mt-1 accent-primary"
+                checked={audience === "recent_90d"}
+                onChange={() => chooseAudience("recent_90d")}
+                data-testid="audience-recent"
+              />
+              <span>Gardiens actifs récemment <span className="text-muted-foreground">(vus sur le site depuis 90 jours)</span></span>
+            </label>
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="radio"
+                name="broadcast-audience"
+                className="mt-1 accent-primary"
+                checked={audience === "all"}
+                onChange={() => chooseAudience("all")}
+                data-testid="audience-all"
+              />
+              <span>Tous les gardiens actifs <span className="text-muted-foreground">(y compris ceux qui ne sont pas revenus depuis longtemps)</span></span>
+            </label>
+          </fieldset>
+          <div className="space-y-1.5">
+            <Label htmlFor="broadcast-subject" className="text-xs">Objet de l'email (facultatif)</Label>
+            <Input
+              id="broadcast-subject"
+              value={customSubject}
+              maxLength={CUSTOM_SUBJECT_MAX + 20}
+              onChange={(e) => { textsTouchedRef.current = true; setCustomSubject(e.target.value); }}
+              placeholder="Et si votre Noël avait lieu à Papeete ?"
+              aria-invalid={!!subjectCheck.error}
+              data-testid="custom-subject"
+            />
+            {subjectCheck.error && <p className="text-xs text-destructive" role="alert">{subjectCheck.error}</p>}
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="broadcast-hook" className="text-xs">Accroche sous la phrase d'ouverture (facultatif)</Label>
+            <textarea
+              id="broadcast-hook"
+              className="flex min-h-[84px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={customHook}
+              onChange={(e) => { textsTouchedRef.current = true; setCustomHook(e.target.value); }}
+              aria-invalid={!!hookCheck.error}
+              data-testid="custom-hook"
+            />
+            <p className="text-[11px] text-muted-foreground">{customHook.length} / {CUSTOM_HOOK_MAX} caractères. Laissez vide pour l'email sans accroche.</p>
+            {hookCheck.error && <p className="text-xs text-destructive" role="alert">{hookCheck.error}</p>}
+          </div>
+        </div>
+      )}
+
       <div className="flex items-end gap-3 flex-wrap">
-        <div className="space-y-1.5 w-28 shrink-0">
+        {!national && (<div className="space-y-1.5 w-28 shrink-0">
           <Label htmlFor="listing-prox-radius" className="text-xs">Rayon (km)</Label>
           <Input
             id="listing-prox-radius"
@@ -246,10 +425,10 @@ const ListingProximityCard = ({
             onChange={(e) => setRadiusKm(clampRadiusInput(e.target.value))}
           />
           <p className="text-[11px] text-muted-foreground">
-            Rayon jusqu'à {MAX_RADIUS_KM.toLocaleString("fr-FR")} km, confirmé au-delà de {LARGE_RADIUS_WARN_KM} km. Les gardiens déjà servis pour cette annonce, ou touchés par une diffusion dans les {PROXIMITY_DEDUP_DAYS} derniers jours, sont exclus.
+            1 000 km et plus : diffusion nationale, tous les gardiens du pays sont visés. Rayon confirmé au-delà de {LARGE_RADIUS_WARN_KM} km (maximum {MAX_RADIUS_KM.toLocaleString("fr-FR")} km). Les gardiens déjà servis pour cette annonce, ou touchés par une diffusion dans les {PROXIMITY_DEDUP_DAYS} derniers jours, sont exclus.
           </p>
-        </div>
-        <Button onClick={handlePreview} disabled={loading} size="sm" variant="outline">
+        </div>)}
+        <Button onClick={() => void handlePreview()} disabled={loading} size="sm" variant="outline">
           {loading ? (
             <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Calcul…</>
           ) : (
@@ -260,7 +439,7 @@ const ListingProximityCard = ({
 
       <SitOwnerAbsenceNotice sitId={sitId} />
 
-      {radiusKm >= LARGE_RADIUS_WARN_KM && (
+      {effectiveRadiusKm >= LARGE_RADIUS_WARN_KM && (
         <Alert variant="default" className="border-warning/40 bg-warning/5 py-2">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription className="text-xs">
@@ -324,7 +503,7 @@ const ListingProximityCard = ({
 
           {preview.count === 0 ? (
             <p className="text-sm text-muted-foreground pt-2" data-testid="proximity-empty">
-              {proximityEmptyText(preview.excluded_recent, radiusKm)}
+              {national ? nationalEmptyText(preview.excluded_recent) : proximityEmptyText(preview.excluded_recent, radiusKm)}
             </p>
           ) : (
             <>
@@ -375,7 +554,7 @@ const ListingProximityCard = ({
           setRadiusConfirmed(false);
           setConfirmOpen(true);
         }}
-        disabled={sending || !preview || recipientCount === 0}
+        disabled={sending || !preview || recipientCount === 0 || !!textError}
       >
         {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
         {sendLabel}
@@ -422,7 +601,7 @@ const ListingProximityCard = ({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {radiusNeedsConfirm ? radiusConfirmationTitle(radiusKm) : "Confirmer l'envoi aux gardiens du coin"}
+              {radiusNeedsConfirm ? radiusConfirmationTitle(effectiveRadiusKm) : "Confirmer l'envoi aux gardiens du coin"}
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-3 text-sm">
@@ -448,7 +627,7 @@ const ListingProximityCard = ({
                       onChange={(e) => setRadiusConfirmed(e.target.checked)}
                     />
                     <span>
-                      Je diffuse à {radiusKm.toLocaleString("fr-FR")} km, au-delà de {LARGE_RADIUS_WARN_KM} km.
+                      {national ? "Je diffuse à toute la France" : `Je diffuse à ${effectiveRadiusKm.toLocaleString("fr-FR")} km`}, au-delà de {LARGE_RADIUS_WARN_KM} km.
                     </span>
                   </label>
                 )}
@@ -465,6 +644,7 @@ const ListingProximityCard = ({
               disabled={
                 sending ||
                 !preview ||
+                !!textError ||
                 Number(confirmInput) !== preview.count ||
                 (radiusNeedsConfirm && !radiusConfirmed)
               }

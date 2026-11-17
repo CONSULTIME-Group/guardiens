@@ -54,6 +54,8 @@ import { compareUrgency, listingUrgency, matchesCounter, URGENCY_COUNTERS, type 
 import { memberMessageDrafts, type MemberDraftTopic } from "@/lib/admin/memberMessageDrafts";
 import { isPastDay } from "@/lib/calendarDate";
 import { isListingStartedWaiting } from "@/lib/admin/listingStartedWaiting";
+import { LISTING_SORT_LABELS, compareListings, effectiveSortKey, sortOptionsFor, sortScopeOf, type ListingSortKey } from "@/lib/admin/listingSort";
+import { draftSummaryHead, draftSummaryParts, summarizeDrafts } from "@/lib/admin/draftSummary";
 import { useAuth } from "@/contexts/AuthContext";
 import { isNewListing, readNewsVisitSince } from "@/hooks/useAdminNews";
 
@@ -334,7 +336,8 @@ const AdminListings = () => {
     });
     return () => { cancelled = true; };
   }, [listings, statsNonce]);
-  const [sortBy, setSortBy] = useState<"urgency" | "created">("urgency");
+  // Lot ANN-6 : choix de tri mémorisé par périmètre ; sans choix, le défaut du filtre.
+  const [sortPick, setSortPick] = useState<{ scope: string; key: ListingSortKey } | null>(null);
   const urgencyInput = (l: any): UrgencyInput | null => {
     const st = stats[l.id];
     if (!st || !waiting) return null;
@@ -549,8 +552,15 @@ const AdminListings = () => {
   const urgencyReady = !!waiting && statsReady && !statsError;
   const PUBLISHED_SCOPE = ["published", "waiting_long", "departure_soon", "to_staff", "awaiting_reply", "started_waiting"];
   const inPublishedScope = PUBLISHED_SCOPE.includes(filterStatus);
-  if (sortBy === "urgency" && urgencyReady && inPublishedScope && !focusSitId && !focusOwnerId) {
-    filtered.sort((a, b) => compareUrgency(urgencyOf(a), urgencyOf(b)));
+  // Lot ANN-6 : le tri se choisit sur tous les filtres ; l'urgence reste réservée aux annonces en ligne.
+  const sortScope = sortScopeOf(filterStatus, inPublishedScope);
+  const sortKey = effectiveSortKey(sortPick, filterStatus, inPublishedScope);
+  if (!focusSitId && !focusOwnerId) {
+    if (sortKey === "urgency") {
+      if (urgencyReady) filtered.sort((a, b) => compareUrgency(urgencyOf(a), urgencyOf(b)));
+    } else {
+      filtered.sort((a, b) => compareListings(sortKey, a, b));
+    }
   }
   const counterCounts = inPublishedScope && urgencyReady && !focusSitId && !focusOwnerId
     ? (filterStatus === "published"
@@ -635,7 +645,7 @@ const AdminListings = () => {
     const writePrimary = urg?.gesture === "write_owner";
     const big = card ? "min-h-11 rounded-full flex-1 basis-40" : "";
     return (
-      <div className={card ? "flex flex-wrap items-center gap-2" : "flex justify-end items-center gap-1 whitespace-nowrap"}>
+      <div className={card ? "flex flex-wrap items-center gap-2" : "flex flex-wrap justify-end items-center gap-1"}>
         {isReady(listing) && (
           <Button size="sm" className={big} onClick={() => setPublishModal(listing.id)} data-testid="publish-on-behalf">
             <Send className="h-4 w-4 mr-1" /> Publier à sa place
@@ -656,26 +666,29 @@ const AdminListings = () => {
         >
           <Mail className="h-4 w-4 mr-1" /> {ownerFirst ? `Écrire à ${ownerFirst.split(" ")[0]}` : "Écrire"}
         </Button>
-        <Button variant="ghost" size="icon" className={card ? "h-11 w-11" : ""} onClick={() => setCoverListing(listing)} aria-label="Photo de couverture" title="Photo de couverture" data-testid="row-cover-picker">
-          <ImageIcon className="h-4 w-4" />
-        </Button>
-        {liveUrl ? (
-          <Button variant="ghost" size="icon" className={card ? "h-11 w-11" : ""} asChild>
-            <a href={liveUrl} target="_blank" rel="noopener noreferrer" aria-label="Voir la version en ligne" title="Voir la version en ligne" data-testid="row-live-link">
+        {card && (<>
+          <Button variant="ghost" size="icon" className="h-11 w-11" onClick={() => setCoverListing(listing)} aria-label="Photo de couverture" title="Photo de couverture" data-testid="row-cover-picker">
+            <ImageIcon className="h-4 w-4" />
+          </Button>
+          {liveUrl ? (
+            <Button variant="ghost" size="icon" className="h-11 w-11" asChild>
+              <a href={liveUrl} target="_blank" rel="noopener noreferrer" aria-label="Voir la version en ligne" title="Voir la version en ligne" data-testid="row-live-link">
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </Button>
+          ) : (
+            <Button variant="ghost" size="icon" className="h-11 w-11" disabled aria-label="Annonce pas en ligne" title="Annonce pas en ligne" data-testid="row-live-link">
               <ExternalLink className="h-4 w-4" />
-            </a>
-          </Button>
-        ) : (
-          <Button variant="ghost" size="icon" className={card ? "h-11 w-11" : ""} disabled aria-label="Annonce pas en ligne" title="Annonce pas en ligne" data-testid="row-live-link">
-            <ExternalLink className="h-4 w-4" />
-          </Button>
-        )}
-        {rowMenu(listing, urg, st, isAdminHidden)}
+            </Button>
+          )}
+        </>)}
+        {rowMenu(listing, urg, st, isAdminHidden, card ? null : { liveUrl })}
       </div>
     );
   };
 
-  const rowMenu = (listing: any, urg: Urgency | null, st: Stats | undefined, isAdminHidden: boolean) => (
+  // Lot ANN-6 : sur ordinateur, couverture et version en ligne rejoignent le groupe « Voir » du menu (media non nul).
+  const rowMenu = (listing: any, urg: Urgency | null, st: Stats | undefined, isAdminHidden: boolean, media: { liveUrl: string | null } | null = null) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="h-11 w-11" aria-label="Autres actions" title="Autres actions">
@@ -690,6 +703,16 @@ const AdminListings = () => {
         )}
         <DropdownMenuItem onSelect={() => openDrill(listing, "applications")}><MessageSquare className="h-4 w-4 mr-2" /> Candidatures et conversations</DropdownMenuItem>
         <DropdownMenuItem onSelect={() => openTraffic(listing)}><BarChart3 className="h-4 w-4 mr-2" /> Sources de trafic</DropdownMenuItem>
+        {media && (<>
+          <DropdownMenuItem onSelect={() => setCoverListing(listing)} data-testid="menu-cover-picker"><ImageIcon className="h-4 w-4 mr-2" /> Photo de couverture</DropdownMenuItem>
+          {media.liveUrl ? (
+            <DropdownMenuItem asChild data-testid="menu-live-link">
+              <a href={media.liveUrl} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-4 w-4 mr-2" /> Voir la version en ligne</a>
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem disabled data-testid="menu-live-link"><ExternalLink className="h-4 w-4 mr-2" /> Annonce pas en ligne</DropdownMenuItem>
+          )}
+        </>)}
         {listing.status === "published" && !broadcastShown(listing, urg, st) && (
           <DropdownMenuItem onSelect={() => setProximityListing(listing)}><Send className="h-4 w-4 mr-2" /> Diffuser aux gardiens du coin</DropdownMenuItem>
         )}
@@ -863,6 +886,23 @@ const AdminListings = () => {
         <p role="status" className="text-sm text-muted-foreground">Chargement des candidatures…</p>
       )}
 
+      {(filterStatus === "preparing" || filterStatus === "ready") && !focusSitId && !focusOwnerId && draftCtx && !draftCtxError && (() => {
+        const sum = summarizeDrafts(listings, draftCtx, today);
+        if (sum.total === 0) return null;
+        const parts = draftSummaryParts(sum);
+        return (
+          <p className="text-sm text-muted-foreground" data-testid="drafts-summary" role="status">
+            <strong className="text-foreground">{draftSummaryHead(sum.total)}</strong>
+            {parts.length > 0 && <> : {parts.map((p, i) => (
+              <span key={p.key}>{i > 0 ? ", " : ""}{p.count} {p.label}</span>
+            ))}</>}
+            {sum.ready > 0 && filterStatus !== "ready" && (
+              <> · <button type="button" className="underline underline-offset-2 text-foreground" onClick={() => selectFilter("ready")} data-testid="drafts-summary-ready">Voir les prêts à publier</button></>
+            )}
+          </p>
+        );
+      })()}
+
       {filterStatus === "preparing" && !focusSitId && !focusOwnerId && <div className="flex items-center gap-3 text-sm">
         <label htmlFor="draft-followup-filter">Brouillons</label>
         <Select disabled={!draftFollowups || draftFollowupError} value={draftFocus} onValueChange={value => { setDraftFocus(value); setPage(0); }}>
@@ -896,15 +936,14 @@ const AdminListings = () => {
             )}
           </SelectContent>
         </Select>
-        {inPublishedScope && (
-          <Select value={sortBy} onValueChange={(v) => setSortBy(v as "urgency" | "created")}>
-            <SelectTrigger className="w-[200px]" aria-label="Tri"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="urgency">Trier : urgence</SelectItem>
-              <SelectItem value="created">Trier : création</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
+        <Select value={sortKey} onValueChange={(v) => { setSortPick({ scope: sortScope, key: v as ListingSortKey }); setPage(0); }}>
+          <SelectTrigger className="w-[230px]" aria-label="Tri" data-testid="sort-select"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {sortOptionsFor(inPublishedScope).map((k) => (
+              <SelectItem key={k} value={k}>{LISTING_SORT_LABELS[k]}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         {cities.length > 0 && (
           <Select value={filterCity} onValueChange={setFilterCity}>
             <SelectTrigger className="w-[160px]"><SelectValue placeholder="Ville" /></SelectTrigger>
@@ -967,10 +1006,10 @@ const AdminListings = () => {
         </div>
       ) : (
       <div className="rounded-lg border bg-card overflow-x-auto">
-        <Table className="table-fixed min-w-[980px]">
+        <Table className="table-fixed min-w-[1080px]">
           <colgroup>
             <col className="w-[26%]" /><col className="w-[15%]" /><col className="w-[17%]" />
-            <col className="w-[8%]" /><col className="w-[8%]" /><col className="w-[6%]" /><col className="w-[300px]" />
+            <col className="w-[8%]" /><col className="w-[8%]" /><col className="w-[6%]" /><col className="w-[340px]" />
           </colgroup>
           <TableHeader>
             <TableRow>
@@ -1037,6 +1076,14 @@ const AdminListings = () => {
                     {" au "}
                     {listing.end_date ? format(calendarDate(listing.end_date), "d MMM yy", { locale: fr }) : "·"}
                     </div>
+                    {!listing.published_at && (listing.created_at || listing.updated_at) && (
+                      <div className="mt-0.5 text-[11px] text-muted-foreground" data-testid="row-created">
+                        {listing.created_at && <>créée le {format(new Date(listing.created_at), "d MMM", { locale: fr })}</>}
+                        {listing.updated_at && (
+                          <>{listing.created_at ? " · " : ""}modifiée {formatDistanceToNow(new Date(listing.updated_at), { addSuffix: true, locale: fr })}</>
+                        )}
+                      </div>
+                    )}
                     {listing.published_at && (
                       <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px]">
                         <span>publiée {formatDistanceToNow(new Date(listing.published_at), { addSuffix: true, locale: fr })}</span>
