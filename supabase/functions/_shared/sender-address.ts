@@ -36,6 +36,7 @@ export const FOUNDER_CAMPAIGN_TEMPLATES: readonly string[] = [
   "owner-noel-v3-logement",
   "owner-noel-v3-relance",
   "owner-departure-question",
+  "lettre-membres-novembre",
 ];
 export const FOUNDER_SENDER_NAME = "Elisa et Jérémie, Guardiens";
 

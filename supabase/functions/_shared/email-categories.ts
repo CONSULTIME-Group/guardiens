@@ -140,6 +140,8 @@ const PRODUCT: ReadonlyArray<string> = [
   'sitter-mutual-aid-invite',
   'entraide-ligne-helps-with',
   'entraide-ligne-relance',
+  // Lettre des fondateurs à tous les membres (17/11/2026)
+  'lettre-membres-novembre',
   // Campagne saisonnière propriétaires (lot N3)
   'owner-noel-2026',
   // Email de Noël v3 (lot V1)

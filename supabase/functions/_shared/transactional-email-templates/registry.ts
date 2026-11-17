@@ -112,6 +112,7 @@ import { template as sitDraftAlmostReady } from './sit-draft-almost-ready.tsx'
 import { template as ownerSitUnconfirmed } from './owner-sit-unconfirmed.tsx'
 import { template as entraideLigneHelpsWith } from './entraide-ligne-helps-with.tsx'
 import { template as entraideLigneRelance } from './entraide-ligne-relance.tsx'
+import { template as lettreMembresNovembre } from './lettre-membres-novembre.tsx'
 import { template as ownerNoel2026 } from './owner-noel-2026.tsx'
 import { template as ownerNoelV3Pret } from './owner-noel-v3-pret.tsx'
 import { template as ownerNoelV3Photo } from './owner-noel-v3-photo.tsx'
@@ -242,6 +243,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'discussion-stalled-nudge': discussionStalledNudge,
   'entraide-ligne-helps-with': entraideLigneHelpsWith,
   'entraide-ligne-relance': entraideLigneRelance,
+  'lettre-membres-novembre': lettreMembresNovembre,
   'owner-noel-2026': ownerNoel2026,
   'owner-noel-v3-pret': ownerNoelV3Pret,
   'owner-noel-v3-photo': ownerNoelV3Photo,
