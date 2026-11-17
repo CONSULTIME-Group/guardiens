@@ -43,6 +43,13 @@ interface Props {
    * pour une garde hors de France). Deduit de distanceKm quand absent.
    */
   farAway?: boolean
+  /**
+   * Lot ANN-6 : accroche rédigée par l'administrateur pour une diffusion
+   * ciblée (texte simple, un paragraphe, sous la phrase d'ouverture).
+   */
+  hook?: string
+  /** Lot ANN-6 : objet rédigé par l'administrateur, prioritaire sur l'objet du gabarit. */
+  customSubject?: string
 }
 
 /** Garde lointaine : drapeau explicite, sinon distance superieure a 200 km. */
@@ -71,6 +78,7 @@ const NearbySitAlertEmail = ({
   completionHref,
   tripsQuestionHref,
   farAway,
+  hook,
 }: Props) => {
   const ctaHref = sitId ? `${SITE_URL}/sits/${sitId}` : `${SITE_URL}/sits`
   const far = isFarAlert({ farAway, distanceKm })
@@ -103,6 +111,8 @@ const NearbySitAlertEmail = ({
               {typeof distanceKm === 'number' ? <> (à environ {distanceKm} km de chez vous)</> : null}.
             </Text>
           )}
+
+          {hook ? <Text style={text}>{hook}</Text> : null}
 
           <Section style={card}>
             {coverPhotoUrl ? (
@@ -189,7 +199,9 @@ const NearbySitAlertEmail = ({
 export const template = {
   component: NearbySitAlertEmail,
   subject: (data: Record<string, any>) =>
-    isFarAlert(data)
+    typeof data.customSubject === 'string' && data.customSubject.trim()
+      ? data.customSubject.trim()
+      : isFarAlert(data)
       ? farSubject(data.ownerFirstName, data.city)
       : data.city
         ? `Nouvelle annonce à ${data.city}`

@@ -24,6 +24,13 @@
  */
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { clampRadiusKm, MAX_RADIUS_KM, PROXIMITY_DEDUP_DAYS } from "../_shared/proximity-radius.ts";
+import {
+  checkCustomHook,
+  checkCustomSubject,
+  parseAudience,
+  recentSeenCutoff,
+  type BroadcastAudience,
+} from "../_shared/proximity-broadcast.ts";
 import { PUBLISHED_STATUS } from "../_shared/sit-alert-guard.ts";
 import {
   farSubject,
@@ -215,6 +222,7 @@ async function computeRecipients(
   serviceClient: SupabaseClient<any, "public", any>,
   sitId: string,
   radiusKm: number,
+  audience: BroadcastAudience = "all",
 ) {
   const { data: sit, error: sErr } = await serviceClient
     .from("sits")
@@ -294,6 +302,11 @@ async function computeRecipients(
       .from("profiles")
       .select("id, first_name, email, city, latitude, longitude, account_status, role")
       .in("role", ["sitter", "both"]);
+    // Lot ANN-6 : diffusion nationale ciblée, les gardiens vus depuis 90 jours
+    // seulement (un profil jamais vu n'a pas de date et reste hors cible).
+    if (nationwide && audience === "recent_90d") {
+      q = q.gte("last_seen_at", recentSeenCutoff());
+    }
     if (!nationwide) {
       q = q
         .not("latitude", "is", null)
@@ -452,6 +465,17 @@ Deno.serve(async (req) => {
       });
     }
     const signalId: string | null = payload.signal_id ?? null;
+    // Lot ANN-6 : audience de la diffusion nationale, objet et accroche facultatifs.
+    const audience = parseAudience(payload.audience);
+    const subjectCheck = checkCustomSubject(payload.custom_subject);
+    const hookCheck = checkCustomHook(payload.custom_hook);
+    const customError = subjectCheck.error || hookCheck.error;
+    if (customError) {
+      return new Response(JSON.stringify({ error: customError }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     if (!sitId) {
       return new Response(JSON.stringify({ error: "sit_id requis" }), {
         status: 400,
@@ -468,7 +492,7 @@ Deno.serve(async (req) => {
       listingCity,
       nationwide,
       ownerFar,
-    } = await computeRecipients(serviceClient, sitId, radiusKm);
+    } = await computeRecipients(serviceClient, sitId, radiusKm, audience);
 
     // Liste explicite optionnelle : INTERSECTION avec la cible géographique,
     // jamais union. Une adresse hors rayon, exclue par une préférence, ou
@@ -512,10 +536,11 @@ Deno.serve(async (req) => {
       excluded_recent: recipients.length - targets.length,
       nationwide,
       owner_far: ownerFar,
+      audience: nationwide ? audience : null,
       far_recipients: targets.filter((r) => isFarForRecipient(r.distance_km, ownerFar || nationwide)).length,
     };
 
-    const subject = buildSubject(authorFirstName, listingCity, farBroadcast || nationwide);
+    const subject = subjectCheck.value || buildSubject(authorFirstName, listingCity, farBroadcast || nationwide);
     const excerpt = buildExcerpt(sit.owner_message ?? sit.specific_expectations);
     const dateRange = buildDateRange(sit.start_date, sit.end_date);
     const startDateFr = formatDateFr(sit.start_date);
@@ -540,6 +565,8 @@ Deno.serve(async (req) => {
             city: listingCity,
             excerpt,
             date_range: dateRange,
+            start_date: sit.start_date ?? null,
+            end_date: sit.end_date ?? null,
             cover_photo_url: coverPhotoUrl,
             pets_sentence: petsSentence,
           },
@@ -628,7 +655,7 @@ Deno.serve(async (req) => {
       .from("mass_emails")
       .insert({
         segment: "listing_proximity",
-        filters: { sit_id: sitId, radius_km: radiusKm } as any,
+        filters: { sit_id: sitId, radius_km: radiusKm, audience: nationwide ? audience : null } as any,
         subject,
         body: `Annonce de garde (${sit.title}) diffusée à ${radiusKm} km, propriétaire ${authorFirstName}`,
         cta_label: "Voir l'annonce",
@@ -688,6 +715,8 @@ Deno.serve(async (req) => {
             sitId: sit.id,
             animalsSummary: petsSentence || undefined,
             coverPhotoUrl: coverPhotoUrl || null,
+            customSubject: subjectCheck.value || undefined,
+            hook: hookCheck.value || undefined,
           },
         } as any,
       });

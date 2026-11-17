@@ -41,6 +41,7 @@ const SAMPLES: Record<string, Record<string, any>[]> = {
     { farAway: true, ownerFirstName: 'Andrée', city: 'Saint Ludger, Québec, Canada' },
     { distanceKm: 250, city: 'Brest' },
     { farAway: true },
+    { farAway: true, customSubject: 'Et si votre Noël avait lieu à Papeete ?' },
   ],
   'availability-nudge': [{ city: 'Lyon' }, {}],
 }
