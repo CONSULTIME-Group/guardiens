@@ -109,20 +109,21 @@ describe("Y3 · Guardiens est gratuit, dit simplement", () => {
     });
   }
 
-  // Lot TAR1 (13/11/2026, décision de Jérémie) : /tarifs dit que Guardiens est
-  // gratuit aujourd'hui, explique ce que coûte la plateforme, et annonce une
-  // contribution demandée plus tard aux membres satisfaits, avec un préavis.
-  // Aucune date, aucun prix, aucune durée de préavis chiffrée.
-  it("/tarifs : gratuit aujourd'hui, coûts expliqués, contribution annoncée sans date ni prix (JSON-LD compris)", () => {
+  // Lot TAR1 (13/11/2026), revu par le lot TAR2 (21/11/2026, décision de
+  // Jérémie) : /tarifs dit que Guardiens est gratuit et ce que coûte la
+  // plateforme, sans durée et sans contribution future. Aucune date, aucun prix.
+  it("/tarifs : gratuit sans durée, coûts expliqués, aucune contribution annoncée (JSON-LD compris)", () => {
     const src = read("src/pages/Pricing.tsx");
-    expect(src).toContain("Guardiens est gratuit aujourd'hui");
-    expect(src).toContain('a: "Aujourd\'hui, Guardiens est gratuit pour tous les membres."');
+    expect(src).toMatch(/>\s*Guardiens est gratuit\s*<\/h1>/);
+    expect(src).toContain(
+      'a: "Guardiens est gratuit, pour les propriétaires comme pour les gardiens : publier une annonce, postuler, échanger et s\'entraider."',
+    );
+    expect(src).toContain("Nous prenons entièrement à notre charge le fonctionnement du site");
     expect(src).toContain("la technologie sert à se rencontrer");
-    expect(src).toContain("nous demanderons une contribution aux membres satisfaits");
-    expect(src).toContain("Vous serez prévenus bien à l'avance.");
     expect(src).toContain("Publier mon annonce de garde");
-    for (const re of [/factur/i, /30 jours/, /maintenant/i, /reste gratuit/i, /tant que/i, /€/, /20\d\d/]) {
-      expect(src, String(re)).not.toMatch(re);
+    const code = stripComments(src);
+    for (const re of [/factur/i, /30 jours/, /maintenant/i, /reste gratuit/i, /tant que/i, /€/, /20\d\d/, /contribution/i, /Et demain/, /aujourd'hui/i]) {
+      expect(code, String(re)).not.toMatch(re);
     }
   });
 
