@@ -167,6 +167,8 @@ const SitterGallery = () => {
         metadata: {
           ext: f.fileName.split(".").pop()?.toLowerCase() || "unknown",
           size_kb: src ? Math.round(src.size / 1024) : 0,
+          // Lot FIX2 : motif de l'échec, sans nom de fichier ni donnée personnelle.
+          reason: (f.message || "unknown").replace(/[^\p{L}\p{N} .,:_-]/gu, "").slice(0, 120),
         },
       });
       toast.error(`${f.fileName} : ${t("upload.photo_failed")}`);
