@@ -1111,6 +1111,24 @@
           "sql": "SELECT position('annul1_annulation_garde' IN pg_get_functiondef('public.recalculate_cancellations(uuid,text)'::regprocedure)) > 0 AND position('''proprio''' IN replace(pg_get_functiondef('public.recalculate_cancellations(uuid,text)'::regprocedure), 'p_role = ''proprio''', '')) = 0 AS ok"
         }
       ]
+    },
+    {
+      "migration": "0180_stop1_stop_activation.sql",
+      "description": "Un « stop » en réponse à un message personnel de l'équipe coupe les emails produit du membre et accuse réception (premier « stop » du 21/11/2026 resté sans effet)",
+      "checks": [
+        {
+          "name": "fonction_repere",
+          "sql": "SELECT position('stop1_stop_activation' IN pg_get_functiondef('public.handle_activation_stop()'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "declencheur_messages",
+          "sql": "SELECT EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid = 'public.messages'::regclass AND tgname = 'trg_messages_activation_stop' AND NOT tgisinternal AND tgenabled <> 'D') AS ok"
+        },
+        {
+          "name": "fonction_fermee_aux_membres",
+          "sql": "SELECT NOT has_function_privilege('anon', 'public.handle_activation_stop()', 'EXECUTE') AND NOT has_function_privilege('authenticated', 'public.handle_activation_stop()', 'EXECUTE') AS ok"
+        }
+      ]
     }
   ]
 }
