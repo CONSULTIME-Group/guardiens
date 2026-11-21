@@ -1097,6 +1097,20 @@
           "sql": "SELECT NOT EXISTS (SELECT 1 FROM cron.job j WHERE j.active AND j.command ILIKE '%net.http_post%' AND j.schedule <> '* * * * *' AND (split_part(j.schedule, ' ', 1) LIKE '*%' OR EXISTS (SELECT 1 FROM unnest(string_to_array(split_part(j.schedule, ' ', 1), ',')) m WHERE m ~ '^[0-9]+$' AND m::int % 5 = 0))) AS ok"
         }
       ]
+    },
+    {
+      "migration": "0179_annul1_annulation_garde.sql",
+      "description": "Annulation d'une garde confirmée par le propriétaire ou le gardien : écriture interne des compteurs autorisée, auteur lu par uuid (blocage « champ sensible » du 21/11/2026)",
+      "checks": [
+        {
+          "name": "notify_sit_cancelled_drapeau",
+          "sql": "SELECT position('annul1_annulation_garde' IN pg_get_functiondef('public.notify_sit_cancelled()'::regprocedure)) > 0 AND position('allow_internal_profile_update' IN pg_get_functiondef('public.notify_sit_cancelled()'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "recalculate_cancellations_uuid",
+          "sql": "SELECT position('annul1_annulation_garde' IN pg_get_functiondef('public.recalculate_cancellations(uuid,text)'::regprocedure)) > 0 AND position('''proprio''' IN replace(pg_get_functiondef('public.recalculate_cancellations(uuid,text)'::regprocedure), 'p_role = ''proprio''', '')) = 0 AS ok"
+        }
+      ]
     }
   ]
 }
