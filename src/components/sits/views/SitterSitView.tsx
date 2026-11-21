@@ -612,7 +612,7 @@ const SitterSitView = ({
                 className="text-muted-foreground mt-[8px]"
                 style={{ fontSize: "13px", lineHeight: 1.5 }}
               >
-                Un accord de garde est disponible pour cette réservation. Ce document résume les dates, ce que chacun s'engage à faire, et les contacts utiles pour cette garde.
+                Un accord de garde facultatif est disponible pour cette réservation. Il met par écrit les dates, ce que chacun prévoit et les contacts utiles. Guardiens est gratuit, pour vous comme pour le propriétaire.
               </p>
               <p
                 className="text-muted-foreground mt-[8px]"
@@ -632,7 +632,7 @@ const SitterSitView = ({
                 {ownerAccordSigned && !sitterAccordSigned && sitterAccordDeclined &&
                   "Le propriétaire l'a signé. Vous avez choisi de ne pas le signer pour le moment : il reste disponible si vous changez d'avis."}
                 {ownerAccordSigned && !sitterAccordSigned && !sitterAccordDeclined &&
-                  "Le propriétaire l'a signé. Lisez-le et signez-le à votre tour pour finaliser la garde."}
+                  "Le propriétaire l'a signé. Vous pouvez le lire et le signer à votre tour, si vous le souhaitez."}
               </p>
               {ownerAccordSigned && accordData && (
                 <div className="mt-[14px]">

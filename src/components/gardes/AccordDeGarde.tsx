@@ -185,10 +185,8 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
   );
   }
 
-  const buttonLabel =
-  role === "gardien"
-  ? "C'est bon pour moi, je signe cet accord"
-  : "C'est bon pour moi, je signe →";
+  // Lot ACC1 : même libellé pour les deux rôles.
+ const buttonLabel = "Je signe cet accord";
 
  return (
  <div className="max-w-2xl mx-auto bg-card border rounded-xl shadow-sm flex flex-col max-h-[90vh] overflow-hidden">
@@ -213,9 +211,13 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  {/* CORPS */}
  <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-6 py-5 space-y-8">
  {/* Intro */}
- <p className="italic text-sm text-muted-foreground">
- Ce document résume ce que {p} et {g} ont prévu ensemble. Il sert de référence commune si une question se pose pendant ou après la garde.
+ {/* Lot ACC1 (21/11/2026) : gratuité et caractère facultatif dits d'emblée. */}
+ <div className="flex items-start gap-2.5 rounded-xl bg-pastel-sage px-3.5 py-3" data-testid="accord-free-note">
+ <CheckCircle2 className="h-5 w-5 shrink-0 mt-px text-pastel-sage-ink" aria-hidden="true" />
+ <p className="text-sm text-pastel-sage-ink">
+ <strong>Guardiens est gratuit.</strong> Cet accord est facultatif : il met par écrit ce que {p} et {g} ont convenu ensemble, et sert de référence commune si une question se pose.
  </p>
+ </div>
 
  {/* Animaux */}
  <div>
@@ -303,9 +305,15 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  )}
  </div>
  {garde.montantVetMax != null && garde.montantVetMax > 0 ? (
- <p className="text-sm mt-3">
- {g} peut engager des soins jusqu'à {garde.montantVetMax}€ sans attendre. Au-delà, {g} tente de joindre {p} avant d'agir. Si {p} est injoignable et que l'état de l'animal l'exige, {g} agit dans l'intérêt de l'animal et conserve tous les justificatifs. Les frais sont remboursés par {p} sur présentation de la facture.
+ <div className="mt-3 rounded-xl border border-border bg-pastel-honey px-3.5 py-3 space-y-1.5" data-testid="accord-frais-avances">
+ <p className="text-xs font-semibold uppercase tracking-wide text-pastel-honey-ink">Frais avancés, remboursés sur facture</p>
+ <p className="text-sm">
+ Pour un soin urgent, {g} peut avancer jusqu'à {garde.montantVetMax} € sans attendre. {p} les rembourse sur présentation de la facture.
  </p>
+ <p className="text-sm text-muted-foreground">
+ Au-delà, {g} joint {p} avant d'agir. Si {p} reste injoignable et que l'animal en a besoin, {g} agit dans son intérêt et garde les justificatifs.
+ </p>
+ </div>
  ) : (
  <p className="text-sm mt-3">
  Le montant de soins que {g} peut engager sans attendre se convient entre {p} et {g} avant la garde, par la messagerie. Si l'état de l'animal l'exige et que {p} reste injoignable, {g} agit dans l'intérêt de l'animal et conserve tous les justificatifs, remboursés par {p} sur présentation de la facture.
@@ -321,7 +329,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  </p>
  {garde.montantLogementMax != null && (
  <p className="text-sm mt-2">
- Dans ce cas, {g} peut engager des frais jusqu'à {garde.montantLogementMax}€ et conserve tous les justificatifs pour remboursement.
+ Dans ce cas, {g} peut avancer jusqu'à {garde.montantLogementMax} €, remboursés par {p} sur facture.
  </p>
  )}
  {joinFilled([garde.voisinConfiance?.prenom, garde.voisinConfiance?.telephone]) && (
@@ -400,7 +408,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  {/* PIED */}
  <div className="shrink-0 border-t px-6 py-4">
   <p className="text-center text-sm text-muted-foreground mb-3">
-  J'ai lu cet accord et je confirme que son contenu correspond à ce que nous avons prévu ensemble.
+  J'ai lu cet accord et il correspond à ce que nous avons prévu ensemble.
   </p>
   <button
   disabled={!hasScrolled || isLoading}
@@ -422,12 +430,26 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
   Vous avez choisi de ne pas signer cet accord{alreadyDeclined.declined_at ? ` le ${format(new Date(alreadyDeclined.declined_at), "d MMMM yyyy", { locale: fr })}` : ""}. Ce choix est visible de l'autre partie. Vous pouvez changer d'avis en le signant ci-dessus.
   </p>
   ) : !declineConfirm ? (
+  <>
+  {/* Lot ACC1 : « Plus tard » referme sans rien enregistrer ; le refus tracé reste possible. */}
+  {onClose && (
+  <button
+  onClick={onClose}
+  className="w-full mt-2 min-h-11 text-sm text-muted-foreground hover:text-foreground transition-colors py-1"
+  >
+  Plus tard
+  </button>
+  )}
+  <p className="text-center text-xs text-muted-foreground mt-1">
+  L'accord reste sur la page de la garde, à signer quand vous voulez.
+  </p>
   <button
   onClick={() => setDeclineConfirm(true)}
-  className="w-full mt-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-1"
+  className="w-full mt-1 min-h-11 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors py-1"
   >
-  Passer cette étape
+  Décliner l'accord
   </button>
+  </>
   ) : (
   <div className="mt-3 rounded-lg border border-border bg-muted/40 p-3 space-y-2">
   <p className="text-sm text-center font-medium">Vous choisissez de ne pas signer cet accord ?</p>

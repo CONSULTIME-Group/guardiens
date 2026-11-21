@@ -34,6 +34,8 @@ interface AccordStatusRow {
 
 export function AccordOwnerStatusBanner({ sitId, sitStatus, onSignAccord, refreshKey }: AccordOwnerStatusBannerProps) {
   const [status, setStatus] = useState<AccordStatusRow | null>(null);
+  // Lot ACC1 : « Plus tard » replie le bandeau pour cette visite, sans rien enregistrer.
+  const [later, setLater] = useState(false);
 
   useEffect(() => {
     if (!["confirmed", "in_progress", "completed"].includes(sitStatus)) return;
@@ -66,18 +68,27 @@ export function AccordOwnerStatusBanner({ sitId, sitStatus, onSignAccord, refres
   const description = "Ce document résume les dates, ce que chacun s'engage à faire, et les contacts utiles pour cette garde.";
 
   if (!status.owner_signed && !status.owner_declined) {
+    if (later) return null;
+    // Lot ACC1 (21/11/2026) : l'accord se présente comme facultatif et gratuit.
     return (
-      <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-2">
-        <p className="font-medium text-sm">Un accord de garde est disponible pour cette réservation.</p>
-        <p className="text-sm text-muted-foreground">{description}</p>
+      <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-2" data-testid="accord-owner-pending">
+        <p className="font-medium text-sm">Un accord de garde, si vous le souhaitez</p>
         <p className="text-sm text-muted-foreground">
-          Il vous reste à le signer : votre gardien est alors prévenu et peut le signer à son tour. Vous partagez ainsi une référence commune.
+          Facultatif. Il met par écrit les dates, ce que chacun prévoit et les contacts utiles.
         </p>
-        {onSignAccord && (
-          <Button size="sm" className="mt-2" onClick={onSignAccord}>
-            Signer l'accord de garde
+        <p className="text-sm font-medium text-pastel-sage-ink">
+          Guardiens est gratuit, pour vous comme pour votre gardien.
+        </p>
+        <div className="flex flex-wrap gap-2 pt-1">
+          {onSignAccord && (
+            <Button size="sm" className="min-h-11 rounded-full px-5" onClick={onSignAccord}>
+              Lire l'accord
+            </Button>
+          )}
+          <Button size="sm" variant="outline" className="min-h-11 rounded-full px-5" onClick={() => setLater(true)}>
+            Plus tard
           </Button>
-        )}
+        </div>
       </div>
     );
   }
