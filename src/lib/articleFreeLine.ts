@@ -23,7 +23,7 @@ export const DATED_PRICING_COMMITMENT_SLUGS: ReadonlySet<string> = new Set([
 ]);
 
 export const FREE_LINE = "Guardiens est gratuit.";
-export const DATED_FREE_LINE = "Plateforme actuellement 100 % gratuite.";
+export const DATED_FREE_LINE = "Guardiens est gratuit.";
 
 export function ownerGuideFreeLine(slug: string): string {
   return DATED_PRICING_COMMITMENT_SLUGS.has(slug) ? DATED_FREE_LINE : FREE_LINE;
