@@ -63,19 +63,23 @@ const SitterOpeningCard = ({
   ];
 
   const doneCount = steps.filter((s) => s.done).length;
-  if (doneCount === steps.length) return null;
-
-  const progressPct = Math.round((doneCount / steps.length) * 100);
-  const firstUndone = steps.find((s) => !s.done)!;
-
   const undoneKeys = steps.filter((s) => !s.done).map((s) => s.key).join(",");
+
+  // Lot FIX2 : les hooks passent avant tout retour anticipé (règle des hooks).
+  // Avant, la carte plantait quand la dernière étape passait à faite pendant
+  // la visite (« Rendered fewer hooks than expected »).
   const sectionRef = useRef<HTMLElement | null>(null);
-  useImpressionOnce(sectionRef, `sitter_opening:${undoneKeys}`, () => {
+  useImpressionOnce(sectionRef, undoneKeys ? `sitter_opening:${undoneKeys}` : null, () => {
     void trackEvent("dashboard_star_seen", {
       source: "sitter_dashboard",
       metadata: { surface: "sitter_dashboard", variant: "opening", undone: undoneKeys },
     });
   });
+
+  if (doneCount === steps.length) return null;
+
+  const progressPct = Math.round((doneCount / steps.length) * 100);
+  const firstUndone = steps.find((s) => !s.done)!;
 
   const trackStep = (stepKey: string) =>
     void trackEvent("dashboard_star_cta_clicked", {
