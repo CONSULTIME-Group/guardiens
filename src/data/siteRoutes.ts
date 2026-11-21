@@ -142,7 +142,7 @@ export const staticRoutes: SiteRoute[] = [
  path: "/tarifs",
 		title: "Tarifs : Guardiens est gratuit | Guardiens",
 		metaDescription: "Guardiens est gratuit, pour les propriétaires comme pour les gardiens : publier une annonce, postuler, échanger et s'entraider.",
-		h1: "Guardiens est gratuit aujourd'hui",
+		h1: "Guardiens est gratuit",
  sitemapPriority: "0.8",
  changeFreq: "weekly",
  },

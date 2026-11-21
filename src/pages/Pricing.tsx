@@ -16,10 +16,10 @@ import { trackEvent } from "@/lib/analytics";
 import { useAuth } from "@/contexts/AuthContext";
 import { homeCtaTarget, HOME_BTN_PRIMARY } from "@/components/landing/homeCta";
 
-// Lot TAR1 (texte validé par Jérémie le 13 novembre) : la page dit pourquoi
-// Guardiens est gratuit aujourd'hui, ce que coûte la plateforme, et qu'une
-// contribution sera demandée plus tard aux membres satisfaits. Elle parle de
-// tarifs : une seule phrase rappelle l'esprit du site.
+// Lot TAR1 (texte validé par Jérémie le 13 novembre), revu par le lot TAR2
+// (21 novembre) : la page dit pourquoi Guardiens est gratuit et ce que coûte
+// la plateforme, sans aucune mention de durée ni de contribution future.
+// Elle parle de tarifs : une seule phrase rappelle l'esprit du site.
 const INTRO =
   "Sur Guardiens, la technologie sert à se rencontrer. Entre membres, tout s'échange en temps et en services : une garde de maison, une garde d'animaux, un coup de main, une sortie, une balade.";
 
@@ -27,12 +27,7 @@ const sections: Array<{ id: string; title: string; body: string }> = [
   {
     id: "pourquoi",
     title: "Pourquoi c'est gratuit",
-    body: "Faire tourner Guardiens a un coût : serveurs, messagerie, emails, maintenance, développements, intelligence artificielle. Aujourd'hui, nous le prenons entièrement à notre charge, pour que la communauté grandisse librement.",
-  },
-  {
-    id: "demain",
-    title: "Et demain",
-    body: "Plus la communauté grandit, mieux elle fonctionne pour chacun, et plus elle coûte à faire tourner. Le jour venu, nous demanderons une contribution aux membres satisfaits, pour faire vivre Guardiens et continuer à l'améliorer. Vous serez prévenus bien à l'avance.",
+    body: "Faire tourner Guardiens a un coût : serveurs, messagerie, emails, maintenance, développements, intelligence artificielle. Nous prenons entièrement à notre charge le fonctionnement du site, pour que la communauté grandisse librement.",
   },
   {
     id: "vrai",
@@ -41,16 +36,13 @@ const sections: Array<{ id: string; title: string; body: string }> = [
   },
 ];
 
+// Le JSON-LD FAQPage est construit depuis cette même liste : il reprend
+// exactement les questions visibles.
 const faqItems: Array<{ id: string; q: string; a: string }> = [
   {
     id: "cout",
     q: "Combien coûte Guardiens ?",
-    a: "Aujourd'hui, Guardiens est gratuit pour tous les membres.",
-  },
-  {
-    id: "contribution",
-    q: "Une contribution sera-t-elle demandée un jour ?",
-    a: "Oui. Le jour venu, une contribution sera demandée aux membres satisfaits, pour faire vivre Guardiens et continuer à l'améliorer. Vous serez prévenus bien à l'avance.",
+    a: "Guardiens est gratuit, pour les propriétaires comme pour les gardiens : publier une annonce, postuler, échanger et s'entraider.",
   },
   {
     id: "inclus",
@@ -99,7 +91,7 @@ const Pricing = () => {
         <main id="main-content" className="max-w-3xl mx-auto px-4 min-w-0">
           <section className="py-10 md:py-14 text-center">
             <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground leading-tight mb-4">
-              Guardiens est gratuit aujourd'hui
+              Guardiens est gratuit
             </h1>
             <p className="text-base md:text-lg font-body text-foreground/80 leading-relaxed">
               {INTRO}
