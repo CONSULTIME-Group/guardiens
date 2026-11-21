@@ -223,7 +223,9 @@ const MessageBubble = ({
   return (
     <>
       <div className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
-      <div className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+      {/* w-full : la largeur maximale de la bulle (78 %) se mesure sur le fil, pas sur
+          le texte. Sans elle, une bulle courte (« Stop ») se coupait lettre par lettre. */}
+      <div className={`flex w-full ${isMe ? "justify-end" : "justify-start"}`} data-testid="message-bubble-row">
         <div
           className={[
             "max-w-[78%] px-4 py-2.5",
