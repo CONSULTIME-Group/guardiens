@@ -135,6 +135,20 @@ const SitterProfile = () => {
           setTimeout(() => el.classList.remove("ring-2", "ring-primary"), 3000);
         }
       }, 500);
+    } else if (focus === "bio" && lastAppliedFocusRef.current !== focus) {
+      // Lot ANNUL1 : l'étape « Écrire votre bio » du tableau de bord mène au
+      // champ Bio, qui vit dans l'onglet Identité.
+      lastAppliedFocusRef.current = focus;
+      setActiveSection("identity");
+      setTimeout(() => {
+        const el = document.getElementById("bio") as HTMLTextAreaElement | null;
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          el.focus();
+          el.classList.add("ring-2", "ring-primary");
+          setTimeout(() => el.classList.remove("ring-2", "ring-primary"), 3000);
+        }
+      }, 500);
     } else if (focus === "interests" && lastAppliedFocusRef.current !== focus) {
       lastAppliedFocusRef.current = focus;
       setActiveSection("sitter");

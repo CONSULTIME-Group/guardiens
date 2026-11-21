@@ -48,7 +48,8 @@ const SitterOpeningCard = ({
       done: hasBioMin,
       label: "Écrire votre bio (50 caractères min)",
       hint: "Votre motivation, en quelques mots sincères.",
-      to: "/profile?section=profil",
+      // Lot ANNUL1 : le champ Bio vit dans l'onglet Identité, pas dans Profil gardien.
+      to: "/profile?section=identite&focus=bio",
       verb: "Écrire",
     },
     {
