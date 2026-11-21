@@ -67,6 +67,8 @@ jobs:
         run: npm run test:sql:d7
       - name: Source enregistrée à l'inscription, lot SRC1 (Postgres local)
         run: npm run test:sql:src1
+      - name: STOP1 stop activation
+        run: npm run test:sql:stop1
       - name: Onglet Leads de Trafic, lot TRF2 (Postgres local)
         run: npm run test:sql:trf2
       - name: Sorties à places comptées, lot SORT1 (Postgres local)

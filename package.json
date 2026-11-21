@@ -33,6 +33,7 @@
     "test:sql:src1": "node scripts/test-src1-source-inscription.mjs",
     "test:sql:trf2": "node scripts/test-trf2-leads.mjs",
     "test:sql:sort1": "node scripts/test-sort1-sorties.mjs",
+    "test:sql:stop1": "node scripts/test-stop1-stop-activation.mjs",
     "test:sql:alr1": "node scripts/test-alr1-diffusion-position.mjs",
     "test:data": "vitest run src/__tests__/article-internal-links.test.ts src/__tests__/article-pricing-content.test.ts",
     "test:e2e:badges": "playwright test tests/badges-long-labels.spec.ts",
