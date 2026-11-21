@@ -630,6 +630,11 @@ const Sits = () => {
         });
         return;
       }
+      // Lot MES1 : une republication depuis Mes annonces compte comme les autres.
+      void trackEvent("sit_publish_succeeded", {
+        source: "sits_list_republish",
+        metadata: { sit_id: sitId, flow: "sits_list_republish" },
+      });
       toast({ title: "Annonce republiée" });
       loadSits();
     } catch (err: any) {

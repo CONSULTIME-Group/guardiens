@@ -140,8 +140,8 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
  path: "/tarifs",
-		title: "Guardiens est gratuit aujourd'hui : pourquoi, et demain | Guardiens",
-		metaDescription: "Guardiens est gratuit aujourd'hui pour tous les membres. Nous prenons ses coûts à notre charge. Une contribution sera demandée plus tard aux membres satisfaits.",
+		title: "Tarifs : Guardiens est gratuit | Guardiens",
+		metaDescription: "Guardiens est gratuit, pour les propriétaires comme pour les gardiens : publier une annonce, postuler, échanger et s'entraider.",
 		h1: "Guardiens est gratuit aujourd'hui",
  sitemapPriority: "0.8",
  changeFreq: "weekly",

@@ -642,10 +642,16 @@ const SearchOwner = () => {
     // sous le plafond serveur de 1 000 lignes, quelle que soit la taille du vivier.
     const allUserIds = allItems.map((s: any) => s.user_id);
     const idChunks = chunkArray(allUserIds, 100);
+    // Lot MES1 (21/11/2026) : la galerie gardien est réservée aux membres
+    // connectés. Sans session, aucune lecture n'est lancée (elle répondait
+    // 401 une fois par lot de 100 gardiens) et la fiche s'affiche sans galerie.
+    // Session lue localement, sans appel réseau.
+    const { data: { session: viewerSession } } = await supabase.auth.getSession();
+    const galleryChunks = viewerSession ? idChunks : [];
     const [badgeResults, emergencyResults, galleryResults, reviewResults, tierResults, helpResults] = await Promise.all([
       Promise.all(idChunks.map((ids) => supabase.from("public_badge_attributions").select("user_id, badge_id").in("user_id", ids))),
       Promise.all(idChunks.map((ids) => supabase.from("public_emergency_sitter_profiles").select("user_id, is_active").in("user_id", ids).eq("is_active", true))),
-      Promise.all(idChunks.map((ids) => supabase.from("sitter_gallery").select("user_id, photo_url, created_at").in("user_id", ids).order("created_at", { ascending: false }))),
+      Promise.all(galleryChunks.map((ids) => supabase.from("sitter_gallery").select("user_id, photo_url, created_at").in("user_id", ids).order("created_at", { ascending: false }))),
       Promise.all(idChunks.map((ids) => supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", ids).eq("published", true))),
       // Lot L4 : palier public de réactivité (90 j, 5 contacts) et offre d'entraide opt-in.
       Promise.all(idChunks.map((ids) => (supabase as any).from("public_responsiveness").select("user_id, tier").in("user_id", ids))),

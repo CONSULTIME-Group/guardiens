@@ -727,6 +727,11 @@ const OwnerSitView = ({
     }
     setSit({ ...sit, status: "published" });
     setJustPublished(true);
+    // Lot MES1 : une publication depuis la fiche compte comme les autres.
+    void trackEvent("sit_publish_succeeded", {
+      source: "owner_sit_view",
+      metadata: { sit_id: sit.id, flow: "owner_sit_view" },
+    });
     // Scroll vers le bloc d'invitation et l'ouvrir automatiquement
     requestAnimationFrame(() => {
       setTimeout(() => {

@@ -488,6 +488,16 @@ const CreateSit = () => {
   // Lot ANN1 : « À mon domicile » choisi d'office, le tri du besoin se fait par Alma ou par ce choix.
   const [sitLocation, setSitLocation] = useState<"home" | "away" | null>("home");
   const stepStartedAtRef = useRef<number>(Date.now());
+  // Lot MES1 (21/11/2026) : « étape terminée » part aussi à la publication
+  // réussie. Le parcours express n'a qu'un écran et la dernière étape du
+  // parcours par étapes se termine par la publication, sans changement
+  // d'étape : ni l'un ni l'autre n'émettait l'événement.
+  const stepFlowRef = useRef<"steps" | "express">("steps");
+  const trackStepCompleted = (step: number) => {
+    void trackEvent("sits_create_step_completed", {
+      metadata: { step, duration_ms: Date.now() - stepStartedAtRef.current, flow: stepFlowRef.current },
+    });
+  };
   const publishedRef = useRef(false);
   const lastStepRef = useRef<number>(0);
   const visitedStepsRef = useRef<Set<number>>(new Set());
@@ -2051,6 +2061,7 @@ const CreateSit = () => {
         } catch {}
       }
       publishedRef.current = true;
+      trackStepCompleted(currentStepRef.current);
       try {
         await trackEvent("sit_publish_succeeded", {
           source: "create_sit_page",
@@ -2059,6 +2070,7 @@ const CreateSit = () => {
             duration_ms: Date.now() - funnelStartedAtRef.current,
             resumed_draft: !!draftIdParam,
             via: publishViaRef.current ?? readPublishVia(searchParams),
+            flow: stepFlowRef.current,
           },
         });
       } catch {}
@@ -2283,8 +2295,11 @@ const CreateSit = () => {
       setupSuspendedRef.current = false;
     } else {
       stepStartedAtRef.current = Date.now();
+      // Lot MES1 : parcours de l'étape (par étapes ou express), lu au début
+      // de l'étape et repris tel quel à sa fin.
+      stepFlowRef.current = expressActiveRef.current ? "express" : "steps";
       const isBackward = step < lastStepRef.current || visitedStepsRef.current.has(step);
-      void trackEvent("sits_create_step_started", { metadata: { step, is_backward: isBackward } });
+      void trackEvent("sits_create_step_started", { metadata: { step, is_backward: isBackward, flow: stepFlowRef.current } });
       formShownRef.current = true;
       visitedStepsRef.current.add(step);
       lastStepRef.current = step;
@@ -2298,8 +2313,7 @@ const CreateSit = () => {
       // l'étape suivante. Avant, quitter la page comptait comme une étape
       // terminée et gonflait l'entonnoir (58 débuts, 34 « finies », 19 étapes 2).
       if (currentStepRef.current <= step) return;
-      const duration = Date.now() - stepStartedAtRef.current;
-      void trackEvent("sits_create_step_completed", { metadata: { step, duration_ms: duration } });
+      trackStepCompleted(step);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep, showSetup, loading]);
