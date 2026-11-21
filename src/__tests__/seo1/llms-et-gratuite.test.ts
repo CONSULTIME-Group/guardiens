@@ -76,10 +76,10 @@ describe("gabarit d'article : Guardiens est gratuit", () => {
     expect(src).toContain("{ownerGuideFreeLine(article.slug)}");
   });
 
-  it("exception du 17/10/2026 : les quatre refontes gardent leur engagement daté", () => {
+  it("les quatre refontes : même ligne de gratuité que le reste du site (TAR2, 21/11/2026)", () => {
     const four = [EXPAT_OWNER_ARTICLE_SLUG, REUNION_OWNER_ARTICLE_SLUG, TAHITI_OWNER_ARTICLE_SLUG, CALEDONIE_OWNER_ARTICLE_SLUG];
     expect([...DATED_PRICING_COMMITMENT_SLUGS].sort()).toEqual([...four].sort());
-    for (const slug of four) expect(ownerGuideFreeLine(slug)).toMatch(/actuellement/);
+    for (const slug of four) expect(ownerGuideFreeLine(slug)).toBe("Guardiens est gratuit.");
   });
 });
 
