@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { uploadFailureMetadata, type UploadFailureStage } from "@/lib/uploadFailure";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -59,23 +60,24 @@ const StepExperience = ({ data, pastAnimals, onChange, onAddAnimal, onRemoveAnim
     if (!user) return null;
     // Plafond d'ingestion galerie (1600 px, repli dégradé 1024 px inclus).
     // Échec définitif = mesure + formulation unique, jamais de brut.
-    const fail = (): null => {
-      void trackEvent("experience_photo_upload_failed", {
-        metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
-      });
+    const fail = (stage: UploadFailureStage, error: unknown): null => {
+      void trackEvent("experience_photo_upload_failed", { metadata: uploadFailureMetadata(file, stage, error) });
       toast.error(t("upload.photo_failed"));
       return null;
     };
     let toUpload: File;
     try {
       toUpload = await compressGalleryFile(file);
-    } catch {
-      return fail();
+    } catch (err) {
+      return fail("compress", err);
     }
     const ext = toUpload.name.split(".").pop();
     const path = `${user.id}/past-animals/${safeUUID()}.${ext}`;
-    const { error } = await supabase.storage.from("sitter-gallery").upload(path, toUpload, { upsert: true });
-    if (error) return fail();
+    // Lot PHOTO2 : envoi sans écrasement. Le chemin est unique, et l'écrasement
+    // demande un droit de lecture que les membres n'ont pas sur ce dossier :
+    // chaque envoi était refusé (0 photo enregistrée depuis mai 2026).
+    const { error } = await supabase.storage.from("sitter-gallery").upload(path, toUpload, { upsert: false });
+    if (error) return fail("upload", error);
     const { data: urlData } = supabase.storage.from("sitter-gallery").getPublicUrl(path);
     return urlData.publicUrl;
   };

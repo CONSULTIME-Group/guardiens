@@ -1,3 +1,4 @@
+import { uploadFailureMetadata } from "@/lib/uploadFailure";
 import { trackEvent } from "@/lib/analytics";
 
 /**
@@ -146,12 +147,9 @@ export async function compressAvatarFile(file: File): Promise<File> {
   } catch (firstError) {
     try {
       return await compressImageFile(file, 1, 512, 0.6);
-    } catch {
+    } catch (secondError) {
       void trackEvent("avatar_compression_failed", {
-        metadata: {
-          ext: file.name.split(".").pop()?.toLowerCase() || "unknown",
-          size_kb: Math.round(file.size / 1024),
-        },
+        metadata: uploadFailureMetadata(file, "compress", secondError),
       });
       throw firstError;
     }

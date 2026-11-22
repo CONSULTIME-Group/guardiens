@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { uploadFailureMetadata, type UploadFailureStage } from "@/lib/uploadFailure";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -157,25 +158,23 @@ const PetForm = ({ initialValues, onSubmit, onCancel, submitLabel = "Enregistrer
     setUploading(true);
     // Plafond d'ingestion (1600 px, repli dégradé 1024 px inclus).
     // Échec définitif = mesure + formulation unique, jamais de brut.
-    const fail = () => {
-      void trackEvent("pet_photo_upload_failed", {
-        metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
-      });
+    const fail = (stage: UploadFailureStage, error: unknown) => {
+      void trackEvent("pet_photo_upload_failed", { metadata: uploadFailureMetadata(file, stage, error) });
       toast.error(t("upload.photo_failed"));
       setUploading(false);
     };
     let toUpload: File;
     try {
       toUpload = await compressGalleryFile(file);
-    } catch {
-      fail();
+    } catch (err) {
+      fail("compress", err);
       return;
     }
     const ext = toUpload.name.split(".").pop() || "jpg";
     const path = `${user.id}/pets/${safeUUID()}.${ext}`;
     const { error } = await supabase.storage.from("property-photos").upload(path, toUpload, { upsert: true });
     if (error) {
-      fail();
+      fail("upload", error);
       return;
     }
     const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
