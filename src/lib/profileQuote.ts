@@ -6,7 +6,9 @@
 export function splitSentences(text: string | null | undefined): string[] {
   if (!text) return [];
   return text
-    .split(/\n+|(?<=[.!?…])\s+/)
+    // Sans assertion arrière (lot REC1) : un saut de ligne remplace l'espace qui suit la ponctuation.
+    .replace(/([.!?…])\s+/g, "$1\n")
+    .split(/\n+/)
     .map((s) => s.trim())
     .filter(Boolean);
 }

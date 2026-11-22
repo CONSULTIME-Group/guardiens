@@ -283,7 +283,8 @@ export function formatProjetDay(start?: string | null, end?: string | null): str
 export function projetParagraphs(text: string): string[] {
   const explicit = text.split(/\n{2,}/).map((s) => s.trim()).filter(Boolean);
   if (explicit.length > 1) return explicit;
-  const sentences = text.trim().split(/(?<=[.!?…])\s+(?=[A-ZÀ-ÖØ-Þ])/);
+  // Sans assertion arrière (lot REC1) : la ponctuation est gardée, un repère marque la coupe.
+  const sentences = text.trim().replace(/([.!?…])\s+(?=[A-ZÀ-ÖØ-Þ])/g, "$1\u0000").split("\u0000");
   const out: string[] = [];
   for (let i = 0; i < sentences.length; i += 2) out.push(sentences.slice(i, i + 2).join(" "));
   return out;
@@ -302,21 +303,23 @@ export type ProjetSectionLabel = (typeof PROJET_SECTION_LABELS)[number];
 export function projetSections(text?: string | null): Partial<Record<ProjetSectionLabel, string>> | null {
   if (!text) return null;
   const alt = PROJET_SECTION_LABELS.map((l) => l.replace("'", "['\u2019]")).join("|");
-  const re = new RegExp(`(?:^|(?<=[.!?]\\s))(${alt})\\s*:\\s*`, "g");
+  // Sans assertion arrière (lot REC1) : la limite de gauche est capturée, le
+  // libellé commence après elle.
+  const re = new RegExp(`(^|[.!?]\\s)(${alt})\\s*:\\s*`, "g");
   const trimmed = text.trim();
-  const marks = [...trimmed.matchAll(re)];
+  const marks = [...trimmed.matchAll(re)].map((m) => ({ label: m[2], start: m.index! + m[1].length, end: m.index! + m[0].length }));
   if (marks.length === 0) return null;
   // Découpage sans perte uniquement : le texte doit commencer par un libellé
   // (rien avant) et chaque libellé n'apparaît qu'une fois. Sinon, null et la
   // page affiche le texte intégral.
-  if (marks[0].index !== 0) return null;
+  if (marks[0].start !== 0) return null;
   const out: Partial<Record<ProjetSectionLabel, string>> = {};
   for (let i = 0; i < marks.length; i++) {
     const m = marks[i];
-    const label = PROJET_SECTION_LABELS.find((l) => l.replace("'", "").toLowerCase() === m[1].replace(/['\u2019]/, "").toLowerCase())!;
+    const label = PROJET_SECTION_LABELS.find((l) => l.replace("'", "").toLowerCase() === m.label.replace(/['\u2019]/, "").toLowerCase())!;
     if (label in out) return null;
-    const end = i + 1 < marks.length ? marks[i + 1].index! : trimmed.length;
-    const body = trimmed.slice(m.index! + m[0].length, end).trim().replace(/[.\s]+$/, "");
+    const end = i + 1 < marks.length ? marks[i + 1].start : trimmed.length;
+    const body = trimmed.slice(m.end, end).trim().replace(/[.\s]+$/, "");
     if (!body) return null;
     out[label] = capitalize(body) + (/https:\/\/\S+$/.test(body) ? "" : ".");
   }
