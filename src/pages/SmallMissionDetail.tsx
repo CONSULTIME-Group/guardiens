@@ -1006,6 +1006,47 @@ const SmallMissionDetail = () => {
             <Button onClick={() => void openResponseConversation(myResponse)} className="w-full rounded-full gap-2" size="lg">
               <MessageSquare className="h-4 w-4" /> Aller à la messagerie
             </Button>
+            {/* Lot REC3 : le membre retenu libère sa place, le besoin se rouvre. */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button
+                  type="button"
+                  className="min-h-[44px] w-full text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                  data-testid="release-my-place"
+                >
+                  Un empêchement ? Je libère ma place
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Libérer votre place ?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {author?.first_name || "L'auteur"} est prévenu(e) tout de suite et son besoin s'ouvre de nouveau
+                    aux membres proches.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Je reste</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={async () => {
+                      const { data, error } = await (supabase.rpc as any)("withdraw_my_accepted_response", { p_mission_id: mission.id });
+                      if (error) {
+                        toast({ variant: "destructive", title: "Votre place reste réservée", description: "Le changement a échoué. Réessayez dans un instant." });
+                        return;
+                      }
+                      const nextResponse = "withdrawn"; const nextNeed = "open";
+                      setResponses((prev) => prev.map((r) => (r.id === myResponse.id ? { ...r, status: nextResponse } : r)));
+                      if ((data as { reopened?: boolean } | null)?.reopened) setMission({ ...mission, status: nextNeed });
+                      void trackEvent("mission_response_withdrawn", { metadata: { mission_id: mission.id, response_id: myResponse.id, was_accepted: true } });
+                      toast({ title: "Votre place est libérée", description: `${author?.first_name || "L'auteur"} est prévenu(e).` });
+                    }}
+                  >
+                    Je libère ma place
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         );
       }

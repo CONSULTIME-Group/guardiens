@@ -30,6 +30,7 @@ import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccordDeGarde from "@/components/gardes/LazyAccordDeGarde";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import ApplicationModal from "@/components/sits/ApplicationModal";
+import ClosedApplicationCard from "@/components/sits/ClosedApplicationCard";
 import { applyDeepLinkTarget } from "@/lib/alma/applyDeepLink";
 import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
 import CancelSitModal from "@/components/sits/CancelSitModal";
@@ -160,6 +161,10 @@ const SitterSitView = ({
       liveApplications: appCount,
     }) === "full";
   const canStillApply = Boolean(sit.accepting_applications) && !capFull;
+  // Lot REC3 : une candidature annulée ou déclinée se dit close ; annulée sur
+  // une annonce encore ouverte, elle se dépose de nouveau.
+  const applicationClosed = hasApplied && (myApplicationStatus === "cancelled" || myApplicationStatus === "rejected");
+  const canReapply = hasApplied && myApplicationStatus === "cancelled" && sit.status === "published" && canStillApply;
   // Lot Z2 (B-12) : même règle pour la barre du haut et la barre fixe mobile.
   const applySurface = sitApplySurface({
     activeRole,
@@ -442,6 +447,14 @@ const SitterSitView = ({
                       {missingHint}
                     </p>
                   </div>
+                ) : applicationClosed ? (
+                  <ClosedApplicationCard
+                    status={myApplicationStatus as "cancelled" | "rejected"}
+                    createdAt={myApplicationTimes?.createdAt}
+                    ownerFirstName={owner?.first_name || ""}
+                    canReapply={canReapply}
+                    onReapply={() => setApplyOpen(true)}
+                  />
                 ) : hasApplied ? (
                   <div className="w-full md:w-auto md:min-w-[16rem] space-y-3">
                     <Button className="w-full md:w-auto md:min-w-[16rem] h-11 md:h-12 px-6 rounded-full text-base font-semibold" disabled>
@@ -717,6 +730,10 @@ const SitterSitView = ({
             ? "closed"
             : capFull
               ? "full"
+              : canReapply
+              ? "apply"
+              : applicationClosed
+              ? "closed"
               : hasApplied
               ? "applied"
               : accessLevel === 1
@@ -747,6 +764,7 @@ const SitterSitView = ({
         onOpenChange={setApplyOpen}
         hideIdentityHint={showIdentityInvite}
         returnToStory
+        reapply={canReapply}
         sitId={sit.id}
         ownerId={sit.user_id}
         ownerFirstName={owner?.first_name || ""}
