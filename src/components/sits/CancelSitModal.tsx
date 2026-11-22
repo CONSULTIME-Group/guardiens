@@ -26,6 +26,8 @@ interface CancelSitModalProps {
   endDate?: string;
   /** Lot X3a (B-02) : issue réelle, annonce republiée ou garde annulée. */
   onCancelled: (outcome?: CancelOutcome) => void;
+  /** Lot REC3 : garde commencée, les textes parlent de mettre fin à la garde. */
+  inProgress?: boolean;
 }
 
 const CancelSitModal = ({
@@ -38,6 +40,7 @@ const CancelSitModal = ({
   startDate,
   endDate,
   onCancelled,
+  inProgress = false,
 }: CancelSitModalProps) => {
   const { user } = useAuth();
   const [reason, setReason] = useState("");
@@ -160,7 +163,7 @@ const CancelSitModal = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Annuler cette garde ?</DialogTitle>
+          <DialogTitle>{inProgress && !isSitterCancelling ? "Mettre fin à la garde ?" : "Annuler cette garde ?"}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -176,7 +179,7 @@ const CancelSitModal = ({
           {/* Reason textarea */}
           <div>
             <label className="text-sm font-medium text-foreground mb-1 block">
-              Raison de l'annulation *
+              {inProgress && !isSitterCancelling ? `Votre message à ${otherName} *` : "Raison de l'annulation *"}
             </label>
             <textarea
               value={reason}
@@ -205,7 +208,7 @@ const CancelSitModal = ({
             disabled={!canSubmit || loading}
             className={!canSubmit ? "opacity-50 cursor-not-allowed" : ""}
           >
-            {loading ? "Annulation..." : "Confirmer l'annulation"}
+            {loading ? "Annulation..." : inProgress && !isSitterCancelling ? "Mettre fin à la garde" : "Confirmer l'annulation"}
           </Button>
         </DialogFooter>
       </DialogContent>

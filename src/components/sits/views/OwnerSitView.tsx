@@ -306,7 +306,10 @@ const OwnerSitView = ({
   today.setHours(0, 0, 0, 0);
   const endDate = sit.end_date ? calendarDate(sit.end_date) : null;
   const isPast = endDate ? endDate < today : false;
-  const canCancel = !isPast && sit.status === "confirmed";
+  // Lot REC3 : une garde en cours se termine aussi côté propriétaire (le
+  // gardien pouvait déjà annuler sa participation pendant le séjour).
+  const inProgress = sit.status === "in_progress";
+  const canCancel = !isPast && (sit.status === "confirmed" || inProgress);
   // canUnpublish, propriétaire d'une annonce publiée sans gardien accepté :
   // on remet simplement en brouillon (pas d'avis, pas de notification gardien).
   const canUnpublish = !isPast && sit.status === "published";
@@ -1346,6 +1349,7 @@ const OwnerSitView = ({
         propertyId={sit.property_id}
         status={sit.status}
         canCancel={canCancel}
+        inProgress={inProgress}
         onCancelClick={() => setCancelOpen(true)}
         canUnpublish={canUnpublish}
         onUnpublishClick={requestUnpublish}
@@ -1374,6 +1378,7 @@ const OwnerSitView = ({
         sitId={sit.id}
         sitTitle={sit.title}
         sitOwnerId={sit.user_id}
+        inProgress={inProgress}
         startDate={formatDate(sit.start_date)}
         endDate={formatDate(sit.end_date)}
         onCancelled={() => {
