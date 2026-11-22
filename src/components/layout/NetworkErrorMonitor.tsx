@@ -3,6 +3,8 @@ import { useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { reportError } from "@/lib/errorLogger";
 import { networkFingerprintKey } from "@/lib/networkFingerprint";
+import { trackEvent } from "@/lib/analytics";
+import { cleanRefusalMessage, isDatabaseRefusal, isGuardRefusal, refusalTarget } from "@/lib/memberActionRefusal";
 
 /**
  * Routes critiques où une réponse réseau non-2xx doit déclencher
@@ -202,6 +204,31 @@ const NetworkErrorMonitor = () => {
       try {
         const path = pathnameRef.current;
         const status = response.status;
+
+        // Lot REC2 : un refus de la base laisse une trace, sur toutes les
+        // routes. Aucun toast : l'appelant affiche déjà son message.
+        if ((status === 400 || status === 403) && /\/rest\/v1\//.test(url) && !shouldIgnoreUrl(url)) {
+          void (async () => {
+            try {
+              const pg = extractPgFields(await readErrorBody(response));
+              if (!isDatabaseRefusal(url, status, pg.pg_code)) return;
+              const target = refusalTarget(url);
+              const message = cleanRefusalMessage(pg.pg_message);
+              void trackEvent("member_action_refused", {
+                metadata: { target, method, route: path, message, ...(pg.pg_hint ? { hint: pg.pg_hint.slice(0, 60) } : {}) },
+              });
+              if (isGuardRefusal(pg.pg_message)) {
+                reportError(
+                  new Error(`Action refusée par un garde-fou : ${target} · ${message}`),
+                  { source: "MemberActionRefused", route: path, method, target, status, ...pg },
+                  { fingerprintKey: `refusal:${target}:${message}` },
+                );
+              }
+            } catch {
+              // Le suivi ne casse jamais la requête
+            }
+          })();
+        }
 
         if (
           isCriticalRoute(path) &&

@@ -101,11 +101,17 @@ const CancelSitModal = ({
       }
 
       // Send system message in conversation
+      // Lot REC2 : le motif part dans la seule conversation des deux parties
+      // de la garde (propriétaire et gardien retenu). Avant, il s'écrivait
+      // dans toutes les conversations de l'annonce, candidats déclinés compris.
+      const convOwnerId = isSitterCancelling ? revieweeId : user.id;
+      const convSitterId = isSitterCancelling ? user.id : revieweeId;
       const { data: convs } = await supabase
         .from("conversations")
         .select("id")
         .eq("sit_id", sitId)
-        .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`);
+        .eq("owner_id", convOwnerId)
+        .eq("sitter_id", convSitterId);
 
       if (convs?.length) {
         const dateRange = startDate && endDate ? ` du ${startDate} au ${endDate}` : "";

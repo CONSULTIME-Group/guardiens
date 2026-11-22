@@ -1129,6 +1129,16 @@
           "sql": "SELECT NOT has_function_privilege('anon', 'public.handle_activation_stop()', 'EXECUTE') AND NOT has_function_privilege('authenticated', 'public.handle_activation_stop()', 'EXECUTE') AS ok"
         }
       ]
+    },
+    {
+      "migration": "0181_rec2_identite_renvoi.sql",
+      "description": "Renvoi d'une pièce d'identité autorisé depuis « en cours de vérification » (blocage « champ sensible » relevé à la recette du 22/11/2026)",
+      "checks": [
+        {
+          "name": "garde_fou_repere",
+          "sql": "SELECT position('rec2_identite_renvoi' IN pg_get_functiondef('public.prevent_profile_sensitive_self_update()'::regprocedure)) > 0 AND position('''rejected'', ''needs_review''' IN pg_get_functiondef('public.prevent_profile_sensitive_self_update()'::regprocedure)) > 0 AS ok"
+        }
+      ]
     }
   ]
 }
