@@ -529,7 +529,8 @@ const GAZ_SKIP = new Set(["Nord", "Lot", "Cher", "Ain", "Var", "Manche", "Somme"
 const ALMA_BIO = ["lyon", "cordoba"];
 
 export function splitSentences(text: string): string[] {
-  return (text || "").split(/(?<=[.!?\u2026])\s+|\n+/).filter((x) => x.trim());
+  // Sans assertion arrière : ce fichier est aussi chargé par le site (lot REC1).
+  return (text || "").replace(/([.!?\u2026])\s+/g, "$1\n").split(/\n+/).filter((x) => x.trim());
 }
 
 function labelVerbs(labels: string[]): Set<string> {

@@ -100,7 +100,7 @@ export function checkReplayAnswer(a: ReplayAnswer): ReplayVerdict {
   for (const w of ex?.forbidden ?? []) if (a.answer.includes(w)) reasons.push(`mention interdite « ${w} »`);
   // Lot L3 : un lieu cité ne l'est que pour dire qu'il n'y a aucune garde.
   for (const place of ex?.placeNotAvailable ?? []) {
-    for (const s of a.answer.split(/(?<=[.!?])\s+/)) {
+    for (const s of a.answer.replace(/([.!?])\s+/g, "$1\u0000").split("\u0000")) {
       if (s.includes(place) && !/\baucune?\b|\bpas de\b/i.test(s)) reasons.push(`lieu présenté comme disponible « ${place} »`);
     }
   }

@@ -17,8 +17,9 @@ export function proximityLine(members: number): string {
 export const cityTitleCase = (city: string) =>
   city.trim().replace(/\s+/g, " ").toLocaleLowerCase("fr").replace(/(^|[\s'’-])(\p{L})/gu, (_, sep: string, ch: string) => sep + ch.toLocaleUpperCase("fr"))
     // Les petits mots de liaison restent en minuscules au milieu du nom (« Aix-en-Provence », « Saint-Cyr-au-Mont-d'Or »).
-    .replace(/(?<=[\s-])(En|De|Du|Des|La|Le|Les|Sur|Sous|Lès|Au|Aux|Et)(?=[\s-])/g, (word) => word.toLocaleLowerCase("fr"))
-    .replace(/(?<=[\s-])([DL])(?=['’])/g, (letter) => letter.toLowerCase());
+    // Sans assertion arrière : Safari iOS avant 16.4 refuse d'analyser le fichier entier (lot REC1).
+    .replace(/([\s-])(En|De|Du|Des|La|Le|Les|Sur|Sous|Lès|Au|Aux|Et)(?=[\s-])/g, (_m, sep: string, word: string) => sep + word.toLocaleLowerCase("fr"))
+    .replace(/([\s-])([DL])(?=['’])/g, (_m, sep: string, letter: string) => sep + letter.toLowerCase());
 
 export interface HomeOrigin { lat: number; lng: number; city?: string | null }
 

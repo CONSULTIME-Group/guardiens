@@ -15,7 +15,7 @@ export const FORBIDDEN_PATTERNS: Array<{ pattern: RegExp; label: string }> = [
   { pattern: /essai\s+gratuit/i, label: "essai gratuit" },
   { pattern: /profitez\s+de\s+la\s+gratuité/i, label: "profitez de la gratuité" },
   { pattern: /\u2014/, label: "tiret cadratin (U+2014)" },
-  { pattern: /(?<=\S)\s+\u2013\s+(?=\S)/, label: "tiret demi-cadratin en ponctuation (U+2013)" },
+  { pattern: /\S\s+\u2013\s+(?=\S)/, label: "tiret demi-cadratin en ponctuation (U+2013)" },
   { pattern: /\bvoisin(e|s|age)?\b/i, label: "voisin/voisinage" },
   { pattern: /à\s+vie\b/i, label: "à vie" },
   { pattern: /gratuitement/i, label: "gratuitement" },
