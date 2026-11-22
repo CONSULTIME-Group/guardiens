@@ -52,7 +52,7 @@ Pour aller plus loin sur les besoins spécifiques de cette race, consultez la [f
 2. Consulter les profils vérifiés et lire les avis laissés par d'autres propriétaires.
 3. Organiser une rencontre préalable pour valider le courant entre votre ${animal} et la personne qui le gardera.
 
-Pour parcourir les profils et annonces du secteur, rendez-vous sur la [page dédiée à ${city}](/villes/${citySlug}).
+Pour parcourir les profils et annonces du secteur, rendez-vous sur la [page dédiée à ${city}](/house-sitting/${citySlug}).
 
 ## Préparer la garde sereinement
 
@@ -67,7 +67,7 @@ Cette préparation rassure tout le monde et permet à votre ${breed} de garder s
 
 ## Et le coup de main entre particuliers
 
-Au-delà des gardes longues, il existe aussi un mode d'entraide plus léger pour les petits besoins du quotidien : promenade ponctuelle, visite courte, dépannage. Ces coups de main entre gens du coin sont gratuits et peuvent rendre service quand vous avez un imprévu. Découvrez [comment ça fonctionne](/coup-de-main).
+Au-delà des gardes longues, il existe aussi un mode d'entraide plus léger pour les petits besoins du quotidien : promenade ponctuelle, visite courte, dépannage. Ces coups de main entre gens du coin sont gratuits et peuvent rendre service quand vous avez un imprévu. Découvrez [comment ça fonctionne](/petites-missions).
 
 ## En résumé
 
@@ -110,9 +110,9 @@ Deno.serve(async (req) => {
     const citySlug = slugify(city);
     const breedSlug = slugify(breed);
     const internalLinks = [
-      { url: `/villes/${citySlug}`, label: `Gardes à ${city}` },
+      { url: `/house-sitting/${citySlug}`, label: `Gardes à ${city}` },
       { url: `/races/${breedSlug}`, label: `Fiche race ${breed}` },
-      { url: '/coup-de-main', label: 'Coups de main entre particuliers' },
+      { url: '/petites-missions', label: 'Coups de main entre particuliers' },
     ];
 
     const { data, error } = await supabase.from('articles').insert({
