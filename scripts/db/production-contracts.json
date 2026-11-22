@@ -1171,6 +1171,24 @@
           "sql": "SELECT EXISTS (SELECT 1 FROM pg_trigger t WHERE t.tgrelid = 'public.sits'::regclass AND t.tgname = 'trg_guard_sit_publish_dates_a_venir' AND t.tgenabled = 'O') AS ok"
         }
       ]
+    },
+    {
+      "migration": "0184_guide1_guides_nettoyage.sql",
+      "description": "Guides de la maison sans trame à accolades dans les champs courts ni sur les guides publiés, guides de ville sans lieu écrit par l'IA hors sélection retenue à la main (audit du 22/11/2026)",
+      "checks": [
+        {
+          "name": "guides_maison_champs_courts_propres",
+          "sql": "SELECT NOT EXISTS (SELECT 1 FROM public.house_guides h WHERE h.vet_address ~ '\\{[^{}\\n]{2,80}\\}' OR h.emergency_contact_name ~ '\\{[^{}\\n]{2,80}\\}' OR (h.published AND (h.wifi_instructions ~ '\\{[^{}\\n]{2,80}\\}' OR h.detailed_instructions ~ '\\{[^{}\\n]{2,80}\\}'))) AS ok"
+        },
+        {
+          "name": "sauvegardes_fermees",
+          "sql": "SELECT (SELECT count(*) FROM pg_class c WHERE c.relname IN ('house_guides_guide1_backup','city_guide_places_guide1_backup') AND c.relrowsecurity) = 2 AND NOT has_table_privilege('anon','public.house_guides_guide1_backup','SELECT') AND NOT has_table_privilege('authenticated','public.house_guides_guide1_backup','SELECT') AND NOT has_table_privilege('anon','public.city_guide_places_guide1_backup','SELECT') AS ok"
+        },
+        {
+          "name": "lieux_sans_source_limites_a_la_selection",
+          "sql": "SELECT (SELECT count(*) FROM public.city_guide_places p JOIN public.city_guides g ON g.id = p.city_guide_id WHERE p.source_url IS NULL AND g.places_sourced_at IS NOT NULL) <= 36 AS ok"
+        }
+      ]
     }
   ]
 }
