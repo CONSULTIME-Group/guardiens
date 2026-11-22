@@ -475,6 +475,7 @@ export type EventType =
   | "secteur_sits_found"                         // Gardes trouvées dans le rayon (count, radius_km)
   | "avatar_compression_failed"                  // Échec définitif compression avatar, repli 512px inclus (ext, size_kb)
   // Uploads photo : échec définitif du parcours, repli dégradé inclus (ext, size_kb)
+  | "member_action_refused"                     // Lot REC2 : refus de la base affiché à un membre (cible, message)
   | "sitter_gallery_upload_failed"               // Galerie gardien (SitterGallery)
   | "experience_photo_upload_failed"             // Animaux gardés par le passé (StepExperience)
   | "pet_photo_upload_failed"                    // Photo animal (PetForm, OwnerStepAnimals)
