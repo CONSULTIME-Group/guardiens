@@ -22390,6 +22390,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      reapply_to_sit: {
+        Args: { p_message: string; p_sit_id: string }
+        Returns: string
+      }
       recalc_completed_sits_count: {
         Args: { _user_id: string }
         Returns: undefined
@@ -22766,6 +22770,10 @@ export type Database = {
       }
       valid_other_passions: { Args: { p: string[] }; Returns: boolean }
       valid_travel_zones: { Args: { z: string[] }; Returns: boolean }
+      withdraw_my_accepted_response: {
+        Args: { p_mission_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       activity_level: "calm" | "moderate" | "sportive"
