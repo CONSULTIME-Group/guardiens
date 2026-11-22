@@ -1157,6 +1157,20 @@
           "sql": "SELECT position('guardiens.accepted_withdrawal' IN pg_get_functiondef('public.small_mission_responses_guard_status()'::regprocedure)) > 0 AND position('guardiens.accepted_withdrawal' IN pg_get_functiondef('public.prevent_mission_response_status_tampering()'::regprocedure)) > 0 AS ok"
         }
       ]
+    },
+    {
+      "migration": "0183_rec4_gardes_coherence.sql",
+      "description": "Annonce remise en ligne sans trace d'annulation, compteur d'annulations du gardien lu sur ses avis, publication refusée aux membres sur des dates passées (recette du 22/11/2026)",
+      "checks": [
+        {
+          "name": "annulation_repere",
+          "sql": "SELECT position('rec4_gardes_coherence' IN pg_get_functiondef('public.create_avis_annulation(uuid,uuid,uuid,text,text)'::regprocedure)) > 0 AND position('rec4_gardes_coherence' IN pg_get_functiondef('public.recalculate_cancellations(uuid,text)'::regprocedure)) > 0 AS ok"
+        },
+        {
+          "name": "garde_fou_dates_actif",
+          "sql": "SELECT EXISTS (SELECT 1 FROM pg_trigger t WHERE t.tgrelid = 'public.sits'::regclass AND t.tgname = 'trg_guard_sit_publish_dates_a_venir' AND t.tgenabled = 'O') AS ok"
+        }
+      ]
     }
   ]
 }
