@@ -1139,6 +1139,24 @@
           "sql": "SELECT position('rec2_identite_renvoi' IN pg_get_functiondef('public.prevent_profile_sensitive_self_update()'::regprocedure)) > 0 AND position('''rejected'', ''needs_review''' IN pg_get_functiondef('public.prevent_profile_sensitive_self_update()'::regprocedure)) > 0 AS ok"
         }
       ]
+    },
+    {
+      "migration": "0182_rec3_trois_impasses.sql",
+      "description": "Recandidater après une candidature annulée et libérer sa place quand on a été retenu pour un coup de main (impasses relevées à la recette du 22/11/2026)",
+      "checks": [
+        {
+          "name": "reapply_to_sit_presente",
+          "sql": "SELECT position('rec3_trois_impasses' IN pg_get_functiondef('public.reapply_to_sit(uuid,text)'::regprocedure)) > 0 AND has_function_privilege('authenticated','public.reapply_to_sit(uuid,text)','EXECUTE') AND NOT has_function_privilege('anon','public.reapply_to_sit(uuid,text)','EXECUTE') AS ok"
+        },
+        {
+          "name": "desistement_present",
+          "sql": "SELECT position('rec3_trois_impasses' IN pg_get_functiondef('public.withdraw_my_accepted_response(uuid)'::regprocedure)) > 0 AND has_function_privilege('authenticated','public.withdraw_my_accepted_response(uuid)','EXECUTE') AND NOT has_function_privilege('anon','public.withdraw_my_accepted_response(uuid)','EXECUTE') AS ok"
+        },
+        {
+          "name": "garde_fous_reperes",
+          "sql": "SELECT position('guardiens.accepted_withdrawal' IN pg_get_functiondef('public.small_mission_responses_guard_status()'::regprocedure)) > 0 AND position('guardiens.accepted_withdrawal' IN pg_get_functiondef('public.prevent_mission_response_status_tampering()'::regprocedure)) > 0 AS ok"
+        }
+      ]
     }
   ]
 }

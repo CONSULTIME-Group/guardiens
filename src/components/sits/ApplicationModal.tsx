@@ -60,11 +60,16 @@ interface ApplicationModalProps {
    * le gardien reste sur l'annonce.
    */
   returnToStory?: boolean;
+  /**
+   * Lot REC3 : le gardien a une candidature annulée sur cette annonce. Son
+   * message précédent est repris et l'envoi passe par reapply_to_sit.
+   */
+  reapply?: boolean;
 }
 
 const ApplicationModal = ({
   open, onOpenChange, sitId, ownerId, ownerFirstName,
-  petNames, city, startDate, endDate, onSuccess, hideIdentityHint = false, returnToStory = false,
+  petNames, city, startDate, endDate, onSuccess, hideIdentityHint = false, returnToStory = false, reapply = false,
 }: ApplicationModalProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -73,6 +78,23 @@ const ApplicationModal = ({
   const defaultMessage = `Bonjour ${ownerFirstName || ""},\n\nVotre annonce pour ${animalText} à ${city || "votre ville"} m'intéresse beaucoup.\n\n\n\nJe serais disponible du ${startDate} au ${endDate}.`;
 
   const [message, setMessage] = useState(defaultMessage);
+  // Lot REC3 : le message de la candidature annulée est repris à l'ouverture.
+  useEffect(() => {
+    if (!open || !reapply || !user) return;
+    let cancelled = false;
+    void supabase
+      .from("applications")
+      .select("message")
+      .eq("sit_id", sitId)
+      .eq("sitter_id", user.id)
+      .eq("status", "cancelled")
+      .maybeSingle()
+      .then(({ data }) => {
+        const previous = (data as { message?: string | null } | null)?.message;
+        if (!cancelled && previous && previous.trim()) setMessage(previous);
+      });
+    return () => { cancelled = true; };
+  }, [open, reapply, user, sitId]);
   const [sending, setSending] = useState(false);
   const [sitterInfo, setSitterInfo] = useState<any>(null);
   const [almaLoading, setAlmaLoading] = useState(false);
@@ -321,16 +343,22 @@ const ApplicationModal = ({
       return;
     }
 
-    const { data: created, error } = await supabase
-      .from("applications")
-      .insert({
-        sit_id: sitId,
-        sitter_id: user.id,
-        message: message.trim(),
-        status: "pending",
-      })
-      .select("id")
-      .single();
+    // Lot REC3 : une candidature annulée est remplacée par reapply_to_sit, qui
+    // repasse par toutes les règles d'une nouvelle candidature.
+    const { data: created, error } = reapply
+      ? await (supabase.rpc as any)("reapply_to_sit", { p_sit_id: sitId, p_message: message.trim() }).then(
+          (r: { data: string | null; error: any }) => ({ data: r.data ? { id: r.data } : null, error: r.error }),
+        )
+      : await supabase
+          .from("applications")
+          .insert({
+            sit_id: sitId,
+            sitter_id: user.id,
+            message: message.trim(),
+            status: "pending",
+          })
+          .select("id")
+          .single();
     if (error) {
       setSending(false);
       // 23505 : la contrainte d'unicité (sit_id, sitter_id) a intercepté une
