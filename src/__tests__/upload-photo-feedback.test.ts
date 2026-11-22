@@ -63,7 +63,8 @@ describe("upload photo : télémétrie d'échec par parcours", () => {
       const source = fs.readFileSync(file, "utf8");
       expect(source, file).toContain("upload.photo_failed");
       expect(source, file).toContain(event);
-      expect(source, file).toContain("size_kb");
+      // Lot PHOTO2 : la taille passe par uploadFailureMetadata (ext, size_kb, étape, motif).
+      expect(source.includes("size_kb") || source.includes("uploadFailureMetadata("), file).toBe(true);
     }
   });
 

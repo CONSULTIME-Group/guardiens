@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { uploadFailureMetadata } from "@/lib/uploadFailure";
 import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
 import { petSpeciesLabel } from "@/lib/petLabels";
 import { logger } from "@/lib/logger";
@@ -180,9 +181,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
       const { error } = await supabase.storage.from("property-photos").upload(path, uploadFile, { contentType: "image/jpeg" });
       if (error) {
         logger.error("Storage upload error", { error: String(error) });
-        void trackEvent("pet_photo_upload_failed", {
-          metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
-        });
+        void trackEvent("pet_photo_upload_failed", { metadata: uploadFailureMetadata(file, "upload", error) });
         toast.error(t("upload.photo_failed"));
       } else {
         const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
@@ -191,9 +190,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
       }
     } catch (err) {
       logger.error("Photo processing error", { err: String(err) });
-      void trackEvent("pet_photo_upload_failed", {
-        metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
-      });
+      void trackEvent("pet_photo_upload_failed", { metadata: uploadFailureMetadata(file, "compress", err) });
       toast.error(t("upload.photo_failed"));
     }
     setUploading(false);

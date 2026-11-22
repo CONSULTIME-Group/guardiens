@@ -138,6 +138,7 @@ Your task:
 Rules:
 - Do NOT try to verify the actual identity of the person. Just verify it's a real, legible ID document.
 - Do NOT judge the dates yourself: never mention dates, expiry or validity in rejection_reason or red_flags. The dates are checked by code from issue_date and expiry_date.
+- A watermark added by the holder over the image (diagonal or repeated text, a date, a mention such as "copie pour Guardiens" or "document réservé à ...") is a protection recommended by the French administration (service FiligraneFacile). It is NOT a sign of editing or tampering: never list it in red_flags, never set is_valid=false and never lower confidence because of it. Judge the document underneath the watermark. Only when the watermark hides the holder's name, the photo or the document number so that they cannot be read, set is_valid=false with rejection_category "other" and say in French which part is hidden.
 - If anything is suspicious, set is_valid=false with a short French reason. A human reviews every refusal, except two cases.
 - rejection_category, when is_valid=false: "unreadable" if the image is too blurry, dark, cropped or small to read the document; "not_identity_document" if the image shows something other than an identity document; "other" for any other doubt.
 - Respond ONLY via the provided tool.`,
