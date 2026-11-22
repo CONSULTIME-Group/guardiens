@@ -351,7 +351,9 @@ function sentences(text: string): string[] {
   return text
     .replace(/\s+/g, " ")
     .trim()
-    .split(/(?<=[.!?])\s+(?=[«A-ZÀ-ÖØ-Þ])/)
+    // Sans assertion arrière (lot REC1) : la ponctuation est gardée, un repère marque la coupe.
+    .replace(/([.!?])\s+(?=[«A-ZÀ-ÖØ-Þ])/g, "$1\u0000")
+    .split("\u0000")
     .filter(Boolean);
 }
 
