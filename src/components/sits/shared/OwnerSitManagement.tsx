@@ -16,6 +16,8 @@ interface OwnerSitManagementProps {
   status: string;
   /** Indique si la garde peut encore être annulée (confirmed uniquement). */
   canCancel: boolean;
+  /** Lot REC3 : garde commencée, le geste devient « Mettre fin à la garde ». */
+  inProgress?: boolean;
   onCancelClick: () => void;
   onShareClick?: () => void;
   /** Indique si l'annonce publiée peut être dépubliée (remise en brouillon). */
@@ -34,6 +36,7 @@ const OwnerSitManagement = ({
   propertyId,
   status,
   canCancel,
+  inProgress = false,
   onCancelClick,
   onShareClick,
   canUnpublish,
@@ -165,14 +168,16 @@ const OwnerSitManagement = ({
             className="justify-start gap-2 text-destructive-text hover:text-destructive-text hover:bg-destructive/10 border-destructive/30 hover:border-destructive/50"
           >
             <XCircle className="h-3.5 w-3.5" />
-            Annuler la garde
+            {inProgress ? "Mettre fin à la garde" : "Annuler la garde"}
           </Button>
         )}
       </div>
 
       {canCancel && (
         <p className="text-xs text-muted-foreground mt-3">
-          L'annulation est définitive. Le gardien sera notifié immédiatement.
+          {inProgress
+            ? "La garde est en cours. Prévenez d'abord votre gardien : il reçoit aussi une notification dès votre confirmation."
+            : "L'annulation est définitive. Le gardien sera notifié immédiatement."}
         </p>
       )}
 
