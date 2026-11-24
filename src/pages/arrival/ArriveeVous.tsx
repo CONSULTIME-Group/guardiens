@@ -2,6 +2,8 @@
  * P1, Faisons connaissance (lot 1). Prénom, localisation, type de logement.
  * Le logement créé ne porte ni pièces, ni chambres, ni environnement.
  */
+import { FrenchPlaceHint } from "@/components/arrival/FrenchPlaceHint";
+import { useFrenchPlaceHint } from "@/hooks/useFrenchPlaceHint";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
@@ -115,6 +117,8 @@ const ArriveeVousProprietaire = () => {
     navigate(departUrl);
   };
 
+  // Lot PAYS1 : un lieu français saisi en mode « hors de France » le dit.
+  const frenchMatch = useFrenchPlaceHint(country !== "FR", city, postalCode);
   if (!user || loading) return null;
   const abroad = country !== "FR";
 
@@ -152,6 +156,7 @@ const ArriveeVousProprietaire = () => {
           <div className="space-y-2">
             <Label htmlFor="arrival-postal-abroad">{t("arrival.p1.postal")}</Label>
             <Input id="arrival-postal-abroad" className="arrival-field" value={postalCode} maxLength={12} autoComplete="postal-code" onChange={(e) => setPostalCode(e.target.value)} />
+            <FrenchPlaceHint match={frenchMatch} onLiveInFrance={(m) => { setCountry("FR"); setCity(m.city); setPostalCode(m.postalCode); }} />
           </div>
         )}
       </div>

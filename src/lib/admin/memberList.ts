@@ -38,7 +38,17 @@ export function applyMemberStatusFilter<Q extends { or: (f: string) => Q; eq: (c
 export const ADMIN_EXTRA_DEPT_NAMES: Record<string, string> = { ...OVERSEAS_NAMES };
 
 /** Département d'un code postal, collectivités d'outre-mer comprises (987 Polynésie, 988 Nouvelle-Calédonie). */
-export function adminDeptLabel(postalCode: string | null | undefined): string {
+/** Lot PAYS1 : pays où un code postal donne un département (France et outre-mer). */
+export const FRENCH_COUNTRY_CODES = ["FR", "GP", "MQ", "GF", "RE", "YT", "PM", "BL", "MF", "WF", "PF", "NC"];
+
+/**
+ * Département lu sur le code postal, pour un membre de France ou d'outre-mer
+ * seulement (lot PAYS1 : « 05540 » à Hastière, Belgique, s'affichait
+ * Alpes-de-Haute-Provence). Pays vide = France.
+ */
+export function adminDeptLabel(postalCode: string | null | undefined, country?: string | null): string {
+  const c = (country || "FR").toUpperCase();
+  if (!FRENCH_COUNTRY_CODES.includes(c)) return "·";
   const label = getDeptLabel(postalCode ?? null);
   if (label !== "-") return label;
   const code = homeDepartmentCodeFromPostal(postalCode);

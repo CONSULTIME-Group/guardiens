@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -64,6 +64,10 @@ const PostalCodeCityFields = ({
   // FR par défaut, y compris pour les anciennes lignes où country valait "" (inconnu).
   const initialCountry = country || "FR";
   const [abroad, setAbroad] = useState<boolean>(initialCountry !== "FR");
+  // Lot PAYS1 : le parent peut repasser le membre en France (« Oui, je vis en France »).
+  useEffect(() => {
+    if (country === "FR") setAbroad(false);
+  }, [country]);
 
   const toggleAbroad = () => {
     const next = !abroad;
