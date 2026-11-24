@@ -41,6 +41,7 @@ import {
   DEFAULT_MEMBER_STATUS_FILTER,
   applyMemberStatusFilter,
   adminDeptLabel,
+  FRENCH_COUNTRY_CODES,
   ADMIN_EXTRA_DEPT_NAMES,
   type MemberStatusFilter,
 } from "@/lib/admin/memberList";
@@ -245,6 +246,8 @@ const AdminUsers = () => {
     else if (filterCountry === "INTL") query = query.not("country", "is", null).neq("country", "FR");
     else if (filterCountry !== "all") query = query.eq("country", filterCountry);
     if (filterDept !== "all") {
+      // Lot PAYS1 : un département se lit sur un code postal de France seulement.
+      query = query.in("country", FRENCH_COUNTRY_CODES);
       if (filterDept === "2A") query = query.gte("postal_code", "20000").lte("postal_code", "20199");
       else if (filterDept === "2B") query = query.gte("postal_code", "20200").lte("postal_code", "20999");
       else query = query.like("postal_code", `${filterDept}%`);
@@ -440,7 +443,7 @@ const AdminUsers = () => {
           roleLabels[u.role] || u.role || "",
           u.city || "",
           u.postal_code || "",
-          adminDeptLabel(u.postal_code).replace(/^·$/, ""),
+          adminDeptLabel(u.postal_code, u.country).replace(/^·$/, ""),
           country === "FR" ? "France" : getCountryName(country),
           u.created_at ? format(new Date(u.created_at), "yyyy-MM-dd") : "",
           u.last_seen_at ? format(new Date(u.last_seen_at), "yyyy-MM-dd HH:mm") : "",
@@ -1008,7 +1011,7 @@ const AdminUsers = () => {
                       {user.postal_code || "Non renseigné"}
                     </TableCell>
                     <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
-                      {adminDeptLabel(user.postal_code)}
+                      {adminDeptLabel(user.postal_code, user.country)}
                     </TableCell>
                     <TableCell className="hidden md:table-cell text-sm">
                       {(() => {
