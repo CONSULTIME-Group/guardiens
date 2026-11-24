@@ -59,6 +59,14 @@ export const sitIdOf = (s: AdminSignalBase): string | null => {
   return null;
 };
 
+/**
+ * Lot VE-6 : types rangés dans l'entrée par annonce. owner_sit_unconfirmed
+ * rejoint les candidatures et les discussions pour ouvrir la carte qui écrit
+ * au propriétaire (son gabarit existe dans ownerMessageDrafts). Liste locale :
+ * queueGroup, lu aussi par l'email du matin, reste tel quel.
+ */
+export const SIT_ENTRY_TYPES = new Set(["pending_application", "stalled_discussion", "owner_sit_unconfirmed"]);
+
 const highest = (items: AdminSignalBase[]): "critical" | "warning" =>
   items.some((s) => s.severity === "critical") ? "critical" : "warning";
 
@@ -81,7 +89,7 @@ export function groupQueueSignals(signals: AdminSignalBase[], opts: QueueSitDate
   const byFamily = new Map<string, AdminSignalBase[]>();
   const rest: AdminSignalBase[] = [];
   for (const s of queued) {
-    const g = SIGNAL_TYPES[s.signal_type]?.queueGroup;
+    const g = SIT_ENTRY_TYPES.has(s.signal_type) ? "sit" : SIGNAL_TYPES[s.signal_type]?.queueGroup;
     const sitId = g === "sit" ? sitIdOf(s) : null;
     if (sitId) {
       bySit.set(sitId, [...(bySit.get(sitId) ?? []), s]);
