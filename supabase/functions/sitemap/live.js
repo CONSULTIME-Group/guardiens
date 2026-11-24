@@ -22,8 +22,13 @@ export function createSitemapDocument(config, collections, today = new Date()) {
   validateRoutesConfig(config);
   // Lot SEO-E : les pages villes d'entraide viennent seulement de la source
   // entraideCities (règle des 90 jours), jamais de l'inventaire statique.
+  // Hub /projets : au sitemap seulement quand la page est indexable, même règle
+  // que projetsHubSeo (au moins un projet ouvert éligible). Sans projet, la page
+  // porte noindex et ne doit pas être envoyée à Google.
+  const projetsIndexable = Array.isArray(collections.projetMissions) && collections.projetMissions.length > 0;
   const raw = config.staticPages
     .filter(page => !isEntraideCityPath(page.loc))
+    .filter(page => page.loc !== "/projets" || projetsIndexable)
     .map(page => ({ loc: page.loc, lastmod: null, changefreq: page.changefreq, priority: page.priority }));
   for (const slug of config.cityLandingPages) raw.push({ loc: `/house-sitting/${slug}`, lastmod: null, changefreq: "weekly", priority: "0.9" });
   for (const key of ["articles", "seoCity", "guides", "depts", "breeds", "profiles", "sits", "entraideMissions", "projetMissions", "associations", "entraideCities"]) {
