@@ -357,7 +357,7 @@ export type EventType =
   | "alma_welcomeback_dismissed"                // Digest fermé (variant)
   // Alma Pass 2 Tour 2 : guide maison génératif ----------------------------
   | "alma_house_guide_bubble_seen"              // Bulle Alma affichée dans le formulaire guide maison
-  | "alma_house_guide_generated"                // Génération réussie des 4 trames
+  | "alma_house_guide_generated"                // Génération réussie des trames (sections_filled)
   | "alma_house_guide_section_edited"           // 1ère édition d'une section pré-remplie par Alma (section)
   | "alma_house_guide_saved_with_draft"         // Guide finalisé avec au moins une trame Alma conservée
   // Alma Pass 2 Tour 2 : fit gardien sur PublicSitterProfile ---------------

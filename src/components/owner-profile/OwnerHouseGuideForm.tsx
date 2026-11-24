@@ -117,8 +117,6 @@ const OwnerHouseGuideForm = () => {
   const DRAFT_TO_FIELD: Record<keyof HouseGuideDrafts, keyof GuideData> = {
     wifi_info: "wifi_instructions",
     neighborhood: "detailed_instructions",
-    veterinary: "vet_address",
-    emergency: "emergency_contact_name",
   };
 
   const emergencyPhone = guide.emergency_contact_phone?.trim() ?? "";
@@ -254,19 +252,29 @@ const OwnerHouseGuideForm = () => {
     debounceRef.current = setTimeout(() => saveGuide(), 800);
   }, [saveGuide]);
 
-  const handleAlmaDrafts = useCallback((drafts: HouseGuideDrafts) => {
-    setGuide(prev => ({
-      ...prev,
-      wifi_instructions: drafts.wifi_info || prev.wifi_instructions,
-      detailed_instructions: drafts.neighborhood || prev.detailed_instructions,
-      vet_address: drafts.veterinary || prev.vet_address,
-      emergency_contact_name: drafts.emergency || prev.emergency_contact_name,
-    }));
-    const filled = new Set<keyof HouseGuideDrafts>(["wifi_info", "neighborhood", "veterinary", "emergency"]);
+  // Lot GUIDE1 (22/11/2026) : une trame ne remplace jamais un texte déjà saisi
+  // et ne va que dans les deux champs de texte libre. Avant ce lot, un clic
+  // écrasait quatre champs et rangeait un paragraphe dans « Nom du contact » et
+  // « Adresse du vétérinaire » (17 guides sur 45 gardaient des accolades).
+  const handleAlmaDrafts = useCallback((drafts: HouseGuideDrafts): number => {
+    const prev = guideRef.current;
+    const next = { ...prev };
+    const filled = new Set<keyof HouseGuideDrafts>();
+    if (!prev.wifi_instructions.trim() && drafts.wifi_info?.trim()) {
+      next.wifi_instructions = drafts.wifi_info;
+      filled.add("wifi_info");
+    }
+    if (!prev.detailed_instructions.trim() && drafts.neighborhood?.trim()) {
+      next.detailed_instructions = drafts.neighborhood;
+      filled.add("neighborhood");
+    }
+    if (filled.size === 0) return 0;
+    setGuide(next);
     setAlmaSections(filled);
     filled.forEach(k => almaEverFilledRef.current.add(k));
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => saveGuide(), 400);
+    return filled.size;
   }, [saveGuide]);
 
   const handleFinalize = async () => {
@@ -399,7 +407,6 @@ const OwnerHouseGuideForm = () => {
           const sectionDrafts: Record<string, (keyof HouseGuideDrafts)[]> = {
             access: ["wifi_info"],
             instructions: ["neighborhood"],
-            emergency: ["veterinary", "emergency"],
           };
           const draftKeys = sectionDrafts[section.id] || [];
           const hasAlmaDraft = draftKeys.some(k => almaSections.has(k));

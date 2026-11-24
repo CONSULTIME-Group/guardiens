@@ -115,6 +115,19 @@ export const ACCORD_HOUSE_GUIDE_COLUMNS =
  */
 export const UNFILLED_PLACEHOLDER = /\{[^{}\n]{2,80}\}/;
 
+/**
+ * Lot GUIDE1 (22/11/2026) : le guide lu par le gardien ne montre jamais une
+ * trame restée entre accolades. Les champs concernés reviennent vides.
+ */
+export function withoutUnfilledPlaceholders<T extends Record<string, unknown>>(row: T | null | undefined): T | null {
+  if (!row) return null;
+  const out: Record<string, unknown> = { ...row };
+  for (const [k, v] of Object.entries(out)) {
+    if (typeof v === "string" && UNFILLED_PLACEHOLDER.test(v)) out[k] = "";
+  }
+  return out as T;
+}
+
 const clean = (v: string | null | undefined): string => {
   const t = typeof v === "string" ? v.trim() : "";
   return UNFILLED_PLACEHOLDER.test(t) ? "" : t;

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Key, Wifi, Phone, Info, MapPin } from "lucide-react";
+import { withoutUnfilledPlaceholders } from "@/lib/accordDeGarde";
 
 interface HouseGuideBlockProps {
   propertyId: string;
@@ -20,7 +21,7 @@ const HouseGuideBlock = ({ propertyId, ownerFirstName }: HouseGuideBlockProps) =
         .select("*")
         .eq("property_id", propertyId)
         .maybeSingle();
-      setGuide(data);
+      setGuide(withoutUnfilledPlaceholders(data));
       setLoading(false);
     };
     load();
@@ -31,7 +32,7 @@ const HouseGuideBlock = ({ propertyId, ownerFirstName }: HouseGuideBlockProps) =
   const hasAddress = guide.exact_address || guide.access_codes;
   const hasWifi = guide.wifi_name || guide.wifi_password;
   const hasVet = guide.vet_name || guide.vet_phone;
-  const hasContacts = guide.emergency_contact_name || guide.neighbor_name || guide.plumber_phone || guide.electrician_phone;
+  const hasContacts = guide.emergency_contact_name || guide.emergency_contact_phone || guide.neighbor_name || guide.plumber_phone || guide.electrician_phone;
   const hasInstructions = guide.detailed_instructions || guide.trash_days || guide.heating_instructions || guide.appliance_notes;
   const hasContent = hasAddress || hasWifi || hasVet || hasContacts || hasInstructions;
 
@@ -95,8 +96,8 @@ const HouseGuideBlock = ({ propertyId, ownerFirstName }: HouseGuideBlockProps) =
 
           {hasContacts && (
             <GuideSection icon={Phone} title="Contacts utiles">
-              {guide.emergency_contact_name && (
-                <ContactRow label="Urgence" name={guide.emergency_contact_name} phone={guide.emergency_contact_phone} />
+              {(guide.emergency_contact_name || guide.emergency_contact_phone) && (
+                <ContactRow label="Urgence" name={guide.emergency_contact_name || "Contact d'urgence"} phone={guide.emergency_contact_phone} />
               )}
               {guide.neighbor_name && (
                 <ContactRow label="Personne de confiance" name={guide.neighbor_name} phone={guide.neighbor_phone} />

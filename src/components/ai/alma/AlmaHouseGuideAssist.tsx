@@ -1,9 +1,10 @@
 /**
  * Alma Pass 2, Chantier 1
- * Bulle dédiée au guide maison génératif : propose à l'owner de générer 4 trames
- * (WiFi, voisinage, vétérinaire, urgences). Au clic, appelle `generate-house-guide`
- * et remonte les 4 trames au parent via `onDrafts`, qui les pré-remplit dans les
- * champs du formulaire avec un badge "Brouillon Alma, à personnaliser".
+ * Bulle dédiée au guide maison génératif : propose à l'owner de générer 2 trames
+ * (précisions WiFi, repères du quartier). Au clic, appelle `generate-house-guide`
+ * et remonte les trames au parent via `onDrafts`, qui pré-remplit les seuls
+ * champs encore vides avec un badge "Brouillon Alma, à personnaliser" et rend
+ * le nombre de sections remplies (lot GUIDE1, 22/11/2026).
  */
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,18 +17,17 @@ import { AlmaBubble } from "./AlmaBubble";
 export interface HouseGuideDrafts {
   wifi_info: string;
   neighborhood: string;
-  veterinary: string;
-  emergency: string;
 }
 
 interface Props {
-  onDrafts: (drafts: HouseGuideDrafts) => void;
+  onDrafts: (drafts: HouseGuideDrafts) => number;
   className?: string;
 }
 
 export function AlmaHouseGuideAssist({ onDrafts, className }: Props) {
   const [loading, setLoading] = useState(false);
   const [generated, setGenerated] = useState(false);
+  const [filled, setFilled] = useState(0);
   const [dismissed, setDismissed] = useState(false);
 
   // trace impression une seule fois
@@ -41,12 +41,19 @@ export function AlmaHouseGuideAssist({ onDrafts, className }: Props) {
     try {
       const { data, error } = await supabase.functions.invoke("generate-house-guide", { body: {} });
       if (error) throw error;
-      const drafts = (data as any)?.drafts as HouseGuideDrafts | undefined;
-      if (!drafts) throw new Error("Réponse Alma vide");
-      onDrafts(drafts);
+      const raw = (data as any)?.drafts as Partial<HouseGuideDrafts> | undefined;
+      if (!raw) throw new Error("Réponse Alma vide");
+      // Seules les deux trames de texte libre sont transmises au formulaire.
+      const drafts: HouseGuideDrafts = { wifi_info: raw.wifi_info ?? "", neighborhood: raw.neighborhood ?? "" };
+      const filledCount = onDrafts(drafts);
       setGenerated(true);
-      void trackEvent("alma_house_guide_generated");
-      toast.success("Trames Alma pré-remplies. Relisez et personnalisez chaque section.");
+      setFilled(filledCount);
+      void trackEvent("alma_house_guide_generated", { metadata: { sections_filled: filledCount } });
+      if (filledCount > 0) {
+        toast.success("Trames Alma pré-remplies. Relisez et personnalisez chaque section.");
+      } else {
+        toast.info("Vos sections WiFi et Instructions générales sont déjà remplies : vos textes restent en place.");
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Alma n'a pas pu générer les trames.";
       toast.error(msg);
@@ -69,18 +76,20 @@ export function AlmaHouseGuideAssist({ onDrafts, className }: Props) {
         !generated ? (
           <Button size="sm" onClick={handleGenerate} disabled={loading}>
             <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-            Générer les 4 trames
+            Générer les 2 trames
           </Button>
         ) : (
           <span className="text-xs text-muted-foreground">
-            Trames pré-remplies dans les sections WiFi, Instructions générales, Contacts d'urgence. À relire.
+            {filled > 0
+              ? "Trames pré-remplies dans les sections WiFi et Instructions générales. À relire."
+              : "Vos sections WiFi et Instructions générales sont déjà remplies : vos textes restent en place."}
           </span>
         )
       }
     >
       <p>
-        Je vous propose une trame WiFi, voisinage, vétérinaire, urgences à partir de votre ville et de votre logement.
-        Vous relisez et vous ajustez.
+        Je vous propose une trame pour vos précisions WiFi et vos repères du quartier, à partir de votre ville et de
+        votre logement. Vos textes déjà saisis restent en place. Vous relisez et vous ajustez.
       </p>
     </AlmaBubble>
   );
