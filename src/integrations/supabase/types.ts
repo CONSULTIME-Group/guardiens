@@ -575,6 +575,96 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_article_petites_missions_20261123: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_article_reunion_20261017: {
         Row: {
           admin_notes: string | null
@@ -11435,6 +11525,27 @@ export type Database = {
         }
         Relationships: []
       }
+      city_guide_places_guide1_backup: {
+        Row: {
+          city_guide_id: string
+          id: string
+          row_data: Json
+          saved_at: string
+        }
+        Insert: {
+          city_guide_id: string
+          id: string
+          row_data: Json
+          saved_at?: string
+        }
+        Update: {
+          city_guide_id?: string
+          id?: string
+          row_data?: Json
+          saved_at?: string
+        }
+        Relationships: []
+      }
       city_guides: {
         Row: {
           city: string
@@ -11519,6 +11630,27 @@ export type Database = {
           seo_dirty_at?: string | null
           slug?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      city_guides_guide1_backup: {
+        Row: {
+          id: string
+          osm_requests: Json | null
+          row_data: Json
+          saved_at: string
+        }
+        Insert: {
+          id: string
+          osm_requests?: Json | null
+          row_data: Json
+          saved_at?: string
+        }
+        Update: {
+          id?: string
+          osm_requests?: Json | null
+          row_data?: Json
+          saved_at?: string
         }
         Relationships: []
       }
@@ -13175,6 +13307,8 @@ export type Database = {
         Row: {
           active_sits_count: number
           admin_notes: string | null
+          auto_attempted_at: string | null
+          auto_attempts: number
           city: string
           city_guide_id: string | null
           country: string | null
@@ -13193,6 +13327,8 @@ export type Database = {
         Insert: {
           active_sits_count?: number
           admin_notes?: string | null
+          auto_attempted_at?: string | null
+          auto_attempts?: number
           city: string
           city_guide_id?: string | null
           country?: string | null
@@ -13211,6 +13347,8 @@ export type Database = {
         Update: {
           active_sits_count?: number
           admin_notes?: string | null
+          auto_attempted_at?: string | null
+          auto_attempts?: number
           city?: string
           city_guide_id?: string | null
           country?: string | null
@@ -13498,6 +13636,39 @@ export type Database = {
             referencedColumns: ["profil_id"]
           },
         ]
+      }
+      house_guides_guide1_backup: {
+        Row: {
+          detailed_instructions: string | null
+          emergency_contact_name: string | null
+          id: string
+          published: boolean | null
+          saved_at: string
+          user_id: string
+          vet_address: string | null
+          wifi_instructions: string | null
+        }
+        Insert: {
+          detailed_instructions?: string | null
+          emergency_contact_name?: string | null
+          id: string
+          published?: boolean | null
+          saved_at?: string
+          user_id: string
+          vet_address?: string | null
+          wifi_instructions?: string | null
+        }
+        Update: {
+          detailed_instructions?: string | null
+          emergency_contact_name?: string | null
+          id?: string
+          published?: boolean | null
+          saved_at?: string
+          user_id?: string
+          vet_address?: string | null
+          wifi_instructions?: string | null
+        }
+        Relationships: []
       }
       identity_verification_logs: {
         Row: {
@@ -20990,6 +21161,7 @@ export type Database = {
           started: number
         }[]
       }
+      auto_create_city_guides: { Args: { p_daily_cap?: number }; Returns: Json }
       auto_flag_urgent_sits: { Args: never; Returns: number }
       auto_resolve_admin_signals: {
         Args: never
