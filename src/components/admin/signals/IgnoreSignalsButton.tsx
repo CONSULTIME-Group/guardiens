@@ -23,6 +23,34 @@ export function ignoreConfirmTitle(count: number): string {
   return count > 1 ? `Ignorer ces ${count} signaux ?` : "Ignorer ce signal ?";
 }
 
+/**
+ * Lot VE-7 : mots de la fermeture. « ignore » pour les cartes (inchangé),
+ * « done » pour « Marquer comme traité » sur une ligne de la vue d'ensemble :
+ * même action enregistrée (dismissed), la fenêtre et le message parlent de la ligne.
+ */
+export function closeWording(done: boolean, count: number) {
+  const many = count > 1;
+  return done
+    ? {
+        title: "Marquer cette ligne comme traitée ?",
+        description: `${many ? `Ses ${count} signaux sortent` : "Elle sort"} de la liste et de l'email du matin. Vous pourrez annuler pendant 10 secondes.`,
+        confirm: "Marquer comme traité",
+        success: "Ligne marquée comme traitée.",
+        failure: "Enregistrement impossible : la ligne reste dans la liste.",
+        restored: "Ligne remise dans la liste.",
+        restoreFailure: "Annulation impossible : la ligne reste marquée comme traitée.",
+      }
+    : {
+        title: ignoreConfirmTitle(count),
+        description: `${many ? "Ils sortent de la liste" : "Il sort de la liste"} et de l'email du matin. Vous pourrez annuler pendant 10 secondes.`,
+        confirm: "Ignorer",
+        success: many ? `${count} signaux ignorés.` : "Signal ignoré.",
+        failure: many ? "Impossible d'ignorer ces signaux." : "Impossible d'ignorer ce signal.",
+        restored: many ? "Signaux remis dans la liste." : "Signal remis dans la liste.",
+        restoreFailure: "Impossible de rouvrir : le signal reste ignoré.",
+      };
+}
+
 /** Ferme les signaux comme ignorés par l'admin connecté. */
 export async function dismissSignals(ids: string[]) {
   const { data: { user } } = await supabase.auth.getUser();
@@ -48,11 +76,12 @@ export async function restoreSignals(ids: string[]) {
  * 10 secondes pour annuler. Un seul composant pour toutes les cartes.
  * Lot VE-6 : className habille le bouton en lien sur une ligne de la vue d'ensemble.
  */
-export const IgnoreSignalsButton = ({ ids, label, className }: { ids: string[]; label?: string; className?: string }) => {
+export const IgnoreSignalsButton = ({ ids, label, className, done = false }: { ids: string[]; label?: string; className?: string; done?: boolean }) => {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const count = ids.length;
+  const words = closeWording(done, count);
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: ["admin_dashboard_snapshot"] });
     refreshAdminBadges();
@@ -64,19 +93,19 @@ export const IgnoreSignalsButton = ({ ids, label, className }: { ids: string[]; 
     setBusy(false);
     setOpen(false);
     if (error) {
-      toast.error(count > 1 ? "Impossible d'ignorer ces signaux." : "Impossible d'ignorer ce signal.");
+      toast.error(words.failure);
       return;
     }
     refresh();
-    toast.success(count > 1 ? `${count} signaux ignorés.` : "Signal ignoré.", {
+    toast.success(words.success, {
       duration: IGNORE_UNDO_MS,
       action: {
         label: "Annuler",
         onClick: async () => {
           const res = await restoreSignals(ids);
-          if (res.error) { toast.error("Impossible de rouvrir : le signal reste ignoré."); return; }
+          if (res.error) { toast.error(words.restoreFailure); return; }
           refresh();
-          toast.success(count > 1 ? "Signaux remis dans la liste." : "Signal remis dans la liste.");
+          toast.success(words.restored);
         },
       },
     });
@@ -90,15 +119,13 @@ export const IgnoreSignalsButton = ({ ids, label, className }: { ids: string[]; 
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{ignoreConfirmTitle(count)}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {count > 1 ? "Ils sortent de la liste" : "Il sort de la liste"} et de l'email du matin. Vous pourrez annuler pendant 10 secondes.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{words.title}</AlertDialogTitle>
+            <AlertDialogDescription>{words.description}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={busy}>Garder</AlertDialogCancel>
             <AlertDialogAction disabled={busy} onClick={(e) => { e.preventDefault(); void confirm(); }}>
-              {busy ? "En cours…" : "Ignorer"}
+              {busy ? "En cours…" : words.confirm}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
