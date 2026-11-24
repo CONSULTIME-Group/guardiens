@@ -1204,7 +1204,7 @@
         },
         {
           "name": "tache_horaire_active",
-          "sql": "SELECT EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'auto-create-city-guides' AND schedule = '17 * * * *' AND active) AS ok"
+          "sql": "SELECT EXISTS (SELECT 1 FROM cron.job WHERE command LIKE '%public.auto_create_city_guides(5)%' AND schedule = '17 * * * *' AND active) AS ok"
         }
       ]
     }
