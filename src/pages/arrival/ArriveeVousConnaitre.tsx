@@ -2,11 +2,12 @@
  * G3, Vos affinités, vous connaître (lot 2) : rythme de vie, langues,
  * centres d'intérêt. Écrit dans sitter_profiles par buildAffinityWrites.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { trackEvent } from "@/lib/analytics";
 import { markArrivalOnboardingDone } from "@/lib/arrivalOnboardingDone";
 import { fetchMySitterProfile, invalidateMyOnboardingStatus } from "@/lib/myProfile";
 import { buildAffinityWrites } from "@/lib/affinityOnboardingWrites";
@@ -44,6 +45,9 @@ const ArriveeVousConnaitre = () => {
   const [allInterests, setAllInterests] = useState(false);
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [missing, setMissing] = useState<"" | "pace" | "languages">("");
+  const paceRef = useRef<HTMLDivElement>(null);
+  const langRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -64,22 +68,38 @@ const ArriveeVousConnaitre = () => {
   }, [user]);
   useArrivalViewed("G3", !loading);
 
-  const valid = !!pace && languages.length > 0;
-
   const save = async () => {
-    if (!user || !valid) return;
+    if (!user || saving) return;
+    // Lot G3-FIX : le bouton reste cliquable, le champ manquant est nommé.
+    const reason = !pace ? "pace" : languages.length === 0 ? "languages" : "";
+    if (reason) {
+      setMissing(reason);
+      if (reason === "languages") setMoreLang(true);
+      void trackEvent("arrival_g3_continue_blocked" as any, { source: "arrival", metadata: { reason } });
+      const target = reason === "pace" ? paceRef.current : langRef.current;
+      target?.scrollIntoView({ behavior: "smooth", block: "center" });
+      target?.querySelector<HTMLElement>("button")?.focus({ preventScroll: true });
+      return;
+    }
+    setMissing("");
     setSaving(true);
     setFailed(false);
-    const row = buildG3Writes({ userId: user.id, role: user.role ?? null, pace, languages, interests });
-    if (row) {
-      const { error } = await supabase.from("sitter_profiles").upsert(row as any, { onConflict: "user_id" });
-      if (error) { setSaving(false); setFailed(true); return; }
+    try {
+      const row = buildG3Writes({ userId: user.id, role: user.role ?? null, pace, languages, interests });
+      if (row) {
+        const { error } = await supabase.from("sitter_profiles").upsert(row as any, { onConflict: "user_id" });
+        if (error) throw error;
+      }
+      // Lot ONB1 : fin du parcours gardien. Un propriétaire qui passe ici après P4 a déjà fini en P3.
+      if (carry.flow !== "owner") await markArrivalOnboardingDone(user.id, "G3", user.role);
+      await invalidateMyOnboardingStatus(user.id);
+      trackArrival("completed", "G3");
+      navigate(afterG3(carry));
+    } catch {
+      setFailed(true);
+    } finally {
+      setSaving(false);
     }
-    // Lot ONB1 : fin du parcours gardien. Un propriétaire qui passe ici après P4 a déjà fini en P3.
-    if (carry.flow !== "owner") await markArrivalOnboardingDone(user.id, "G3", user.role);
-    await invalidateMyOnboardingStatus(user.id);
-    trackArrival("completed", "G3");
-    navigate(afterG3(carry));
   };
 
   if (!user || loading) return null;
@@ -96,18 +116,20 @@ const ArriveeVousConnaitre = () => {
         <p className="text-foreground/80">{t("arrival.g3.text")}</p>
       </div>
       <div className="space-y-2">
-        <p id="g3-pace-label" className="text-sm font-medium">{t("arrival.g3.pace")}</p>
-        <div role="radiogroup" aria-labelledby="g3-pace-label" className="grid grid-cols-3 gap-2">
+        <p id="g3-pace-label" className="text-sm font-medium">{t("arrival.g3.pace")} <span className="text-muted-foreground font-normal">{t("arrival.g3.required")}</span></p>
+        <div ref={paceRef} role="radiogroup" aria-labelledby="g3-pace-label" aria-invalid={missing === "pace"} aria-describedby={missing === "pace" ? "g3-pace-error" : undefined} className="grid grid-cols-3 gap-2">
           {LIFE_PACE_OPTIONS.map((o) => (
-            <button key={o.value} type="button" role="radio" aria-checked={pace === o.value} className="arrival-card p-3 text-center" onClick={() => setPace(o.value)}>
+            <button key={o.value} type="button" role="radio" aria-checked={pace === o.value} className="arrival-card p-3 text-center" onClick={() => { setPace(o.value); setMissing(""); }}>
               <span className="block font-semibold">{o.label}</span>
               <span className="block text-xs text-muted-foreground">{t(`arrival.g3.pace_sub.${o.value}`)}</span>
             </button>
           ))}
         </div>
+        {missing === "pace" && <p id="g3-pace-error" role="alert" className="text-sm text-destructive">{t("arrival.g3.pace_missing")}</p>}
       </div>
-      <div className="space-y-2">
-        <MultiChoice label={t("arrival.g3.languages")} value={languages} onChange={setLanguages} options={langOptions} />
+      <div ref={langRef} className="space-y-2">
+        <MultiChoice label={`${t("arrival.g3.languages")} ${t("arrival.g3.required")}`} value={languages} onChange={(v) => { setLanguages(v); setMissing(""); }} options={langOptions} />
+        {missing === "languages" && <p role="alert" className="text-sm text-destructive">{t("arrival.g3.languages_missing")}</p>}
         {!moreLang && <button type="button" className="arrival-link text-sm" onClick={() => setMoreLang(true)}>{t("arrival.g3.more_languages")}</button>}
       </div>
       <div className="space-y-2">
@@ -117,7 +139,7 @@ const ArriveeVousConnaitre = () => {
         )}
       </div>
       <SaveError show={failed} />
-      <button type="button" className="arrival-primary" onClick={save} disabled={!valid || saving}>{t("arrival.continue")}</button>
+      <button type="button" className="arrival-primary" onClick={save} disabled={saving}>{t("arrival.continue")}</button>
       <p className="text-center"><button type="button" className="arrival-link text-sm" onClick={() => navigate(-1)}>{t("arrival.back")}</button></p>
     </ArrivalShell>
   );
