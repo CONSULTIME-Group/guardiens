@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/i18n/react";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { trackFirstAction, trackEvent } from "@/lib/analytics";
+import { uploadFailureMetadata, type UploadFailureStage } from "@/lib/uploadFailure";
 import { describeRetainedText, moderateContent, RETENTION_TITLE } from "@/lib/moderation";
 import { appStatusBadge as appStatusLabels } from "@/lib/messageStatus";
 import { useAutoOpenConversation } from "@/hooks/useAutoOpenConversation";
@@ -1159,9 +1160,9 @@ const Messages = () => {
                 if (!user || !activeConv) return;
                 // Échec définitif : mesure + formulation unique (le rejet de
                 // loadImage est un ProgressEvent sans message exploitable).
-                const fail = () => {
+                const fail = (stage: UploadFailureStage, err: unknown) => {
                   void trackEvent("message_photo_upload_failed", {
-                    metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
+                    metadata: uploadFailureMetadata(file, stage, err),
                   });
                   toast({ title: t("upload.photo_failed"), variant: "destructive" });
                 };
@@ -1169,8 +1170,8 @@ const Messages = () => {
                 let toUpload: File;
                 try {
                   toUpload = await compressMessagePhotoFile(file);
-                } catch {
-                  fail();
+                } catch (err) {
+                  fail("compress", err);
                   return;
                 }
                 const ext = toUpload.name.split(".").pop();
@@ -1178,7 +1179,7 @@ const Messages = () => {
                 // les regles de securite du stockage l'exigent.
                 const path = `${user.id}/messages/${activeConv.id}/${Date.now()}.${ext}`;
                 const { error } = await supabase.storage.from("property-photos").upload(path, toUpload);
-                if (error) { fail(); return; }
+                if (error) { fail("upload", error); return; }
                 const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
                 await supabase.from("messages").insert({
                   conversation_id: activeConv.id, sender_id: user.id, content: "", photo_url: urlData.publicUrl,

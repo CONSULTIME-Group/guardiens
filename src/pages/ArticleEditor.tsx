@@ -16,6 +16,7 @@ import { useTranslation } from "@/i18n/react";
 import { slugify } from "@/lib/normalize";
 import { compressArticleCoverFile } from "@/lib/compressImage";
 import { trackEvent } from "@/lib/analytics";
+import { uploadFailureMetadata, type UploadFailureStage } from "@/lib/uploadFailure";
 import { findUnknownPlaceholders, KNOWN_PLACEHOLDERS } from "@/lib/contentPlaceholders";
 import { ARTICLE_LINKS_MIN, articleLinkProblem, cleanArticleLinks, readArticleLinks, type ArticleLink } from "@/lib/admin/articleLinks";
 
@@ -179,9 +180,11 @@ const ArticleEditor = () => {
     const { data: authData } = await supabase.auth.getUser();
     const uid = authData?.user?.id;
     if (!uid) { toast.error("Session expirée"); return; }
+    let stage: UploadFailureStage = "compress";
     try {
       // Compression avant envoi avec repli dégradé : le brut n'est jamais stocké.
       const compressed = await compressArticleCoverFile(file);
+      stage = "upload";
       const ext = compressed.name.split(".").pop() || "webp";
       // Le premier segment DOIT etre l'identifiant utilisateur (regles de securite du stockage).
       const path = `${uid}/articles/${Date.now()}.${ext}`;
@@ -190,9 +193,9 @@ const ArticleEditor = () => {
       const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
       updateField("cover_image_url", urlData.publicUrl);
       toast.success("Image uploadée");
-    } catch {
+    } catch (err) {
       void trackEvent("article_cover_upload_failed", {
-        metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
+        metadata: uploadFailureMetadata(file, stage, err),
       });
       toast.error(t("upload.photo_failed"));
     }

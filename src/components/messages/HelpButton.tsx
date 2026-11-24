@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AlertTriangle, PawPrint, Home, Phone, Zap, CheckCircle2, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import { withoutUnfilledPlaceholders } from "@/lib/accordDeGarde";
 
 interface HelpButtonProps {
   propertyId: string;
@@ -98,7 +99,7 @@ const HelpButton = ({ propertyId, ownerId, ownerName, sitId, sitCity, conversati
       .select("vet_name, vet_phone, vet_address, emergency_contact_name, emergency_contact_phone, plumber_phone, electrician_phone")
       .eq("property_id", propertyId)
       .maybeSingle()
-      .then(({ data }) => setGuide(data));
+      .then(({ data }) => setGuide(withoutUnfilledPlaceholders(data)));
   }, [open, propertyId]);
 
   const handleAlertEmergencySitters = async () => {
@@ -168,15 +169,15 @@ const HelpButton = ({ propertyId, ownerId, ownerName, sitId, sitCity, conversati
               <a href={`tel:${guide.electrician_phone}`} className="text-primary hover:underline">{guide.electrician_phone}</a>
             </div>
           )}
-          {guide.emergency_contact_name && (
+          {(guide.emergency_contact_name || guide.emergency_contact_phone) && (
             <div className="flex items-center gap-2">
-              <span>📞 {guide.emergency_contact_name} :</span>
+              <span>📞 {guide.emergency_contact_name || "Contact d'urgence"} :</span>
               {guide.emergency_contact_phone && (
                 <a href={`tel:${guide.emergency_contact_phone}`} className="text-primary hover:underline">{guide.emergency_contact_phone}</a>
               )}
             </div>
           )}
-          {!guide.plumber_phone && !guide.electrician_phone && !guide.emergency_contact_name && (
+          {!guide.plumber_phone && !guide.electrician_phone && !guide.emergency_contact_name && !guide.emergency_contact_phone && (
             <p className="text-muted-foreground italic">Aucun contact d'urgence renseigné.</p>
           )}
           {conversationId && notifyBox("logement")}

@@ -5,6 +5,7 @@ import { ImagePlus, X, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/i18n/react";
 import { trackEvent } from "@/lib/analytics";
+import { uploadFailureMetadata, type UploadFailureStage } from "@/lib/uploadFailure";
 import { Progress } from "@/components/ui/progress";
 import { safeUUID } from "@/lib/uuid";
 import { HOVER_REVEAL } from "@/lib/hoverReveal";
@@ -51,9 +52,11 @@ const MissionPhotoUpload = ({ userId, photos, onChange, onUploadingChange, onUpl
       const file = files[i];
       if (!file.type.startsWith("image/")) continue;
 
+      let stage: UploadFailureStage = "compress";
       try {
         setProgress(Math.round(((i) / toProcess) * 80));
         const compressed = await compressImageFile(file, 0.3, 1200);
+        stage = "upload";
         const ext = compressed.name.split(".").pop() || "webp";
         const path = `${userId}/${safeUUID()}.${ext}`;
 
@@ -64,9 +67,9 @@ const MissionPhotoUpload = ({ userId, photos, onChange, onUploadingChange, onUpl
         const { data: urlData } = supabase.storage.from("mission-photos").getPublicUrl(path);
         newUrls.push(urlData.publicUrl);
         setProgress(Math.round(((i + 1) / toProcess) * 100));
-      } catch {
+      } catch (err) {
         void trackEvent("mission_photo_upload_failed", {
-          metadata: { ext: file.name.split(".").pop()?.toLowerCase() || "unknown", size_kb: Math.round(file.size / 1024) },
+          metadata: uploadFailureMetadata(file, stage, err),
         });
         toast({ title: t("upload.photo_failed"), variant: "destructive" });
         onUploadError?.();
