@@ -171,6 +171,33 @@ describe("Parcours gardien v2", () => {
     expect((writes.find((w) => w.table === "sitter_profiles")?.row as any).languages).toEqual(["Français", "Anglais"]);
   });
 
+  it("G3 : rythme de vie vide, Continuer nomme le champ manquant et ne navigue pas", async () => {
+    authUser = { id: "u1", role: "sitter", firstName: "Marie" };
+    search = new URLSearchParams({ flow: "sitter" });
+    sitterRow = { user_id: "u1", languages: ["Français"] };
+    navigateMock.mockClear();
+    const { default: G3 } = await import("@/pages/arrival/ArriveeVousConnaitre");
+    R(<G3 />);
+    const btn = await screen.findByRole("button", { name: "Continuer" });
+    expect(btn).toHaveProperty("disabled", false);
+    fireEvent.click(btn);
+    expect(await screen.findByRole("alert")).toBeTruthy();
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it("G3 : langues vidées, Continuer nomme le champ manquant et ne navigue pas", async () => {
+    authUser = { id: "u1", role: "sitter", firstName: "Marie" };
+    search = new URLSearchParams({ flow: "sitter" });
+    sitterRow = { user_id: "u1", languages: ["Français"], life_pace: "calme" };
+    navigateMock.mockClear();
+    const { default: G3 } = await import("@/pages/arrival/ArriveeVousConnaitre");
+    R(<G3 />);
+    fireEvent.click(await screen.findByRole("button", { name: "Français" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
+    expect(await screen.findByRole("alert")).toBeTruthy();
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
   it("G4 : un savoir-faire pose available_for_help, puis N1", async () => {
     authUser = { id: "u1", role: "sitter", firstName: "Marie" };
     search = new URLSearchParams({ flow: "sitter" });
