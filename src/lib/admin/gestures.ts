@@ -167,7 +167,7 @@ function almaGesture(profileId: string, signals: PilotageSignal[], family: WorkF
   };
 }
 
-function noApplicationGesture(sitId: string, signals: PilotageSignal[], model: WorkListModel, family: WorkFamily, now: number): { g: Gesture; days: number | null } {
+function noApplicationGesture(sitId: string, signals: PilotageSignal[], model: WorkListModel, family: WorkFamily, now: number): Gesture {
   const m = signals[0].metadata ?? {};
   const sit = model.sits.get(sitId);
   const title = clean(str(sit?.title) || str(m.sit_title) || "Annonce sans titre");
@@ -180,32 +180,29 @@ function noApplicationGesture(sitId: string, signals: PilotageSignal[], model: W
   const named = city && !title.toLowerCase().includes(city.toLowerCase()) ? `${title}, ${city}` : title;
   const ownerId = str(m.owner_id);
   return {
-    days,
-    g: {
-      key: `sit:${sitId}`,
-      bucket: today ? "today" : "week",
-      family,
-      title: `${named} : aucune candidature`,
-      detail: [
-        start && days !== null ? `Départ le ${dayMonth(start)}, ${departureLabel(days)}.` : "",
-        published > 0 ? `Publiée il y a ${published} ${published > 1 ? "jours" : "jour"}.` : "",
-        // Lot VE-6 : le compte inclut les gardiens déjà prévenus (lot ANN-3), la ligne le dit.
-        eligible > 0 ? `${eligible} ${eligible > 1 ? "gardiens" : "gardien"} à proximité, déjà prévenus compris.` : "Rayon de diffusion à élargir.",
-      ].filter(Boolean).join(" "),
-      chip: days !== null ? `Départ ${departureLabel(days)}` : "Cette semaine",
-      tone: today ? "urgent" : "normal",
-      kind: "broadcast",
-      // Lot ANN-3 : le nombre de gardiens du coin inclut ceux déjà prévenus,
-      // le bouton dit donc le geste, la fenêtre de diffusion dit qui le recevra.
-      actionLabel: "Diffuser l'annonce",
-      links: [{ label: "L'annonce", to: `/admin/listings?sit=${encodeURIComponent(sitId)}` }],
-      signals,
-      secondaryWrite: ownerId
-        ? { userId: ownerId, firstName: "", sitId, topic: "no_applications", label: "Écrire au propriétaire" }
-        : undefined,
-      sitId, type: "no_applications", daysToStart: days,
-      sort: days ?? 9999,
-    },
+    key: `sit:${sitId}`,
+    bucket: today ? "today" : "week",
+    family,
+    title: `${named} : aucune candidature`,
+    detail: [
+      start && days !== null ? `Départ le ${dayMonth(start)}, ${departureLabel(days)}.` : "",
+      published > 0 ? `Publiée il y a ${published} ${published > 1 ? "jours" : "jour"}.` : "",
+      // Lot VE-6 : le compte inclut les gardiens déjà prévenus (lot ANN-3), la ligne le dit.
+      eligible > 0 ? `${eligible} ${eligible > 1 ? "gardiens" : "gardien"} à proximité, déjà prévenus compris.` : "Rayon de diffusion à élargir.",
+    ].filter(Boolean).join(" "),
+    chip: days !== null ? `Départ ${departureLabel(days)}` : "Cette semaine",
+    tone: today ? "urgent" : "normal",
+    kind: "broadcast",
+    // Lot ANN-3 : le nombre de gardiens du coin inclut ceux déjà prévenus,
+    // le bouton dit donc le geste, la fenêtre de diffusion dit qui le recevra.
+    actionLabel: "Diffuser l'annonce",
+    links: [{ label: "L'annonce", to: `/admin/listings?sit=${encodeURIComponent(sitId)}` }],
+    signals,
+    secondaryWrite: ownerId
+      ? { userId: ownerId, firstName: "", sitId, topic: "no_applications", label: "Écrire au propriétaire" }
+      : undefined,
+    sitId, type: "no_applications", daysToStart: days,
+    sort: days ?? 9999,
   };
 }
 
@@ -357,7 +354,7 @@ export function buildGestures(model: WorkListModel | null | undefined, now: numb
     for (const [key, signals] of groups) {
       const sitId = sitIdOf(signals[0]);
       if (item.type === "no_applications" && sitId) {
-        built.push(noApplicationGesture(sitId, signals, model, item.family, now).g);
+        built.push(noApplicationGesture(sitId, signals, model, item.family, now));
         continue;
       }
       const m = signals[0].metadata ?? {};

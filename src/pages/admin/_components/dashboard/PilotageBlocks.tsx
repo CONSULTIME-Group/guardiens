@@ -64,6 +64,8 @@ const TONE_CLASS: Record<WorkItem["tone"], string> = {
 export const ELEMENT_LINKS_SHOWN = 3;
 
 const LINK_CLASS = "inline-flex min-h-11 items-center text-[13px] font-semibold text-primary underline underline-offset-2";
+/** Lot VE-6 : « Marquer comme traité » se lit comme un lien de la ligne, en retrait des gestes. */
+const CLOSE_CLASS = "h-auto min-h-11 rounded-none px-0 py-0 text-[13px] font-semibold text-muted-foreground underline underline-offset-2 hover:bg-transparent hover:text-foreground";
 const PRIMARY_CLASS = "min-h-11 w-full rounded-full px-5 font-bold sm:w-auto";
 
 /** Ce que le membre a écrit à Alma ce jour-là, pour le rappeler au-dessus du message. */
@@ -203,7 +205,7 @@ const GestureRow = ({ g, sitMap, last, onWrite, onOwnerWrite }: {
                 <li><button type="button" className={LINK_CLASS} aria-expanded={more} onClick={() => setMore((v) => !v)}>{more ? "Replier" : "Autres gestes"}</button></li>
               )}
               {closable && (
-                <li data-testid="pilotage-close"><IgnoreSignalsButton ids={g.signals.map((s) => s.id)} label="Marquer comme traité" /></li>
+                <li data-testid="pilotage-close"><IgnoreSignalsButton ids={g.signals.map((s) => s.id)} label="Marquer comme traité" className={CLOSE_CLASS} /></li>
               )}
             </ul>
           )}

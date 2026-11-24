@@ -46,8 +46,9 @@ export async function restoreSignals(ids: string[]) {
  * Lot ADM14 (lot A V5 de l'arène admin du 09/11/2026) : « Ignorer » et « Tout
  * ignorer » demandent confirmation avec le nombre de signaux, puis laissent
  * 10 secondes pour annuler. Un seul composant pour toutes les cartes.
+ * Lot VE-6 : className habille le bouton en lien sur une ligne de la vue d'ensemble.
  */
-export const IgnoreSignalsButton = ({ ids, label }: { ids: string[]; label?: string }) => {
+export const IgnoreSignalsButton = ({ ids, label, className }: { ids: string[]; label?: string; className?: string }) => {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -83,7 +84,7 @@ export const IgnoreSignalsButton = ({ ids, label }: { ids: string[]; label?: str
 
   return (
     <>
-      <Button size="sm" variant="ghost" onClick={() => setOpen(true)} disabled={busy || count === 0}>
+      <Button size="sm" variant="ghost" className={className} onClick={() => setOpen(true)} disabled={busy || count === 0}>
         {label ?? (count > 1 ? "Tout ignorer" : "Ignorer")}
       </Button>
       <AlertDialog open={open} onOpenChange={setOpen}>
