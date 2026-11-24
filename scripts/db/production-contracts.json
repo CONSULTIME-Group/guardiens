@@ -1171,6 +1171,24 @@
           "sql": "SELECT EXISTS (SELECT 1 FROM pg_trigger t WHERE t.tgrelid = 'public.sits'::regclass AND t.tgname = 'trg_guard_sit_publish_dates_a_venir' AND t.tgenabled = 'O') AS ok"
         }
       ]
+    },
+    {
+      "migration": "0185_guide2_guides_ville_auto.sql",
+      "description": "Création automatique des guides de ville en France : colonnes d'essai, fonction fermée aux membres, tâche horaire hors minute multiple de 5 (audit du 22/11/2026, défaut V2)",
+      "checks": [
+        {
+          "name": "colonnes_essai_presentes",
+          "sql": "SELECT (SELECT count(*) FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'guide_requests' AND column_name IN ('auto_attempts','auto_attempted_at')) = 2 AS ok"
+        },
+        {
+          "name": "fonction_fermee_aux_membres",
+          "sql": "SELECT to_regprocedure('public.auto_create_city_guides(integer)') IS NOT NULL AND NOT has_function_privilege('anon','public.auto_create_city_guides(integer)','EXECUTE') AND NOT has_function_privilege('authenticated','public.auto_create_city_guides(integer)','EXECUTE') AS ok"
+        },
+        {
+          "name": "tache_horaire_active",
+          "sql": "SELECT EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'auto-create-city-guides' AND schedule = '17 * * * *' AND active) AS ok"
+        }
+      ]
     }
   ]
 }
