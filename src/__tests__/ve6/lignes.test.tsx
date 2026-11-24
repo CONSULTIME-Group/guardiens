@@ -27,7 +27,7 @@ vi.mock("@/integrations/supabase/client", () => ({
           }),
         };
       }
-      return { update: (v: unknown) => { updateSpy(t, v); return { in: (...a: unknown[]) => { inSpy(...a); return Promise.resolve({ error: null }); } }; } };
+      return { update: (v: unknown) => { updateSpy(t, v); return { in: (...a: unknown[]) => { inSpy(...a); const done = Promise.resolve({ error: null }); return Object.assign(done, { is: () => done, eq: () => done }); } }; } };
     },
     auth: { getUser: () => Promise.resolve({ data: { user: { id: "admin-1" } } }) },
     functions: { invoke: (...a: unknown[]) => invokeSpy(...a) },
@@ -153,7 +153,14 @@ describe("VE-6 C : « Marquer comme traité » sur la ligne", () => {
     await screen.findByRole("button", { name: "Écrire à Eliane" });
     fireEvent.click(within(lineOf("Aider le propriétaire")).getByRole("button", { name: "Marquer comme traité" }));
     expect(updateSpy).not.toHaveBeenCalled();
-    expect((await screen.findByRole("alertdialog")).textContent).toContain("2 signaux");
+    const dialog = await screen.findByRole("alertdialog");
+    // Lot VE-7 : la fenêtre parle de la ligne, avec le même mot que le lien.
+    expect(dialog.textContent).toContain("Marquer cette ligne comme traitée ?");
+    expect(dialog.textContent).toContain("Ses 2 signaux sortent de la liste");
+    expect(dialog.textContent).not.toContain("Ignorer");
+    fireEvent.click(within(dialog).getByRole("button", { name: "Marquer comme traité" }));
+    await waitFor(() => expect(inSpy).toHaveBeenCalledWith("id", ["u1", "d1"]));
+    expect((updateSpy.mock.calls[0][1] as { action_taken: string }).action_taken).toBe("dismissed");
   });
 });
 

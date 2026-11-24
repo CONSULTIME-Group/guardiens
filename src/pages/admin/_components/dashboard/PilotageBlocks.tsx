@@ -205,7 +205,7 @@ const GestureRow = ({ g, sitMap, last, onWrite, onOwnerWrite }: {
                 <li><button type="button" className={LINK_CLASS} aria-expanded={more} onClick={() => setMore((v) => !v)}>{more ? "Replier" : "Autres gestes"}</button></li>
               )}
               {closable && (
-                <li data-testid="pilotage-close"><IgnoreSignalsButton ids={g.signals.map((s) => s.id)} label="Marquer comme traité" className={CLOSE_CLASS} /></li>
+                <li data-testid="pilotage-close"><IgnoreSignalsButton ids={g.signals.map((s) => s.id)} label="Marquer comme traité" className={CLOSE_CLASS} done /></li>
               )}
             </ul>
           )}

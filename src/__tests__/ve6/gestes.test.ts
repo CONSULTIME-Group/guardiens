@@ -68,7 +68,7 @@ describe("VE-6 A : une ligne par annonce", () => {
     expect(list).toHaveLength(1);
     const g = list[0];
     expect(g.type).toBe("owner_missing_coordinates");
-    expect(g.title).toBe("Corriger le lieu de 1 propriétaire à situer sur la carte");
+    expect(g.title).toBe("Corriger le lieu du propriétaire à situer sur la carte");
     expect(g.actionLabel).toBe("Corriger");
     expect(g.detail).toContain("Aussi : zéro gardien touché.");
     expect(g.signals.map((s) => s.id)).toEqual(["c1", "z1"]);

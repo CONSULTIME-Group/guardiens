@@ -206,6 +206,22 @@ function noApplicationGesture(sitId: string, signals: PilotageSignal[], model: W
   };
 }
 
+/**
+ * Lot VE-7 : « titre, ville » d'une annonce dans le détail d'une ligne. Le
+ * titre saisi par le membre perd sa ponctuation finale, la ville n'est dite
+ * qu'une fois (« Garde de maison et d'animaux, à Puycelsi »).
+ */
+export function sitLabel(title: string, city: string): string {
+  const t = clean(title).replace(/[\s.,;:!?…]+$/, "") || "Annonce sans titre";
+  const c = clean(city).replace(/[\s.,;:]+$/, "");
+  return c && !t.toLowerCase().includes(c.toLowerCase()) ? `${t}, ${c}` : t;
+}
+
+/** Lot VE-7 : titre d'une ligne qui porte une seule annonce, quand le titre par type compte (« de 1 propriétaire »). */
+const LINE_TITLES: Record<string, string> = {
+  owner_missing_coordinates: "Corriger le lieu du propriétaire à situer sur la carte",
+};
+
 const bucketRank = (b: GestureBucket) => (b === "today" ? 0 : 1);
 const byUrgency = (a: Gesture, b: Gesture) => bucketRank(a.bucket) - bucketRank(b.bucket) || toneRank(a.tone) - toneRank(b.tone) || a.sort - b.sort;
 const sentence = (s: string) => (/[.!?…]$/.test(s.trim()) ? s.trim() : `${s.trim()}.`);
@@ -359,9 +375,9 @@ export function buildGestures(model: WorkListModel | null | undefined, now: numb
       }
       const m = signals[0].metadata ?? {};
       const sit = sitId ? model.sits.get(sitId) : undefined;
-      const label = clean(sitId
-        ? [str(sit?.title) || str(m.sit_title) || "Annonce sans titre", str(sit?.city) || str(m.city)].filter(Boolean).join(", ")
-        : str(m.first_name) || str(m.title) || str(m.excerpt));
+      const label = sitId
+        ? sitLabel(str(sit?.title) || str(m.sit_title), str(sit?.city) || str(m.city))
+        : clean(str(m.first_name) || str(m.title) || str(m.excerpt));
       const single = groups.size === 1;
       const own = elementLinkOf(signals[0]);
       const profile = profileOf(signals[0]);
@@ -384,8 +400,8 @@ export function buildGestures(model: WorkListModel | null | undefined, now: numb
       built.push({
         key: `${item.key}:${key}`, bucket: isToday(item) ? "today" : "week", family: item.family,
         sitId: sitId ?? undefined, type: item.type,
-        title: single ? item.title : workCopy(item.type).title(1),
-        detail: [label, single ? item.detail : ""].filter(Boolean).join(". ").replace(/\.\.$/, "."),
+        title: LINE_TITLES[item.type] ?? (single ? item.title : workCopy(item.type).title(1)),
+        detail: [label, single ? item.detail : ""].filter(Boolean).map(sentence).join(" "),
         chip: item.deadline, tone: item.tone, kind: "card", actionLabel: item.action || "Traiter",
         links: own ? [{ label: sitId ? "L'annonce" : "Sa fiche", to: own }] : [],
         signals, sort: new Date(signals[0].detected_at).getTime(),
