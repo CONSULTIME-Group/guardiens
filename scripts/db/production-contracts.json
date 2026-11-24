@@ -1207,6 +1207,24 @@
           "sql": "SELECT EXISTS (SELECT 1 FROM cron.job WHERE command LIKE '%public.auto_create_city_guides(5)%' AND schedule = '17 * * * *' AND active) AS ok"
         }
       ]
+    },
+    {
+      "migration": "0186_journ3_taches_sql_journalisees.sql",
+      "description": "Onze tâches pg_cron purement SQL journalisées dans cron_run_log par run_logged_cron, fonction fermée aux membres (conseil du 23/11/2026, décision 3)",
+      "checks": [
+        {
+          "name": "enveloppe_fermee_aux_membres",
+          "sql": "SELECT to_regprocedure('public.run_logged_cron(text,text,integer)') IS NOT NULL AND NOT has_function_privilege('anon','public.run_logged_cron(text,text,integer)','EXECUTE') AND NOT has_function_privilege('authenticated','public.run_logged_cron(text,text,integer)','EXECUTE') AS ok"
+        },
+        {
+          "name": "onze_taches_enveloppees",
+          "sql": "SELECT (SELECT count(*) FROM cron.job WHERE active AND jobname IN ('admin-signals-auto-resolve-hourly','auto-archive-past-sits','detect-low-email-delivery','detect-stale-digest-queue','notif-mot-fondateurs-nouveaux-inscrits','outing-reminders','purge-cron-run-details','recalc-seo-city-nearby-counts-daily','recalc-seo-city-page-counts-daily','recalc-seo-department-page-counts-daily','retry-missing-geocoding') AND command ILIKE '%public.run_logged_cron(%') = 11 AS ok"
+        },
+        {
+          "name": "horaires_inchanges",
+          "sql": "SELECT (SELECT schedule FROM cron.job WHERE jobname = 'purge-cron-run-details') = '*/2 * * * *' AND (SELECT schedule FROM cron.job WHERE jobname = 'retry-missing-geocoding') = '*/10 * * * *' AS ok"
+        }
+      ]
     }
   ]
 }
