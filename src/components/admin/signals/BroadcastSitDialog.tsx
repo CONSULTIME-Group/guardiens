@@ -1,5 +1,5 @@
 import { proximityEmptyText } from "@/lib/admin/proximityEmpty";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, Search, Send, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -128,6 +128,17 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
     }
   };
 
+  // Lot VE-6 : l'aperçu part seul une fois à l'ouverture, la ligne et la fenêtre
+  // disent ainsi le même nombre ; « Prévisualiser » relance après un changement de rayon.
+  const autoPreviewed = useRef(false);
+  useEffect(() => {
+    if (!open) { autoPreviewed.current = false; return; }
+    if (autoPreviewed.current) return;
+    autoPreviewed.current = true;
+    void doPreview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   const requestSend = () => {
     if (!preview || preview.count === 0) return;
     if (needsRadiusConfirmation(radiusKm)) {
@@ -185,7 +196,7 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
           <DialogTitle>Diffuser l'annonce aux gardiens du coin</DialogTitle>
           <DialogDescription>
             Envoi individuel avec le template riche (photo, animaux, dates, affinité).
-            Prévisualisez avant d'envoyer.
+La liste des destinataires s'affiche à l'ouverture.
           </DialogDescription>
         </DialogHeader>
 
@@ -276,7 +287,9 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
             </div>
           ) : (
             <div className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground bg-muted/20">
-              Cliquez sur « Prévisualiser » pour obtenir la liste réelle.
+              {previewing
+                ? "Recherche des destinataires…"
+                : "« Prévisualiser » relance la recherche avec le rayon choisi."}
             </div>
           )}
         </div>

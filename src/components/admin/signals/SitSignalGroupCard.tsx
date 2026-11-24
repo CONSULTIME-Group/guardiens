@@ -14,6 +14,7 @@ import {
   daysUntilStart,
   signalAction,
   sitGroupLine,
+  sitGroupSummary,
   SIT_ACTION_PRIORITY,
 } from "../../../../supabase/functions/_shared/admin-signal-config.ts";
 
@@ -30,6 +31,21 @@ export function startCountdown(startDate: string | null | undefined, now: number
 export function sitGroupAction(types: string[]): string {
   const main = SIT_ACTION_PRIORITY.find((t) => types.includes(t)) ?? types[0] ?? "";
   return signalAction(main);
+}
+
+/**
+ * Lot VE-6 : ligne de résumé de la carte. « garde à confirmer » complète le
+ * résumé partagé quand l'annonce porte owner_sit_unconfirmed (sitGroupSummary,
+ * lu aussi par l'email du matin, reste tel quel).
+ */
+export function sitCardLine(
+  sit: { title?: string | null; city?: string | null; start_date?: string | null },
+  types: string[],
+): string {
+  const head = sitGroupLine(sit, []).replace(/\s*:\s*$/, "");
+  const summary = [sitGroupSummary(types), types.includes("owner_sit_unconfirmed") ? "garde à confirmer" : ""]
+    .filter(Boolean).join(", ");
+  return summary ? `${head} : ${summary}` : head;
 }
 
 export interface SitInfo {
@@ -69,7 +85,7 @@ export const SitSignalGroupCard = ({ sitId, sit, items }: Props) => {
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
   const fallbackTitle = (items[0]?.metadata?.sit_title as string | undefined) ?? null;
-  const line = sitGroupLine(
+  const line = sitCardLine(
     { title: sit?.title ?? fallbackTitle, city: sit?.city, start_date: sit?.start_date },
     items.map((s) => s.signal_type),
   );

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,8 +22,9 @@ import type { AdminSignalBase } from "@/components/admin/signals/signalGrouping"
 import type { SitInfo } from "@/components/admin/signals/SitSignalGroupCard";
 import { AUTO_RELANCE_TEMPLATES } from "../../../../../supabase/functions/_shared/admin-signal-config.ts";
 import { renderEntry } from "./signalEntries";
-import { buildGestures, gesturesSentence, type Gesture, type GestureWrite } from "@/lib/admin/gestures";
+import { applyOwnerAbsence, broadcastSitIds, buildGestures, gesturesSentence, type Gesture, type GestureWrite } from "@/lib/admin/gestures";
 import { memberMessageDrafts } from "@/lib/admin/memberMessageDrafts";
+import { ownerMessageDraft } from "@/lib/admin/ownerMessageDrafts";
 import { BroadcastSitDialog } from "@/components/admin/signals/BroadcastSitDialog";
 import type { AdminSignal as BroadcastSignal } from "@/components/admin/signals/NoApplicationsCard";
 import { IgnoreSignalsButton } from "@/components/admin/signals/IgnoreSignalsButton";
@@ -62,6 +64,8 @@ const TONE_CLASS: Record<WorkItem["tone"], string> = {
 export const ELEMENT_LINKS_SHOWN = 3;
 
 const LINK_CLASS = "inline-flex min-h-11 items-center text-[13px] font-semibold text-primary underline underline-offset-2";
+/** Lot VE-6 : « Marquer comme traité » se lit comme un lien de la ligne, en retrait des gestes. */
+const CLOSE_CLASS = "h-auto min-h-11 rounded-none px-0 py-0 text-[13px] font-semibold text-muted-foreground underline underline-offset-2 hover:bg-transparent hover:text-foreground";
 const PRIMARY_CLASS = "min-h-11 w-full rounded-full px-5 font-bold sm:w-auto";
 
 /** Ce que le membre a écrit à Alma ce jour-là, pour le rappeler au-dessus du message. */
@@ -109,22 +113,76 @@ async function writeTargetOf(g: Gesture, w: GestureWrite, closes: boolean): Prom
 }
 
 /**
+ * Lot VE-6 : message au propriétaire d'une ligne de garde, texte prêt par
+ * ownerMessageDraft (mêmes gabarits que la carte de l'annonce).
+ */
+export function ownerWriteTargetOf(g: Gesture): WriteToMemberTarget | null {
+  const o = g.ownerWrite;
+  if (!o) return null;
+  const name = o.firstName || "le propriétaire";
+  return {
+    userId: o.userId,
+    userName: name,
+    sitId: o.sitId,
+    draft: ownerMessageDraft(o.types, { ownerName: name, city: o.city, startDate: o.startDate, applications: o.applications }) ?? undefined,
+  };
+}
+
+/**
+ * Lot VE-6 : dernière visite des propriétaires des annonces « aucune
+ * candidature », en une lecture pour toutes les lignes (même jointure que
+ * useSitOwnerLastSeen, cache 5 minutes). En échec, la liste reste telle quelle.
+ */
+export function useSitOwnersLastSeen(sitIds: string[]) {
+  return useQuery<Map<string, string | null>>({
+    queryKey: ["admin-sits-owner-last-seen", sitIds],
+    enabled: sitIds.length > 0,
+    staleTime: 5 * 60_000,
+    retry: 1,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("sits")
+        .select("id, owner:profiles!sits_user_id_fkey(last_seen_at)")
+        .in("id", sitIds);
+      if (error) throw error;
+      const rows = (data ?? []) as unknown as { id: string; owner?: { last_seen_at?: string | null } | null }[];
+      return new Map(rows.map((r) => [r.id, r.owner?.last_seen_at ?? null]));
+    },
+  });
+}
+
+/** Lot VE-6 : à l'envoi du message au propriétaire, les signaux de la ligne se ferment (comme SitSignalGroupCard). */
+async function closeAsOwnerWritten(ids: string[]): Promise<boolean> {
+  if (ids.length === 0) return true;
+  const { data: { user } } = await supabase.auth.getUser();
+  const { error } = await supabase
+    .from("admin_signals")
+    .update({ resolved_at: new Date().toISOString(), action_taken: "owner_written", admin_id: user?.id ?? null })
+    .in("id", ids);
+  return !error;
+}
+
+/**
  * Lot VE-1 : une ligne = une personne ou une annonce. Le bouton porte le
  * verbe et fait le geste sur place : écrire (message prêt), prévenir les
  * gardiens (diffusion), ouvrir la file, ou déplier la carte d'action du signal.
  */
-const GestureRow = ({ g, sitMap, last, onWrite }: {
+const GestureRow = ({ g, sitMap, last, onWrite, onOwnerWrite }: {
   g: Gesture;
   sitMap: Map<string, SitInfo>;
   last: boolean;
   onWrite: (g: Gesture, w: GestureWrite, closes: boolean) => void;
+  onOwnerWrite: (g: Gesture) => void;
 }) => {
   const [open, setOpen] = useState(false);
   const [more, setMore] = useState(false);
   const [broadcast, setBroadcast] = useState(false);
   const qc = useQueryClient();
   const id = `pilotage-${g.key.replace(/[^a-z0-9_-]/gi, "-")}`;
-  const unfolds = g.kind === "card" || g.kind === "more";
+  // Lot VE-6 : propriétaire absent, le bouton écrit et la diffusion passe en lien.
+  const ownerAway = g.kind === "broadcast" && g.ownerAbsentDays != null && !!g.secondaryWrite;
+  // Lot VE-6 : toute ligne qui porte des signaux se ferme d'un mot, sur la ligne.
+  const closable = g.signals.length > 0 && g.kind !== "more";
   return (
     <li className={last ? "" : "border-b border-border/70"} data-testid="pilotage-line" data-family={g.family} data-kind={g.kind}>
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-4 sm:px-5">
@@ -132,19 +190,22 @@ const GestureRow = ({ g, sitMap, last, onWrite }: {
           <p className="text-[15px] font-semibold text-foreground">{g.title}</p>
           <p className="mt-0.5 text-[13px] text-muted-foreground">{g.detail}</p>
           {g.quote && <p className="mt-1.5 inline-block rounded-lg bg-muted/60 px-3 py-2 text-sm text-foreground">« {g.quote.slice(0, 200)} »</p>}
-          {(g.links.length > 0 || g.secondaryWrite || g.moreActions || g.kind === "write" || g.kind === "broadcast") && (
+          {(g.links.length > 0 || g.secondaryWrite || g.moreActions || closable) && (
             <ul className="mt-1.5 flex flex-wrap gap-x-4 gap-y-0" data-testid="pilotage-elements">
               {g.links.slice(0, ELEMENT_LINKS_SHOWN).map((l) => (
                 <li key={l.to + l.label}><Link to={l.to} className={LINK_CLASS}>{l.label}</Link></li>
               ))}
-              {g.secondaryWrite && (
+              {g.secondaryWrite && !ownerAway && (
                 <li><button type="button" className={LINK_CLASS} onClick={() => onWrite(g, g.secondaryWrite!, false)}>{g.secondaryWrite.label}</button></li>
+              )}
+              {ownerAway && (
+                <li><button type="button" className={LINK_CLASS} data-testid="pilotage-broadcast-link" onClick={() => setBroadcast(true)}>Diffuser l'annonce</button></li>
               )}
               {g.moreActions && (
                 <li><button type="button" className={LINK_CLASS} aria-expanded={more} onClick={() => setMore((v) => !v)}>{more ? "Replier" : "Autres gestes"}</button></li>
               )}
-              {(g.kind === "write" || g.kind === "broadcast") && !g.moreActions && (
-                <li><IgnoreSignalsButton ids={g.signals.map((s) => s.id)} label="Classer sans agir" /></li>
+              {closable && (
+                <li data-testid="pilotage-close"><IgnoreSignalsButton ids={g.signals.map((s) => s.id)} label="Marquer comme traité" className={CLOSE_CLASS} /></li>
               )}
             </ul>
           )}
@@ -153,7 +214,9 @@ const GestureRow = ({ g, sitMap, last, onWrite }: {
         {g.kind === "link" ? (
           <Button asChild variant="outline" className={PRIMARY_CLASS}><Link to={g.link ?? "/admin"}>{g.actionLabel}</Link></Button>
         ) : g.kind === "write" ? (
-          <Button className={PRIMARY_CLASS} onClick={() => g.write && onWrite(g, g.write, true)}>{g.actionLabel}</Button>
+          <Button className={PRIMARY_CLASS} onClick={() => (g.ownerWrite ? onOwnerWrite(g) : g.write && onWrite(g, g.write, true))}>{g.actionLabel}</Button>
+        ) : ownerAway ? (
+          <Button className={PRIMARY_CLASS} onClick={() => onWrite(g, g.secondaryWrite!, false)}>{g.actionLabel}</Button>
         ) : g.kind === "broadcast" ? (
           <Button className={PRIMARY_CLASS} onClick={() => setBroadcast(true)}>{g.actionLabel}</Button>
         ) : (
@@ -165,7 +228,7 @@ const GestureRow = ({ g, sitMap, last, onWrite }: {
       {((g.kind === "card" && open) || (g.moreActions && more)) && <div id={id}><LineDetail signals={g.signals} sitMap={sitMap} /></div>}
       {g.kind === "more" && open && (
         <ul id={id} className="border-t border-border/70 bg-muted/20">
-          {(g.children ?? []).map((c, i) => <GestureRow key={c.key} g={c} sitMap={sitMap} last={i === (g.children?.length ?? 0) - 1} onWrite={onWrite} />)}
+          {(g.children ?? []).map((c, i) => <GestureRow key={c.key} g={c} sitMap={sitMap} last={i === (g.children?.length ?? 0) - 1} onWrite={onWrite} onOwnerWrite={onOwnerWrite} />)}
         </ul>
       )}
       {g.kind === "broadcast" && broadcast && (
@@ -182,17 +245,18 @@ const GestureRow = ({ g, sitMap, last, onWrite }: {
 
 const BUCKET_LABELS = { today: "Aujourd'hui", week: "Cette semaine" } as const;
 
-const GestureGroup = ({ bucket, rows, sitMap, onWrite }: {
+const GestureGroup = ({ bucket, rows, sitMap, onWrite, onOwnerWrite }: {
   bucket: "today" | "week";
   rows: Gesture[];
   sitMap: Map<string, SitInfo>;
   onWrite: (g: Gesture, w: GestureWrite, closes: boolean) => void;
+  onOwnerWrite: (g: Gesture) => void;
 }) => (
   <div className="overflow-hidden rounded-2xl border border-border bg-card" data-testid="pilotage-group" data-bucket={bucket}>
     <p className={`border-b border-border/70 px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] sm:px-5 ${bucket === "today" ? "bg-destructive/5 text-destructive" : "text-muted-foreground"}`}>
       {BUCKET_LABELS[bucket]}
     </p>
-    <ul>{rows.map((g, i) => <GestureRow key={g.key} g={g} sitMap={sitMap} last={i === rows.length - 1} onWrite={onWrite} />)}</ul>
+    <ul>{rows.map((g, i) => <GestureRow key={g.key} g={g} sitMap={sitMap} last={i === rows.length - 1} onWrite={onWrite} onOwnerWrite={onOwnerWrite} />)}</ul>
   </div>
 );
 
@@ -226,11 +290,29 @@ export const TechnicalSignalsLine = () => {
 export const TodaySection = () => {
   const { flagEnabled, flagLoading, model, sitMap, loading, error } = usePilotage();
   const [writeTarget, setWriteTarget] = useState<WriteToMemberTarget | null>(null);
+  // Lot VE-6 : signaux à fermer quand le message au propriétaire est parti.
+  const [ownerSignalIds, setOwnerSignalIds] = useState<string[]>([]);
+  const qc = useQueryClient();
+  const built = useMemo(() => buildGestures(model), [model]);
+  const sitIds = useMemo(() => broadcastSitIds(built), [built]);
+  const lastSeen = useSitOwnersLastSeen(sitIds);
   if (flagLoading) return null;
-  const gestures = buildGestures(model);
+  const gestures = applyOwnerAbsence(built, lastSeen.data);
   const membresWaiting = (model?.items ?? []).some((i) => i.family === "membres");
   const onWrite = (g: Gesture, w: GestureWrite, closes: boolean) => {
+    setOwnerSignalIds([]);
     void writeTargetOf(g, w, closes).then(setWriteTarget);
+  };
+  const onOwnerWrite = (g: Gesture) => {
+    setOwnerSignalIds(g.signals.map((s) => s.id));
+    setWriteTarget(ownerWriteTargetOf(g));
+  };
+  const onSent = () => {
+    if (ownerSignalIds.length === 0) return;
+    void closeAsOwnerWritten(ownerSignalIds).then((ok) => {
+      if (!ok) toast.error("Message parti, la ligne reste dans la liste : marquez-la comme traitée.");
+      void qc.invalidateQueries({ queryKey: ["admin_dashboard_snapshot"] });
+    });
   };
 
   return (
@@ -259,7 +341,7 @@ export const TodaySection = () => {
           )}
           {(["today", "week"] as const).map((bucket) => {
             const rows = gestures.filter((g) => g.bucket === bucket);
-            return rows.length === 0 ? null : <GestureGroup key={bucket} bucket={bucket} rows={rows} sitMap={sitMap} onWrite={onWrite} />;
+            return rows.length === 0 ? null : <GestureGroup key={bucket} bucket={bucket} rows={rows} sitMap={sitMap} onWrite={onWrite} onOwnerWrite={onOwnerWrite} />;
           })}
           {!membresWaiting && !model.unavailable.includes("queues") && (
             <p className="text-sm text-muted-foreground" data-testid="waiting-members">
@@ -268,7 +350,7 @@ export const TodaySection = () => {
           )}
         </>
       )}
-      <WriteToMemberDialog target={writeTarget} onClose={() => setWriteTarget(null)} />
+      <WriteToMemberDialog target={writeTarget} onClose={() => setWriteTarget(null)} onSent={onSent} />
     </section>
   );
 };
