@@ -584,8 +584,10 @@ const Register = () => {
  )}
  </div>
 
+ {/* Lot INS2 (24/11/2026) : au téléphone, le compteur de membres passe sous
+     « Créer mon compte » (membersCountLine, plus bas) ; il reste ici entre 768 et 1 023 px. */}
  {step === 2 && totalInscrits !== null && totalInscrits > 0 && (
- <div className="lg:hidden flex items-center justify-center gap-2 mb-6 text-sm text-muted-foreground">
+ <div className="hidden md:flex lg:hidden items-center justify-center gap-2 mb-6 text-sm text-muted-foreground">
  <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-semibold">
  {totalInscrits}
  </span>
@@ -771,7 +773,7 @@ const Register = () => {
   )}
 
   {step === 2 && (
-  <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+  <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
   {v2 && (
    <Suspense fallback={null}><ArrivalC2Header
     recap={entraideIntent ? "arrival.c2.entraide_recap" : selectedRole === "owner" ? "arrival.c1.owner_title" : selectedRole === "sitter" ? "arrival.c1.sitter_title" : selectedRole === "both" ? "arrival.c2.both_recap" : (roles.find((r) => r.value === selectedRole)?.label ?? "")}
@@ -940,7 +942,8 @@ const Register = () => {
     </button>
    </div>
 
-   {v2 && <p className="text-xs text-muted-foreground">{t("arrival.c2.password_hint")}</p>}
+   {/* Lot INS2 : au téléphone, le champ dit déjà « Au moins 8 caractères ». */}
+   {v2 && <p className="hidden md:block text-xs text-muted-foreground" data-testid="password-hint">{t("arrival.c2.password_hint")}</p>}
    <PasswordStrengthMeter password={password} isCommon={isObviouslyWeak(password)} />
 
    {formError && (
@@ -984,6 +987,14 @@ const Register = () => {
                <ArrowUp className="h-4 w-4" aria-hidden="true" />
                {t("register_page.terms_reminder")}
              </button>
+           )}
+           {step === 2 && totalInscrits !== null && totalInscrits > 0 && (
+             <div data-testid="members-count-under-submit" className="md:hidden flex items-center justify-center gap-2 text-sm text-muted-foreground">
+               <span className="inline-flex items-center justify-center min-w-6 h-6 px-1 rounded-full bg-primary/10 text-primary text-xs font-semibold tabular-nums">
+                 {totalInscrits}
+               </span>
+               <span>{t("register_page.members_count")}</span>
+             </div>
            )}
   </form>
   )}
