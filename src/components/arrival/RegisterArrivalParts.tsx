@@ -91,11 +91,14 @@ export function ArrivalC2Header({ recap, onModify }: { recap: string; onModify: 
   const recapLabel = recap.startsWith("arrival.") ? t(recap) : recap;
   useArrivalViewed("C2");
   return (
-    <div className="space-y-4" data-testid="arrival-c2">
+    // Lot INS2 (24/11/2026, conseil du 23/11, décision 3) : au téléphone, le
+    // surtitre se retire et le titre se resserre pour que « Créer mon compte »
+    // passe au-dessus du bandeau cookies (805 px avant, sous 700 px visé à 390 × 844).
+    <div className="space-y-3 md:space-y-4" data-testid="arrival-c2">
       <p className="text-center text-sm text-muted-foreground">{t("arrival.c2.header")}</p>
       <div className="space-y-3">
-        <Eyebrow>{t("arrival.c2.eyebrow")}</Eyebrow>
-        <h2 className="text-3xl font-semibold">{t("arrival.c2.title")}</h2>
+        <div className="hidden md:block" data-testid="arrival-c2-eyebrow"><Eyebrow>{t("arrival.c2.eyebrow")}</Eyebrow></div>
+        <h2 className="text-2xl md:text-3xl font-semibold">{t("arrival.c2.title")}</h2>
       </div>
       <div className="flex items-center justify-between rounded-xl bg-card px-4 py-3">
         <span className="font-medium">{recapLabel}</span>
