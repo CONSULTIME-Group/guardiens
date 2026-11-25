@@ -18,6 +18,20 @@ import { isAffinityOnboardingSnoozed, isGateAlwaysOpenPath, isGateOpenProfileFoc
 // Lot ONB1 : arrivalFlag est déjà dans la coquille (useArrivalV2Account), plus de copie locale.
 import { isArrivalV2Account } from "@/lib/arrivalFlag";
 
+/**
+ * Lot ONB3 (25/11/2026) : un compte à double rôle va vers l'écran du jeu qui
+ * manque. Gardien incomplet : G2 (`/arrivee/garder`). Gardien complet et
+ * propriétaire incomplet : P3 (`/arrivee/affinites`). Avant, il partait
+ * toujours vers G2 ; G2 et G3 n'écrivent que sitter_profiles, le jeu
+ * propriétaire restait vide et la porte le renvoyait vers G2 sans fin
+ * (11 comptes inscrits depuis le 01/11, un membre a terminé G3 17 fois).
+ * `r` est déjà encodé.
+ */
+export function gateArrivalTarget(s: { needsSitter: boolean; needsOwner: boolean }, r: string): string {
+  if (!s.needsSitter && s.needsOwner) return `/arrivee/affinites?redirect=${r}`;
+  return `/arrivee/garder?flow=sitter&next=${r}`;
+}
+
 const OnboardingGate = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
@@ -70,7 +84,7 @@ const OnboardingGate = () => {
       }
       // Lot 2 : gardien (et entraide, seul le code postal manque) reprend G1 ou G2.
       const flow = status.needsSitter || status.needsOwner ? "sitter" : "entraide";
-      navigate(status.needsPostal ? `/arrivee/vous?flow=${flow}&next=${r}` : `/arrivee/garder?flow=sitter&next=${r}`, { replace: true });
+      navigate(status.needsPostal ? `/arrivee/vous?flow=${flow}&next=${r}` : gateArrivalTarget(status, r), { replace: true });
     });
     return () => { cancelled = true; };
   }, [loading, flagLoading, status.loading, status.needsOnboarding, status.needsPostal, status.needsSitter, status.needsOwner, status.profileCreatedAt, user, enabled, appliesSince, location, navigate]);
